@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eau corporelle — Exercice (sans indices visibles)</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --muted:#94a3b8;
+    --text:#e5e7eb;
+    --accent-2:#60a5fa;
+    --ok:#10b981;
+    --error:#ef4444;
+    --chip:#1f2937;
+    --card:rgba(17,24,39,.85);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b1225 0%, #0f172a 100%); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial; line-height:1.45}
+  .wrap{max-width:980px;margin:32px auto;padding:16px}
+  header{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+  .logo{width:56px;height:56px;border-radius:14px;background:radial-gradient(circle at 30% 30%, #4ade80, #22c55e 40%, #14532d 60%); box-shadow:0 10px 30px rgba(34,197,94,.35)}
+  h1{font-size:clamp(1.5rem,2.6vw,2.1rem);margin:0}
+  .subtitle{color:var(--muted); margin-top:4px}
+  .card{background:var(--card); backdrop-filter: blur(6px); border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:18px; box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .columns{display:grid; grid-template-columns: 1fr; gap:14px}
+  @media (min-width:820px){ .columns{ grid-template-columns: 1fr 1fr } }
+  .section{display:flex; flex-direction:column; gap:12px}
+  .block{background:linear-gradient(180deg, rgba(31,41,55,.7), rgba(31,41,55,.35)); border:1px solid rgba(148,163,184,.18); padding:12px;border-radius:12px}
+  .row{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .prefix,.suffix{white-space:nowrap}
+  input{
+    padding:8px 10px; border-radius:10px; border:1px solid rgba(148,163,184,.35);
+    background:#0b1220; color:var(--text); outline:none; font-size:.95rem;
+    min-width:60px;
+  }
+  input.small{width:90px}
+  input.medium{width:160px}
+  input::placeholder{color:#64748b}
+  input:focus{border-color:var(--accent-2); box-shadow:0 0 0 3px rgba(96,165,250,.2)}
+  .status{min-height:20px; font-size:.85rem; margin-top:6px}
+  .status.ok{color:var(--ok)}
+  .status.err{color:var(--error)}
+  .solution{font-size:.85rem; color:#a5b4fc; min-height:18px; margin-top:2px}
+  .controls{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+  button{border:1px solid rgba(148,163,184,.25); background:#0b1220; color:var(--text); padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer}
+  button:hover{transform:translateY(-1px); box-shadow:0 8px 16px rgba(2,6,23,.45)}
+  .primary{background:linear-gradient(90deg,#16a34a,#22c55e); border-color:transparent}
+  .ghost{background:transparent}
+  .footer{margin-top:18px; color:var(--muted); font-size:.85rem}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; border:1px solid rgba(148,163,184,.35); background:#0b1220; padding:2px 6px; border-radius:6px}
+  @media print{
+    body{background:#fff; color:#111}
+    .card{box-shadow:none; background:#fff; border:1px solid #e5e7eb}
+    input{border:1px solid #ddd}
+    .logo{display:none}
+    .controls button{display:none}
+    .subtitle, .footer{color:#333}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Eau corporelle — Exercice</h1>
+        <div class="subtitle">Complétez uniquement les zones vides. Vert = correct, rouge = faux. Les solutions n’apparaissent qu’en cas d’erreur (ou via le bouton).</div>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="columns">
+        <!-- Colonne gauche -->
+        <div class="section" id="col1">
+          <div class="block">
+            <div class="row">
+              <span class="prefix">eau</span>
+              <input id="intraWord" class="small" placeholder="…" aria-label="mot">
+              <span class="suffix">cellulaire</span>
+            </div>
+            <div class="status" id="st_intraWord"></div>
+            <div class="solution" id="sol_intraWord"></div>
+          </div>
+
+          <div class="block">
+            <div class="row">
+              <input id="intraPct" class="small" placeholder="…" aria-label="nombre">
+              <span class="suffix">%</span>
+            </div>
+            <div class="status" id="st_intraPct"></div>
+            <div class="solution" id="sol_intraPct"></div>
+          </div>
+        </div>
+
+        <!-- Colonne droite -->
+        <div class="section" id="col2">
+          <div class="block">
+            <div class="row">
+              <span class="prefix">eau</span>
+              <input id="extraWord" class="small" placeholder="…" aria-label="mot">
+              <span class="suffix">cellulaire</span>
+            </div>
+            <div class="status" id="st_extraWord"></div>
+            <div class="solution" id="sol_extraWord"></div>
+          </div>
+
+          <div class="block">
+            <div class="row">
+              <input id="termA" class="medium" placeholder="terme…" aria-label="terme">
+              <input id="pctA" class="small" placeholder="…" aria-label="pourcentage">
+              <span class="suffix">%</span>
+            </div>
+            <div class="status" id="st_boxA"></div>
+            <div class="solution" id="sol_boxA"></div>
+          </div>
+
+          <div class="block">
+            <div class="row">
+              <input id="termB" class="medium" placeholder="terme…" aria-label="terme">
+              <input id="pctB" class="small" placeholder="…" aria-label="pourcentage">
+              <span class="suffix">%</span>
+            </div>
+            <div class="status" id="st_boxB"></div>
+            <div class="solution" id="sol_boxB"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="primary" id="checkBtn">Vérifier</button>
+        <button class="ghost" id="solutionBtn">Solutions</button>
+        <button class="ghost" id="retryBtn">Réessayer</button>
+      </div>
+    </section>
+
+    <div class="footer">Raccourcis : <span class="kbd">Entrée</span> = Vérifier • <span class="kbd">Ctrl</span>+<span class="kbd">R</span> = Réessayer • <span class="kbd">Ctrl</span>+<span class="kbd">S</span> = Solutions</div>
+  </div>
+
+<script>
+function norm(s){return (s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+function num(s){return (s||'').toString().replace(',', '.').match(/[0-9]+(\.[0-9]+)?/);}
+function mark(el, st, sol, ok, solText){
+  if(ok){
+    el.style.borderColor='rgba(16,185,129,.8)';
+    st.textContent='✓ Correct';
+    st.className='status ok';
+    sol.textContent='';
+    el.readOnly = true;
+  }else{
+    el.style.borderColor='rgba(239,68,68,.8)';
+    st.textContent='✗ Incorrect';
+    st.className='status err';
+    if(solText) sol.textContent=solText;
+  }
+}
+function neutral(el, st, sol){
+  el.style.borderColor='rgba(148,163,184,.35)';
+  st.textContent='';
+  st.className='status';
+  sol.textContent='';
+  el.readOnly = false;
+}
+
+function check(showSolutionsOnlyOnWrong=true){
+  // Colonne gauche
+  const intraWord = document.getElementById('intraWord');
+  const st_iw = document.getElementById('st_intraWord');
+  const sol_iw = document.getElementById('sol_intraWord');
+  const iw = norm(intraWord.value);
+  const iwOK = iw==='intra' || iw==='intra-';
+  if(intraWord.value.trim()){
+    mark(intraWord, st_iw, sol_iw, iwOK, showSolutionsOnlyOnWrong ? 'Solution : intra' : 'Solution : intra');
+  }else{ neutral(intraWord, st_iw, sol_iw); }
+
+  const intraPct = document.getElementById('intraPct');
+  const st_ip = document.getElementById('st_intraPct');
+  const sol_ip = document.getElementById('sol_intraPct');
+  const ipm = num(intraPct.value); const ip = ipm?ipm[0]:'';
+  const ipOK = ip==='40';
+  if(intraPct.value.trim()){
+    mark(intraPct, st_ip, sol_ip, ipOK, showSolutionsOnlyOnWrong ? 'Solution : 40' : 'Solution : 40');
+  }else{ neutral(intraPct, st_ip, sol_ip); }
+
+  // Colonne droite
+  const extraWord = document.getElementById('extraWord');
+  const st_ew = document.getElementById('st_extraWord');
+  const sol_ew = document.getElementById('sol_extraWord');
+  const ew = norm(extraWord.value);
+  const ewOK = ew==='extra' || ew==='extra-';
+  if(extraWord.value.trim()){
+    mark(extraWord, st_ew, sol_ew, ewOK, showSolutionsOnlyOnWrong ? 'Solution : extra' : 'Solution : extra');
+  }else{ neutral(extraWord, st_ew, sol_ew); }
+
+  const termA = document.getElementById('termA');
+  const pctA = document.getElementById('pctA');
+  const st_a = document.getElementById('st_boxA');
+  const sol_a = document.getElementById('sol_boxA');
+
+  const termB = document.getElementById('termB');
+  const pctB = document.getElementById('pctB');
+  const st_b = document.getElementById('st_boxB');
+  const sol_b = document.getElementById('sol_boxB');
+
+  const tA = norm(termA.value), pA = (num(pctA.value)||[''])[0]||'';
+  const tB = norm(termB.value), pB = (num(pctB.value)||[''])[0]||'';
+
+  const isInter = (t,p) => (/(^|\s)interstitiel(le)?($|\s)/.test(t)) && p==='16';
+  const isPlasma = (t,p) => (/(^|\s)plasma(tique)?($|\s)/.test(t)) && p==='4';
+
+  const aInter = isInter(tA,pA), aPlasma = isPlasma(tA,pA);
+  const bInter = isInter(tB,pB), bPlasma = isPlasma(tB,pB);
+
+  const opt1 = (aInter?1:0) + (bPlasma?1:0);
+  const opt2 = (aPlasma?1:0) + (bInter?1:0);
+  const assign = (opt2>opt1)?'opt2':'opt1';
+
+  const Aok = assign==='opt1' ? aInter : aPlasma;
+  const Bok = assign==='opt1' ? bPlasma : bInter;
+
+  if(termA.value.trim() || pctA.value.trim()){
+    if(Aok){
+      mark(termA, st_a, sol_a, true);
+      pctA.style.borderColor='rgba(16,185,129,.8)';
+      pctA.readOnly=true;
+    }else{
+      mark(termA, st_a, sol_a, false, showSolutionsOnlyOnWrong ? 'Attendu (ici) : ' + (assign==='opt1' ? 'interstitiel 16' : 'plasma 4') : 'Attendu : ' + (assign==='opt1' ? 'interstitiel 16' : 'plasma 4'));
+      pctA.style.borderColor='rgba(239,68,68,.8)';
+    }
+  }else{
+    neutral(termA, st_a, sol_a);
+    neutral(pctA, {textContent:'', className:'status'}, {textContent:''});
+  }
+
+  if(termB.value.trim() || pctB.value.trim()){
+    if(Bok){
+      mark(termB, st_b, sol_b, true);
+      pctB.style.borderColor='rgba(16,185,129,.8)';
+      pctB.readOnly=true;
+    }else{
+      mark(termB, st_b, sol_b, false, showSolutionsOnlyOnWrong ? 'Attendu (ici) : ' + (assign==='opt1' ? 'plasma 4' : 'interstitiel 16') : 'Attendu : ' + (assign==='opt1' ? 'plasma 4' : 'interstitiel 16'));
+      pctB.style.borderColor='rgba(239,68,68,.8)';
+    }
+  }else{
+    neutral(termB, st_b, sol_b);
+    neutral(pctB, {textContent:'', className:'status'}, {textContent:''});
+  }
+}
+
+function showSolutions(){
+  check(false);
+}
+
+function retry(){
+  const ids = ['intraWord','intraPct','extraWord','termA','pctA','termB','pctB'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    const stId = (id==='intraWord')?'st_intraWord':
+                 (id==='intraPct')?'st_intraPct':
+                 (id==='extraWord')?'st_extraWord':
+                 (id in {termA:1,pctA:1})?'st_boxA':'st_boxB';
+    const solId = (id==='intraWord')?'sol_intraWord':
+                  (id==='intraPct')?'sol_intraPct':
+                  (id==='extraWord')?'sol_extraWord':
+                  (id in {termA:1,pctA:1})?'sol_boxA':'sol_boxB';
+    const st = document.getElementById(stId);
+    const sol = document.getElementById(solId);
+    if(st && st.classList.contains('ok')){
+      el.readOnly = true;
+      el.style.borderColor = 'rgba(16,185,129,.8)';
+    }else{
+      el.value='';
+      el.readOnly = false;
+      if(st && sol) { st.textContent=''; st.className='status'; sol.textContent=''; }
+      el.style.borderColor='rgba(148,163,184,.35)';
+    }
+  });
+  const first = document.querySelector('input:not([readonly])');
+  if(first) first.focus();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('checkBtn').addEventListener('click', () => check(true));
+  document.getElementById('solutionBtn').addEventListener('click', showSolutions);
+  document.getElementById('retryBtn').addEventListener('click', retry);
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); check(true); }
+    if(e.ctrlKey && (e.key==='s' || e.key==='S')){ e.preventDefault(); showSolutions(); }
+    if(e.ctrlKey && (e.key==='r' || e.key==='R')){ e.preventDefault(); retry(); }
+  });
+});
+</script>
+</body>
+</html>

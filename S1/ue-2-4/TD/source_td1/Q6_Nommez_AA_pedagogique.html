@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nommez les 20 acides aminés — Version pédagogique</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --muted:#94a3b8;
+    --text:#e5e7eb;
+    --accent-2:#60a5fa;
+    --error:#ef4444;
+    --ok:#10b981;
+    --chip:#1f2937;
+    --card:rgba(17,24,39,.85);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:linear-gradient(180deg,#0b1225 0%, #0f172a 100%); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial; line-height:1.45}
+  .wrap{max-width:1100px;margin:32px auto;padding:16px}
+  header{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+  .logo{width:56px;height:56px;border-radius:14px;background:radial-gradient(circle at 30% 30%, #4ade80, #22c55e 40%, #14532d 60%); box-shadow:0 10px 30px rgba(34,197,94,.35)}
+  h1{font-size:clamp(1.6rem,2.8vw,2.2rem);margin:0}
+  .subtitle{color:var(--muted); margin-top:4px}
+  .card{background:var(--card); backdrop-filter: blur(6px); border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:18px; box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px}
+  @media (min-width:820px){ .grid{grid-template-columns:repeat(4,minmax(0,1fr))} }
+  .item{display:flex; flex-direction:column; gap:8px; background:linear-gradient(180deg, rgba(31,41,55,.7), rgba(31,41,55,.35)); border:1px solid rgba(148,163,184,.18); padding:12px;border-radius:12px; position:relative}
+  .code{font-weight:700; letter-spacing:.06em; font-size:.95rem; color:#cffafe; background:linear-gradient(90deg,#0ea5e9, #22d3ee); -webkit-background-clip:text; background-clip:text; color:transparent}
+  input{padding:10px 12px; border-radius:10px; border:1px solid rgba(148,163,184,.35); background:#0b1220; color:var(--text); outline:none; font-size:.95rem}
+  input::placeholder{color:#64748b}
+  input:focus{border-color:var(--accent-2); box-shadow:0 0 0 3px rgba(96,165,250,.2)}
+  .status{min-height:20px; font-size:.85rem}
+  .status.ok{color:var(--ok)}
+  .status.err{color:var(--error)}
+  .solution{font-size:.85rem; color:#a5b4fc; min-height:18px}
+  .controls{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+  button{border:1px solid rgba(148,163,184,.25); background:#0b1220; color:var(--text); padding:10px 14px; border-radius:12px; font-weight:600; cursor:pointer}
+  button:hover{transform:translateY(-1px); box-shadow:0 8px 16px rgba(2,6,23,.45)}
+  .primary{background:linear-gradient(90deg,#16a34a,#22c55e); border-color:transparent}
+  .ghost{background:transparent}
+  .muted{color:var(--muted)}
+  .score{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px}
+  .bar{flex:1; height:10px; background:#0b1220; border:1px solid rgba(148,163,184,.25); border-radius:999px; overflow:hidden}
+  .fill{height:100%; width:0%; background:linear-gradient(90deg,#60a5fa,#22c55e)}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+  .chip{background:var(--chip); border:1px solid rgba(148,163,184,.18); border-radius:999px; padding:6px 10px; font-size:.85rem}
+  .footer{margin-top:18px; color:var(--muted); font-size:.85rem}
+  .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; border:1px solid rgba(148,163,184,.35); background:#0b1220; padding:2px 6px; border-radius:6px}
+  @media print{
+    body{background:#fff; color:#111}
+    .card{box-shadow:none; background:#fff; border:1px solid #e5e7eb}
+    input{border:1px solid #ddd}
+    .logo{display:none}
+    .controls button{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Nommez les 20 acides aminés à partir de leur code 3 lettres</h1>
+        <div class="subtitle">Écrivez le <strong>nom complet</strong> Accents/majuscules/espaces tolérés. Variantes acceptées : « aspar__ / acide aspar___ », « gluta___/ acide glut___ », etc.</div>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="chips">
+        <span class="chip">Conseils</span>
+        <span class="chip">Utilisez <span class="kbd">Entrée</span> pour vérifier</span>
+        <span class="chip">Réessayer efface uniquement les erreurs</span>
+        <span class="chip">Solutions affichées <em>sous</em> le champ en cas d’erreur</span>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="controls">
+        <button class="primary" id="checkBtn">Vérifier</button>
+        <button class="ghost" id="solutionBtn">Solutions (erreurs seulement)</button>
+        <button class="ghost" id="retryBtn">Réessayer</button>
+      </div>
+
+      <div class="score">
+        <div id="scoreText" class="muted">0 / 20 correct</div>
+        <div class="bar"><div class="fill" id="fill"></div></div>
+      </div>
+
+      <div class="footer">
+        Raccourcis : <span class="kbd">Entrée</span> = Vérifier • <span class="kbd">Ctrl</span> + <span class="kbd">S</span> = Solutions (erreurs) • <span class="kbd">Ctrl</span> + <span class="kbd">R</span> = Réessayer
+      </div>
+    </section>
+  </div>
+
+<script>
+const DATA = [
+  ["ALA","alanine"],
+  ["ARG","arginine"],
+  ["ASP","aspartate/acide aspartique/aspartic acid"],
+  ["ASN","asparagine"],
+  ["CYS","cysteine/cystéine"],
+  ["GLN","glutamine"],
+  ["GLU","glutamate/acide glutamique/glutamic acid"],
+  ["GLY","glycine"],
+  ["HIS","histidine"],
+  ["ILE","isoleucine"],
+  ["LEU","leucine"],
+  ["LYS","lysine"],
+  ["MET","méthionine/methionine"],
+  ["PHE","phénylalanine/phenylalanine"],
+  ["PRO","proline"],
+  ["SER","sérine/serine"],
+  ["THR","thréonine/threonine"],
+  ["TRP","tryptophane/tryptophan"],
+  ["TYR","tyrosine"],
+  ["VAL","valine"]
+];
+
+function normalize(s){
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[-_']/g,' ')
+    .replace(/\s+/g,' ')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // remove accents
+}
+
+function build(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  DATA.forEach(([code, answers], idx) => {
+    const item = document.createElement('div');
+    item.className = 'item';
+
+    const label = document.createElement('div');
+    label.className = 'code';
+    label.textContent = code;
+    item.appendChild(label);
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = 'Nom complet...';
+    input.autocomplete = 'off';
+    input.setAttribute('data-idx', idx);
+    item.appendChild(input);
+
+    const st = document.createElement('div');
+    st.className = 'status';
+    item.appendChild(st);
+
+    const sol = document.createElement('div');
+    sol.className = 'solution';
+    item.appendChild(sol);
+
+    grid.appendChild(item);
+  });
+}
+
+function clearSolution(item){
+  const sol = item.querySelector('.solution');
+  if(sol) sol.textContent = '';
+}
+
+function setSolution(item, text){
+  const sol = item.querySelector('.solution');
+  if(sol) sol.textContent = text;
+}
+
+function isCorrect(i, val){
+  const variants = DATA[i][1].split('/').map(normalize);
+  return val && variants.includes(val);
+}
+
+function primarySolution(i){
+  const first = DATA[i][1].split('/')[0];
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
+
+function check(){
+  let correct = 0;
+  document.querySelectorAll('.item').forEach((item, i) => {
+    const input = item.querySelector('input');
+    const status = item.querySelector('.status');
+    const val = normalize(input.value);
+
+    if(isCorrect(i, val)){
+      status.textContent = '✓ Correct';
+      status.className = 'status ok';
+      input.style.borderColor = 'rgba(16,185,129,.8)';
+      input.disabled = true;
+      clearSolution(item);
+      correct++;
+    } else if(input.value.trim() !== ''){
+      status.textContent = '✗ Incorrect';
+      status.className = 'status err';
+      input.style.borderColor = 'rgba(239,68,68,.8)';
+      setSolution(item, 'Solution : ' + primarySolution(i));
+    } else {
+      // Vide: neutre
+      status.textContent = '';
+      status.className = 'status';
+      input.style.borderColor = 'rgba(148,163,184,.35)';
+      clearSolution(item);
+    }
+  });
+  updateScore(correct);
+}
+
+function showSolutionsForErrors(){
+  document.querySelectorAll('.item').forEach((item, i) => {
+    const input = item.querySelector('input');
+    const status = item.querySelector('.status');
+    if(input.disabled) return; // déjà correct
+    const val = normalize(input.value);
+    if(!isCorrect(i, val)){
+      setSolution(item, 'Solution : ' + primarySolution(i));
+      // conservez la couleur actuelle (rouge si déjà marqué faux, neutre sinon)
+      if(status.classList.contains('err')) {
+        input.style.borderColor = 'rgba(239,68,68,.8)';
+      }
+    } else {
+      clearSolution(item);
+    }
+  });
+}
+
+function retry(){
+  document.querySelectorAll('.item').forEach((item, i) => {
+    const input = item.querySelector('input');
+    const status = item.querySelector('.status');
+    if(!input.disabled){
+      input.value = '';
+      status.textContent = '';
+      status.className = 'status';
+      input.style.borderColor = 'rgba(148,163,184,.35)';
+      clearSolution(item);
+    }
+  });
+  updateScore(calcScore());
+  const first = document.querySelector('input:not([disabled])');
+  if(first) first.focus();
+}
+
+function calcScore(){
+  let n=0;
+  document.querySelectorAll('.item').forEach((item, i) => {
+    const input = item.querySelector('input');
+    if(input.disabled) n++;
+  });
+  return n;
+}
+
+function updateScore(n){
+  const scoreText = document.getElementById('scoreText');
+  const fill = document.getElementById('fill');
+  scoreText.textContent = n + ' / 20 correct';
+  fill.style.width = (n/20*100).toFixed(1) + '%';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  build();
+  updateScore(0);
+  document.getElementById('checkBtn').addEventListener('click', check);
+  document.getElementById('solutionBtn').addEventListener('click', showSolutionsForErrors);
+  document.getElementById('retryBtn').addEventListener('click', retry);
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ e.preventDefault(); check(); }
+    if(e.ctrlKey && (e.key==='s' || e.key==='S')){ e.preventDefault(); showSolutionsForErrors(); }
+    if(e.ctrlKey && (e.key==='r' || e.key==='R')){ e.preventDefault(); retry(); }
+  });
+});
+</script>
+</body>
+</html>
