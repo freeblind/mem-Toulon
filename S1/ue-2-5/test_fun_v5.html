@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UE 2.5 S1 — Mega Quiz Fun (TD1+TD2)</title>
+  <style>
+    :root{
+      --bg:#121212; --fg:#eee; --card:#1e1e1e; --accent:#ff7a00; --ok:#15d07a; --err:#ff4d4f; --muted:#aaa; --shadow:rgba(255,122,0,.35);
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --sans:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica,Arial;
+    }
+    body.theme-forge { --bg:#121212; --card:#1e1e1e; --accent:#ff7a00; --shadow:rgba(255,122,0,.35) }
+    body.theme-cyber { --bg:#04121f; --card:#0b2438; --accent:#00e0ff; --shadow:rgba(0,224,255,.35) }
+    body.theme-chalk { --bg:#152415; --card:#1f3a1f; --accent:#f4f1a6; --shadow:rgba(244,241,166,.35) }
+    body.theme-parch { --bg:#2b241b; --card:#3a3025; --accent:#f1c27d; --shadow:rgba(241,194,125,.35) }
+    body.theme-arcade { --bg:#0d0d0d; --card:#151515; --accent:#ff00ff; --shadow:rgba(255,0,255,.35) }
+    *{box-sizing:border-box}
+    body{margin:0;padding:24px;background:
+      radial-gradient(800px 500px at -10% -20%, var(--shadow) 0, transparent 60%),
+      radial-gradient(900px 600px at 120% 120%, var(--shadow) 0, transparent 60%),
+      var(--bg);
+      color:var(--fg);font-family:var(--sans); line-height:1.6;
+    }
+    .wrap{max-width:1000px;margin:0 auto;background:var(--card);border:1px solid #fff2;border-radius:16px;padding:24px;box-shadow:0 8px 24px #0007; position:relative}
+    h1{margin:0 0 4px;text-align:center}
+    .sub{color:var(--muted);text-align:center;margin:0 0 16px}
+    .hud{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0 16px}
+    .tile{background:#0003;border:1px solid #fff2;border-radius:10px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono)}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .btn{padding:10px 14px;border:1px solid var(--accent);border-radius:10px;background:transparent;color:var(--fg);cursor:pointer;font-weight:600}
+    .btn:hover{background:var(--accent);color:#000}
+    .q{padding:16px;border:1px solid #fff2;border-radius:14px;background:#0003}
+    .q h2{margin:0 0 6px}
+    .q .prompt{margin:8px 0 12px}
+    .options label{display:block;margin:6px 0;padding:10px 12px;border:1px solid #fff2;border-radius:10px;cursor:pointer}
+    .options label:hover{border-color:var(--accent)}
+    input[type="radio"],input[type="checkbox"]{margin-right:10px}
+    input[type="text"]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #fff2;background:#0003;color:var(--fg)}
+    select{padding:10px 12px;border-radius:10px;border:1px solid #fff2;background:#0003;color:var(--fg)}
+    .feedback{display:none;margin-top:12px;padding:12px;border-radius:12px;font-weight:700}
+    .good{background:#0f3; color:#021; }
+    .bad{background:#f33; color:#210; }
+    .wiggle{animation:wig .25s ease-in-out 2}
+    @keyframes wig{0%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+    .small{font-size:.9rem;color:var(--muted)}
+    .confetti{ pointer-events:none; position:fixed; inset:0; overflow:hidden }
+    .confetti b{ position:absolute; width:6px; height:12px; background:currentColor; top:-20px; opacity:.95 }
+    .shout{ font-size:1.3rem; font-weight:900; letter-spacing:.5px; margin-bottom:6px }
+  </style>
+</head>
+<body class="theme-forge">
+  <div class="wrap">
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+    <h1>UE 2.5 S1 — Mega Quiz Fun</h1>
+    <p class="sub">TD1 + TD2 (texte uniquement) — Click / Coche / Écris — Tout en un.</p>
+
+    <div class="hud" aria-live="polite">
+      <div class="tile"><span>Question</span><strong id="hud-q">0</strong></div>
+      <div class="tile"><span>Bonnes</span><strong id="hud-ok">0</strong></div>
+      <div class="tile"><span>Série</span><strong id="hud-streak">0</strong></div>
+      <div class="tile"><span>Record</span><strong id="hud-best">0</strong></div>
+      <div class="tile"><span>Banque</span><strong id="hud-bank">0</strong></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="btn-next">Question suivante</button>
+      <button class="btn" id="btn-theme">Changer de thème</button>
+      <button class="btn" id="btn-sound">Son : ON</button>
+    </div>
+
+    <div id="qa"></div>
+    <p class="small">Astuce : pour les questions « texte », les accents/casse ne comptent pas.</p>
+  </div>
+
+  <script>
+    // THEME
+    const themes=['theme-forge','theme-cyber','theme-chalk','theme-parch','theme-arcade'];
+    function cycleTheme(){
+      const b=document.body;
+      const i = themes.findIndex(t=>b.classList.contains(t));
+      themes.forEach(t=>b.classList.remove(t));
+      b.classList.add(themes[(i+1)%themes.length]);
+    }
+    document.getElementById('btn-theme').onclick=cycleTheme;
+
+    // BANK — TD2 + TD1 (schémas exclus)
+    const BANK = [
+      {id:'td2-1',type:'text',title:'Définition',prompt:"Gamète mâle (un mot)",answer:"Spermatozoïde",accepted:["spermatozoide","spermatozoïde"],correction:"Gamète mâle = <strong>Spermatozoïde</strong>."},
+      {id:'td2-2',type:'text',title:'Définition',prompt:"Gamète femelle (un mot)",answer:"Ovocyte",accepted:["ovocyte","ovule"],correction:"Gamète femelle = <strong>Ovocyte</strong>."},
+      {id:'td2-3',type:'text',title:'Définition',prompt:"Œuf fécondé (un mot)",answer:"Zygote",accepted:["zygote"],correction:"Œuf fécondé = <strong>Zygote</strong>."},
+      {id:'td2-4',type:'text',title:'Définition',prompt:"Implantation de l’embryon dans l’utérus (un mot)",answer:"Nidation",accepted:["nidation"],correction:"Implantation = <strong>Nidation</strong> (J5–J7)."},
+      {id:'td2-5',type:'text',title:'Définition',prompt:"Période de l’œuf fécondé à la fin de la 8ᵉ semaine (un mot)",answer:"Embryogénèse",accepted:["embryogenese","embryogénèse"],correction:"<strong>Embryogénèse</strong>."},
+      {id:'td2-6',type:'text',title:'Définition',prompt:"Différenciation cellulaire et apparition des organes (un mot)",answer:"Organogénèse",accepted:["organogenese","organogénèse"],correction:"<strong>Organogénèse</strong> (0–8 sem.)."},
+      {id:'td2-7',type:'vf',title:'V/F — Fœtus',prompt:"La myélinisation du fœtus est complète.",options:{VRAI:false,FAUX:true},correction:"FAUX : elle est incomplète."},
+      {id:'td2-8',type:'vf',title:'V/F — Fœtus',prompt:"Le fœtus produit de l’urine.",options:{VRAI:true,FAUX:false},correction:"VRAI."},
+      {id:'td2-9',type:'vf',title:'V/F — Fœtus',prompt:"Le fœtus produit du colostrum.",options:{VRAI:false,FAUX:true},correction:"FAUX : il s’agit du <strong>méconium</strong>."},
+      {id:'td2-10',type:'qcm',title:"Accouchement — Ordre",prompt:"Ordre correct des 3 phases ?",options:["Dilatation → Expulsion du fœtus → Délivrance","Dilatation → Délivrance → Expulsion du fœtus"],answer:"Dilatation → Expulsion du fœtus → Délivrance",correction:"<strong>Dilatation → Expulsion du fœtus → Délivrance</strong>."},
+      {id:'td2-11',type:'vf',title:'V/F — Définition',prompt:"La délivrance est l’expulsion du fœtus.",options:{VRAI:false,FAUX:true},correction:"FAUX : c’est l’expulsion du <strong>placenta</strong>."},
+      {id:'td2-12',type:'vf',title:"V/F — Besoins du Nouveau-né",prompt:"Le nouveau-né a un besoin accru en magnésium et vitamine C.",options:{VRAI:false,FAUX:true},correction:"FAUX : besoin accru en <strong>fer</strong> et <strong>vitamine D</strong>."},
+      {id:'td2-13',type:'vf',title:"V/F — Nouveau-né",prompt:"Le nouveau-né n’a aucune immunité.",options:{VRAI:false,FAUX:true},correction:"FAUX : immunité passive maternelle (placenta + colostrum)."},
+      {id:'td2-14',type:'select-match',title:"Appariement — Paramètres (Adulte vs Nouveau-né)",prompt:"Associe Adultes/Nouveau-né :",labels:["Masse hydrique ADULTE","Masse hydrique NOUVEAU-NÉ","FC NOUVEAU-NÉ (bpm)","PA NOUVEAU-NÉ (mmHg)"],options:["60 %","80 %","120-180","70"],answers:["60 %","80 %","120-180","70"],correction:"Adulte ~60% ; Nouveau-né ~80% ; FC 120–180 ; PA ~70 mmHg."},
+      {id:'td2-15',type:'vf',title:"V/F — Ménopause",prompt:"La ménopause correspond à l’arrêt définitif du fonctionnement de l’utérus.",options:{VRAI:false,FAUX:true},correction:"FAUX : arrêt des <strong>ovaires</strong>."},
+      {id:'td2-16',type:'vf',title:"V/F — β-HCG",prompt:"Le dosage β-HCG permet de diagnostiquer le diabète.",options:{VRAI:false,FAUX:true},correction:"FAUX : il affirme la <strong>grossesse</strong>."},
+      {id:'td2-17',type:'vf',title:"V/F — Vieillissement",prompt:"La gériatrie étudie le vieillissement sous tous ses aspects.",options:{VRAI:false,FAUX:true},correction:"FAUX : c’est la <strong>gérontologie</strong>."},
+      {id:'td2-18',type:'vf',title:"V/F — Sensoriel",prompt:"Diminution audition = presbyacousie ; diminution vue = presbytie.",options:{VRAI:true,FAUX:false},correction:"VRAI."},
+      {id:'td2-19',type:'vf',title:"V/F — Mort",prompt:"La cause la plus fréquente de décès est l’insuffisance cardiaque.",options:{VRAI:false,FAUX:true},correction:"FAUX : <strong>cancer</strong> le plus fréquent."},
+
+      {id:'td2-h1',type:'text',title:'Homéostasie — Terme',prompt:"Taux de potassium dans le sang (un mot)",answer:"Kaliémie",accepted:["kaliemie","kaliémies","kaliemies"],correction:"<strong>Kaliémie</strong>."},
+      {id:'td2-h2',type:'text',title:'Homéostasie — Terme',prompt:"Régulation de la température corporelle (un mot)",answer:"Thermorégulation",accepted:["thermoregulation","thermorégulation"],correction:"<strong>Thermorégulation</strong>."},
+      {id:'td2-h3',type:'text',title:'Homéostasie — Terme',prompt:"Production de chaleur (un mot)",answer:"Thermogénèse",accepted:["thermogenese","thermogénèse"],correction:"<strong>Thermogénèse</strong>."},
+      {id:'td2-h4',type:'text',title:'Homéostasie — Terme',prompt:"Évacuation de chaleur (un mot)",answer:"Thermolyse",accepted:["thermolyse"],correction:"<strong>Thermolyse</strong>."},
+      {id:'td2-h5',type:'text',title:'Homéostasie — Terme',prompt:"Capteurs barométriques (pluriel)",answer:"Barorécepteurs",accepted:["barorecepteurs","barorécepteurs"],correction:"<strong>Barorécepteurs</strong>."},
+      {id:'td2-h6',type:'text',title:'Homéostasie — Terme',prompt:"Capteurs détectant la variation d’osmolarité (pluriel)",answer:"Osmorécepteurs",accepted:["osmorecepteurs","osmorécepteurs"],correction:"<strong>Osmorécepteurs</strong>."},
+      {id:'td2-h7',type:'qcm',title:'Homéostasie — Compartiments',prompt:"L’eau se répartit en combien de <strong>grands compartiments</strong> ?",options:["2","3"],answer:"2",correction:"Deux grands compartiments : <strong>LIC</strong> et <strong>LEC</strong> (LEC = interstitiel + plasma)."},
+      {id:'td2-h8',type:'qcm',title:'Homéostasie — Part LIC',prompt:"Le LIC représente … de l’eau totale du corps :",options:["33 %","67 %"],answer:"67 %",correction:"LIC ≈ <strong>67%</strong>."},
+      {id:'td2-h9',type:'qcm',title:'Homéostasie — Environnement interne',prompt:"L’environnement interne correspond au …",options:["LEC","LIC"],answer:"LEC",correction:"Environnement interne = <strong>LEC</strong>."},
+      {id:'td2-h10',type:'text',title:'Homéostasie — Composants',prompt:"Donne <em>un</em> des trois composants de l’homéostasie.",answer:"capteur/centre de contrôle/effecteur",accepted:["capteur","recepteur","récepteur","centre de controle","centre de contrôle","centre integrateur","centre intégrateur","integrateur","intégrateur","effecteur","effecteurs"],correction:"Trois composants : capteur (récepteur), centre intégrateur/de contrôle, effecteur."},
+      {id:'td2-h11',type:'qcm',title:'Rétro-inhibition',prompt:"Rôle principal ?",options:["Amplifier le stimulus","Diminuer le stimulus et ramener à la consigne"],answer:"Diminuer le stimulus et ramener à la consigne",correction:"Rétro-inhibition diminue le stimulus initial."},
+      {id:'td2-h12',type:'qcm',title:'Rétro-activation',prompt:"Rôle principal ?",options:["Amplifier le stimulus","Diminuer le stimulus"],answer:"Amplifier le stimulus",correction:"Rétro-activation = amplification (ex. ocytocine à l’accouchement)."},
+      {id:'td2-h13',type:'text',title:'Exemple — Rétro-inhibition',prompt:"Écris l’hormone sécrétée après un repas pour faire entrer le glucose dans les cellules.",answer:"Insuline",accepted:["insuline"],correction:"<strong>Insuline</strong>."},
+      {id:'td2-h14',type:'text',title:'Exemple — Rétro-activation',prompt:"Hormone qui augmente les contractions lors de l’accouchement (un mot).",answer:"Ocytocine",accepted:["ocytocine","oxytocine"],correction:"<strong>Ocytocine</strong>."},
+
+      {id:'td2-im1',type:'text',title:'Immunité — Terme',prompt:"Toute substance étrangère déclenchant une réponse immunitaire (un mot).",answer:"Antigène",accepted:["antigene","antigène"],correction:"<strong>Antigène</strong>."},
+      {id:'td2-im2',type:'text',title:'Immunité — Terme',prompt:"Protéine sécrétée par LB, se liant à un antigène (un mot).",answer:"Anticorps",accepted:["anticorps"],correction:"<strong>Anticorps</strong> (immunoglobuline)."},
+      {id:'td2-im3',type:'vf',title:'Immunité — Types',prompt:"L’immunité innée est la 1ère ligne de défense.",options:{VRAI:true,FAUX:false},correction:"VRAI : granulocytes/macrophages, phagocytose, inflammation."},
+      {id:'td2-im4',type:'vf',title:'Immunité — Types',prompt:"L’immunité spécifique est plus lente et moins efficace.",options:{VRAI:false,FAUX:true},correction:"FAUX : elle est + rapide et efficace (LB/LT, anticorps, cytokines)."},
+      {id:'td2-im5',type:'qcm',title:'Lymphoïdes primaires',prompt:"Organes lymphoïdes primaires :",options:["Ganglions et rate","Thymus et moelle osseuse"],answer:"Thymus et moelle osseuse",correction:"Primaires = <strong>Thymus + Moelle osseuse</strong>."},
+      {id:'td2-im6',type:'qcm',title:'Lymphoïdes secondaires',prompt:"Organes lymphoïdes secondaires :",options:["Ganglions, rate, amygdales, végétations","Thymus, moelle osseuse"],answer:"Ganglions, rate, amygdales, végétations",correction:"Secondaires = ganglions, rate, amygdales, végétations."},
+      {id:'td2-im7',type:'text',title:'Rôle — Secondaires',prompt:"Rôle des organes lymphoïdes secondaires (un mot clé) :",answer:"Activation",accepted:["activation","rencontre","réponse","reponse","adaptative"],correction:"Lieu de rencontre antigènes/lymphocytes → <strong>activation</strong> et réponse adaptative."},
+
+      {id:'td1-p1',type:'text',title:'Racine',prompt:"« derm(ato) » signifie…",answer:"peau",accepted:["peau"],correction:"derm(ato) = <strong>peau</strong>."},
+      {id:'td1-p2',type:'text',title:'Racine',prompt:"« pnee / -pnée » signifie…",answer:"respiration",accepted:["respiration"],correction:"-pnée = <strong>respiration</strong>."},
+      {id:'td1-p3',type:'text',title:'Racine',prompt:"« cardio » signifie…",answer:"coeur",accepted:["coeur","cœur"],correction:"cardio = <strong>cœur</strong>."},
+      {id:'td1-p4',type:'text',title:'Racine',prompt:"« néphro » signifie…",answer:"rein",accepted:["rein","reins"],correction:"néphro = <strong>rein</strong>."},
+      {id:'td1-p5',type:'text',title:'Préfixe',prompt:"« hypo » signifie…",answer:"déficient, bas",accepted:["deficient bas","déficient bas","bas","déficient"],correction:"hypo = <strong>déficient, bas</strong>."},
+      {id:'td1-p6',type:'text',title:'Racine',prompt:"« hémato » signifie…",answer:"sang",accepted:["sang"],correction:"hémato = <strong>sang</strong>."},
+      {id:'td1-p7',type:'text',title:'Suffixe',prompt:"« -émie » signifie…",answer:"dans le sang",accepted:["dans le sang","sang"],correction:"-émie = <strong>dans le sang</strong>."},
+
+      {id:'td1-n1',type:'select-match',title:'Niveaux — Appariement',prompt:"Associe :",labels:["Cellule","Organe","Système/Appareil"],options:["Unité structurale, fonctionnelle et reproductrice","Ensemble de tissus aux fonctions spécifiques","Ensemble d’organes accomplissant une activité essentielle"],answers:["Unité structurale, fonctionnelle et reproductrice","Ensemble de tissus aux fonctions spécifiques","Ensemble d’organes accomplissant une activité essentielle"],correction:"Cellule → unité ; Organe → tissus/fonctions ; Système → organes/activité essentielle."},
+      {id:'td1-n2',type:'qcm',title:'Organisation — Ordre',prompt:"Nombre de niveaux d’organisation listés dans le TD ?",options:["5","6"],answer:"6",correction:"Ordre : chimique → cellulaire → tissulaire → organique → systémique → organisme."},
+
+      {id:'td1-b1',type:'qcm',title:'Lipides — Définition',prompt:"Les lipides sont :",options:["Molécules hydrophiles riches en O","Molécules hydrophobes riches en C et H, peu d’O"],answer:"Molécules hydrophobes riches en C et H, peu d’O",correction:"Hydrophobes ; stockage énergie, membranes, hormones (vit. D, stéroïdes)."},
+      {id:'td1-b2',type:'qcm',title:'Glucides — Catégories',prompt:"Parmi ces trios, lequel correspond aux <em>disaccharides</em> ?",options:["Glucose, fructose, galactose","Saccharose, lactose, maltose"],answer:"Saccharose, lactose, maltose",correction:"Monosaccharides : glucose/fructose/galactose ; Disaccharides : saccharose/lactose/maltose."},
+      {id:'td1-b3',type:'qcm',title:'Protides — Fonction',prompt:"Fonction qui n’est PAS citée :",options:["Structure","Transport","Enzymes","Photosynthèse"],answer:"Photosynthèse",correction:"Protides : structure, transport, enzymes, défense, mouvement."},
+      {id:'td1-b4',type:'qcm',title:'Acides nucléiques — Types',prompt:"Types :",options:["ADN et ARN","ARNm et ARNt uniquement"],answer:"ADN et ARN",correction:"ADN = support info ; ARN = synthèse des protéines."},
+      {id:'td1-b5',type:'qcm',title:'Ions — Définition',prompt:"Un cation est…",options:["Ion positif (perte d’électrons)","Ion négatif (gain d’électrons)"],answer:"Ion positif (perte d’électrons)",correction:"Cation = positif ; Anion = négatif."},
+
+      {id:'td1-c1',type:'qcm',title:'Cellule — Éléments communs',prompt:"Élément <em>non</em> listé parmi les 4 communs :",options:["Noyau","Cytoplasme","Paroi cellulosique","Membrane plasmique"],answer:"Paroi cellulosique",correction:"Les 4 : noyau, cytoplasme, membrane plasmique, organites."},
+
+      {id:'td1-t1',type:'qcm',title:'Tissu épithélial',prompt:"Caractéristique vraie :",options:["Avasculaire mais innervé","Riche en vaisseaux"],answer:"Avasculaire mais innervé",correction:"Épithélium : protection/absorption/sensibilité/sécrétion ; forme le parenchyme."},
+      {id:'td1-t2',type:'qcm',title:'Tissu conjonctif',prompt:"Constituants :",options:["Cellules + matrice extracellulaire (fibres + substance)","Cellules jointives multinucleées"],answer:"Cellules + matrice extracellulaire (fibres + substance)",correction:"Fonction de soutien/isolant ; os, cartilage, derme, tendons, etc."},
+      {id:'td1-t3',type:'qcm',title:'Tissu musculaire',prompt:"Fonction principale :",options:["Transport de l’influx","Locomotion/contraction"],answer:"Locomotion/contraction",correction:"Striés, lisses, cardiaque."},
+      {id:'td1-t4',type:'qcm',title:'Tissu nerveux',prompt:"Pourcentage approximatif de gliocytes :",options:["10%","90%"],answer:"90%",correction:"Ne véhiculent pas l’influx ; rôle de soutien."},
+
+      {id:'td1-s1',type:'qcm',title:'Systèmes — Nombre',prompt:"Nombre de grands systèmes listés :",options:["9","11"],answer:"11",correction:"Tégumentaire, squelettique, musculaire, nerveux, endocrinien, cardio-vasculaire, lymphatique, respiratoire, digestif, urinaire, reproducteur."},
+      {id:'td1-s2',type:'qcm',title:'Digestif — Rôle',prompt:"Rôle principal :",options:["Échanges gazeux","Digestion + absorption + élimination solides"],answer:"Digestion + absorption + élimination solides",correction:"Organes : bouche → vésicule biliaire."},
+      {id:'td1-s3',type:'qcm',title:'Reproducteur — Organes',prompt:"Contient <em>tous</em> les organes listés :",options:["Testicules, prostate, pénis, ovaires, utérus, trompes, vagin","Foie, pancréas, vésicule biliaire"],answer:"Testicules, prostate, pénis, ovaires, utérus, trompes, vagin",correction:"Rôle : reproduction, gamètes, hormones sexuelles."},
+      {id:'td1-circ1',type:'vf',title:'Circulation',prompt:"Tous les vaisseaux partant du cœur sont des veines.",options:{VRAI:false,FAUX:true},correction:"FAUX : artères partent du cœur."},
+      {id:'td1-circ2',type:'vf',title:'Circulation',prompt:"Tous les vaisseaux allant vers le cœur sont des veines.",options:{VRAI:true,FAUX:false},correction:"VRAI."},
+      {id:'td1-circ3',type:'vf',title:'Circulation',prompt:"La circulation pulmonaire = grande circulation.",options:{VRAI:false,FAUX:true},correction:"FAUX : pulmonaire = petite ; systémique = grande."},
+      {id:'td1-sid1',type:'select-match',title:'Identifier le système',prompt:"Associe le descriptif au système :",labels:["Nez, larynx, voies aériennes, poumons","Cœur, vaisseaux, sang","Reins, uretères, vessie, urètre"],options:["Respiratoire","Circulatoire","Urinaire"],answers:["Respiratoire","Circulatoire","Urinaire"],correction:"Respiratoire / Circulatoire / Urinaire."}
+    ];
+
+    // CORE
+    const qa=document.getElementById('qa');
+    const hudQ=document.getElementById('hud-q');
+    const hudOk=document.getElementById('hud-ok');
+    const hudStreak=document.getElementById('hud-streak');
+    const hudBest=document.getElementById('hud-best');
+    const hudBank=document.getElementById('hud-bank');
+
+    let asked=0, ok=0, streak=0, best=0;
+    hudBank.textContent = BANK.length;
+
+    function esc(s){return (s+'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]))}
+    function norm(s){return (s||'').toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ')}
+
+    function build(q){
+      let inner='';
+      if(q.type==='vf'){
+        inner = '<div class="options">'+Object.keys(q.options).map(k=>`<label><input type="radio" name="answer" value="${k}"> ${k}</label>`).join('')+'</div>';
+      }else if(q.type==='qcm'){
+        inner = '<div class="options">'+q.options.map(o=>`<label><input type="radio" name="answer" value="${esc(o)}"> ${esc(o)}</label>`).join('')+'</div>';
+      }else if(q.type==='text'){
+        inner = `<input id="text-answer" type="text" placeholder="Écris ici… (accents/casse ignorés)">`;
+      }else if(q.type==='select-match'){
+        const sh=[...(q.options||[])].sort(()=>Math.random()-0.5);
+        inner = (q.labels||[]).map((lab,i)=> `<p>${esc(lab)} → <select id="m-${i}"><option value="">— Choisir —</option>${sh.map(x=>`<option>${esc(x)}</option>`).join('')}</select></p>`).join('');
+      }
+      return `<div class="q" id="qbox">
+        <h2>${q.title}</h2>
+        <div class="prompt">${q.prompt||''}</div>
+        ${inner}
+        <div class="feedback" id="fb"></div>
+        <button class="btn" id="check">Vérifier</button>
+      </div>`;
+    }
+
+    
+    // ====== Audio (WebAudio) ======
+    let SOUND_ON = true;
+    let _ac = null;
+    function getAC(){
+      if(!_ac){
+        const AC = window.AudioContext || window.webkitAudioContext;
+        _ac = new AC();
+      }
+      return _ac;
+    }
+    function playTone(freq=440, dur=0.12, type='sine', vol=0.2){
+      if(!SOUND_ON) return;
+      const ac = getAC();
+      const t0 = ac.currentTime;
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t0);
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(vol, t0+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+      o.connect(g).connect(ac.destination);
+      o.start(t0); o.stop(t0+dur+0.02);
+    }
+    function successSfx(){
+      // arpeggio up
+      playTone(660, 0.10, 'sine', 0.20);
+      setTimeout(()=>playTone(880, 0.10, 'sine', 0.20), 100);
+      setTimeout(()=>playTone(1046.5, 0.12, 'triangle', 0.18), 210);
+    }
+    function errorSfx(){
+      // brief buzz down
+      playTone(200, 0.14, 'square', 0.18);
+      setTimeout(()=>playTone(160, 0.14, 'square', 0.18), 110);
+    }
+    const btnSound = document.getElementById('btn-sound');
+    btnSound.onclick = ()=>{
+      SOUND_ON = !SOUND_ON;
+      btnSound.textContent = 'Son : ' + (SOUND_ON ? 'ON' : 'OFF');
+      if(SOUND_ON){
+        // Resume context after user gesture if suspended
+        try{ getAC().resume(); }catch(e){}
+        // tiny click to confirm
+        playTone(800, 0.06, 'sine', 0.15);
+      }
+    };
+
+    let current=null;
+    function next(){
+      // change theme randomly
+      const pick = themes[Math.floor(Math.random()*themes.length)];
+      themes.forEach(t=>document.body.classList.remove(t));
+      document.body.classList.add(pick);
+
+      current = BANK[Math.floor(Math.random()*BANK.length)];
+      asked++; hudQ.textContent=asked;
+      qa.innerHTML = build(current);
+      document.getElementById('check').onclick = verify;
+      const first = qa.querySelector('input,select'); if(first) first.focus();
+    }
+
+    // Confetti
+    const confetti = document.getElementById('confetti');
+    function boom(){
+      confetti.innerHTML='';
+      const N=70;
+      for(let i=0;i<N;i++){
+        const b=document.createElement('b');
+        b.style.left=(Math.random()*100)+'%';
+        b.style.color=['#ffffff','#ffd166','#06d6a0','#118ab2','#ef476f'][Math.floor(Math.random()*5)];
+        const dur=600+Math.random()*900;
+        const dx=(Math.random()*2-1)*90;
+        const delay=Math.random()*100;
+        b.animate([{transform:'translate(0,-20px) rotate(0deg)',opacity:1},
+                   {transform:'translate('+dx+'px, 120vh) rotate('+(Math.random()*720-360)+'deg)',opacity:.95}],
+                   {duration:dur,easing:'cubic-bezier(.2,.7,.2,1)',delay});
+        confetti.appendChild(b);
+      }
+      setTimeout(()=>confetti.innerHTML='',1300);
+    }
+
+    const SHOUTS_BAD = ["NON !","NEIN !","FAUX !","NOPE !","WRONG !","ERRONÉ !","NÃO !","¡NO!"];
+
+    function verify(){
+      const fb=document.getElementById('fb'); let good=false;
+      const q=current;
+      if(q.type==='vf'||q.type==='qcm'){
+        const pick = qa.querySelector('input[name="answer"]:checked'); if(!pick){ jiggle(); return }
+        if(q.type==='vf'){ good = !!q.options[pick.value]; }
+        else { good = (pick.value===q.answer); }
+      }else if(q.type==='text'){
+        const val = norm((qa.querySelector('#text-answer')||{}).value||'');
+        if(!val){ jiggle(); return }
+        const accepted = (q.accepted && q.accepted.length) ? q.accepted.map(norm) : (q.answer||'').split('/').map(norm);
+        good = accepted.includes(val);
+      }else if(q.type==='select-match'){
+        let okc=0; (q.labels||[]).forEach((_,i)=>{ const v=(qa.querySelector('#m-'+i)||{}).value; if(v===q.answers[i]) okc++; });
+        good = okc===(q.labels||[]).length;
+      }
+      fb.style.display='block';
+      if(good){
+        ok++; streak++; best=Math.max(best,streak);
+        fb.className='feedback good';
+        fb.innerHTML='✔️ Bonne réponse ! '+(q.correction||'');
+        hudOk.textContent=ok; hudStreak.textContent=streak; hudBest.textContent=best;
+        boom(); successSfx();
+        setTimeout(next,900);
+      }else{
+        streak=0; hudStreak.textContent=streak;
+        fb.className='feedback bad'; errorSfx();
+        const shout = SHOUTS_BAD[Math.floor(Math.random()*SHOUTS_BAD.length)];
+        fb.innerHTML='<div class="shout">'+shout+'</div>❌ Mauvaise réponse. '+(q.correction||'')+'<br><em>Réponds à nouveau à la question pour passer à la suivante.</em>';
+      }
+    }
+    function jiggle(){ const b=document.getElementById('qbox'); b.classList.remove('wiggle'); void b.offsetWidth; b.classList.add('wiggle'); }
+
+    document.getElementById('btn-next').onclick=next;
+    document.addEventListener('DOMContentLoaded', next);
+  </script>
+</body>
+</html>

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhysiqueRadio Challenge - ERM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #0f2027 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 950px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            backdrop-filter: blur(15px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(30,60,114,0.1), transparent);
+            transform: rotate(45deg);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header h1 {
+            color: #1e3c72;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 18px 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .game-area {
+            position: relative;
+            z-index: 2;
+        }
+
+        .question-card {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border-left: 6px solid #667eea;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            animation: slideIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px) scale(0.95); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            line-height: 1.7;
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            border: 2px solid #38b2ac;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            text-align: center;
+            color: #234e52;
+            font-weight: bold;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
+            border: 3px solid #cbd5e0;
+            padding: 18px 22px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.05em;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+        }
+
+        .answer-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        .answer-btn:hover:before {
+            left: 100%;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border-color: #38a169;
+            transform: scale(1.05);
+            animation: correctPulse 0.6s ease-out;
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+            border-color: #e53e3e;
+            animation: shake 0.5s ease-out;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .answer-btn.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: none;
+            margin: 25px auto;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .next-btn:hover {
+            transform: scale(1.08) translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            text-align: center;
+            padding: 50px;
+            border-radius: 25px;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+            animation: spin 15s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-card h2 {
+            font-size: 3em;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .final-score {
+            font-size: 1.6em;
+            margin-bottom: 35px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .restart-btn {
+            background: white;
+            color: #1e3c72;
+            border: none;
+            padding: 18px 45px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.3);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: bold;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .physics-icon {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2.2em;
+            }
+            
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .score-value {
+                font-size: 1.6em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>⚛️ PhysiqueRadio Challenge</h1>
+            <p>Physique appliquée à la Radiologie - ERM</p>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                <span class="score-value" id="currentScore">0</span>
+                <div>Score</div>
+            </div>
+            <div class="score-item">
+                <span class="score-value" id="currentQuestion">1</span>
+                <div>Question</div>
+            </div>
+            <div class="score-item">
+                <span class="score-value" id="correctAnswers">0</span>
+                <div>Bonnes réponses</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <!-- Question dynamique -->
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <h2>🏆 Quiz terminé !</h2>
+            <div class="final-score" id="finalScore"></div>
+            <button class="restart-btn" onclick="restartGame()">Nouvelle partie</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                category: "Rayons X - Production",
+                question: "Comment sont produits les rayons X dans un tube radiogène ?",
+                answers: [
+                    "Par collision d'électrons avec l'anode",
+                    "Par désintégration radioactive naturelle",
+                    "Par fusion nucléaire contrôlée",
+                    "Par ionisation de l'air ambiant"
+                ],
+                correct: 0
+            },
+            {
+                category: "Tube radiogène",
+                question: "Quel est le rôle de la cathode dans un tube à rayons X ?",
+                answers: [
+                    "Absorber les rayons X",
+                    "Refroidir le tube",
+                    "Émettre des électrons",
+                    "Filtrer les rayons X"
+                ],
+                correct: 2
+            },
+            {
+                category: "Paramètres techniques",
+                question: "Qu'est-ce que les kV (kilovolts) contrôlent principalement ?",
+                answers: [
+                    "La quantité de rayons X produits",
+                    "La qualité (énergie) des rayons X",
+                    "La durée de l'exposition",
+                    "La température du tube"
+                ],
+                correct: 1
+            },
+            {
+                category: "Paramètres techniques",
+                question: "Qu'est-ce que les mAs (milliampères-seconde) déterminent ?",
+                answers: [
+                    "L'énergie des rayons X",
+                    "La pénétration des rayons X",
+                    "La quantité de rayons X produits",
+                    "La résolution de l'image"
+                ],
+                correct: 2
+            },
+            {
+                category: "Interaction rayonnement-matière",
+                question: "Quel est l'effet photoélectrique ?",
+                answers: [
+                    "La diffusion du photon sans perte d'énergie",
+                    "L'absorption complète du photon X avec éjection d'un électron",
+                    "La création d'une paire électron-positron",
+                    "La transmission du rayonnement sans interaction"
+                ],
+                correct: 1
+            },
+            {
+                category: "Diffusion Compton",
+                question: "Dans la diffusion Compton, que se passe-t-il ?",
+                answers: [
+                    "Le photon est totalement absorbé",
+                    "Le photon est diffusé avec perte d'énergie",
+                    "Le photon traverse sans interaction",
+                    "Le photon crée deux électrons"
+                ],
+                correct: 1
+            },
+            {
+                category: "Imagerie numérique",
+                question: "Qu'est-ce qu'un pixel ?",
+                answers: [
+                    "Un détecteur de rayonnement",
+                    "Le plus petit élément d'une image numérique",
+                    "Un type de cristal scintillant",
+                    "Une unité de dose de rayonnement"
+                ],
+                correct: 1
+            },
+            {
+                category: "Radioprotection",
+                question: "Quelle est l'unité de la dose absorbée ?",
+                answers: [
+                    "Le Sievert (Sv)",
+                    "Le Becquerel (Bq)",
+                    "Le Gray (Gy)",
+                    "Le Roentgen (R)"
+                ],
+                correct: 2
+            },
+            {
+                category: "Qualité image",
+                question: "Qu'est-ce qui améliore le contraste radiographique ?",
+                answers: [
+                    "L'augmentation des mAs uniquement",
+                    "La diminution des kV",
+                    "L'augmentation de la distance",
+                    "L'utilisation d'une grille anti-diffusante"
+                ],
+                correct: 3
+            },
+            {
+                category: "Filtration",
+                question: "À quoi sert la filtration du faisceau de rayons X ?",
+                answers: [
+                    "À augmenter l'intensité du faisceau",
+                    "À éliminer les rayons X de basse énergie",
+                    "À accélérer la production des rayons X",
+                    "À refroidir le tube radiogène"
+                ],
+                correct: 1
+            },
+            {
+                category: "Géométrie radiologique",
+                question: "Comment réduire le flou géométrique ?",
+                formula: "Flou = (taille foyer × distance objet-film) ÷ distance foyer-objet",
+                answers: [
+                    "Augmenter la distance foyer-objet",
+                    "Diminuer la distance objet-récepteur",
+                    "Utiliser un foyer plus petit",
+                    "Toutes les réponses ci-dessus"
+                ],
+                correct: 3
+            },
+            {
+                category: "Scanner - TDM",
+                question: "Que signifie l'unité Hounsfield (UH) ?",
+                answers: [
+                    "La dose reçue par le patient",
+                    "La densité radiologique des tissus",
+                    "La vitesse de rotation du tube",
+                    "L'épaisseur des coupes"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctAnswersCount = 0;
+        let selectedAnswer = null;
+
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            const gameArea = document.getElementById('gameArea');
+            
+            let formulaHTML = question.formula ? 
+                `<div class="formula-box">${question.formula}</div>` : '';
+            
+            gameArea.innerHTML = `
+                <div class="question-card">
+                    <div class="category-badge">
+                        <span class="physics-icon">⚛️</span>${question.category}
+                    </div>
+                    <div class="question-number">Question ${currentQuestionIndex + 1}/${questions.length}</div>
+                    <div class="question-text">${question.question}</div>
+                    ${formulaHTML}
+                    <div class="answers-grid" id="answersGrid">
+                        ${question.answers.map((answer, index) => `
+                            <button class="answer-btn" onclick="selectAnswer(${index})">
+                                ${String.fromCharCode(65 + index)}. ${answer}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Question suivante</button>
+                </div>
+            `;
+            
+            updateProgress();
+            updateScoreBoard();
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (selectedAnswer !== null) return;
+            
+            selectedAnswer = selectedIndex;
+            const question = questions[currentQuestionIndex];
+            const answerButtons = document.querySelectorAll('.answer-btn');
+            
+            answerButtons.forEach((btn, index) => {
+                btn.classList.add('disabled');
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === question.correct) {
+                score += 100;
+                correctAnswersCount++;
+                // Animation de succès
+                setTimeout(() => {
+                    answerButtons[selectedIndex].style.transform = 'scale(1.05)';
+                }, 100);
+            }
+            
+            document.getElementById('nextBtn').style.display = 'block';
+            updateScoreBoard();
+        }
+
+        function nextQuestion() {
+            selectedAnswer = null;
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateScoreBoard() {
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('correctAnswers').textContent = correctAnswersCount;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const gameArea = document.getElementById('gameArea');
+            const resultCard = document.getElementById('resultCard');
+            const percentage = Math.round((correctAnswersCount / questions.length) * 100);
+            
+            let message = "";
+            let emoji = "";
+            
+            if (percentage >= 90) {
+                message = "Physicien en herbe ! Vous maîtrisez parfaitement les concepts !";
+                emoji = "🔬";
+            } else if (percentage >= 75) {
+                message = "Excellent ! Vous avez une très bonne compréhension de la physique !";
+                emoji = "⚛️";
+            } else if (percentage >= 60) {
+                message = "Bien ! Quelques notions à revoir mais c'est sur la bonne voie !";
+                emoji = "📐";
+            } else if (percentage >= 40) {
+                message = "Il faut approfondir vos connaissances en physique !";
+                emoji = "📚";
+            } else {
+                message = "Révision intensive recommandée ! La physique demande de la pratique !";
+                emoji = "💪";
+            }
+            
+            document.getElementById('finalScore').innerHTML = `
+                <div style="font-size: 4em; margin-bottom: 20px; animation: bounce 1s ease-out;">${emoji}</div>
+                <div style="font-size: 1.8em; margin-bottom: 15px;">Score final: ${score} points</div>
+                <div style="font-size: 1.4em; margin-bottom: 20px;">Bonnes réponses: ${correctAnswersCount}/${questions.length} (${percentage}%)</div>
+                <div style="font-style: italic; font-size: 1.2em; opacity: 0.9;">${message}</div>
+            `;
+            
+            gameArea.style.display = 'none';
+            resultCard.style.display = 'block';
+        }
+
+        function restartGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            correctAnswersCount = 0;
+            selectedAnswer = null;
+            
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('resultCard').style.display = 'none';
+            
+            // Mélanger les questions pour une nouvelle partie
+            shuffleArray(questions);
+            displayQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Styles CSS pour l'animation bounce
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 20%, 60%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-20px); }
+                80% { transform: translateY(-10px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialisation du jeu
+        shuffleArray(questions);
+        displayQuestion();
+    </script>
+</body>
+</html>

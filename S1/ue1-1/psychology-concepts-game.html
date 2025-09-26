@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsychoConceptChallenge - UE 1.1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 35%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 35px;
+            max-width: 1000px;
+            width: 92%;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.15);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: conic-gradient(from 0deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            animation: rotate 25s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 35px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 3em;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-weight: 800;
+        }
+
+        .header p {
+            color: #4a5568;
+            font-size: 1.3em;
+            font-weight: 500;
+        }
+
+        .score-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-value {
+            font-size: 2.2em;
+            font-weight: bold;
+            display: block;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .game-area {
+            position: relative;
+            z-index: 2;
+        }
+
+        .question-card {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            border-left: 8px solid #667eea;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.08);
+            animation: slideIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1), transparent);
+            border-radius: 50%;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px) scale(0.9); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .question-text {
+            font-size: 1.25em;
+            margin-bottom: 28px;
+            line-height: 1.8;
+            color: #2d3748;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            border: 2px solid #38b2ac;
+            border-radius: 15px;
+            padding: 18px;
+            margin: 20px 0;
+            color: #234e52;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .answer-btn {
+            background: linear-gradient(135deg, #ffffff, #f1f5f9);
+            border: 3px solid #cbd5e0;
+            padding: 20px 25px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.1em;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+        }
+
+        .answer-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            transition: left 0.6s;
+        }
+
+        .answer-btn:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .answer-btn:hover::before {
+            left: 100%;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            border-color: #38a169;
+            transform: scale(1.05);
+            animation: correctPulse 0.8s ease-out;
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+            border-color: #e53e3e;
+            animation: shake 0.6s ease-out;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7); }
+            50% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(72, 187, 120, 0); }
+            100% { transform: scale(1.05); box-shadow: 0 0 0 0 rgba(72, 187, 120, 0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .answer-btn.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 35px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: none;
+            margin: 30px auto;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 60px;
+            border-radius: 30px;
+            display: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+            animation: spin 20s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-card h2 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .final-score {
+            font-size: 1.8em;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .restart-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 20px 50px;
+            border-radius: 35px;
+            cursor: pointer;
+            font-size: 1.4em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(255,255,255,0.3);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 35px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 6px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .category-icon {
+            font-size: 1.3em;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 25px;
+                margin: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .answers-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .score-board {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .score-value {
+                font-size: 1.8em;
+            }
+        }
+
+        .difficulty-indicator {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            background: rgba(255,255,255,0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            z-index: 3;
+        }
+
+        .easy { color: #48bb78; }
+        .medium { color: #ed8936; }
+        .hard { color: #f56565; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🧠 PsychoConceptChallenge</h1>
+            <p>UE 1.1 - Psychologie, Sociologie, Anthropologie</p>
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                <span class="score-value" id="currentScore">0</span>
+                <div class="score-label">Score</div>
+            </div>
+            <div class="score-item">
+                <span class="score-value" id="currentQuestion">1</span>
+                <div class="score-label">Question</div>
+            </div>
+            <div class="score-item">
+                <span class="score-value" id="correctAnswers">0</span>
+                <div class="score-label">Bonnes réponses</div>
+            </div>
+            <div class="score-item">
+                <span class="score-value" id="totalQuestions">40</span>
+                <div class="score-label">Total</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <!-- Question dynamique -->
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <h2>🎓 Quiz terminé !</h2>
+            <div class="final-score" id="finalScore"></div>
+            <button class="restart-btn" onclick="restartGame()">Nouveau défi</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // CONCEPTS FONDAMENTAUX
+            {
+                category: "Concepts fondamentaux",
+                difficulty: "easy",
+                question: "Qu'est-ce qu'un concept selon la définition scientifique ?",
+                answers: [
+                    "Une représentation mentale générale et abstraite d'un objet ou d'une classe d'objets",
+                    "Une opinion personnelle sur un sujet donné",
+                    "Une méthode de recherche scientifique",
+                    "Un sentiment particulier envers quelque chose"
+                ],
+                correct: 0
+            },
+            {
+                category: "Concepts fondamentaux",
+                difficulty: "medium",
+                question: "Quelle est la différence principale entre un concept et un modèle ?",
+                answers: [
+                    "Il n'y a pas de différence, ce sont des synonymes",
+                    "Un concept est abstrait, un modèle est une représentation concrète",
+                    "Un concept est concret, un modèle est abstrait",
+                    "Un concept concerne la psychologie, un modèle la sociologie"
+                ],
+                correct: 1
+            },
+            {
+                category: "Concepts fondamentaux",
+                difficulty: "medium",
+                question: "Qu'est-ce qu'une théorie scientifique ?",
+                answers: [
+                    "Une hypothèse non vérifiée",
+                    "Une opinion d'expert",
+                    "Un système organisé de principes explicatifs vérifiables",
+                    "Une croyance populaire"
+                ],
+                correct: 2
+            },
+            {
+                category: "Concepts fondamentaux",
+                difficulty: "hard",
+                question: "Selon Karl Popper, qu'est-ce qui caractérise une théorie scientifique valide ?",
+                answers: [
+                    "Sa popularité dans la communauté scientifique",
+                    "Sa capacité à être réfutée (falsifiabilité)",
+                    "Son ancienneté et sa tradition",
+                    "Sa complexité mathématique"
+                ],
+                correct: 1
+            },
+
+            // VIRGINIA HENDERSON - 14 BESOINS
+            {
+                category: "Virginia Henderson",
+                difficulty: "easy",
+                question: "Combien de besoins fondamentaux Virginia Henderson a-t-elle identifiés ?",
+                answers: ["12 besoins", "14 besoins", "16 besoins", "10 besoins"],
+                correct: 1
+            },
+            {
+                category: "Virginia Henderson",
+                difficulty: "easy",
+                question: "Quel est le premier besoin fondamental selon Virginia Henderson ?",
+                answers: [
+                    "Besoin de communiquer",
+                    "Besoin de respirer",
+                    "Besoin de boire et manger",
+                    "Besoin de dormir"
+                ],
+                correct: 1
+            },
+            {
+                category: "Virginia Henderson",
+                difficulty: "medium",
+                question: "Parmi ces propositions, lesquelles font partie des 14 besoins d'Henderson ?",
+                concept: "Besoin d'éliminer - Besoin de se mouvoir - Besoin de maintenir sa température corporelle",
+                answers: [
+                    "Toutes ces propositions sont correctes",
+                    "Seul le besoin d'éliminer est correct",
+                    "Seuls les besoins d'éliminer et se mouvoir sont corrects",
+                    "Aucune de ces propositions n'est correcte"
+                ],
+                correct: 0
+            },
+            {
+                category: "Virginia Henderson",
+                difficulty: "medium",
+                question: "Le besoin de 'se vêtir et se dévêtir' selon Henderson correspond à quoi ?",
+                answers: [
+                    "Un besoin esthétique uniquement",
+                    "La protection du corps et l'expression de la personnalité",
+                    "Un besoin social de conformité",
+                    "La régulation thermique uniquement"
+                ],
+                correct: 1
+            },
+            {
+                category: "Virginia Henderson",
+                difficulty: "hard",
+                question: "Le 14ème besoin d'Henderson 'Apprendre, découvrir, satisfaire sa curiosité' relève de quelle dimension ?",
+                answers: [
+                    "Dimension biologique uniquement",
+                    "Dimension sociale uniquement",
+                    "Dimension psychologique et intellectuelle",
+                    "Dimension spirituelle uniquement"
+                ],
+                correct: 2
+            },
+            {
+                category: "Virginia Henderson",
+                difficulty: "medium",
+                question: "Selon Henderson, le besoin de 'communiquer avec ses semblables' implique :",
+                answers: [
+                    "Seulement la capacité de parler",
+                    "Les interactions verbales et non-verbales",
+                    "Uniquement l'écriture",
+                    "La technologie moderne"
+                ],
+                correct: 1
+            },
+
+            // PSYCHOLOGIE COGNITIVE
+            {
+                category: "Psychologie cognitive",
+                difficulty: "easy",
+                question: "La psychologie cognitive étudie principalement :",
+                answers: [
+                    "Les émotions inconscientes",
+                    "Les processus mentaux de traitement de l'information",
+                    "Les comportements sociaux",
+                    "Les instincts primitifs"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie cognitive",
+                difficulty: "medium",
+                question: "Qu'est-ce que la mémoire de travail selon Baddeley ?",
+                answers: [
+                    "La mémoire des souvenirs d'enfance",
+                    "Un système de maintien et manipulation temporaire d'informations",
+                    "La mémoire des gestes automatiques",
+                    "La mémoire émotionnelle"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie cognitive",
+                difficulty: "hard",
+                question: "Les biais cognitifs sont :",
+                answers: [
+                    "Des erreurs de raisonnement systématiques",
+                    "Des capacités intellectuelles supérieures",
+                    "Des troubles psychiatriques",
+                    "Des méthodes d'apprentissage efficaces"
+                ],
+                correct: 0
+            },
+            {
+                category: "Psychologie cognitive",
+                difficulty: "medium",
+                question: "Le concept de 'schéma cognitif' selon Piaget désigne :",
+                answers: [
+                    "Un dessin mental de la réalité",
+                    "Une structure mentale d'organisation des connaissances",
+                    "Une méthode pédagogique",
+                    "Un trouble de la perception"
+                ],
+                correct: 1
+            },
+
+            // PSYCHANALYSE - FREUD
+            {
+                category: "Psychanalyse - Freud",
+                difficulty: "easy",
+                question: "Selon Freud, quelles sont les trois instances de l'appareil psychique ?",
+                answers: [
+                    "Conscient, préconscient, inconscient",
+                    "Ça, Moi, Surmoi",
+                    "Oral, anal, phallique",
+                    "Amour, haine, indifférence"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychanalyse - Freud",
+                difficulty: "medium",
+                question: "Que représente le 'Ça' dans la théorie freudienne ?",
+                answers: [
+                    "La partie rationnelle de la personnalité",
+                    "La conscience morale",
+                    "Les pulsions inconscientes et primitives",
+                    "La perception de la réalité"
+                ],
+                correct: 2
+            },
+            {
+                category: "Psychanalyse - Freud",
+                difficulty: "medium",
+                question: "Le 'Surmoi' selon Freud correspond à :",
+                answers: [
+                    "L'instance des pulsions",
+                    "L'instance morale et critique",
+                    "L'instance de la réalité",
+                    "L'instance créatrice"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychanalyse - Freud",
+                difficulty: "hard",
+                question: "Quelles sont les deux topiques freudiennes ?",
+                answers: [
+                    "Conscient/Inconscient et Ça/Moi/Surmoi",
+                    "Oral/Anal et Phallique/Génital",
+                    "Amour/Haine et Vie/Mort",
+                    "Réel/Imaginaire et Plaisir/Réalité"
+                ],
+                correct: 0
+            },
+            {
+                category: "Psychanalyse - Freud",
+                difficulty: "medium",
+                question: "Le complexe d'Œdipe selon Freud survient à quelle période ?",
+                answers: [
+                    "Stade oral (0-2 ans)",
+                    "Stade anal (2-3 ans)",
+                    "Stade phallique (3-6 ans)",
+                    "Stade de latence (6-12 ans)"
+                ],
+                correct: 2
+            },
+
+            // PSYCHOLOGIE ANALYTIQUE - JUNG
+            {
+                category: "Psychologie analytique - Jung",
+                difficulty: "medium",
+                question: "Selon Carl Jung, qu'est-ce que l'inconscient collectif ?",
+                answers: [
+                    "Les souvenirs personnels refoulés",
+                    "Une couche psychique commune à tous les humains",
+                    "Les pensées d'un groupe social",
+                    "La conscience collective d'une société"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie analytique - Jung",
+                difficulty: "hard",
+                question: "Les archétypes jungiens sont :",
+                answers: [
+                    "Des modèles de comportement appris",
+                    "Des images primordiales universelles dans l'inconscient collectif",
+                    "Des types de personnalité",
+                    "Des méthodes thérapeutiques"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie analytique - Jung",
+                difficulty: "medium",
+                question: "Jung distingue deux attitudes psychologiques principales :",
+                answers: [
+                    "Actif et passif",
+                    "Masculin et féminin",
+                    "Introverti et extraverti",
+                    "Rationnel et irrationnel"
+                ],
+                correct: 2
+            },
+
+            // THEORIES DU DEVELOPPEMENT
+            {
+                category: "Théories du développement",
+                difficulty: "medium",
+                question: "Selon Piaget, à quel stade l'enfant développe-t-il la pensée logique concrète ?",
+                answers: [
+                    "Stade sensori-moteur",
+                    "Stade préopératoire",
+                    "Stade des opérations concrètes",
+                    "Stade des opérations formelles"
+                ],
+                correct: 2
+            },
+            {
+                category: "Théories du développement",
+                difficulty: "hard",
+                question: "Erik Erikson propose 8 stades de développement. Le premier stade concerne :",
+                answers: [
+                    "Autonomie vs honte",
+                    "Confiance vs méfiance",
+                    "Initiative vs culpabilité",
+                    "Identité vs confusion"
+                ],
+                correct: 1
+            },
+
+            // EMOTIONS ET COGNITION
+            {
+                category: "Émotions et cognition",
+                difficulty: "medium",
+                question: "Selon Paul Ekman, combien d'émotions de base universelles existe-t-il ?",
+                answers: ["4 émotions", "6 émotions", "8 émotions", "10 émotions"],
+                correct: 1
+            },
+            {
+                category: "Émotions et cognition",
+                difficulty: "hard",
+                question: "La théorie de l'évaluation cognitive des émotions (Lazarus) stipule que :",
+                answers: [
+                    "Les émotions précèdent la pensée",
+                    "L'évaluation cognitive détermine l'émotion ressentie",
+                    "Les émotions sont uniquement corporelles",
+                    "La culture n'influence pas les émotions"
+                ],
+                correct: 1
+            },
+
+            // SOCIOLOGIE
+            {
+                category: "Sociologie",
+                difficulty: "easy",
+                question: "Qui est considéré comme le père de la sociologie ?",
+                answers: ["Émile Durkheim", "Auguste Comte", "Max Weber", "Karl Marx"],
+                correct: 1
+            },
+            {
+                category: "Sociologie",
+                difficulty: "medium",
+                question: "Le concept de 'fait social' selon Durkheim désigne :",
+                answers: [
+                    "Un événement historique important",
+                    "Une manière d'agir extérieure et contraignante pour l'individu",
+                    "Une statistique démographique",
+                    "Un phénomène psychologique collectif"
+                ],
+                correct: 1
+            },
+            {
+                category: "Sociologie",
+                difficulty: "hard",
+                question: "Max Weber distingue trois types d'autorité légitime :",
+                answers: [
+                    "Économique, politique, religieuse",
+                    "Traditionnelle, charismatique, légale-rationnelle",
+                    "Familiale, scolaire, professionnelle",
+                    "Locale, nationale, internationale"
+                ],
+                correct: 1
+            },
+
+            // ANTHROPOLOGIE
+            {
+                category: "Anthropologie",
+                difficulty: "medium",
+                question: "L'anthropologie culturelle étudie principalement :",
+                answers: [
+                    "L'évolution biologique humaine",
+                    "Les cultures et sociétés humaines",
+                    "Les langues anciennes",
+                    "L'art préhistorique"
+                ],
+                correct: 1
+            },
+            {
+                category: "Anthropologie",
+                difficulty: "hard",
+                question: "Le relativisme culturel postule que :",
+                answers: [
+                    "Toutes les cultures se valent exactement",
+                    "Il faut juger une culture selon ses propres critères",
+                    "La culture occidentale est supérieure",
+                    "Les cultures évoluent selon un modèle unique"
+                ],
+                correct: 1
+            },
+
+            // COMMUNICATION ET RELATION
+            {
+                category: "Communication",
+                difficulty: "medium",
+                question: "Selon l'École de Palo Alto, on ne peut pas :",
+                answers: [
+                    "Communiquer parfaitement",
+                    "Ne pas communiquer",
+                    "Communiquer sans émotions",
+                    "Communiquer sans intention"
+                ],
+                correct: 1
+            },
+            {
+                category: "Communication",
+                difficulty: "hard",
+                question: "La communication non-verbale représente environ quel pourcentage de la communication ?",
+                answers: ["30%", "55%", "70%", "90%"],
+                correct: 1
+            },
+            {
+                category: "Communication",
+                difficulty: "medium",
+                question: "L'empathie se définit comme :",
+                answers: [
+                    "Ressentir les mêmes émotions qu'autrui",
+                    "Comprendre et partager les sentiments d'autrui",
+                    "Être d'accord avec autrui",
+                    "Aider autrui en toute circonstance"
+                ],
+                correct: 1
+            },
+
+            // PSYCHOLOGIE DE LA SANTE
+            {
+                category: "Psychologie de la santé",
+                difficulty: "medium",
+                question: "Le modèle biopsychosocial de la santé considère :",
+                answers: [
+                    "Uniquement les facteurs biologiques",
+                    "Les facteurs biologiques, psychologiques et sociaux",
+                    "Uniquement les facteurs psychologiques",
+                    "Les facteurs spirituels exclusivement"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie de la santé",
+                difficulty: "hard",
+                question: "Le coping selon Lazarus et Folkman désigne :",
+                answers: [
+                    "Une forme de thérapie comportementale",
+                    "Les stratégies d'adaptation face au stress",
+                    "Un trouble de l'adaptation",
+                    "Une méthode de diagnostic psychologique"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie de la santé",
+                difficulty: "medium",
+                question: "La résilience en psychologie désigne :",
+                answers: [
+                    "La résistance aux maladies",
+                    "La capacité à rebondir face à l'adversité",
+                    "L'évitement des problèmes",
+                    "La négation de la réalité"
+                ],
+                correct: 1
+            },
+
+            // PSYCHOLOGIE COMPORTEMENTALE
+            {
+                category: "Psychologie comportementale",
+                difficulty: "easy",
+                question: "Le conditionnement classique a été découvert par :",
+                answers: ["Skinner", "Pavlov", "Watson", "Bandura"],
+                correct: 1
+            },
+            {
+                category: "Psychologie comportementale",
+                difficulty: "medium",
+                question: "Dans le conditionnement opérant, un renforcement positif :",
+                answers: [
+                    "Diminue la probabilité d'un comportement",
+                    "Augmente la probabilité d'un comportement par ajout",
+                    "Élimine un stimulus désagréable",
+                    "Punit un comportement indésirable"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie comportementale",
+                difficulty: "hard",
+                question: "L'apprentissage social selon Bandura implique :",
+                answers: [
+                    "Uniquement l'imitation directe",
+                    "L'observation, l'imitation et les processus cognitifs",
+                    "Le conditionnement classique seulement",
+                    "Les réflexes innés"
+                ],
+                correct: 1
+            },
+
+            // PSYCHOLOGIE HUMANISTE
+            {
+                category: "Psychologie humaniste",
+                difficulty: "medium",
+                question: "La pyramide des besoins de Maslow comprend combien de niveaux ?",
+                answers: ["3 niveaux", "5 niveaux", "7 niveaux", "4 niveaux"],
+                correct: 1
+            },
+            {
+                category: "Psychologie humaniste",
+                difficulty: "hard",
+                question: "Selon Carl Rogers, les conditions nécessaires à la croissance personnelle sont :",
+                answers: [
+                    "Intelligence, volonté, persévérance",
+                    "Considération positive inconditionnelle, empathie, congruence",
+                    "Discipline, effort, concentration",
+                    "Analyse, synthèse, évaluation"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychologie humaniste",
+                difficulty: "medium",
+                question: "L'actualisation de soi selon Maslow représente :",
+                answers: [
+                    "Le besoin de reconnaissance sociale",
+                    "La réalisation de son potentiel personnel",
+                    "L'adaptation à la société",
+                    "L'accumulation de connaissances"
+                ],
+                correct: 1
+            },
+
+            // PSYCHOPATHOLOGIE
+            {
+                category: "Psychopathologie",
+                difficulty: "medium",
+                question: "La différence entre normal et pathologique en psychologie :",
+                answers: [
+                    "Est toujours clairement définie",
+                    "Dépend du contexte culturel et social",
+                    "Est identique dans toutes les cultures",
+                    "Ne concerne que les symptômes physiques"
+                ],
+                correct: 1
+            },
+            {
+                category: "Psychopathologie",
+                difficulty: "hard",
+                question: "Le DSM-5 (Manuel diagnostique) classe les troubles selon :",
+                answers: [
+                    "Leurs causes psychanalytiques",
+                    "Leurs symptômes observables et critères diagnostiques",
+                    "Leur gravité uniquement",
+                    "Leur origine biologique exclusive"
+                ],
+                correct: 1
+            },
+
+            // NEUROSCIENCES
+            {
+                category: "Neurosciences",
+                difficulty: "medium",
+                question: "La plasticité cérébrale désigne :",
+                answers: [
+                    "La souplesse du crâne",
+                    "La capacité du cerveau à se modifier",
+                    "La résistance aux traumatismes",
+                    "La taille variable du cerveau"
+                ],
+                correct: 1
+            },
+            {
+                category: "Neurosciences",
+                difficulty: "hard",
+                question: "Les neurones miroirs sont impliqués dans :",
+                answers: [
+                    "La vision uniquement",
+                    "L'empathie et l'imitation",
+                    "La mémoire à long terme",
+                    "Le contrôle moteur seulement"
+                ],
+                correct: 1
+            },
+
+            // METHODOLOGIE
+            {
+                category: "Méthodologie",
+                difficulty: "medium",
+                question: "Une étude longitudinale consiste à :",
+                answers: [
+                    "Étudier plusieurs groupes en même temps",
+                    "Suivre les mêmes individus dans le temps",
+                    "Analyser des documents historiques",
+                    "Comparer différentes cultures"
+                ],
+                correct: 1
+            },
+            {
+                category: "Méthodologie",
+                difficulty: "hard",
+                question: "L'effet placebo démontre l'importance :",
+                answers: [
+                    "Des médicaments actifs",
+                    "Des facteurs psychologiques dans la guérison",
+                    "Des facteurs génétiques",
+                    "De l'environnement physique"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctAnswersCount = 0;
+        let selectedAnswer = null;
+        let totalQuestions = questions.length;
+
+        function displayQuestion() {
+            const question = questions[currentQuestionIndex];
+            const gameArea = document.getElementById('gameArea');
+            
+            let conceptHTML = question.concept ? 
+                `<div class="concept-box">💡 ${question.concept}</div>` : '';
+            
+            let difficultyClass = question.difficulty || 'medium';
+            let difficultyIcon = difficultyClass === 'easy' ? '🟢' : 
+                               difficultyClass === 'medium' ? '🟡' : '🔴';
+            
+            gameArea.innerHTML = `
+                <div class="question-card">
+                    <div class="difficulty-indicator ${difficultyClass}">
+                        ${difficultyIcon} ${difficultyClass.toUpperCase()}
+                    </div>
+                    <div class="category-badge">
+                        <span class="category-icon">🧠</span>${question.category}
+                    </div>
+                    <div class="question-number">Question ${currentQuestionIndex + 1}/${totalQuestions}</div>
+                    <div class="question-text">${question.question}</div>
+                    ${conceptHTML}
+                    <div class="answers-grid" id="answersGrid">
+                        ${question.answers.map((answer, index) => `
+                            <button class="answer-btn" onclick="selectAnswer(${index})">
+                                ${String.fromCharCode(65 + index)}. ${answer}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Question suivante</button>
+                </div>
+            `;
+            
+            updateProgress();
+            updateScoreBoard();
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (selectedAnswer !== null) return;
+            
+            selectedAnswer = selectedIndex;
+            const question = questions[currentQuestionIndex];
+            const answerButtons = document.querySelectorAll('.answer-btn');
+            
+            answerButtons.forEach((btn, index) => {
+                btn.classList.add('disabled');
+                if (index === question.correct) {
+                    btn.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === question.correct) {
+                let difficultyBonus = question.difficulty === 'easy' ? 100 : 
+                                    question.difficulty === 'medium' ? 150 : 200;
+                score += difficultyBonus;
+                correctAnswersCount++;
+                
+                // Animation de succès
+                setTimeout(() => {
+                    if (answerButtons[selectedIndex]) {
+                        answerButtons[selectedIndex].style.transform = 'scale(1.05)';
+                    }
+                }, 100);
+            }
+            
+            document.getElementById('nextBtn').style.display = 'block';
+            updateScoreBoard();
+        }
+
+        function nextQuestion() {
+            selectedAnswer = null;
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateScoreBoard() {
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('correctAnswers').textContent = correctAnswersCount;
+            document.getElementById('totalQuestions').textContent = totalQuestions;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const gameArea = document.getElementById('gameArea');
+            const resultCard = document.getElementById('resultCard');
+            const percentage = Math.round((correctAnswersCount / totalQuestions) * 100);
+            
+            let message = "";
+            let emoji = "";
+            let level = "";
+            
+            if (percentage >= 95) {
+                message = "Maîtrise exceptionnelle ! Vous avez un niveau d'expert en sciences humaines !";
+                emoji = "🏆";
+                level = "Expert";
+            } else if (percentage >= 85) {
+                message = "Excellence ! Vous maîtrisez parfaitement les concepts fondamentaux !";
+                emoji = "🌟";
+                level = "Très avancé";
+            } else if (percentage >= 75) {
+                message = "Très bien ! Vous avez une solide compréhension de la matière !";
+                emoji = "🎯";
+                level = "Avancé";
+            } else if (percentage >= 65) {
+                message = "Bien ! Continuez vos révisions pour consolider vos acquis !";
+                emoji = "📚";
+                level = "Intermédiaire";
+            } else if (percentage >= 50) {
+                message = "Correct ! Il faut approfondir certains concepts !";
+                emoji = "💪";
+                level = "Débutant";
+            } else {
+                message = "Il faut réviser intensivement cette UE fondamentale !";
+                emoji = "🔄";
+                level = "À retravailler";
+            }
+            
+            document.getElementById('finalScore').innerHTML = `
+                <div style="font-size: 4em; margin-bottom: 25px; animation: bounce 1.2s ease-out;">${emoji}</div>
+                <div style="font-size: 2em; margin-bottom: 15px; font-weight: bold;">Niveau : ${level}</div>
+                <div style="font-size: 1.6em; margin-bottom: 15px;">Score final: ${score} points</div>
+                <div style="font-size: 1.4em; margin-bottom: 25px;">Bonnes réponses: ${correctAnswersCount}/${totalQuestions} (${percentage}%)</div>
+                <div style="font-style: italic; font-size: 1.2em; opacity: 0.95; line-height: 1.6;">${message}</div>
+            `;
+            
+            gameArea.style.display = 'none';
+            resultCard.style.display = 'block';
+        }
+
+        function restartGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            correctAnswersCount = 0;
+            selectedAnswer = null;
+            
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('resultCard').style.display = 'none';
+            
+            // Mélanger les questions pour une nouvelle partie
+            shuffleArray(questions);
+            displayQuestion();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // Styles CSS pour l'animation bounce
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 20%, 60%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-30px); }
+                80% { transform: translateY(-15px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialisation du jeu
+        shuffleArray(questions);
+        displayQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UE 2.11 — Physique des rayonnements (S1) — Jeu autonome</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:#111827;
+    --card:#0b1220;
+    --text:#e5e7eb;
+    --muted:#94a3b8;
+    --accent:#38bdf8;
+    --good:#22c55e;
+    --bad:#ef4444;
+    --warn:#f59e0b;
+    --border:#1f2937;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    background: radial-gradient(1200px 800px at 20% -10%, #0b1b32 0%, var(--bg) 60%);
+    color:var(--text);
+  }
+  header{
+    position:sticky; top:0; z-index:10;
+    backdrop-filter: blur(8px);
+    background:rgba(10,17,30,.6);
+    border-bottom:1px solid var(--border);
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:16px}
+  h1{margin:8px 0 6px; font-size: clamp(20px, 2.4vw, 30px)}
+  .sub{color:var(--muted); font-size:14px}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .pill{
+    padding:6px 10px; border:1px solid var(--border); border-radius:999px;
+    color:var(--muted); font-size:12px; letter-spacing:.2px
+  }
+  #muteBtn{margin-left:auto; cursor:pointer; user-select:none}
+  #muteBtn button{
+    background:transparent; color:var(--muted); border:1px solid var(--border);
+    padding:6px 10px; border-radius:10px; font-size:13px
+  }
+  #progressBar{
+    height:8px; width:100%; background:#0b1324; border-radius:999px; overflow:hidden; margin-top:10px;
+    border:1px solid var(--border)
+  }
+  #progressFill{height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #60a5fa)}
+  main{max-width:1100px; margin:18px auto; padding:0 16px 120px}
+  .card{
+    border:1px solid var(--border); border-radius:16px; overflow:hidden; background:linear-gradient(180deg,#0b1220,#0a1326);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  }
+  .card-hd{padding:16px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .badge{font-size:12px; color:#0b1220; background:linear-gradient(90deg,#a7f3d0,#6ee7b7); padding:4px 8px; border-radius:999px; font-weight:600}
+  #qid{color:var(--muted); font-size:13px}
+  .hint{margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .hint .pill{border-color:#334155; color:#cbd5e1}
+  .timer{font-weight:700}
+  .card-bd{padding:18px}
+  #question{font-size: clamp(16px, 2.1vw, 20px); line-height:1.45; margin:8px 0 14px}
+  .options{display:grid; gap:10px}
+  .opt{
+    border:1px solid var(--border); border-radius:12px; padding:12px 12px;
+    background: #0b1220; display:flex; gap:10px; align-items:flex-start; cursor:pointer;
+  }
+  .opt:hover{outline:1px solid #1f2f4d}
+  .opt input{margin-top:3px}
+  .opt.disabled{opacity:.65; pointer-events:none}
+  .exp{font-size:13px; color:var(--muted); margin-top:8px; display:none}
+  .exp.show{display:block}
+  .multiTip{font-size:13px; color:var(--muted); margin:6px 0 10px}
+  .controls{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap}
+  .btn{
+    background:linear-gradient(180deg,#12213b,#0e1a30);
+    color:var(--text); border:1px solid var(--border); padding:10px 14px; border-radius:12px;
+    font-weight:600; cursor:pointer;
+  }
+  .btn[disabled]{opacity:.5; cursor:not-allowed}
+  .btn.primary{border-color:#1b3a6b}
+  .btn.good{border-color:#166534}
+  .btn.bad{border-color:#7f1d1d}
+  .status{margin-left:auto; font-size:14px; color:var(--muted)}
+  .keyfacts{
+    margin-top:18px; border:1px dashed #1e293b; border-radius:12px; padding:12px; background:#0a1528;
+  }
+  .keyfacts h3{margin:0 0 8px; font-size:14px; color:#a5b4fc}
+  .kv{display:flex; gap:8px; flex-wrap:wrap}
+  .kv span{font-size:12px; color:#c7d2fe; background:#111a35; padding:6px 8px; border-radius:999px; border:1px solid #1e2750}
+  .footer{
+    position:fixed; left:0; right:0; bottom:0; background:rgba(10,17,30,.9);
+    border-top:1px solid var(--border); padding:10px 16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap
+  }
+  .footer .score{font-weight:700}
+  .ghost{opacity:.3}
+  /* Drag list */
+  .drag-list{display:flex; gap:8px; flex-wrap:wrap}
+  .chip{
+    border:1px solid var(--border); background:#0b1220; padding:8px 10px; border-radius:10px; cursor:grab; user-select:none
+  }
+  .bucket{min-height:46px; border:1px dashed #1f2f4d; padding:8px; border-radius:10px}
+  .bucket .chip{margin:4px}
+  /* Overlay FAUX */
+  #wrongOverlay{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:50;
+    background: rgba(0,0,0,.35);
+  }
+  #wrongOverlay .bubble{
+    background: #2a0303; border:2px solid var(--bad); color:#fff; padding:24px 28px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.5);
+    font-size: clamp(22px, 4vw, 36px); font-weight:800; letter-spacing:1px; transform:scale(1); animation: pop .2s ease-out
+  }
+  @keyframes pop{from{transform:scale(.9)}to{transform:scale(1)}}
+  /* Confetti canvas */
+  #confetti{position:fixed; inset:0; pointer-events:none; z-index:60}
+  /* Solution styling */
+  .sol{border-color:#166534; box-shadow:0 0 0 1px #1b3a2b inset}
+  /* Start overlay */
+  #startOverlay{
+    position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
+    background:rgba(3,6,14,.85); backdrop-filter: blur(6px);
+  }
+  .start-card{
+    width:min(720px, 92vw);
+    background:linear-gradient(180deg,#0b1220,#0a1326);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 15px 40px rgba(0,0,0,.4);
+  }
+  .mode{
+    display:flex; gap:12px; align-items:flex-start;
+    border:1px solid var(--border); border-radius:12px; padding:10px;
+    background:#0b1220;
+  }
+  .mode h4{margin:0 0 4px; font-size:16px}
+  .mode p{margin:0; font-size:13px; color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <h1>UE 2.11 — Physique des rayonnements</h1>
+        <div class="sub">S1 — Jeu autonome (QCM/QRM, saisie, classement)</div>
+      </div>
+      <div class="hint">
+        <span class="pill">ℹ️ La solution s’affichera après <strong>3 essais</strong> infructueux.</span>
+        <span id="modeBadge" class="pill" style="display:none"></span>
+        <span id="timeBadge" class="pill timer" style="display:none">⏱️ 5</span>
+      </div>
+      <div id="muteBtn" class="row">
+        <button id="muteToggle" aria-pressed="false" title="Activer/Désactiver le son">🔊 Son</button>
+      </div>
+    </div>
+    <div id="progressBar"><div id="progressFill"></div></div>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <div class="card-hd">
+      <span class="badge">Question</span>
+      <span id="qid">0 / 0</span>
+    </div>
+    <div class="card-bd">
+      <div id="question">Choisis un mode puis lance la partie.</div>
+      <div id="multiTip" class="multiTip" style="display:none">Plusieurs réponses attendues.</div>
+      <div id="options" class="options"></div>
+      <div id="extra" style="margin-top:6px"></div>
+      <div class="controls">
+        <button id="validateBtn" class="btn primary" disabled>Valider</button>
+        <button id="retryBtn" class="btn" disabled>Réessayer</button>
+        <button id="nextBtn" class="btn good" disabled>Suivante ▶</button>
+        <div class="status" id="status">Réponds puis valide. Tu ne passeras que si c’est correct (ou solution après 3 essais).</div>
+      </div>
+
+      <div class="keyfacts" id="keyfacts" style="display:none">
+        <h3>Mémo utile</h3>
+        <div class="kv" id="factsWrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap">
+    <button id="resetBtn" class="btn">↺ Réinitialiser le jeu</button>
+    <span class="pill">Sans dépendance externe</span>
+    <span class="pill">Tout en local</span>
+  </div>
+</main>
+
+<!-- Start overlay -->
+<div id="startOverlay" role="dialog" aria-modal="true">
+  <div class="start-card">
+    <h2 style="margin:0 0 8px">Choisis ton mode</h2>
+    <p class="sub" style="margin:0 0 12px">Tu peux changer de mode à chaque partie.</p>
+    <div class="options" style="margin:12px 0">
+      <label class="mode">
+        <input type="radio" name="mode" value="detente" checked style="margin-top:4px">
+        <div>
+          <h4>Mode détente</h4>
+          <p>Rien de particulier. Tu avances seulement quand la réponse est correcte. Solution affichée après 3 essais.</p>
+        </div>
+      </label>
+      <label class="mode">
+        <input type="radio" name="mode" value="bombe" style="margin-top:4px">
+        <div>
+          <h4>Mode bombe</h4>
+          <p><strong>Une erreur = Game Over</strong>. Idéal pour se tester rapidement.</p>
+        </div>
+      </label>
+      <label class="mode">
+        <input type="radio" name="mode" value="timed" style="margin-top:4px">
+        <div>
+          <h4>Mode “j’ai pas le time”</h4>
+          <p id="timedDesc">⏱️ X secondes par question. Si le compteur atteint 0, c’est fini.</p>
+        </div>
+      </label>
+      <div style="margin:6px 0 0 34px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <span class="pill">⏱️ Durée par question :</span>
+        <label class="pill"><input type="radio" name="tsecs" value="5" checked style="margin-right:6px">5 s</label>
+        <label class="pill"><input type="radio" name="tsecs" value="10" style="margin-right:6px">10 s</label>
+        <label class="pill"><input type="radio" name="tsecs" value="15" style="margin-right:6px">15 s</label>
+      </div>
+
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap">
+      <button id="startBtn" class="btn good">Lancer la partie ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlays & FX -->
+<div id="wrongOverlay"><div class="bubble">❌ FAUX — réessaie</div></div>
+<canvas id="confetti"></canvas>
+
+<script>
+/* ========= Données questions ========= */
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+function genAttenuationItem(){
+  const mu = (Math.round((Math.random()*0.4+0.2)*100)/100).toFixed(2);
+  const x = rand(1,5);
+  const I0 = rand(50,200);
+  const I = I0 * Math.exp(-parseFloat(mu)*x);
+  const Iround = Math.round(I*10)/10;
+  return {
+    id: "atten",
+    type: "input",
+    stem: `Atténuation exponentielle : I = I₀·e^(−μx). Pour un faisceau X : I₀ = ${I0} (unités), μ = ${mu} cm⁻¹, épaisseur x = ${x} cm. Calcule I (arrondir à 0,1).`,
+    answer: {pattern: `^${Iround.toString().replace('.', '\\.')}$`, normalize:"number"},
+    explain: `Formule: I = I₀·e^(−μx) = ${I0}·e^(−${mu}×${x}) ≈ ${Iround}.`,
+    facts: ["I = I₀·e^(−μx)", "μ: coeff. d’atténuation linéaire (cm⁻¹)", "HVL: couche demi-atténuatrice"]
+  };
+}
+
+const bank = [
+  {
+    id:"def-ion",
+    type:"single",
+    stem:"Un rayonnement « ionisant » est celui qui…",
+    options:[
+      {id:"a", text:"possède assez d’énergie pour arracher un électron à la matière."},
+      {id:"b", text:"échauffe la matière sans modifier les atomes."},
+      {id:"c", text:"ne traverse jamais les tissus mous."},
+      {id:"d", text:"ne peut pas provoquer d’effets stochastiques."}
+    ],
+    answer:"a",
+    explain:"Ioniser = créer des ions en arrachant des électrons. Les effets peuvent être déterministes ou stochastiques.",
+    facts:["Ionisation: arrachement d’électron","Effets: déterministes & stochastiques"]
+  },
+  {
+    id:"types-particules",
+    type:"multi",
+    stem:"Coche les rayonnements classés comme « directement ionisants ».",
+    options:[
+      {id:"a", text:"Particules α"},
+      {id:"b", text:"Électrons/β⁻"},
+      {id:"c", text:"Photons X/γ"},
+      {id:"d", text:"Protons"}
+    ],
+    answer:["a","b","d"],
+    explain:"Directement ionisants: particules chargées (α, β, protons…). Photons X/γ sont indirectement ionisants.",
+    facts:["Direct: particules chargées","Indirect: photons X/γ via électrons secondaires"]
+  },
+  {
+    id:"unites",
+    type:"order",
+    stem:"Associe grandeur ⇔ unité (ordonne de haut en bas dans le bon appariement).",
+    answer:["Activité → becquerel (Bq)","Dose absorbée → gray (Gy)","Dose équivalente/efficace → sievert (Sv)","Énergie → joule (J)"],
+    explain:"Activité=Bq ; Dose absorbée=Gy ; Dose équivalente/efficace=Sv ; Énergie=J.",
+    facts:["Bq (s⁻¹)","Gy (J·kg⁻¹)","Sv (J·kg⁻¹ pondérée)"]
+  },
+  {
+    id:"atten-dyn",
+    type:"input",
+    stem:"(Voir énoncé)",
+    answer:{pattern:"^0$", normalize:"number"},
+    explain:"",
+    facts:["I = I₀·e^(−μx)","HVL liée au spectre"]
+  },
+  {
+    id:"interactions-photons",
+    type:"multi",
+    stem:"Pour les photons X/γ d’énergie diagnostique (≈ 20–150 keV), les interactions dominantes sont…",
+    options:[
+      {id:"a", text:"Effet photoélectrique"},
+      {id:"b", text:"Diffusion Compton"},
+      {id:"c", text:"Création de paires"},
+      {id:"d", text:"Diffusion Rayleigh (cohérente)"}
+    ],
+    answer:["a","b","d"],
+    explain:"Création de paires ≥ 1,022 MeV (trop élevé pour le diagnostic). Photoélectrique, Compton et un peu Rayleigh prédominent.",
+    facts:["Seuil paires: 1,022 MeV","Photoélectrique ∝ Z³ / E³ (≈)","Compton ~ électron quasi-libre"]
+  },
+  {
+    id:"hvl",
+    type:"single",
+    stem:"La « couche demi-atténuatrice » (HVL) est…",
+    options:[
+      {id:"a", text:"l’épaisseur qui divise l’intensité par 2."},
+      {id:"b", text:"le coefficient μ d’atténuation linéaire."},
+      {id:"c", text:"l’épaisseur qui annule totalement le faisceau."},
+      {id:"d", text:"indépendante de la filtration."}
+    ],
+    answer:"a",
+    explain:"HVL est l’épaisseur qui réduit l’intensité à 50 %. Elle dépend du spectre et donc de la filtration (et du kV)."
+  },
+  {
+    id:"kv-mas",
+    type:"multi",
+    stem:"Au tube RX, quels réglages augmentent principalement… le CONTRASTE d’image et la DOSE au patient ?",
+    options:[
+      {id:"a", text:"Augmenter le kV (énergie du faisceau)"},
+      {id:"b", text:"Augmenter le mAs (quantité de photons)"},
+      {id:"c", text:"Ajouter de la filtration"},
+      {id:"d", text:"Réduire le champ de collimation"}
+    ],
+    answer:["b","d"],
+    explain:"mAs et champ large augmentent la dose (et le bruit diminue). kV élevé tend à diminuer le contraste sujet; la filtration élimine les basses énergies et peut réduire la dose cutanée."
+  },
+  {
+    id:"radioactivite",
+    type:"single",
+    stem:"La période radioactive (T½) est…",
+    options:[
+      {id:"a", text:"le temps pour que l’activité soit divisée par deux."},
+      {id:"b", text:"le temps pour que l’activité s’annule."},
+      {id:"c", text:"la moyenne des temps de désintégration."},
+      {id:"d", text:"une grandeur dépendant de la masse d’échantillon."}
+    ],
+    answer:"a",
+    explain:"Après une demi-vie, l’activité (ou le nombre d’atomes non désintégrés) est divisée par 2. Elle ne dépend pas de la masse."
+  },
+  {
+    id:"kerma-dose",
+    type:"single",
+    stem:"Le KERMA représente…",
+    options:[
+      {id:"a", text:"l’énergie transférée par unité de masse (J·kg⁻¹) au point d’interaction."},
+      {id:"b", text:"la dose efficace, pondérée par Wᵀ et Wᴿ."},
+      {id:"c", text:"le débit de comptage du détecteur."},
+      {id:"d", text:"la période biologique effective."}
+    ],
+    answer:"a",
+    explain:"KERMA (Kinetic Energy Released per unit MAss) ≈ énergie transférée par les photons aux électrons par unité de masse."
+  },
+  {
+    id:"protec",
+    type:"multi",
+    stem:"Protection: que permet « le principe ALARA » ?",
+    options:[
+      {id:"a", text:"Optimiser temps, distance, écran."},
+      {id:"b", text:"Justifier chaque acte irradiant."},
+      {id:"c", text:"Augmenter systématiquement le kV."},
+      {id:"d", text:"Optimiser les paramètres pour une dose aussi faible que raisonnable."}
+    ],
+    answer:["a","b","d"],
+    explain:"Justification + Optimisation (ALARA) + Limitation des doses. Augmenter le kV n’est pas un objectif en soi."
+  },
+  {
+    id:"lexico",
+    type:"input",
+    stem:"Donne le nom de la grandeur en unité « sievert ». (répondre au singulier, accents/casse requis)",
+    answer:{pattern:"^dose équivalente|dose efficace$", normalize:"none"},
+    explain:"Le sievert (Sv) s’applique à la dose équivalente et à la dose efficace (pondérations radiologique et tissulaire)."
+  }
+];
+
+// Remplace le placeholder atten-dyn par une vraie question générée
+const dyn = genAttenuationItem();
+const dynIdx = bank.findIndex(q=>q.id==='atten-dyn');
+if(dynIdx>=0) bank[dynIdx] = dyn;
+
+/* ========= Audio minimal ========= */
+const sfx = {
+  good: new Audio(URL.createObjectURL(new Blob([
+    new Uint8Array([82,73,70,70,70,0,0,0,87,65,86,69,102,109,116,32,16,0,0,0,1,0,1,0,68,172,0,0,68,172,0,0,1,0,8,0,100,97,116,97,34,0,0,0,128,200,220,240,255,220,200,180,160,150,140,130,120,110,100,90,80,70,60,50,40,30,25,20,15,10,8,6,4,3,2,1,0,0,0,0])
+  ],{type:'audio/wav'}))),
+  bad: new Audio(URL.createObjectURL(new Blob([
+    new Uint8Array([82,73,70,70,70,0,0,0,87,65,86,69,102,109,116,32,16,0,0,0,1,0,1,0,68,172,0,0,68,172,0,0,1,0,8,0,100,97,116,97,34,0,0,0,128,20,20,20,20,20,20,20,20,130,150,170,190,210,230,250,230,210,190,170,150,130,110,90,70,50,30,20,10,5,2,1,0,0])
+  ],{type:'audio/wav'})))
+};
+
+/* ======= WebAudio nicer sounds ======= */
+let _ac;
+function getAC(){
+  if(muted) return null;
+  if(!_ac){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return null;
+    _ac = new Ctx();
+  }
+  // iOS may need a resume on interaction; try resume()
+  if(_ac.state === 'suspended'){ _ac.resume().catch(()=>{}); }
+  return _ac;
+}
+function playArpeggio(){
+  const ac = getAC(); if(!ac) return;
+  const now = ac.currentTime + 0.01;
+  const base = 523.25; // C5
+  const steps = [0,4,7,12]; // major arpeggio
+  const dur = 0.09;
+  steps.forEach((st, i)=>{
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = 'triangle';
+    o.frequency.value = base * Math.pow(2, st/12);
+    g.gain.setValueAtTime(0, now + i*dur);
+    g.gain.linearRampToValueAtTime(0.08, now + i*dur + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + i*dur + dur);
+    o.connect(g).connect(ac.destination);
+    o.start(now + i*dur);
+    o.stop(now + i*dur + dur + 0.02);
+  });
+}
+function playSoftBuzzer(){
+  const ac = getAC(); if(!ac) return;
+  const now = ac.currentTime + 0.01;
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(190, now);
+  o.frequency.linearRampToValueAtTime(160, now + 0.5);
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(0.06, now + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+  o.connect(g).connect(ac.destination);
+  o.start(now);
+  o.stop(now + 0.6);
+}
+
+let muted = false;
+function playSfx(which){
+  if(muted) return;
+  const a = sfx[which];
+  if(a){ try{ a.currentTime=0; a.play(); }catch(e){} }
+}
+
+/* ========= Confetti ========= */
+const confettiCanvas = document.getElementById('confetti');
+const cx = confettiCanvas.getContext('2d');
+let confs = [];
+function resizeCanvas(){
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+function burstConfetti(x, y){
+  try{ playSfx('celebrate'); }catch(e){}
+  confs = [];
+  const n = 180;
+  for(let i=0;i<n;i++){
+    confs.push({
+      x, y,
+      vx:(Math.random()-0.5)*8, vy:(Math.random()-1)*8,
+      g:0.2+Math.random()*0.2, a:1,
+      r:2+Math.random()*3,
+      color:`hsl(${Math.floor(Math.random()*360)}, 90%, 60%)`
+    });
+  }
+  let t=0;
+  function step(){
+    cx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    for(const p of confs){
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.a *= 0.992;
+      cx.globalAlpha = Math.max(0, p.a);
+      cx.beginPath(); cx.fillStyle = p.color; cx.arc(p.x, p.y, p.r, 0, Math.PI*2); cx.fill();
+    }
+    cx.globalAlpha = 1;
+    t++;
+    if(t<200) requestAnimationFrame(step); else cx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+  }
+  step();
+}
+
+/* ========= Logique du jeu + modes ========= */
+let order = [];
+let idx = 0;
+let score = 0;
+let answeredWrongOnce = false;
+let wrongCount = 0; // essais infructueux pour la question courante
+const MAX_WRONG = 3;
+
+let gameMode = 'detente';       // 'detente' | 'bombe' | 'timed'
+let QUESTION_TIME = 5;        // secondes
+let timeLeft = QUESTION_TIME;
+let timerId = null;
+
+const els = {
+  qid: document.getElementById('qid'),
+  question: document.getElementById('question'),
+  options: document.getElementById('options'),
+  extra: document.getElementById('extra'),
+  validate: document.getElementById('validateBtn'),
+  retry: document.getElementById('retryBtn'),
+  next: document.getElementById('nextBtn'),
+  status: document.getElementById('status'),
+  progressFill: document.getElementById('progressFill'),
+  multiTip: document.getElementById('multiTip'),
+  keyfacts: document.getElementById('keyfacts'),
+  factsWrap: document.getElementById('factsWrap'),
+  wrongOverlay: document.getElementById('wrongOverlay'),
+  muteToggle: document.getElementById('muteToggle'),
+  reset: document.getElementById('resetBtn'),
+  startOverlay: document.getElementById('startOverlay'),
+  startBtn: document.getElementById('startBtn'),
+  modeBadge: document.getElementById('modeBadge'),
+  timeBadge: document.getElementById('timeBadge'),
+};
+
+els.muteToggle.addEventListener('click', ()=>{
+  muted = !muted;
+  els.muteToggle.textContent = muted ? "🔇 Son coupé" : "🔊 Son";
+  els.muteToggle.setAttribute('aria-pressed', String(muted));
+});
+
+document.getElementById('wrongOverlay').addEventListener('click', ()=>{
+  els.wrongOverlay.style.display = 'none';
+});
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function start(){
+  order = Array.from({length: bank.length}, (_,i)=>i);
+  shuffle(order);
+  idx = 0; score = 0;
+  loadCurrent();
+  updateProgress();
+  answeredWrongOnce = false;
+}
+
+function updateProgress(){
+  const total = order.length;
+  els.qid.textContent = (idx+1)+" / "+total;
+  els.progressFill.style.width = ((idx)/total*100).toFixed(1)+"%";
+}
+
+function updateBadges(){
+  // Mode badge
+  let label = "";
+  if(gameMode==='detente') label = "Mode détente";
+  if(gameMode==='bombe') label = "Mode bombe — 1 erreur = fin";
+  if(gameMode==='timed') label = `Mode ${QUESTION_TIME}s/question`;
+  els.modeBadge.style.display = label ? "" : "none";
+  els.modeBadge.textContent = label;
+  // Timer badge
+  els.timeBadge.style.display = (gameMode==='timed') ? "" : "none";
+  if(gameMode==='timed') els.timeBadge.textContent = "⏱️ " + timeLeft;
+}
+
+function clearTimer(){
+  if(timerId){ clearInterval(timerId); timerId = null; }
+}
+function startTimer(){
+  clearTimer();
+  timeLeft = QUESTION_TIME;
+  updateBadges();
+  timerId = setInterval(()=>{
+    timeLeft--;
+    updateBadges();
+    if(timeLeft<=0){
+      clearTimer();
+      gameOver("⏱️ Temps écoulé (mode 5s).", bank[order[idx]]);
+    }
+  }, 1000);
+}
+
+function loadCurrent(){
+  const q = bank[order[idx]];
+  wrongCount = 0; // reset essais
+  els.question.textContent = q.stem;
+  els.options.innerHTML = "";
+  els.extra.innerHTML = "";
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+  els.multiTip.style.display = (q.type==='multi') ? "" : "none";
+  els.status.textContent = "Réponds puis valide. Tu ne passeras que si c’est correct (ou solution après 3 essais).";
+  els.keyfacts.style.display = q.facts ? "" : "none";
+  els.factsWrap.innerHTML = q.facts ? q.facts.map(f=>`<span>${f}</span>`).join("") : "";
+
+  if(gameMode==='timed'){ startTimer(); } else { clearTimer(); updateBadges(); }
+
+  if(q.type==='single' || q.type==='multi'){
+    const isMulti = q.type==='multi';
+    const shuffled = shuffle(q.options.map(o=>({...o})));
+    shuffled.forEach(opt=>{
+      const div = document.createElement('label');
+      div.className = 'opt';
+      const input = document.createElement('input');
+      input.type = isMulti ? 'checkbox' : 'radio';
+      input.name = 'q';
+      input.value = opt.id;
+      const txt = document.createElement('div');
+      txt.innerHTML = `<div>${opt.text}</div><div class="exp" id="exp-${opt.id}">${opt.explain||""}</div>`;
+      div.appendChild(input); div.appendChild(txt);
+      div.addEventListener('click', (e)=>{
+        setTimeout(()=>{
+          const any = [...document.querySelectorAll('input[name="q"]')].some(i=>i.checked);
+          els.validate.disabled = !any;
+        },0);
+      });
+      els.options.appendChild(div);
+    });
+  }
+  else if(q.type==='input'){
+    const div = document.createElement('div');
+    div.className = 'opt';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'in';
+    input.placeholder = 'Ta réponse…';
+    input.style.width = '220px';
+    input.addEventListener('input', ()=>{
+      els.validate.disabled = input.value.trim()==="";
+    });
+    div.appendChild(input);
+    div.appendChild(Object.assign(document.createElement('div'), {innerHTML:`<div class="exp" id="exp-in"></div>`}));
+    els.options.appendChild(div);
+  }
+  else if(q.type==='order'){
+    const chips = q.answer.slice();
+    shuffle(chips);
+    const wrap = document.createElement('div');
+    wrap.className = 'drag-list';
+    chips.forEach(text=>{
+      const c = document.createElement('div');
+      c.className='chip'; c.draggable=true; c.textContent=text;
+      c.addEventListener('dragstart', (e)=>{
+        e.dataTransfer.setData('text/plain', text);
+        c.classList.add('ghost');
+      });
+      c.addEventListener('dragend', ()=> c.classList.remove('ghost'));
+      wrap.appendChild(c);
+    });
+    const bucket = document.createElement('div');
+    bucket.className = 'bucket';
+    bucket.textContent = "Déplace les puces ICI dans le bon ordre (haut → bas).";
+    bucket.addEventListener('dragover', (e)=>e.preventDefault());
+    bucket.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      const t = e.dataTransfer.getData('text/plain');
+      const found = [...wrap.children].find(n=>n.textContent===t);
+      if(found){ bucket.appendChild(found); }
+      els.validate.disabled = bucket.querySelectorAll('.chip').length === q.answer.length ? false : true;
+    });
+    els.options.appendChild(wrap);
+    els.extra.appendChild(bucket);
+  }
+}
+
+function showWrong(msg){
+  els.status.textContent = "❌ Faux. " + (msg||"Réponds à nouveau à la question pour passer à la suivante.");
+  els.retry.disabled = false;
+  els.wrongOverlay.style.display = 'flex';
+  playSoftBuzzer();
+}
+
+function showRight(){
+  els.status.textContent = "✅ Correct !";
+  playArpeggio();
+  burstConfetti(window.innerWidth*0.75, 120);
+  if(gameMode==='timed'){ clearTimer(); }
+}
+
+function normalizeInput(val, mode){
+  if(mode==='number'){
+    val = val.replace(',', '.').trim();
+  }else if(mode==='upper'){
+    val = val.toUpperCase();
+  }
+  return val;
+}
+
+function explainAll(q){
+  if(q.type==='single' || q.type==='multi'){
+    document.querySelectorAll('.exp').forEach(e=>e.classList.add('show'));
+  }else if(q.type==='input'){
+    const exp = document.getElementById('exp-in');
+    if(exp){ exp.textContent = q.explain||""; exp.classList.add('show'); }
+  }else if(q.type==='order'){
+    const box = document.createElement('div');
+    box.className = 'multiTip';
+    box.style.marginTop = '10px';
+    box.textContent = 'Bon ordre: ' + q.answer.join('  →  ');
+    els.extra.appendChild(box);
+  }
+}
+
+/* ======= Révélation de la solution après 3 essais ======= */
+function revealSolution(q){
+  explainAll(q);
+  if(q.type==='single' || q.type==='multi'){
+    const need = q.type==='single' ? [q.answer] : q.answer;
+    document.querySelectorAll('input[name="q"]').forEach(inp=>{
+      const parent = inp.closest('.opt');
+      const isGood = need.includes(inp.value);
+      if(isGood){ parent.classList.add('sol'); }
+      inp.disabled = true;
+    });
+    els.status.textContent = "ℹ️ Solution affichée après 3 essais. Passe à la suivante.";
+  }else if(q.type==='input'){
+    const inEl = document.getElementById('in');
+    if(inEl){ inEl.disabled = true; }
+    els.status.textContent = "ℹ️ Solution affichée après 3 essais : " + (q.explain||"voir explication.");
+  }else if(q.type==='order'){
+    const bucket = els.extra.querySelector('.bucket');
+    if(bucket){
+      bucket.innerHTML = "";
+      q.answer.forEach(text=>{
+        const c = document.createElement('div');
+        c.className='chip sol'; c.textContent=text;
+        bucket.appendChild(c);
+      });
+    }
+    els.status.textContent = "ℹ️ Solution affichée après 3 essais (ordre correct).";
+  }
+  els.next.disabled = false;
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+}
+
+
+/* ======= Bloc solution pour Game Over ======= */
+function solutionBlock(q){
+  if(!q) return "";
+  let html = '<div style="text-align:left; margin-top:12px">'
+           + '<h3 style="margin:0 0 6px; font-size:16px">Solution de la dernière question</h3>';
+  if(q.type==='single'){
+    const opt = (q.options||[]).find(o=>o.id===q.answer);
+    if(opt){
+      html += '<p style="margin:6px 0"><strong>Réponse :</strong> ' + opt.text + '</p>';
+    }
+    if(q.explain) html += '<p class="sub" style="margin:6px 0">'+ q.explain +'</p>';
+  }else if(q.type==='multi'){
+    const goods = (q.options||[]).filter(o=> (q.answer||[]).includes(o.id));
+    if(goods.length){
+      html += '<p style="margin:6px 0"><strong>Réponses :</strong></p><ul>'
+        + goods.map(o=>'<li>'+o.text+'</li>').join('') + '</ul>';
+    }
+    if(q.explain) html += '<p class="sub" style="margin:6px 0">'+ q.explain +'</p>';
+  }else if(q.type==='input'){
+    // Tente d'extraire les réponses attendues depuis le pattern
+    let patt = (q.answer && q.answer.pattern) ? q.answer.pattern : "";
+    patt = patt.replace(/^\^|\$$/g, "").replace(/\\./g, ".");
+    const parts = patt.split("|").map(s=>s.trim()).filter(Boolean);
+    if(parts.length){
+      html += '<p style="margin:6px 0"><strong>Réponses acceptées :</strong> ' + parts.join(" ou ") + '</p>';
+    }
+    if(q.explain) html += '<p class="sub" style="margin:6px 0">'+ q.explain +'</p>';
+  }else if(q.type==='order'){
+    if(q.answer && q.answer.length){
+      html += '<p style="margin:6px 0"><strong>Ordre correct :</strong></p><ol>'
+        + q.answer.map(t=>'<li>'+t+'</li>').join('') + '</ol>';
+    }
+    if(q.explain) html += '<p class="sub" style="margin:6px 0">'+ q.explain +'</p>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function gameOver(reason, q){
+  clearTimer();
+  const total = bank.length;
+  const html = `
+    <div style="text-align:center; padding:26px">
+      <h2 style="margin:0 0 10px">Game Over 💥</h2>
+      <p class="sub" style="margin:6px 0">${reason||"Fin de partie."}</p>
+      <p class="sub">Mode : <strong>${gameMode}</strong></p>
+      <p class="sub">Progression : ${idx+1}/${total} — Score (1er essai) : <span class="score" style="font-size:22px">${score}</span></p>
+      ${solutionBlock(q)}
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+        <button class="btn" onclick="showStart()">↺ Rejouer</button>
+      </div>
+    </div>`;
+  els.question.innerHTML = html;
+  els.options.innerHTML = "";
+  els.extra.innerHTML = "";
+  els.multiTip.style.display = "none";
+  els.keyfacts.style.display = "none";
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+}
+
+/* ============== Événements ============== */
+els.validate.addEventListener('click', ()=>{
+  const q = bank[order[idx]];
+  let ok = false;
+  if(q.type==='single'){
+    const val = (document.querySelector('input[name="q"]:checked')||{}).value;
+    ok = (val===q.answer);
+  }
+  else if(q.type==='multi'){
+    const vals = [...document.querySelectorAll('input[name="q"]:checked')].map(i=>i.value).sort();
+    const need = q.answer.slice().sort();
+    ok = JSON.stringify(vals)===JSON.stringify(need);
+  }
+  else if(q.type==='input'){
+    const inEl = document.getElementById('in');
+    const norm = normalizeInput(inEl.value, (q.answer.normalize||'none'));
+    const re = new RegExp(q.answer.pattern, 'i');
+    ok = re.test(norm);
+  }
+  else if(q.type==='order'){
+    const got = [...els.extra.querySelectorAll('.bucket .chip')].map(n=>n.textContent);
+    ok = JSON.stringify(got)===JSON.stringify(q.answer);
+  }
+
+  if(ok){
+    if(!answeredWrongOnce) score++;
+    showRight();
+    explainAll(q);
+    els.next.disabled = false;
+    els.validate.disabled = true;
+  }else{
+    answeredWrongOnce = true;
+    if(gameMode==='bombe'){
+      els.wrongOverlay.style.display = 'none';
+      gameOver("Erreur unique en mode bombe.", q);
+      return;
+    }
+    wrongCount++;
+    showWrong("Réponds à nouveau à la question pour passer à la suivante.");
+    explainAll(q);
+    if(wrongCount >= MAX_WRONG){
+      els.wrongOverlay.style.display = 'none';
+      revealSolution(q);
+    }
+  }
+});
+
+els.retry.addEventListener('click', ()=>{
+  const q = bank[order[idx]];
+  if(wrongCount >= MAX_WRONG){
+    return;
+  }
+  if(q.type==='single' || q.type==='multi'){
+    document.querySelectorAll('input[name="q"]').forEach(i=> i.checked=false);
+  }else if(q.type==='input'){
+    const inEl = document.getElementById('in'); if(inEl) inEl.value="";
+  }else if(q.type==='order'){
+    const chips = [...document.querySelectorAll('.bucket .chip')];
+    const wrap = document.querySelector('.drag-list');
+    chips.forEach(c=>wrap.appendChild(c));
+  }
+  document.querySelectorAll('.exp').forEach(e=>e.classList.remove('show'));
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  const left = Math.max(0, MAX_WRONG - wrongCount);
+  els.status.textContent = `Réponds puis valide. Essais restants avant solution : ${left}.`;
+  els.wrongOverlay.style.display = 'none';
+});
+
+els.next.addEventListener('click', ()=>{
+  idx++;
+  answeredWrongOnce = false;
+  wrongCount = 0;
+  if(idx>=order.length){
+    els.qid.textContent = bank.length+" / "+bank.length;
+    els.progressFill.style.width = "100%";
+    endScreen();
+  }else{
+    loadCurrent();
+    updateProgress();
+  }
+});
+
+function endScreen(){
+  clearTimer();
+  const total = bank.length;
+  const pct = Math.round(score/total*100);
+  const msg = pct>=90 ? "Excellent" : pct>=75 ? "Très bien" : pct>=60 ? "Bien" : pct>=40 ? "À renforcer" : "À retravailler";
+  const html = `
+    <div style="text-align:center; padding:26px">
+      <h2 style="margin:0 0 10px">Terminé ✅</h2>
+      <p class="sub">Mode : <strong>${gameMode}</strong></p>
+      <p class="sub">Score (1er essai) : <span class="score" style="font-size:22px">${score}/${total}</span> — ${pct}%</p>
+      <p class="sub">Niveau : ${msg}</p>
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+        <button class="btn" onclick="showStart()">↺ Rejouer</button>
+      </div>
+    </div>`;
+  els.question.innerHTML = html;
+  els.options.innerHTML = "";
+  els.extra.innerHTML = "";
+  els.multiTip.style.display = "none";
+  els.keyfacts.style.display = "none";
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+  burstConfetti(window.innerWidth/2, window.innerHeight/3);
+}
+
+/* Reset */
+els.reset.addEventListener('click', ()=>{
+  showStart();
+});
+
+
+// --- Dynamic update of "X secondes" in timed mode description ---
+function updateTimedDesc(){
+  const p = document.getElementById('timedDesc');
+  if(!p) return;
+  const tsel = document.querySelector('input[name="tsecs"]:checked');
+  const val = tsel ? parseInt(tsel.value,10) : QUESTION_TIME;
+  p.textContent = `⏱️ ${val} secondes par question. Si le compteur atteint 0, c’est fini.`;
+}
+// Attach listeners on start overlay open
+function attachTimedDescListeners(){
+  document.querySelectorAll('input[name="tsecs"]').forEach(r=>{
+    r.addEventListener('change', updateTimedDesc);
+  });
+  const timedModeRadio = document.querySelector('input[name="mode"][value="timed"]');
+  if(timedModeRadio){
+    timedModeRadio.addEventListener('change', updateTimedDesc);
+  }
+  updateTimedDesc();
+}
+
+/* Start overlay control */
+function showStart(){
+  clearTimer();
+  els.startOverlay.style.display = 'flex';
+  els.modeBadge.style.display = 'none';
+  els.timeBadge.style.display = 'none';
+  // Reset UI
+  els.question.textContent = "Choisis un mode puis lance la partie.";
+  els.options.innerHTML = "";
+  els.extra.innerHTML = "";
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+  els.keyfacts.style.display = "none";
+  els.multiTip.style.display = "none";
+  els.status.textContent = "Réponds puis valide. Tu ne passeras que si c’est correct (ou solution après 3 essais).";
+attachTimedDescListeners();
+}
+els.startBtn.addEventListener('click', ()=>{
+  const chosen = document.querySelector('input[name="mode"]:checked');
+  gameMode = chosen ? chosen.value : 'detente';
+  if(gameMode==='timed'){
+    const tsel = document.querySelector('input[name="tsecs"]:checked');
+    const val = tsel ? parseInt(tsel.value,10) : 5;
+    QUESTION_TIME = isFinite(val) && val>0 ? val : 5;
+  }
+  els.startOverlay.style.display = 'none';
+  updateBadges();
+  start();
+});
+
+// Kickoff: show mode chooser
+showStart();
+</script>
+</body>
+</html>
