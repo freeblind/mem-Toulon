@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UE 2.11 — Jeu des Définitions (Saisie & Modes Chronométrés)</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:#111827;
+    --card:#0b1220;
+    --text:#e5e7eb;
+    --muted:#94a3b8;
+    --accent:#38bdf8;
+    --good:#22c55e;
+    --bad:#ef4444;
+    --warn:#f59e0b;
+    --border:#1f2937;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+    background: radial-gradient(1200px 800px at 20% -10%, #0b1b32 0%, var(--bg) 60%);
+    color:var(--text);
+  }
+  header{
+    position:sticky; top:0; z-index:10;
+    backdrop-filter: blur(8px);
+    background:rgba(10,17,30,.6);
+    border-bottom:1px solid var(--border);
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:16px}
+  h1{margin:8px 0 6px; font-size: clamp(20px, 2.4vw, 30px)}
+  .sub{color:var(--muted); font-size:14px}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  .pill{
+    padding:6px 10px; border:1px solid var(--border); border-radius:999px;
+    color:var(--muted); font-size:12px; letter-spacing:.2px
+  }
+  #muteBtn{margin-left:auto; cursor:pointer; user-select:none}
+  #muteBtn button{
+    background:transparent; color:var(--muted); border:1px solid var(--border);
+    padding:6px 10px; border-radius:10px; font-size:13px
+  }
+  #progressBar{
+    height:8px; width:100%; background:#0b1324; border-radius:999px; overflow:hidden; margin-top:10px;
+    border:1px solid var(--border)
+  }
+  #progressFill{height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #60a5fa)}
+  main{max-width:1100px; margin:18px auto; padding:0 16px 120px}
+  .card{
+    border:1px solid var(--border); border-radius:16px; overflow:hidden; background:linear-gradient(180deg,#0b1220,#0a1326);
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  }
+  .card-hd{padding:16px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .badge{font-size:12px; color:#0b1220; background:linear-gradient(90deg,#a7f3d0,#6ee7b7); padding:4px 8px; border-radius:999px; font-weight:600}
+  #qid{color:var(--muted); font-size:13px}
+  .hint{margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .hint .pill{border-color:#334155; color:#cbd5e1}
+  .timer{font-weight:700}
+  .card-bd{padding:18px}
+  #question{font-size: clamp(18px, 2.5vw, 24px); line-height:1.45; margin:8px 0 14px}
+  #question strong{font-size: clamp(20px, 3.5vw, 30px); display:block; margin-top:10px}
+  .options{display:block; gap:10px}
+  .controls{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap}
+  .btn{
+    background:linear-gradient(180deg,#12213b,#0e1a30);
+    color:var(--text); border:1px solid var(--border); padding:10px 14px; border-radius:12px;
+    font-weight:600; cursor:pointer;
+  }
+  .btn[disabled]{opacity:.5; cursor:not-allowed}
+  .btn.primary{border-color:#1b3a6b}
+  .btn.good{border-color:#166534}
+  .btn.bad{border-color:#7f1d1d}
+  .status{margin-left:auto; font-size:14px; color:var(--muted)}
+  .keyfacts{
+    margin-top:18px; border:1px dashed #1e293b; border-radius:12px; padding:12px; background:#0a1528;
+  }
+  .keyfacts h3{margin:0 0 8px; font-size:14px; color:#a5b4fc}
+  .kv{display:flex; gap:8px; flex-wrap:wrap}
+  .kv span{font-size:12px; color:#c7d2fe; background:#111a35; padding:6px 8px; border-radius:999px; border:1px solid #1e2750}
+  /* Overlay FAUX */
+  #wrongOverlay{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:50;
+    background: rgba(0,0,0,.35);
+  }
+  #wrongOverlay .bubble{
+    background: #2a0303; border:2px solid var(--bad); color:#fff; padding:24px 28px; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.5);
+    font-size: clamp(22px, 4vw, 36px); font-weight:800; letter-spacing:1px; transform:scale(1); animation: pop .2s ease-out
+  }
+  @keyframes pop{from{transform:scale(.9)}to{transform:scale(1)}}
+  /* Confetti canvas */
+  #confetti{position:fixed; inset:0; pointer-events:none; z-index:60}
+  /* Start overlay */
+  #startOverlay{
+    position:fixed; inset:0; z-index:70; display:flex; align-items:center; justify-content:center;
+    background:rgba(3,6,14,.85); backdrop-filter: blur(6px);
+  }
+  .start-card{
+    width:min(720px, 92vw);
+    background:linear-gradient(180deg,#0b1220,#0a1326);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 15px 40px rgba(0,0,0,.4);
+  }
+  .mode{
+    display:flex; gap:12px; align-items:flex-start;
+    border:1px solid var(--border); border-radius:12px; padding:10px;
+    background:#0b1220;
+  }
+  .mode h4{margin:0 0 4px; font-size:16px}
+  .mode p{margin:0; font-size:13px; color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="row">
+      <div>
+        <h1>UE 2.11 — Jeu des Définitions</h1>
+        <div class="sub">Saisie Libre — Vocabulaire clé de la Physique des rayonnements</div>
+      </div>
+      <div class="hint">
+        <span class="pill">ℹ️ La solution s’affichera après <strong>3 essais</strong> infructueux.</span>
+        <span id="modeBadge" class="pill" style="display:none"></span>
+        <span id="timeBadge" class="pill timer" style="display:none">⏱️ 5</span>
+      </div>
+      <div id="muteBtn" class="row">
+        <button id="muteToggle" aria-pressed="false" title="Activer/Désactiver le son">🔊 Son</button>
+      </div>
+    </div>
+    <div id="progressBar"><div id="progressFill"></div></div>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <div class="card-hd">
+      <span class="badge">Définition</span>
+      <span id="qid">0 / 0</span>
+    </div>
+    <div class="card-bd">
+      <div id="question">Choisis un mode puis lance la partie.</div>
+      <div id="options" class="options">
+        </div>
+      <div id="extra" style="margin-top:6px"></div>
+      <div class="controls">
+        <button id="validateBtn" class="btn primary" disabled>Valider (Entrée)</button>
+        <button id="retryBtn" class="btn" disabled>Réessayer (Réinitialiser)</button>
+        <button id="nextBtn" class="btn good" disabled>Suivante ▶</button>
+        <div class="status" id="status">Réponds puis valide. La casse et les accents sont ignorés.</div>
+      </div>
+
+      <div class="keyfacts" id="keyfacts" style="display:none">
+        <h3>Terme correct</h3>
+        <div class="kv" id="factsWrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <div style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap">
+    <button id="resetBtn" class="btn">↺ Réinitialiser le jeu</button>
+    <span class="pill">Source : Maxi Quiz UE 2.11, Section Définitions</span>
+  </div>
+</main>
+
+<div id="startOverlay" role="dialog" aria-modal="true">
+  <div class="start-card">
+    <h2 style="margin:0 0 8px">Choisis ton mode</h2>
+    <p class="sub" style="margin:0 0 12px">Tu peux changer de mode à chaque partie.</p>
+    <div class="options" style="margin:12px 0">
+      <label class="mode">
+        <input type="radio" name="mode" value="detente" checked style="margin-top:4px">
+        <div>
+          <h4>Mode détente</h4>
+          <p>Tu avances seulement quand la réponse est correcte. Solution affichée après 3 essais. Pas de pression.</p>
+        </div>
+      </label>
+      <label class="mode">
+        <input type="radio" name="mode" value="bombe" style="margin-top:4px">
+        <div>
+          <h4>💣 Mode bombe</h4>
+          <p><strong>Une erreur = Game Over</strong>. La mémoire est une arme, ne tremble pas.</p>
+        </div>
+      </label>
+      <label class="mode">
+        <input type="radio" name="mode" value="timed" style="margin-top:4px">
+        <div>
+          <h4>⏱️ Mode “j’ai pas le temps”</h4>
+          <p id="timedDesc">X secondes par question. Si le compteur atteint 0, la mission échoue.</p>
+        </div>
+      </label>
+      <div style="margin:6px 0 0 34px; display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <span class="pill">⏱️ Durée par question :</span>
+        <label class="pill"><input type="radio" name="tsecs" value="5" checked style="margin-right:6px">5 s</label>
+        <label class="pill"><input type="radio" name="tsecs" value="10" style="margin-right:6px">10 s</label>
+        <label class="pill"><input type="radio" name="tsecs" value="15" style="margin-right:6px">15 s</label>
+      </div>
+
+    </div>
+    <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap">
+      <button id="startBtn" class="btn good">Lancer la partie ▶</button>
+    </div>
+  </div>
+</div>
+
+<div id="wrongOverlay"><div class="bubble">❌ FAUX — réessaie</div></div>
+<canvas id="confetti"></canvas>
+
+<script>
+// =========================================================================
+// 1. Déclarations globales (Engine Core)
+// =========================================================================
+let order = [];
+let idx = 0;
+let score = 0;
+let answeredWrongOnce = false;
+let wrongCount = 0; 
+const MAX_WRONG = 3;
+
+let gameMode = 'detente';
+let QUESTION_TIME = 5;
+let timeLeft = QUESTION_TIME;
+let timerId = null;
+
+let muted = false;
+let _ac;
+
+
+// =========================================================================
+/* 2. Données questions et utilitaires de données (Maxi Quiz Data) */
+// =========================================================================
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+const DEFS = [
+  {t:"Radioactivité", d:"Transformation spontanée d’un noyau instable en noyau plus stable avec émission (α, β, γ…)."},
+  {t:"Désintégration", d:"Événement élémentaire de transformation d’un noyau instable (on parle aussi d’événement de radioactivité)."},
+  {t:"Activité (Bq)", d:"Nombre de désintégrations par seconde (1 Bq = 1 s⁻¹)."},
+  {t:"Demi‑vie", d:"Temps au bout duquel l’activité (ou le nombre de noyaux instables) est divisée par deux."},
+  {t:"Irradiation", d:"Exposition d’un organisme à un rayonnement, sans préjuger d’une contamination."},
+  {t:"Contamination", d:"Présence de radionucléides sur ou dans l’organisme."},
+  {t:"Dose absorbée (Gy)", d:"Énergie déposée par unité de masse (J·kg⁻¹)."},
+  {t:"Dose équivalente/effective (Sv)", d:"Dose tenant compte des pondérations (rayonnement, tissu). Unité de risque radiologique."},
+  {t:"Isotopes", d:"Noyaux d’un même élément (même Z) mais A différent (N différent)."},
+  {t:"Isotones", d:"Noyaux de même N, Z différent."},
+  {t:"Isobares", d:"Noyaux de même A, Z différent."},
+  {t:"Cation", d:"Atome/ion qui a perdu des électrons (charge +)."},
+  {t:"Anion", d:"Atome/ion qui a gagné des électrons (charge −)."},
+  {t:"Onde mécanique", d:"Perturbation qui se propage dans un milieu matériel en transportant de l’énergie."},
+  {t:"Période / fréquence", d:"Période = durée d’un motif ; fréquence = nombre de motifs par seconde."},
+  {t:"Coefficient d’atténuation μ", d:"Paramètre décrivant la décroissance de l’intensité avec l’épaisseur (plus μ est grand, plus l’atténuation est forte)."},
+  {t:"Couche de demi‑atténuation (HVL)", d:"Épaisseur qui réduit d’environ moitié l’intensité transmise."},
+  {t:"Effet photoélectrique", d:"Absorption totale du photon et éjection d’un électron lié (favorisé à basse énergie et Z élevé)."},
+  {t:"Diffusion Compton", d:"Diffusion inélastique : photon diffusé + électron éjecté, partage d’énergie."},
+  {t:"Production de paires", d:"Création e⁻/e⁺ par un photon γ près d’un noyau (seuil d’énergie requis)."},
+  {t:"Blindage α", d:"Feuille de papier / peau."},
+  {t:"Blindage β", d:"Aluminium / plastique (quelques mm)."},
+  {t:"Blindage γ", d:"Plomb / matériau à Z élevé (épais)."},
+  {t:"Noyau excité → γ", d:"Un noyau excité peut se désexciter par émission d’un photon γ."}
+];
+
+// Fonction pour normaliser le texte (supprimer accents, passer en minuscule, nettoyer)
+function normalize(text) {
+  if (!text) return "";
+  // 1. Supprimer accents
+  let norm = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // 2. Minuscules
+  norm = norm.toLowerCase();
+  // 3. Remplacer les tirets, espaces et slashes multiples par un seul espace
+  // FIX: Le tiret (-) est placé à la fin pour éviter le SyntaxError "Range out of order" sur certaines plateformes.
+  norm = norm.replace(/[‑/\s-]+/g, ' '); 
+  // 4. Retirer les ponctuations courantes qui ne sont pas des lettres/chiffres/espaces
+  norm = norm.replace(/[^a-z0-9\s]/g, '');
+  // 5. Supprimer les mots superflus pour la vérification flexible (la/le/l'/de/d'/un/une/des/les...)
+  norm = norm.replace(/\s(la|le|de|du|des|un|une|l|d)\s/g, ' '); 
+  norm = norm.replace(/^(la|le|de|du|des|un|une|l|d)\s/g, ''); 
+  // 6. Supprimer les espaces multiples et trim
+  norm = norm.replace(/\s+/g, ' ').trim();
+  return norm;
+}
+
+// Génère des questions de type Définition -> Terme (Type Input)
+function genDefToTermQuestionsRobust(){
+  const questions = [];
+  for(let i=0;i<DEFS.length;i++){
+    const good = DEFS[i];
+    const key = good.t;
+
+    // Normalisation et génération des termes acceptés
+    const normKey = normalize(key);
+    let accepted = [normKey];
+    
+    // 1. Gestion des slashes (ex: "Periode / frequence")
+    if (key.includes('/')) {
+        key.split('/').map(s => s.trim()).forEach(v => accepted.push(normalize(v)));
+    }
+    
+    // 2. Gestion des pluriels/singuliers (règle simple: ajout/retrait de 's' final)
+    if (!normKey.endsWith('s')) {
+        accepted.push(normalize(normKey + 's')); // Ajout de s (ex: anion -> anions)
+    }
+    if (normKey.endsWith('s') && normKey.length > 3) {
+        accepted.push(normalize(normKey.slice(0, -1))); // Retrait de s (ex: anions -> anion)
+    }
+    
+    // 3. Gestion des acronymes/parenthèses (ex: Dose absorbee (Gy))
+    const cleanKey = key.replace(/\s*\(.*\)\s*/g, '').trim();
+    if (cleanKey !== key) {
+        accepted.push(normalize(cleanKey));
+    }
+    
+    // 4. Gestion des mots clés seuls (ex: 'Onde mecanique' doit accepter 'onde' ou 'mecanique')
+    const keywords = normKey.split(/\s+/g).filter(w => w.length > 2);
+    keywords.forEach(kw => {
+        accepted.push(kw);
+        accepted.push(normalize(kw + 's'));
+    });
+
+    // 5. Filtrage des doublons et des vides
+    accepted = [...new Set(accepted)].filter(w => w.length > 0);
+    
+    questions.push({
+      id: 'D2T'+i,
+      type: 'input',
+      stem: `<strong>${good.d}</strong>`, // Définition en carte
+      answer: good.t, // Le terme exact (pour affichage de solution)
+      accepted: accepted, // Liste des formes normalisées acceptées
+      explain: `Le terme exact est : <strong>${good.t}</strong>`,
+      facts: [good.t, 'Définition à Terme']
+    });
+  }
+  return questions;
+}
+
+const bank = genDefToTermQuestionsRobust();
+
+
+// Fonction de vérification flexible de la réponse utilisateur
+function isAnswerCorrect(userInput, q) {
+  const normalizedInput = normalize(userInput);
+  
+  // Si la saisie normalisée correspond à une des formes acceptées normalisées
+  if (q.accepted.includes(normalizedInput)) {
+    return true;
+  }
+  
+  // Vérification de "mot-clé important"
+  // On trouve le mot-clé le plus important (le plus long ou le plus complexe)
+  const mainKeys = q.accepted.filter(w => w.length > 2).sort((a,b) => b.length - a.length);
+  
+  // Si l'entrée contient un des mots-clés principaux
+  if(mainKeys.some(key => normalizedInput.includes(key))) {
+      return true;
+  }
+  
+  return false;
+}
+
+
+// =========================================================================
+/* 3. Audio & Confetti (Engine Core) */
+// =========================================================================
+const sfx = {
+  good: new Audio(URL.createObjectURL(new Blob([new Uint8Array([82,73,70,70,70,0,0,0,87,65,86,69,102,109,116,32,16,0,0,0,1,0,1,0,68,172,0,0,68,172,0,0,1,0,8,0,100,97,116,97,34,0,0,0,128,200,220,240,255,220,200,180,160,150,140,130,120,110,100,90,80,70,60,50,40,30,25,20,15,10,8,6,4,3,2,1,0,0,0,0])],{type:'audio/wav'}))),
+  bad: new Audio(URL.createObjectURL(new Blob([new Uint8Array([82,73,70,70,70,0,0,0,87,65,86,69,102,109,116,32,16,0,0,0,1,0,1,0,68,172,0,0,68,172,0,0,1,0,8,0,100,97,116,97,34,0,0,0,128,20,20,20,20,20,20,20,20,130,150,170,190,210,230,250,230,210,190,170,150,130,110,90,70,50,30,20,10,5,2,1,0,0])],{type:'audio/wav'})))
+};
+
+function getAC(){
+  if(muted) return null;
+  if(!_ac){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return null;
+    _ac = new Ctx();
+  }
+  if(_ac.state === 'suspended'){ _ac.resume().catch(()=>{}); }
+  return _ac;
+}
+function playArpeggio(){
+  const ac = getAC(); if(!ac) return;
+  const now = ac.currentTime + 0.01;
+  const base = 523.25;
+  const steps = [0,4,7,12];
+  const dur = 0.09;
+  steps.forEach((st, i)=>{
+    const o = ac.createOscillator();
+    const g = ac.createGain();
+    o.type = 'triangle';
+    o.frequency.value = base * Math.pow(2, st/12);
+    g.gain.setValueAtTime(0, now + i*dur);
+    g.gain.linearRampToValueAtTime(0.08, now + i*dur + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, now + i*dur + dur);
+    o.connect(g).connect(ac.destination);
+    o.start(now + i*dur);
+    o.stop(now + i*dur + dur + 0.02);
+  });
+}
+function playSoftBuzzer(){
+  const ac = getAC(); if(!ac) return;
+  const now = ac.currentTime + 0.01;
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(190, now);
+  o.frequency.linearRampToValueAtTime(160, now + 0.5);
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(0.06, now + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+  o.connect(g).connect(ac.destination);
+  o.start(now);
+  o.stop(now + 0.6);
+}
+
+function playSfx(which){
+  if(muted) return;
+  const a = sfx[which];
+  if(a){ try{ a.currentTime=0; a.play(); }catch(e){} }
+}
+
+const confettiCanvas = document.getElementById('confetti');
+const cx = confettiCanvas.getContext('2d');
+let confs = [];
+function resizeCanvas(){
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas); resizeCanvas();
+function burstConfetti(x, y){
+  try{ playArpeggio(); }catch(e){} 
+  confs = [];
+  const n = 180;
+  for(let i=0;i<n;i++){
+    confs.push({
+      x, y,
+      vx:(Math.random()-0.5)*8, vy:(Math.random()-1)*8,
+      g:0.2+Math.random()*0.2, a:1,
+      r:2+Math.random()*3,
+      color:`hsl(${Math.floor(Math.random()*360)}, 90%, 60%)`
+    });
+  }
+  let t=0;
+  function step(){
+    cx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    for(const p of confs){
+      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.a *= 0.992;
+      cx.globalAlpha = Math.max(0, p.a);
+      cx.beginPath(); cx.fillStyle = p.color; cx.arc(p.x, p.y, p.r, 0, Math.PI*2); cx.fill();
+    }
+    cx.globalAlpha = 1;
+    t++;
+    if(t<200) requestAnimationFrame(step); else cx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+  }
+  step();
+}
+
+// =========================================================================
+/* 4. Logique du jeu + modes (Engine Core) */
+// =========================================================================
+
+const els = {
+  qid: document.getElementById('qid'),
+  question: document.getElementById('question'),
+  options: document.getElementById('options'),
+  extra: document.getElementById('extra'),
+  validate: document.getElementById('validateBtn'),
+  retry: document.getElementById('retryBtn'),
+  next: document.getElementById('nextBtn'),
+  status: document.getElementById('status'),
+  progressFill: document.getElementById('progressFill'),
+  keyfacts: document.getElementById('keyfacts'),
+  factsWrap: document.getElementById('factsWrap'),
+  wrongOverlay: document.getElementById('wrongOverlay'),
+  muteToggle: document.getElementById('muteToggle'),
+  reset: document.getElementById('resetBtn'),
+  startOverlay: document.getElementById('startOverlay'),
+  startBtn: document.getElementById('startBtn'),
+  modeBadge: document.getElementById('modeBadge'),
+  timeBadge: document.getElementById('timeBadge'),
+};
+
+els.muteToggle.addEventListener('click', ()=>{
+  muted = !muted;
+  els.muteToggle.textContent = muted ? "🔇 Son coupé" : "🔊 Son";
+  els.muteToggle.setAttribute('aria-pressed', String(muted));
+  if (_ac) { 
+      if(_ac.masterGain) _ac.masterGain.gain.setValueAtTime(muted ? 0 : 1, _ac.currentTime);
+      else if (_ac.state === 'suspended' && !muted) _ac.resume().catch(()=>{});
+      else if (_ac.state === 'running' && muted) _ac.suspend().catch(()=>{});
+  }
+});
+
+document.getElementById('wrongOverlay').addEventListener('click', ()=>{
+  els.wrongOverlay.style.display = 'none';
+});
+
+function start(){
+  order = Array.from({length: bank.length}, (_,i)=>i);
+  shuffle(order);
+  idx = 0; score = 0;
+  loadCurrent();
+  updateProgress();
+  answeredWrongOnce = false;
+}
+
+function updateProgress(){
+  const total = order.length;
+  els.qid.textContent = (idx+1)+" / "+total;
+  els.progressFill.style.width = ((idx)/total*100).toFixed(1)+"%";
+}
+
+function updateBadges(){
+  let label = "";
+  if(gameMode==='detente') label = "Mode détente";
+  if(gameMode==='bombe') label = "💣 Mode bombe — 1 erreur = fin";
+  if(gameMode==='timed') label = `⏱️ Mode ${QUESTION_TIME}s/question`;
+  els.modeBadge.style.display = label ? "" : "none";
+  els.modeBadge.textContent = label;
+  
+  els.timeBadge.style.display = (gameMode==='timed') ? "" : "none";
+  if(gameMode==='timed') els.timeBadge.textContent = "⏱️ " + timeLeft;
+}
+
+function clearTimer(){
+  if(timerId){ clearInterval(timerId); timerId = null; }
+}
+function startTimer(){
+  clearTimer();
+  timeLeft = QUESTION_TIME;
+  updateBadges();
+  timerId = setInterval(()=>{
+    timeLeft--;
+    updateBadges();
+    if(timeLeft<=0){
+      clearTimer();
+      gameOver("⏱️ Temps écoulé (mode "+QUESTION_TIME+"s). La mission est abandonnée.", bank[order[idx]]);
+    }
+  }, 1000);
+}
+
+function loadCurrent(){
+  const q = bank[order[idx]];
+  wrongCount = 0;
+  els.question.innerHTML = q.stem; // Show definition as the question
+  els.options.innerHTML = `
+    <input type="text" id="answerInput" placeholder="Saisis le terme ou le concept correspondant..." style="width:100%; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:18px;">
+    <div style="margin-top:10px; display:flex; gap:10px;">
+        <button id="showHintBtn" class="btn" style="flex-grow:1;">👀 Indice (1er mot)</button>
+        <button id="showFullBtn" class="btn bad" style="flex-grow:1;">🚨 Révéler la solution</button>
+    </div>
+  `;
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+  els.status.textContent = "Réponds puis valide. La casse et les accents sont ignorés.";
+  els.keyfacts.style.display = "none";
+
+  if(gameMode==='timed'){ startTimer(); } else { clearTimer(); updateBadges(); }
+
+  const answerInput = document.getElementById('answerInput');
+  const showHintBtn = document.getElementById('showHintBtn');
+  const showFullBtn = document.getElementById('showFullBtn');
+
+  // --- Sécurité / Attachement des événements dynamiques ---
+  if (answerInput) {
+      answerInput.focus();
+      
+      // Valider sur l'input
+      answerInput.addEventListener('input', () => {
+          els.validate.disabled = answerInput.value.trim() === '';
+      });
+
+      // Valider sur la touche Entrée
+      answerInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' && !els.validate.disabled) {
+              e.preventDefault();
+              els.validate.click();
+          }
+      });
+  }
+
+  // Logique du bouton Indice
+  if (showHintBtn) {
+    showHintBtn.addEventListener('click', () => {
+      const term = q.answer.split(/[\s/]/g)[0]; // First word of the exact term
+      els.status.textContent = `Indice : Le terme commence par "${term.charAt(0).toUpperCase()}" ou contient le mot "${normalize(term)}".`;
+    });
+  }
+  
+  // Logique du bouton Révéler
+  if (showFullBtn) {
+    showFullBtn.addEventListener('click', () => {
+      answeredWrongOnce = true;
+      wrongCount = MAX_WRONG;
+      els.wrongOverlay.style.display = 'none';
+      revealSolution(q);
+    });
+  }
+}
+
+function showWrong(msg){
+  els.status.textContent = "❌ Faux. " + (msg||"Réessaie.");
+  els.retry.disabled = false;
+  els.wrongOverlay.style.display = 'flex';
+  playSoftBuzzer();
+  document.getElementById('answerInput').focus();
+}
+
+function showRight(){
+  els.status.textContent = "✅ Correct ! Mission accomplie pour cette cible.";
+  playArpeggio();
+  burstConfetti(window.innerWidth*0.75, 120);
+
+  const answerInput = document.getElementById('answerInput');
+  if (answerInput) answerInput.disabled = true;
+  
+  const showHintBtn = document.getElementById('showHintBtn');
+  const showFullBtn = document.getElementById('showFullBtn');
+  if (showHintBtn) showHintBtn.disabled = true;
+  if (showFullBtn) showFullBtn.disabled = true;
+
+  if(gameMode==='timed'){ clearTimer(); }
+}
+
+function revealSolution(q){
+  const answerInput = document.getElementById('answerInput');
+  if (answerInput) {
+    answerInput.value = q.answer; // Display the correct term
+    answerInput.disabled = true; // Disable input
+  }
+
+  const showHintBtn = document.getElementById('showHintBtn');
+  const showFullBtn = document.getElementById('showFullBtn');
+  if (showHintBtn) showHintBtn.disabled = true;
+  if (showFullBtn) showFullBtn.disabled = true;
+  
+  els.keyfacts.style.display = "";
+  els.factsWrap.innerHTML = `<span>${q.answer}</span>`;
+  
+  els.status.textContent = `🚨 Solution forcée : Le terme était : ${q.answer}. Passe à la suivante.`;
+  els.next.disabled = false;
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+}
+
+function gameOver(reason, q){
+  clearTimer();
+  const total = bank.length;
+  const html = `
+    <div style="text-align:center; padding:26px">
+      <h2 style="margin:0 0 10px">Game Over 💥</h2>
+      <p class="sub" style="margin:6px 0">${reason||"Fin de partie."}</p>
+      <p class="sub">Mode : <strong>${gameMode}</strong></p>
+      <p class="sub">Progression : ${idx+1}/${total} — Score (1er essai) : <span class="score" style="font-size:22px">${score}</span></p>
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+        <button class="btn" onclick="showStart()">↺ Rejouer</button>
+      </div>
+    </div>`;
+  els.question.innerHTML = html;
+  els.options.innerHTML = "";
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+  els.keyfacts.style.display = "none";
+}
+
+/* ============== Événements ============== */
+els.validate.addEventListener('click', ()=>{
+  const answerInput = document.getElementById('answerInput');
+  if (!answerInput) return; // Sécurité
+
+  const q = bank[order[idx]];
+  const userInput = answerInput.value;
+  let ok = isAnswerCorrect(userInput, q); // Utilisation du vérificateur flexible
+
+  if(ok){
+    if(!answeredWrongOnce) score++;
+    showRight();
+    els.next.disabled = false;
+    els.validate.disabled = true;
+  }else{
+    answeredWrongOnce = true;
+    if(gameMode==='bombe'){
+      els.wrongOverlay.style.display = 'none';
+      gameOver("💣 Bombe déclenchée. Erreur unique.", q);
+      return;
+    }
+    wrongCount++;
+    showWrong(`Réessaie. Essais restants avant solution : ${MAX_WRONG - wrongCount}.`);
+    if(wrongCount >= MAX_WRONG){
+      els.wrongOverlay.style.display = 'none';
+      revealSolution(q);
+    }
+  }
+});
+
+els.retry.addEventListener('click', ()=>{
+  const answerInput = document.getElementById('answerInput');
+  if (!answerInput) return; // Sécurité
+
+  if(wrongCount >= MAX_WRONG){ return; }
+  
+  answerInput.value = '';
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  const left = Math.max(0, MAX_WRONG - wrongCount);
+  els.status.textContent = `Réponds puis valide. Essais restants avant solution : ${left}.`;
+  els.wrongOverlay.style.display = 'none';
+  answerInput.focus();
+});
+
+els.next.addEventListener('click', ()=>{
+  idx++;
+  answeredWrongOnce = false;
+  wrongCount = 0;
+  if(idx>=order.length){
+    els.qid.textContent = bank.length+" / "+bank.length;
+    els.progressFill.style.width = "100%";
+    endScreen();
+  }else{
+    loadCurrent();
+    updateProgress();
+  }
+});
+
+function endScreen(){
+  clearTimer();
+  const total = bank.length;
+  const pct = Math.round(score/total*100);
+  const msg = pct>=90 ? "Excellent. Maîtrise totale." : pct>=75 ? "Très bien. Solide." : pct>=60 ? "Bien. À consolider." : "À retravailler. Le système est fragile.";
+  const html = `
+    <div style="text-align:center; padding:26px">
+      <h2 style="margin:0 0 10px">Opération Terminée ✅</h2>
+      <p class="sub">Mode : <strong>${gameMode}</strong></p>
+      <p class="sub">Score (1er essai) : <span class="score" style="font-size:22px">${score}/${total}</span> — ${pct}%</p>
+      <p class="sub">Analyse : ${msg}</p>
+      <div style="margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+        <button class="btn" onclick="showStart()">↺ Rejouer</button>
+      </div>
+    </div>`;
+  els.question.innerHTML = html;
+  els.options.innerHTML = "";
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+  els.keyfacts.style.display = "none";
+  burstConfetti(window.innerWidth/2, window.innerHeight/3);
+}
+
+/* Start overlay control */
+function updateTimedDesc(){
+  const p = document.getElementById('timedDesc');
+  if(!p) return;
+  const tsel = document.querySelector('input[name="tsecs"]:checked');
+  const val = tsel ? parseInt(tsel.value,10) : QUESTION_TIME;
+  p.textContent = `⏱️ ${val} secondes par question. Si le compteur atteint 0, la mission échoue.`;
+}
+function attachTimedDescListeners(){
+  document.querySelectorAll('input[name="tsecs"]').forEach(r=>{
+    r.addEventListener('change', updateTimedDesc);
+  });
+  const timedModeRadio = document.querySelector('input[name="mode"][value="timed"]');
+  if(timedModeRadio){
+    timedModeRadio.addEventListener('change', updateTimedDesc);
+  }
+  updateTimedDesc();
+}
+
+function showStart(){
+  clearTimer();
+  els.startOverlay.style.display = 'flex'; 
+  els.modeBadge.style.display = 'none';
+  els.timeBadge.style.display = 'none';
+  // Reset UI
+  els.question.textContent = "Choisis un mode puis lance la partie.";
+  els.options.innerHTML = "";
+  els.validate.disabled = true;
+  els.retry.disabled = true;
+  els.next.disabled = true;
+  els.keyfacts.style.display = "none";
+  els.status.textContent = "Réponds puis valide. La casse et les accents sont ignorés.";
+attachTimedDescListeners();
+}
+
+els.startBtn.addEventListener('click', ()=>{
+  try {
+      const chosen = document.querySelector('input[name="mode"]:checked');
+      gameMode = chosen ? chosen.value : 'detente';
+      if(gameMode==='timed'){
+        const tsel = document.querySelector('input[name="tsecs"]:checked');
+        const val = tsel ? parseInt(tsel.value,10) : 5;
+        QUESTION_TIME = isFinite(val) && val>0 ? val : 5;
+      }
+      
+      els.startOverlay.style.display = 'none';
+      updateBadges();
+      start(); 
+  } catch (e) {
+      els.status.textContent = "Erreur fatale au démarrage: " + e.message;
+      els.startOverlay.style.display = 'none'; // Clôture forcée de l'écran de démarrage
+      console.error("Erreur au démarrage du jeu:", e);
+      // Fallback: Réafficher l'écran de démarrage pour re-essayer
+      setTimeout(showStart, 100); 
+  }
+});
+
+// Le lancement
+showStart();
+</script>
+</body>
+</html>
