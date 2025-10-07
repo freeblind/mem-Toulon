@@ -12,9 +12,10 @@ button:hover{background:#1a2332}
 #canvas{position:relative;width:100%;max-width:1000px;margin:0 auto}
 #base{display:block;width:100%;max-width:1000px;height:auto;user-select:none}
 .field{position:absolute;box-sizing:border-box;background:#1a1f2e;color:#fff;padding:6px;border-radius:8px;resize:none;z-index:40;font-family:inherit}
-.field.ok{background:#1a3a28;color:#d1fae5}
-.field.ko{background:#3a1a1a;color:#fee2e2}
-.field.shown{background:#2d2416;color:#fef3c7}
+.field.ok{border-color:#22c55e;border-width:3px;background:#1a3a28;color:#d1fae5}
+.field.ko{border-color:#ef4444;border-width:3px;background:#3a1a1a;color:#fee2e2}
+.field.shown{border-color:#f59e0b;border-width:3px;background:#2d2416;color:#fef3c7}
+.feedback-icon{position:absolute;z-index:50;font-size:24px;font-weight:bold;pointer-events:none;text-shadow:0 0 3px #000}
 .mask{position:absolute;box-sizing:border-box;border-radius:8px;padding:6px;color:#fff;z-index:50;cursor:pointer}
 .mask.hidden{display:none}
 .answerText{position:absolute;color:#fff;font-weight:700;text-shadow:0 0 3px #000,0 0 6px #000,1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;z-index:45;pointer-events:none;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);border-radius:6px;padding:4px}
@@ -74,7 +75,7 @@ function render(){
     setTimeout(render,100);
     return;
   }
-  Array.from(C.querySelectorAll(".field,.mask,.answerText,.decor,svg")).forEach(function(n){n.remove();});
+  Array.from(C.querySelectorAll(".field,.mask,.answerText,.decor,.feedback-icon,svg")).forEach(function(n){n.remove();});
   var ratio=displayWidth/(S.referenceWidth||1000);
   var displayHeight=B.naturalHeight*(displayWidth/B.naturalWidth);
   C.style.height=displayHeight+"px";
@@ -238,11 +239,13 @@ C.addEventListener("blur",function(e){
   }
 },true);
 document.getElementById("modeBtn").addEventListener("click",function(){
+  C.querySelectorAll(".feedback-icon").forEach(function(icon){icon.remove();});
   mode=(mode==="ecriture")?"mental":"ecriture";
   this.textContent="Mode: "+(mode==="ecriture"?"Écriture":"Mental");
   render();
 });
 document.getElementById("checkBtn").addEventListener("click",function(){
+  C.querySelectorAll(".feedback-icon").forEach(function(icon){icon.remove();});
   var fields=C.querySelectorAll(".field");
   fields.forEach(function(ta){
     var it=S.items.find(function(x){return x.uid===ta.dataset.uid;});
@@ -261,9 +264,17 @@ document.getElementById("checkBtn").addEventListener("click",function(){
       return false;
     });
     ta.classList.add(isCorrect?"ok":"ko");
+    var icon=document.createElement("div");
+    icon.className="feedback-icon";
+    icon.textContent=isCorrect?"✓":"✗";
+    icon.style.color=isCorrect?"#22c55e":"#ef4444";
+    icon.style.left=(parseFloat(ta.style.left)+parseFloat(ta.style.width)+5)+"px";
+    icon.style.top=(parseFloat(ta.style.top)+parseFloat(ta.style.height)/2-12)+"px";
+    C.appendChild(icon);
   });
 });
 document.getElementById("retryBtn").addEventListener("click",function(){
+  C.querySelectorAll(".feedback-icon").forEach(function(icon){icon.remove();});
   if(mode==="ecriture"){
     C.querySelectorAll(".field").forEach(function(ta){
       if(!ta.classList.contains("ok")||ta.classList.contains("shown")){
@@ -278,6 +289,7 @@ document.getElementById("retryBtn").addEventListener("click",function(){
   }
 });
 document.getElementById("showAnswersBtn").addEventListener("click",function(){
+  C.querySelectorAll(".feedback-icon").forEach(function(icon){icon.remove();});
   if(mode==="ecriture"){
     C.querySelectorAll(".field").forEach(function(ta){
       if(ta.classList.contains("ko")||!ta.value.trim()){
@@ -290,6 +302,13 @@ document.getElementById("showAnswersBtn").addEventListener("click",function(){
           ta.value=answer;
           ta.classList.remove("ko");
           ta.classList.add("ok","shown");
+          var icon=document.createElement("div");
+          icon.className="feedback-icon";
+          icon.textContent="👁";
+          icon.style.color="#f59e0b";
+          icon.style.left=(parseFloat(ta.style.left)+parseFloat(ta.style.width)+5)+"px";
+          icon.style.top=(parseFloat(ta.style.top)+parseFloat(ta.style.height)/2-12)+"px";
+          C.appendChild(icon);
         }
       }
     });
