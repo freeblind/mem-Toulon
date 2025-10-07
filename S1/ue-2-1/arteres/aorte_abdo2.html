@@ -58,6 +58,7 @@ var S={"items":[{"type":"field","uid":"i1","x":7,"y":178,"w":176,"h":76,"ff":"",
 var C=document.getElementById("canvas");
 var B=document.getElementById("base");
 var mode=S.defaultMode||"ecriture";
+var verificationState={};
 function normalize(s){
   try{
     return (s||"").toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim().replace(/\s+/g," ");
@@ -95,10 +96,26 @@ function render(){
       ta.style.borderWidth="2px";
       ta.style.borderStyle="solid";
       ta.style.borderColor=it.borderColor||it.color||"#60a5fa";
-      ta.value="";
-      if(mode==="ecriture"&&it.showDefault&&it.answer){ta.value=it.answer;}
+      if(verificationState[it.uid]){
+        ta.value=verificationState[it.uid].value||"";
+        if(verificationState[it.uid].status){
+          ta.classList.add(verificationState[it.uid].status);
+        }
+      }else{
+        ta.value="";
+        if(mode==="ecriture"&&it.showDefault&&it.answer){ta.value=it.answer;}
+      }
       if(mode==="mental"){ta.style.display="none";}
       C.appendChild(ta);
+      if(verificationState[it.uid]&&verificationState[it.uid].icon){
+        var icon=document.createElement("div");
+        icon.className="feedback-icon";
+        icon.textContent=verificationState[it.uid].icon.text;
+        icon.style.color=verificationState[it.uid].icon.color;
+        icon.style.left=(it.x*ratio+it.w*ratio+5)+"px";
+        icon.style.top=(it.y*ratio+it.h*ratio/2-12)+"px";
+        C.appendChild(icon);
+      }
       if(mode==="mental"){
         var ans=document.createElement("div");
         ans.className="answerText";
@@ -239,6 +256,7 @@ C.addEventListener("blur",function(e){
   }
 },true);
 document.getElementById("modeBtn").addEventListener("click",function(){
+  verificationState={};
   C.querySelectorAll(".feedback-icon").forEach(function(icon){icon.remove();});
   mode=(mode==="ecriture")?"mental":"ecriture";
   this.textContent="Mode: "+(mode==="ecriture"?"Écriture":"Mental");
@@ -253,7 +271,10 @@ document.getElementById("checkBtn").addEventListener("click",function(){
     var list=expected.split("/").map(function(s){return s.trim();}).filter(Boolean);
     var val=(ta.value||"").trim();
     ta.classList.remove("ok","ko","shown");
-    if(!list.length)return;
+    if(!list.length){
+      delete verificationState[ta.dataset.uid];
+      return;
+    }
     var isCorrect=list.some(function(exp){
       var e=normalize(exp);
       var v=normalize(val);
@@ -263,11 +284,17 @@ document.getElementById("checkBtn").addEventListener("click",function(){
       if(e+"x"===v||e===v+"x")return true;
       return false;
     });
-    ta.classList.add(isCorrect?"ok":"ko");
+    var status=isCorrect?"ok":"ko";
+    ta.classList.add(status);
+    verificationState[ta.dataset.uid]={
+      value:val,
+      status:status,
+      icon:{text:isCorrect?"✓":"✗",color:isCorrect?"#22c55e":"#ef4444"}
+    };
     var icon=document.createElement("div");
     icon.className="feedback-icon";
-    icon.textContent=isCorrect?"✓":"✗";
-    icon.style.color=isCorrect?"#22c55e":"#ef4444";
+    icon.textContent=verificationState[ta.dataset.uid].icon.text;
+    icon.style.color=verificationState[ta.dataset.uid].icon.color;
     icon.style.left=(parseFloat(ta.style.left)+parseFloat(ta.style.width)+5)+"px";
     icon.style.top=(parseFloat(ta.style.top)+parseFloat(ta.style.height)/2-12)+"px";
     C.appendChild(icon);
@@ -277,9 +304,11 @@ document.getElementById("retryBtn").addEventListener("click",function(){
   C.querySelectorAll(".feedback-icon").forEach(function(icon){icon.remove();});
   if(mode==="ecriture"){
     C.querySelectorAll(".field").forEach(function(ta){
-      if(!ta.classList.contains("ok")||ta.classList.contains("shown")){
+      var state=verificationState[ta.dataset.uid];
+      if(!state||state.status!=="ok"||state.shown){
         ta.value="";
-        ta.classList.remove("ko","shown");
+        ta.classList.remove("ko","shown","ok");
+        delete verificationState[ta.dataset.uid];
       }
     });
   }else{
@@ -292,7 +321,8 @@ document.getElementById("showAnswersBtn").addEventListener("click",function(){
   C.querySelectorAll(".feedback-icon").forEach(function(icon){icon.remove();});
   if(mode==="ecriture"){
     C.querySelectorAll(".field").forEach(function(ta){
-      if(ta.classList.contains("ko")||!ta.value.trim()){
+      var state=verificationState[ta.dataset.uid];
+      if(!state||state.status==="ko"||!ta.value.trim()){
         var it=S.items.find(function(x){return x.uid===ta.dataset.uid;});
         if(it&&it.answer){
           var answer=it.answer.toString();
@@ -302,6 +332,12 @@ document.getElementById("showAnswersBtn").addEventListener("click",function(){
           ta.value=answer;
           ta.classList.remove("ko");
           ta.classList.add("ok","shown");
+          verificationState[ta.dataset.uid]={
+            value:answer,
+            status:"ok",
+            shown:true,
+            icon:{text:"👁",color:"#f59e0b"}
+          };
           var icon=document.createElement("div");
           icon.className="feedback-icon";
           icon.textContent="👁";
