@@ -77,7 +77,7 @@
             function drawHelperShape(ctx, start, end) { ctx.strokeStyle = 'yellow'; ctx.lineWidth = 2; ctx.beginPath(); switch(currentGameTool) { case 'rectangle': ctx.rect(start.x, start.y, end.x-start.x, end.y-start.y); break; case 'oval': ctx.ellipse(start.x + (end.x-start.x)/2, start.y + (end.y-start.y)/2, Math.abs((end.x-start.x)/2), Math.abs((end.y-start.y)/2), 0, 0, 2*Math.PI); break; case 'freehand': case 'brush': ctx.moveTo(currentPoints[0].x, currentPoints[0].y); for(let i=1; i<currentPoints.length; i++) ctx.lineTo(currentPoints[i].x, currentPoints[i].y); if(currentGameTool === 'brush') ctx.lineWidth = brushSize; break; } ctx.stroke(); }
             function createObjectFromInteraction(start, end, tool) { const baseObj = { id: Date.now() }; if (Math.hypot(end.x - start.x, end.y - start.y) < 10 && !['brush', 'freehand'].includes(tool)) return null; switch(tool) { case 'rectangle': return {...baseObj, isZone: true, type: tool, x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), width: Math.abs(end.x-start.x), height: Math.abs(end.y-start.y) }; case 'oval': return {...baseObj, isZone: true, type: tool, x: start.x, y: start.y, width: end.x-start.x, height: end.y-start.y }; case 'freehand': case 'brush': const bounds = getBoundsFromPoints(currentPoints); return {...baseObj, isZone: true, type: tool, x: bounds.minX, y: bounds.minY, width: bounds.width, height: bounds.height, points: currentPoints.map(p => ({x: p.x, y: p.y})), brushSize: tool === 'brush' ? brushSize : undefined }; } return null; }
             function getBoundsFromPoints(points) { let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity; points.forEach(p => { minX = Math.min(minX, p.x); minY = Math.min(minY, p.y); maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); }); return { minX, minY, width: maxX - minX, height: maxY - minY }; }
-            function setupGameCanvas() { if (!userCanvas) { userCanvas = document.createElement('canvas'); userCanvas.style.position = 'absolute'; userCanvas.style.top = '0'; userCanvas.style.left = '0'; userCanvas.style.cursor = 'crosshair'; containerEl.appendChild(userCanvas); const getPos = e => { const rect = e.target.getBoundingClientRect(); return { x: e.clientX - rect.left, y: e.clientY - rect.top }; }; userCanvas.addEventListener('mousedown', e => { isUserDrawing = true; userDragStart = getPos(e); currentPoints = [userDragStart]; }); userCanvas.addEventListener('mousemove', e => { if (!isUserDrawing) return; redrawUserCanvas(); const pos = getPos(e); currentPoints.push(pos); drawHelperShape(userCanvas.getContext('2d'), userDragStart, pos); }); userCanvas.addEventListener('mouseup', e => { isUserDrawing = false; const pos = getPos(e); const newGuess = createObjectFromInteraction(userDragStart, pos, currentGameTool); if(newGuess) { userGuesses.push(newGuess); } redrawUserCanvas(); }); } userCanvas.width = imageEl.clientWidth; userCanvas.height = imageEl.clientHeight; userCanvas.style.display = 'block'; setStudentTool('rectangle'); }
+            function setupGameCanvas() { if (!userCanvas) { userCanvas = document.createElement('canvas'); userCanvas.style.position = 'absolute'; userCanvas.style.top = '0'; userCanvas.style.left = '0'; userCanvas.style.cursor = 'crosshair'; containerEl.appendChild(userCanvas); const getPos = e => { const rect = e.target.getBoundingClientRect(); const clientX = e.clientX || (e.touches && e.touches[0].clientX); const clientY = e.clientY || (e.touches && e.touches[0].clientY); return { x: clientX - rect.left, y: clientY - rect.top }; }; const handleStart = e => { e.preventDefault(); isUserDrawing = true; userDragStart = getPos(e); currentPoints = [userDragStart]; }; const handleMove = e => { if (!isUserDrawing) return; e.preventDefault(); redrawUserCanvas(); const pos = getPos(e); currentPoints.push(pos); drawHelperShape(userCanvas.getContext('2d'), userDragStart, pos); }; const handleEnd = e => { e.preventDefault(); isUserDrawing = false; const pos = getPos(e.changedTouches ? e.changedTouches[0] : e); const newGuess = createObjectFromInteraction(userDragStart, pos, currentGameTool); if(newGuess) { userGuesses.push(newGuess); } redrawUserCanvas(); }; userCanvas.addEventListener('mousedown', handleStart); userCanvas.addEventListener('mousemove', handleMove); userCanvas.addEventListener('mouseup', handleEnd); userCanvas.addEventListener('touchstart', handleStart, { passive: false }); userCanvas.addEventListener('touchmove', handleMove, { passive: false }); userCanvas.addEventListener('touchend', handleEnd, { passive: false }); } userCanvas.width = imageEl.clientWidth; userCanvas.height = imageEl.clientHeight; userCanvas.style.display = 'block'; setStudentTool('rectangle'); }
             window.choixErreurs = function() { choixEl.style.display = 'none'; gameEl.style.display = 'block'; studentToolbar.style.display = 'flex'; feedbackEl.textContent = "Dessinez sur les zones d'erreur, puis validez."; setupGameCanvas(); }
             function validerReponses() { 
                 console.log('=== Validation des réponses ===');
@@ -182,6 +182,7 @@
                         canvasRef.style.maxWidth = '100%';
                         canvasRef.style.maxHeight = '70vh';
                         canvasRef.style.border = '2px solid #555';
+                        canvasRef.style.cursor = 'pointer';
                         const ctxRef = canvasRef.getContext('2d');
                         
                         let showCriteria = true;
@@ -204,6 +205,47 @@
                         
                         drawReferenceImage();
                         
+                        // Gestion des clics sur les zones pour afficher les explications
+                        const handleCanvasClick = (e) => {
+                            if (!showCriteria) return; // Ne rien faire si les critères sont masqués
+                            
+                            const rect = canvasRef.getBoundingClientRect();
+                            const scaleX = canvasRef.width / rect.width;
+                            const scaleY = canvasRef.height / rect.height;
+                            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                            const pos = {
+                                x: (clientX - rect.left) * scaleX,
+                                y: (clientY - rect.top) * scaleY
+                            };
+                            
+                            // Chercher la zone cliquée
+                            let clickedZone = null;
+                            const allObjects = [...(currentCase.zonesReussite || []), ...(currentCase.annotationsReussite || [])];
+                            
+                            for (const obj of allObjects) {
+                                if (isPointInObject(pos, obj)) {
+                                    clickedZone = obj;
+                                    break;
+                                }
+                            }
+                            
+                            if (clickedZone && clickedZone.critere) {
+                                // Afficher l'explication dans un mini-popup
+                                const explanationDiv = document.getElementById('ref-explanation');
+                                if (explanationDiv) {
+                                    explanationDiv.innerHTML = `<strong>Critère de réussite :</strong><br>${clickedZone.critere}`;
+                                    explanationDiv.style.display = 'block';
+                                }
+                            }
+                        };
+                        
+                        canvasRef.addEventListener('click', handleCanvasClick);
+                        canvasRef.addEventListener('touchend', (e) => {
+                            e.preventDefault();
+                            handleCanvasClick(e.changedTouches[0]);
+                        });
+                        
                         const toggleBtn = document.createElement('button');
                         toggleBtn.textContent = '👁️ Masquer les critères';
                         toggleBtn.style.marginTop = '15px';
@@ -213,11 +255,30 @@
                             showCriteria = !showCriteria;
                             toggleBtn.textContent = showCriteria ? '👁️ Masquer les critères' : '👁️ Afficher les critères';
                             drawReferenceImage();
+                            // Masquer l'explication si on masque les critères
+                            const explanationDiv = document.getElementById('ref-explanation');
+                            if (explanationDiv && !showCriteria) {
+                                explanationDiv.style.display = 'none';
+                            }
                         };
                         
-                        document.getElementById('popup-content').innerHTML = '<h3 style="margin-top:0;">Image de Référence</h3>';
+                        const explanationBox = document.createElement('div');
+                        explanationBox.id = 'ref-explanation';
+                        explanationBox.style.display = 'none';
+                        explanationBox.style.marginTop = '15px';
+                        explanationBox.style.padding = '15px';
+                        explanationBox.style.backgroundColor = '#1a4d2e';
+                        explanationBox.style.border = '2px solid #4caf50';
+                        explanationBox.style.borderRadius = '8px';
+                        explanationBox.style.fontSize = '14px';
+                        explanationBox.style.lineHeight = '1.5';
+                        explanationBox.style.maxHeight = '150px';
+                        explanationBox.style.overflowY = 'auto';
+                        
+                        document.getElementById('popup-content').innerHTML = '<h3 style="margin-top:0;">Image de Référence</h3><p style="font-size:12px;color:#aaa;margin-top:-5px;">Cliquez sur une zone verte pour voir le critère</p>';
                         document.getElementById('popup-content').appendChild(canvasRef);
                         document.getElementById('popup-content').appendChild(toggleBtn);
+                        document.getElementById('popup-content').appendChild(explanationBox);
                         popup.style.display = 'flex';
                     };
                     img.src = currentCase.imageReferenceSrc;
