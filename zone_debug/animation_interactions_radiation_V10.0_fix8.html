@@ -1055,6 +1055,21 @@
       if(e.highlight && e.htag){ label(e.htag, p.x+12, p.y+12, "#cde5ff"); }
     }
 
+    // Transition electrons (visible red dots moving between shells)
+    function drawTransition(trans, fromR, toR, labelTxt){
+      if(!trans || !trans.active) return;
+      var p = trans.progress;
+      if(STATE.t>=trans.start && p<1){
+        var curR = fromR + (toR - fromR) * p;
+        var pos = posOnShell(trans.angle, curR);
+        circle(pos.x, pos.y, ELECTRON_R, "#ff6b6b", "#a83b3b", 1.2);
+        label(labelTxt, pos.x + 12, pos.y + 12, "#ff6b6b");
+      }
+    }
+    // Draw the L→K and M→L transitions like in V9.6
+    drawTransition(STATE.transLK, SHELLS.L.r, SHELLS.K.r, "L→K");
+    drawTransition(STATE.transML, SHELLS.M.r, SHELLS.L.r, "M→L");
+
     // incident
     if(STATE.mode==='photo' || STATE.mode==='compton' || STATE.mode==='coherent'){
       if(STATE.photon && STATE.photon.alive){
