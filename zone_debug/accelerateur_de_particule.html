@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LINAC — Parcours + Détails par étape (Photons / Électrons)</title>
+<style>
+  :root{
+    --bg:#ffffff; --text:#0b1220; --muted:#475569; --stroke:#cbd5e1;
+    --panel:#f1f5f9; --card:#ffffff; --accent:#2563eb; --ok:#16a34a;
+    --beam:#f59e0b; --beam2:#b45309;
+  }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:Inter,Segoe UI,system-ui,-apple-system,Arial}
+  .wrap{max-width:1200px;margin:18px auto;padding:0 16px}
+  .top{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .title{font-size:20px;font-weight:900}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--panel);
+    border:1px solid var(--stroke);border-radius:12px;padding:8px 10px}
+  .controls>*{background:var(--card);border:1px solid var(--stroke);border-radius:10px;
+    padding:8px 12px;font-weight:800;font-size:14px}
+  .controls label{display:flex;align-items:center;gap:8px;padding:6px 10px}
+
+  .stage{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:12px}
+  svg{width:100%;height:auto;display:block;border-radius:10px}
+
+  /* Ligne + faisceau */
+  .beamline{stroke:#334155;stroke-width:6}
+  .beamDot{fill:var(--beam);stroke:var(--beam2);stroke-width:2}
+
+  /* Compos */
+  .comp rect,.comp path,.comp polygon,.comp ellipse,.comp circle,.comp line{
+    stroke:#1f2937;stroke-width:3;fill:#fff
+  }
+  .comp text{fill:#0b1220;font-size:14px;font-weight:900}
+  .sub{fill:#475569;font-size:12px;font-weight:800}
+  .dimmed{opacity:.18}
+  .active rect,.active path,.active polygon,.active ellipse,.active circle,.active line{
+    stroke:var(--ok);stroke-width:5
+  }
+  .jaw{fill:#cbd5e1;stroke:#334155}
+  .tung{fill:#9aa5b1}
+  .foil{fill:#9ca3af}
+  .cone{fill:#e2e8f0}
+  .ionA,.ionB{stroke:#64748b;stroke-width:4}
+  .mlcLeaf{fill:#c7d2fe;stroke:#4f46e5;stroke-width:2}
+  .table{fill:#cbd5e1;stroke:#334155}
+  .patientBody{fill:#e5e7eb;stroke:#475569}
+
+  /* Stepbar + détails sous le canvas */
+  .legend{color:#475569;font-size:13px;margin-top:6px}
+  .stepbar{margin-top:8px;border:1px solid var(--stroke);background:var(--panel);
+    border-radius:12px;padding:10px 12px;font-size:18px;font-weight:900;display:flex;gap:12px;align-items:center}
+  .badgeStep{min-width:44px;height:44px;border-radius:999px;background:var(--accent);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .muted{color:#475569;font-weight:800;margin-left:auto}
+
+  .details{margin-top:10px;background:#ffffff;border:1px solid var(--stroke);border-radius:12px;padding:14px}
+  .details h3{margin:.2rem 0 .5rem;font-size:18px}
+  .details p{margin:.3rem 0;color:#0b1220}
+  .details .mini{color:#475569;font-size:13px}
+
+  /* Rays (mode continu) */
+  .rays line{stroke:#f59e0b;stroke-width:3;opacity:0}
+  @keyframes rayPulse { 0%{opacity:0} 30%{opacity:1} 60%{opacity:.3} 100%{opacity:0} }
+
+  .duration{margin-top:12px;color:#0b1220;font-size:14px;background:#f8fafc;border:1px solid var(--stroke);
+    padding:10px;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="title">LINAC — Parcours + Détails par étape (Photons / Électrons)</div>
+    <div class="controls">
+      <button id="btnPrev">◀ Précédent</button>
+      <button id="btnPlay">▶ Démarrer</button>
+      <button id="btnPause">⏸ Pause</button>
+      <button id="btnStep">➜ Étape</button>
+      <button id="btnReplay">⟲ Rejouer</button>
+      <select id="mode">
+        <option value="photons" selected>Photons (X)</option>
+        <option value="electrons">Électrons (e⁻)</option>
+      </select>
+      <label>Vitesse <input id="speed" type="range" min="0.3" max="2" step="0.1" value="0.9"></label>
+      <label><input id="chkPause" type="checkbox" checked> Pause à chaque étape</label>
+      <label><input id="chkFocus" type="checkbox" checked> Focus étape</label>
+      <label><input id="chkImage" type="checkbox"> Mode Image</label>
+      <label><input id="chkLoop" type="checkbox"> Mode continu (boucle)</label>
+    </div>
+  </div>
+
+  <div class="stage">
+    <svg id="linac" viewBox="0 0 1320 560" aria-label="LINAC clair">
+      <!-- ligne de faisceau -->
+      <line class="beamline" x1="120" y1="300" x2="1200" y2="300"></line>
+
+      <!-- Canon -->
+      <g id="canon" class="comp" transform="translate(100,220)">
+        <rect x="0" y="0" width="120" height="160" rx="14"/>
+        <text x="60" y="-8" text-anchor="middle">Canon e⁻</text>
+      </g>
+
+      <!-- RF -->
+      <g id="rf" class="comp" transform="translate(260,220)">
+        <rect x="0" y="0" width="160" height="160" rx="14"/>
+        <text x="80" y="-8" text-anchor="middle">Guide RF</text>
+        <text class="sub" x="80" y="176" text-anchor="middle">Klystron/Magnétron</text>
+      </g>
+
+      <!-- Aimants -->
+      <g id="bend" class="comp" transform="translate(460,210)">
+        <rect x="0" y="0" width="160" height="180" rx="14"/>
+        <text x="80" y="-8" text-anchor="middle">Aimants</text>
+        <text class="sub" x="80" y="196" text-anchor="middle">Focalisation</text>
+      </g>
+
+      <!-- Collimateur primaire -->
+      <g id="prim" class="comp" transform="translate(650,220)">
+        <rect x="0" y="0" width="120" height="160" rx="12"/>
+        <rect class="jaw" x="12" y="20" width="40" height="120" rx="6"/>
+        <rect class="jaw" x="68" y="20" width="40" height="120" rx="6"/>
+        <text x="60" y="-8" text-anchor="middle">Collimateur primaire</text>
+      </g>
+
+      <!-- Cible W -->
+      <g id="target" class="comp" transform="translate(800,230)">
+        <rect x="0" y="0" width="80" height="140" rx="12"/>
+        <circle class="tung" cx="40" cy="70" r="18"/>
+        <text x="40" y="-8" text-anchor="middle">Cible (W)</text>
+      </g>
+
+      <!-- Filtre d’aplatissement (photons) -->
+      <g id="flat" class="comp" transform="translate(900,230)">
+        <rect x="0" y="0" width="80" height="140" rx="12"/>
+        <polygon class="cone" points="40,10 18,110 62,110"/>
+        <text x="40" y="-8" text-anchor="middle">Filtre</text>
+        <text class="sub" x="40" y="156" text-anchor="middle">aplatissement</text>
+      </g>
+
+      <!-- Feuille de diffusion (électrons) -->
+      <g id="foil" class="comp" transform="translate(900,230)" style="display:none">
+        <rect x="0" y="0" width="80" height="140" rx="12"/>
+        <ellipse class="foil" cx="40" cy="70" rx="26" ry="7"/>
+        <text x="40" y="-8" text-anchor="middle">Feuille</text>
+        <text class="sub" x="40" y="156" text-anchor="middle">diffusion</text>
+      </g>
+
+      <!-- Chambre d’ionisation -->
+      <g id="ion" class="comp" transform="translate(980,230)">
+        <rect x="0" y="0" width="80" height="140" rx="12"/>
+        <line class="ionA" x1="10" y1="55" x2="70" y2="55"/>
+        <line class="ionB" x1="10" y1="95" x2="70" y2="95"/>
+        <text x="40" y="-8" text-anchor="middle">Chambre</text>
+        <text class="sub" x="40" y="156" text-anchor="middle">ionisation</text>
+      </g>
+
+      <!-- MLC -->
+      <g id="mlc" class="comp" transform="translate(1060,220)">
+        <rect x="0" y="0" width="100" height="160" rx="12"/>
+        <rect class="mlcLeaf" x="10" y="25" width="6" height="110" rx="3"/>
+        <rect class="mlcLeaf" x="22" y="25" width="6" height="110" rx="3"/>
+        <rect class="mlcLeaf" x="34" y="25" width="6" height="110" rx="3"/>
+        <rect class="mlcLeaf" x="46" y="25" width="6" height="110" rx="3"/>
+        <rect class="mlcLeaf" x="58" y="25" width="6" height="110" rx="3"/>
+        <rect class="mlcLeaf" x="70" y="25" width="6" height="110" rx="3"/>
+        <text x="50" y="-8" text-anchor="middle">MLC /</text>
+        <text class="sub" x="50" y="176" text-anchor="middle">Applicateur</text>
+      </g>
+
+      <!-- Patient silhouette humaine au bout -->
+      <g id="patient" class="comp" transform="translate(1180,235)">
+        <rect x="-10" y="140" width="120" height="18" class="table"/>
+        <circle cx="20" cy="30" r="10" class="patientBody"/>
+        <line x1="20" y1="40" x2="20" y2="90" class="patientBody"/>
+        <line x1="20" y1="55" x2="5"  y2="75" class="patientBody"/>
+        <line x1="20" y1="55" x2="35" y2="75" class="patientBody"/>
+        <line x1="20" y1="90" x2="10" y2="115" class="patientBody"/>
+        <line x1="20" y1="90" x2="30" y2="115" class="patientBody"/>
+        <text x="40" y="-8" text-anchor="middle">Patient</text>
+        <!-- rayons animés (mode continu) -->
+        <g id="rays" class="rays">
+          <line x1="40" y1="60" x2="75" y2="40"/>
+          <line x1="40" y1="60" x2="78" y2="60"/>
+          <line x1="40" y1="60" x2="75" y2="80"/>
+        </g>
+      </g>
+
+      <!-- Faisceau -->
+      <circle id="beam" class="beamDot" r="10" cx="120" cy="300"></circle>
+    </svg>
+
+    <div class="legend">Une **ligne** = faisceau. Une **étape** à la fois. Les <b>détails</b> (en-dessous) s’affichent seulement pour l’étape courante.</div>
+
+    <div class="stepbar">
+      <div class="badgeStep" id="stepNum">1</div>
+      <div id="caption">—</div>
+      <div class="muted" id="stepTotal">Étape 1/9</div>
+    </div>
+
+    <!-- DÉTAILS ICI, SOUS LE CANVAS -->
+    <div id="details" class="details"></div>
+
+    <div class="duration">
+      <b>Durée moyenne d’une séance de radiothérapie (externe) :</b> ~10–20 minutes (mise en place + imagerie éventuelle + irradiation).  
+      <span class="muted">L’irradiation elle-même dure souvent quelques minutes.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const get = id => document.getElementById(id);
+
+  // UI
+  const beam = get("beam");
+  const caption = get("caption");
+  const stepNum = get("stepNum");
+  const stepTotal = get("stepTotal");
+  const details = get("details");
+
+  const modeSel = get("mode");
+  const speed = get("speed");
+  const chkPause = get("chkPause");
+  const chkFocus = get("chkFocus");
+  const chkImage = get("chkImage");
+  const chkLoop = get("chkLoop");
+
+  const btnPrev = get("btnPrev");
+  const btnPlay = get("btnPlay");
+  const btnPause = get("btnPause");
+  const btnStep = get("btnStep");
+  const btnReplay = get("btnReplay");
+
+  const comps = {
+    canon:get("canon"), rf:get("rf"), bend:get("bend"), prim:get("prim"),
+    target:get("target"), flat:get("flat"), foil:get("foil"), ion:get("ion"),
+    mlc:get("mlc"), patient:get("patient")
+  };
+
+  // Rays animation
+  const rays = get("rays");
+  function setRaysAnimation(on){
+    const lines = rays.querySelectorAll("line");
+    lines.forEach((ln,i)=>{
+      ln.style.animation = on ? `rayPulse 1.4s ${i*0.2}s infinite` : "none";
+      ln.style.opacity = on ? "1" : "0";
+    });
+  }
+
+  // Points ancrage
+  const pts = {
+    canon:{x:120, y:300},
+    rf:{x:260+80, y:300},
+    bend:{x:460+80, y:300},
+    prim:{x:650+60, y:300},
+    target:{x:800+40, y:300},
+    flat:{x:900+40, y:300},
+    foil:{x:900+40, y:300},
+    ion:{x:980+40, y:300},
+    mlc:{x:1060+50, y:300},
+    patient:{x:1180+40, y:300}
+  };
+
+  // Séquences
+  const stepsPhotons = [
+    {id:"canon",   txt:"Canon e⁻ : “pistolet” qui envoie des électrons."},
+    {id:"rf",      txt:"Guide RF : “tuyau à micro-ondes” qui accélère fort."},
+    {id:"bend",    txt:"Aimants : virage magnétique qui trie et focalise."},
+    {id:"prim",    txt:"Collimateur primaire : deux mâchoires, ouverture propre."},
+    {id:"target",  txt:"Cible (W) : les e⁻ frappent le tungstène → rayons X."},
+    {id:"flat",    txt:"Filtre d’aplatissement : égalise l’intensité du faisceau X."},
+    {id:"ion",     txt:"Chambre d’ionisation : capteur de dose (sécurité)."},
+    {id:"mlc",     txt:"MLC : lames qui dessinent la forme du champ."},
+    {id:"patient", txt:"Patient : la dose est délivrée au volume cible."}
+  ];
+  const stepsElectrons = [
+    {id:"canon",   txt:"Canon e⁻ : “pistolet” qui envoie des électrons."},
+    {id:"rf",      txt:"Guide RF : “tuyau à micro-ondes” qui accélère fort."},
+    {id:"bend",    txt:"Aimants : virage magnétique qui trie et focalise."},
+    {id:"prim",    txt:"Collimateur primaire : deux mâchoires, ouverture propre."},
+    {id:"foil",    txt:"Feuille de diffusion : élargit et homogénéise le faisceau e⁻."},
+    {id:"ion",     txt:"Chambre d’ionisation : capteur de dose."},
+    {id:"mlc",     txt:"Applicateur/MLC : forme finale du champ d’électrons."},
+    {id:"patient", txt:"Patient : traitement surtout en surface (peu profond)."}
+  ];
+
+  // Détails “patate” affichés en dessous — seulement pour 3,4,6,7
+  const detailsMapPhotons = {
+    bend: `
+      <h3>3) Aimants — virage magnétique, tri/focalisation</h3>
+      <p><b>Image simple :</b> des “rails” magnétiques qui font tourner et resserrent le flot d’électrons.</p>
+      <p><b>À retenir :</b> on élimine ce qui n’est pas dans la bonne direction/énergie et on garde un faisceau propre.</p>
+      <p class="mini">Effet secondaire attendu : moins de divergence = meilleure précision plus loin.</p>
+    `,
+    prim: `
+      <h3>4) Collimateur primaire — deux mâchoires, première ouverture propre</h3>
+      <p><b>Image simple :</b> deux blocs de tungstène qui se rapprochent comme des mâchoires.</p>
+      <p><b>Rôle :</b> on dessine un cône propre, on coupe les rayons parasites qui partent de travers.</p>
+      <p class="mini">Plus l’ouverture est petite, plus le champ est serré (mais attention au débit).</p>
+    `,
+    flat: `
+      <h3>6) Filtre d’aplatissement — égalise l’intensité (centre/bords)</h3>
+      <p><b>Image simple :</b> un cône métal plus épais au centre qu’aux bords.</p>
+      <p><b>Rôle :</b> sans ce filtre, le centre serait trop “fort”. Le filtre rabote le centre pour rendre le faisceau <i>uniforme</i>.</p>
+      <p class="mini">Variante moderne : <b>FFF</b> (Flattening Filter Free) = pas de filtre, faisceau plus intense au centre mais débits plus élevés.</p>
+    `,
+    ion: `
+      <h3>7) Chambre d’ionisation — capteur de dose (asservissement/sécurité)</h3>
+      <p><b>Image simple :</b> une boîte avec du gaz entre 2 plaques. Quand le faisceau passe, le gaz “crépite” et on mesure le courant.</p>
+      <p><b>Rôle :</b> compter la dose en temps réel et <b>couper</b> si on dépasse ce qui est prescrit.</p>
+      <p class="mini">C’est le “compteur kilométrique” de la dose : précis et surveillé en continu.</p>
+    `
+  };
+  const detailsMapElectrons = {
+    bend: detailsMapPhotons.bend,
+    prim: detailsMapPhotons.prim,
+    ion:  detailsMapPhotons.ion,
+    // Pas de filtre en électrons : on rappelle la feuille de diffusion mais la consigne ne demandait pas de fiche dédiée ici
+  };
+
+  let mode="photons", seq=stepsPhotons;
+  let playing=false, rafId=null, idx=0, t=0;
+  const pxBase=3.0;
+
+  function setMode(m){
+    mode=m;
+    seq = (mode==="photons") ? stepsPhotons : stepsElectrons;
+    // bascule filtre/feuille
+    get("flat").style.display   = (mode==="photons") ? "" : "none";
+    get("target").style.display = (mode==="photons") ? "" : "none";
+    get("foil").style.display   = (mode==="photons") ? "none" : "";
+    reset(false);
+  }
+
+  function setRays(){
+    // rayons visibles seulement en loop
+    setRaysAnimation(chkLoop.checked);
+  }
+
+  function updateDetails(){
+    const id = seq[idx].id;
+    if(mode==="photons"){
+      details.innerHTML = detailsMapPhotons[id] || "";
+    }else{
+      details.innerHTML = detailsMapElectrons[id] || "";
+    }
+  }
+
+  function updateUI(){
+    // focus
+    Object.values(comps).forEach(g=> g.classList.remove("active","dimmed"));
+    if(chkFocus.checked && !chkImage.checked){
+      Object.values(comps).forEach(g=> g.classList.add("dimmed"));
+      comps[seq[idx].id].classList.remove("dimmed");
+      comps[seq[idx].id].classList.add("active");
+    }
+    caption.textContent = seq[idx].txt;
+    stepNum.textContent = (idx+1);
+    stepTotal.textContent = `Étape ${idx+1}/${seq.length}`;
+    updateDetails();
+    setRays();
+  }
+
+  function placeBeam(p){ if(!p) return; beam.setAttribute("cx", p.x); beam.setAttribute("cy", p.y); }
+  const lerp=(a,b,s)=>({x:a.x+(b.x-a.x)*s, y:a.y+(b.y-a.y)*s});
+
+  function reset(restart=true){
+    playing=false; cancelAnimationFrame(rafId);
+    idx=0; t=0; updateUI(); placeBeam(pts[seq[0].id]);
+    if(restart && !chkImage.checked){ playing=true; animate(); }
+  }
+
+  function animate(){
+    if(!playing) return;
+    const v = pxBase * parseFloat(speed.value||"1");
+    const curId = seq[idx].id;
+    const nextId = seq[(idx+1) % seq.length].id;
+    const A = pts[curId], B = pts[nextId];
+
+    t += v/60;
+    if(t>=1){
+      placeBeam(B);
+      if(idx < seq.length-1){
+        idx++; t=0; updateUI();
+        if(chkPause.checked && !chkLoop.checked){ playing=false; return; }
+      } else {
+        if(chkLoop.checked){ idx=0; t=0; updateUI(); placeBeam(pts[seq[0].id]); }
+        else { playing=false; return; }
+      }
+    } else {
+      placeBeam(lerp(A,B,t));
+    }
+    rafId = requestAnimationFrame(animate);
+  }
+
+  // Events
+  btnPlay.addEventListener("click", ()=>{ if(!chkImage.checked){ playing=true; animate(); }});
+  btnPause.addEventListener("click", ()=>{ playing=false; cancelAnimationFrame(rafId); });
+  btnStep.addEventListener("click", ()=>{
+    playing=false; cancelAnimationFrame(rafId);
+    if(idx < seq.length-1){ idx++; }
+    updateUI(); placeBeam(pts[seq[idx].id]);
+  });
+  btnPrev.addEventListener("click", ()=>{
+    playing=false; cancelAnimationFrame(rafId);
+    if(idx > 0){ idx--; }
+    updateUI(); placeBeam(pts[seq[idx].id]);
+  });
+  btnReplay.addEventListener("click", ()=>{
+    playing=false; cancelAnimationFrame(rafId);
+    idx=0; t=0; updateUI(); placeBeam(pts[seq[0].id]);
+    if(!chkImage.checked){ playing=true; animate(); }
+  });
+
+  modeSel.addEventListener("change", e=> setMode(e.target.value));
+  chkFocus.addEventListener("change", updateUI);
+  chkImage.addEventListener("change", ()=>{
+    const on = chkImage.checked;
+    if(on){
+      playing=false; cancelAnimationFrame(rafId);
+      Object.values(comps).forEach(g=> g.classList.remove("dimmed","active"));
+      placeBeam(pts[seq[seq.length-1].id]);
+      caption.textContent = "Vue figée — capture prête pour PowerPoint.";
+      stepNum.textContent = "•";
+      stepTotal.textContent = `Aperçu ${mode==="photons"?"Photons":"Électrons"}`;
+      details.innerHTML = "";
+      setRaysAnimation(false);
+    }else{
+      reset(false); updateUI();
+    }
+  });
+  chkLoop.addEventListener("change", ()=>{
+    if(chkLoop.checked){ playing=true; animate(); }
+    setRays();
+  });
+
+  // Start
+  setMode("photons");
+});
+</script>
+</body>
+</html>
