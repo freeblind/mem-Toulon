@@ -90,6 +90,39 @@
       max-width: 1100px;
     }
 
+    /* Timeline */
+    #timeline-wrapper {
+      margin: 10px auto 8px;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    #timeline {
+      width: 100%;
+      height: 6px;
+      background: #020617;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      margin-bottom: 4px;
+    }
+
+    #timeline-progress {
+      height: 100%;
+      width: 20%;
+      background: linear-gradient(90deg, #22c55e, #3b82f6);
+      transition: width 0.4s ease;
+    }
+
+    #timeline-text {
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+
+    #timeline-text strong {
+      color: #fbbf24;
+    }
+
     #explanations {
       max-width: 1100px;
       width: 100%;
@@ -455,6 +488,24 @@
       font-style: italic;
     }
 
+    .step-block {
+      transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+
+    .step-block.inactive {
+      opacity: 0.35;
+    }
+
+    .step-block.active {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .step-block.active .steps-rect {
+      stroke: #fbbf24;
+      stroke-width: 2;
+    }
+
     @media (max-width: 768px) {
       h1 {
         font-size: 22px;
@@ -482,7 +533,7 @@
   </header>
 
   <div id="controls">
-    <button id="btn-play">▶ Lecture automatique</button>
+    <button id="btn-play">▶ Lecture</button>
     <button id="btn-prev">← Étape précédente</button>
     <button id="btn-step">➜ Étape suivante</button>
     <button id="btn-reset">⟲ Recommencer</button>
@@ -805,6 +856,16 @@
 
       </svg>
 
+      <!-- TIMELINE -->
+      <div id="timeline-wrapper">
+        <div id="timeline">
+          <div id="timeline-progress"></div>
+        </div>
+        <div id="timeline-text">
+          Étape <strong><span id="timeline-current">1</span></strong> / 5
+        </div>
+      </div>
+
       <!-- SCHÉMA DES ÉTAPES EN BAS -->
       <svg id="steps-diagram" viewBox="0 0 1100 80" xmlns="http://www.w3.org/2000/svg">
         <!-- accolade horizontale stylisée sous les blocs -->
@@ -821,29 +882,39 @@
         <!-- 5 blocs d'étapes -->
         <g>
           <!-- Étape 1 -->
-          <rect x="80" y="15" width="170" height="35" class="steps-rect"/>
-          <text x="95" y="30" class="steps-label">Étape 1</text>
-          <text x="95" y="43" class="steps-sub">Faisceau incident homogène</text>
+          <g class="step-block" data-step="1">
+            <rect x="80" y="15" width="170" height="35" class="steps-rect"/>
+            <text x="95" y="30" class="steps-label">Étape 1</text>
+            <text x="95" y="43" class="steps-sub">Faisceau incident homogène</text>
+          </g>
 
           <!-- Étape 2 -->
-          <rect x="270" y="15" width="170" height="35" class="steps-rect"/>
-          <text x="285" y="30" class="steps-label">Étape 2</text>
-          <text x="285" y="43" class="steps-sub">Atténuation dans le patient</text>
+          <g class="step-block" data-step="2">
+            <rect x="270" y="15" width="170" height="35" class="steps-rect"/>
+            <text x="285" y="30" class="steps-label">Étape 2</text>
+            <text x="285" y="43" class="steps-sub">Atténuation dans le patient</text>
+          </g>
 
           <!-- Étape 3 -->
-          <rect x="460" y="15" width="170" height="35" class="steps-rect"/>
-          <text x="475" y="30" class="steps-label">Étape 3</text>
-          <text x="475" y="43" class="steps-sub">Rayonnement diffusé</text>
+          <g class="step-block" data-step="3">
+            <rect x="460" y="15" width="170" height="35" class="steps-rect"/>
+            <text x="475" y="30" class="steps-label">Étape 3</text>
+            <text x="475" y="43" class="steps-sub">Rayonnement diffusé</text>
+          </g>
 
           <!-- Étape 4 -->
-          <rect x="650" y="15" width="170" height="35" class="steps-rect"/>
-          <text x="665" y="30" class="steps-label">Étape 4</text>
-          <text x="665" y="43" class="steps-sub">Détection du faisceau</text>
+          <g class="step-block" data-step="4">
+            <rect x="650" y="15" width="170" height="35" class="steps-rect"/>
+            <text x="665" y="30" class="steps-label">Étape 4</text>
+            <text x="665" y="43" class="steps-sub">Détection du faisceau</text>
+          </g>
 
           <!-- Étape 5 -->
-          <rect x="840" y="15" width="170" height="35" class="steps-rect"/>
-          <text x="855" y="30" class="steps-label">Étape 5</text>
-          <text x="855" y="43" class="steps-sub">Image radiologique finale</text>
+          <g class="step-block" data-step="5">
+            <rect x="840" y="15" width="170" height="35" class="steps-rect"/>
+            <text x="855" y="30" class="steps-label">Étape 5</text>
+            <text x="855" y="43" class="steps-sub">Image radiologique finale</text>
+          </g>
         </g>
       </svg>
     </div>
@@ -859,6 +930,9 @@
     const btnPrev = document.getElementById('btn-prev');
     const btnReset = document.getElementById('btn-reset');
     const btnPause = document.getElementById('btn-pause');
+    const timelineProgress = document.getElementById('timeline-progress');
+    const timelineCurrent = document.getElementById('timeline-current');
+    const stepBlocks = document.querySelectorAll('.step-block');
 
     let currentStep = 1;
     const maxStep = 5;
@@ -911,12 +985,37 @@
       explanations.innerHTML = explanationTexts[step] || explanationTexts[1];
     }
 
+    function updateTimeline(step) {
+      if (timelineProgress) {
+        const pct = (step / maxStep) * 100;
+        timelineProgress.style.width = pct + '%';
+      }
+      if (timelineCurrent) {
+        timelineCurrent.textContent = String(step);
+      }
+    }
+
+    function updateStepsDiagram(step) {
+      stepBlocks.forEach(block => {
+        const s = parseInt(block.dataset.step, 10);
+        if (s === step) {
+          block.classList.add('active');
+          block.classList.remove('inactive');
+        } else {
+          block.classList.add('inactive');
+          block.classList.remove('active');
+        }
+      });
+    }
+
     function setStep(step) {
       if (step < 1) step = 1;
       if (step > maxStep) step = maxStep;
       currentStep = step;
       scene.setAttribute('data-step', String(step));
       updateExplanations(step);
+      updateTimeline(step);
+      updateStepsDiagram(step);
     }
 
     function playAnimation() {
@@ -1081,7 +1180,7 @@
     animateRxPhotons();
 
     console.log('🔬 Formation d\'une Image Radiologique - multi RX animés');
-    console.log('👉 Bouton Étape précédente + schéma des étapes en bas.');
+    console.log('👉 Timeline + mise en évidence de l’étape courante en bas.');
   </script>
 </body>
 </html>
