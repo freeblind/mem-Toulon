@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>LINAC - Animations Consolidées (votre_nom)</title>
+  <style>
+    /* Styles généraux du champ de bataille */
+    body {
+      margin: 0;
+      padding: 15px;
+      background: #020617; /* Fond du chaos */
+      color: #f9fafb;
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      font-size: 24px;
+      color: #fbbf24;
+      margin-top: 0;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #4b5563;
+      text-align: center;
+    }
+
+    /* Conteneur principal du champ de bataille */
+    .battlefield {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+
+    /* Ligne pour les animations (groupe d'acier) */
+    .anim-row {
+      display: flex;
+      flex-wrap: wrap; /* Pour la résilience sur petit écran */
+      gap: 15px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* Le panneau d'une animation (bloc blindé) */
+    .anim-panel {
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+      /* Taille ajustée pour la ligne de trois */
+      min-width: 320px; 
+      max-width: 340px;
+      flex: 1 1 30%; /* Permet aux 3 de se partager la ligne */
+    }
+    
+    /* Le panneau élargi de l'anim 3 (pour le canvas plus grand) */
+    #anim3.anim-panel {
+      max-width: 500px; 
+      min-width: 480px; 
+      flex: 1 1 30%;
+      height: auto;
+    }
+
+    .anim-panel-full {
+      /* Pour les animations en ligne complète */
+      max-width: 1000px;
+      width: 100%;
+      background: #0f172a;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .anim-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #e5e7eb;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .anim-subtitle {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    /* Canvas (la fenêtre sur l'enfer) */
+    canvas {
+      background: #020617;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      margin-top: 8px;
+      max-width: 100%;
+    }
+
+    /* Contrôles (l'interface de combat) */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 150px;
+    }
+    .control-group label {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    input[type="range"] { flex: 1; }
+    .value-badge {
+      min-width: 50px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #111827;
+      text-align: center;
+      font-size: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+    button.secondary { background: #4b5563; }
+
+    /* Styles spécifiques à l'anim 4 (modes photons/e-) */
+    .anim-panel-4 button.mode {
+      background: #4b5563;
+    }
+    .anim-panel-4 button.active {
+      background: #fbbf24;
+      color: #111827;
+    }
+    
+    /* Styles spécifiques Anim 3 (nouveaux) */
+    .debug-block {
+      font-size: 9px;
+      color: #f97316;
+      border-top: 1px dashed rgba(148, 163, 184, 0.4);
+      margin-top: 4px;
+      padding-top: 4px;
+      max-height: 50px;
+      overflow-y: auto;
+    }
+    
+  </style>
+</head>
+<body>
+  <h1>Le Cœur Nucléaire de la Bête : Les Étapes du LINAC</h1>
+
+  <div class="battlefield">
+    
+    <div class="anim-row">
+
+      <div id="anim1" class="anim-panel">
+        <div class="anim-title">Étape 1 : Production d’Électrons ⚡</div>
+        <div class="anim-subtitle">Tirer l'électron du métal chaud.</div>
+        <canvas id="scene1" width="320" height="200"></canvas>
+        <div class="controls">
+          <div class="control-group">
+            <label for="voltage1">Tension accélératrice</label>
+            <div class="slider-row">
+              <input id="voltage1" type="range" min="0" max="20" step="1" value="10">
+              <div id="voltageValue1" class="value-badge">10 kV</div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label for="filamentPower1">Chauffage filament</label>
+            <div class="slider-row">
+              <input id="filamentPower1" type="range" min="0" max="100" step="1" value="70">
+              <div id="filamentValue1" class="value-badge">70 %</div>
+            </div>
+          </div>
+          <button id="startBtn1">▶ Démarrer</button>
+          <button id="pauseBtn1" class="secondary">⏸ Pause</button>
+          <button id="resetBtn1" class="secondary">⟲ Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="anim2" class="anim-panel">
+        <div class="anim-title">Étape 2 : Accélération RF 🚀</div>
+        <div class="anim-subtitle">Surfer sur l'onde micro-ondes pour atteindre le MeV.</div>
+        <canvas id="scene2" width="320" height="200"></canvas>
+        <div class="controls">
+          <div class="control-group">
+            <label for="rfPower2">Puissance RF (klystron/magnétron)</label>
+            <div class="slider-row">
+              <input id="rfPower2" type="range" min="0" max="100" step="1" value="70">
+              <div id="rfPowerValue2" class="value-badge">70 %</div>
+            </div>
+          </div>
+          <div class="control-group">
+            <label>Énergie de sortie (approx.)</label>
+            <div id="energyBadge2" class="value-badge">≈ 10,0 MeV</div>
+          </div>
+          <button id="startBtn2">▶ Démarrer</button>
+          <button id="pauseBtn2" class="secondary">⏸ Pause</button>
+          <button id="resetBtn2" class="secondary">⟲ Réinitialiser</button>
+        </div>
+      </div>
+
+      <div id="anim3" class="anim-panel">
+        <div class="anim-title">Étape 3 : Aimant 270° & Sélection 🧭</div>
+        <div class="anim-subtitle">La boucle pour trier la horde par énergie.</div>
+        
+        <canvas id="scene3" width="380" height="300"></canvas> <div class="controls">
+          <div class="control-group" style="min-width: 100px;">
+            <label for="tolerance">Tolérance de sélection</label>
+            <div class="slider-row">
+              <input id="tolerance" type="range" min="0" max="100" step="1" value="50">
+              <div id="toleranceValue" class="value-badge">Tolérance ≈ ±25 %</div>
+            </div>
+          </div>
+
+          <button id="startBtn3">▶ Démarrer</button>
+          <button id="pauseBtn3" class="secondary">⏸ Pause</button>
+          <button id="resetBtn3" class="secondary">⟲ Réinitialiser</button>
+          <button id="clearDebugBtn" class="secondary">🧹 Debug</button> </div>
+
+        <div id="readout" class="value-badge" style="min-width: 90%; margin-top: 4px; height: auto; text-align: left; font-size: 10px;">
+          Tolérance large → fenêtre d’énergie large : plus d’électrons verts passent la fente.
+        </div>
+        
+        <div class="debug-block">
+          <div id="debugList">(clique sur le schéma pour marquer les points à aligner)</div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="anim-row">
+      <div id="anim4" class="anim-panel-full anim-panel-4">
+        <div class="anim-title">Étape 4 : Choix du Mode (Photons ou Électrons) 🎯</div>
+        <div class="anim-subtitle">Le pivot du combat : conversion en X ou projection directe d'e⁻.</div>
+        
+        <div class="controls">
+          <button onclick="startAnim4()">▶ Start</button>
+          <button onclick="pauseAnim4()">⏸ Pause</button>
+          <button onclick="resetAnim4()" class="secondary">⟲ Réinitialiser</button> <button class="mode active" id="btnPhotons4" onclick="setMode4('photons')">Mode photons (X)</button>
+          <button class="mode" id="btnElectrons4" onclick="setMode4('electrons')">Mode électrons (e⁻)</button>
+        </div>
+
+        <canvas id="scene4" width="780" height="350"></canvas>
+
+        <div style="font-size: 12px; margin-top: 8px; text-align: left; max-width: 780px;">
+          <div>• **Mode photons** : électrons bleus → cible grise (conversion) → petits traits jaunes = photons X qui descendent.</div>
+          <div>• **Mode électrons** : pas de cible, électrons bleus descendent en cône vers l’applicateur (rectangle vert en bas).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="anim-row">
+      <div id="anim5" class="anim-panel-full">
+        <div class="anim-title">Étape 5 : Collimateur Multilames (MLC) & Gantry 🔄</div>
+        <div class="anim-subtitle">Le sculpteur du champ et l'œil du cyclone tournant autour de la cible.</div>
+        <canvas id="scene5" width="780" height="440"></canvas>
+        <div style="font-size: 12px; margin-top: 8px; max-width: 780px;">
+            <p>Le MLC adapte en temps réel la **forme** du faisceau (carré, cœur, batman...) à la **forme** de la tumeur, pendant que le Gantry (l'ensemble de la tête) tourne lentement autour du patient, déposant la dose avec précision.</p>
+        </div>
+      </div>
+    </div>
+
+  </div> <script>
+    // ====================================================================
+    // 💀 ADAPTATION DES CODES ORIGINAUX POUR ÉVITER LES CONFLITS GLOBALS 
+    // Chaque animation est encapsulée dans sa propre fonction anonyme.
+    // Les ID des éléments (canvas, boutons, sliders) sont suffixés par le numéro de l'anim.
+    // ====================================================================
+
+
+    // --------------------------------------------------------------------
+    // ANIMATION 1 : PRODUCTION D'ÉLECTRONS (Cathode)
+    // --------------------------------------------------------------------
+    (function () {
+      const canvas = document.getElementById('scene1');
+      const ctx = canvas.getContext('2d');
+      const voltageSlider = document.getElementById('voltage1');
+      const filamentSlider = document.getElementById('filamentPower1');
+      const voltageLabel = document.getElementById('voltageValue1');
+      const filamentLabel = document.getElementById('filamentValue1');
+      // const readout = document.getElementById('readout1'); // Non utilisé ici
+      const startBtn = document.getElementById('startBtn1');
+      const pauseBtn = document.getElementById('pauseBtn1');
+      const resetBtn = document.getElementById('resetBtn1');
+
+      // Géométrie du tube (adaptée à la petite taille)
+      const tube = { x: 20, y: 30, w: canvas.width - 40, h: 140, radius: 25 };
+      const cathodeX = tube.x + 30;
+      const anodeX = tube.x + tube.w - 30;
+      const beamY = canvas.height / 2;
+
+      let electrons = [];
+      let running = false;
+      let lastTime = 0;
+      let emissionAccumulator = 0;
+
+      function updateLabels() {
+        const V = parseInt(voltageSlider.value, 10);
+        const F = parseInt(filamentSlider.value, 10);
+        voltageLabel.textContent = V + ' kV';
+        filamentLabel.textContent = F + ' %';
+        // const approxEnergy = V * 1000;
+        // readout.textContent = '... ' + approxEnergy.toLocaleString('fr-FR') + ' eV...';
+      }
+
+      function roundedRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      function drawStatic() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Fond léger
+        const gradBg = ctx.createRadialGradient(canvas.width / 2, beamY, 10, canvas.width / 2, beamY, canvas.width / 1.5);
+        gradBg.addColorStop(0, '#0f172a'); gradBg.addColorStop(0.7, '#0f172a'); gradBg.addColorStop(1, '#000000');
+        ctx.fillStyle = gradBg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Tube en verre
+        ctx.save();
+        roundedRect(tube.x, tube.y, tube.w, tube.h, tube.radius);
+        const glassGrad = ctx.createLinearGradient(tube.x, tube.y, tube.x + tube.w, tube.y);
+        glassGrad.addColorStop(0, 'rgba(148, 163, 184, 0.12)'); glassGrad.addColorStop(0.5, 'rgba(226, 232, 240, 0.2)'); glassGrad.addColorStop(1, 'rgba(148, 163, 184, 0.12)');
+        ctx.fillStyle = glassGrad; ctx.fill();
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)'; ctx.lineWidth = 1.2; ctx.stroke();
+        ctx.restore();
+
+        // Cathode métallique
+        ctx.save();
+        ctx.fillStyle = '#4b5563'; ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1.5;
+        const cathodeWidth = 20; const cathodeHeight = 60; const cathodeY = beamY - cathodeHeight / 2;
+        ctx.beginPath(); roundedRect(cathodeX - cathodeWidth, cathodeY, cathodeWidth, cathodeHeight, 6);
+        ctx.fill(); ctx.stroke(); ctx.restore();
+
+        // Filament chauffé
+        drawFilament();
+
+        // Anode
+        ctx.save();
+        ctx.fillStyle = '#e5e7eb'; ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1.6;
+        const anodeWidth = 18; const anodeHeight = 70; const anodeY = beamY - anodeHeight / 2;
+        roundedRect(anodeX, anodeY, anodeWidth, anodeHeight, 6);
+        ctx.fill(); ctx.stroke(); ctx.restore();
+
+        // Flèche de la tension (Cathode -> Anode)
+        drawVoltageArrow();
+
+        // Lignes de champ
+        drawFieldLines();
+      }
+
+      function drawFilament() {
+        const heat = parseInt(filamentSlider.value, 10);
+        const cathodeWidth = 20; const cathodeHeight = 60;
+        const centerX = cathodeX - cathodeWidth / 2;
+        const centerY = beamY;
+        const t = heat / 100;
+        const r = Math.round(120 + 120 * t); const g = Math.round(60 + 80 * t); const b = Math.round(20 + 10 * t);
+
+        ctx.save(); ctx.translate(centerX, centerY);
+        // Halo lumineux
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        ctx.shadowColor = 'rgba(' + r + ',' + g + ',' + b + ',' + (0.25 + 0.35 * t) + ')';
+        ctx.shadowBlur = 10 + 10 * t;
+        ctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',0.9)';
+        ctx.lineWidth = 3 + 2 * t;
+        ctx.beginPath();
+        ctx.moveTo(-3, -18); ctx.lineTo(3, -8); ctx.lineTo(-3, 0); ctx.lineTo(3, 8); ctx.lineTo(-3, 18);
+        ctx.stroke(); ctx.restore();
+        // Filament "fil" interne
+        ctx.strokeStyle = 'rgba(' + r + ',' + g + ',' + b + ',1)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-2, -18); ctx.lineTo(2, -8); ctx.lineTo(-2, 0); ctx.lineTo(2, 8); ctx.lineTo(-2, 18);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawVoltageArrow() {
+        const V = parseInt(voltageSlider.value, 10);
+        const arrowY = tube.y + 12; const startX = cathodeX - 5; const endX = anodeX + 5;
+        ctx.save();
+        const grad = ctx.createLinearGradient(startX, arrowY, endX, arrowY);
+        grad.addColorStop(0, '#f97316'); grad.addColorStop(0.5, '#facc15'); grad.addColorStop(1, '#22c55e');
+        ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(startX, arrowY); ctx.lineTo(endX, arrowY); ctx.stroke();
+        // Pointe de flèche
+        ctx.beginPath(); ctx.moveTo(endX, arrowY); ctx.lineTo(endX - 6, arrowY - 3); ctx.lineTo(endX - 6, arrowY + 3); ctx.closePath();
+        ctx.fillStyle = '#22c55e'; ctx.fill();
+        // Texte de tension
+        ctx.fillStyle = '#e5e7eb'; ctx.font = '10px Arial'; ctx.textAlign = 'center';
+        ctx.fillText(V + ' kV', (startX + endX) / 2, arrowY - 6);
+        ctx.restore();
+      }
+
+      function drawFieldLines() {
+        const lines = 3; const V = parseInt(voltageSlider.value, 10);
+        const intensity = Math.max(0.2, V / 20);
+        ctx.save(); ctx.strokeStyle = 'rgba(148, 163, 184,' + (0.3 + 0.4 * intensity) + ')'; ctx.lineWidth = 1;
+        for (let i = 0; i < lines; i++) {
+          const offset = (i - (lines - 1) / 2) * 20;
+          ctx.beginPath(); ctx.moveTo(cathodeX + 2, beamY + offset);
+          const midX = (cathodeX + anodeX) / 2;
+          ctx.bezierCurveTo(midX, beamY + offset - 10, midX, beamY + offset + 10, anodeX - 2, beamY + offset);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      function spawnElectrons(dt) {
+        const heat = parseInt(filamentSlider.value, 10);
+        if (heat <= 0) return;
+        const baseRate = 10; const maxRate = 100;
+        const emissionRate = baseRate + (maxRate - baseRate) * (heat / 100);
+        emissionAccumulator += emissionRate * (dt / 1000);
+        while (emissionAccumulator >= 1) {
+          emissionAccumulator -= 1;
+          createElectron();
+        }
+      }
+
+      function createElectron() {
+        const V = parseInt(voltageSlider.value, 10);
+        const baseSpeed = 60; const maxExtra = 220;
+        const speed = baseSpeed + maxExtra * (V / 20);
+        const spread = 16;
+        electrons.push({
+          x: cathodeX - 2, y: beamY + (Math.random() - 0.5) * spread,
+          vx: speed, vy: (Math.random() - 0.5) * 10, age: 0, maxAge: 1200 + Math.random() * 400
+        });
+      }
+
+      function updateElectrons(dt) {
+        const dtSec = dt / 1000;
+        const V = parseInt(voltageSlider.value, 10);
+        const accel = 60 + 220 * (V / 20);
+
+        for (let i = electrons.length - 1; i >= 0; i--) {
+          const e = electrons[i];
+          e.vx += accel * dtSec;
+          e.x += e.vx * dtSec;
+          e.y += e.vy * dtSec;
+          e.age += dt;
+
+          if (e.x > anodeX + 5 || e.age > e.maxAge || e.y < tube.y + 4 || e.y > tube.y + tube.h - 4) {
+            electrons.splice(i, 1);
+          }
+        }
+      }
+
+      function drawElectrons() {
+        if (!electrons.length) return;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < electrons.length; i++) {
+          const e = electrons[i];
+          const life = 1 - Math.min(1, e.age / e.maxAge);
+          const alpha = 0.3 + 0.7 * life;
+          const radius = 3 + 1 * life;
+          const grad = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, radius);
+          grad.addColorStop(0, 'rgba(125, 211, 252,' + alpha + ')');
+          grad.addColorStop(0.5, 'rgba(56, 189, 248,' + (alpha * 0.8) + ')');
+          grad.addColorStop(1, 'rgba(8, 47, 73, 0)');
+          ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(e.x, e.y, radius, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(56, 189, 248,' + (0.5 + 0.5 * life) + ')';
+          ctx.beginPath(); ctx.arc(e.x, e.y, 1.5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function loop(timestamp) {
+        if (!running) return;
+        if (!lastTime) { lastTime = timestamp; }
+        const dt = timestamp - lastTime;
+        lastTime = timestamp;
+        spawnElectrons(dt);
+        updateElectrons(dt);
+        drawStatic();
+        drawElectrons();
+        requestAnimationFrame(loop);
+      }
+
+      startBtn.addEventListener('click', function () {
+        if (!running) { running = true; lastTime = 0; requestAnimationFrame(loop); }
+      });
+      pauseBtn.addEventListener('click', function () { running = false; });
+      resetBtn.addEventListener('click', function () {
+        running = false; electrons = []; emissionAccumulator = 0; drawStatic(); drawElectrons();
+      });
+      voltageSlider.addEventListener('input', function () { updateLabels(); drawStatic(); drawElectrons(); });
+      filamentSlider.addEventListener('input', function () { updateLabels(); drawStatic(); drawElectrons(); });
+
+      updateLabels();
+      drawStatic();
+    })();
+
+
+    // --------------------------------------------------------------------
+    // ANIMATION 2 : ACCÉLÉRATION RF
+    // --------------------------------------------------------------------
+    (function () {
+      const canvas = document.getElementById('scene2');
+      const ctx = canvas.getContext('2d');
+      const rfSlider = document.getElementById('rfPower2');
+      const rfLabel = document.getElementById('rfPowerValue2');
+      const energyBadge = document.getElementById('energyBadge2');
+      const startBtn = document.getElementById('startBtn2');
+      const pauseBtn = document.getElementById('pauseBtn2');
+      const resetBtn = document.getElementById('resetBtn2');
+
+      // Géométrie (adaptée à la petite taille)
+      const guide = { x: 100, y: 50, w: 200, h: 100, radius: 12, cavities: 4 };
+      const gun = { x: 40, y: guide.y + guide.h / 2 - 20, w: 20, h: 40 };
+      const rfBox = { x: guide.x, y: 10, w: 60, h: 20 };
+
+      let electrons = [];
+      let running = false;
+      let lastTime = 0;
+      let emissionAccumulator = 0;
+      let timeGlobal = 0;
+
+      function roundedRectPath(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      function updateLabels() {
+        const rf = parseInt(rfSlider.value, 10);
+        rfLabel.textContent = rf + ' %';
+        const minMeV = 4; const maxMeV = 18;
+        const energy = minMeV + (maxMeV - minMeV) * (rf / 100);
+        energyBadge.textContent = '≈ ' + energy.toFixed(1).replace('.', ',') + ' MeV';
+      }
+
+      function drawStatic() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Fond
+        const bg = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 10, canvas.width / 2, canvas.height / 2, canvas.width / 1.3);
+        bg.addColorStop(0, '#0f172a'); bg.addColorStop(0.65, '#0f172a'); bg.addColorStop(1, '#000000');
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Guide d’ondes
+        ctx.save();
+        roundedRectPath(guide.x, guide.y, guide.w, guide.h, guide.radius);
+        const guideGrad = ctx.createLinearGradient(guide.x, guide.y, guide.x + guide.w, guide.y);
+        guideGrad.addColorStop(0, 'rgba(148, 163, 184, 0.18)'); guideGrad.addColorStop(0.5, 'rgba(209, 213, 219, 0.26)'); guideGrad.addColorStop(1, 'rgba(148, 163, 184, 0.18)');
+        ctx.fillStyle = guideGrad; ctx.fill();
+        ctx.strokeStyle = 'rgba(156, 163, 175, 0.7)'; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.restore();
+
+        // Cavités
+        ctx.save(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.5)'; ctx.lineWidth = 1.2;
+        const step = guide.w / (guide.cavities + 1);
+        for (let i = 1; i <= guide.cavities; i++) {
+          const x = guide.x + step * i;
+          ctx.beginPath(); ctx.moveTo(x, guide.y + 6); ctx.lineTo(x, guide.y + guide.h - 6); ctx.stroke();
+        }
+        ctx.restore();
+
+        // Pistolet
+        ctx.save();
+        roundedRectPath(gun.x, gun.y, gun.w, gun.h, 6);
+        const gunGrad = ctx.createLinearGradient(gun.x, gun.y, gun.x + gun.w, gun.y + gun.h);
+        gunGrad.addColorStop(0, '#4b5563'); gunGrad.addColorStop(1, '#1f2937');
+        ctx.fillStyle = gunGrad; ctx.fill();
+        ctx.strokeStyle = '#9ca3af'; ctx.lineWidth = 1.4; ctx.stroke();
+        ctx.restore();
+
+        // Liaison pistolet → guide
+        ctx.save(); ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(gun.x + gun.w, gun.y + gun.h / 2); ctx.lineTo(guide.x + 5, guide.y + guide.h / 2); ctx.stroke();
+        ctx.restore();
+
+        // Boîtier RF
+        ctx.save();
+        roundedRectPath(rfBox.x, rfBox.y, rfBox.w, rfBox.h, 4);
+        const rfGrad = ctx.createLinearGradient(rfBox.x, rfBox.y, rfBox.x + rfBox.w, rfBox.y + rfBox.h);
+        rfGrad.addColorStop(0, '#f97316'); rfGrad.addColorStop(1, '#facc15');
+        ctx.fillStyle = rfGrad; ctx.fill();
+        ctx.strokeStyle = '#9a3412'; ctx.lineWidth = 1.3; ctx.stroke();
+        ctx.restore();
+
+        // Guide d’ondes RF
+        ctx.save(); ctx.strokeStyle = 'rgba(249, 115, 22, 0.7)'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(rfBox.x + rfBox.w, rfBox.y + rfBox.h / 2);
+        ctx.lineTo(guide.x + guide.w / 2, guide.y); ctx.stroke();
+        ctx.restore();
+
+        // Onde RF
+        drawRFWave();
+      }
+
+      function drawRFWave() {
+        const rf = parseInt(rfSlider.value, 10);
+        const amplitude = 10 + 6 * (rf / 100);
+        const baseline = guide.y + guide.h / 2;
+        const lambdaCount = 3;
+
+        ctx.save();
+        ctx.beginPath();
+        const k = lambdaCount * Math.PI * 2 / guide.w;
+        const phase = timeGlobal * 0.006;
+        for (let i = 0; i <= guide.w; i += 3) {
+          const x = guide.x + i;
+          const y = baseline + amplitude * Math.sin(k * i + phase);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+
+        const rfGrad = ctx.createLinearGradient(guide.x, baseline - amplitude, guide.x + guide.w, baseline + amplitude);
+        rfGrad.addColorStop(0.3, 'rgba(249, 115, 22, 0.85)');
+        rfGrad.addColorStop(0.7, 'rgba(250, 204, 21, 0.9)');
+        ctx.strokeStyle = rfGrad; ctx.lineWidth = 1.5; ctx.shadowColor = 'rgba(248, 250, 252, 0.4)'; ctx.shadowBlur = 6;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function spawnElectrons(dt) {
+        const rate = 20;
+        emissionAccumulator += rate * (dt / 1000);
+        while (emissionAccumulator >= 1) {
+          emissionAccumulator -= 1;
+          createElectron();
+        }
+      }
+
+      function createElectron() {
+        const ySpread = 12;
+        const baseSpeed = 60;
+        electrons.push({
+          x: gun.x + gun.w + 3, y: guide.y + guide.h / 2 + (Math.random() - 0.5) * ySpread,
+          vx: baseSpeed * (0.8 + 0.4 * Math.random()), vy: (Math.random() - 0.5) * 6,
+          age: 0, maxAge: 1500 + Math.random() * 500
+        });
+      }
+
+      function updateElectrons(dt) {
+        const dtSec = dt / 1000;
+        const rf = parseInt(rfSlider.value, 10) / 100;
+        const baseAccel = 40; const extraAccel = 220;
+
+        for (let i = electrons.length - 1; i >= 0; i--) {
+          const e = electrons[i];
+          const inGuide = e.x > guide.x + 3 && e.x < guide.x + guide.w - 3 && e.y > guide.y + 4 && e.y < guide.y + guide.h - 4;
+
+          if (inGuide) {
+            const xRel = (e.x - guide.x) / guide.w;
+            const localPhase = xRel * Math.PI * 6 + timeGlobal * 0.008;
+            let field = Math.sin(localPhase);
+            if (field < 0) field = 0;
+            const accel = baseAccel + extraAccel * rf * field;
+            e.vx += accel * dtSec;
+          }
+
+          e.x += e.vx * dtSec; e.y += e.vy * dtSec; e.age += dt;
+
+          if (e.x > guide.x + guide.w + 30 || e.age > e.maxAge) {
+            electrons.splice(i, 1);
+          }
+        }
+      }
+
+      function drawElectrons() {
+        if (!electrons.length) return;
+        ctx.save(); ctx.globalCompositeOperation = 'lighter';
+        for (let i = 0; i < electrons.length; i++) {
+          const e = electrons[i];
+          const vNorm = Math.min(1, e.vx / 350);
+          const alpha = 0.35 + 0.45 * vNorm;
+          const radius = 2.5 + 2 * vNorm;
+          const grad = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, radius);
+          grad.addColorStop(0, 'rgba(125, 211, 252,' + alpha + ')');
+          grad.addColorStop(0.5, 'rgba(56, 189, 248,' + (alpha * 0.9) + ')');
+          grad.addColorStop(1, 'rgba(8, 47, 73, 0)');
+          ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(e.x, e.y, radius, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(56, 189, 248,' + (0.6 + 0.4 * vNorm) + ')';
+          ctx.beginPath(); ctx.arc(e.x, e.y, 1.2, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function loop(timestamp) {
+        if (!running) return;
+        if (!lastTime) { lastTime = timestamp; }
+        const dt = timestamp - lastTime;
+        lastTime = timestamp;
+        timeGlobal += dt;
+        spawnElectrons(dt);
+        updateElectrons(dt);
+        drawStatic();
+        drawElectrons();
+        requestAnimationFrame(loop);
+      }
+
+      startBtn.addEventListener('click', function () {
+        if (!running) { running = true; lastTime = 0; requestAnimationFrame(loop); }
+      });
+      pauseBtn.addEventListener('click', function () { running = false; });
+      resetBtn.addEventListener('click', function () {
+        running = false; electrons = []; emissionAccumulator = 0; timeGlobal = 0; drawStatic(); drawElectrons();
+      });
+      rfSlider.addEventListener('input', function () { updateLabels(); drawStatic(); drawElectrons(); });
+
+      updateLabels();
+      drawStatic();
+    })();
+
+
+    // --------------------------------------------------------------------
+    // ANIMATION 3 : AIMANT DE COURBURE (NOUVELLE VERSION)
+    // --------------------------------------------------------------------
+    (function () {
+      'use strict';
+
+      // Correction: L'ID pour le slider de tolérance dans le HTML est 'tolerance', 
+      // pas 'tolerance3', donc on le corrige ici pour le JS.
+      
+      const canvas = document.getElementById('scene3');
+      const ctx = canvas.getContext('2d');
+
+      const tolSlider = document.getElementById('tolerance');
+      const tolLabel = document.getElementById('toleranceValue');
+      const readout = document.getElementById('readout');
+      const debugList = document.getElementById('debugList');
+
+      const startBtn = document.getElementById('startBtn3');
+      const pauseBtn = document.getElementById('pauseBtn3');
+      const resetBtn = document.getElementById('resetBtn3');
+      const clearDebugBtn = document.getElementById('clearDebugBtn'); // ID du bouton debug dans le nouveau HTML
+
+      const centerY = canvas.height / 2;
+
+      // Géométrie
+      const source = { x: 80,  y: centerY };   // sortie guide d’ondes
+      const entry  = { x: 190, y: centerY };   // entrée du looping
+
+      const arcGeom = {
+        baseRadius: 80,
+        maxAngle: 1.5 * Math.PI,  // φ: 0 → 3π/2
+        radiusSpread: 0.4
+      };
+
+      // Centre nominal de la boucle (carcasse aimant)
+      const bend = {
+        cx: entry.x,
+        cyBase: entry.y - arcGeom.baseRadius   // centre au-dessus de l’entrée
+      };
+
+      // Sélecteur sous la sortie nominale (à gauche)
+      const selector = {
+        slitCenterX: bend.cx - arcGeom.baseRadius, // x à φ=3π/2
+        yTop: entry.y + 30,
+        yBottom: entry.y + 140,
+        slitHalfWidthBase: 14
+      };
+
+      let electrons = [];
+      let running = false;
+      let lastTime = 0;
+      let emissionAccumulator = 0;
+
+      // Clic debug
+      let debugPoints = [];
+
+      function roundedRectPath(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+
+      function updateToleranceLabel() {
+        const val = parseInt(tolSlider.value, 10);
+        const tol = 10 + 30 * (val / 100); // ≈ 10–40 %
+        tolLabel.textContent = 'Tolérance ≈ ±' + tol.toFixed(0) + ' %';
+        readout.textContent =
+          'Tolérance large → fenêtre d’énergie large : plus d’électrons verts passent la fente. ' +
+          'Tolérance serrée → plus d’électrons arrêtés sur les blocs au niveau de la fente (plus d’impacts).';
+      }
+
+      // Aimant aligné sur la même boucle que les électrons
+      function drawMagnet270() {
+        ctx.save();
+
+        const cx = bend.cx;
+        const cy = bend.cyBase;
+        const outerR = arcGeom.baseRadius + 26;
+        const innerR = Math.max(arcGeom.baseRadius - 26, 24);
+
+        // Trajectoire nominale des électrons :
+        // x = cx + R sin φ, y = cy + R cos φ, φ: 0 → 3π/2
+        // Pour arc(): θ = π/2 - φ, donc φ:0→3π/2 ↔ θ:π/2→-π
+        const thetaStart = Math.PI / 2; // φ = 0 (bas)
+        const thetaEnd   = -Math.PI;    // φ = 3π/2 (gauche)
+
+        ctx.fillStyle = '#4b5563';
+        ctx.strokeStyle = '#9ca3af';
+        ctx.lineWidth = 1.6;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR, thetaStart, thetaEnd, true);   // sens horaire
+        ctx.arc(cx, cy, innerR, thetaEnd, thetaStart, false);  // retour
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Lignes de champ à l’intérieur de l’aimant
+        ctx.strokeStyle = 'rgba(96, 165, 250, 0.55)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 3; i++) {
+          const r = innerR + (outerR - innerR) * (0.3 + 0.3 * i / 2);
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, thetaStart + 0.1, thetaEnd - 0.1, true);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // Tube aligné avec la trajectoire des électrons
+      function drawBeamPipe() {
+        ctx.save();
+        ctx.strokeStyle = '#020617';
+        ctx.lineWidth = 8;
+        ctx.lineCap = 'round';
+
+        // Tube droit (guide → entrée boucle)
+        ctx.beginPath();
+        ctx.moveTo(source.x - 26, centerY);
+        ctx.lineTo(entry.x + 4, centerY);
+        ctx.stroke();
+
+        // Tube courbe (même cercle que la trajectoire nominale)
+        const cx = bend.cx;
+        const cy = bend.cyBase;
+        const R  = arcGeom.baseRadius;
+
+        const thetaStart = Math.PI / 2;
+        const thetaEnd   = -Math.PI;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, R, thetaStart, thetaEnd, true);
+        ctx.stroke();
+
+        // Tube vertical (sortie boucle → fente)
+        const slitX = selector.slitCenterX;
+        const exitY = cy; // à φ=3π/2, y=cy
+        ctx.beginPath();
+        ctx.moveTo(slitX, exitY);
+        ctx.lineTo(slitX, selector.yTop - 6);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function drawSelector() {
+        ctx.save();
+
+        const val = parseInt(tolSlider.value, 10);
+        const slitHalfWidth = selector.slitHalfWidthBase * (0.4 + 0.6 * (val / 100));
+
+        const slitX = selector.slitCenterX;
+        const yTop = selector.yTop;
+        const yBottom = selector.yBottom;
+        const blockW = 18;
+
+        // Halo vert autour de la fente
+        const haloGrad = ctx.createRadialGradient(
+          slitX,
+          (yTop + yBottom) / 2,
+          0,
+          slitX,
+          (yTop + yBottom) / 2,
+          (yBottom - yTop) * 1.4
+        );
+        haloGrad.addColorStop(0, 'rgba(34, 197, 94, 0.35)');
+        haloGrad.addColorStop(1, 'rgba(34, 197, 94, 0)');
+        ctx.fillStyle = haloGrad;
+        ctx.fillRect(
+          slitX - slitHalfWidth * 3 - blockW,
+          yTop - 40,
+          (slitHalfWidth * 6) + blockW * 2,
+          (yBottom - yTop) + 80
+        );
+
+        // Blocs collimation
+        ctx.fillStyle = '#d1d5db';
+        ctx.strokeStyle = '#6b7280';
+        ctx.lineWidth = 1.4;
+
+        // bloc gauche
+        roundedRectPath(
+          slitX - slitHalfWidth - blockW,
+          yTop,
+          blockW,
+          yBottom - yTop,
+          6
+        );
+        ctx.fill();
+        ctx.stroke();
+
+        // bloc droit
+        roundedRectPath(
+          slitX + slitHalfWidth,
+          yTop,
+          blockW,
+          yBottom - yTop,
+          6
+        );
+        ctx.fill();
+        ctx.stroke();
+
+        // Fente
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(
+          slitX - slitHalfWidth,
+          yTop,
+          slitHalfWidth * 2,
+          yBottom - yTop
+        );
+
+        // Contour fente
+        ctx.strokeStyle = 'rgba(34, 197, 94, 0.9)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(
+          slitX - slitHalfWidth + 0.5,
+          yTop + 0.5,
+          slitHalfWidth * 2 - 1,
+          (yBottom - yTop) - 1
+        );
+
+        // Faisceau de sortie
+        ctx.strokeStyle = 'rgba(34, 197, 94, 0.9)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(slitX, yBottom);
+        ctx.lineTo(slitX, canvas.height - 20);
+        ctx.stroke();
+
+        // Textes décalés pour lisibilité
+        ctx.fillStyle = '#bbf7d0';
+        ctx.font = '11px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('Fente du sélecteur d’énergie', slitX + 22, yTop - 6);
+        ctx.fillText('Faisceau sélectionné ↓', slitX + 22, canvas.height - 26);
+
+        ctx.restore();
+      }
+
+      function drawBackgroundAndHardware() {
+        // Fond
+        const bg = ctx.createRadialGradient(
+          canvas.width / 2,
+          canvas.height / 2,
+          10,
+          canvas.width / 2,
+          canvas.height / 2,
+          canvas.width / 1.3
+        );
+        bg.addColorStop(0, '#020617');
+        bg.addColorStop(0.65, '#020617');
+        bg.addColorStop(1, '#000000');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Ligne d’entrée
+        ctx.save();
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.7)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(source.x - 40, centerY);
+        ctx.lineTo(source.x, centerY);
+        ctx.lineTo(entry.x, entry.y);
+        ctx.stroke();
+        ctx.restore();
+
+        // Texte décalé pour ne pas chevaucher le tube
+        ctx.save();
+        ctx.fillStyle = '#e5e7eb';
+        ctx.font = '11px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText('Sortie guide d’ondes', source.x - 60, centerY - 26);
+        ctx.restore();
+
+        drawMagnet270();
+        drawBeamPipe();
+        drawSelector();
+      }
+
+      function spawnElectrons(dt) {
+        const rate = 28; // e-/s
+        emissionAccumulator += rate * (dt / 1000);
+        while (emissionAccumulator >= 1) {
+          emissionAccumulator -= 1;
+          createElectron();
+        }
+      }
+
+      function createElectron() {
+        const energyFactor = 0.7 + 0.6 * Math.random();
+        const radius = arcGeom.baseRadius * (1 + arcGeom.radiusSpread * (energyFactor - 1));
+
+        const centerX = entry.x;
+        const centerY = entry.y - radius; // centre au-dessus
+
+        const phiEnd = arcGeom.maxAngle; // 3π/2
+        const exitX = centerX + radius * Math.sin(phiEnd); // = centerX - radius
+
+        const val = parseInt(tolSlider.value, 10);
+        const slitHalfWidth = selector.slitHalfWidthBase * (0.4 + 0.6 * (val / 100));
+        const willPass = Math.abs(exitX - selector.slitCenterX) <= slitHalfWidth;
+
+        electrons.push({
+          phase: 'straight', // 'straight' -> 'arc' -> 'out' / 'block' -> 'dead'
+          tStraight: 0,
+          tArc: 0,
+          speed: 0.6 + Math.random() * 0.35,
+          x: source.x,
+          y: source.y,
+          energyFactor,
+          radius,
+          centerX,
+          centerY,
+          exitX,
+          willPass,
+          age: 0,
+          maxAge: 7000 + Math.random() * 3000,
+          outY: 0,
+          deadTimer: 0,
+          blockT: 0,
+          blockStartX: 0,
+          blockStartY: 0,
+          blockHitX: 0,
+          blockHitY: 0
+        });
+      }
+
+      function updateElectrons(dt) {
+        const dtSec = dt / 1000;
+
+        const val = parseInt(tolSlider.value, 10);
+        const slitHalfWidth = selector.slitHalfWidthBase * (0.4 + 0.6 * (val / 100));
+
+        for (let i = electrons.length - 1; i >= 0; i--) {
+          const e = electrons[i];
+          e.age += dt;
+          if (e.age > e.maxAge) {
+            electrons.splice(i, 1);
+            continue;
+          }
+
+          if (e.phase === 'straight') {
+            e.tStraight += e.speed * 1.2 * dtSec;
+            if (e.tStraight >= 1) {
+              e.tStraight = 1;
+              e.x = entry.x;
+              e.y = entry.y;
+              e.phase = 'arc';
+              e.tArc = 0;
+            } else {
+              e.x = source.x + (entry.x - source.x) * e.tStraight;
+              e.y = source.y;
+            }
+
+          } else if (e.phase === 'arc') {
+            e.tArc += e.speed * 0.8 * dtSec;
+            if (e.tArc >= 1) e.tArc = 1;
+
+            const phi = e.tArc * arcGeom.maxAngle; // 0 → 3π/2
+            e.x = e.centerX + e.radius * Math.sin(phi);
+            e.y = e.centerY + e.radius * Math.cos(phi);
+
+            if (e.tArc >= 1) {
+              const exitX = e.x;
+              const pass = Math.abs(exitX - selector.slitCenterX) <= slitHalfWidth;
+              if (pass) {
+                // Électron dans la fenêtre : descend dans le tube vertical et passe la fente
+                e.phase = 'out';
+                e.outY = e.y;
+                e.x = selector.slitCenterX;
+              } else {
+                // Électron hors fenêtre : il va frapper un des blocs au niveau de la fente
+                e.phase = 'block';
+                e.blockT = 0;
+                e.blockStartX = e.x;
+                e.blockStartY = e.y;
+
+                const side = exitX < selector.slitCenterX ? -1 : 1;
+                e.blockHitX = selector.slitCenterX + side * (slitHalfWidth + 3);
+                e.blockHitY = selector.yTop + Math.random() * (selector.yBottom - selector.yTop);
+              }
+            }
+
+          } else if (e.phase === 'block') {
+            // Transition visuelle de la sortie de la boucle vers le bloc de collimation
+            e.blockT += 2.0 * dtSec; // vitesse vers le bloc
+            const tB = Math.min(1, e.blockT);
+            e.x = e.blockStartX + (e.blockHitX - e.blockStartX) * tB;
+            e.y = e.blockStartY + (e.blockHitY - e.blockStartY) * tB;
+
+            if (tB >= 1) {
+              e.phase = 'dead';    // impact sur le bloc
+              e.deadTimer = 0;
+            }
+
+          } else if (e.phase === 'out') {
+            // Faisceau sélectionné → vertical vers le bas
+            e.outY += 220 * dtSec;
+            e.y = e.outY;
+            if (e.y > canvas.height + 30) {
+              electrons.splice(i, 1);
+            }
+
+          } else if (e.phase === 'dead') {
+            e.deadTimer += dt;
+            if (e.deadTimer > 400) {
+              electrons.splice(i, 1);
+            }
+          }
+        }
+      }
+
+      function drawElectrons() {
+        if (!electrons.length) return;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+
+        for (let i = 0; i < electrons.length; i++) {
+          const e = electrons[i];
+
+          if (e.phase === 'dead') {
+            // Explosion sur le bloc (au niveau de la fente)
+            const t = Math.min(1, e.deadTimer / 350);
+            const r = 3 + 10 * t;
+
+            const gradExp = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, r);
+            gradExp.addColorStop(0, 'rgba(248, 250, 252,' + (1 - t) + ')');
+            gradExp.addColorStop(0.4, 'rgba(250, 204, 21,' + (0.7 * (1 - t)) + ')');
+            gradExp.addColorStop(1, 'rgba(15, 23, 42,0)');
+            ctx.fillStyle = gradExp;
+            ctx.beginPath();
+            ctx.arc(e.x, e.y, r, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(248, 250, 252,' + (0.6 * (1 - t)) + ')';
+            ctx.lineWidth = 1.2;
+            const len = 4 + 6 * (1 - t);
+            ctx.beginPath();
+            ctx.moveTo(e.x - len, e.y);
+            ctx.lineTo(e.x + len, e.y);
+            ctx.moveTo(e.x, e.y - len);
+            ctx.lineTo(e.x, e.y + len);
+            ctx.stroke();
+
+            continue;
+          }
+
+          const radiusPix = 4;
+          const isGood =
+            e.phase === 'out' ||
+            ((e.phase === 'straight' || e.phase === 'arc') && e.willPass);
+
+          let innerColor, outerColor, coreColor;
+          if (isGood) {
+            innerColor = 'rgba(74, 222, 128,0.75)';
+            outerColor = 'rgba(21, 128, 61,0)';
+            coreColor  = 'rgba(74, 222, 128,0.95)';
+          } else {
+            innerColor = 'rgba(125, 211, 252,0.75)';
+            outerColor = 'rgba(8, 47, 73,0)';
+            coreColor  = 'rgba(56, 189, 248,0.95)';
+          }
+
+          const grad = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, radiusPix);
+          grad.addColorStop(0, innerColor);
+          grad.addColorStop(0.6, innerColor);
+          grad.addColorStop(1, outerColor);
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, radiusPix, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = coreColor;
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function drawDebugPoints() {
+        if (!debugPoints.length) return;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-over';
+
+        debugPoints.forEach((p, index) => {
+          const n = index + 1;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(248, 113, 113, 0.9)';
+          ctx.fill();
+
+          ctx.strokeStyle = 'rgba(248, 250, 252, 0.9)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x - 6, p.y);
+          ctx.lineTo(p.x + 6, p.y);
+          ctx.moveTo(p.x, p.y - 6);
+          ctx.lineTo(p.x, p.y + 6);
+          ctx.stroke();
+
+          ctx.fillStyle = 'rgba(248, 113, 113, 0.95)';
+          ctx.font = '10px system-ui';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText('#' + n, p.x + 6, p.y - 3);
+        });
+
+        ctx.restore();
+      }
+
+      function refreshDebugList() {
+        if (!debugPoints.length) {
+          debugList.textContent = '(clique sur le schéma pour marquer les points à aligner)';
+          return;
+        }
+        debugList.textContent = debugPoints
+          .map((p, i) => '#' + (i + 1) + ' : x=' + p.x.toFixed(0) + ', y=' + p.y.toFixed(0))
+          .join('\n');
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackgroundAndHardware();
+        drawElectrons();
+        drawDebugPoints();
+      }
+
+      function loop(timestamp) {
+        if (!running) return;
+        if (!lastTime) lastTime = timestamp;
+        const dt = timestamp - lastTime;
+        lastTime = timestamp;
+
+        spawnElectrons(dt);
+        updateElectrons(dt);
+        render();
+
+        requestAnimationFrame(loop);
+      }
+
+      // Clic debug
+      canvas.addEventListener('click', (evt) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (evt.clientX - rect.left) * scaleX;
+        const y = (evt.clientY - rect.top) * scaleY;
+
+        debugPoints.push({ x, y });
+        console.log('Debug clic #' + debugPoints.length + ' : x=' + x.toFixed(1) + ', y=' + y.toFixed(1));
+        refreshDebugList();
+        render();
+      });
+
+      clearDebugBtn.addEventListener('click', () => {
+        debugPoints = [];
+        refreshDebugList();
+        render();
+      });
+
+      // Boutons
+      startBtn.addEventListener('click', () => {
+        if (!running) {
+          running = true;
+          lastTime = 0;
+          requestAnimationFrame(loop);
+        }
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        running = false;
+      });
+
+      resetBtn.addEventListener('click', () => {
+        running = false;
+        electrons = [];
+        emissionAccumulator = 0;
+        lastTime = 0;
+        render();
+      });
+
+      tolSlider.addEventListener('input', () => {
+        updateToleranceLabel();
+        render();
+      });
+
+      // Init
+      updateToleranceLabel();
+      refreshDebugList();
+      render();
+    })();
+
+
+// --------------------------------------------------------------------
+    // ANIMATION 4 : MODES PHOTONS / ÉLECTRONS (CORRIGÉE)
+    // --------------------------------------------------------------------
+    (function () {
+      var canvas = document.getElementById('scene4');
+      var ctx = canvas.getContext('2d');
+      var mode = 'photons';
+      var running = false;
+      var timer = null;
+      var lastTime = 0; // Initialisé à 0
+      var electrons = [];
+      var photons = [];
+      var accuE = 0;
+
+      // Géométrie simple (adaptée à la taille)
+      var entryX = 60;
+      var entryY = 100;
+      var targetX = 220;
+      var targetY = 100;
+      var targetW = 15;
+      var targetH = 30;
+      var beamX = 227.5;
+      var foilY = 130;
+      var foilR = 12;
+      var applicatorTopY = 200;
+      var applicatorBottomY = 300;
+
+      function clear() {
+        ctx.fillStyle = "#0f172a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function drawHeadPhotonsStatic() {
+        // électrons entrants
+        ctx.strokeStyle = "rgba(56,189,248,0.9)"; ctx.lineWidth = 2; ctx.beginPath();
+        ctx.moveTo(entryX - 30, entryY); ctx.lineTo(entryX, entryY); ctx.stroke();
+
+        ctx.fillStyle = "#e5e7eb"; ctx.font = "10px Arial"; ctx.textAlign = "center";
+        ctx.fillText("Électrons HE", entryX, entryY - 10);
+
+        // cible
+        ctx.fillStyle = "#9ca3af"; ctx.fillRect(targetX, targetY - targetH / 2, targetW, targetH);
+        ctx.strokeStyle = "#e5e7eb"; ctx.strokeRect(targetX, targetY - targetH / 2, targetW, targetH);
+
+        // halo simple sous la cible (Photons X)
+        ctx.fillStyle = "rgba(250,204,21,0.3)"; ctx.beginPath();
+        ctx.arc(targetX + targetW / 2, targetY + 10, 40, 0, Math.PI * 2); ctx.fill();
+
+        // champ de traitement (ligne jaune en bas)
+        ctx.strokeStyle = "rgba(251,191,36,0.9)"; ctx.lineWidth = 1.5; ctx.beginPath();
+        ctx.moveTo(beamX - 40, 310); ctx.lineTo(beamX + 40, 310); ctx.stroke();
+        ctx.fillStyle = "#facc15"; ctx.font = "9px Arial"; ctx.textAlign = "center";
+        ctx.fillText("Champ X", beamX, 325);
+      }
+
+      function drawHeadElectronsStatic() {
+        // faisceau e- entrant
+        ctx.strokeStyle = "rgba(56,189,248,0.9)"; ctx.lineWidth = 2; ctx.beginPath();
+        ctx.moveTo(beamX, 50); ctx.lineTo(beamX, 80); ctx.stroke();
+
+        ctx.fillStyle = "#e5e7eb"; ctx.font = "10px Arial"; ctx.textAlign = "left";
+        ctx.fillText("Électrons HE", beamX + 10, 65);
+
+        // foil de diffusion
+        ctx.fillStyle = "#9ca3af"; ctx.beginPath(); ctx.arc(beamX, foilY, foilR, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = "#e5e7eb"; ctx.stroke();
+
+        // applicateur
+        ctx.strokeStyle = "rgba(34,197,94,0.9)"; ctx.lineWidth = 1.5; ctx.beginPath();
+        ctx.moveTo(beamX - 30, applicatorTopY);
+        ctx.lineTo(beamX - 40, applicatorBottomY);
+        ctx.lineTo(beamX + 40, applicatorBottomY);
+        ctx.lineTo(beamX + 30, applicatorTopY);
+        ctx.closePath(); ctx.stroke();
+        ctx.fillStyle = "#bbf7d0"; ctx.font = "9px Arial"; ctx.textAlign = "center";
+        ctx.fillText("Applicateur e⁻", beamX, applicatorBottomY + 10);
+      }
+
+      function drawElectrons() {
+        for (var i = 0; i < electrons.length; i++) {
+          var e = electrons[i];
+          var r = 2.5; ctx.beginPath(); ctx.arc(e.x, e.y, r, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(56,189,248,0.9)"; ctx.fill();
+        }
+      }
+
+      function drawPhotons() {
+        for (var i = 0; i < photons.length; i++) {
+          var p = photons[i];
+          var len = 7;
+          // Normalisation du vecteur vitesse pour dessiner une ligne de longueur fixe
+          var mag = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;
+          var nx = p.vx / mag;
+          var ny = p.vy / mag;
+          var x2 = p.x + nx * len;
+          var y2 = p.y + ny * len;
+
+          ctx.strokeStyle = "rgba(250,204,21,0.9)"; ctx.lineWidth = 1.5; ctx.beginPath();
+          ctx.moveTo(p.x, p.y); ctx.lineTo(x2, y2); ctx.stroke();
+        }
+      }
+
+      window.setMode4 = function (m) {
+        // Cette fonction ne réinitialise que les particules et le mode.
+        mode = m; electrons = []; photons = []; accuE = 0;
+        var bP = document.getElementById("btnPhotons4");
+        var bE = document.getElementById("btnElectrons4");
+        bP.className = "mode"; bE.className = "mode";
+        if (m === "photons") { bP.className = "mode active"; } else { bE.className = "mode active"; }
+        drawScene();
+      }
+      
+      // Nouvelle fonction de reset propre pour éviter l'empilement
+      window.resetAnim4 = function() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+        running = false;
+        electrons = [];
+        photons = [];
+        accuE = 0;
+        lastTime = 0;
+        drawScene();
+      }
+
+      window.startAnim4 = function () {
+        if (running) return;
+        running = true; 
+        lastTime = new Date().getTime(); // Assure que lastTime est bien initialisé
+        timer = setInterval(loop, 30); // ~33 FPS
+      }
+
+      window.pauseAnim4 = function () {
+        running = false; 
+        if (timer) {
+          clearInterval(timer);
+          timer = null; // Important: annuler et vider le timer
+        }
+      }
+
+      function spawnElectrons(dt) {
+        var rate = 15; accuE += rate * (dt / 1000);
+        while (accuE >= 1) {
+          accuE -= 1;
+          if (mode === "photons") {
+            electrons.push({
+              x: entryX, y: entryY + (Math.random() - 0.5) * 6, vx: 180, vy: 0, age: 0, life: 1000
+            });
+          } else {
+            electrons.push({
+              x: beamX + (Math.random() - 0.5) * 4, y: 80, vx: 0, vy: 180, age: 0, life: 2000, passedFoil: false
+            });
+          }
+        }
+      }
+
+      function spawnPhotonsFromTarget(x, y) {
+        for (var i = 0; i < 4; i++) {
+          var angleBase = Math.PI / 2; var spread = 0.4;
+          var a = angleBase + (Math.random() - 0.5) * spread;
+          var s = 180 + Math.random() * 80;
+          photons.push({
+            x: x, y: y + 3, vx: Math.cos(a) * s, vy: Math.sin(a) * s, age: 0, life: 1500
+          });
+        }
+      }
+
+      function updateParticles(dt) {
+        var dtSec = dt / 1000;
+
+        for (var i = electrons.length - 1; i >= 0; i--) {
+          var e = electrons[i]; e.age += dt;
+          if (e.age > e.life) { electrons.splice(i, 1); continue; }
+
+          if (mode === "photons") {
+            e.x += e.vx * dtSec; e.y += e.vy * dtSec;
+            var cx = targetX + targetW / 2;
+            if (e.x >= cx) {
+              spawnPhotonsFromTarget(cx, targetY); electrons.splice(i, 1); continue;
+            }
+          } else {
+            if (!e.passedFoil && e.y >= foilY) {
+              e.passedFoil = true; e.vx = (Math.random() - 0.5) * 60; e.vy = 200 + Math.random() * 60;
+            }
+            e.x += e.vx * dtSec; e.y += e.vy * dtSec;
+            if (e.y > canvas.height + 10 || e.x < 0 || e.x > canvas.width) { electrons.splice(i, 1); continue; }
+          }
+        }
+
+        if (mode === "photons") {
+          for (var i = photons.length - 1; i >= 0; i--) {
+            var p = photons[i]; p.age += dt;
+            if (p.age > p.life) { photons.splice(i, 1); continue; }
+            p.x += p.vx * dtSec; p.y += p.vy * dtSec;
+            if (p.y > canvas.height + 10 || p.x < 0 || p.x > canvas.width) { photons.splice(i, 1); }
+          }
+        } else {
+          photons = [];
+        }
+      }
+
+      function drawScene() {
+        clear();
+        if (mode === "photons") { drawHeadPhotonsStatic(); } else { drawHeadElectronsStatic(); }
+        drawElectrons();
+        drawPhotons();
+      }
+
+      function loop() {
+        if (!running) {
+            // Si running est false, on s'assure d'arrêter le timer
+            window.pauseAnim4();
+            return;
+        }
+        var now = new Date().getTime();
+        var dt = now - lastTime;
+        lastTime = now;
+        
+        // Sécurité : éviter les dt trop grands après une longue pause
+        if (dt > 100) dt = 30; 
+
+        spawnElectrons(dt);
+        updateParticles(dt);
+        drawScene();
+      }
+
+      // Initialisation
+      window.setMode4("photons");
+      drawScene();
+    })();
+
+
+    // --------------------------------------------------------------------
+    // ANIMATION 5 : COLLIMATEUR MULTILAMES & GANTRY
+    // --------------------------------------------------------------------
+    (function () {
+      var canvas = document.getElementById('scene5');
+      var ctx = canvas.getContext('2d');
+
+      var centerX = canvas.width / 2;
+      var patientY = canvas.height - 60; // position du patient (adaptée)
+
+      // Coordonnées LOCALES (origine = centre du patient)
+      var topRaysLocal = -240;
+      var mlcCenterLocalY = -120;
+      var mlcHeight = 100; // Adapté
+      var mlcTopLocal = mlcCenterLocalY - mlcHeight / 2;
+      var mlcBottomLocal = mlcCenterLocalY + mlcHeight / 2;
+      var imageTopLocal = mlcBottomLocal;
+      var bottomRaysLocal = 0;
+
+      var maxHalfOpen = 110; // Adapté
+      var localLeftBound = -maxHalfOpen - 30;
+      var localRightBound = maxHalfOpen + 30;
+
+      var leafCount = 18; // Adapté
+      var leaves = [];
+      var photons = [];
+      var photonCount = 300; // Adapté
+
+      var timeMs = 0;
+      var timer = null;
+
+      var currentShape = 'square';
+      var phaseDuration = 6000;
+      var cycleDuration = phaseDuration * 3;
+
+      var gantryAngle = 0;
+      var gantryTargetAngle = 0;
+
+      var doseGy = 0;
+      var doseRateGyPerSec = 0.02;
+
+      function getHalfGapSquare(t) { return maxHalfOpen * 0.45; }
+      function getHalfGapHeart(t) {
+        var half;
+        if (t < 0.2) { half = maxHalfOpen * (0.3 + 0.7 * (t / 0.2)); }
+        else if (t < 0.55) { half = maxHalfOpen * 1.0; }
+        else { var u = (t - 0.55) / 0.45; half = maxHalfOpen * (1.0 * (1 - u)); }
+        return Math.min(maxHalfOpen, Math.max(0, half));
+      }
+      function getHalfGapBatman(t) {
+        var half;
+        if (t < 0.10) { half = maxHalfOpen * (0.20 + 0.7 * (t / 0.10)); }
+        else if (t < 0.20) { var u1 = (t - 0.10) / 0.10; half = maxHalfOpen * (0.90 - 0.35 * u1); }
+        else if (t < 0.38) { var u2 = (t - 0.20) / 0.18; half = maxHalfOpen * (0.55 + 0.60 * u2); }
+        else if (t < 0.62) { var u3 = (t - 0.38) / 0.24; half = maxHalfOpen * (1.15 - 0.25 * u3); }
+        else if (t < 0.80) { var u4 = (t - 0.62) / 0.18; half = maxHalfOpen * (0.90 - 0.50 * u4); }
+        else { var u5 = (t - 0.80) / 0.20; half = maxHalfOpen * (0.40 * (1 - u5)); }
+        return Math.min(maxHalfOpen * 1.1, Math.max(0, half));
+      }
+      function getHalfGapForShape(shape, t) {
+        if (shape === 'square') return getHalfGapSquare(t);
+        if (shape === 'heart') return getHalfGapHeart(t);
+        return getHalfGapBatman(t);
+      }
+
+      function initLeaves() {
+        leaves = [];
+        var step = mlcHeight / (leafCount - 1);
+        for (var i = 0; i < leafCount; i++) {
+          var yLocal = mlcTopLocal + i * step;
+          var halfGap = getHalfGapSquare(0.5);
+          leaves.push({ y: yLocal, leftX: -halfGap, rightX: halfGap, targetLeft: -halfGap, targetRight: halfGap });
+        }
+      }
+
+      function initPhotons() {
+        photons = [];
+        var width = maxHalfOpen * 2 * 0.96;
+        var startX = -width / 2;
+        for (var i = 0; i < photonCount; i++) {
+          var x = startX + Math.random() * width;
+          var y = topRaysLocal - 100 + Math.random() * (bottomRaysLocal - topRaysLocal + 200);
+          var vy = 2.0 + Math.random() * 1.4;
+          photons.push({ x: x, y: y, vy: vy });
+        }
+      }
+
+      function updatePhase(dtSec) {
+        var inCycle = timeMs % cycleDuration;
+        var idx = Math.floor(inCycle / phaseDuration);
+
+        var newShape = 'square';
+        if (idx === 1) newShape = 'heart';
+        else if (idx === 2) newShape = 'batman';
+
+        if (newShape !== currentShape) {
+          currentShape = newShape;
+          if (currentShape === 'square') { gantryTargetAngle = 0; }
+          else if (currentShape === 'heart') { gantryTargetAngle = 25 * Math.PI / 180; }
+          else { gantryTargetAngle = -25 * Math.PI / 180; }
+          setLeafTargetsForCurrentShape();
+        }
+
+        gantryAngle += (gantryTargetAngle - gantryAngle) * 0.12;
+      }
+
+      function setLeafTargetsForCurrentShape() {
+        for (var i = 0; i < leaves.length; i++) {
+          var lf = leaves[i];
+          var t = (lf.y - mlcTopLocal) / mlcHeight;
+          var mappedT = 0.1 + t * 0.8;
+          var halfGap = getHalfGapForShape(currentShape, mappedT);
+          lf.targetLeft = -halfGap;
+          lf.targetRight = halfGap;
+        }
+      }
+
+      function updateLeaves() {
+        for (var i = 0; i < leaves.length; i++) {
+          var lf = leaves[i];
+          var k = 0.10;
+          lf.leftX += (lf.targetLeft - lf.leftX) * k;
+          lf.rightX += (lf.targetRight - lf.rightX) * k;
+        }
+      }
+
+      function updatePhotons() {
+        for (var i = 0; i < photons.length; i++) {
+          var p = photons[i];
+          p.y += p.vy;
+          if (p.y > bottomRaysLocal + 50) {
+            p.y = topRaysLocal - 100 - Math.random() * 60;
+          }
+        }
+      }
+
+      function updateDose(dtSec) { doseGy += doseRateGyPerSec * dtSec; }
+
+      function drawPhotonsSegment(localYMin, localYMax) {
+        var L = 14;
+        for (var i = 0; i < photons.length; i++) {
+          var p = photons[i];
+          var y1 = p.y - L / 2;
+          var y2 = p.y + L / 2;
+          if (y2 < localYMin || y1 > localYMax) continue;
+
+          var yy1 = Math.max(y1, localYMin);
+          var yy2 = Math.min(y2, localYMax);
+
+          var alpha = 0.35 + 0.35 * Math.random();
+          ctx.strokeStyle = "rgba(250, 204, 21," + alpha + ")";
+          ctx.lineWidth = 1.5;
+
+          ctx.beginPath(); ctx.moveTo(p.x, yy1); ctx.lineTo(p.x, yy2); ctx.stroke();
+        }
+      }
+
+      function drawMLC() {
+        var depthOffset = 5;
+        // cadre
+        ctx.strokeStyle = "#4b5563"; ctx.lineWidth = 1.5;
+        //... [simplification du dessin du cadre pour la concision] ...
+
+        // Lames
+        var totalH = mlcHeight; var leafH = totalH / leafCount * 0.7;
+
+        for (var i = 0; i < leaves.length; i++) {
+          var lf = leaves[i];
+          var topY = lf.y - leafH / 2; var botY = lf.y + leafH / 2;
+
+          // lame gauche
+          if (lf.leftX > localLeftBound + 1) {
+            ctx.beginPath();
+            ctx.moveTo(localLeftBound, topY); ctx.lineTo(lf.leftX, topY);
+            ctx.lineTo(lf.leftX + depthOffset, botY + depthOffset);
+            ctx.lineTo(localLeftBound + depthOffset, botY + depthOffset);
+            ctx.closePath();
+            ctx.fillStyle = "#6b7280"; ctx.fill();
+          }
+          // lame droite
+          if (lf.rightX < localRightBound - 1) {
+            ctx.beginPath();
+            ctx.moveTo(lf.rightX, topY); ctx.lineTo(localRightBound, topY);
+            ctx.lineTo(localRightBound + depthOffset, botY + depthOffset);
+            ctx.lineTo(lf.rightX + depthOffset, botY + depthOffset);
+            ctx.closePath();
+            ctx.fillStyle = "#6b7280"; ctx.fill();
+          }
+          // ouverture centrale (halo vert)
+          if (lf.rightX > lf.leftX) {
+            ctx.beginPath();
+            ctx.moveTo(lf.leftX, topY); ctx.lineTo(lf.rightX, topY);
+            ctx.lineTo(lf.rightX + depthOffset, botY + depthOffset);
+            ctx.lineTo(lf.leftX + depthOffset, botY + depthOffset);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(16,185,129,0.22)"; ctx.fill();
+          }
+        }
+      }
+
+      // Fonctions buildPath (réutilisées sans modification du contenu mathématique)
+      function buildSquarePath() {
+        var w = maxHalfOpen * 0.8; var top = -40; var bottom = 0; var left = -w; var right = w;
+        ctx.moveTo(left, top); ctx.lineTo(right, top); ctx.lineTo(right, bottom); ctx.lineTo(left, bottom); ctx.closePath();
+      }
+      function buildHeartPath() {
+        var cx = 0; var top = -50; var bottom = 0; var midY = (top + bottom) / 2; var w = maxHalfOpen * 1.1;
+        ctx.moveTo(cx, bottom);
+        ctx.bezierCurveTo(
+          cx - w * 0.8, bottom - (bottom - top) * 0.25, cx - w * 0.9, midY, cx, top + (bottom - top) * 0.22
+        );
+        ctx.bezierCurveTo(
+          cx + w * 0.9, midY, cx + w * 0.8, bottom - (bottom - top) * 0.25, cx, bottom
+        );
+        ctx.closePath();
+      }
+      function buildBatmanPath() {
+        var cx = 0; var top = -50; var bottom = 0; var mid = (top + bottom) / 2; var w = maxHalfOpen * 1.25;
+        ctx.moveTo(cx, top);
+        ctx.lineTo(cx - w * 0.10, top - 12); ctx.lineTo(cx - w * 0.22, top + 6);
+        ctx.quadraticCurveTo(cx - w * 0.55, mid - 14, cx - w * 0.72, mid + 6);
+        ctx.lineTo(cx - w * 0.98, mid + 30);
+        ctx.lineTo(cx - w * 0.60, mid + 22); ctx.lineTo(cx - w * 0.30, bottom - 8);
+        ctx.lineTo(cx, bottom + 12);
+        ctx.lineTo(cx + w * 0.30, bottom - 8); ctx.lineTo(cx + w * 0.60, mid + 22);
+        ctx.lineTo(cx + w * 0.98, mid + 30);
+        ctx.lineTo(cx + w * 0.72, mid + 6);
+        ctx.quadraticCurveTo(cx + w * 0.55, mid - 14, cx + w * 0.22, top + 6);
+        ctx.lineTo(cx + w * 0.10, top - 12); ctx.lineTo(cx, top);
+        ctx.closePath();
+      }
+
+      function buildShapePath() {
+        if (currentShape === 'square') { buildSquarePath(); }
+        else if (currentShape === 'heart') { buildHeartPath(); }
+        else { buildBatmanPath(); }
+      }
+
+      function clipShapedField() { ctx.beginPath(); buildShapePath(); ctx.clip(); }
+
+      function drawShapeOutline() {
+        ctx.beginPath(); buildShapePath();
+        ctx.strokeStyle = "rgba(52,211,153,0.9)"; ctx.lineWidth = 1.8; ctx.stroke();
+      }
+
+      function drawHeartOverlay() {
+        ctx.save(); ctx.beginPath(); buildHeartPath();
+        ctx.fillStyle = "rgba(248, 113, 113, 0.30)"; ctx.fill();
+        ctx.strokeStyle = "rgba(248, 250, 252, 0.95)"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+      }
+
+      function drawBatmanOverlay() {
+        ctx.save(); ctx.beginPath(); buildBatmanPath();
+        ctx.fillStyle = "rgba(15, 23, 42, 0.75)"; ctx.fill();
+        ctx.strokeStyle = "rgba(250, 250, 250, 0.95)"; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
+      }
+
+      function drawPatientGlobal() {
+        var ySurface = patientY; var headR = 8; var headCx = centerX; var headCy = ySurface + 10;
+        var bodyTop = headCy + headR; var bodyHeight = 24; var bodyWidth = 40;
+
+        ctx.save();
+        // table
+        ctx.strokeStyle = "#64748b"; ctx.lineWidth = 1.5; ctx.beginPath();
+        ctx.moveTo(60, ySurface + 35); ctx.lineTo(canvas.width - 60, ySurface + 35); ctx.stroke();
+
+        // corps
+        ctx.fillStyle = "#64748b"; ctx.fillRect(headCx - bodyWidth / 2, bodyTop + 2, bodyWidth, bodyHeight);
+
+        // tête
+        ctx.beginPath(); ctx.arc(headCx, headCy, headR, 0, Math.PI * 2);
+        ctx.fillStyle = "#e5e7eb"; ctx.fill();
+        ctx.restore();
+      }
+
+      function drawScene() {
+        ctx.fillStyle = "#020617"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Infos forme + dose (en haut à gauche)
+        ctx.fillStyle = "#e5e7eb"; ctx.font = "11px Arial"; ctx.textAlign = "left";
+
+        var labelPhase = "Forme du champ : ";
+        if (currentShape === 'square') labelPhase += "Cible simple";
+        else if (currentShape === 'heart') labelPhase += "Cœur (exemple 2)";
+        else labelPhase += "Tumeur complexe (ex 3)";
+
+        ctx.fillText(labelPhase, 10, 20);
+        ctx.fillText("Dose délivrée : " + doseGy.toFixed(2) + " Gy", 10, 34);
+
+        // Patient fixe
+        drawPatientGlobal();
+
+        // Faisceau + MLC + champ dans le repère local tournant
+        ctx.save();
+        ctx.translate(centerX, patientY);
+        ctx.rotate(gantryAngle);
+
+        // Flux AVANT et dans le MLC
+        drawPhotonsSegment(topRaysLocal, mlcBottomLocal);
+
+        // MLC
+        drawMLC();
+
+        // Flux APRÈS MLC, découpé par la forme
+        ctx.save();
+        clipShapedField();
+        drawPhotonsSegment(imageTopLocal, bottomRaysLocal);
+        ctx.restore();
+
+        // Contour du champ
+        drawShapeOutline();
+
+        // Overlays forme
+        if (currentShape === 'heart') { drawHeartOverlay(); }
+        else if (currentShape === 'batman') { drawBatmanOverlay(); }
+
+        ctx.restore();
+      }
+
+      function tick() {
+        var dtMs = 30; var dtSec = dtMs / 1000;
+        timeMs += dtMs;
+        updatePhase(dtSec);
+        updateLeaves();
+        updatePhotons();
+        updateDose(dtSec);
+        drawScene();
+      }
+
+      function start() {
+        if (timer) return;
+        timer = setInterval(tick, 30);
+      }
+
+      initLeaves();
+      initPhotons();
+      setLeafTargetsForCurrentShape();
+      drawScene();
+      start(); // L'animation 5 démarre automatiquement
+    })();
+  </script>
+</body>
+</html>
