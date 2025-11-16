@@ -1,748 +1,1124 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UE 2.1 – Anatomie générale – S1</title>
+<meta charset="utf-8" />
+<title>MEM — Atlas radio & anatomie S1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-:root {
-  --bg-grad: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 35%, #fdfdfd 100%);
-  --card-bg: rgba(255,255,255,0.96);
-  --border-soft: #e5e7eb;
-  --shadow-soft: 0 18px 40px rgba(15,23,42,0.12);
-  --text-main: #0f172a;
-  --text-soft: #6b7280;
-  --pill-bg: #f4f4ff;
-  --pill-border: #e0e7ff;
-  --radius-xl: 22px;
-  --radius-pill: 999px;
-  --transition: 0.18s ease-out;
-}
+  /* RESET + BASE */
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+  :root {
+    color-scheme: light dark;
+    --bg: #020617;
+    --bg-elevated: rgba(15,23,42,0.85);
+    --bg-soft: rgba(15,23,42,0.65);
+    --fg: #e5e7eb;
+    --muted: #9ca3af;
+    --accent: #38bdf8;
+    --accent-soft: rgba(56,189,248,0.12);
+    --accent-strong: rgba(56,189,248,0.35);
+    --border-subtle: rgba(148,163,184,0.24);
+    --shadow-soft: 0 18px 45px rgba(15,23,42,0.80);
+    --card-radius: 18px;
+    --transition-fast: 0.18s ease-out;
+    --transition-med: 0.22s ease-out;
+  }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(circle at top, #0b1120 0, #020617 55%, #000 100%);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100%;
+  }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  min-height: 100vh;
-  background: var(--bg-grad);
-  color: var(--text-main);
-  display: flex;
-  justify-content: center;
-  padding: 24px 16px 32px;
-}
+  body {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
 
-.page {
-  width: 100%;
-  max-width: 1150px;
-  margin: 0 auto;
-}
+  /* MAIN LAYOUT */
+  .page-shell {
+    width: 100%;
+    max-width: 1120px;
+    margin: 18px auto 32px auto;
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
 
-/* BREADCRUMB */
+  header.page-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    background: linear-gradient(
+      to bottom,
+      rgba(15,23,42,0.95),
+      rgba(15,23,42,0.75),
+      transparent
+    );
+    padding: 12px 0 6px 0;
+  }
 
-.breadcrumbs {
-  font-size: 0.85rem;
-  color: var(--text-soft);
-  margin-bottom: 10px;
-}
+  .hero-card {
+    border-radius: 20px;
+    border: 1px solid rgba(148,163,184,0.55);
+    background: radial-gradient(circle at top left, rgba(56,189,248,0.35), transparent 55%),
+                linear-gradient(to bottom right, rgba(15,23,42,0.96), rgba(15,23,42,0.88));
+    box-shadow: 0 18px 50px rgba(15,23,42,0.95);
+    padding: 14px 16px 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
 
-.breadcrumbs a {
-  color: var(--text-soft);
-  text-decoration: none;
-}
+  .hero-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
 
-.breadcrumbs a:hover {
-  text-decoration: underline;
-}
+  .hero-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
-/* HEADER CARD */
+  .hero-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    border: 1px solid rgba(248,250,252,0.7);
+    background:
+      radial-gradient(circle at 25% 20%, #e5e7eb 0, transparent 55%),
+      conic-gradient(from 210deg, #0ea5e9, #22c55e, #eab308, #0ea5e9);
+    box-shadow:
+      0 0 0 1px rgba(15,23,42,0.8),
+      0 18px 40px rgba(15,23,42,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
 
-.header-card {
-  position: relative;
-  border-radius: 26px;
-  background: var(--card-bg);
-  border: 1px solid rgba(148,163,184,0.3);
-  box-shadow: var(--shadow-soft);
-  padding: 18px 20px 18px;
-  margin-bottom: 18px;
-  overflow: hidden;
-  backdrop-filter: blur(14px);
-}
+  .hero-logo-inner {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    background: radial-gradient(circle at 30% 20%, #f9fafb 0, #e5e7eb 40%, #cbd5f5 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f172a;
+    text-shadow: 0 0 12px rgba(15,23,42,0.5);
+  }
 
-.header-main {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  flex-wrap: wrap;
-}
+  .hero-title-text h1 {
+    margin: 0;
+    font-size: clamp(1.05rem, 1.1rem + 0.2vw, 1.25rem);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #f9fafb;
+  }
 
-.icon-bubble {
-  width: 70px;
-  height: 70px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 20%, #e0f2fe, #e0e7ff 45%, #ffffff 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 10px 30px rgba(37,99,235,0.25);
-  position: relative;
-}
+  .hero-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
 
-.icon-bubble::after {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgba(129,140,248,0.4);
-  right: -4px;
-  bottom: 4px;
-}
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 9px 3px 7px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.9);
+    border: 1px solid rgba(148,163,184,0.6);
+    font-size: 0.75rem;
+    color: #e5e7eb;
+  }
 
-.icon-bubble span {
-  font-size: 2rem;
-}
+  .hero-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34,197,94,0.45);
+  }
 
-.header-text h1 {
-  font-size: clamp(1.7rem, 3vw, 2.1rem);
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 6px;
-}
+  .hero-badge {
+    font-size: 0.74rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(248,250,252,0.4);
+    color: #e5e7eb;
+    background: rgba(15,23,42,0.85);
+  }
 
-.header-text h1 span.code {
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: #e0e7ff;
-  color: #1d4ed8;
-}
-
-.header-text h1 small {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-soft);
-}
-
-.pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-.pill {
-  border-radius: var(--radius-pill);
-  padding: 3px 10px;
-  font-size: 0.75rem;
-  background: var(--pill-bg);
-  border: 1px solid var(--pill-border);
-  color: #4b5563;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.pill strong {
-  font-weight: 700;
-}
-
-.subtitle {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: var(--text-soft);
-  max-width: 620px;
-}
-
-.header-floating {
-  position: absolute;
-  right: 18px;
-  top: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-end;
-  pointer-events: none;
-}
-
-.tiny-chip {
-  padding: 3px 9px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  background: #ecfdf5;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.soft-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  background: radial-gradient(circle at 30% 20%, #fefce8, #e0f2fe);
-  opacity: 0.75;
-}
-
-/* SECTIONS */
-
-.sections {
-  margin-top: 6px;
-  display: grid;
-  gap: 14px;
-}
-
-/* Chaque bloc de zone anatomique */
-
-.section-card {
-  border-radius: var(--radius-xl);
-  background: var(--card-bg);
-  border: 1px solid var(--border-soft);
-  padding: 14px 14px 12px;
-  box-shadow: 0 10px 24px rgba(15,23,42,0.07);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-title span.emoji {
-  font-size: 1.2rem;
-}
-
-.section-title h2 {
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.section-note {
-  font-size: 0.85rem;
-  color: var(--text-soft);
-  margin-bottom: 8px;
-}
-
-.section-chip {
-  font-size: 0.75rem;
-  border-radius: 999px;
-  padding: 2px 9px;
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  color: #4b5563;
-}
-
-/* Liste de ressources */
-
-.resource-list {
-  display: grid;
-  gap: 7px;
-}
-
-.resource-item {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0,1fr) auto;
-  gap: 6px;
-  align-items: center;
-  padding: 7px 9px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  text-decoration: none;
-  color: inherit;
-  font-size: 0.88rem;
-  transition:
-    box-shadow var(--transition),
-    transform var(--transition),
-    border-color var(--transition),
-    background var(--transition);
-}
-
-.resource-item:hover {
-  box-shadow: 0 10px 26px rgba(15,23,42,0.12);
-  transform: translateY(-1px);
-  border-color: rgba(79,70,229,0.6);
-  background: #fdfdff;
-}
-
-.resource-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.resource-title {
-  font-weight: 600;
-}
-
-.resource-desc {
-  font-size: 0.8rem;
-  color: var(--text-soft);
-}
-
-.resource-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  font-size: 0.75rem;
-}
-
-.badge {
-  border-radius: var(--radius-pill);
-  padding: 2px 8px;
-  font-size: 0.72rem;
-  background: #0f172a;
-  color: #f9fafb;
-}
-
-.badge.badge-soft {
-  background: #e0e7ff;
-  color: #1d4ed8;
-}
-
-.tag-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 3px;
-}
-
-.tag {
-  border-radius: 999px;
-  padding: 1px 6px;
-  font-size: 0.7rem;
-  background: #f3f4ff;
-  color: #4b5563;
-}
-
-/* Adaptation mobile */
-
-@media (max-width: 640px) {
-  .header-floating {
-    position: static;
-    margin-top: 10px;
+  .hero-kpis {
+    display: flex;
     flex-direction: row;
-    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: rgba(226,232,240,0.95);
   }
-  .resource-item {
-    grid-template-columns: minmax(0,1fr);
-    align-items: flex-start;
-  }
-  .resource-meta {
-    align-items: flex-start;
-  }
-}
 
-@media (min-width: 900px) {
-  .sections {
-    grid-template-columns: repeat(2, minmax(0,1fr));
+  .hero-kpi {
+    background: rgba(15,23,42,0.75);
+    border-radius: 999px;
+    padding: 3px 9px 4px 8px;
+    border: 1px solid rgba(148,163,184,0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
-  .section-card.full-width {
-    grid-column: 1 / -1;
+
+  .hero-kpi-label {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.62rem;
+    color: rgba(148,163,184,0.9);
   }
-}
+
+  .hero-kpi-value {
+    font-weight: 600;
+    font-size: 0.72rem;
+  }
+
+  /* MAIN CONTENT */
+  .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  @media (max-width: 900px) {
+    .content-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /* SECTIONS */
+  main.sections {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .section-card {
+    border-radius: var(--card-radius);
+    border: 1px solid rgba(148,163,184,0.35);
+    background:
+      radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 55%),
+      radial-gradient(circle at bottom right, rgba(56,189,248,0.08), transparent 55%),
+      linear-gradient(to bottom right, rgba(15,23,42,0.96), rgba(15,23,42,0.90));
+    box-shadow: var(--shadow-soft);
+    padding: 12px 14px 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .section-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(248,250,252,0.08), transparent 55%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-med);
+  }
+
+  .section-card:hover::before {
+    opacity: 1;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title .emoji {
+    font-size: 1.1rem;
+    filter: drop-shadow(0 0 10px rgba(15,23,42,0.9));
+  }
+
+  .section-title h2 {
+    font-size: 0.95rem;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #e5e7eb;
+  }
+
+  .section-chip {
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.50);
+    background: rgba(15,23,42,0.9);
+    color: rgba(226,232,240,0.95);
+    white-space: nowrap;
+  }
+
+  .section-note {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .resource-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .resource-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 10px;
+    padding: 7px 9px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: rgba(15,23,42,0.85);
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.8rem;
+    position: relative;
+    overflow: hidden;
+    transition:
+      border-color var(--transition-fast),
+      background var(--transition-fast),
+      transform var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .resource-item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 60%);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+    pointer-events: none;
+  }
+
+  .resource-item:hover::before {
+    opacity: 1;
+  }
+
+  .resource-item:hover {
+    border-color: rgba(56,189,248,0.78);
+    background: rgba(15,23,42,0.98);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 35px rgba(15,23,42,0.85);
+  }
+
+  .resource-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .resource-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #e5e7eb;
+  }
+
+  .resource-desc {
+    font-size: 0.74rem;
+    color: var(--muted);
+  }
+
+  .resource-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 0.72rem;
+  }
+
+  .badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(56,189,248,0.18);
+    color: #e0f2fe;
+    border: 1px solid rgba(56,189,248,0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.6rem;
+  }
+
+  .badge-soft {
+    background: rgba(34,197,94,0.1);
+    color: #bbf7d0;
+    border-color: rgba(34,197,94,0.5);
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .tag {
+    padding: 1px 6px 2px 6px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.9);
+    border: 1px solid rgba(148,163,184,0.6);
+    font-size: 0.64rem;
+    color: rgba(209,213,219,0.95);
+  }
+
+  /* SIDE PANEL */
+  aside.side-panel {
+    border-radius: var(--card-radius);
+    border: 1px solid rgba(148,163,184,0.35);
+    background:
+      radial-gradient(circle at top right, rgba(56,189,248,0.18), transparent 55%),
+      linear-gradient(to bottom left, rgba(15,23,42,0.96), rgba(15,23,42,0.92));
+    box-shadow: 0 18px 48px rgba(15,23,42,0.95);
+    padding: 11px 13px 11px 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .side-section {
+    border-radius: 12px;
+    border: 1px solid rgba(148,163,184,0.4);
+    background: rgba(15,23,42,0.95);
+    padding: 8px 9px;
+  }
+
+  .side-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .side-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .side-title span {
+    font-size: 0.9rem;
+  }
+
+  .side-chip {
+    font-size: 0.66rem;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: rgba(226,232,240,0.95);
+  }
+
+  .side-text {
+    font-size: 0.76rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  .side-link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 5px;
+  }
+
+  .side-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 7px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    text-decoration: none;
+    color: inherit;
+    font-size: 0.74rem;
+    background: rgba(15,23,42,0.95);
+    transition:
+      border-color var(--transition-fast),
+      background var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  .side-link:hover {
+    border-color: rgba(56,189,248,0.9);
+    background: rgba(15,23,42,0.99);
+    transform: translateY(-1px);
+  }
+
+  .side-link-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .side-link-label span:first-child {
+    font-size: 0.85rem;
+  }
+
+  .side-link-meta {
+    font-size: 0.66rem;
+    color: var(--muted);
+  }
+
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+
+  .pill {
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.6);
+    font-size: 0.68rem;
+    color: rgba(226,232,240,0.95);
+    background: rgba(15,23,42,0.95);
+  }
+
+  .progress-row {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  .progress-bar-shell {
+    position: relative;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(15,23,42,0.95);
+    overflow: hidden;
+    border: 1px solid rgba(30,64,175,0.8);
+  }
+
+  .progress-bar-fill {
+    position: absolute;
+    inset: 0;
+    width: 68%;
+    background: linear-gradient(to right, #0ea5e9, #22c55e);
+    box-shadow: 0 0 12px rgba(34,197,94,0.7);
+  }
+
+  .side-footer {
+    margin-top: 3px;
+    font-size: 0.7rem;
+    color: rgba(148,163,184,0.95);
+  }
+
+  .side-footer strong {
+    color: rgba(226,232,240,0.95);
+  }
+
+  /* MOBILE TWEAKS */
+  @media (max-width: 640px) {
+    .hero-card {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .hero-logo {
+      width: 38px;
+      height: 38px;
+    }
+
+    .hero-logo-inner {
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
+    }
+
+    .content-grid {
+      gap: 12px;
+    }
+
+    .section-card {
+      padding: 10px 10px 9px 10px;
+    }
+
+    .section-title h2 {
+      font-size: 0.9rem;
+    }
+
+    .section-chip {
+      display: none;
+    }
+  }
+
+  /* GLOW ORBIT DECORATION */
+  .background-orbit {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .background-orbit::before,
+  .background-orbit::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    border: 1px dashed rgba(148,163,184,0.25);
+    mix-blend-mode: screen;
+  }
+
+  .background-orbit::before {
+    width: 520px;
+    height: 520px;
+    top: -220px;
+    right: -120px;
+  }
+
+  .background-orbit::after {
+    width: 420px;
+    height: 420px;
+    bottom: -180px;
+    left: -60px;
+  }
+
+  .glow-dot {
+    position: fixed;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(56,189,248,0.26) 0, transparent 60%);
+    top: 16%;
+    left: 22%;
+    pointer-events: none;
+    filter: blur(1px);
+    opacity: 0.9;
+  }
+
+  .glow-dot-2 {
+    position: fixed;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,197,94,0.24) 0, transparent 60%);
+    bottom: 10%;
+    right: 12%;
+    pointer-events: none;
+    filter: blur(1px);
+    opacity: 0.8;
+  }
+
+  /* Small "S1" floating chip */
+  .s1-chip {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 0.7rem;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid rgba(148,163,184,0.6);
+    background: rgba(15,23,42,0.9);
+    color: rgba(226,232,240,0.95);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+
+  /* Micro radar in hero */
+  .hero-radar {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border-radius: 20px;
+    border: 1px solid rgba(148,163,184,0.6);
+    background: radial-gradient(circle at center, rgba(56,189,248,0.25), transparent 60%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-radar-inner {
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    border: 1px solid rgba(148,163,184,0.55);
+    position: relative;
+    box-shadow: 0 0 18px rgba(56,189,248,0.6);
+  }
+
+  .hero-radar-dot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    top: 18%;
+    left: 58%;
+    box-shadow: 0 0 16px rgba(56,189,248,0.85);
+  }
+
+  .hero-radar-track {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(56,189,248,0.8), transparent);
+    left: 50%;
+    transform: translateX(-50%) rotate(28deg);
+    transform-origin: center;
+    opacity: 0.8;
+  }
+
+  .hero-radar-text {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: rgba(226,232,240,0.85);
+  }
+
+  /* Subtle breathing animation for radar */
+  @keyframes pulseGlow {
+    0% {
+      box-shadow: 0 0 18px rgba(56,189,248,0.4);
+    }
+    50% {
+      box-shadow: 0 0 28px rgba(56,189,248,0.9);
+    }
+    100% {
+      box-shadow: 0 0 18px rgba(56,189,248,0.4);
+    }
+  }
+
+  .hero-radar-inner {
+    animation: pulseGlow 4s ease-in-out infinite;
+  }
 </style>
 </head>
 <body>
-<div class="page">
+<div class="background-orbit"></div>
+<div class="glow-dot"></div>
+<div class="glow-dot-2"></div>
 
-  <div class="breadcrumbs">
-    <a href="../index.html">← Semestre 1</a>
-  </div>
+<div class="page-shell">
 
-  <!-- EN-TÊTE UE 2.1 -->
-  <section class="header-card">
-    <div class="header-main">
-      <div class="icon-bubble">
-        <span>🩻</span>
-      </div>
-      <div class="header-text">
-        <h1>
-          UE 2.1 – Anatomie générale
-          <span class="code">S1</span>
-        </h1>
-        <div class="pill-row">
-          <div class="pill">
-            <span>🧍‍♂️</span>
-            <span>Repères globaux du corps → thorax → MS → abdomen → MI</span>
+  <header class="page-header">
+    <div class="hero-card">
+      <div class="hero-main">
+        <div class="hero-title-row">
+          <div class="hero-logo">
+            <div class="hero-logo-inner">
+              MEM
+            </div>
           </div>
-          <div class="pill">
-            <span>🎯</span>
-            <span><strong>Objectif :</strong> fixer une carte mentale claire du corps humain</span>
+          <div class="hero-title-text">
+            <h1>Atlas radio & anatomie — S1</h1>
+            <div class="hero-sub">
+              <span class="hero-pill">
+                <span class="hero-pill-dot"></span>
+                <span>UE 3.11 &amp; pratique radio — intégration visuelle</span>
+              </span>
+              <span class="hero-badge">Version étudiant — local</span>
+            </div>
           </div>
         </div>
-        <p class="subtitle">
-          Utilise ces jeux et fiches pour naviguer dans l’anatomie générale&nbsp;: organisation du corps,
-          thorax et gros vaisseaux, membre supérieur, abdomen et bas du corps.
+        <div class="hero-kpis">
+          <div class="hero-kpi">
+            <div class="hero-kpi-label">Zones</div>
+            <div class="hero-kpi-value">Tête, rachis, thorax, membres, appareil urinaire</div>
+          </div>
+          <div class="hero-kpi">
+            <div class="hero-kpi-label">Type</div>
+            <div class="hero-kpi-value">Quiz d’anatomie, repères externes & radios</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px; position:relative; min-width:115px;">
+        <div class="s1-chip">S1 — MEM</div>
+        <div class="hero-radar">
+          <div class="hero-radar-inner">
+            <div class="hero-radar-dot"></div>
+            <div class="hero-radar-track"></div>
+            <div class="hero-radar-text">RADIO</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="content-grid">
+
+    <main class="sections">
+
+      <!-- 1) TETE -->
+      <article class="section-card">
+        <header class="section-header">
+          <div class="section-title">
+            <span class="emoji">🧠</span>
+            <h2>1) Tête &amp; cou</h2>
+          </div>
+          <span class="section-chip">Crâne, massif facial, rachis cervical</span>
+        </header>
+        <p class="section-note">
+          Travaux dirigés d’anatomie et points clés visibles en imagerie (rayons X, scanners).
         </p>
-      </div>
-    </div>
 
-    <div class="header-floating">
-      <span class="tiny-chip">Mode révision anatomie</span>
-      <div class="soft-circle"></div>
-    </div>
-  </section>
+        <div class="resource-list">
+          <a class="resource-item" href="tete/atlas_crane_face.html">
+            <div class="resource-main">
+              <div class="resource-title">Atlas crâne &amp; massif facial</div>
+              <div class="resource-desc">Repères osseux principaux en vue de face / profil.</div>
+            </div>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">crâne</span>
+                <span class="tag">massif facial</span>
+              </div>
+            </div>
+          </a>
 
-  <!-- SECTIONS PAR ZONE -->
-  <section class="sections">
-
-    <!-- 1) ANATOMIE TRÈS GÉNÉRALE -->
-    <article class="section-card">
-      <header class="section-header">
-        <div class="section-title">
-          <span class="emoji">🧭</span>
-          <h2>1) Anatomie très générale</h2>
+          <a class="resource-item" href="tete/rachis_cervical_radio.html">
+            <div class="resource-main">
+              <div class="resource-title">Rachis cervical — radio</div>
+              <div class="resource-desc">Repérage des vertèbres C1–C7 en radiographie standard.</div>
+            </div>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">rachis cervical</span>
+                <span class="tag">repères</span>
+              </div>
+            </div>
+          </a>
         </div>
-        <span class="section-chip">Repères & plans</span>
-      </header>
-      <p class="section-note">
-        Repères globaux du corps et premières vues vasculaires générales.
-      </p>
+      </article>
 
-      <div class="resource-list">
-        <a class="resource-item" href="plan/index.html">
-          <div class="resource-main">
-            <div class="resource-title">Plan du corps – Ressources</div>
-            <div class="resource-desc">Plans, axes, termes d’orientation, coupes de base.</div>
+      <!-- 2) RACHIS COMPLET -->
+      <article class="section-card">
+        <header class="section-header">
+          <div class="section-title">
+            <span class="emoji">🦴</span>
+            <h2>2) Rachis complet</h2>
           </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">plans</span>
-              <span class="tag">axes</span>
+          <span class="section-chip">Cervical à sacrum</span>
+        </header>
+        <p class="section-note">
+          Repérage global des segments rachidiens sur les clichés standards.
+        </p>
+
+        <div class="resource-list">
+          <a class="resource-item" href="rachis/rachis_complet_index.html">
+            <div class="resource-main">
+              <div class="resource-title">Rachis complet — atlas</div>
+              <div class="resource-desc">De C1 à S1, repères anatomiques et alignements.</div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="arteres/artere-full-generale.html">
-          <div class="resource-main">
-            <div class="resource-title">Système artériel — Vue générale</div>
-            <div class="resource-desc">Panorama des principales artères du corps.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">artères</span>
-              <span class="tag">vue globale</span>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">rachis</span>
+                <span class="tag">alignement</span>
+              </div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="arteres/aorte_full.html">
-          <div class="resource-main">
-            <div class="resource-title">Aorte — Vue complète</div>
-            <div class="resource-desc">Trajet global (crosse, thorax, abdomen) et branches majeures.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">aorte</span>
-              <span class="tag">tronc principal</span>
-            </div>
-          </div>
-        </a>
-      </div>
-    </article>
-
-    <!-- 2) THORAX & VAISSEAUX -->
-    <article class="section-card">
-      <header class="section-header">
-        <div class="section-title">
-          <span class="emoji">❤️</span>
-          <h2>2) Thorax & vaisseaux</h2>
+          </a>
         </div>
-        <span class="section-chip">Cœur & gros troncs</span>
-      </header>
-      <p class="section-note">
-        Thorax, médiastin, cœur et crosse de l’aorte avec jeux de localisation.
-      </p>
+      </article>
 
-      <div class="resource-list">
-        <a class="resource-item" href="zone_thorax/index.html">
-          <div class="resource-main">
-            <div class="resource-title">Zone thoracique – Ressources</div>
-            <div class="resource-desc">Paroi, médiastin, poumons, repères généraux.</div>
+      <!-- 3) THORAX & APPAREILS -->
+      <article class="section-card">
+        <header class="section-header">
+          <div class="section-title">
+            <span class="emoji">🫁</span>
+            <h2>3) Thorax &amp; appareils</h2>
           </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">thorax</span>
-              <span class="tag">médiastin</span>
+          <span class="section-chip">Poumons, cœur, digestif, urinaire</span>
+        </header>
+        <p class="section-note">
+          Clichés thoraciques standard, appareils cardio-respiratoires et premières bases digestif/urinaire.
+        </p>
+
+        <div class="resource-list">
+          <a class="resource-item" href="thorax/thorax_poumons_cardio.html">
+            <div class="resource-main">
+              <div class="resource-title">Thorax — Poumons &amp; silhouette cardiaque</div>
+              <div class="resource-desc">Repères classiques en radiographie thoracique de face.</div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="le_coeur/index.html">
-          <div class="resource-main">
-            <div class="resource-title">Le cœur – Ressources & quiz</div>
-            <div class="resource-desc">Cavités, valves, vascularisation, conduction.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">cœur</span>
-              <span class="tag">fonctionnel</span>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">poumons</span>
+                <span class="tag">cœur</span>
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
 
-        <a class="resource-item" href="arteres/crosse_aorte.html">
-          <div class="resource-main">
-            <div class="resource-title">Crosse de l’aorte</div>
-            <div class="resource-desc">Aorte ascendante + crosse et branches supra-aortiques.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">aorte</span>
-              <span class="tag">supra-aortiques</span>
+          <a class="resource-item" href="abdomen/appareil_digestif_debuts.html">
+            <div class="resource-main">
+              <div class="resource-title">Appareil digestif — bases sur radio</div>
+              <div class="resource-desc">Premiers repères de l’abdomen sans préparation.</div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="arteres/crosse_aorte_localisation.html">
-          <div class="resource-main">
-            <div class="resource-title">Crosse de l’aorte — Jeu de localisation</div>
-            <div class="resource-desc">Cliquer la bonne zone (classique, « bombe », « j’ai pas le time »).</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge badge-soft">jeu</span>
-            <div class="tag-row">
-              <span class="tag">localisation</span>
-              <span class="tag">interactif</span>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">digestif</span>
+                <span class="tag">abdomen</span>
+              </div>
             </div>
-          </div>
-        </a>
-      </div>
-    </article>
+          </a>
 
-    <!-- 3) MEMBRE SUPÉRIEUR -->
-    <article class="section-card">
-      <header class="section-header">
-        <div class="section-title">
-          <span class="emoji">✋</span>
-          <h2>3) Membre supérieur</h2>
+          <a class="resource-item" href="urinaire/appareil_urinaire_repere.html">
+            <div class="resource-main">
+              <div class="resource-title">Appareil urinaire — repères</div>
+              <div class="resource-desc">Visualisation des reins, uretères, vessie sur les clichés adaptés.</div>
+            </div>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">urinaire</span>
+                <span class="tag">reins</span>
+              </div>
+            </div>
+          </a>
         </div>
-        <span class="section-chip">Épaule → main</span>
-      </header>
-      <p class="section-note">
-        De l’humérus à la main&nbsp;: repères osseux et articulaires.
-      </p>
+      </article>
 
-      <div class="resource-list">
-        <a class="resource-item" href="membre-sup/humérus_mental_Ecriture.html">
-          <div class="resource-main">
-            <div class="resource-title">Humérus – Jeu mental / écriture</div>
-            <div class="resource-desc">Jeu/fiche en modes « Écriture » & « Mental » avec masques.</div>
+      <!-- 4) MEMBRE SUPERIEUR -->
+      <article class="section-card">
+        <header class="section-header">
+          <div class="section-title">
+            <span class="emoji">💪</span>
+            <h2>4) Membre supérieur</h2>
           </div>
-          <div class="resource-meta">
-            <span class="badge badge-soft">jeu</span>
-            <div class="tag-row">
-              <span class="tag">humérus</span>
-              <span class="tag">repères</span>
+          <span class="section-chip">Épaule à main</span>
+        </header>
+        <p class="section-note">
+          Repères osseux principaux du membre supérieur en imagerie.
+        </p>
+
+        <div class="resource-list">
+          <a class="resource-item" href="membre_sup/index.html">
+            <div class="resource-main">
+              <div class="resource-title">Membre supérieur — Atlas rapide</div>
+              <div class="resource-desc">Épaule, bras, coude, avant-bras, poignet et main.</div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="membre-sup/articulation-coude.html">
-          <div class="resource-main">
-            <div class="resource-title">Articulation du coude</div>
-            <div class="resource-desc">Anatomie et repères du coude.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">coude</span>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">MS</span>
+                <span class="tag">os</span>
+              </div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="main/index.html">
-          <div class="resource-main">
-            <div class="resource-title">La main – Ressources</div>
-            <div class="resource-desc">Anatomie descriptive & repères de la main.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">main</span>
-              <span class="tag">détail</span>
-            </div>
-          </div>
-        </a>
-      </div>
-    </article>
-
-    <!-- 4) ABDOMEN (FULL WIDTH) -->
-    <article class="section-card full-width">
-      <header class="section-header">
-        <div class="section-title">
-          <span class="emoji">🫁</span>
-          <h2>4) Abdomen</h2>
+          </a>
         </div>
-        <span class="section-chip">Parois, viscères & vaisseaux</span>
-      </header>
-      <p class="section-note">
-        Abdomen complet&nbsp;: viscères, coupes transverses, artères, veines et système porte.
-      </p>
+      </article>
 
-      <div class="resource-list">
-        <a class="resource-item" href="zone_abdominale/index.html">
-          <div class="resource-main">
-            <div class="resource-title">Zone abdominale – Ressources</div>
-            <div class="resource-desc">Parois, viscères, topographie de base.</div>
+      <!-- 5) BAS DU CORPS -->
+      <article class="section-card">
+        <header class="section-header">
+          <div class="section-title">
+            <span class="emoji">🦵</span>
+            <h2>5) Bas du corps</h2>
           </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">abdomen</span>
-              <span class="tag">topographie</span>
+          <span class="section-chip">Membre inférieur</span>
+        </header>
+        <p class="section-note">
+          Membre inférieur, repères externes et jeu de localisation sur le bassin.
+        </p>
+
+        <div class="resource-list">
+          <a class="resource-item" href="membre_inf/index.html">
+            <div class="resource-main">
+              <div class="resource-title">Membre inférieur — Zone anatomique extérieure</div>
+              <div class="resource-desc">Repères cutanés et musculaires principaux.</div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="zone_abdominale/coupe_axial.html">
-          <div class="resource-main">
-            <div class="resource-title">Coupe axiale — Abdomen</div>
-            <div class="resource-desc">Coupe transverse, repères TDM/IRM et structures clés.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">coupe</span>
-              <span class="tag">transverse</span>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">MI</span>
+                <span class="tag">repères</span>
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
 
-        <a class="resource-item" href="zone_abdominale/anat_full_abdo_art_nerf_muscle.html">
-          <div class="resource-main">
-            <div class="resource-title">Anatomie complète — Abdomen</div>
-            <div class="resource-desc">Artères, nerfs, muscles – jeu en modes « Écriture » & « Mental ».</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge badge-soft">jeu</span>
-            <div class="tag-row">
-              <span class="tag">artères</span>
-              <span class="tag">nerfs</span>
-              <span class="tag">muscles</span>
+          <a class="resource-item" href="membre_inf/lacalisation_bassin_radio.html">
+            <div class="resource-main">
+              <div class="resource-title">Localisation bassin sur radio</div>
+              <div class="resource-desc">Jeu de localisation : clique sur la bonne zone (plusieurs modes).</div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="tube_digestif/index.html">
-          <div class="resource-main">
-            <div class="resource-title">Tube digestif – Ressources</div>
-            <div class="resource-desc">Œsophage → rectum : vues générales et segmentaires.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">tube digestif</span>
+            <div class="resource-meta">
+              <span class="badge badge-soft">jeu</span>
+              <div class="tag-row">
+                <span class="tag">bassin</span>
+                <span class="tag">radio</span>
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
 
-        <a class="resource-item" href="arteres/aorte_abdo.html">
-          <div class="resource-main">
-            <div class="resource-title">Aorte abdominale</div>
-            <div class="resource-desc">Branches viscérales (TC, AMS, AMI) et pariétales.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">aorte abdo</span>
+          <a class="resource-item" href="membre_inf/ligament-genou-anterieur.html">
+            <div class="resource-main">
+              <div class="resource-title">Ligaments du genou – Vue antérieure</div>
+              <div class="resource-desc">Repérage des principaux ligaments en vue antérieure.</div>
             </div>
-          </div>
-        </a>
-
-        <a class="resource-item" href="arteres/aorte_abdo_localisation.html">
-          <div class="resource-main">
-            <div class="resource-title">Aorte abdominale — Jeu de localisation</div>
-            <div class="resource-desc">Cliquer la bonne zone (classique, « bombe », « j’ai pas le time »).</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge badge-soft">jeu</span>
-            <div class="tag-row">
-              <span class="tag">localisation</span>
-              <span class="tag">interactif</span>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">genou</span>
+                <span class="tag">ligaments</span>
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
 
-        <a class="resource-item" href="veines/systeme_porte.html">
-          <div class="resource-main">
-            <div class="resource-title">Système porte hépatique</div>
-            <div class="resource-desc">Veine porte et affluents, circulation hépatique.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">système porte</span>
+          <a class="resource-item" href="membre_inf/ligament-genou-posterieur.html">
+            <div class="resource-main">
+              <div class="resource-title">Ligaments du genou – Vue postérieure</div>
+              <div class="resource-desc">Repérage des principaux ligaments en vue postérieure.</div>
             </div>
-          </div>
-        </a>
-      </div>
-    </article>
-
-    <!-- 5) BAS DU CORPS -->
-    <article class="section-card">
-      <header class="section-header">
-        <div class="section-title">
-          <span class="emoji">🦵</span>
-          <h2>5) Bas du corps</h2>
+            <div class="resource-meta">
+              <span class="badge">ouvrir</span>
+              <div class="tag-row">
+                <span class="tag">genou</span>
+                <span class="tag">ligaments</span>
+              </div>
+            </div>
+          </a>
         </div>
-        <span class="section-chip">Membre inférieur</span>
-      </header>
-      <p class="section-note">
-        Membre inférieur, repères externes et jeu de localisation sur le bassin.
-      </p>
+      </article>
 
-      <div class="resource-list">
-        <a class="resource-item" href="membre_inf/index.html">
-          <div class="resource-main">
-            <div class="resource-title">Membre inférieur — Zone anatomique extérieure</div>
-            <div class="resource-desc">Repères cutanés et musculaires principaux.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">MI</span>
-              <span class="tag">repères</span>
-            </div>
-          </div>
-        </a>
+    </main>
 
-        <a class="resource-item" href="membre_inf/lacalisation_bassin_radio.html">
-          <div class="resource-main">
-            <div class="resource-title">Localisation bassin sur radio</div>
-            <div class="resource-desc">Jeu de localisation : clique sur la bonne zone (plusieurs modes).</div>
+    <aside class="side-panel">
+      <section class="side-section">
+        <div class="side-title-row">
+          <div class="side-title">
+            <span>🎯</span>
+            <span>Objectif du mini-site</span>
           </div>
-          <div class="resource-meta">
-            <span class="badge badge-soft">jeu</span>
-            <div class="tag-row">
-              <span class="tag">bassin</span>
-              <span class="tag">radio</span>
+          <span class="side-chip">S1</span>
+        </div>
+        <p class="side-text">
+          Centraliser les petits quiz d’anatomie visible en radio :
+          repères externes, correspondance avec les clichés, et
+          premiers réflexes de localisation.
+        </p>
+        <div class="pill-row">
+          <span class="pill">Révisions rapides avant TD / TP</span>
+          <span class="pill">Anatomie appliquée aux rayons X</span>
+          <span class="pill">UE 3.11 — S1 MEM</span>
+        </div>
+      </section>
+
+      <section class="side-section">
+        <div class="side-title-row">
+          <div class="side-title">
+            <span>🧩</span>
+            <span>Accès rapide</span>
+          </div>
+        </div>
+        <div class="side-link-list">
+          <a class="side-link" href="tete/atlas_crane_face.html">
+            <div class="side-link-label">
+              <span>🧠</span>
+              <span>Tête &amp; massif facial</span>
             </div>
+            <div class="side-link-meta">clichés de base</div>
+          </a>
+          <a class="side-link" href="rachis/rachis_complet_index.html">
+            <div class="side-link-label">
+              <span>🦴</span>
+              <span>Rachis complet</span>
+            </div>
+            <div class="side-link-meta">profil &amp; face</div>
+          </a>
+          <a class="side-link" href="thorax/thorax_poumons_cardio.html">
+            <div class="side-link-label">
+              <span>🫁</span>
+              <span>Thorax — Poumons &amp; cœur</span>
+            </div>
+            <div class="side-link-meta">radio thoracique</div>
+          </a>
+          <a class="side-link" href="membre_inf/index.html">
+            <div class="side-link-label">
+              <span>🦵</span>
+              <span>Membre inférieur</span>
+            </div>
+            <div class="side-link-meta">repères externes</div>
+          </a>
+        </div>
+      </section>
+
+      <section class="side-section">
+        <div class="side-title-row">
+          <div class="side-title">
+            <span>📊</span>
+            <span>Suivi perso (indicatif)</span>
           </div>
-        </a>
-      </div>
-    </article>
+        </div>
+        <p class="side-text">
+          Barre indicative pour visualiser globalement ta progression en
+          anatomie appliquée à la radio sur le semestre.
+        </p>
+        <div class="progress-row">
+          <div class="progress-label">
+            <span>Zones déjà vues en TD</span>
+            <span>~68%</span>
+          </div>
+          <div class="progress-bar-shell">
+            <div class="progress-bar-fill"></div>
+          </div>
+        </div>
+        <p class="side-footer">
+          <strong>Idée :</strong> te servir de ce mini-site comme check-list pour
+          être à l’aise sur les clichés « classiques » avant les partiels.
+        </p>
+      </section>
+    </aside>
 
   </section>
 

@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>UE 3.1 – Exercice interactif – Techniques d’imagerie</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root {
+  --bg-grad: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 35%, #fdfdfd 100%);
+  --card-bg: rgba(255,255,255,0.96);
+  --border-soft: #e5e7eb;
+  --shadow-soft: 0 18px 40px rgba(15,23,42,0.12);
+  --text-main: #0f172a;
+  --text-soft: #6b7280;
+  --pill-bg: #f4f4ff;
+  --pill-border: #e0e7ff;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+  --transition: 0.18s ease-out;
+  --good: #16a34a;
+  --bad: #dc2626;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100vh;
+  background: var(--bg-grad);
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px 36px;
+}
+
+.page {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+}
+
+/* HEADER */
+
+.header-card {
+  position: relative;
+  border-radius: 26px;
+  background: var(--card-bg);
+  border: 1px solid rgba(148,163,184,0.32);
+  box-shadow: var(--shadow-soft);
+  padding: 18px 20px 18px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+}
+
+.header-main {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.icon-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  min-width: 78px;
+}
+
+.icon-circle {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 26px rgba(37,99,235,0.2);
+  font-size: 1.7rem;
+}
+
+.icon-circle.rx {
+  background: radial-gradient(circle at 30% 20%, #fee2e2, #e0f2fe 55%, #ffffff 100%);
+}
+
+.icon-circle.ct {
+  background: radial-gradient(circle at 30% 20%, #e0f2fe, #e0e7ff 55%, #ffffff 100%);
+}
+
+.icon-circle.mn {
+  background: radial-gradient(circle at 30% 20%, #bbf7d0, #e0f2fe 55%, #ffffff 100%);
+}
+
+.header-text h1 {
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.header-text h1 small {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-soft);
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.pill {
+  border-radius: var(--radius-pill);
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  color: #4b5563;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pill strong {
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  max-width: 650px;
+}
+
+.header-floating {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.tiny-chip {
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  background: #ecfdf5;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.soft-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 20%, #fefce8, #e0f2fe);
+  opacity: 0.8;
+}
+
+/* NAV EXERCICES */
+
+.exercise-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.exercise-nav button {
+  border-radius: var(--radius-pill);
+  border: 1px solid #e5e7eb;
+  background: rgba(255,255,255,0.92);
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+}
+
+.exercise-nav button span.icon {
+  font-size: 1rem;
+}
+
+.exercise-nav button:hover {
+  background: #ffffff;
+  border-color: rgba(79,70,229,0.7);
+  box-shadow: 0 8px 20px rgba(15,23,42,0.1);
+  transform: translateY(-1px);
+}
+
+.exercise-nav button.active {
+  background: #111827;
+  color: #f9fafb;
+  border-color: #111827;
+}
+
+/* CARDS EXERCICES */
+
+.exercise-card {
+  border-radius: var(--radius-xl);
+  background: var(--card-bg);
+  border: 1px solid var(--border-soft);
+  box-shadow: 0 14px 30px rgba(15,23,42,0.1);
+  padding: 14px 14px 14px;
+  margin-bottom: 12px;
+}
+
+.exercise-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.exercise-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exercise-title span.icon {
+  font-size: 1.2rem;
+}
+
+.exercise-title h2 {
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.exercise-meta {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+}
+
+.exercise-intro {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  margin-bottom: 10px;
+}
+
+/* QUESTIONS GÉNÉRALES */
+
+.question-block {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 8px 9px;
+  margin-bottom: 8px;
+  font-size: 0.86rem;
+}
+
+.question-text {
+  margin-bottom: 6px;
+}
+
+/* QCM */
+
+.qcm-options label {
+  display: block;
+  margin-bottom: 3px;
+  cursor: pointer;
+}
+
+.qcm-options input[type="radio"] {
+  margin-right: 6px;
+}
+
+/* VRAI / FAUX */
+
+.vf-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.vf-statement {
+  font-size: 0.86rem;
+}
+
+.vf-choices {
+  display: flex;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.vf-choices label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.vf-choices input[type="radio"] {
+  margin: 0;
+}
+
+.vf-correction {
+  font-size: 0.76rem;
+  margin-top: 2px;
+}
+
+/* ASSOCIER (matching) */
+
+.match-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.3fr);
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.84rem;
+}
+
+.match-row select {
+  font-size: 0.8rem;
+  padding: 3px 5px;
+}
+
+.match-correction {
+  grid-column: 1 / -1;
+  font-size: 0.76rem;
+  margin-top: 1px;
+}
+
+/* CAS CLINIQUES */
+
+.case-block {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 8px 9px;
+  margin-bottom: 8px;
+  font-size: 0.86rem;
+}
+
+.case-text {
+  margin-bottom: 6px;
+}
+
+.case-selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.case-selects select {
+  font-size: 0.8rem;
+  padding: 3px 5px;
+}
+
+.case-correction {
+  font-size: 0.76rem;
+  margin-top: 2px;
+}
+
+/* BOUTONS */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.btn {
+  border-radius: var(--radius-pill);
+  border: 1px solid #111827;
+  background: #111827;
+  color: #f9fafb;
+  padding: 5px 11px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background var(--transition), transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+
+.btn.secondary {
+  background: #ffffff;
+  color: #111827;
+  border-color: #d1d5db;
+}
+
+.btn.softer {
+  background: #f9fafb;
+  color: #111827;
+  border-color: #e5e7eb;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15,23,42,0.18);
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* FEEDBACK & SCORE */
+
+.feedback {
+  margin-top: 6px;
+  font-size: 0.8rem;
+}
+
+.feedback.good {
+  color: var(--good);
+}
+
+.feedback.bad {
+  color: var(--bad);
+}
+
+.score {
+  font-weight: 600;
+}
+
+/* ÉTATS BONS / MAUVAIS */
+
+.good-answer {
+  background: #ecfdf3 !important;
+  border-color: #bbf7d0 !important;
+}
+
+.bad-answer {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+}
+
+.text-good {
+  color: var(--good);
+}
+
+.text-bad {
+  color: var(--bad);
+}
+
+/* MASQUAGE EXERCICES */
+
+.exercise-card[data-ex="2"],
+.exercise-card[data-ex="3"],
+.exercise-card[data-ex="4"] {
+  display: none;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+  .header-floating {
+    position: static;
+    margin-top: 10px;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .match-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vf-row {
+    grid-template-columns: minmax(0,1fr);
+    align-items: flex-start;
+  }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <section class="header-card">
+    <div class="header-main">
+      <div class="icon-stack" aria-hidden="true">
+        <div class="icon-circle rx">🩻</div>
+        <div class="icon-circle ct">📡</div>
+        <div class="icon-circle mn">☢️</div>
+      </div>
+      <div class="header-text">
+        <h1>
+          UE 3.1 – Exercice interactif
+          <small>Rayons X, Scanner, Médecine nucléaire & Écho</small>
+        </h1>
+        <div class="pill-row">
+          <div class="pill">
+            <span>🎯</span>
+            <span><strong>Objectif :</strong> revoir les notions clés des trois cours (RX/Écho, Scanner, MN).</span>
+          </div>
+          <div class="pill">
+            <span>🧠</span>
+            <span>Principe physique, indications, produits de contraste, MRP, rôle du MERM.</span>
+          </div>
+        </div>
+        <p class="subtitle">
+          Lis les énoncés, réponds au mieux, puis corrige. Tu peux réinitialiser chaque exercice pour le refaire plus tard.
+        </p>
+      </div>
+    </div>
+    <div class="header-floating">
+      <span class="tiny-chip">UE 3.1 – Techniques d’imagerie</span>
+      <div class="soft-circle"></div>
+    </div>
+  </section>
+
+  <!-- NAVIGATION EXERCICES -->
+  <div class="exercise-nav">
+    <button type="button" data-target="1" class="active">
+      <span class="icon">①</span> Définitions & QCM
+    </button>
+    <button type="button" data-target="2">
+      <span class="icon">②</span> Vrai / Faux
+    </button>
+    <button type="button" data-target="3">
+      <span class="icon">③</span> Associer techniques / notions
+    </button>
+    <button type="button" data-target="4">
+      <span class="icon">④</span> Situations cliniques
+    </button>
+  </div>
+
+  <!-- EXERCICE 1 -->
+  <section class="exercise-card" data-ex="1">
+    <div class="exercise-header">
+      <div class="exercise-title">
+        <span class="icon">🧩</span>
+        <h2>Exercice 1 – QCM notions de base</h2>
+      </div>
+      <div class="exercise-meta">Principes physiques, définitions générales</div>
+    </div>
+    <p class="exercise-intro">
+      Pour chaque question, choisis la meilleure réponse. Certaines questions mélangent Scanner, Médecine nucléaire,
+      radiologie conventionnelle et échographie.
+    </p>
+
+    <!-- Q1 -->
+    <div class="question-block qcm-question" data-correct="B">
+      <div class="question-text">
+        1. La tomodensitométrie (scanner) repose principalement sur&nbsp;:
+      </div>
+      <div class="qcm-options">
+        <label><input type="radio" name="q1" value="A">
+          La détection d’ultrasons réfléchis par les tissus.
+        </label>
+        <label><input type="radio" name="q1" value="B">
+          La mesure de l’atténuation d’un faisceau de rayons X par les tissus, transformée en valeurs de densité (Unités Hounsfield).
+        </label>
+        <label><input type="radio" name="q1" value="C">
+          L’injection systématique d’un médicament radiopharmaceutique et la détection du rayonnement gamma.
+        </label>
+      </div>
+      <div class="correction-line"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="question-block qcm-question" data-correct="C">
+      <div class="question-text">
+        2. En médecine nucléaire, un médicament radiopharmaceutique (MRP) est défini comme&nbsp;:
+      </div>
+      <div class="qcm-options">
+        <label><input type="radio" name="q2" value="A">
+          Un produit de contraste iodé injecté en intraveineux avant un scanner.
+        </label>
+        <label><input type="radio" name="q2" value="B">
+          Un simple gaz radioactif inhalé par le patient pour tous les examens.
+        </label>
+        <label><input type="radio" name="q2" value="C">
+          L’association d’un <strong>vecteur</strong> (molécule qui cible un organe/tissu) et d’un <strong>marqueur radioactif</strong>.
+        </label>
+      </div>
+      <div class="correction-line"></div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="question-block qcm-question" data-correct="A">
+      <div class="question-text">
+        3. L’échographie médicale utilise comme principe physique&nbsp;:
+      </div>
+      <div class="qcm-options">
+        <label><input type="radio" name="q3" value="A">
+          Des ultrasons émis et reçus par une sonde (effet piézo-électrique).
+        </label>
+        <label><input type="radio" name="q3" value="B">
+          Un faisceau de rayons X fortement ionisants traversant le patient.
+        </label>
+        <label><input type="radio" name="q3" value="C">
+          Un rayonnement gamma émis par un radio-isotope injecté.
+        </label>
+      </div>
+      <div class="correction-line"></div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="question-block qcm-question" data-correct="C">
+      <div class="question-text">
+        4. La TEP-Scanner (PET-Scan) utilise principalement comme type de rayonnement&nbsp;:
+      </div>
+      <div class="qcm-options">
+        <label><input type="radio" name="q4" value="A">
+          Des ondes radio et un champ magnétique puissant.
+        </label>
+        <label><input type="radio" name="q4" value="B">
+          Des rayons X produits uniquement par un tube radiogène.
+        </label>
+        <label><input type="radio" name="q4" value="C">
+          Des <strong>positons</strong> émis par le radio-isotope, donnant naissance à deux photons d’annihilation détectés en coïncidence.
+        </label>
+      </div>
+      <div class="correction-line"></div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="question-block qcm-question" data-correct="B">
+      <div class="question-text">
+        5. En scanner, l’échelle de Hounsfield&nbsp;:
+      </div>
+      <div class="qcm-options">
+        <label><input type="radio" name="q5" value="A">
+          Va de 0 à 255 et sert uniquement à coder les niveaux de gris des radiographies standards.
+        </label>
+        <label><input type="radio" name="q5" value="B">
+          Va d’environ –1000 à +1000, avec l’air vers –1000, l’eau à 0 et l’os dense vers +1000.
+        </label>
+        <label><input type="radio" name="q5" value="C">
+          Ne concerne que la médecine nucléaire pour quantifier la fixation du MRP.
+        </label>
+      </div>
+      <div class="correction-line"></div>
+    </div>
+
+    <!-- Q6 -->
+    <div class="question-block qcm-question" data-correct="A">
+      <div class="question-text">
+        6. Parmi ces examens, lequel est <strong>essentiellement fonctionnel / métabolique</strong>&nbsp;?
+      </div>
+      <div class="qcm-options">
+        <label><input type="radio" name="q6" value="A">
+          La scintigraphie osseuse avec 99mTc.
+        </label>
+        <label><input type="radio" name="q6" value="B">
+          La radiographie standard du thorax.
+        </label>
+        <label><input type="radio" name="q6" value="C">
+          Le scanner cérébral sans injection.
+        </label>
+      </div>
+      <div class="correction-line"></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" onclick="corrigerQCM()">Corriger l’exercice 1</button>
+      <button type="button" class="btn secondary" onclick="resetQCM()">Réinitialiser</button>
+      <button type="button" class="btn softer" onclick="showExercise(2)">Aller à l’exercice 2</button>
+    </div>
+    <div id="feedback-qcm" class="feedback"></div>
+  </section>
+
+  <!-- EXERCICE 2 -->
+  <section class="exercise-card" data-ex="2">
+    <div class="exercise-header">
+      <div class="exercise-title">
+        <span class="icon">✅</span>
+        <h2>Exercice 2 – Vrai / Faux</h2>
+      </div>
+      <div class="exercise-meta">Sécurité, contrastes, radioactivité, rayons X / ultrasons</div>
+    </div>
+    <p class="exercise-intro">
+      Pour chaque affirmation, coche Vrai ou Faux. La correction apparaît en vert sous l’énoncé.
+    </p>
+
+    <div class="question-block">
+      <!-- 1 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            1. Les rayons X sont des ondes électromagnétiques ionisantes.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf1" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf1" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="vf-row" data-correct="Faux">
+        <div>
+          <div class="vf-statement">
+            2. L’échographie utilise des rayonnements ionisants mais peu dangereux.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf2" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf2" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            3. En médecine nucléaire, on administre un radio-traceur, puis on recueille le rayonnement émis par le patient (gamma caméra ou TEP).
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf3" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf3" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            4. Un médicament radiopharmaceutique associe un vecteur et un marqueur radioactif, défini notamment par sa période (demi-vie).
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf4" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf4" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="vf-row" data-correct="Faux">
+        <div>
+          <div class="vf-statement">
+            5. Les produits de contraste iodés sont totalement dépourvus de risques, il n’y a donc plus d’allergie ni de toxicité rénale à surveiller.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf5" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf5" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            6. Une insuffisance rénale sévère (clairance &lt; 30 mL/min) est une contre-indication à l’injection de produit de contraste iodé.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf6" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf6" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 7 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            7. En scanner, l’examen utilise des rayons X et implique une irradiation du patient, d’où la nécessité d’optimiser les paramètres (ALARA).
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf7" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf7" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 8 -->
+      <div class="vf-row" data-correct="Faux">
+        <div>
+          <div class="vf-statement">
+            8. La scintigraphie pulmonaire de ventilation / perfusion est strictement contre-indiquée chez la femme enceinte, quelle que soit la situation.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf8" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf8" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 9 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            9. Après injection d’un MRP, il existe un temps d’attente spécifique entre l’injection et l’acquisition pour permettre la fixation dans l’organe cible.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf9" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf9" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 10 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            10. En médecine nucléaire, le patient devient temporairement une source de rayonnement pour son entourage.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf10" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf10" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 11 -->
+      <div class="vf-row" data-correct="Faux">
+        <div>
+          <div class="vf-statement">
+            11. En scanner, l’injection de produit de contraste iodé est systématiquement obligatoire pour tous les examens.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf11" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf11" value="Faux">Faux</label>
+        </div>
+      </div>
+
+      <!-- 12 -->
+      <div class="vf-row" data-correct="Vrai">
+        <div>
+          <div class="vf-statement">
+            12. Une échographie Doppler permet d’évaluer les flux sanguins dans un vaisseau ou un cœur.
+          </div>
+          <div class="vf-correction"></div>
+        </div>
+        <div class="vf-choices">
+          <label><input type="radio" name="vf12" value="Vrai">Vrai</label>
+          <label><input type="radio" name="vf12" value="Faux">Faux</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" onclick="corrigerVF()">Corriger l’exercice 2</button>
+      <button type="button" class="btn secondary" onclick="resetVF()">Réinitialiser</button>
+      <button type="button" class="btn softer" onclick="showExercise(3)">Aller à l’exercice 3</button>
+    </div>
+    <div id="feedback-vf" class="feedback"></div>
+  </section>
+
+  <!-- EXERCICE 3 -->
+  <section class="exercise-card" data-ex="3">
+    <div class="exercise-header">
+      <div class="exercise-title">
+        <span class="icon">🔗</span>
+        <h2>Exercice 3 – Associe chaque technique à la bonne notion</h2>
+      </div>
+      <div class="exercise-meta">Techniques, type d’image, rayonnement, notions-clés</div>
+    </div>
+    <p class="exercise-intro">
+      Pour chaque <strong>technique</strong>, choisis la <strong>notion qui lui correspond le mieux</strong>. La correction s’affiche en vert.
+    </p>
+
+    <div class="question-block">
+      <!-- Légende -->
+      <div class="match-row" style="font-weight:600; margin-bottom:4px;">
+        <div>Technique</div>
+        <div>Notion principale</div>
+      </div>
+
+      <div class="match-row" data-correct="Coupe axiale X + échelle de Hounsfield">
+        <div>1. Scanner (TDM)</div>
+        <select>
+          <option value="">— Choisir —</option>
+          <option>Imagerie fonctionnelle métabolique pure</option>
+          <option>Coupe axiale X + échelle de Hounsfield</option>
+          <option>Ondes radio + champ magnétique</option>
+          <option>Ultrasons, écho de retour</option>
+        </select>
+        <div class="match-correction"></div>
+      </div>
+
+      <div class="match-row" data-correct="Imagerie fonctionnelle métabolique pure">
+        <div>2. TEP-Scanner (PET-Scan)</div>
+        <select>
+          <option value="">— Choisir —</option>
+          <option>Imagerie fonctionnelle métabolique pure</option>
+          <option>Radiographie standard du thorax</option>
+          <option>Mesure de la densité minérale osseuse</option>
+          <option>Acquisition en mode B, Doppler</option>
+        </select>
+        <div class="match-correction"></div>
+      </div>
+
+      <div class="match-row" data-correct="Gamma caméra">
+        <div>3. Scintigraphie osseuse</div>
+        <select>
+          <option value="">— Choisir —</option>
+          <option>Gamma caméra</option>
+          <option>Capteur plan (ERLM) en projection 2D</option>
+          <option>2 tubes radiologiques simultanés en charge</option>
+          <option>Mesure de la densité minérale osseuse</option>
+        </select>
+        <div class="match-correction"></div>
+      </div>
+
+      <div class="match-row" data-correct="Ultrasons, écho de retour">
+        <div>4. Échographie abdominale</div>
+        <select>
+          <option value="">— Choisir —</option>
+          <option>Ultrasons, écho de retour</option>
+          <option>Rayons X de haute énergie</option>
+          <option>Rayonnement gamma issu d’un MRP</option>
+          <option>Injection de gadolinium</option>
+        </select>
+        <div class="match-correction"></div>
+      </div>
+
+      <div class="match-row" data-correct="Capteur plan (ERLM) en projection 2D">
+        <div>5. Radiographie standard du thorax</div>
+        <select>
+          <option value="">— Choisir —</option>
+          <option>Gamma caméra</option>
+          <option>Capteur plan (ERLM) en projection 2D</option>
+          <option>Balayage statique/dynamique 3D</option>
+          <option>Ultrasons haute fréquence</option>
+        </select>
+        <div class="match-correction"></div>
+      </div>
+
+      <div class="match-row" data-correct="Mesure de la densité minérale osseuse">
+        <div>6. Ostéodensitométrie</div>
+        <select>
+          <option value="">— Choisir —</option>
+          <option>Mesure de la densité minérale osseuse</option>
+          <option>Étude de la perfusion pulmonaire uniquement</option>
+          <option>Étude de l’ischémie myocardique</option>
+          <option>Étude de la ventilation et perfusion pulmonaires</option>
+        </select>
+        <div class="match-correction"></div>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" onclick="corrigerMatching()">Corriger l’exercice 3</button>
+      <button type="button" class="btn secondary" onclick="resetMatching()">Réinitialiser</button>
+      <button type="button" class="btn softer" onclick="showExercise(4)">Aller à l’exercice 4</button>
+    </div>
+    <div id="feedback-match" class="feedback"></div>
+  </section>
+
+  <!-- EXERCICE 4 -->
+  <section class="exercise-card" data-ex="4">
+    <div class="exercise-header">
+      <div class="exercise-title">
+        <span class="icon">🩺</span>
+        <h2>Exercice 4 – Situations cliniques</h2>
+      </div>
+      <div class="exercise-meta">Choisir la technique la plus adaptée + notion clé</div>
+    </div>
+    <p class="exercise-intro">
+      Pour chaque situation clinique, choisis la <strong>technique d’imagerie principale</strong> et la <strong>notion clé</strong> associée.
+    </p>
+
+    <!-- Cas 1 -->
+    <div class="case-block" data-tech="Scanner (TDM)" data-notion="Produit de contraste iodé">
+      <div class="case-text">
+        1. Homme de 55 ans, douleur abdominale aiguë, suspicion de diverticulite compliquée. On veut une analyse détaillée des organes
+        et des vaisseaux, avec injection de produit de contraste iodé.
+      </div>
+      <div class="case-selects">
+        <select class="case-tech">
+          <option value="">Technique principale…</option>
+          <option>Radiographie standard</option>
+          <option>Scanner (TDM)</option>
+          <option>Scintigraphie</option>
+          <option>TEP-Scanner</option>
+          <option>Échographie</option>
+        </select>
+        <select class="case-notion">
+          <option value="">Notion clé…</option>
+          <option>Produit de contraste iodé</option>
+          <option>MRP (vecteur + marqueur)</option>
+          <option>Ultrasons non ionisants</option>
+          <option>Examen strictement fonctionnel</option>
+        </select>
+      </div>
+      <div class="case-correction"></div>
+    </div>
+
+    <!-- Cas 2 -->
+    <div class="case-block" data-tech="Scintigraphie" data-notion="Imagerie fonctionnelle métabolique">
+      <div class="case-text">
+        2. Patient atteint d’un cancer prostatique, pour lequel on recherche des <strong>métastases osseuses</strong> à distance. On attend
+        des images de fixation diffuse ou focalisée du radio-traceur au niveau du squelette.
+      </div>
+      <div class="case-selects">
+        <select class="case-tech">
+          <option value="">Technique principale…</option>
+          <option>Radiographie standard</option>
+          <option>Scanner (TDM)</option>
+          <option>Scintigraphie</option>
+          <option>TEP-Scanner</option>
+          <option>Échographie</option>
+        </select>
+        <select class="case-notion">
+          <option value="">Notion clé…</option>
+          <option>Imagerie fonctionnelle métabolique</option>
+          <option>Coupe axiale X</option>
+          <option>Examen Doppler couleur</option>
+          <option>Tomographie par émission de positons</option>
+        </select>
+      </div>
+      <div class="case-correction"></div>
+    </div>
+
+    <!-- Cas 3 -->
+    <div class="case-block" data-tech="Échographie" data-notion="Ultrasons non ionisants">
+      <div class="case-text">
+        3. Femme enceinte de 22 semaines, suivi de grossesse standard. On souhaite visualiser le développement fœtal sans utiliser de
+        rayonnements ionisants.
+      </div>
+      <div class="case-selects">
+        <select class="case-tech">
+          <option value="">Technique principale…</option>
+          <option>Radiographie standard</option>
+          <option>Scanner (TDM)</option>
+          <option>Scintigraphie</option>
+          <option>TEP-Scanner</option>
+          <option>Échographie</option>
+        </select>
+        <select class="case-notion">
+          <option value="">Notion clé…</option>
+          <option>Rayons X ionisants</option>
+          <option>Ultrasons non ionisants</option>
+          <option>MRP (vecteur + marqueur)</option>
+          <option>Tomographie par émission de positons</option>
+        </select>
+      </div>
+      <div class="case-correction"></div>
+    </div>
+
+    <!-- Cas 4 -->
+    <div class="case-block" data-tech="TEP-Scanner" data-notion="Hyperfixation du 18FDG">
+      <div class="case-text">
+        4. Patient atteint d’un lymphome, bilan d’extension et évaluation de la réponse au traitement. On utilise un radiotraceur du type
+        <strong>18FDG</strong>, très consommé par les cellules tumorales, et on recherche des zones d’hyperfixation.
+      </div>
+      <div class="case-selects">
+        <select class="case-tech">
+          <option value="">Technique principale…</option>
+          <option>Radiographie standard</option>
+          <option>Scanner (TDM)</option>
+          <option>Scintigraphie</option>
+          <option>TEP-Scanner</option>
+          <option>Échographie</option>
+        </select>
+        <select class="case-notion">
+          <option value="">Notion clé…</option>
+          <option>Hyperfixation du 18FDG</option>
+          <option>Mesure de la densité minérale</option>
+          <option>Fenêtre pulmonaire</option>
+          <option>Balayage 2D par gamma caméra</option>
+        </select>
+      </div>
+      <div class="case-correction"></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" onclick="corrigerCas()">Corriger l’exercice 4</button>
+      <button type="button" class="btn secondary" onclick="resetCas()">Réinitialiser</button>
+      <button type="button" class="btn softer" onclick="showExercise(1)">Revenir à l’exercice 1</button>
+    </div>
+    <div id="feedback-cas" class="feedback"></div>
+  </section>
+
+</div>
+
+<script>
+// ---------- NAV EXERCICES ----------
+function showExercise(target) {
+  var buttons = document.querySelectorAll(".exercise-nav button");
+  var cards = document.querySelectorAll(".exercise-card");
+  buttons.forEach(function(btn) {
+    var t = btn.getAttribute("data-target");
+    if (String(target) === t) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
+  cards.forEach(function(c) {
+    var ex = c.getAttribute("data-ex");
+    c.style.display = (String(target) === ex) ? "block" : "none";
+  });
+}
+
+// initialisation nav
+(function() {
+  var buttons = document.querySelectorAll(".exercise-nav button");
+  buttons.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var target = btn.getAttribute("data-target");
+      showExercise(target);
+    });
+  });
+  showExercise(1);
+})();
+
+// ---------- EXERCICE 1 : QCM ----------
+function corrigerQCM() {
+  var questions = document.querySelectorAll(".qcm-question");
+  var total = questions.length;
+  var score = 0;
+
+  questions.forEach(function(q) {
+    q.classList.remove("good-answer", "bad-answer");
+    var correction = q.querySelector(".correction-line");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "correction-line";
+    }
+
+    var correct = q.getAttribute("data-correct");
+    var checked = q.querySelector("input[type=radio]:checked");
+    var correctInput = q.querySelector('input[type="radio"][value="' + correct + '"]');
+    var correctLabel = correctInput ? correctInput.parentNode : null;
+    var correctText = correctLabel ? correctLabel.textContent.trim() : "";
+
+    if (!checked) {
+      q.classList.add("bad-answer");
+      if (correction && correctText) {
+        correction.textContent = "Correction : " + correctText;
+        correction.classList.add("text-good");
+      }
+      return;
+    }
+
+    if (checked.value === correct) {
+      score++;
+      q.classList.add("good-answer");
+      if (correction && correctText) {
+        correction.textContent = "✔ Correct : " + correctText;
+        correction.classList.add("text-good");
+      }
+    } else {
+      q.classList.add("bad-answer");
+      if (correction && correctText) {
+        correction.textContent = "Correction : " + correctText;
+        correction.classList.add("text-good");
+      }
+    }
+  });
+
+  var fb = document.getElementById("feedback-qcm");
+  fb.className = "feedback " + (score === total ? "good" : "bad");
+  fb.innerHTML = "<span class='score'>" + score + " / " + total + "</span> bonnes réponses.";
+}
+
+function resetQCM() {
+  var questions = document.querySelectorAll(".qcm-question");
+  questions.forEach(function(q) {
+    q.classList.remove("good-answer", "bad-answer");
+    var inputs = q.querySelectorAll("input[type=radio]");
+    inputs.forEach(function(i) { i.checked = false; });
+    var correction = q.querySelector(".correction-line");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "correction-line";
+    }
+  });
+  var fb = document.getElementById("feedback-qcm");
+  fb.className = "feedback";
+  fb.textContent = "";
+}
+
+// ---------- EXERCICE 2 : VRAI / FAUX ----------
+function corrigerVF() {
+  var rows = document.querySelectorAll(".question-block .vf-row");
+  var total = rows.length;
+  var score = 0;
+
+  rows.forEach(function(row, index) {
+    row.classList.remove("good-answer", "bad-answer");
+    var correction = row.querySelector(".vf-correction");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "vf-correction";
+    }
+
+    var expected = row.getAttribute("data-correct");
+    var checked = row.querySelector("input[type='radio']:checked");
+
+    if (!checked) {
+      row.classList.add("bad-answer");
+      if (correction && expected) {
+        correction.textContent = "Correction : " + expected;
+        correction.classList.add("text-good");
+      }
+      return;
+    }
+
+    if (checked.value === expected) {
+      score++;
+      row.classList.add("good-answer");
+      if (correction && expected) {
+        correction.textContent = "✔ Correct : " + expected;
+        correction.classList.add("text-good");
+      }
+    } else {
+      row.classList.add("bad-answer");
+      if (correction && expected) {
+        correction.textContent = "Correction : " + expected;
+        correction.classList.add("text-good");
+      }
+    }
+  });
+
+  var fb = document.getElementById("feedback-vf");
+  fb.className = "feedback " + (score === total ? "good" : "bad");
+  fb.innerHTML = "<span class='score'>" + score + " / " + total + "</span> affirmations correctes.";
+}
+
+function resetVF() {
+  var rows = document.querySelectorAll(".question-block .vf-row");
+  rows.forEach(function(row) {
+    row.classList.remove("good-answer", "bad-answer");
+    var inputs = row.querySelectorAll("input[type='radio']");
+    inputs.forEach(function(i) { i.checked = false; });
+    var correction = row.querySelector(".vf-correction");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "vf-correction";
+    }
+  });
+  var fb = document.getElementById("feedback-vf");
+  fb.className = "feedback";
+  fb.textContent = "";
+}
+
+// ---------- EXERCICE 3 : MATCHING ----------
+function corrigerMatching() {
+  var rows = document.querySelectorAll(".match-row[data-correct]");
+  var total = rows.length;
+  var score = 0;
+
+  rows.forEach(function(row) {
+    row.classList.remove("good-answer", "bad-answer");
+    var select = row.querySelector("select");
+    var correction = row.querySelector(".match-correction");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "match-correction";
+    }
+
+    var correct = row.getAttribute("data-correct");
+    var value = select.value;
+
+    if (!value) {
+      row.classList.add("bad-answer");
+      if (correction && correct) {
+        correction.textContent = "Correction : " + correct;
+        correction.classList.add("text-good");
+      }
+      return;
+    }
+
+    if (value === correct) {
+      score++;
+      row.classList.add("good-answer");
+      if (correction && correct) {
+        correction.textContent = "✔ Correct : " + correct;
+        correction.classList.add("text-good");
+      }
+    } else {
+      row.classList.add("bad-answer");
+      if (correction && correct) {
+        correction.textContent = "Correction : " + correct;
+        correction.classList.add("text-good");
+      }
+    }
+  });
+
+  var fb = document.getElementById("feedback-match");
+  fb.className = "feedback " + (score === total ? "good" : "bad");
+  fb.innerHTML = "<span class='score'>" + score + " / " + total + "</span> associations correctes.";
+}
+
+function resetMatching() {
+  var rows = document.querySelectorAll(".match-row[data-correct]");
+  rows.forEach(function(row) {
+    row.classList.remove("good-answer", "bad-answer");
+    var select = row.querySelector("select");
+    select.value = "";
+    var correction = row.querySelector(".match-correction");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "match-correction";
+    }
+  });
+  var fb = document.getElementById("feedback-match");
+  fb.className = "feedback";
+  fb.textContent = "";
+}
+
+// ---------- EXERCICE 4 : CAS CLINIQUES ----------
+function corrigerCas() {
+  var cases = document.querySelectorAll(".case-block");
+  var total = cases.length * 2; // technique + notion
+  var score = 0;
+
+  cases.forEach(function(c) {
+    c.classList.remove("good-answer", "bad-answer");
+    var expectedTech = c.getAttribute("data-tech");
+    var expectedNotion = c.getAttribute("data-notion");
+    var techSelect = c.querySelector(".case-tech");
+    var notionSelect = c.querySelector(".case-notion");
+    var correction = c.querySelector(".case-correction");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "case-correction";
+    }
+
+    var vTech = techSelect.value;
+    var vNotion = notionSelect.value;
+    var good = true;
+
+    if (vTech === expectedTech) {
+      score++;
+    } else {
+      good = false;
+    }
+    if (vNotion === expectedNotion) {
+      score++;
+    } else {
+      good = false;
+    }
+
+    if (correction) {
+      correction.textContent = "Correction : " + expectedTech + " – " + expectedNotion;
+      correction.classList.add("text-good");
+    }
+
+    if (good) {
+      c.classList.add("good-answer");
+    } else {
+      c.classList.add("bad-answer");
+    }
+  });
+
+  var fb = document.getElementById("feedback-cas");
+  fb.className = "feedback " + (score === total ? "good" : "bad");
+  fb.innerHTML = "<span class='score'>" + score + " / " + total + "</span> éléments correctement identifiés.";
+}
+
+function resetCas() {
+  var cases = document.querySelectorAll(".case-block");
+  cases.forEach(function(c) {
+    c.classList.remove("good-answer", "bad-answer");
+    var techSelect = c.querySelector(".case-tech");
+    var notionSelect = c.querySelector(".case-notion");
+    techSelect.value = "";
+    notionSelect.value = "";
+    var correction = c.querySelector(".case-correction");
+    if (correction) {
+      correction.textContent = "";
+      correction.className = "case-correction";
+    }
+  });
+  var fb = document.getElementById("feedback-cas");
+  fb.className = "feedback";
+  fb.textContent = "";
+}
+</script>
+</body>
+</html>

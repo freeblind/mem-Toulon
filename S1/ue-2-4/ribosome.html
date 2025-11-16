@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Ribosome – Sites A, P, E (step by step)</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      background: #020617;
+      color: #f9fafb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    h1 {
+      font-size: 24px;
+      color: #fbbf24;
+      text-align: center;
+      margin: 0 0 4px;
+    }
+    .subtitle-main {
+      text-align: center;
+      font-size: 13px;
+      color: #e5e7eb;
+      opacity: 0.85;
+      margin-bottom: 16px;
+    }
+    .panel {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #0f172a;
+      border-radius: 14px;
+      padding: 12px 14px 14px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.7);
+    }
+    .panel-title {
+      font-size: 17px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .panel-subtitle {
+      font-size: 11px;
+      text-align: center;
+      opacity: 0.8;
+      margin-bottom: 8px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: 940px;
+      margin: 0 auto;
+      background: #020617;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 11px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    button.secondary {
+      background: #4b5563;
+    }
+    button:active {
+      transform: translateY(1px);
+    }
+    .badge {
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      white-space: nowrap;
+    }
+    .step-label {
+      font-size: 13px;
+      text-align: center;
+      margin-top: 8px;
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+    .step-help {
+      font-size: 11px;
+      margin-top: 4px;
+      text-align: center;
+      color: #9ca3af;
+      min-height: 32px;
+    }
+    .chain-text {
+      font-size: 12px;
+      margin-top: 6px;
+      text-align: center;
+      color: #d1d5db;
+    }
+    .legend-block {
+      margin-top: 10px;
+      font-size: 12px;
+      background: #020617;
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid #1f2937;
+    }
+    .legend-block h2 {
+      font-size: 13px;
+      margin: 0 0 4px;
+      color: #fbbf24;
+    }
+    .legend-block ul {
+      padding-left: 18px;
+      margin: 4px 0;
+    }
+    .legend-block li {
+      margin-bottom: 2px;
+    }
+    .legend-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+      font-size: 11px;
+      color: #d1d5db;
+    }
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .dot-mRNA { background: #22c55e; }
+    .dot-tRNA-A { background: #22c55e; }
+    .dot-tRNA-P { background: #f97316; }
+    .dot-tRNA-E { background: #9ca3af; }
+    .dot-polypeptide { background: #38bdf8; }
+  </style>
+</head>
+<body>
+  <h1>Traduction : sites A, P, E du ribosome</h1>
+  <div class="subtitle-main">
+    Animation <strong>pas à pas</strong> : ce qui se passe précisément dans les sites <strong>A</strong>, <strong>P</strong>, <strong>E</strong>
+    à chaque cycle d’élongation (arrivée de l’ARNt, <strong>liaison peptidique</strong>, <strong>translocation</strong>).
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Cycle d’élongation – sites bien séparés</div>
+    <div class="panel-subtitle">
+      Clique sur <strong>Étape suivante</strong> et regarde l’ARNt dans <span style="color:#22c55e;">A</span>,
+      la chaîne en <span style="color:#f97316;">P</span> et la sortie de l’ARNt vide par <span style="color:#9ca3af;">E</span>.
+    </div>
+
+    <canvas id="ribosomeScene" width="940" height="420"></canvas>
+
+    <div class="controls">
+      <button id="prevBtn">◀ Étape précédente</button>
+      <button id="nextBtn">Étape suivante ▶</button>
+      <button id="restartBtn" class="secondary">Recommencer au début</button>
+      <div id="stepIndexBadge" class="badge">Étape 1 / ?</div>
+    </div>
+
+    <div id="stepTitle" class="step-label"></div>
+    <div id="stepText" class="step-help"></div>
+    <div id="chainText" class="chain-text"></div>
+
+    <div class="legend-block">
+      <h2>Ce que montre chaque étape</h2>
+      <ul>
+        <li><strong>Site A (Aminoacyl)</strong> – arrivée d’un ARNt chargé (ex. GGC → Gly).</li>
+        <li><strong>Site P (Peptidyl)</strong> – ARNt qui porte la chaîne : Met, puis Met–Gly, Met–Gly–Leu, etc.</li>
+        <li><strong>Site E (Exit)</strong> – ARNt <em>vide</em> qui quitte le ribosome.</li>
+        <li>En bas, chaque ARNt est posé sur son <strong>codon</strong> d’ARNm (AUG, GGC, UUA, CGA, AAU, GAA, puis UAA = STOP).</li>
+        <li>Les acides aminés représentés ici :
+          AUG → Met, GGC → Gly, UUA → Leu, CGA → Arg, AAU → Asn, GAA → Glu.</li>
+      </ul>
+      <div class="legend-inline">
+        <div><span class="dot dot-mRNA"></span> ARNm / codons</div>
+        <div><span class="dot dot-tRNA-P"></span> ARNt en site P (porte la chaîne)</div>
+        <div><span class="dot dot-tRNA-A"></span> ARNt en site A (nouvel AA)</div>
+        <div><span class="dot dot-tRNA-E"></span> ARNt en site E (vide)</div>
+        <div><span class="dot dot-polypeptide"></span> Chaîne polypeptidique (Met – Gly – Leu – …)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById('ribosomeScene');
+      const ctx = canvas.getContext('2d');
+
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      const stepIndexBadge = document.getElementById('stepIndexBadge');
+      const stepTitle = document.getElementById('stepTitle');
+      const stepText = document.getElementById('stepText');
+      const chainText = document.getElementById('chainText');
+
+      const centerX = canvas.width / 2;
+      const centerY = 220;
+
+      const xE = centerX - 220;
+      const xP = centerX;
+      const xA = centerX + 220;
+      const yTop = 110;
+      const yBottom = 310;
+      const yTRNA = 210;
+      const yCodon = 270;
+
+      const codons = ["AUG", "GGC", "UUA", "CGA", "AAU", "GAA", "UAA"]; // dernier = STOP
+
+      function codonToAA(codon) {
+        switch (codon) {
+          case "AUG": return "Met";
+          case "GGC": return "Gly";
+          case "UUA": return "Leu";
+          case "CGA": return "Arg";
+          case "AAU": return "Asn";
+          case "GAA": return "Glu";
+          default: return null; // STOP ou non défini
+        }
+      }
+
+      const frames = [];
+
+      function buildFrames() {
+        frames.length = 0;
+
+        let prevCodon = codons[0]; // AUG
+        let chain = [];
+        const firstAA = codonToAA(prevCodon);
+        if (firstAA) chain.push(firstAA); // Met
+
+        // 0 – Initiation
+        frames.push({
+          title: "0. Initiation : codon de départ en site P",
+          explanation: "Le codon AUG (Met) est en site P. L’ARNt initiateur porte déjà Met et la chaîne commence : Met.",
+          P: { codon: prevCodon, aa: firstAA, hasChain: true },
+          A: null,
+          E: null,
+          chain: [...chain],
+          phase: "init"
+        });
+
+        // cycles d’élongation sur les codons suivants (sans le STOP)
+        for (let i = 1; i < codons.length - 1; i++) {
+          const codon = codons[i];
+          const aa = codonToAA(codon) || "AA";
+
+          // 1) Décodage : ARNt arrive en A
+          frames.push({
+            title: `Cycle ${i} – Décodage : ARNt en site A`,
+            explanation: `Un ARNt chargé portant ${aa} vient reconnaître le codon ${codon} en site A. La chaîne est encore sur l’ARNt en P (${chain.join(" – ") || "Met"}).`,
+            P: { codon: prevCodon, aa: chain[chain.length - 1], hasChain: true },
+            A: { codon, aa, hasChain: false },
+            E: null,
+            chain: [...chain],
+            phase: "decode"
+          });
+
+          // 2) Liaison peptidique
+          frames.push({
+            title: `Cycle ${i} – Liaison peptidique en P/A`,
+            explanation: `La liaison peptidique se forme : la chaîne ${chain.join(" – ")} est transférée sur ${aa} en site A.`,
+            P: { codon: prevCodon, aa: chain[chain.length - 1], hasChain: false },
+            A: { codon, aa, hasChain: true },
+            E: null,
+            chain: [...chain], // la chaîne n’a pas encore "avancé" officiellement
+            phase: "peptidyl"
+          });
+
+          // 3) Translocation
+          chain = [...chain, aa]; // la chaîne s’allonge réellement
+          frames.push({
+            title: `Cycle ${i} – Translocation : A → P, P → E`,
+            explanation: `Le ribosome avance d’un codon : l’ARNt qui porte ${chain.join(" – ")} passe en P. L’ancien ARNt quitte par E (vide).`,
+            P: { codon, aa, hasChain: true },
+            A: null,
+            E: { occupied: true, label: "ARNt vide" },
+            chain: [...chain],
+            phase: "transloc"
+          });
+
+          prevCodon = codon;
+        }
+
+        // Dernière étape : codon STOP
+        const stopCodon = codons[codons.length - 1]; // UAA
+        frames.push({
+          title: "Dernière étape – Codon STOP en site A",
+          explanation: `Le codon STOP (${stopCodon}) arrive en site A : aucun ARNt ne peut se lier. Des facteurs de terminaison libèrent la chaîne polypeptidique complète.`,
+          P: { codon: prevCodon, aa: chain[chain.length - 1], hasChain: true },
+          A: { codon: stopCodon, aa: "STOP", hasChain: false },
+          E: null,
+          chain: [...chain],
+          phase: "stop"
+        });
+      }
+
+      // ===================== DESSINS =====================
+
+      function drawSiteColumns(frame) {
+        const siteWidth = 150;
+
+        function alphaFor(site) {
+          switch (frame.phase) {
+            case "init":
+              return site === "P" ? 0.35 : 0.12;
+            case "decode":
+              return site === "A" ? 0.38 : 0.16;
+            case "peptidyl":
+              return site === "P" || site === "A" ? 0.4 : 0.16;
+            case "transloc":
+              return site === "P" || site === "E" ? 0.35 : 0.16;
+            case "stop":
+              return site === "P" || site === "A" ? 0.35 : 0.16;
+            default:
+              return 0.2;
+          }
+        }
+
+        // E
+        ctx.fillStyle = "rgba(148, 163, 184," + alphaFor("E") + ")";
+        ctx.fillRect(xE - siteWidth / 2, yTop, siteWidth, yBottom - yTop);
+        // P
+        ctx.fillStyle = "rgba(245, 158, 11," + alphaFor("P") + ")";
+        ctx.fillRect(xP - siteWidth / 2, yTop - 6, siteWidth, yBottom - yTop + 12);
+        // A
+        ctx.fillStyle = "rgba(34, 197, 94," + alphaFor("A") + ")";
+        ctx.fillRect(xA - siteWidth / 2, yTop, siteWidth, yBottom - yTop);
+
+        // séparateurs verticaux
+        ctx.save();
+        ctx.strokeStyle = "rgba(15,23,42,0.9)";
+        ctx.setLineDash([6, 4]);
+        ctx.lineWidth = 1.2;
+
+        ctx.beginPath();
+        ctx.moveTo(xE, yTop - 8);
+        ctx.lineTo(xE, yBottom + 10);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(xP, yTop - 10);
+        ctx.lineTo(xP, yBottom + 10);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(xA, yTop - 8);
+        ctx.lineTo(xA, yBottom + 10);
+        ctx.stroke();
+
+        ctx.restore();
+
+        // labels des sites
+        ctx.save();
+        ctx.font = "13px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillStyle = "#9ca3af";
+        ctx.fillText("Site E (Exit)", xE, yTop - 12);
+
+        ctx.fillStyle = "#f97316";
+        ctx.fillText("Site P (Peptidyl – chaîne)", xP, yTop - 20);
+
+        ctx.fillStyle = "#22c55e";
+        ctx.fillText("Site A (Aminoacyl – nouvel ARNt)", xA, yTop - 12);
+
+        ctx.restore();
+      }
+
+      function drawRibosomeShape() {
+        const bigR = 210;
+
+        // grande sous-unité
+        ctx.save();
+        ctx.fillStyle = "#1f2937";
+        ctx.strokeStyle = "#4b5563";
+        ctx.lineWidth = 2;
+
+        const bigTop = centerY - 130;
+        const bigBottom = centerY + 10;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX - bigR, centerY - 30);
+        ctx.quadraticCurveTo(centerX - bigR / 2, bigTop, centerX, bigTop - 5);
+        ctx.quadraticCurveTo(centerX + bigR / 2, bigTop, centerX + bigR, centerY - 30);
+        ctx.quadraticCurveTo(centerX + bigR / 2, bigBottom + 6, centerX, bigBottom + 10);
+        ctx.quadraticCurveTo(centerX - bigR / 2, bigBottom + 6, centerX - bigR, centerY - 30);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // petite sous-unité
+        ctx.fillStyle = "#111827";
+        ctx.strokeStyle = "#4b5563";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        const smallTop = centerY + 15;
+        const smallBottom = centerY + 70;
+        ctx.moveTo(centerX - bigR * 0.65, smallTop);
+        ctx.quadraticCurveTo(centerX - bigR * 0.25, smallTop - 10, centerX, smallTop - 6);
+        ctx.quadraticCurveTo(centerX + bigR * 0.25, smallTop - 10, centerX + bigR * 0.65, smallTop);
+        ctx.quadraticCurveTo(centerX + bigR * 0.25, smallBottom + 8, centerX, smallBottom + 12);
+        ctx.quadraticCurveTo(centerX - bigR * 0.25, smallBottom + 8, centerX - bigR * 0.65, smallTop);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function drawmRNA(frame) {
+        // ligne ARNm
+        ctx.save();
+        ctx.strokeStyle = "#22c55e";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(xE - 80, yCodon);
+        ctx.lineTo(xA + 80, yCodon);
+        ctx.stroke();
+
+        // flèche 5'→3'
+        ctx.beginPath();
+        ctx.moveTo(xA + 60, yCodon);
+        ctx.lineTo(xA + 80, yCodon);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(xA + 80, yCodon);
+        ctx.lineTo(xA + 74, yCodon - 4);
+        ctx.lineTo(xA + 74, yCodon + 4);
+        ctx.closePath();
+        ctx.fillStyle = "#22c55e";
+        ctx.fill();
+
+        ctx.fillStyle = "#a7f3d0";
+        ctx.font = "11px system-ui";
+        ctx.textAlign = "right";
+        ctx.fillText("5′", xE - 84, yCodon - 10);
+        ctx.fillText("3′", xA + 74, yCodon - 10);
+        ctx.restore();
+
+        // codons sous P et A uniquement (E = ARNt qui sort, pas de nouveau codon lu)
+        function drawCodonBox(codon, x, isStop) {
+          const w = 48;
+          const h = 22;
+          const rx = x - w / 2;
+          const ry = yCodon - h / 2;
+          let fill = "rgba(34,197,94,0.18)";
+          let stroke = "rgba(34,197,94,0.9)";
+
+          if (isStop) {
+            fill = "rgba(248,113,113,0.22)";
+            stroke = "rgba(248,113,113,0.95)";
+          }
+
+          ctx.save();
+          if (ctx.roundRect) {
+            ctx.beginPath();
+            ctx.roundRect(rx, ry, w, h, 4);
+          } else {
+            ctx.beginPath();
+            ctx.rect(rx, ry, w, h);
+          }
+          ctx.fillStyle = fill;
+          ctx.fill();
+          ctx.strokeStyle = stroke;
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+
+          ctx.fillStyle = "#e5e7eb";
+          ctx.font = "11px system-ui";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(codon, x, yCodon + 0.5);
+          ctx.restore();
+        }
+
+        if (frame.P && frame.P.codon) {
+          drawCodonBox(frame.P.codon, xP, frame.phase === "stop" && frame.A && frame.A.codon === "UAA");
+        }
+        if (frame.A && frame.A.codon) {
+          drawCodonBox(frame.A.codon, xA, frame.A.codon === "UAA");
+        }
+      }
+
+      function drawTRNA(x, aaLabel, hasChain, chainTextLocal, siteLabel, colorBody) {
+        const y = yTRNA;
+
+        // tige
+        ctx.strokeStyle = colorBody;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y - 28);
+        ctx.stroke();
+
+        // base anticodon
+        ctx.beginPath();
+        ctx.moveTo(x - 11, y);
+        ctx.lineTo(x + 11, y);
+        ctx.stroke();
+
+        // crochet vers le centre
+        ctx.beginPath();
+        ctx.moveTo(x, y - 20);
+        ctx.lineTo(x - 10, y - 30);
+        ctx.stroke();
+
+        // acide aminé (rond)
+        ctx.beginPath();
+        ctx.arc(x, y - 34, 9, 0, Math.PI * 2);
+        ctx.fillStyle = colorBody;
+        ctx.fill();
+
+        ctx.fillStyle = "#020617";
+        ctx.font = "9px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(aaLabel, x, y - 34);
+
+        // étiquette ARNt + site
+        ctx.fillStyle = "#e5e7eb";
+        ctx.font = "9px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText("ARNt " + siteLabel, x, y + 3);
+
+        // chaine locale si présente
+        if (hasChain && chainTextLocal) {
+          ctx.fillStyle = "#bae6fd";
+          ctx.font = "9px system-ui";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          ctx.fillText("Chaîne : " + chainTextLocal, x, y - 54);
+        }
+      }
+
+      function drawSitesContent(frame) {
+        // Site E
+        if (frame.E && frame.E.occupied) {
+          ctx.save();
+          ctx.fillStyle = "#9ca3af";
+          ctx.font = "10px system-ui";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("ARNt vide en sortie", xE, yTRNA + 4);
+          ctx.restore();
+        } else {
+          // gris clair : vide
+          ctx.save();
+          ctx.fillStyle = "rgba(148,163,184,0.7)";
+          ctx.font = "10px system-ui";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Site E : vide", xE, yTRNA + 4);
+          ctx.restore();
+        }
+
+        // Site P
+        if (frame.P) {
+          const aaLabel = frame.P.aa || "AA";
+          let chainLabel = null;
+          if (frame.P.hasChain) {
+            // si on est en phase de liaison peptidique, la chaîne complète est sur A, pas sur P
+            if (frame.phase === "peptidyl") {
+              // ici P n’a plus la chaîne
+              chainLabel = null;
+            } else {
+              chainLabel = frame.chain.join(" – ");
+            }
+          }
+          drawTRNA(xP, aaLabel, !!frame.P.hasChain, chainLabel, "P", "#f97316");
+        } else {
+          ctx.save();
+          ctx.fillStyle = "#f97316";
+          ctx.font = "10px system-ui";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Site P : vide", xP, yTRNA + 4);
+          ctx.restore();
+        }
+
+        // Site A
+        if (frame.A) {
+          const aaLabel = frame.A.aa || "AA";
+          let chainLabel = null;
+          if (frame.A.hasChain) {
+            if (frame.phase === "peptidyl" && frame.A.aa !== "STOP") {
+              const extended = [...frame.chain, frame.A.aa];
+              chainLabel = extended.join(" – ");
+            } else {
+              chainLabel = frame.chain.join(" – ");
+            }
+          }
+          drawTRNA(xA, aaLabel, !!frame.A.hasChain, chainLabel, "A", "#22c55e");
+        } else {
+          ctx.save();
+          ctx.fillStyle = "#22c55e";
+          ctx.font = "10px system-ui";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("Site A : vide (en attente d’un ARNt)", xA, yTRNA + 4);
+          ctx.restore();
+        }
+
+        // Flèche d’arrivée des ARNt à droite
+        ctx.save();
+        ctx.strokeStyle = "rgba(34,197,94,0.9)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(xA + 120, yTRNA);
+        ctx.lineTo(xA + 40, yTRNA);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(xA + 40, yTRNA);
+        ctx.lineTo(xA + 48, yTRNA - 4);
+        ctx.lineTo(xA + 48, yTRNA + 4);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(34,197,94,0.9)";
+        ctx.fill();
+
+        ctx.fillStyle = "#22c55e";
+        ctx.font = "11px system-ui";
+        ctx.textAlign = "left";
+        ctx.fillText("Arrivée des ARNt chargés (site A)", xA + 130, yTRNA - 4);
+        ctx.restore();
+      }
+
+      function drawFrame(frame) {
+        // fond
+        const grad = ctx.createRadialGradient(
+          canvas.width / 2, canvas.height / 2, 40,
+          canvas.width / 2, canvas.height / 2, canvas.width / 1.4
+        );
+        grad.addColorStop(0, "#020617");
+        grad.addColorStop(0.55, "#020617");
+        grad.addColorStop(1, "#000000");
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawSiteColumns(frame);
+        drawRibosomeShape();
+        drawmRNA(frame);
+        drawSitesContent(frame);
+
+        // petit titre interne
+        ctx.save();
+        ctx.fillStyle = "#e5e7eb";
+        ctx.font = "11px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillText("Traduction : cycle d’élongation", centerX, 12);
+        ctx.restore();
+      }
+
+      // ===================== GESTION DES ÉTAPES =====================
+
+      let currentIndex = 0;
+
+      function updateTextAndChain() {
+        const frame = frames[currentIndex];
+        stepTitle.textContent = frame.title;
+        stepText.textContent = frame.explanation;
+        stepIndexBadge.textContent = "Étape " + (currentIndex + 1) + " / " + frames.length;
+
+        // Chaîne polypeptidique affichée (pendant la liaison, on montre déjà la chaîne allongée)
+        let chainDisplay = frame.chain;
+        if (frame.phase === "peptidyl" && frame.A && frame.A.aa !== "STOP") {
+          chainDisplay = [...frame.chain, frame.A.aa];
+        }
+
+        if (!chainDisplay || chainDisplay.length === 0) {
+          chainText.textContent = "Chaîne polypeptidique (ordre des acides aminés) : —";
+        } else {
+          chainText.textContent = "Chaîne polypeptidique (ordre des acides aminés) : " +
+            chainDisplay.join(" – ");
+        }
+      }
+
+      function render() {
+        const frame = frames[currentIndex];
+        drawFrame(frame);
+        updateTextAndChain();
+      }
+
+      // ===================== ÉVÈNEMENTS =====================
+
+      prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+          currentIndex--;
+          render();
+        }
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (currentIndex < frames.length - 1) {
+          currentIndex++;
+          render();
+        }
+      });
+
+      restartBtn.addEventListener('click', () => {
+        currentIndex = 0;
+        render();
+      });
+
+      // ===================== INIT =====================
+
+      buildFrames();
+      currentIndex = 0;
+      render();
+    })();
+  </script>
+</body>
+</html>

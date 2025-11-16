@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>UE 2.4 S1 - TD & TPG interactifs (V2)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: #1e88e5;
+      color: white;
+      padding: 16px 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.6rem;
+    }
+
+    header p {
+      margin: 4px 0 0;
+      font-size: 0.95rem;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    nav {
+      background: white;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      font-size: 0.95rem;
+    }
+
+    nav a {
+      margin-right: 15px;
+      text-decoration: none;
+      color: #1e88e5;
+      font-weight: bold;
+    }
+
+    .section-title {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      font-size: 1.4rem;
+      color: #333;
+    }
+
+    .section-intro {
+      font-size: 0.95rem;
+      margin-bottom: 15px;
+      color: #555;
+    }
+
+    .warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffb300;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+
+    .question-block {
+      background: white;
+      margin-bottom: 16px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .question-block h3 {
+      margin-top: 0;
+      font-size: 1.05rem;
+      color: #222;
+    }
+
+    .question-text {
+      margin: 6px 0 8px;
+      font-size: 0.95rem;
+    }
+
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 6px 8px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .toggle-correction,
+    .check-order,
+    .check-match {
+      display: inline-block;
+      padding: 5px 10px;
+      margin: 4px 4px 6px 0;
+      font-size: 0.85rem;
+      border-radius: 4px;
+      border: 1px solid #1e88e5;
+      background: #e3f2fd;
+      color: #1e88e5;
+      cursor: pointer;
+    }
+
+    .toggle-correction:hover,
+    .check-order:hover,
+    .check-match:hover {
+      background: #bbdefb;
+    }
+
+    .correction {
+      display: none;
+      font-size: 0.9rem;
+      color: #1b5e20;
+      border-left: 3px solid #1b5e20;
+      padding-left: 10px;
+      margin-top: 4px;
+      white-space: pre-line;
+    }
+
+    .next-link {
+      text-align: right;
+      margin-top: 8px;
+      font-size: 0.9rem;
+    }
+
+    .next-link a {
+      color: #1e88e5;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .next-link a:hover {
+      text-decoration: underline;
+    }
+
+    ul, ol {
+      margin-top: 4px;
+      margin-bottom: 4px;
+      padding-left: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 4px 6px;
+      text-align: left;
+    }
+
+    .footer-debug {
+      margin-top: 25px;
+      text-align: right;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    .footer-debug a {
+      color: #777;
+      text-decoration: none;
+    }
+
+    .footer-debug a:hover {
+      text-decoration: underline;
+    }
+
+    /* Drag & drop – remise en ordre */
+    .dd-container {
+      margin-top: 6px;
+    }
+
+    .dd-list {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
+    .dd-item {
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      border: 1px solid #bdbdbd;
+      background: #fafafa;
+      cursor: move;
+      font-size: 0.9rem;
+    }
+
+    .dd-item.dragging {
+      opacity: 0.6;
+      border-style: dashed;
+    }
+
+    .dd-item.correct {
+      border-color: #2e7d32;
+      background: #e8f5e9;
+    }
+
+    .dd-item.incorrect {
+      border-color: #c62828;
+      background: #ffebee;
+    }
+
+    .dd-list.dd-over {
+      border: 1px dashed #1e88e5;
+      padding: 6px;
+    }
+
+    /* Matching – association */
+    .match-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .match-left,
+    .match-right {
+      flex: 1 1 250px;
+      min-width: 250px;
+    }
+
+    .match-slot {
+      border: 1px dashed #9e9e9e;
+      border-radius: 4px;
+      padding: 6px;
+      margin-bottom: 6px;
+      min-height: 40px;
+      font-size: 0.88rem;
+      background: #fafafa;
+    }
+
+    .match-slot-label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .match-slot.good {
+      border-color: #2e7d32;
+      background: #e8f5e9;
+    }
+
+    .match-slot.bad {
+      border-color: #c62828;
+      background: #ffebee;
+    }
+
+    .match-pool {
+      border: 1px solid #bdbdbd;
+      border-radius: 4px;
+      padding: 6px;
+      min-height: 40px;
+      background: #ffffff;
+    }
+
+    .match-item {
+      display: inline-block;
+      padding: 4px 8px;
+      margin: 3px;
+      border-radius: 4px;
+      border: 1px solid #616161;
+      background: #eeeeee;
+      font-size: 0.9rem;
+      cursor: move;
+      user-select: none;
+    }
+
+    .match-item.dragging {
+      opacity: 0.6;
+      border-style: dashed;
+    }
+  </style>
+</head>
+<body>
+<header id="haut">
+  <h1>UE 2.4 S1 – Biologie cellulaire</h1>
+  <p>TD 1, TD 2 et TPG – Version interactive (saisie libre, drag & drop, associations, corrections).</p>
+</header>
+
+<main>
+  <nav>
+    <strong>Navigation :</strong>
+    <a href="#td1">TD 1</a>
+    <a href="#td2">TD 2</a>
+    <a href="#tpg">TPG</a>
+  </nav>
+
+  <div class="warning">
+    Remarque : les questions purement basées sur des tableaux/schémas non visibles dans les fichiers
+    (Vrai/Faux sans le texte, schémas sans légende) ne sont pas reprises pour éviter d’inventer du contenu.
+  </div>
+
+  <!-- =================== TD 1 =================== -->
+  <section id="td1">
+    <h2 class="section-title">TD 1 – Biologie cellulaire (1/2)</h2>
+    <p class="section-intro">
+      Pour chaque question : réponds d’abord, puis affiche la correction.  
+      Pour les questions d’ordre / étapes, un système de drag & drop est utilisé plus loin (dans le TPG).
+    </p>
+
+    <!-- TD1 Q1 -->
+    <div class="question-block" id="td1-q1">
+      <h3>Question 1</h3>
+      <div class="question-text">
+        Citez les 4 éléments majeurs de l’organisme.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+CHON : 
+- Carbone
+- Hydrogène
+- Oxygène
+- Azote
+      </div>
+    </div>
+
+    <!-- TD1 Q2 -->
+    <div class="question-block" id="td1-q2">
+      <h3>Question 2</h3>
+      <div class="question-text">
+        2.1. Citez les 3 types de liaisons chimiques.<br>
+        2.2. Classez ces 3 types de liaisons de la plus résistante à la moins résistante.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Types de liaisons chimiques :
+- Liaison covalente
+- Liaison ionique
+- Liaison hydrogène
+
+De la plus résistante à la moins résistante :
+1. Liaison covalente
+2. Liaison ionique
+3. Liaison hydrogène
+      </div>
+    </div>
+
+    <!-- TD1 Q3 -->
+    <div class="question-block" id="td1-q3">
+      <h3>Question 3</h3>
+      <div class="question-text">
+        Complétez le schéma concernant la répartition de l’eau dans l’organisme (eau totale,
+        intra / extra-cellulaire…).
+      </div>
+      <textarea placeholder="Écris les pourcentages et la répartition des compartiments."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Ordres de grandeur classiques de répartition de l’eau :
+- Eau totale : ≈ 60 % du poids corporel
+- Compartiment intracellulaire : ≈ 40 % du poids corporel (≈ 2/3 de l’eau totale)
+- Compartiment extracellulaire : ≈ 20 % du poids corporel (≈ 1/3 de l’eau totale)
+    • Liquide interstitiel : ≈ 15 %
+    • Plasma : ≈ 5 %
+      </div>
+    </div>
+
+    <!-- TD1 Q4 -->
+    <div class="question-block" id="td1-q4">
+      <h3>Question 4</h3>
+      <div class="question-text">
+        a) Indiquez le pH de l’organisme.<br>
+        b) Définissez l’acidose.<br>
+        c) Nommez un système de régulation du pH.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+pH de l’organisme :
+- Il se situe entre 7,35 et 7,45.
+
+Définition de l’acidose :
+- Situation où le pH est inférieur à 7,35.
+
+Exemples de systèmes de régulation du pH :
+- Systèmes tampons (absorption ou libération d’H+ / absorption d’OH−)
+- Excrétion rénale des H+ et absorption des HCO3−
+- Expiration du CO2 (réglage respiratoire)
+      </div>
+    </div>
+
+    <!-- TD1 Q5 -->
+    <div class="question-block" id="td1-q5">
+      <h3>Question 5</h3>
+      <div class="question-text">
+        a) Citez les 4 familles moléculaires organiques constituant le vivant.<br>
+        b) Indiquez 2 rôles principaux des glucides.<br>
+        c) Citez 2 rôles concernant la famille des lipides.<br>
+        d) Que signifie l’acronyme ARN ?
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Familles moléculaires organiques :
+- Lipides
+- Glucides
+- Protides
+- Acides nucléiques
+
+Rôles principaux des glucides :
+- Réserve énergétique
+- Constitution de structures rigides (macromolécules)
+
+Rôles des lipides (au moins 2) :
+- Constituant de la membrane plasmique
+- Réserve énergétique
+- Composant de certaines vitamines
+- Communication intercellulaire et intracellulaire
+
+Signification de ARN :
+- Acide ribonucléique
+      </div>
+    </div>
+
+    <!-- TD1 Q6 -->
+    <div class="question-block" id="td1-q6">
+      <h3>Question 6</h3>
+      <div class="question-text">
+        À partir du tableau des acides aminés, nommez les 20 acides aminés.
+      </div>
+      <textarea placeholder="Liste tous les acides aminés que tu peux."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Les 20 acides aminés standards (ordre libre) :
+- Alanine
+- Arginine
+- Asparagine
+- Acide aspartique (Aspartate)
+- Cystéine
+- Acide glutamique (Glutamate)
+- Glutamine
+- Glycine
+- Histidine
+- Isoleucine
+- Leucine
+- Lysine
+- Méthionine
+- Phénylalanine
+- Proline
+- Sérine
+- Thréonine
+- Tryptophane
+- Tyrosine
+- Valine
+      </div>
+    </div>
+
+    <!-- TD1 Q9 -->
+    <div class="question-block" id="td1-q9">
+      <h3>Question 9</h3>
+      <div class="question-text">
+        Explicitez les 4 grandes phases du cycle cellulaire de la mitose.
+      </div>
+      <textarea placeholder="Décris G1, S, G2, M."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Les 4 grandes phases :
+- G1 : croissance cellulaire et préparation de la réplication.
+- S : réplication de l’ADN.
+- G2 : croissance cellulaire et préparation de la mitose.
+- M : mitose (prophase, métaphase, anaphase, télophase – PMAT).
+      </div>
+    </div>
+
+    <!-- TD1 Q10 -->
+    <div class="question-block" id="td1-q10">
+      <h3>Question 10</h3>
+      <div class="question-text">
+        Citez deux caractéristiques des cellules cancéreuses.
+      </div>
+      <textarea placeholder="Écris au moins deux caractéristiques."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Exemples de caractéristiques (au moins 2) :
+- Se divisent rapidement et de façon infinie.
+- Gardent certaines caractéristiques des tissus sains (intérêt anatomo-pathologie).
+- Invasives.
+- Peuvent créer des métastases (dissémination par voie sanguine ou lymphatique).
+- Responsables d’angiogenèse (visible en imagerie injectée).
+- Concurrencent les tissus normaux pour les nutriments (tissus sains qui finissent par diminuer voire mourir).
+      </div>
+    </div>
+
+    <!-- TD1 Q11 -->
+    <div class="question-block" id="td1-q11">
+      <h3>Question 11</h3>
+      <div class="question-text">
+        11.1. Citez les 3 éléments composant la membrane plasmique.<br>
+        11.2. Citez 3 caractéristiques de la membrane plasmique.<br>
+        11.3. Explicitez les 2 types de transports avec mouvements membranaires.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Éléments composants la membrane plasmique :
+- Lipides : phospholipides et cholestérol en bicouche
+- Protides : protéines intégrales / transmembranaires, ancrées, périphériques
+- Glucides (≤ 5 %) : glycolipides (reliés à un lipide) et glycoprotéines (reliées à une protéine)
+
+Caractéristiques de la membrane plasmique (au moins 3) :
+- Asymétrie entre les 2 feuillets dans la composition (lipides, protides, glucides)
+- Mouvements libres des protides et lipides
+- Présence d’expansions : microvillosités (expansions apicales), stéréocils (microvillosités géantes),
+  cils (parfois mobiles), expansions du pôle basal
+
+Transports avec mouvements membranaires :
+- Endocytose : internalisation d’un matériel extracellulaire (ex : phagocytose par les macrophages)
+- Exocytose : exportation de matériel vers le milieu extracellulaire
+      </div>
+    </div>
+
+    <!-- TD1 Q14 -->
+    <div class="question-block" id="td1-q14">
+      <h3>Question 14</h3>
+      <div class="question-text">
+        Citez les 3 modes de communication intercellulaire et expliquez brièvement leur principe.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+1) Jonctions communicantes ou gap junction :
+- Pont protéique permettant le passage direct de signaux chimiques (ions et petites molécules hydrophiles).
+
+2) Molécules d’adhérence :
+- CAM (entre les cellules) et SAM (entre la cellule et la matrice extracellulaire).
+- Glycoprotéines déclenchant des signaux mécaniques et/ou chimiques (transduction mécano-chimique).
+
+3) Sécrétion de signaux chimiques dans le milieu extracellulaire :
+- Agissent à distance variable, captés par des récepteurs et induisant des effets sur la cellule cible.
+      </div>
+    </div>
+
+    <!-- TD1 Q15 -->
+    <div class="question-block" id="td1-q15">
+      <h3>Question 15</h3>
+      <div class="question-text">
+        15.1. Expliquez le mécanisme d’action des molécules hydrosolubles.<br>
+        15.2. Citez un exemple de molécule hydrosoluble.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Mécanisme d’action des molécules hydrosolubles :
+1. Circulation sans transporteur dans le sang (elles sont solubles dans l’eau / plasma).
+2. Fixation sur un récepteur membranaire (les molécules hydrophiles ne traversent pas la bicouche lipidique).
+3. Action dans le cytosol ou sur le noyau pour obtenir un effet biologique (action rapide et de courte durée).
+
+Exemples de molécules hydrosolubles :
+- La majorité des médiateurs chimiques locaux (cytokines, facteurs de croissance cellulaire)
+- Certains neurotransmetteurs (acétylcholine, adrénaline, noradrénaline, dopamine, …)
+- Certaines hormones (insuline, glucagon, hormones hypophysaires, mélatonine)
+(Le glucose n’est pas un médiateur de ce type.)
+      </div>
+    </div>
+
+    <p class="next-link">
+      <a href="#td2">Aller à l’exercice suivant : TD 2</a>
+    </p>
+  </section>
+
+  <!-- =================== TD 2 =================== -->
+  <section id="td2">
+    <h2 class="section-title">TD 2 – Biologie cellulaire (2/2)</h2>
+    <p class="section-intro">
+      Même principe : réponses libres + correction.  
+      Les questions d’association et d’ordre sont traitées de façon plus interactive dans le TPG.
+    </p>
+
+    <!-- TD2 Q1 -->
+    <div class="question-block" id="td2-q1">
+      <h3>Question 1</h3>
+      <div class="question-text">
+        Citez les 4 grands types de tissus de l’organisme et donnez pour chacun l’idée générale de son rôle.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Les 4 grands types de tissus :
+- Tissu épithélial : épithélium de revêtement et épithélium glandulaire (sécrétions endocrines, exocrines ou mixtes).
+- Tissu conjonctif : le plus abondant, rôle de protection (cartilages), séparation (fascias), isolant (tissu adipeux),
+  soutien (tissu osseux), transport et immunité (sang et lymphe).
+- Tissu musculaire.
+- Tissu nerveux.
+      </div>
+    </div>
+
+    <!-- TD2 Q2 -->
+    <div class="question-block" id="td2-q2">
+      <h3>Question 2</h3>
+      <div class="question-text">
+        Définissez les termes suivants :<br>
+        a) Hyperplasie<br>
+        b) Hypertrophie
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Hyperplasie :
+- Augmentation du nombre de cellules (par mitose).
+
+Hypertrophie :
+- Augmentation de la taille de la cellule.
+      </div>
+    </div>
+
+    <!-- TD2 Q3 -->
+    <div class="question-block" id="td2-q3">
+      <h3>Question 3</h3>
+      <div class="question-text">
+        Citez les 3 éléments figurés du sang.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Éléments figurés du sang :
+- Globules rouges (GR) ou érythrocytes ou hématies
+- Globules blancs (GB) ou leucocytes
+- Plaquettes ou thrombocytes
+      </div>
+    </div>
+
+    <!-- TD2 Q5 -->
+    <div class="question-block" id="td2-q5">
+      <h3>Question 5</h3>
+      <div class="question-text">
+        Explicitez les 3 types de lymphocytes.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Lymphocytes B :
+- Support de l’immunité adaptative à médiation humorale : production d’anticorps, mémoire immunitaire.
+
+Lymphocytes T :
+- Support de l’immunité adaptative à médiation cellulaire : reconnaissance de l’antigène présenté, mémoire immunitaire.
+
+Lymphocytes NK :
+- Provenant de la lignée lymphocytaire, fonctions innées (aspécifiques).
+      </div>
+    </div>
+
+    <!-- TD2 Q6 -->
+    <div class="question-block" id="td2-q6">
+      <h3>Question 6</h3>
+      <div class="question-text">
+        a) Explicitez les 2 entités du système nerveux.<br>
+        b) Explicitez les 2 types de cellules du tissu nerveux.<br>
+        c) Citez les 2 propriétés des neurones.<br>
+        d) Explicitez les 2 types de signaux électriques suite à des stimuli exercés sur un neurone.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Deux entités du système nerveux :
+- SNC : encéphale et moelle épinière.
+- SNP : nerfs, ganglions, plexus entériques et récepteurs sensoriels (ou sensitifs).
+
+Deux types de cellules du tissu nerveux :
+- Neurones.
+- Tissu glial (gliocytes ou cellules gliales), tissu de soutien et de protection des neurones.
+
+Deux propriétés des neurones :
+- Excitabilité.
+- Conduction de l’influx nerveux.
+
+Deux types de signaux électriques après un stimulus :
+- Potentiels gradués : générés localement, ne se propagent pas ou se transforment en…
+- Potentiels d’action (ou influx nerveux) : se propagent tout le long de la membrane plasmique du neurone stimulé.
+      </div>
+    </div>
+
+    <!-- TD2 Q8 -->
+    <div class="question-block" id="td2-q8">
+      <h3>Question 8</h3>
+      <div class="question-text">
+        Potentiel d’action : donner la signification des termes suivants :<br>
+        – Potentiel de repos<br>
+        – Dépolarisation<br>
+        – Repolarisation<br>
+        – Hyperpolarisation
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Potentiel de repos :
+- Différence de potentiel stable entre l’intérieur et l’extérieur de la membrane (environ –70 mV).
+
+Dépolarisation :
+- Diminution de la polarisation de la membrane (l’intérieur devient moins négatif / se rapproche de 0 voire devient positif).
+
+Repolarisation :
+- Retour de la membrane vers son potentiel de repos après une dépolarisation (redevient négative).
+
+Hyperpolarisation :
+- Augmentation de la polarisation de la membrane (intérieur encore plus négatif que le potentiel de repos).
+      </div>
+    </div>
+
+    <!-- TD2 Q9 -->
+    <div class="question-block" id="td2-q9">
+      <h3>Question 9</h3>
+      <div class="question-text">
+        a) Citez les 5 bases azotées.<br>
+        b) Classez-les parmi les bases puriques et pyrimidiques.<br>
+        c) Donnez les règles de complémentarité (ADN / ARN).
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Les 5 bases azotées :
+- Adénine (A)
+- Guanine (G)
+- Cytosine (C)
+- Thymine (T) – uniquement dans l’ADN
+- Uracile (U) – uniquement dans l’ARN
+
+Bases puriques :
+- Adénine (A)
+- Guanine (G)
+
+Bases pyrimidiques :
+- Cytosine (C)
+- Thymine (T)
+- Uracile (U)
+
+Règles de complémentarité :
+- Dans l’ADN : A ↔ T, C ↔ G.
+- Entre ADN et ARN : A de l’ADN ↔ U de l’ARN, T ↔ A, C ↔ G, G ↔ C.
+      </div>
+    </div>
+
+    <!-- TD2 Q11 -->
+    <div class="question-block" id="td2-q11">
+      <h3>Question 11</h3>
+      <div class="question-text">
+        À partir du brin d’ADN suivant :<br>
+        Brin non transcrit : <code>ATGTTTCTCTGTGTAAGAAGTTAC</code><br>
+        Brin transcrit : <code>TACAAAGAGACACATTCTTCAATG</code><br><br>
+        a) Indiquez la séquence d’ARNm.<br>
+        b) Précisez la séquence d’acides aminés (écrits en toutes lettres).
+      </div>
+      <textarea placeholder="Écris ta séquence ARNm et la suite d’acides aminés."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+ARNm :
+- AUG UUU CUC UGU GUA AGA AGU UAC
+  (souvent écrit : AUGUUUCUCUGUGUAAGAAGUUAC)
+
+Séquence d’acides aminés :
+- Méthionine – Phénylalanine – Leucine – Cystéine – Valine – Arginine – Sérine – Tyrosine
+      </div>
+    </div>
+
+    <!-- TD2 Q12 -->
+    <div class="question-block" id="td2-q12">
+      <h3>Question 12</h3>
+      <div class="question-text">
+        Méiose : entourez la bonne réponse.  
+        À partir d’une cellule diploïde, après le phénomène de méiose, nous obtenons :
+        <ul>
+          <li>2 cellules diploïdes</li>
+          <li>2 cellules haploïdes</li>
+          <li>4 cellules diploïdes</li>
+          <li>4 cellules haploïdes</li>
+        </ul>
+        Indique la bonne réponse.
+      </div>
+      <textarea placeholder="Écris la bonne proposition (ex : « 4 cellules haploïdes »)."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Bonne réponse :
+- 4 cellules haploïdes.
+      </div>
+    </div>
+
+    <p class="next-link">
+      <a href="#tpg">Aller à l’exercice suivant : TPG</a>
+    </p>
+  </section>
+
+  <!-- =================== TPG =================== -->
+  <section id="tpg">
+    <h2 class="section-title">TPG – Révisions Biologie cellulaire</h2>
+    <p class="section-intro">
+      Ici, on rajoute des exercices interactifs plus poussés :  
+      – questions ouvertes,  
+      – drag & drop pour remettre des étapes dans l’ordre,  
+      – association de définitions / mots en déplaçant des étiquettes.
+    </p>
+
+    <!-- TPG Q1 -->
+    <div class="question-block" id="tpg-q1">
+      <h3>Question 1</h3>
+      <div class="question-text">
+        Citez les trois catégories des principaux éléments de l’organisme, puis donnez deux exemples pour chaque catégorie.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Catégories :
+- Éléments majeurs : CHON
+- Éléments mineurs : ex. Ca, P, K, S, Na, Cl, Mg, Fe
+- Oligo-éléments : ex. I, Al, F, Zn, Si, …
+
+Exemples (au moins 2 par catégorie) :
+- Majeurs : C, H, O, N
+- Mineurs : Ca, P, K, S, Na, Cl, Mg, Fe
+- Oligo-éléments : I, F, Zn, Si, etc.
+      </div>
+    </div>
+
+    <!-- TPG Q2 -->
+    <div class="question-block" id="tpg-q2">
+      <h3>Question 2</h3>
+      <div class="question-text">
+        Complétez le tableau suivant concernant la matière vivante :
+        distinguez substance minérale / substance organique.
+      </div>
+      <textarea placeholder="Explique la différence et donne des exemples."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Matière vivante :
+
+Substance minérale (sans atome de C) :
+- Eau
+- Sels minéraux
+
+Substance organique (avec atome de C) :
+- Glucides
+- Lipides
+- Protides
+- Acides nucléiques
+      </div>
+    </div>
+
+    <!-- TPG Q3 -->
+    <div class="question-block" id="tpg-q3">
+      <h3>Question 3</h3>
+      <div class="question-text">
+        Indiquez le pourcentage d’eau présent dans l’organisme.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Pourcentage d’eau dans l’organisme :
+- Environ 60 à 65 %.
+      </div>
+    </div>
+
+    <!-- TPG Q4 -->
+    <div class="question-block" id="tpg-q4">
+      <h3>Question 4</h3>
+      <div class="question-text">
+        Complétez le tableau suivant en citant deux rôles et en nommant le monomère de chaque catégorie
+        (glucides, lipides, protides).
+      </div>
+      <textarea placeholder="Écris les rôles + monomères pour chaque famille."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Glucides :
+- Rôles : principale source d’énergie, constituants de macromolécules.
+- Monomère : ose.
+
+Lipides :
+- Rôles : isolant, constituant de la membrane plasmique, réserve énergétique, composant des vitamines,
+  communication intercellulaire et intracellulaire.
+- Monomère : acide gras.
+
+Protides :
+- Rôles : structure de la cellule, réactions chimiques (enzymes), réactions immunologiques (antigène et anticorps).
+- Monomère : acide aminé.
+      </div>
+    </div>
+
+    <!-- TPG Q5 -->
+    <div class="question-block" id="tpg-q5">
+      <h3>Question 5</h3>
+      <div class="question-text">
+        Citez la famille moléculaire organique dont le monomère est le nucléotide.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Famille concernée :
+- Les acides nucléiques.
+      </div>
+    </div>
+
+    <!-- TPG Q6 -->
+    <div class="question-block" id="tpg-q6">
+      <h3>Question 6</h3>
+      <div class="question-text">
+        Expliquez la différence entre la structure primaire et secondaire de l’ADN.
+      </div>
+      <textarea placeholder="Explique structure primaire vs secondaire."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Structure primaire :
+- Séquence nucléotidique linéaire (lecture de 5’ vers 3’).
+
+Structure secondaire :
+- Double hélice en orientation antiparallèle, avec :
+  • Brin sens (brin transcrit, brin matrice) 5’ → 3’, de même orientation que l’ARNm et la protéine.
+  • Brin antisens 3’ → 5’.
+      </div>
+    </div>
+
+    <!-- TPG Q7 -->
+    <div class="question-block" id="tpg-q7">
+      <h3>Question 7</h3>
+      <div class="question-text">
+        D’après les règles de complémentarité des bases, complétez le brin antisens suivant :<br>
+        Brin sens : <code>AGTAGGCTC</code><br>
+        Brin antisens : ?
+      </div>
+      <textarea placeholder="Écris le brin antisens complémentaire."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Brin sens : AGTAGGCTC  
+Brin antisens complémentaire : TCATCCGAG
+      </div>
+    </div>
+
+    <!-- TPG Q8 -->
+    <div class="question-block" id="tpg-q8">
+      <h3>Question 8</h3>
+      <div class="question-text">
+        8.1. Sur un schéma de cellule, légendez les éléments principaux.<br>
+        8.2. Définissez les 3 constituants suivants : membrane plasmique, noyau, cytoplasme.<br>
+        8.3. Indiquez le compartiment où a lieu la transcription.<br>
+        8.4. Indiquez le compartiment où a lieu la traduction.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+1. Membrane plasmique :
+- Isole la cellule du milieu extracellulaire.
+
+2. Noyau :
+- Délimité par une enveloppe nucléaire, contient l’ADN et contrôle l’activité cellulaire.
+
+3. Cytoplasme :
+- Contient les organites (système endomembranaire, mitochondries, etc.) baignant dans le cytosol.
+
+Lieu de la transcription :
+- Dans le noyau.
+
+Lieu de la traduction :
+- Dans le cytoplasme (au niveau des ribosomes).
+      </div>
+    </div>
+
+    <!-- TPG Q9 -->
+    <div class="question-block" id="tpg-q9">
+      <h3>Question 9</h3>
+      <div class="question-text">
+        9.1. Indiquez le type de cellules effectuant la mitose.<br>
+        9.2. Indiquez le type de cellules effectuant la méiose.<br>
+        9.3. Combien de cellules obtient-on suite à la mitose ? (comparez avec la méiose).
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Cellules effectuant la mitose :
+- Cellules somatiques.
+
+Cellules effectuant la méiose :
+- Gamètes (cellules reproductrices).
+
+Nombre de cellules obtenues :
+- Mitose : 2 cellules diploïdes identiques.
+- Méiose : 4 cellules haploïdes génétiquement différentes.
+      </div>
+    </div>
+
+    <!-- TPG Q10 -->
+    <div class="question-block" id="tpg-q10">
+      <h3>Question 10</h3>
+      <div class="question-text">
+        Complétez le tableau en distinguant transport sans mouvement membranaire et avec mouvement membranaire.
+      </div>
+      <textarea placeholder="Liste les types de transport et classe-les."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Transport sans mouvement membranaire :
+- Transport passif sans perméase : diffusion simple.
+- Transport passif avec perméase : selon un gradient de concentration (canaux ioniques, gradient électrochimique).
+- Transport actif avec perméase : couplé à un mécanisme produisant de l’énergie, contre un gradient.
+
+Transport avec mouvement membranaire :
+- Endocytose : internalisation d’un matériel extracellulaire (ex : phagocytose).
+- Exocytose : exportation vers le milieu extracellulaire.
+      </div>
+    </div>
+
+    <!-- TPG Q11 -->
+    <div class="question-block" id="tpg-q11">
+      <h3>Question 11</h3>
+      <div class="question-text">
+        Citez les trois types de tissus musculaires et précisez leur localisation principale.
+      </div>
+      <textarea placeholder="Écris ta réponse ici."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Trois types de tissus musculaires :
+- TM strié squelettique : fixé aux os du squelette.
+- TM lisse : paroi des organes creux (vaisseaux sanguins, voies respiratoires, tube digestif…).
+- TM myocardique : présent uniquement au niveau du cœur (contraction involontaire).
+      </div>
+    </div>
+
+    <!-- TPG Q12 – DRAG & DROP influx nerveux -->
+    <div class="question-block" id="tpg-q12">
+      <h3>Question 12 – Influx nerveux (drag & drop)</h3>
+      <div class="question-text">
+        Remets les étapes de l’influx nerveux dans l’ordre correct en déplaçant les lignes.
+      </div>
+      <div class="dd-container">
+        <ul class="dd-list" data-dd-id="influx">
+          <!-- ordre correct cible : 1 à 7 -->
+          <li class="dd-item" draggable="true" data-correct="4">
+            Dépolarisation membranaire.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="1">
+            Dépolarisation du potentiel gradué.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="6">
+            Repolarisation membranaire.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="3">
+            Ouverture des canaux Na⁺ voltage-dépendants.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="2">
+            Atteinte du seuil d’excitation (≈ –50 mV).
+          </li>
+          <li class="dd-item" draggable="true" data-correct="7">
+            Période réfractaire : temps après un PA pour pouvoir en générer un nouveau.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="5">
+            Ouverture des canaux K⁺ voltage-dépendants.
+          </li>
+        </ul>
+      </div>
+      <button class="check-order" data-dd-target="influx">Vérifier l'ordre</button>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Ordre correct de l’influx nerveux :
+1. Dépolarisation du potentiel gradué.  
+2. Atteinte du seuil d’excitation (≈ –50 mV).  
+3. Ouverture des canaux Na⁺ voltage-dépendants.  
+4. Dépolarisation membranaire.  
+5. Ouverture des canaux K⁺ voltage-dépendants.  
+6. Repolarisation membranaire.  
+7. Période réfractaire (temps après un PA pour générer un nouveau PA).
+      </div>
+    </div>
+
+    <!-- TPG Q13 -->
+    <div class="question-block" id="tpg-q13">
+      <h3>Question 13</h3>
+      <div class="question-text">
+        Complétez la phrase suivante sur les potentiels gradués : hyperpolarisants vs dépolarisants.
+      </div>
+      <textarea placeholder="Explique la différence entre un potentiel gradué hyperpolarisant et dépolarisant."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Un potentiel gradué peut être hyperpolarisant :
+- Augmentation de la polarisation de la membrane plasmique, l’intérieur devient plus négatif que le potentiel de repos.
+
+Un potentiel gradué peut être dépolarisant :
+- Diminution de la polarisation de la membrane plasmique, l’intérieur se rapproche de 0 (devient moins négatif).
+      </div>
+    </div>
+
+    <!-- TPG Q14 – DRAG & DROP transmission synaptique -->
+    <div class="question-block" id="tpg-q14">
+      <h3>Question 14 – Transmission synaptique (drag & drop)</h3>
+      <div class="question-text">
+        Remets les étapes de la transmission synaptique chimique dans l’ordre correct.
+      </div>
+      <div class="dd-container">
+        <ul class="dd-list" data-dd-id="synapse">
+          <!-- ordre cible 1..6 -->
+          <li class="dd-item" draggable="true" data-correct="3">
+            Augmentation intracellulaire de Ca²⁺ dans le bouton synaptique, entraînant l’exocytose du neurotransmetteur.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="5">
+            Fixation du neurotransmetteur sur les récepteurs post-synaptiques et ouverture des canaux ioniques.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="2">
+            Dépolarisation du bouton terminal entraînant l’ouverture des canaux Ca²⁺ voltage-dépendants.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="1">
+            Potentiel d’action arrivant dans le bouton terminal du neurone pré-synaptique.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="6">
+            Dépolarisation ou hyperpolarisation post-synaptique et éventuel déclenchement d’un potentiel d’action.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="4">
+            Diffusion du neurotransmetteur dans la fente synaptique.
+          </li>
+        </ul>
+      </div>
+      <button class="check-order" data-dd-target="synapse">Vérifier l'ordre</button>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Ordre correct de la transmission synaptique chimique :
+1. Potentiel d’action dans le bouton terminal d’un neurone pré-synaptique.  
+2. Dépolarisation entraînant l’ouverture des canaux Ca²⁺ voltage-dépendants.  
+3. Augmentation intracellulaire de Ca²⁺ dans le bouton synaptique et exocytose du neurotransmetteur.  
+4. Diffusion du neurotransmetteur dans la fente synaptique.  
+5. Fixation sur les récepteurs du neurone post-synaptique et ouverture des canaux ioniques.  
+6. Dépolarisation (ou hyperpolarisation) et, si le seuil est atteint, déclenchement d’un potentiel d’action.
+      </div>
+    </div>
+
+    <!-- TPG Q15 -->
+    <div class="question-block" id="tpg-q15">
+      <h3>Question 15</h3>
+      <div class="question-text">
+        Définissez les termes suivants :<br>
+        – Réplication (duplication ou synthèse)<br>
+        – Traduction<br>
+        – Transcription
+      </div>
+      <textarea placeholder="Écris les trois définitions."></textarea>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Réplication (duplication ou synthèse) :
+- Processus par lequel 2 molécules d’ADN sont produites à partir d’une seule molécule d’ADN « mère ».
+
+Traduction :
+- Processus de conversion d’une séquence d’ARNm en une protéine.
+
+Transcription :
+- Processus de conversion d’une séquence d’ADN en ARN.
+      </div>
+    </div>
+
+    <!-- TPG Q16 – DRAG & DROP transcription -->
+    <div class="question-block" id="tpg-q16">
+      <h3>Question 16 – Transcription (drag & drop)</h3>
+      <div class="question-text">
+        Remets les grandes étapes de la transcription dans l’ordre.
+      </div>
+      <div class="dd-container">
+        <ul class="dd-list" data-dd-id="transcription">
+          <!-- ordre 1..4 -->
+          <li class="dd-item" draggable="true" data-correct="2">
+            Élongation : synthèse de l’ARN à partir du brin matrice de l’ADN (de 5’ vers 3’).
+          </li>
+          <li class="dd-item" draggable="true" data-correct="4">
+            Maturation de l’ARN pré-messager (coiffe, queue poly-A, épissage) pour obtenir l’ARNm fonctionnel.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="1">
+            Initiation : fixation de l’ARN polymérase au niveau du promoteur du gène.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="3">
+            Terminaison : séquence d’ADN permettant le décrochage de l’ARN polymérase et la libération de l’ARN transcrit.
+          </li>
+        </ul>
+      </div>
+      <button class="check-order" data-dd-target="transcription">Vérifier l'ordre</button>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Ordre correct des étapes de la transcription :
+1. Initiation : l’ARN polymérase se lie au promoteur.  
+2. Élongation : synthèse de l’ARN à partir du brin matrice de l’ADN.  
+3. Terminaison : séquence d’ADN signalant l’arrêt et la libération de l’ARN transcrit.  
+4. Maturation de l’ARN pré-messager en ARNm fonctionnel.
+      </div>
+    </div>
+
+    <!-- TPG Q17 – DRAG & DROP traduction -->
+    <div class="question-block" id="tpg-q17">
+      <h3>Question 17 – Traduction (drag & drop)</h3>
+      <div class="question-text">
+        Remets les étapes de la traduction protéique dans l’ordre.
+      </div>
+      <div class="dd-container">
+        <ul class="dd-list" data-dd-id="traduction">
+          <!-- ordre cible 1..7 -->
+          <li class="dd-item" draggable="true" data-correct="4">
+            Création d’une liaison peptidique entre les acides aminés des sites P et A.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="6">
+            Déplacement du ribosome : l’ARNt du site P passe au site E, celui du site A passe au site P.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="2">
+            Liaison de la grande sous-unité du ribosome et positionnement de l’ARNt initiateur sur le site P.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="7">
+            Répétition du cycle jusqu’au codon stop, puis détachement de la protéine synthétisée.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="3">
+            Arrivée d’un deuxième ARNt se liant au codon de l’ARNm du site A.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="1">
+            Liaison de l’ARNm avec la petite sous-unité du ribosome.
+          </li>
+          <li class="dd-item" draggable="true" data-correct="5">
+            Les deux acides aminés sont désormais fixés sur l’ARNt du site A.
+          </li>
+        </ul>
+      </div>
+      <button class="check-order" data-dd-target="traduction">Vérifier l'ordre</button>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Ordre correct des étapes de la traduction :
+1. Liaison de l’ARNm avec la petite sous-unité du ribosome.  
+2. Liaison de la grande sous-unité et positionnement de l’ARNt initiateur sur le site P.  
+3. Un deuxième ARNt se fixe au codon du site A.  
+4. Formation d’une liaison peptidique entre les acides aminés des sites P et A.  
+5. Les deux acides aminés sont portés par l’ARNt du site A.  
+6. Déplacement du ribosome (ARNt P → E, ARNt A → P).  
+7. Répétition du cycle jusqu’au codon stop et libération de la protéine.
+      </div>
+    </div>
+
+    <!-- TPG Q18 – MATCHING définitions / mots -->
+    <div class="question-block" id="tpg-q18">
+      <h3>Question 18 – Associer mot et définition (drag d’étiquettes)</h3>
+      <div class="question-text">
+        Associe chaque mot à la bonne définition en déplaçant les étiquettes de droite dans les cases de gauche.
+      </div>
+
+      <div class="match-container" data-match-id="genetique">
+        <div class="match-left">
+          <div class="match-slot" data-accept="heredite">
+            <span class="match-slot-label">1. Hérédité</span>
+            <span>Transmission de caractères ou traits d’une génération à la suivante.</span>
+          </div>
+          <div class="match-slot" data-accept="allele">
+            <span class="match-slot-label">2. Allèle</span>
+            <span>Forme alternative d’un gène, codant pour le même caractère.</span>
+          </div>
+          <div class="match-slot" data-accept="genotype">
+            <span class="match-slot-label">3. Génotype</span>
+            <span>Composition allélique d’un individu pour un gène donné.</span>
+          </div>
+          <div class="match-slot" data-accept="phenotype">
+            <span class="match-slot-label">4. Phénotype</span>
+            <span>Expression physique extérieure visible d’un gène.</span>
+          </div>
+          <div class="match-slot" data-accept="punnett">
+            <span class="match-slot-label">5. Grille de Punnett</span>
+            <span>Représentation des compositions possibles de gamètes issus des deux parents.</span>
+          </div>
+        </div>
+
+        <div class="match-right">
+          <p style="font-size:0.9rem;margin:0 0 4px;">Étiquettes à déplacer :</p>
+          <div class="match-pool">
+            <span class="match-item" draggable="true" data-key="genotype">Génotype</span>
+            <span class="match-item" draggable="true" data-key="heredite">Hérédité</span>
+            <span class="match-item" draggable="true" data-key="punnett">Grille de Punnett</span>
+            <span class="match-item" draggable="true" data-key="phenotype">Phénotype</span>
+            <span class="match-item" draggable="true" data-key="allele">Allèle</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="check-match" data-match-target="genetique">Vérifier les associations</button>
+      <button class="toggle-correction">Afficher la correction</button>
+      <div class="correction">
+Associations correctes :
+1. Hérédité → définition 1  
+2. Allèle → définition 2  
+3. Génotype → définition 3  
+4. Phénotype → définition 4  
+5. Grille de Punnett → définition 5
+      </div>
+    </div>
+
+    <p class="next-link">
+      <a href="#haut">Revenir en haut de la page</a>
+    </p>
+
+    <div class="footer-debug">
+      <a href="zone_debug/index.html">debug</a>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Boutons Afficher/Masquer la correction
+  document.querySelectorAll('.toggle-correction').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var block = btn.closest('.question-block');
+      if (!block) return;
+      var corr = block.querySelector('.correction');
+      if (!corr) return;
+      if (corr.style.display === 'block') {
+        corr.style.display = 'none';
+        btn.textContent = 'Afficher la correction';
+      } else {
+        corr.style.display = 'block';
+        btn.textContent = 'Masquer la correction';
+      }
+    });
+  });
+
+  // ===== Drag & drop pour les listes ordonnées =====
+  let draggedItem = null;
+
+  document.querySelectorAll('.dd-item').forEach(function (item) {
+    item.addEventListener('dragstart', function (e) {
+      draggedItem = item;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    item.addEventListener('dragend', function () {
+      draggedItem = null;
+      item.classList.remove('dragging');
+    });
+  });
+
+  document.querySelectorAll('.dd-list').forEach(function (list) {
+    list.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      list.classList.add('dd-over');
+      const afterElement = getDragAfterElement(list, e.clientY);
+      if (!draggedItem) return;
+      if (afterElement == null) {
+        list.appendChild(draggedItem);
+      } else {
+        list.insertBefore(draggedItem, afterElement);
+      }
+    });
+
+    list.addEventListener('dragleave', function () {
+      list.classList.remove('dd-over');
+    });
+
+    list.addEventListener('drop', function () {
+      list.classList.remove('dd-over');
+    });
+  });
+
+  function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.dd-item:not(.dragging)')];
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  // Vérification de l'ordre
+  document.querySelectorAll('.check-order').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const id = btn.getAttribute('data-dd-target');
+      const list = document.querySelector('.dd-list[data-dd-id="' + id + '"]');
+      if (!list) return;
+      const items = list.querySelectorAll('.dd-item');
+      items.forEach(function (it, index) {
+        const expected = parseInt(it.getAttribute('data-correct'), 10);
+        const currentPos = index + 1;
+        it.classList.remove('correct', 'incorrect');
+        if (expected === currentPos) {
+          it.classList.add('correct');
+        } else {
+          it.classList.add('incorrect');
+        }
+      });
+    });
+  });
+
+  // ===== Matching – association (déplacements d’étiquettes) =====
+  let draggedMatch = null;
+
+  document.querySelectorAll('.match-item').forEach(function (item) {
+    item.addEventListener('dragstart', function (e) {
+      draggedMatch = item;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    item.addEventListener('dragend', function () {
+      draggedMatch = null;
+      item.classList.remove('dragging');
+    });
+  });
+
+  // Slots + pool acceptent les étiquettes
+  document.querySelectorAll('.match-slot, .match-pool').forEach(function (target) {
+    target.addEventListener('dragover', function (e) {
+      e.preventDefault();
+    });
+
+    target.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (!draggedMatch) return;
+
+      // Si le match-item vient d’une autre slot, on le enlève simplement de là
+      // (DOM le fait automatiquement quand on l’append ici).
+
+      // Pour les slots : on ne garde qu’une étiquette à la fois
+      if (target.classList.contains('match-slot')) {
+        // Retirer éventuellement un item déjà présent dans la slot (le renvoyer dans la pool la plus proche)
+        const existing = target.querySelector('.match-item');
+        if (existing && existing !== draggedMatch) {
+          // Cherche un pool dans ce bloc
+          const container = target.closest('.match-container');
+          const pool = container ? container.querySelector('.match-pool') : null;
+          if (pool) {
+            pool.appendChild(existing);
+          }
+        }
+      }
+
+      target.appendChild(draggedMatch);
+    });
+  });
+
+  // Vérification des associations
+  document.querySelectorAll('.check-match').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const id = btn.getAttribute('data-match-target');
+      const container = document.querySelector('.match-container[data-match-id="' + id + '"]');
+      if (!container) return;
+      const slots = container.querySelectorAll('.match-slot');
+      slots.forEach(function (slot) {
+        slot.classList.remove('good', 'bad');
+        const expected = slot.getAttribute('data-accept');
+        const child = slot.querySelector('.match-item');
+        if (!child) {
+          slot.classList.add('bad');
+          return;
+        }
+        const key = child.getAttribute('data-key');
+        if (key === expected) {
+          slot.classList.add('good');
+        } else {
+          slot.classList.add('bad');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
