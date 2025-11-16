@@ -1,0 +1,3369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>UE 2.11 Physique – TD interactif</title>
+  <style>
+    :root {
+      --bg-color: #020617;
+      --card-bg: rgba(15, 23, 42, 0.9);
+      --card-border: rgba(148, 163, 184, 0.4);
+      --accent: #22d3ee;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --accent-strong: rgba(56, 189, 248, 0.35);
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.95);
+      --radius-xl: 22px;
+      --radius-pill: 999px;
+      --danger: #fb7185;
+      --danger-soft: rgba(248, 113, 113, 0.1);
+      --success: #4ade80;
+      --success-soft: rgba(74, 222, 128, 0.14);
+      --info-soft: rgba(56, 189, 248, 0.18);
+      --warning: #facc15;
+      --warning-soft: rgba(250, 204, 21, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Helvetica Neue", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 20% 120%, rgba(94,234,212,0.08), transparent),
+        radial-gradient(circle at 80% 0%, rgba(59,130,246,0.14), transparent),
+        radial-gradient(circle at -10% 40%, rgba(129,140,248,0.12), transparent),
+        #020617;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1100px;
+      position: relative;
+    }
+
+    .bg-orbit {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.4;
+      z-index: -1;
+    }
+
+    .bg-orbit::before,
+    .bg-orbit::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      box-shadow:
+        0 0 60px rgba(56, 189, 248, 0.18),
+        0 0 120px rgba(129, 140, 248, 0.14);
+    }
+
+    .bg-orbit::before {
+      width: 540px;
+      height: 540px;
+      top: 8%;
+      left: -8%;
+    }
+
+    .bg-orbit::after {
+      width: 620px;
+      height: 620px;
+      bottom: -10%;
+      right: -20%;
+    }
+
+    .main-card {
+      background: radial-gradient(circle at 10% 0%, rgba(56,189,248,0.16), transparent 40%),
+                  radial-gradient(circle at 90% 0%, rgba(59,130,246,0.18), transparent 42%),
+                  radial-gradient(circle at 50% 110%, rgba(52,211,153,0.12), transparent 50%),
+                  rgba(15, 23, 42, 0.96);
+      border-radius: 28px;
+      border: 1px solid rgba(148, 163, 184, 0.55);
+      box-shadow:
+        0 40px 160px rgba(15, 23, 42, 1),
+        0 0 0 1px rgba(15, 23, 42, 0.7);
+      padding: 26px 26px 28px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .main-card::before {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      border-radius: 26px;
+      background: radial-gradient(circle at top left, rgba(248,250,252,0.06), transparent 60%);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .main-card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
+      gap: 16px;
+    }
+
+    .header-left h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-main {
+      font-size: 1.6rem;
+      font-weight: 650;
+      letter-spacing: 0.03em;
+    }
+
+    .title-pill {
+      background: linear-gradient(135deg, rgba(56,189,248,0.13), rgba(129,140,248,0.2));
+      border-radius: 999px;
+      padding: 2px 10px;
+      border: 1px solid rgba(191, 219, 254, 0.55);
+      box-shadow: 0 0 18px rgba(56,189,248,0.45);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #e0f2fe;
+    }
+
+    .header-left .subtitle {
+      margin-top: 4px;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      max-width: 480px;
+    }
+
+    .header-left .subtitle-small {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: rgba(148,163,184,0.95);
+    }
+
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .attempts-badge {
+      background: rgba(15,23,42,0.95);
+      border-radius: 18px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(148,163,184,0.6);
+      box-shadow:
+        0 0 0 1px rgba(15,23,42,1),
+        0 12px 40px rgba(15,23,42,0.8);
+    }
+
+    .attempts-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle, var(--accent), transparent 60%);
+      box-shadow: 0 0 12px rgba(56,189,248,0.8);
+    }
+
+    .view-toggle {
+      display: inline-flex;
+      padding: 3px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.96);
+      box-shadow:
+        0 16px 40px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,1);
+      border: 1px solid rgba(148,163,184,0.6);
+      font-size: 0.74rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .toggle-option {
+      padding: 6px 13px;
+      border-radius: 999px;
+      cursor: pointer;
+      color: var(--text-soft);
+      border: none;
+      background: transparent;
+      font: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      z-index: 1;
+      white-space: nowrap;
+    }
+
+    .toggle-option.active {
+      color: #e0f2fe;
+    }
+
+    .toggle-pill {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      width: 50%;
+      border-radius: 999px;
+      background: radial-gradient(circle at top, rgba(56,189,248,0.25), transparent 60%),
+                  linear-gradient(135deg, rgba(56,189,248,0.65), rgba(129,140,248,0.9));
+      box-shadow:
+        0 0 0 1px rgba(191,219,254,0.65),
+        0 18px 30px rgba(56,189,248,0.6);
+      transition: transform 0.22s cubic-bezier(0.25, 0.8, 0.3, 1.2);
+      z-index: 0;
+    }
+
+    .toggle-pill.right {
+      transform: translateX(100%);
+    }
+
+    .toggle-pill.left {
+      transform: translateX(0%);
+    }
+
+    .toggle-option .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(248,250,252,0.9);
+      box-shadow: 0 0 10px rgba(248,250,252,0.8);
+    }
+
+    .toggle-option.secondary .dot {
+      background: rgba(248,250,252,0.9);
+    }
+
+    .toggle-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .toggle-sub {
+      font-size: 0.7rem;
+      opacity: 0.85;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .questions-panel {
+      background: radial-gradient(circle at top left, rgba(15,23,55,0.8), rgba(15,23,42,1));
+      border-radius: 22px;
+      padding: 14px 16px 16px;
+      border: 1px solid rgba(148,163,184,0.6);
+      box-shadow:
+        0 18px 55px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .questions-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(59,130,246,0.12), transparent 55%);
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .questions-panel-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .questions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .questions-title {
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--text-soft);
+      padding-left: 2px;
+    }
+
+    .questions-subtitle {
+      font-size: 0.8rem;
+      color: rgba(148,163,184,0.9);
+      margin-top: 2px;
+      padding-left: 2px;
+    }
+
+    .questions-scroll {
+      max-height: 540px;
+      overflow-y: auto;
+      padding-right: 4px;
+      margin-right: -4px;
+      padding-top: 3px;
+    }
+
+    .questions-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .questions-scroll::-webkit-scrollbar-track {
+      background: rgba(15,23,42,1);
+    }
+
+    .questions-scroll::-webkit-scrollbar-thumb {
+      background: linear-gradient(to bottom, rgba(56,189,248,0.75), rgba(129,140,248,0.85));
+      border-radius: 999px;
+      box-shadow: 0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .question-card {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px 11px 11px;
+      margin-bottom: 9px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top left, rgba(31,41,55,0.9), rgba(15,23,42,0.97));
+      border: 1px solid rgba(148,163,184,0.7);
+      box-shadow:
+        0 12px 30px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(56,189,248,0.16), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s ease-out;
+      pointer-events: none;
+    }
+
+    .question-card:hover::before {
+      opacity: 0.6;
+    }
+
+    .question-header {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 4px;
+    }
+
+    .question-index {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(56,189,248,0.9), rgba(56,189,248,0.2));
+      border: 1px solid rgba(191,219,254,0.8);
+      box-shadow:
+        0 0 0 1px rgba(15,23,42,1),
+        0 10px 20px rgba(56,189,248,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #e0f2fe;
+      margin-top: 2px;
+    }
+
+    .question-body {
+      min-width: 0;
+    }
+
+    .question-title {
+      margin: 0 0 3px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .question-meta {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+
+    .question-options {
+      margin-left: 36px;
+      display: grid;
+      gap: 4px;
+      font-size: 0.85rem;
+    }
+
+    .option {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+      padding: 3px 9px;
+      border-radius: 999px;
+      position: relative;
+      transition: background 0.16s ease-out, transform 0.12s ease-out, box-shadow 0.16s ease-out, border-color 0.16s ease-out;
+      border: 1px solid transparent;
+    }
+
+    .option:hover {
+      background: rgba(15,23,42,0.95);
+      transform: translateY(-0.5px);
+      box-shadow:
+        0 10px 18px rgba(15,23,42,0.85),
+        0 0 0 1px rgba(15,23,42,0.9);
+    }
+
+    .option.selected {
+      background: rgba(15,23,42,0.9);
+      border-color: rgba(148,163,184,0.9);
+      box-shadow:
+        0 10px 20px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(30,64,175,0.9);
+    }
+
+    .option-label {
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.9);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: rgba(209,213,219,0.9);
+      background: radial-gradient(circle at top left, rgba(15,23,42,1), rgba(15,23,42,0.9));
+      box-shadow: 0 3px 8px rgba(15,23,42,0.9);
+    }
+
+    .option-text {
+      color: rgba(229,231,235,0.95);
+      font-size: 0.84rem;
+    }
+
+    .option.correct.selected {
+      background: var(--success-soft);
+      border-color: rgba(74,222,128,0.9);
+      box-shadow:
+        0 0 0 1px rgba(22,101,52,0.9),
+        0 0 25px rgba(74,222,128,0.55);
+    }
+
+    .option.correct.selected .option-label {
+      border-color: rgba(74,222,128,0.9);
+      background: radial-gradient(circle at top left, rgba(34,197,94,1), rgba(22,101,52,0.95));
+      color: #ecfdf5;
+      box-shadow:
+        0 0 14px rgba(74,222,128,0.8),
+        0 3px 9px rgba(22,101,52,0.9);
+    }
+
+    .option.correct.selected .option-text {
+      color: #bbf7d0;
+    }
+
+    .option.incorrect.selected {
+      background: var(--danger-soft);
+      border-color: rgba(248,113,113,0.95);
+      box-shadow:
+        0 0 0 1px rgba(127,29,29,0.85),
+        0 0 25px rgba(248,113,113,0.5);
+    }
+
+    .option.incorrect.selected .option-label {
+      border-color: rgba(248,113,113,0.95);
+      background: radial-gradient(circle at top left, rgba(248,113,113,1), rgba(127,29,29,0.95));
+      color: #fef2f2;
+      box-shadow:
+        0 0 14px rgba(248,113,113,0.9),
+        0 3px 9px rgba(127,29,29,0.9);
+    }
+
+    .option.incorrect.selected .option-text {
+      color: #fecaca;
+    }
+
+    .option.ghosted {
+      opacity: 0.4;
+      filter: grayscale(0.6);
+    }
+
+    .option.solution-highlight {
+      box-shadow:
+        0 0 0 1px rgba(56,189,248,0.9),
+        0 0 22px rgba(56,189,248,0.9);
+      border-color: rgba(56,189,248,0.9);
+    }
+
+    .input-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      margin-left: 34px;
+    }
+
+    .input-row span {
+      color: rgba(209,213,219,0.95);
+    }
+
+    .input-pill {
+      min-width: 58px;
+      max-width: 130px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: radial-gradient(circle at top left, rgba(15,23,42,1), rgba(15,23,42,0.9));
+      color: #e5e7eb;
+      font-size: 0.82rem;
+      outline: none;
+      text-align: center;
+      box-shadow:
+        0 10px 24px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,0.95);
+      transition: border-color 0.15s ease-out, box-shadow 0.15s ease-out, transform 0.1s ease-out;
+    }
+
+    .input-pill::placeholder {
+      color: rgba(148,163,184,0.7);
+    }
+
+    .input-pill:focus {
+      border-color: rgba(56,189,248,0.9);
+      box-shadow:
+        0 0 0 1px rgba(8,47,73,0.9),
+        0 0 25px rgba(56,189,248,0.6);
+      transform: translateY(-0.5px);
+    }
+
+    .input-pill.correct {
+      border-color: rgba(74,222,128,0.9);
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.16), rgba(15,23,42,0.98));
+      box-shadow:
+        0 0 0 1px rgba(22,101,52,0.9),
+        0 0 25px rgba(74,222,128,0.65);
+      color: #bbf7d0;
+    }
+
+    .input-pill.incorrect {
+      border-color: rgba(248,113,113,0.95);
+      background: radial-gradient(circle at top left, rgba(248,113,113,0.16), rgba(15,23,42,0.98));
+      box-shadow:
+        0 0 0 1px rgba(127,29,29,0.9),
+        0 0 25px rgba(248,113,113,0.7);
+      color: #fecaca;
+    }
+
+    .input-pill.ghosted {
+      opacity: 0.5;
+      filter: grayscale(0.5);
+    }
+
+    .select-pill {
+      min-width: 140px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(191, 219, 254, 0.95);
+      background: radial-gradient(circle at top left, #0f172a, #020617);
+      color: #e5e7eb;
+      font-size: 0.82rem;
+      outline: none;
+      box-shadow:
+        0 10px 24px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,0.95);
+      appearance: none;
+      -moz-appearance: none;
+      -webkit-appearance: none;
+    }
+
+	/* Couleurs du menu déroulant */
+.select-pill option {
+  background-color: #020617;
+  color: #e5e7eb;
+}
+    .select-pill.correct {
+      border-color: rgba(74,222,128,0.9);
+      background: radial-gradient(circle at top left, rgba(34,197,94,0.16), rgba(15,23,42,0.98));
+      box-shadow:
+        0 0 0 1px rgba(22,101,52,0.9),
+        0 0 25px rgba(74,222,128,0.65);
+      color: #bbf7d0;
+    }
+
+    .select-pill.incorrect {
+      border-color: rgba(248,113,113,0.95);
+      background: radial-gradient(circle at top left, rgba(248,113,113,0.16), rgba(15,23,42,0.98));
+      box-shadow:
+        0 0 0 1px rgba(127,29,29,0.9),
+        0 0 25px rgba(248,113,113,0.7);
+      color: #fecaca;
+    }
+
+    .select-pill.ghosted {
+      opacity: 0.5;
+      filter: grayscale(0.5);
+    }
+
+    .input-unit {
+      font-size: 0.8rem;
+      color: rgba(148,163,184,0.9);
+    }
+
+    .order-list {
+      margin-left: 34px;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: radial-gradient(circle at top left, rgba(15,23,42,1), rgba(15,23,42,0.96));
+      box-shadow:
+        0 10px 24px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,0.95);
+      font-size: 0.84rem;
+      color: rgba(229,231,235,0.95);
+    }
+
+    .order-label {
+      flex: 1;
+    }
+
+    .order-controls {
+      display: flex;
+      gap: 4px;
+    }
+
+    .order-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.8);
+      background: rgba(15,23,42,0.95);
+      color: rgba(226,232,240,0.95);
+      font-size: 0.7rem;
+      width: 22px;
+      height: 22px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 8px 18px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .order-btn:hover {
+      transform: translateY(-0.5px);
+    }
+
+    .order-item.correct {
+      border-color: rgba(74,222,128,0.9);
+      box-shadow:
+        0 0 0 1px rgba(22,101,52,0.9),
+        0 0 18px rgba(74,222,128,0.6);
+    }
+
+    .order-item.incorrect {
+      border-color: rgba(248,113,113,0.95);
+      box-shadow:
+        0 0 0 1px rgba(127,29,29,0.9),
+        0 0 18px rgba(248,113,113,0.6);
+    }
+
+    .note {
+      font-size: 0.78rem;
+      color: rgba(148,163,184,0.95);
+      margin-top: 3px;
+      margin-left: 36px;
+    }
+
+    .error-note {
+      color: #fecaca;
+    }
+
+    .solution-text {
+      font-size: 0.78rem;
+      margin-left: 6px;
+    }
+
+    .solution-text .user-error {
+      color: #fecaca;
+      text-decoration: line-through;
+    }
+
+    .solution-text .correct-value {
+      color: #bbf7d0;
+      margin-left: 4px;
+    }
+
+    .answers-panel {
+      background: radial-gradient(circle at top right, rgba(30,64,175,0.3), rgba(15,23,42,1));
+      border-radius: 22px;
+      padding: 14px 15px 16px;
+      border: 1px solid rgba(148,163,184,0.7);
+      box-shadow:
+        0 18px 55px rgba(15,23,42,0.98),
+        0 0 0 1px rgba(15,23,42,1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .answers-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 110% 0%, rgba(56,189,248,0.22), transparent 58%),
+        radial-gradient(circle at 0% 80%, rgba(52,211,153,0.2), transparent 50%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .answers-panel-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .answers-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .answers-title {
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(191,219,254,0.95);
+    }
+
+    .score-badge {
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(191,219,254,0.7);
+      background: rgba(15,23,42,0.98);
+      box-shadow:
+        0 16px 40px rgba(15,23,42,0.96),
+        0 0 0 1px rgba(15,23,42,1);
+      color: rgba(226,232,240,0.95);
+    }
+
+    .score-main {
+      font-weight: 600;
+    }
+
+    .score-detail {
+      font-size: 0.75rem;
+      color: rgba(148,163,184,0.95);
+    }
+
+    .score-indicator {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(74,222,128,0.95);
+      box-shadow:
+        0 0 16px rgba(74,222,128,0.9),
+        0 0 0 1px rgba(15,23,42,1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #bbf7d0;
+      background: radial-gradient(circle at top left, rgba(34,197,94,1), rgba(22,101,52,0.9));
+    }
+
+    .summary-card {
+      background: radial-gradient(circle at top left, rgba(15,23,42,1), rgba(15,23,42,0.96));
+      border-radius: 18px;
+      padding: 10px 11px 11px;
+      border: 1px solid rgba(148,163,184,0.75);
+      box-shadow:
+        0 16px 40px rgba(15,23,42,0.98),
+        0 0 0 1px rgba(15,23,42,1);
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .summary-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 0 0, rgba(56,189,248,0.18), transparent 60%),
+        radial-gradient(circle at 120% 10%, rgba(52,211,153,0.2), transparent 60%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .summary-card-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .summary-label {
+      color: rgba(148,163,184,0.95);
+      font-size: 0.8rem;
+    }
+
+    .summary-value {
+      font-weight: 600;
+      color: rgba(226,232,240,0.98);
+    }
+
+    .summary-help {
+      font-size: 0.78rem;
+      color: rgba(148,163,184,0.95);
+      margin-top: 4px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 8px;
+      font-size: 0.78rem;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.97);
+      border: 1px solid rgba(148,163,184,0.7);
+      color: rgba(148,163,184,0.96);
+      box-shadow:
+        0 10px 24px rgba(15,23,42,0.95),
+        0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .legend-dot.correct {
+      background: radial-gradient(circle, var(--success), transparent 60%);
+      color: var(--success);
+    }
+
+    .legend-dot.incorrect {
+      background: radial-gradient(circle, var(--danger), transparent 60%);
+      color: var(--danger);
+    }
+
+    .legend-dot.partial {
+      background: radial-gradient(circle, var(--warning), transparent 60%);
+      color: var(--warning);
+    }
+
+    .legend-dot.neutral {
+      background: radial-gradient(circle, var(--accent), transparent 60%);
+      color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 7px 14px;
+      border: 1px solid rgba(148,163,184,0.8);
+      background: rgba(15,23,42,1);
+      color: rgba(226,232,240,0.98);
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow:
+        0 16px 32px rgba(15,23,42,0.98),
+        0 0 0 1px rgba(15,23,42,1);
+      transition: background 0.16s ease-out, transform 0.12s ease-out, box-shadow 0.16s ease-out, border-color 0.16s ease-out;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(56,189,248,0.9), rgba(129,140,248,0.95));
+      border-color: rgba(191,219,254,0.9);
+      color: #ecfeff;
+      box-shadow:
+        0 18px 36px rgba(56,189,248,0.9),
+        0 0 0 1px rgba(15,23,42,0.9);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow:
+        0 10px 20px rgba(15,23,42,0.9),
+        0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow:
+        0 20px 40px rgba(15,23,42,0.98),
+        0 0 0 1px rgba(15,23,42,1);
+      border-color: rgba(191,219,254,0.9);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      box-shadow:
+        0 22px 46px rgba(56,189,248,1),
+        0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .btn-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.9);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      background: radial-gradient(circle at top left, rgba(15,23,42,1), rgba(15,23,42,0.95));
+      box-shadow: 0 3px 8px rgba(15,23,42,0.95);
+    }
+
+    .attempts-info {
+      font-size: 0.78rem;
+      color: rgba(148,163,184,0.96);
+      margin-top: 8px;
+    }
+
+    .attempts-highlight {
+      color: #e0f2fe;
+      font-weight: 500;
+    }
+
+    .tips-section {
+      margin-top: 12px;
+      background: rgba(15,23,42,0.96);
+      border-radius: 16px;
+      padding: 8px 10px;
+      border: 1px dashed rgba(148,163,184,0.8);
+      font-size: 0.78rem;
+      color: rgba(148,163,184,0.96);
+      box-shadow:
+        0 14px 30px rgba(15,23,42,0.96),
+        0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .tips-title {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 5px;
+      color: rgba(191,219,254,0.95);
+    }
+
+    .tips-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .tips-list li {
+      margin-bottom: 3px;
+    }
+
+    .badge-mode {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      border: 1px solid rgba(148,163,184,0.75);
+      color: rgba(226,232,240,0.95);
+      background: radial-gradient(circle at top left, rgba(15,23,42,1), rgba(15,23,42,0.95));
+      box-shadow:
+        0 8px 20px rgba(15,23,42,0.96),
+        0 0 0 1px rgba(15,23,42,1);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(56,189,248,0.9);
+    }
+
+    .badge-mode.locked .badge-dot {
+      background: var(--danger);
+      box-shadow: 0 0 10px rgba(248,113,113,0.95);
+    }
+
+    .checkmark {
+      font-size: 1rem;
+      line-height: 1;
+    }
+	
+	.answers-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.exam-timer {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(191, 219, 254, 0.4);
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 0.75rem;
+}
+
+.exam-timer .timer-label {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(191, 219, 254, 0.9);
+}
+
+.exam-timer .timer-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+    .celebration {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 6px;
+      height: 12px;
+      border-radius: 3px;
+      opacity: 0;
+      transform: translateY(-20px) rotate(0deg);
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .main-card {
+        padding: 18px 16px 20px;
+        border-radius: 22px;
+      }
+
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .header-right {
+        align-items: flex-start;
+      }
+
+      .questions-scroll {
+        max-height: 480px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .header-left h1 {
+        font-size: 1.3rem;
+        flex-wrap: wrap;
+      }
+
+      .title-pill {
+        font-size: 0.7rem;
+      }
+/* Mise en forme propre de la question Vrai/Faux récap (Q49) */
+.question-card[data-question="49"] .input-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.question-card[data-question="49"] .vf-label {
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.question-card[data-question="49"] .vf-text {
+  font-size: 0.8rem;
+}
+
+.question-card[data-question="49"] .select-pill {
+  margin-l
+  
+      .questions-panel,
+      .answers-panel {
+        border-radius: 18px;
+      }
+
+      .question-card {
+        padding: 9px 9px 10px;
+      }
+
+      .question-index {
+        width: 26px;
+        height: 26px;
+        font-size: 0.78rem;
+      }
+
+      .input-pill {
+        min-width: 52px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-orbit"></div>
+  <div class="app-container">
+    <div class="main-card">
+      <div class="main-card-inner">
+        <div class="header">
+          <div class="header-left">
+            <h1>
+              <span class="title-main">UE : 2.11 Physique</span>
+              <span class="title-pill">TD interactif</span>
+            </h1>
+            <div class="subtitle">
+              Questions progressives pour maîtriser les notions de radioactivité, ondes, champs électrostatiques et magnétiques.
+            </div>
+            <div class="subtitle-small">
+              par Sébastien Beyer sur un cours de mM Gharbi Jamel : Manipulateur en électroradiologie médical
+            </div>
+          </div>
+          <div class="header-right">
+            <div class="view-toggle" id="viewToggle">
+              <div class="toggle-pill left" id="togglePill"></div>
+              <button class="toggle-option active" data-mode="check" id="modeCheck">
+                <span class="dot"></span>
+                <div>
+                  <div class="toggle-label">Mode Correction</div>
+                  <div class="toggle-sub">Vérifie tes réponses</div>
+                </div>
+              </button>
+              <button class="toggle-option secondary" data-mode="exam" id="modeExam">
+                <span class="dot"></span>
+                <div>
+                  <div class="toggle-label">Mode Examen</div>
+                  <div class="toggle-sub">Sans auto-correction</div>
+                </div>
+              </button>
+            </div>
+            <div class="attempts-badge">
+              <div class="attempts-dot"></div>
+              <span>Essais effectués : <span id="attemptsCount">0</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="layout">
+          <div class="questions-panel">
+            <div class="questions-panel-inner">
+              <div class="questions-header">
+                <div>
+                  <div class="questions-title">Questions</div>
+                  <div class="questions-subtitle">Clique pour cocher, saisis dans les champs pour répondre.</div>
+                </div>
+              </div>
+              <div class="questions-scroll">
+
+                <!-- Q1 -->
+                <div class="question-card" data-question="1">
+                  <div class="question-header">
+                    <div class="question-index">1</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Qu’est-ce qu’un radionucléide ?</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="false">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Un noyau stable qui ne se désintègre jamais.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Un noyau instable qui se désintègre spontanément en émettant un rayonnement.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Une particule élémentaire chargée négativement.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="question-card" data-question="2">
+                  <div class="question-header">
+                    <div class="question-index">2</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Noyaux stables vs instables</h2>
+                      <div class="question-meta">Complète la phrase avec les bons mots.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Un noyau est dit</span>
+                    <input class="input-pill" data-correct="stable" placeholder="Réponse" />
+                    <span>s’il ne se désintègre pas, et</span>
+                    <input class="input-pill" data-correct="instable" placeholder="Réponse" />
+                    <span>s’il se désintègre spontanément.</span>
+                  </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="question-card" data-question="3">
+                  <div class="question-header">
+                    <div class="question-index">3</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Transformation radioactive</h2>
+                      <div class="question-meta">Sélectionne les propositions vraies.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">La transformation radioactive est un processus aléatoire à l’échelle de chaque noyau.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">La transformation radioactive suit une loi probabiliste à l’échelle d’un grand nombre de noyaux.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Tous les noyaux se désintègrent simultanément au même instant.</span>
+                    </label>
+                  </div>
+                  <div class="note">Plusieurs réponses peuvent être correctes.</div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="question-card" data-question="4">
+                  <div class="question-header">
+                    <div class="question-index">4</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Stabilité du noyau</h2>
+                      <div class="question-meta">Complète la phrase suivante.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>La stabilité d’un noyau dépend du rapport entre le nombre de</span>
+                    <input class="input-pill" data-correct="protons" placeholder="Réponse 1" />
+                    <span>et de</span>
+                    <input class="input-pill" data-correct="neutrons" placeholder="Réponse 2" />
+                    <span>.</span>
+                  </div>
+                  <div class="note">Les réponses peuvent être données avec les lettres (Z, N) ou les mots (protons, neutrons).</div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="question-card" data-question="5">
+                  <div class="question-header">
+                    <div class="question-index">5</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition de l’activité A</h2>
+                      <div class="question-meta">Choisis la bonne définition.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="false">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Nombre de particules émises par noyau.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Nombre de désintégrations par unité de temps.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Énergie totale des rayonnements émis.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="question-card" data-question="6">
+                  <div class="question-header">
+                    <div class="question-index">6</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Unité de l’activité</h2>
+                      <div class="question-meta">Donne l’unité Système International : S.I. de l’activité.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>L’unité de l’activité dans le S.I. est le</span>
+                    <input class="input-pill" data-correct="becquerel" placeholder="Nom" />
+                    <span>(symbole</span>
+                    <input class="input-pill" data-correct="Bq" placeholder="Symbole" />
+                    <span>).</span>
+                  </div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="question-card" data-question="7">
+                  <div class="question-header">
+                    <div class="question-index">7</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition de la période T½</h2>
+                      <div class="question-meta">Complète la définition.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>La période radioactive T½ est le temps au bout duquel l’activité ou le nombre de noyaux a été</span>
+                    <input class="input-pill" data-correct="divisé par 2" placeholder="Réponse" />
+                    <span>.</span>
+                  </div>
+                </div>
+
+                <!-- Q8 -->
+                <div class="question-card" data-question="8">
+                  <div class="question-header">
+                    <div class="question-index">8</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Relation entre T½ et λ</h2>
+                      <div class="question-meta">Complète la relation.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>La période T½ est liée à la constante de désintégration λ par :</span>
+                    <span>T½ =</span>
+                    <input class="input-pill" data-correct="ln(2)/λ" placeholder="Formule" />
+                  </div>
+                  <div class="note">
+                    Tu peux écrire en lettres ou en symboles. Exemples à copier-coller : λ, lambda, exp, e, ln, log, π, σ…
+                  </div>
+                </div>
+
+                <!-- Q9 -->
+                <div class="question-card" data-question="9">
+                  <div class="question-header">
+                    <div class="question-index">9</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Loi de décroissance radioactive</h2>
+                      <div class="question-meta">Complète la loi en N(t).</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>On a :</span>
+                    <span>N(t) =</span>
+                    <input class="input-pill" data-correct="N0·e^(-λt)" placeholder="Expression" />
+                  </div>
+                  <div class="note">
+                    Astuce : les écritures du type exp(-λt), e^-λt, avec ou sans points ou parenthèses, sont tolérées.
+                  </div>
+                </div>
+
+                <!-- Q10 -->
+                <div class="question-card" data-question="10">
+                  <div class="question-header">
+                    <div class="question-index">10</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Type de rayonnement</h2>
+                      <div class="question-meta">Associe chaque rayonnement à sa nature (menus déroulants).</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Un rayonnement α est</span>
+                    <select class="select-pill" data-correct="un noyau d’hélium">
+                      <option value="">Choisir…</option>
+                      <option value="un noyau d’hélium">un noyau d’hélium</option>
+                      <option value="un électron">un électron</option>
+                      <option value="un photon">un photon</option>
+                      <option value="un proton">un proton</option>
+                      <option value="un neutron">un neutron</option>
+                      <option value="un positon">un positon</option>
+                    </select>
+                    <span>, un rayonnement β⁻ est</span>
+                    <select class="select-pill" data-correct="un électron">
+                      <option value="">Choisir…</option>
+                      <option value="un noyau d’hélium">un noyau d’hélium</option>
+                      <option value="un électron">un électron</option>
+                      <option value="un photon">un photon</option>
+                      <option value="un proton">un proton</option>
+                      <option value="un neutron">un neutron</option>
+                      <option value="un positon">un positon</option>
+                    </select>
+                    <span>et un rayonnement γ est</span>
+                    <select class="select-pill" data-correct="un photon">
+                      <option value="">Choisir…</option>
+                      <option value="un noyau d’hélium">un noyau d’hélium</option>
+                      <option value="un électron">un électron</option>
+                      <option value="un photon">un photon</option>
+                      <option value="un proton">un proton</option>
+                      <option value="un neutron">un neutron</option>
+                      <option value="un positon">un positon</option>
+                    </select>
+                    <span>électromagnétique.</span>
+                  </div>
+                  <div class="note">Symboles utiles à copier-coller : α  β  γ</div>
+                </div>
+
+                <!-- Q11 -->
+                <div class="question-card" data-question="11">
+                  <div class="question-header">
+                    <div class="question-index">11</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Pénétration des rayonnements</h2>
+                      <div class="question-meta">Classe les rayonnements du moins pénétrant au plus pénétrant (↑ / ↓ pour changer l’ordre).</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Ordre croissant de pouvoir de pénétration :</span>
+                  </div>
+                  <div class="order-list" data-correct-order="alpha,beta,gamma">
+                    <div class="order-item" data-value="alpha">
+                      <span class="order-label">α (alpha)</span>
+                      <div class="order-controls">
+                        <button class="order-btn" data-dir="up">↑</button>
+                        <button class="order-btn" data-dir="down">↓</button>
+                      </div>
+                    </div>
+                    <div class="order-item" data-value="beta">
+                      <span class="order-label">β (bêta)</span>
+                      <div class="order-controls">
+                        <button class="order-btn" data-dir="up">↑</button>
+                        <button class="order-btn" data-dir="down">↓</button>
+                      </div>
+                    </div>
+                    <div class="order-item" data-value="gamma">
+                      <span class="order-label">γ (gamma)</span>
+                      <div class="order-controls">
+                        <button class="order-btn" data-dir="up">↑</button>
+                        <button class="order-btn" data-dir="down">↓</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Q12 -->
+                <div class="question-card" data-question="12">
+                  <div class="question-header">
+                    <div class="question-index">12</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Interaction avec la matière</h2>
+                      <div class="question-meta">Sélectionne la proposition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="false">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Les rayons γ sont complètement arrêtés par une simple feuille de papier.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Les rayonnements ionisants peuvent arracher des électrons aux atomes de la matière traversée.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Les rayons α traversent facilement plusieurs centimètres de plomb.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q13 -->
+                <div class="question-card" data-question="13">
+                  <div class="question-header">
+                    <div class="question-index">13</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Dose absorbée D</h2>
+                      <div class="question-meta">Complète la définition.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>La dose absorbée D correspond à l’énergie déposée par unité de</span>
+                    <input class="input-pill" data-correct="masse" placeholder="Réponse" />
+                    <span>dans un tissu.</span>
+                  </div>
+                </div>
+
+                <!-- Q14 -->
+                <div class="question-card" data-question="14">
+                  <div class="question-header">
+                    <div class="question-index">14</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Unité de la dose absorbée</h2>
+                      <div class="question-meta">Donne l’unité dans le SI.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>L’unité SI de la dose absorbée est le</span>
+                    <input class="input-pill" data-correct="gray" placeholder="Nom" />
+                    <span>(symbole</span>
+                    <input class="input-pill" data-correct="Gy" placeholder="Symbole" />
+                    <span>).</span>
+                  </div>
+                </div>
+
+                <!-- Q15 -->
+                <div class="question-card" data-question="15">
+                  <div class="question-header">
+                    <div class="question-index">15</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Dose équivalente H</h2>
+                      <div class="question-meta">Complète la relation entre H et D.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>La dose équivalente H est donnée par :</span>
+                    <span>H =</span>
+                    <input class="input-pill" data-correct="D·wR" placeholder="Formule" />
+                    <span>où wR est le</span>
+                    <input class="input-pill" data-correct="facteur de pondération radiologique" placeholder="Nom" />
+                    <span>.</span>
+                  </div>
+                </div>
+
+                <!-- Q16 -->
+                <div class="question-card" data-question="16">
+                  <div class="question-header">
+                    <div class="question-index">16</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Unité de la dose équivalente</h2>
+                      <div class="question-meta">Donne l’unité dans le SI.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>L’unité SI de la dose équivalente est le</span>
+                    <input class="input-pill" data-correct="sievert" placeholder="Nom" />
+                    <span>(symbole</span>
+                    <input class="input-pill" data-correct="Sv" placeholder="Symbole" />
+                    <span>).</span>
+                  </div>
+                </div>
+
+                <!-- Q17 -->
+                <div class="question-card" data-question="17">
+                  <div class="question-header">
+                    <div class="question-index">17</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Effets déterministes</h2>
+                      <div class="question-meta">Complète la phrase.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Les effets déterministes apparaissent au-delà d’une certaine</span>
+                    <input class="input-pill" data-correct="dose seuil" placeholder="Réponse" />
+                    <span>et leur gravité</span>
+                    <input class="input-pill" data-correct="augmente" placeholder="Réponse" />
+                    <span>avec la dose.</span>
+                  </div>
+                </div>
+
+                <!-- Q18 -->
+                <div class="question-card" data-question="18">
+                  <div class="question-header">
+                    <div class="question-index">18</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Effets stochastiques</h2>
+                      <div class="question-meta">Complète la définition.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Les effets stochastiques sont des effets dont la</span>
+                    <input class="input-pill" data-correct="probabilité" placeholder="Réponse" />
+                    <span>augmente avec la dose, sans</span>
+                    <input class="input-pill" data-correct="seuil" placeholder="Réponse" />
+                    <span>et dont la gravité est indépendante de la dose.</span>
+                  </div>
+                </div>
+
+                <!-- Q19 -->
+                <div class="question-card" data-question="19">
+                  <div class="question-header">
+                    <div class="question-index">19</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Exemple d’effet déterministe</h2>
+                      <div class="question-meta">Donne un exemple.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Un exemple d’effet déterministe est :</span>
+                    <input class="input-pill" data-correct="érythème cutané" placeholder="Réponse" />
+                    <span>(ou tout autre effet aigu comme épilation, brûlure, etc.).</span>
+                  </div>
+                </div>
+
+                <!-- Q20 -->
+                <div class="question-card" data-question="20">
+                  <div class="question-header">
+                    <div class="question-index">20</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Exemple d’effet stochastique</h2>
+                      <div class="question-meta">Choisis les exemples d’effets stochastiques (plusieurs bonnes réponses).</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Cancer radio-induit.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Mutation héréditaire.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Érythème cutané aigu.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">D</span>
+                      <span class="option-text">Leucémie radio-induite.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">E</span>
+                      <span class="option-text">Brûlure cutanée à haute dose localisée.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q21 -->
+                <div class="question-card" data-question="21">
+                  <div class="question-header">
+                    <div class="question-index">21</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Relation dose–effet</h2>
+                      <div class="question-meta">Sélectionne la proposition vraie.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Les effets déterministes ont une dose seuil, les effets stochastiques n’en ont pas.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Les effets stochastiques ont une gravité qui augmente avec la dose.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Les effets déterministes sont indépendants de la dose.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q22 -->
+                <div class="question-card" data-question="22">
+                  <div class="question-header">
+                    <div class="question-index">22</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Exposition médicale vs exposition naturelle</h2>
+                      <div class="question-meta">Complète la phrase.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>La population est exposée à une radioactivité</span>
+                    <input class="input-pill" data-correct="naturelle" placeholder="Réponse" />
+                    <span>et à une radioactivité</span>
+                    <input class="input-pill" data-correct="artificielle" placeholder="Réponse" />
+                    <span>(en particulier médicale).</span>
+                  </div>
+                </div>
+
+                <!-- Q23 -->
+                <div class="question-card" data-question="23">
+                  <div class="question-header">
+                    <div class="question-index">23</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Proton, neutron, nucléon</h2>
+                      <div class="question-meta">Complète la phrase.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Le nombre de protons d’un noyau est noté</span>
+                    <input class="input-pill" data-correct="Z" placeholder="Réponse" />
+                    <span>, le nombre de neutrons est noté</span>
+                    <input class="input-pill" data-correct="N" placeholder="Réponse" />
+                    <span>et le nombre total de nucléons est noté</span>
+                    <input class="input-pill" data-correct="A" placeholder="Réponse" />
+                    <span>.</span>
+                  </div>
+                </div>
+
+                <!-- Q24 -->
+                <div class="question-card" data-question="24">
+                  <div class="question-header">
+                    <div class="question-index">24</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Notation d’un noyau</h2>
+                      <div class="question-meta">Complète la notation symbolique.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Un noyau est noté :</span>
+                    <span><sup>A</sup><sub>Z</sub>X où A =</span>
+                    <input class="input-pill" data-correct="nombre de nucléons" placeholder="Réponse" />
+                    <span>et Z =</span>
+                    <input class="input-pill" data-correct="nombre de protons" placeholder="Réponse" />
+                    <span>.</span>
+                  </div>
+                  <div class="note">Les réponses du type « nucléons », « protons » sont acceptées.</div>
+                </div>
+
+                <!-- Q25 -->
+                <div class="question-card" data-question="25">
+                  <div class="question-header">
+                    <div class="question-index">25</div>
+                    <div class="question-body">
+                      <h2 class="question-title">
+                        Composition du noyau
+                        <span style="font-size:0.8em; vertical-align:super;">14</span>
+                        <span style="font-size:0.8em; vertical-align:sub;">6</span>
+                        C
+                      </h2>
+                      <div class="question-meta">
+                        Complète la composition du noyau de carbone
+                        <span style="font-size:0.8em; vertical-align:super;">14</span>
+                        <span style="font-size:0.8em; vertical-align:sub;">6</span>
+                        C.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Ce noyau contient</span>
+                    <input class="input-pill" data-correct="6" placeholder="Z" />
+                    <span>protons et</span>
+                    <input class="input-pill" data-correct="8" placeholder="N" />
+                    <span>neutrons, soit</span>
+                    <input class="input-pill" data-correct="14" placeholder="A" />
+                    <span>nucléons.</span>
+                  </div>
+                </div>
+
+                <!-- Q26 -->
+                <div class="question-card" data-question="26">
+                  <div class="question-header">
+                    <div class="question-index">26</div>
+                    <div class="question-body">
+                      <h2 class="question-title">
+                        Composition du noyau
+                        <span style="font-size:0.8em; vertical-align:super;">14</span>
+                        <span style="font-size:0.8em; vertical-align:sub;">7</span>
+                        N
+                      </h2>
+                      <div class="question-meta">
+                        Complète la composition du noyau d’azote
+                        <span style="font-size:0.8em; vertical-align:super;">14</span>
+                        <span style="font-size:0.8em; vertical-align:sub;">7</span>
+                        N.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Ce noyau contient</span>
+                    <input class="input-pill" data-correct="7" placeholder="Z" />
+                    <span>protons et</span>
+                    <input class="input-pill" data-correct="7" placeholder="N" />
+                    <span>neutrons, soit</span>
+                    <input class="input-pill" data-correct="14" placeholder="A" />
+                    <span>nucléons.</span>
+                  </div>
+                </div>
+
+                <!-- Q27 -->
+                <div class="question-card" data-question="27">
+                  <div class="question-header">
+                    <div class="question-index">27</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Isotopes</h2>
+                      <div class="question-meta">Complète la phrase.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Deux noyaux isotopes ont le même</span>
+                    <input class="input-pill" data-correct="Z" placeholder="Réponse" />
+                    <span>mais un nombre différent de</span>
+                    <input class="input-pill" data-correct="neutrons" placeholder="Réponse" />
+                    <span>.</span>
+                  </div>
+                </div>
+
+                <!-- Q28 (NOUVELLE VERSION) -->
+                <div class="question-card" data-question="28">
+                  <div class="question-header">
+                    <div class="question-index">28</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Famille de noyaux : exemple de l’hydrogène</h2>
+                      <div class="question-meta">Choisis le type de famille nucléaire correspondant.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>Les noyaux</span>
+                    <span><sup>1</sup><sub>1</sub>H,</span>
+                    <span><sup>2</sup><sub>1</sub>H et</span>
+                    <span><sup>3</sup><sub>1</sub>H</span>
+                    <span>appartiennent à la famille des</span>
+                    <select class="select-pill" data-correct="isotopes">
+                      <option value="">Choisir…</option>
+                      <option value="isotopes">isotopes</option>
+                      <option value="isotones">isotones</option>
+                      <option value="isobares">isobares</option>
+                      <option value="isomères">isomères</option>
+                      <option value="isodiaphères">isodiaphères</option>
+                    </select>
+                    <span>.</span>
+                  </div>
+                </div>
+
+                <!-- Q29 -->
+                <div class="question-card" data-question="29">
+                  <div class="question-header">
+                    <div class="question-index">29</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Activité et nombre de noyaux</h2>
+                      <div class="question-meta">Complète la relation entre A, λ et N.</div>
+                    </div>
+                  </div>
+                  <div class="input-row">
+                    <span>On a :</span>
+                    <span>A(t) =</span>
+                    <input class="input-pill" data-correct="λ·N(t)" placeholder="Expression" />
+                  </div>
+                  <div class="note">Tu peux écrire en lettres ou en symboles, l’important est que la relation soit correcte.</div>
+                </div>
+
+                <!-- Q30 -->
+                <div class="question-card" data-question="30">
+                  <div class="question-header">
+                    <div class="question-index">30</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Interprétation clinique (QCM difficile)</h2>
+                      <div class="question-meta">Sélectionne les affirmations correctes (plusieurs réponses possibles).</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Il faut limiter la dose pour réduire les risques tout en gardant une qualité d’image suffisante.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">La meilleure stratégie est toujours de minimiser la dose, quitte à rendre l’image inutilisable.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">C</span>
+                      <span class="option-text">La justification de l’examen et l’optimisation des paramètres sont essentielles pour chaque patient.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">D</span>
+                      <span class="option-text">Une image de mauvaise qualité ne pose pas de problème si la dose est faible.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">E</span>
+                      <span class="option-text">La notion de « dose aussi faible que raisonnablement possible » (principe ALARA) s’applique en imagerie.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q31 -->
+                <div class="question-card" data-question="31">
+                  <div class="question-header">
+                    <div class="question-index">31</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition d’une onde mécanique</h2>
+                      <div class="question-meta">Sélectionne la bonne définition.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">
+                        Une perturbation qui se propage dans un milieu matériel en transportant de l’énergie sans transport global de matière.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">
+                        Une particule neutre se déplaçant à vitesse constante dans le vide.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">
+                        Un champ électrique uniforme créé par deux plaques métalliques.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q32 -->
+                <div class="question-card" data-question="32">
+                  <div class="question-header">
+                    <div class="question-index">32</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Onde mécanique transversale</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">La déformation est perpendiculaire au sens de propagation de l’onde.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">La déformation est parallèle au sens de propagation de l’onde.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">La déformation dépend uniquement du temps et pas de l’espace.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q33 -->
+                <div class="question-card" data-question="33">
+                  <div class="question-header">
+                    <div class="question-index">33</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Onde mécanique longitudinale</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="false">
+                      <span class="option-label">A</span>
+                      <span class="option-text">La déformation est perpendiculaire au sens de propagation.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">La déformation est parallèle au sens de propagation.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">La déformation est nulle, seule l’énergie se déplace.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q34 -->
+                <div class="question-card multi" data-question="34">
+                  <div class="question-header">
+                    <div class="question-index">34</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Caractéristiques d’une onde</h2>
+                      <div class="question-meta">Coche les grandeurs qui caractérisent une onde mécanique.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">La période T.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">La fréquence f.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">C</span>
+                      <span class="option-text">La longueur d’onde λ.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">D</span>
+                      <span class="option-text">L’amplitude.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">E</span>
+                      <span class="option-text">La masse totale du milieu traversé.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">F</span>
+                      <span class="option-text">La charge électrique du milieu.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q35 -->
+                <div class="question-card" data-question="35">
+                  <div class="question-header">
+                    <div class="question-index">35</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Lien entre période et fréquence</h2>
+                      <div class="question-meta">Sélectionne la relation correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">f = 1 / T</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">f = T</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">T = 2π f</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q36 -->
+                <div class="question-card" data-question="36">
+                  <div class="question-header">
+                    <div class="question-index">36</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Longueur d’onde λ</h2>
+                      <div class="question-meta">Sélectionne la relation correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">λ = v · T</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">λ = v / T</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">λ = T / v</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q37 -->
+                <div class="question-card" data-question="37">
+                  <div class="question-header">
+                    <div class="question-index">37</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition du champ électrostatique</h2>
+                      <div class="question-meta">Sélectionne la meilleure définition.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">
+                        Le champ qui décrit, en un point, la force exercée sur une charge d’essai immobile.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">
+                        Le champ créé uniquement par des charges en mouvement dans un conducteur.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">
+                        La variation de température par unité de temps.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q38 -->
+                <div class="question-card" data-question="38">
+                  <div class="question-header">
+                    <div class="question-index">38</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Unité du champ électrostatique</h2>
+                      <div class="question-meta">Coche les unités qui conviennent.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">N/C (Newton par Coulomb).</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">V/m (Volt par mètre).</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Joule (J).</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">D</span>
+                      <span class="option-text">Tesla (T).</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q39 -->
+                <div class="question-card" data-question="39">
+                  <div class="question-header">
+                    <div class="question-index">39</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Lignes de champ électrostatique</h2>
+                      <div class="question-meta">Sélectionne la bonne description.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Pour une charge ponctuelle positive, les lignes de champ sont radiales et sortent de la charge.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Pour une charge ponctuelle positive, les lignes de champ rentrent vers la charge.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Pour une charge ponctuelle négative, les lignes de champ convergent vers la charge.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q40 -->
+                <div class="question-card" data-question="40">
+                  <div class="question-header">
+                    <div class="question-index">40</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Origine du champ magnétique</h2>
+                      <div class="question-meta">Coche les sources possibles d’un champ magnétique.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Un aimant permanent.</span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Des charges électriques en mouvement.</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Une masse immobile sans charge.</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q41 -->
+                <div class="question-card" data-question="41">
+                  <div class="question-header">
+                    <div class="question-index">41</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Unité du champ magnétique</h2>
+                      <div class="question-meta">Sélectionne l’unité du S.I.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">Tesla (T).</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">Volt (V).</span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">Coulomb (C).</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q42 -->
+                <div class="question-card" data-question="42">
+                  <div class="question-header">
+                    <div class="question-index">42</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition des isotopes</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">
+                        Noyaux ayant le même nombre de protons Z, mais des nombres de neutrons N différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">
+                        Noyaux ayant le même nombre de neutrons N, mais des nombres de protons Z différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">
+                        Noyaux ayant le même nombre de masse A, mais des Z différents.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q43 -->
+                <div class="question-card" data-question="43">
+                  <div class="question-header">
+                    <div class="question-index">43</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition des isotones</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="false">
+                      <span class="option-label">A</span>
+                      <span class="option-text">
+                        Noyaux ayant le même nombre de protons Z, mais des N différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">
+                        Noyaux ayant le même nombre de neutrons N, mais des nombres de protons Z différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">
+                        Noyaux ayant le même nombre de masse A, mais le même Z.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q44 -->
+                <div class="question-card" data-question="44">
+                  <div class="question-header">
+                    <div class="question-index">44</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition des isobares</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="false">
+                      <span class="option-label">A</span>
+                      <span class="option-text">
+                        Noyaux ayant le même Z mais des A différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="true">
+                      <span class="option-label">B</span>
+                      <span class="option-text">
+                        Noyaux ayant le même nombre de masse A, mais des nombres Z et N différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">
+                        Noyaux ayant le même N mais des A différents.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q45 -->
+                <div class="question-card" data-question="45">
+                  <div class="question-header">
+                    <div class="question-index">45</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition des isomères nucléaires</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">
+                        Noyaux ayant le même Z et le même A, mais dans des états d’énergie (niveaux excités) différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">
+                        Noyaux ayant le même N et le même A, mais des Z différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">
+                        Noyaux ayant des Z, N et A tous différents.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Q46 -->
+                <div class="question-card" data-question="46">
+                  <div class="question-header">
+                    <div class="question-index">46</div>
+                    <div class="question-body">
+                      <h2 class="question-title">Définition des isodiaphères</h2>
+                      <div class="question-meta">Sélectionne la définition correcte.</div>
+                    </div>
+                  </div>
+                  <div class="question-options">
+                    <label class="option" data-correct="true">
+                      <span class="option-label">A</span>
+                      <span class="option-text">
+                        Noyaux pour lesquels la différence (N − Z) est la même, mais Z et N peuvent être différents.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">B</span>
+                      <span class="option-text">
+                        Noyaux ayant le même Z et le même N.
+                      </span>
+                    </label>
+                    <label class="option" data-correct="false">
+                      <span class="option-label">C</span>
+                      <span class="option-text">
+                        Noyaux ayant le même produit Z·N mais des A différents.
+                      </span>
+                    </label>
+                  </div>
+                </div>
+				          <!-- Q47 : TLE - définition -->
+          <div class="question-card" data-question="47">
+            <div class="question-header">
+              <div class="question-index">47</div>
+              <div class="question-body">
+                <h2 class="question-title">TLE : définition</h2>
+                <div class="question-meta">
+                  Choisis la meilleure définition du TLE (Transfert Linéique d’Énergie).
+                </div>
+              </div>
+            </div>
+            <div class="question-options">
+              <label class="option" data-correct="true">
+                <span class="option-label">A</span>
+                <span class="option-text">
+                  Énergie moyenne transférée par un rayonnement chargé à la matière
+                  par unité de longueur de trajectoire (keV/µm).
+                </span>
+              </label>
+              <label class="option" data-correct="false">
+                <span class="option-label">B</span>
+                <span class="option-text">
+                  Énergie totale émise par la source par unité de temps
+                  (activité en Bq).
+                </span>
+              </label>
+              <label class="option" data-correct="false">
+                <span class="option-label">C</span>
+                <span class="option-text">
+                  Nombre moyen de désintégrations par seconde pour un noyau donné.
+                </span>
+              </label>
+              <label class="option" data-correct="false">
+                <span class="option-label">D</span>
+                <span class="option-text">
+                  Distance moyenne parcourue dans l’air par un photon avant interaction.
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Q48 : TLE et pouvoir de pénétration -->
+          <div class="question-card" data-question="48">
+            <div class="question-header">
+              <div class="question-index">48</div>
+              <div class="question-body">
+                <h2 class="question-title">TLE et pouvoir de pénétration</h2>
+                <div class="question-meta">
+                  Sélectionne l’affirmation la plus juste concernant le lien TLE / pénétration.
+                </div>
+              </div>
+            </div>
+            <div class="question-options">
+              <label class="option" data-correct="false">
+                <span class="option-label">A</span>
+                <span class="option-text">
+                  Plus le TLE est élevé, plus le rayonnement pénètre profondément dans la matière.
+                </span>
+              </label>
+              <label class="option" data-correct="true">
+                <span class="option-label">B</span>
+                <span class="option-text">
+                  Plus le TLE est faible, plus le rayonnement a un grand pouvoir de pénétration.
+                </span>
+              </label>
+              <label class="option" data-correct="false">
+                <span class="option-label">C</span>
+                <span class="option-text">
+                  Le TLE et le pouvoir de pénétration sont totalement indépendants.
+                </span>
+              </label>
+              <label class="option" data-correct="false">
+                <span class="option-label">D</span>
+                <span class="option-text">
+                  Un rayonnement garde exactement le même TLE quel que soit le milieu traversé.
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Q49 : Vrai / Faux récapitulatif (pièges) -->
+          <div class="question-card" data-question="49">
+            <div class="question-header">
+              <div class="question-index">49</div>
+              <div class="question-body">
+                <h2 class="question-title">Vrai / Faux : récapitulatif piégeux</h2>
+                <div class="question-meta">
+                  Pour chaque affirmation, choisis Vrai ou Faux. Attention aux pièges.
+                </div>
+              </div>
+            </div>
+
+            <div class="input-row">
+              <span class="vf-label">1.</span>
+              <span class="vf-text">
+                Les photons X et γ sont des rayonnements indirectement ionisants.
+              </span>
+              <select class="select-pill" data-correct="vrai">
+                <option value="">Choisir...</option>
+                <option value="vrai">Vrai</option>
+                <option value="faux">Faux</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <span class="vf-label">2.</span>
+              <span class="vf-text">
+                Les électrons β⁻ sont des rayonnements directement ionisants.
+              </span>
+              <select class="select-pill" data-correct="vrai">
+                <option value="">Choisir...</option>
+                <option value="vrai">Vrai</option>
+                <option value="faux">Faux</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <span class="vf-label">3.</span>
+              <span class="vf-text">
+                Augmenter le TLE d’un rayonnement augmente en général sa portée dans la matière.
+              </span>
+              <select class="select-pill" data-correct="faux">
+                <option value="">Choisir...</option>
+                <option value="vrai">Vrai</option>
+                <option value="faux">Faux</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <span class="vf-label">4.</span>
+              <span class="vf-text">
+                Deux isotopes ont le même nombre de neutrons N.
+              </span>
+              <select class="select-pill" data-correct="faux">
+                <option value="">Choisir...</option>
+                <option value="vrai">Vrai</option>
+                <option value="faux">Faux</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <span class="vf-label">5.</span>
+              <span class="vf-text">
+                Les isobares ont le même nombre de masse A mais des Z différents.
+              </span>
+              <select class="select-pill" data-correct="vrai">
+                <option value="">Choisir...</option>
+                <option value="vrai">Vrai</option>
+                <option value="faux">Faux</option>
+              </select>
+            </div>
+
+            <div class="input-row">
+              <span class="vf-label">6.</span>
+              <span class="vf-text">
+                Les rayonnements électromagnétiques (X, γ) n’ont pas de charge électrique.
+              </span>
+              <select class="select-pill" data-correct="vrai">
+                <option value="">Choisir...</option>
+                <option value="vrai">Vrai</option>
+                <option value="faux">Faux</option>
+              </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="answers-header">
+  <div class="answers-title">Bilan & Aide</div>
+  <div class="answers-header-right">
+    <div class="exam-timer" id="examTimer" style="display:none;">
+      <span class="timer-label">Mode examen</span>
+      <span class="timer-value" id="examTimerValue">00:00</span>
+    </div>
+    <div class="score-badge">
+      <div class="score-main">
+        <span class="score-label">Score</span>
+        <span class="score-value">
+          <span id="scoreValue">0</span>/<span id="scoreTotal">0</span>
+        </span>
+      </div>
+      <div class="score-sub">
+        <span id="scorePercent">0</span>% de bonnes réponses
+      </div>
+    </div>
+  </div>
+</div>
+
+              <div class="summary-card">
+                <div class="summary-card-content">
+                  <div class="summary-row">
+                    <div class="summary-label">Questions exactes</div>
+                    <div class="summary-value" id="summaryCorrect">0</div>
+                  </div>
+                  <div class="summary-row">
+                    <div class="summary-label">Réponses partiellement justes</div>
+                    <div class="summary-value" id="summaryPartial">0</div>
+                  </div>
+                  <div class="summary-row">
+                    <div class="summary-label">À retravailler</div>
+                    <div class="summary-value" id="summaryIncorrect">0</div>
+                  </div>
+                  <div class="summary-help">
+                    Utilise ce panneau pour cibler les notions à revoir en priorité. En mode Examen, la correction détaillée est masquée.
+                  </div>
+                </div>
+              </div>
+
+              <div class="legend">
+                <div class="legend-item">
+                  <span class="legend-dot correct"></span>
+                  <span>Réponse correcte</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot incorrect"></span>
+                  <span>Réponse fausse</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot partial"></span>
+                  <span>Partiellement correct</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot neutral"></span>
+                  <span>Non répondu</span>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn btn-primary" id="checkButton">
+                  <span class="btn-icon">✓</span>
+                  Vérifier les réponses
+                </button>
+                <button class="btn" id="resetButton">
+                  <span class="btn-icon">⟳</span>
+                  Réinitialiser toutes les réponses
+                </button>
+                <button class="btn" id="showSolutionsButton" disabled>
+                  <span class="btn-icon">★</span>
+                  Afficher les solutions
+                </button>
+              </div>
+
+              <div class="attempts-info">
+                Tentatives : <span class="attempts-highlight" id="attemptsDetail">aucune vérification pour l’instant.</span>
+              </div>
+
+              <div class="tips-section">
+                <div class="tips-title">Conseils</div>
+                <ul class="tips-list">
+                  <li>Utilise le <strong>Mode Correction</strong> pour t’auto-évaluer question par question.</li>
+                  <li>Active le <strong>Mode Examen</strong> pour t’entraîner sans indication immédiate de réussite.</li>
+                  <li>Les réponses ne sont pas sensibles à la casse, mais les fautes d’orthographe peuvent être pénalisées.</li>
+                  <li>Tu peux écrire les lettres grecques en toutes lettres (alpha, beta, gamma, lambda…) ou copier les symboles : α β γ λ.</li>
+                </ul>
+              </div>
+
+              <div style="margin-top: 10px;">
+                <span class="badge-mode" id="modeBadge">
+                  <span class="badge-dot"></span>
+                  <span id="modeBadgeText">Mode Correction actif</span>
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+  </div>
+
+  <script>
+    (function () {
+      const attemptLimit = 50;
+      let attemptCount = 0;
+      let mode = "check";
+
+      const questions = document.querySelectorAll(".question-card");
+      const attemptsCountEl = document.getElementById("attemptsCount");
+      const attemptsDetailEl = document.getElementById("attemptsDetail");
+      const scoreValueEl = document.getElementById("scoreValue");
+      const scorePercentEl = document.getElementById("scorePercent");
+      const scoreTotalEl = document.getElementById("scoreTotal");
+      const summaryCorrectEl = document.getElementById("summaryCorrect");
+      const summaryPartialEl = document.getElementById("summaryPartial");
+      const summaryIncorrectEl = document.getElementById("summaryIncorrect");
+      const checkButton = document.getElementById("checkButton");
+      const resetButton = document.getElementById("resetButton");
+      const showSolutionsButton = document.getElementById("showSolutionsButton");
+      const celebration = document.getElementById("celebration");
+      const modeCheckBtn = document.getElementById("modeCheck");
+      const modeExamBtn = document.getElementById("modeExam");
+      const togglePill = document.getElementById("togglePill");
+      const modeBadge = document.getElementById("modeBadge");
+      const modeBadgeText = document.getElementById("modeBadgeText");
+
+      const examTimerEl = document.getElementById("examTimer");
+      const examTimerValueEl = document.getElementById("examTimerValue");
+      let examTimerInterval = null;
+      let examSeconds = 0;
+
+      const questionsContainer = document.querySelector(".questions-scroll");
+      const originalQuestionOrder = questionsContainer
+        ? Array.from(questionsContainer.querySelectorAll(".question-card"))
+        : [];
+
+      const totalQuestions = questions.length;
+      scoreTotalEl.textContent = totalQuestions.toString();
+      summaryIncorrectEl.textContent = totalQuestions.toString();
+
+      const orderLists = document.querySelectorAll(".order-list");
+      const orderOriginalStates = new Map();
+      orderLists.forEach((list) => {
+        const items = Array.from(list.querySelectorAll(".order-item"));
+        orderOriginalStates.set(
+          list,
+          items.map((it) => it.getAttribute("data-value"))
+        );
+      });
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const tmp = array[i];
+          array[i] = array[j];
+          array[j] = tmp;
+        }
+        return array;
+      }
+
+      function randomizeOrderList(list) {
+        const items = Array.from(list.querySelectorAll(".order-item"));
+        if (items.length <= 1) return;
+        shuffleArray(items);
+        items.forEach((it) => {
+          it.classList.remove("correct", "incorrect");
+          list.appendChild(it);
+        });
+      }
+
+      function randomizeSelectOptions() {
+        const selects = document.querySelectorAll(".select-pill");
+        selects.forEach((sel) => {
+          const options = Array.from(sel.querySelectorAll("option"));
+          if (options.length <= 2) return;
+          const placeholder = options.find((opt) => opt.value === "") || null;
+          const realOptions = options.filter((opt) => opt !== placeholder);
+
+          shuffleArray(realOptions);
+
+          sel.innerHTML = "";
+          if (placeholder) {
+            sel.appendChild(placeholder);
+          }
+          realOptions.forEach((opt) => sel.appendChild(opt));
+          sel.selectedIndex = 0;
+        });
+      }
+
+      // Randomisation initiale au chargement :
+      // - menus déroulants (tous)
+      // - liste α/β/γ
+      orderLists.forEach((list) => randomizeOrderList(list));
+      randomizeSelectOptions();
+
+      function randomizeQuestionOrderForExam() {
+  if (!questionsContainer || originalQuestionOrder.length === 0) return;
+  // On clone le tableau avant de le mélanger pour ne pas casser l’original
+  const shuffled = shuffleArray([...originalQuestionOrder]);
+  shuffled.forEach((q) => questionsContainer.appendChild(q));
+}
+
+      function restoreOriginalQuestionOrder() {
+        if (!questionsContainer || originalQuestionOrder.length === 0) return;
+        originalQuestionOrder.forEach((q) => questionsContainer.appendChild(q));
+      }
+
+      function normalize(str) {
+        if (!str) return "";
+        return str
+          .toString()
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, " ")
+          .replace(/[’']/g, "'")
+          .replace(/[éèêë]/g, "e")
+          .replace(/[àâ]/g, "a")
+          .replace(/[îï]/g, "i")
+          .replace(/[ôö]/g, "o")
+          .replace(/[ùûü]/g, "u")
+          .replace(/-/g, " - ");
+      }
+
+      const inputSynonyms = {
+        "divise par 2": [
+          "divisé par 2",
+          "divise par deux",
+          "divise par 2",
+          "divisé par deux"
+        ],
+        "divise par 4": [
+          "divisé par 4",
+          "divise par quatre",
+          "divise par 4",
+          "divisé par quatre"
+        ],
+        "fois 2": ["x2", "×2", "multiplié par 2", "fois deux"],
+        "fois 4": ["x4", "×4", "multiplié par 4", "fois quatre"]
+      };
+
+      function isInputCorrect(userVal, correctVal) {
+        const u = normalize(userVal);
+        const c = normalize(correctVal);
+
+        if (!u && !c) return true;
+        if (!u || !c) return false;
+        if (u === c) return true;
+
+        const syns = inputSynonyms[c];
+        if (syns && syns.some((alt) => normalize(alt) === u)) return true;
+
+        return false;
+      }
+
+      function clearSolutionTextFor(el) {
+        let node = el.nextElementSibling;
+        while (node && node.classList.contains("solution-text")) {
+          const toRemove = node;
+          node = node.nextElementSibling;
+          toRemove.remove();
+        }
+      }
+
+      function clearAllSolutionTexts() {
+        document
+          .querySelectorAll(".solution-text")
+          .forEach((span) => span.remove());
+      }
+
+      function addSolutionText(el, userVal, correctVal) {
+        clearSolutionTextFor(el);
+        if (!correctVal) return;
+
+        const span = document.createElement("span");
+        span.className = "solution-text";
+
+        if (userVal && !isInputCorrect(userVal, correctVal)) {
+          span.innerHTML =
+            '<span class="user-error">' +
+            userVal +
+            '</span> → <span class="correct-value">' +
+            correctVal +
+            "</span>";
+        } else if (!userVal) {
+          span.innerHTML =
+            '<span class="correct-value">' + correctVal + "</span>";
+        } else {
+          span.innerHTML =
+            '<span class="correct-value">' + correctVal + "</span>";
+        }
+
+        el.insertAdjacentElement("afterend", span);
+      }
+
+      function formatExamTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+      }
+
+      function startExamTimer() {
+        if (!examTimerEl || !examTimerValueEl) return;
+        if (examTimerInterval) {
+          clearInterval(examTimerInterval);
+        }
+        examSeconds = 0;
+        examTimerEl.style.display = "flex";
+        examTimerValueEl.textContent = formatExamTime(examSeconds);
+        examTimerInterval = setInterval(() => {
+          examSeconds++;
+          examTimerValueEl.textContent = formatExamTime(examSeconds);
+        }, 1000);
+      }
+
+      function stopExamTimer() {
+        if (examTimerInterval) {
+          clearInterval(examTimerInterval);
+          examTimerInterval = null;
+        }
+      }
+
+      function resetOrderList(list) {
+        // On rebrasse simplement la liste à chaque reset
+        randomizeOrderList(list);
+      }
+
+      function adjustQuestion4Flags(q, flags) {
+        const inputs = q.querySelectorAll(".input-pill");
+        if (inputs.length < 2) return flags;
+
+        const v1 = normalize(inputs[0].value);
+        const v2 = normalize(inputs[1].value);
+
+        const anyAnswered = v1.length > 0 || v2.length > 0;
+        if (!anyAnswered) return flags;
+
+        const protonSet = new Set([
+          "proton",
+          "protons",
+          "noyau d’hydrogene",
+          "noyau d'hydrogene"
+        ]);
+        const neutronSet = new Set([
+          "neutron",
+          "neutrons",
+          "particule neutre"
+        ]);
+
+        const case1 = protonSet.has(v1) && neutronSet.has(v2);
+        const case2 = protonSet.has(v2) && neutronSet.has(v1);
+
+        inputs.forEach((inp) => {
+          inp.classList.remove("ghosted");
+        });
+
+        if (case1 || case2) {
+          inputs.forEach((inp) => {
+            inp.classList.remove("incorrect");
+            inp.classList.add("correct");
+            clearSolutionTextFor(inp);
+          });
+          flags.hasCorrect = true;
+          flags.hasPartial = false;
+        } else if (v1 || v2) {
+          flags.hasCorrect = false;
+          flags.hasPartial = true;
+
+          inputs.forEach((inp) => {
+            const correctVal = inp.getAttribute("data-correct") || "";
+            addSolutionText(inp, inp.value, correctVal);
+          });
+        }
+
+        flags.hasAnyAnswered = true;
+        return flags;
+      }
+
+      function checkAnswers() {
+        if (attemptCount >= attemptLimit) {
+          alert("Nombre maximum de vérifications atteint.");
+          return;
+        }
+
+        attemptCount++;
+        attemptsCountEl.textContent = attemptCount.toString();
+        attemptsDetailEl.textContent =
+          attemptCount === 1
+            ? "1 vérification effectuée."
+            : attemptCount + " vérifications effectuées.";
+
+        clearAllSolutionTexts();
+
+        let correctCount = 0;
+        let partialCount = 0;
+        let incorrectCount = 0;
+
+        questions.forEach((q) => {
+          const qId = q.getAttribute("data-question");
+          let hasCorrect = true;
+          let hasAnyAnswered = false;
+          let hasPartial = false;
+
+          const options = q.querySelectorAll(".option");
+          if (options.length) {
+            options.forEach((opt) => {
+              const isCorrect = opt.getAttribute("data-correct") === "true";
+              const isSelected = opt.classList.contains("selected");
+
+              opt.classList.remove("correct", "incorrect", "ghosted", "solution-highlight");
+
+              if (isSelected) {
+                hasAnyAnswered = true;
+                if (isCorrect) {
+                  opt.classList.add("correct");
+                } else {
+                  opt.classList.add("incorrect");
+                  hasCorrect = false;
+                  hasPartial = true;
+                }
+              } else {
+                if (attemptCount > 1) {
+                  opt.classList.add("ghosted");
+                }
+              }
+
+              if (isCorrect && !isSelected) {
+                hasCorrect = false;
+              }
+            });
+          }
+
+          const inputs = q.querySelectorAll(".input-pill");
+          if (inputs.length) {
+            let flags = {
+              hasCorrect,
+              hasPartial,
+              hasAnyAnswered
+            };
+
+            if (qId === "4") {
+              flags = adjustQuestion4Flags(q, flags);
+              hasCorrect = flags.hasCorrect;
+              hasPartial = flags.hasPartial;
+              hasAnyAnswered = flags.hasAnyAnswered;
+            } else {
+              inputs.forEach((inp) => {
+                const correctVal = inp.getAttribute("data-correct") || "";
+                const userVal = inp.value;
+
+                inp.classList.remove("correct", "incorrect", "ghosted");
+
+                if (userVal.trim().length > 0) {
+                  hasAnyAnswered = true;
+                }
+
+                if (userVal.trim().length === 0) {
+                  hasCorrect = false;
+                  if (attemptCount > 1) {
+                    inp.classList.add("ghosted");
+                  }
+                } else if (isInputCorrect(userVal, correctVal)) {
+                  inp.classList.add("correct");
+                } else {
+                  inp.classList.add("incorrect");
+                  hasCorrect = false;
+                  hasPartial = true;
+                  addSolutionText(inp, userVal, correctVal);
+                }
+              });
+            }
+          }
+
+          const selects = q.querySelectorAll(".select-pill");
+          if (selects.length) {
+            selects.forEach((sel) => {
+              const correctVal = sel.getAttribute("data-correct") || "";
+              const userVal = sel.value;
+
+              sel.classList.remove("correct", "incorrect", "ghosted");
+
+              if (userVal.trim().length > 0) {
+                hasAnyAnswered = true;
+              }
+
+              if (!userVal) {
+                hasCorrect = false;
+                if (attemptCount > 1) {
+                  sel.classList.add("ghosted");
+                }
+              } else if (isInputCorrect(userVal, correctVal)) {
+                sel.classList.add("correct");
+              } else {
+                sel.classList.add("incorrect");
+                hasCorrect = false;
+                hasPartial = true;
+              }
+            });
+          }
+
+          const orderList = q.querySelector(".order-list");
+          if (orderList) {
+            const items = Array.from(orderList.querySelectorAll(".order-item"));
+            const correctOrder = (orderList.getAttribute("data-correct-order") || "").split(",");
+            items.forEach((it) => it.classList.remove("correct", "incorrect"));
+            if (items.length) hasAnyAnswered = true;
+            const values = items.map((it) => it.getAttribute("data-value"));
+            const isRight =
+              JSON.stringify(values) === JSON.stringify(correctOrder);
+            if (isRight) {
+              items.forEach((it) => it.classList.add("correct"));
+            } else {
+              items.forEach((it) => it.classList.add("incorrect"));
+              hasCorrect = false;
+              hasPartial = true;
+            }
+          }
+
+          if (!hasAnyAnswered) {
+            hasCorrect = false;
+            hasPartial = false;
+          }
+
+          if (hasCorrect && hasAnyAnswered) {
+            correctCount++;
+          } else if (hasPartial && hasAnyAnswered) {
+            partialCount++;
+          } else {
+            incorrectCount++;
+          }
+        });
+
+        scoreValueEl.textContent = correctCount.toString();
+        scorePercentEl.textContent = ((correctCount / totalQuestions) * 100).toFixed(0);
+        summaryCorrectEl.textContent = correctCount.toString();
+        summaryPartialEl.textContent = partialCount.toString();
+        summaryIncorrectEl.textContent = incorrectCount.toString();
+
+        if (correctCount === totalQuestions) {
+          triggerCelebration();
+        }
+
+        if (mode === "exam") {
+          stopExamTimer();
+        }
+
+        showSolutionsButton.disabled = false;
+      }
+
+      function showSolutions() {
+        if (mode === "exam") {
+          alert("Les solutions ne sont disponibles qu’en mode Correction.");
+          return;
+        }
+
+        questions.forEach((q) => {
+          const qId = q.getAttribute("data-question");
+
+          if (qId === "4") {
+            const inputs = q.querySelectorAll(".input-pill");
+            if (inputs.length >= 2) {
+              const correctValues = Array.from(inputs).map((inp) =>
+                inp.getAttribute("data-correct") || ""
+              );
+              inputs.forEach((inp, idx) => {
+                inp.classList.remove("incorrect", "ghosted");
+                inp.classList.add("correct");
+                clearSolutionTextFor(inp);
+                addSolutionText(inp, inp.value, correctValues[idx]);
+              });
+            }
+          } else {
+            const inputs = q.querySelectorAll(".input-pill");
+            inputs.forEach((inp) => {
+              const correctVal = inp.getAttribute("data-correct") || "";
+              inp.classList.remove("incorrect", "ghosted");
+              inp.classList.add("correct");
+              clearSolutionTextFor(inp);
+              addSolutionText(inp, inp.value, correctVal);
+            });
+          }
+
+          const selects = q.querySelectorAll(".select-pill");
+          selects.forEach((sel) => {
+            const correctVal = sel.getAttribute("data-correct") || "";
+            sel.value = correctVal;
+            sel.classList.remove("incorrect", "ghosted");
+            sel.classList.add("correct");
+            clearSolutionTextFor(sel);
+          });
+
+          const orderList = q.querySelector(".order-list");
+          if (orderList) {
+            const correctOrder = (orderList.getAttribute("data-correct-order") || "").split(",");
+            const items = Array.from(orderList.querySelectorAll(".order-item"));
+            const map = new Map();
+            items.forEach((it) => map.set(it.getAttribute("data-value"), it));
+            correctOrder.forEach((val) => {
+              const it = map.get(val);
+              if (it) orderList.appendChild(it);
+            });
+            items.forEach((it) => {
+              it.classList.remove("incorrect");
+              it.classList.add("correct");
+            });
+          }
+
+          const options = q.querySelectorAll(".option");
+          options.forEach((opt) => {
+            const isCorrect = opt.getAttribute("data-correct") === "true";
+            opt.classList.remove("ghosted");
+            if (isCorrect) {
+              opt.classList.add("solution-highlight");
+            }
+          });
+        });
+      }
+
+      function resetAnswers() {
+        questions.forEach((q) => {
+          const options = q.querySelectorAll(".option");
+          options.forEach((opt) => {
+            opt.classList.remove("selected", "correct", "incorrect", "ghosted", "solution-highlight");
+          });
+
+          const inputs = q.querySelectorAll(".input-pill");
+          inputs.forEach((inp) => {
+            inp.value = "";
+            inp.classList.remove("correct", "incorrect", "ghosted");
+            clearSolutionTextFor(inp);
+          });
+
+          const selects = q.querySelectorAll(".select-pill");
+          selects.forEach((sel) => {
+            sel.selectedIndex = 0;
+            sel.classList.remove("correct", "incorrect", "ghosted");
+            clearSolutionTextFor(sel);
+          });
+
+          const orderList = q.querySelector(".order-list");
+          if (orderList) {
+            resetOrderList(orderList);
+          }
+        });
+
+        clearAllSolutionTexts();
+
+        scoreValueEl.textContent = "0";
+        scorePercentEl.textContent = "0";
+        summaryCorrectEl.textContent = "0";
+        summaryPartialEl.textContent = "0";
+        summaryIncorrectEl.textContent = totalQuestions.toString();
+
+        // On rebrasse aussi les menus déroulants
+        randomizeSelectOptions();
+
+        showSolutionsButton.disabled = true;
+      }
+
+      function triggerCelebration() {
+        celebration.innerHTML = "";
+        const colors = [
+          "#22c55e",
+          "#38bdf8",
+          "#a855f7",
+          "#eab308",
+          "#f97316"
+        ];
+
+        const count = 220;
+        for (let i = 0; i < count; i++) {
+          const confetti = document.createElement("div");
+          confetti.className = "confetti";
+          const x = Math.random() * 100;
+          const delay = Math.random() * 0.5;
+          const duration = 2 + Math.random() * 1.5;
+          confetti.style.left = x + "vw";
+          confetti.style.animationDelay = delay + "s";
+          confetti.style.animationDuration = duration + "s";
+          confetti.style.backgroundColor =
+            colors[Math.floor(Math.random() * colors.length)];
+          celebration.appendChild(confetti);
+        }
+
+        celebration.classList.add("active");
+        setTimeout(() => {
+          celebration.classList.remove("active");
+          celebration.innerHTML = "";
+        }, 4000);
+      }
+
+      orderLists.forEach((list) => {
+        list.addEventListener("click", (e) => {
+          const btn = e.target.closest(".order-btn");
+          if (!btn) return;
+          const dir = btn.getAttribute("data-dir");
+          const item = btn.closest(".order-item");
+          if (!item) return;
+
+          if (dir === "up" && item.previousElementSibling) {
+            list.insertBefore(item, item.previousElementSibling);
+          } else if (dir === "down" && item.nextElementSibling) {
+            list.insertBefore(item.nextElementSibling, item);
+          }
+        });
+      });
+
+      questions.forEach((q) => {
+  const options = q.querySelectorAll(".option");
+  options.forEach((opt) => {
+    opt.addEventListener("click", () => {
+      // Multi-sélection partout : chaque clic coche/décoche indépendamment
+      opt.classList.toggle("selected");
+      // On enlève d’éventuels styles de correction de la tentative précédente
+      opt.classList.remove("correct", "incorrect", "ghosted", "solution-highlight");
+    });
+  });
+
+  const inputs = q.querySelectorAll(".input-pill");
+  inputs.forEach((inp) => {
+    inp.addEventListener("input", () => {
+      inp.classList.remove("correct", "incorrect", "ghosted");
+      clearSolutionTextFor(inp);
+    });
+  });
+
+  const selects = q.querySelectorAll(".select-pill");
+  selects.forEach((sel) => {
+    sel.addEventListener("change", () => {
+      sel.classList.remove("correct", "incorrect", "ghosted");
+      clearSolutionTextFor(sel);
+    });
+  });
+});
+
+      checkButton.addEventListener("click", checkAnswers);
+
+      resetButton.addEventListener("click", () => {
+        resetAnswers();
+        attemptCount = 0;
+        attemptsCountEl.textContent = "0";
+        attemptsDetailEl.textContent = "aucune vérification pour l’instant.";
+
+        if (mode === "exam") {
+          randomizeQuestionOrderForExam();
+          startExamTimer();
+        } else {
+          stopExamTimer();
+          if (examTimerEl) {
+            examTimerEl.style.display = "none";
+          }
+          restoreOriginalQuestionOrder();
+        }
+      });
+
+      showSolutionsButton.addEventListener("click", showSolutions);
+
+      modeCheckBtn.addEventListener("click", () => {
+        mode = "check";
+        modeCheckBtn.classList.add("active");
+        modeExamBtn.classList.remove("active");
+        togglePill.classList.remove("right");
+        togglePill.classList.add("left");
+        checkButton.disabled = false;
+        modeBadge.classList.remove("locked");
+        modeBadgeText.textContent = "Mode Correction actif";
+
+        stopExamTimer();
+        if (examTimerEl) {
+          examTimerEl.style.display = "none";
+        }
+        restoreOriginalQuestionOrder();
+      });
+
+      modeExamBtn.addEventListener("click", () => {
+        mode = "exam";
+        modeExamBtn.classList.add("active");
+        modeCheckBtn.classList.remove("active");
+        togglePill.classList.remove("left");
+        togglePill.classList.add("right");
+        checkButton.disabled = false;
+        modeBadge.classList.add("locked");
+        modeBadgeText.textContent = "Mode Examen : chrono + note";
+        randomizeQuestionOrderForExam();
+        startExamTimer();
+      });
+
+})();
+  </script>
+
+
+</body>
+</html>
