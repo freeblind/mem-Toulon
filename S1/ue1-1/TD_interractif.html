@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>UE 1.1 - Psychologie : Exercice interactif complet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #f5f7ff 0, #e8f0ff 30%, #fefefe 100%);
+      --primary: #3b82f6;
+      --primary-soft: #dbeafe;
+      --accent: #ec4899;
+      --accent-soft: #fce7f3;
+      --good: #16a34a;
+      --bad: #dc2626;
+      --text-main: #0f172a;
+      --text-soft: #6b7280;
+      --card-bg: #ffffffcc;
+      --border-soft: #e5e7eb;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.08);
+      --radius-xl: 20px;
+      --radius-pill: 999px;
+      --transition-fast: 0.2s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 20px;
+    }
+
+    .title {
+      font-size: clamp(1.7rem, 2.4vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-badge {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--primary));
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .subtitle {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      color: var(--text-soft);
+      max-width: 720px;
+    }
+
+    .shell-card {
+      background: var(--card-bg);
+      border-radius: 28px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      backdrop-filter: blur(12px);
+    }
+
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tab-button {
+      border-radius: var(--radius-pill);
+      border: 1px solid transparent;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--text-soft);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .tab-button span.emoji {
+      font-size: 1.1rem;
+    }
+
+    .tab-button.active {
+      background: linear-gradient(135deg, var(--primary-soft), var(--accent-soft));
+      color: var(--text-main);
+      border-color: rgba(59, 130, 246, 0.55);
+      box-shadow: 0 10px 26px rgba(59, 130, 246, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .tab-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.16);
+    }
+
+    .tab-panels {
+      margin-top: 4px;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(4px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    .panel-header {
+      margin-bottom: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .panel-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      max-width: 540px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: var(--radius-pill);
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      white-space: nowrap;
+    }
+
+    .pill.neutral {
+      background: #f3f4ff;
+      color: #4b5563;
+      border-color: #e5e7eb;
+    }
+
+    .pill strong {
+      font-weight: 700;
+    }
+
+    .section-card {
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-soft);
+      padding: 14px 16px;
+      background: #ffffffee;
+      margin-bottom: 16px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      border-radius: var(--radius-pill);
+      border: 1px solid transparent;
+      padding: 7px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f3f4ff;
+      color: #111827;
+      transition: background var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #6366f1);
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.28);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-main);
+      border-color: #cbd5f5;
+    }
+
+    .btn-soft {
+      background: #fdf2ff;
+      color: #4c1d95;
+      border-color: #f5d0ff;
+    }
+
+    .btn-next {
+      margin-top: 4px;
+    }
+
+    .btn:hover {
+      transform: translateY(-0.5px);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14);
+    }
+
+    .btn .emoji {
+      font-size: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    thead th {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-soft);
+      border-bottom: 1px solid var(--border-soft);
+      background: #f9fafb;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    tbody tr:nth-child(odd) {
+      background: #ffffff;
+    }
+
+    tbody tr {
+      transition: background 0.15s ease;
+    }
+
+    tbody tr:hover {
+      background: #eef2ff;
+    }
+
+    .term {
+      font-weight: 600;
+      min-width: 120px;
+    }
+
+    select, input[type="text"], textarea {
+      width: 100%;
+      font-size: 0.85rem;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #cbd5f5;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+      background: #fff;
+    }
+
+    select:focus, input[type="text"]:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+      background: #f9fbff;
+    }
+
+    .feedback {
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+
+    .feedback.good {
+      color: var(--good);
+      font-weight: 600;
+    }
+
+    .feedback.bad {
+      color: var(--bad);
+      font-weight: 600;
+    }
+
+    .feedback.neutral {
+      color: var(--text-soft);
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .chip.good {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .chip.bad {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .chip.info {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .vf-question {
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      padding: 10px 10px;
+      margin-bottom: 8px;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .vf-text {
+      font-size: 0.9rem;
+    }
+
+    .vf-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .vf-btn {
+      border-radius: var(--radius-pill);
+      border: 1px solid #d1d5db;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #fff;
+      transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .vf-btn.selected {
+      background: #1d4ed8;
+      color: #fff;
+      border-color: #1d4ed8;
+      box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .vf-feedback {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+    }
+
+    .vf-feedback.good {
+      color: var(--good);
+      font-weight: 600;
+    }
+
+    .vf-feedback.bad {
+      color: var(--bad);
+      font-weight: 600;
+    }
+
+    .stat-line {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .stat-line strong {
+      color: var(--text-main);
+    }
+
+    .badge-count {
+      border-radius: var(--radius-pill);
+      background: #eef2ff;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      color: #312e81;
+    }
+
+    .situation-box {
+      border-radius: 16px;
+      border: 1px dashed #cbd5f5;
+      background: #f9fafb;
+      padding: 10px 12px;
+      margin-top: 6px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .situation-feedback {
+      margin-top: 8px;
+      font-size: 0.82rem;
+    }
+
+    .situation-feedback p {
+      margin-bottom: 4px;
+    }
+
+    .highlight {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .concept-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #075985;
+      font-size: 0.75rem;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+
+    .concept-tag strong {
+      font-weight: 700;
+    }
+
+    /* Définitions – détails sous le select */
+    .def-detail {
+      margin-top: 4px;
+      font-size: 0.78rem;
+      line-height: 1.3;
+    }
+
+    .def-wrong {
+      color: #b91c1c;
+    }
+
+    .def-correct {
+      color: #15803d;
+    }
+
+    .select-good {
+      border-color: #16a34a !important;
+      background: #f0fdf4;
+    }
+
+    .select-bad {
+      border-color: #dc2626 !important;
+      background: #fef2f2;
+    }
+
+    /* Freud – ordre repensé */
+    .freud-order-section {
+      margin-bottom: 16px;
+    }
+
+    .freud-order-info {
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    .freud-order-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 8px;
+    }
+
+    .freud-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      gap: 8px;
+    }
+
+    .freud-left {
+      flex: 1;
+    }
+
+    .freud-position-label {
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin-bottom: 2px;
+    }
+
+    .freud-input {
+      width: 100%;
+    }
+
+    .freud-controls {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-left: 8px;
+    }
+
+    .freud-move-btn {
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      padding: 2px 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .freud-move-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .freud-item.good {
+      border-color: #16a34a;
+      background: #ecfdf3;
+    }
+
+    .freud-item.bad {
+      border-color: #dc2626;
+      background: #fef2f2;
+    }
+
+    .freud-solution {
+      margin-top: 6px;
+      font-size: 0.82rem;
+    }
+
+    .freud-solution span {
+      font-weight: 600;
+    }
+
+    .freud-tag {
+      display: inline-block;
+      margin-right: 4px;
+      margin-bottom: 2px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      font-size: 0.78rem;
+      color: #075985;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 16px;
+      }
+      .shell-card {
+        padding: 14px 14px 16px;
+        border-radius: 22px;
+      }
+      th, td {
+        font-size: 0.8rem;
+      }
+      .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .situation-box {
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <header>
+    <div class="title">
+      <span class="title-badge">UE 1.1 • Psycho</span>
+      <span>Entraînement interactif complet</span>
+    </div>
+    <p class="subtitle">
+      Définitions, QCM Vrai/Faux, stades de l’enfance selon Freud (ordre + âges) et analyse de situations cliniques
+      (mécanismes de défense, empathie, attachement, transfert, etc.).
+    </p>
+  </header>
+
+  <div class="shell-card">
+    <nav class="tab-bar">
+      <button class="tab-button active" data-target="tab-defs">
+        <span class="emoji">🧩</span>
+        Définitions à remettre
+      </button>
+      <button class="tab-button" data-target="tab-vf">
+        <span class="emoji">✅</span>
+        Vrai / Faux
+      </button>
+      <button class="tab-button" data-target="tab-freud">
+        <span class="emoji">👶</span>
+        Stades de l’enfance (Freud)
+      </button>
+      <button class="tab-button" data-target="tab-situations">
+        <span class="emoji">🩺</span>
+        Situations cliniques
+      </button>
+    </nav>
+
+    <div class="tab-panels">
+
+      <!-- TAB 1 : DEFINITIONS -->
+      <section id="tab-defs" class="tab-panel active">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">
+              <span>1. Définitions à remettre</span>
+              <span class="pill neutral">Concept / théorie / modèle / mécanismes de défense…</span>
+            </div>
+            <p class="panel-subtitle">
+              Associe chaque concept à la bonne définition. En cas d’erreur, ta réponse s’affiche en rouge
+              et la bonne définition en vert juste en dessous.
+            </p>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <table>
+            <thead>
+            <tr>
+              <th>Concept</th>
+              <th>Définition</th>
+              <th>Feedback</th>
+            </tr>
+            </thead>
+            <tbody id="definitions-body">
+            <!-- Rempli en JavaScript -->
+            </tbody>
+          </table>
+
+          <div class="btn-row">
+            <button id="check-definitions" class="btn btn-primary">
+              <span class="emoji">🔍</span> Corriger
+            </button>
+            <button id="reset-definitions" class="btn btn-outline">
+              <span class="emoji">♻️</span> Réinitialiser
+            </button>
+            <span id="definitions-stat" class="stat-line"></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-soft btn-next" onclick="goToTab('tab-vf')">
+            <span class="emoji">➡️</span> Exercice suivant : Vrai / Faux
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 2 : VRAI FAUX -->
+      <section id="tab-vf" class="tab-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">
+              <span>2. Vrai / Faux ciblé</span>
+              <span class="pill neutral">Émotion • Stress • Défenses • Empathie • Attachement…</span>
+            </div>
+            <p class="panel-subtitle">
+              Choisis Vrai ou Faux pour chaque affirmation. Feedback immédiat avec une explication courte.
+            </p>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div id="vf-container">
+            <!-- Questions V/F générées en JS -->
+          </div>
+          <div class="btn-row">
+            <button id="check-vf" class="btn btn-primary">
+              <span class="emoji">🧠</span> Corriger tout
+            </button>
+            <button id="reset-vf" class="btn btn-outline">
+              <span class="emoji">🧼</span> Effacer mes réponses
+            </button>
+            <span id="vf-stat" class="stat-line"></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-soft btn-next" onclick="goToTab('tab-freud')">
+            <span class="emoji">➡️</span> Exercice suivant : Stades de l’enfance
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 3 : FREUD -->
+      <section id="tab-freud" class="tab-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">
+              <span>3. Stades de l’enfance selon Freud</span>
+              <span class="pill neutral">Travail sur l’ordre + tranches d’âges</span>
+            </div>
+            <p class="panel-subtitle">
+              <strong>Partie A :</strong> saisis le nom des stades du plus jeune au plus vieux, en les plaçant dans la bonne
+              position. Tu peux déplacer les lignes avec les flèches.<br>
+              <strong>Partie B :</strong> se débloque uniquement après avoir validé la Partie A : tu associes alors chaque stade
+              à la bonne tranche d’âge.
+            </p>
+          </div>
+        </div>
+
+        <!-- PARTIE A : ORDONNER LES STADES SANS DONNER LES NOMS -->
+        <div class="section-card freud-order-section">
+          <div class="panel-subtitle" style="margin-bottom:4px;">
+            <strong>Partie A – Ordre des stades :</strong> écris les stades du <span class="highlight">plus jeune au plus vieux</span>.
+          </div>
+          <div class="freud-order-info">
+            Tu peux utiliser les flèches pour déplacer les lignes, sans avoir à tout réécrire.
+          </div>
+
+          <ul id="freud-order-list" class="freud-order-list">
+            <!-- Rempli en JS -->
+          </ul>
+
+          <div class="btn-row">
+            <button id="check-freud-order" class="btn btn-primary">
+              <span class="emoji">✅</span> Corriger l’ordre
+            </button>
+            <button id="reset-freud-order" class="btn btn-outline">
+              <span class="emoji">🧽</span> Effacer les réponses
+            </button>
+            <span id="freud-order-stat" class="stat-line"></span>
+          </div>
+
+          <div id="freud-order-solution" class="freud-solution"></div>
+        </div>
+
+        <!-- PARTIE B : TRANCHES D’ÂGES (DÉBLOQUÉE APRÈS VALIDATION PARTIE A) -->
+        <p id="freud-ages-locked-text" class="freud-order-info">
+          🔒 Cette partie se débloque après avoir validé le classement des stades (bouton « Corriger l’ordre »).
+        </p>
+
+        <div class="section-card" id="freud-ages-section" style="display:none;">
+          <div style="font-size:0.85rem; color:var(--text-soft); margin-bottom:6px;">
+            <strong>Partie B – Tranches d’âges :</strong> associe chaque stade à la bonne tranche d’âge.
+            Plusieurs options sont volontairement fausses.
+          </div>
+          <table>
+            <thead>
+            <tr>
+              <th>Stade</th>
+              <th>Âge (choisis la bonne plage)</th>
+              <th>Feedback</th>
+            </tr>
+            </thead>
+            <tbody id="freud-body">
+            <!-- Lignes créées en JS -->
+            </tbody>
+          </table>
+
+          <div class="btn-row">
+            <button id="check-freud" class="btn btn-primary">
+              <span class="emoji">🧪</span> Corriger les âges
+            </button>
+            <button id="reset-freud" class="btn btn-outline">
+              <span class="emoji">🔁</span> Réinitialiser
+            </button>
+            <span id="freud-stat" class="stat-line"></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-soft btn-next" onclick="goToTab('tab-situations')">
+            <span class="emoji">➡️</span> Exercice suivant : Situations cliniques
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 4 : SITUATIONS CLINIQUES -->
+      <section id="tab-situations" class="tab-panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">
+              <span>4. Analyse de situations cliniques</span>
+              <span class="pill">
+                <span>🎯</span> Défenses, stress, émotions, empathie, transfert…
+              </span>
+            </div>
+            <p class="panel-subtitle">
+              Génère des situations cliniques variées (âge, sexe, contexte médical…) et retrouve le ou les
+              concepts clés (déni, refoulement, évitement, sublimation, transfert, contre-transfert, etc.).
+            </p>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="btn-row">
+            <button id="new-situation" class="btn btn-primary">
+              <span class="emoji">🎲</span> Générer une situation
+            </button>
+            <span class="badge-count" id="situation-counter">Situations vues : 0</span>
+          </div>
+
+          <div class="situation-box" id="situation-text">
+            Clique sur « Générer une situation » pour commencer.
+          </div>
+
+          <div style="margin-top: 10px;">
+            <label for="situation-answer" style="font-size:0.85rem; color:var(--text-soft);">
+              Tes réponses (un ou plusieurs concepts, séparés par des virgules) :
+            </label>
+            <input type="text" id="situation-answer" placeholder="Ex. : déni, évitement, stress">
+          </div>
+
+          <div class="btn-row">
+            <button id="check-situation" class="btn btn-soft">
+              <span class="emoji">✔️</span> Vérifier
+            </button>
+            <button id="show-solution" class="btn btn-outline">
+              <span class="emoji">💡</span> Voir les concepts attendus
+            </button>
+          </div>
+
+          <div id="situation-feedback" class="situation-feedback">
+            <!-- Feedback dynamique -->
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-soft btn-next" onclick="goToTab('tab-defs')">
+            <span class="emoji">🔁</span> Revenir à l’exercice 1
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- UTILITAIRES ----------
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function normalizeWord(str) {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  }
+
+  function goToTab(tabId) {
+    const btn = document.querySelector('.tab-button[data-target="' + tabId + '"]');
+    if (btn) btn.click();
+  }
+
+  // ---------- DONNÉES : DÉFINITIONS ----------
+  const definitionItems = [
+    {
+      id: "concept",
+      term: "Concept",
+      definition: "Représentation mentale abstraite et générale, relativement stable, utilisée pour penser et organiser une réalité."
+    },
+    {
+      id: "theorie",
+      term: "Théorie",
+      definition: "Construction explicative qui relie plusieurs concepts entre eux pour rendre compte d’un domaine particulier."
+    },
+    {
+      id: "modele",
+      term: "Modèle",
+      definition: "Représentation simplifiée d’une théorie, souvent schématique ou imagée, qui la rend plus concrète et utilisable."
+    },
+    {
+      id: "emotion",
+      term: "Émotion",
+      definition: "Modification brève de l’état affectif se traduisant par des changements corporels, mentaux et comportementaux."
+    },
+    {
+      id: "mecanisme",
+      term: "Mécanisme de défense",
+      definition: "Processus psychique inconscient et automatique par lequel le Moi gère des tensions internes ou externes."
+    },
+    {
+      id: "stress",
+      term: "Stress",
+      definition: "État de tension face à une menace réelle ou perçue, qui rompt l’équilibre et nécessite un effort d’adaptation."
+    },
+    {
+      id: "empathie",
+      term: "Empathie",
+      definition: "Capacité à percevoir et comprendre le vécu de l’autre tout en restant à sa place."
+    },
+    {
+      id: "attachement",
+      term: "Attachement",
+      definition: "Lien affectif durable servant de base de sécurité dans les relations, surtout chez l’enfant."
+    },
+    {
+      id: "refoulement",
+      term: "Refoulement",
+      definition: "Mécanisme de défense qui maintient hors de la conscience des pensées ou désirs jugés inacceptables."
+    },
+    {
+      id: "deni",
+      term: "Déni",
+      definition: "Refus de reconnaître une réalité pourtant évidente ou menaçante."
+    },
+    {
+      id: "rationalisation",
+      term: "Rationalisation",
+      definition: "Mécanisme de défense qui remplace l’affect par des explications logiques pour rendre la situation plus acceptable."
+    },
+    {
+      id: "evitement",
+      term: "Évitement",
+      definition: "Stratégie consciente ou non consistant à fuir une situation, un lieu ou un sujet vécu comme menaçant."
+    },
+    {
+      id: "sublimation",
+      term: "Sublimation",
+      definition: "Transformation de pulsions jugées inacceptables en activités socialement valorisées (sport, art, travail…)."
+    },
+    {
+      id: "transfert",
+      term: "Transfert",
+      definition: "Déplacement, sur le soignant, de sentiments et attentes issus de relations antérieures."
+    },
+    {
+      id: "contretransfert",
+      term: "Contre-transfert",
+      definition: "Réactions affectives du soignant face au patient, en écho au transfert, pouvant être conscientes ou non."
+    }
+  ];
+
+  // ---------- DONNÉES : VRAI/FAUX ----------
+  const vfQuestions = [
+    {
+      id: "vf1",
+      text: "Une théorie est plus générale qu’un concept et relie plusieurs concepts entre eux.",
+      answer: true,
+      explanation: "Une théorie organise un ensemble de concepts pour expliquer un domaine."
+    },
+    {
+      id: "vf2",
+      text: "Les mécanismes de défense sont toujours conscients et volontaires.",
+      answer: false,
+      explanation: "Au contraire, ils sont inconscients et automatiques."
+    },
+    {
+      id: "vf3",
+      text: "Le stress ne concerne que la dimension psychologique et jamais le corps.",
+      answer: false,
+      explanation: "Il a une dimension psychologique et une dimension physiologique."
+    },
+    {
+      id: "vf4",
+      text: "L’empathie suppose de ressentir exactement la même chose que le patient, comme si on devenait lui.",
+      answer: false,
+      explanation: "On perçoit et comprend le vécu de l’autre, mais on reste distinct de lui."
+    },
+    {
+      id: "vf5",
+      text: "Dans le déni, le sujet refuse une réalité menaçante.",
+      answer: true,
+      explanation: "Le déni est un refus de percevoir ou reconnaître une réalité douloureuse."
+    },
+    {
+      id: "vf6",
+      text: "Les émotions de base comme la peur ou la joie sont brèves et universelles.",
+      answer: true,
+      explanation: "Elles sont de courte durée et partagées dans toutes les cultures."
+    },
+    {
+      id: "vf7",
+      text: "L’attachement sécurisant fournit une base de sécurité pour explorer le monde.",
+      answer: true,
+      explanation: "L’enfant peut s’éloigner en sachant qu’il peut revenir vers la figure d’attachement."
+    },
+    {
+      id: "vf8",
+      text: "La sublimation consiste à transformer des pulsions en activités socialement valorisées.",
+      answer: true,
+      explanation: "C’est une défense mature qui canalise l’énergie pulsionnelle."
+    },
+    {
+      id: "vf9",
+      text: "Le transfert concerne uniquement les soignants, jamais les patients.",
+      answer: false,
+      explanation: "Le transfert concerne d’abord le patient, qui rejoue sur le soignant d’anciennes relations."
+    },
+    {
+      id: "vf10",
+      text: "Le mécanisme de défense d’évitement peut se manifester par le fait d’éviter un service ou un sujet de conversation.",
+      answer: true,
+      explanation: "C’est une mise à distance d’une situation ou d’un affect menaçant."
+    }
+  ];
+
+  // ---------- DONNÉES : FREUD ----------
+  const freudStages = [
+    { id: "oral", name: "Oral", expected: "0-1" },
+    { id: "anal", name: "Anal", expected: "1-3" },
+    { id: "phal", name: "Phallique", expected: "3-6" },
+    { id: "lat", name: "Période de latence", expected: "6-11" },
+    { id: "gen", name: "Génital", expected: "puberte-plus" }
+  ];
+
+  const freudExpectedOrder = ["oral", "anal", "phal", "lat", "gen"];
+
+  // Âges : 5 bons + 5 mauvais (distracteurs)
+  const freudAges = [
+    { id: "0-1", label: "De la naissance à 1 an (≈ 0–1 an)" },
+    { id: "1-3", label: "D’environ 1 à 3 ans" },
+    { id: "3-6", label: "D’environ 3 à 6 ans" },
+    { id: "6-11", label: "D’environ 6 à 11 / 12 ans" },
+    { id: "puberte-plus", label: "De la puberté à l’âge adulte" },
+    // distracteurs
+    { id: "0-0.5", label: "0 à 6 mois uniquement" },
+    { id: "2-5", label: "De 2 à 5 ans" },
+    { id: "4-8", label: "De 4 à 8 ans" },
+    { id: "10-15", label: "De 10 à 15 ans" },
+    { id: "adulte-mur", label: "Âge adulte mûr uniquement" }
+  ];
+
+  // ---------- DONNÉES : SITUATIONS CLINIQUES ----------
+  const situations = [
+    {
+      id: 1,
+      text: "Homme de 55 ans, venu pour un scanner thoracique après la découverte d’une masse suspecte sur une radio. Il répète que « ce n’est sûrement qu’une erreur de laboratoire » et refuse d’écouter les explications du médecin, en évoquant plutôt un vieux rhume mal soigné.",
+      concepts: ["déni"]
+    },
+    {
+      id: 2,
+      text: "Étudiante EMEM de 20 ans, très en colère après une remarque humiliante d’un médecin sénior. Le soir même, elle s’inscrit à un club de boxe et augmente fortement ses séances de sport, expliquant qu’elle doit « vider son énergie ».",
+      concepts: ["sublimation"]
+    },
+    {
+      id: 3,
+      text: "Interne de 26 ans en imagerie d’urgence avant une garde de nuit. En arrivant dans le service, il sent son cœur battre vite, ses mains sont légèrement tremblantes, il a du mal à se concentrer et craint de ne pas suivre le rythme des demandes d’examens.",
+      concepts: ["stress"]
+    },
+    {
+      id: 4,
+      text: "Femme de 48 ans en suivi pour un cancer du sein métastatique, venue pour un contrôle scanner. Dès que la maladie est évoquée, elle coupe la conversation, parle de la météo ou de la décoration de la salle, et se montre joviale comme si tout allait bien.",
+      concepts: ["déni", "évitement"]
+    },
+    {
+      id: 5,
+      text: "Homme de 40 ans hospitalisé pour complications d’alcoolisation chronique. En salle de radio, il t’accuse d’être « froid et autoritaire », alors que c’est lui qui hausse la voix, interrompt sans cesse et impose le rythme de l’échange.",
+      concepts: ["projection"]
+    },
+    {
+      id: 6,
+      text: "Adolescent de 15 ans, opéré du genou après un accident de sport. Les examens somatiques sont rassurants, mais il se plaint très souvent de maux de ventre et de tête. L’équipe sait qu’il vit de fortes tensions à la maison (conflit parental, séparation).",
+      concepts: ["somatisation"]
+    },
+    {
+      id: 7,
+      text: "Garçon de 3 ans en radio pédiatrique pour vérifier une suspicion de pneumonie. Il se cramponne à son père, pleure dès qu’il sort de son champ de vision et ne regarde la salle qu’une fois que son père est revenu s’asseoir à côté.",
+      concepts: ["attachement"]
+    },
+    {
+      id: 8,
+      text: "Femme de 82 ans venue pour un contrôle d’ostéoporose. En te voyant, elle t’appelle plusieurs fois « mon petit-fils » et commence à raconter des souvenirs de son propre petit-fils en fin d’études, en te parlant comme si tu étais lui.",
+      concepts: ["transfert"]
+    },
+    {
+      id: 9,
+      text: "Tu accompagnes un homme de 45 ans alcoolo-dépendant pour une imagerie abdominale. Il te rappelle un proche avec qui tu as une histoire compliquée. Pendant l’examen, tu te montres inhabituellement sec, impatient, avec peu de tolérance pour ses hésitations.",
+      concepts: ["contre-transfert"]
+    },
+    {
+      id: 10,
+      text: "Étudiante EMEM de 21 ans qui a subi récemment une humiliation publique en staff. Elle a eu des pensées très violentes envers un supérieur, mais dit maintenant qu’elle ne pense « plus du tout à cette histoire » et ne souhaite pas en parler, comme si l’événement avait disparu.",
+      concepts: ["refoulement"]
+    },
+    {
+      id: 11,
+      text: "Homme de 60 ans, claustrophobe, programmé pour une IRM cérébrale. Dès qu’il entre dans la salle, il enchaîne les blagues sur la machine, sur lui-même et sur l’équipe, commente les moindres détails avec un humour très présent, alors que son corps reste tendu.",
+      concepts: ["humour", "mécanisme de défense"]
+    },
+    {
+      id: 12,
+      text: "Femme de 52 ans en surpoids important, venue pour une échographie abdominale. Elle explique que « de toute façon, tout le monde finit malade un jour » et que certains ont « une constitution faite pour supporter plus de kilos », minimisant les recommandations médicales.",
+      concepts: ["rationalisation"]
+    },
+    {
+      id: 13,
+      text: "Jeune femme de 24 ans, suivie pour une maladie chronique, qui ne vient jamais seule à ses examens d’imagerie. Elle insiste pour que sa mère reste dans la salle d’attente et répète qu’elle « ne pourrait jamais gérer tout ça toute seule ». Elle semble apaisée seulement quand elle voit sa mère.",
+      concepts: ["attachement"]
+    },
+    {
+      id: 14,
+      text: "Étudiant EMEM de 22 ans ayant vécu un incident marquant lors d’un examen scanner. Depuis, il évite systématiquement de se porter volontaire pour ce type d’examen, propose toujours d’aller dans un autre secteur et trouve des justifications pour « aider ailleurs ».",
+      concepts: ["évitement"]
+    },
+    {
+      id: 15,
+      text: "Homme de 58 ans diabétique qui ne suit pas correctement son traitement. Lorsque les résultats sont mauvais, il reproche aux soignants de ne pas « bien faire leur travail » et refuse de reconnaître qu’il ne prend pas ses médicaments comme prévu.",
+      concepts: ["projection", "déni"]
+    },
+    {
+      id: 16,
+      text: "Femme de 67 ans, en fin de vie, arrives en IRM pour un bilan de douleurs. Tu perçois fortement sa détresse. Tu restes physiquement présent près d’elle, reformules ce qu’elle exprime, adaptes le rythme de l’installation à ce qu’elle supporte, sans t’effondrer avec elle.",
+      concepts: ["empathie"]
+    },
+    {
+      id: 17,
+      text: "Homme de 35 ans victime d’un accident de la route, examiné en radio. Il répète qu’il conduisait « parfaitement bien » et que « la route était mal faite », alors qu’il roulait très vite et avait consommé de l’alcool selon le dossier.",
+      concepts: ["rationalisation"]
+    },
+    {
+      id: 18,
+      text: "Étudiante EMEM de 19 ans qui supporte mal la vue du sang et des plaies. Lors des répartitions en stage, elle choisit systématiquement les postes en console ou à distance et évite les salles où elle serait au contact direct des patients blessés.",
+      concepts: ["évitement"]
+    },
+    {
+      id: 19,
+      text: "Soignante de 32 ans travaillant en imagerie d’urgence. Après un conflit très violent dans le service, elle développe brutalement des douleurs musculaires diffuses, une grande fatigue et des maux de tête, sans explication médicale claire à l’examen.",
+      concepts: ["somatisation", "stress"]
+    },
+    {
+      id: 20,
+      text: "Homme de 70 ans venu pour une IRM lombaire, qui raconte combien son ancien médecin de famille « s’occupait de tout pour lui ». Il t’adresse les mêmes attentes, te demande de « gérer tout le reste » et semble te confondre avec cette figure du passé.",
+      concepts: ["transfert"]
+    },
+    {
+      id: 21,
+      text: "Femme de 59 ans atteinte d’un cancer avancé, en scanner de contrôle. Elle pose surtout des questions très techniques sur la machine et les paramètres d’exposition, s’intéresse aux chiffres, mais évite complètement de parler de son vécu émotionnel et de son pronostic.",
+      concepts: ["rationalisation", "évitement"]
+    },
+    {
+      id: 22,
+      text: "Étudiante EMEM de 23 ans très anxieuse à l’idée de commettre une erreur en stage. Elle apprend l’anatomie de façon extrêmement détaillée, répète plusieurs fois les procédures et se rassure en récitant chaque étape avant d’entrer en salle.",
+      concepts: ["stress", "coping"]
+    },
+    {
+      id: 23,
+      text: "Étudiant de 25 ans ayant perdu récemment un proche. Pendant sa période de deuil, il s’investit fortement dans une association de soutien aux endeuillés, consacre ses temps libres à l’accompagnement de familles et à l’organisation d’actions de sensibilisation.",
+      concepts: ["sublimation"]
+    },
+    {
+      id: 24,
+      text: "Patient de 62 ans, diabétique, qui ne suit pas son régime. Il répète qu’il connaît « quelqu’un qui mange bien pire et qui n’a jamais rien eu » et qu’il doit être « plus résistant que la moyenne », minimisant l’impact de son comportement.",
+      concepts: ["rationalisation", "déni"]
+    },
+    {
+      id: 25,
+      text: "Étudiante EMEM de 20 ans qui doit présenter un exposé devant la promotion. Elle rougit, a la gorge serrée et les mains moites, mais poursuit sa présentation jusqu’au bout en gardant un discours cohérent.",
+      concepts: ["émotion", "stress"]
+    },
+    {
+      id: 26,
+      text: "Patiente de 45 ans, hospitalisée pour une pathologie chronique, qui se montre d’emblée froide et distante avec toi en salle de radio. Plus tard, elle explique que les soignants l’ont souvent déçue et qu’elle ne peut faire confiance à personne.",
+      concepts: ["transfert", "évitement"]
+    },
+    {
+      id: 27,
+      text: "Lors d’un examen scanner, tu t’occupes d’une femme de 79 ans très douce, qui te rappelle ta propre grand-mère. Tu te rends compte que tu lui consacres spontanément plus de temps, plus d’attention et que tu as du mal à garder la même distance professionnelle que d’habitude.",
+      concepts: ["contre-transfert"]
+    },
+    {
+      id: 28,
+      text: "Homme de 63 ans venant d’apprendre un diagnostic grave. Pendant l’examen, il parle longuement de son jardin, du sport et de voyages passés. À chaque fois qu’une allusion à la maladie apparaît, il change de sujet sans s’y attarder.",
+      concepts: ["déni", "évitement"]
+    },
+    {
+      id: 29,
+      text: "Jeune sportif de 19 ans blessé au genou, contraint d’arrêter la compétition pendant plusieurs mois. Il utilise sa convalescence pour coacher ses coéquipiers, organiser des séances de prévention des blessures et créer du contenu en ligne sur l’entraînement sécurisé.",
+      concepts: ["sublimation"]
+    },
+    {
+      id: 30,
+      text: "Femme de 50 ans, très anxieuse à l’idée de passer un scanner abdominal. Elle te demande à plusieurs reprises si les réglages sont corrects, imagine les pires scénarios possibles, s’inquiète du moindre bruit de la machine et a du mal à se calmer malgré des explications rassurantes.",
+      concepts: ["anxiété", "stress"]
+    },
+    {
+      id: 31,
+      text: "Étudiant EMEM de 21 ans ayant commis une petite erreur rapidement corrigée en stage. Plusieurs jours après, il y repense encore, rejoue mentalement la scène, se dévalorise et craint de « tout rater » aux prochains stages.",
+      concepts: ["stress", "émotion"]
+    },
+    {
+      id: 32,
+      text: "En radio d’urgence, un homme de 38 ans, victime d’un accident de travail, doit attendre une vingtaine de minutes avant son examen. Il se met en colère contre toi pour ce léger retard, te reproche violemment un manque de respect alors que l’organisation dépend d’un autre service.",
+      concepts: ["déplacement", "mécanisme de défense"]
+    }
+  ];
+
+  // ---------- INIT TABS ----------
+  function initTabs() {
+    const buttons = document.querySelectorAll(".tab-button");
+    const panels = document.querySelectorAll(".tab-panel");
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.getAttribute("data-target");
+        buttons.forEach(b => b.classList.remove("active"));
+        panels.forEach(p => p.classList.remove("active"));
+        btn.classList.add("active");
+        const panel = document.getElementById(target);
+        if (panel) {
+          panel.classList.add("active");
+        }
+      });
+    });
+  }
+
+  // ---------- INIT DEFINITIONS ----------
+  function initDefinitions() {
+    const tbody = document.getElementById("definitions-body");
+    const shuffledDefs = shuffleArray(definitionItems);
+
+    definitionItems.forEach(item => {
+      const tr = document.createElement("tr");
+      const optionsHtml = shuffledDefs.map(opt =>
+        `<option value="${opt.id}">${opt.definition}</option>`
+      ).join("");
+
+      tr.innerHTML = `
+        <td class="term">${item.term}</td>
+        <td>
+          <select data-id="${item.id}">
+            <option value="">Choisis une définition…</option>
+            ${optionsHtml}
+          </select>
+          <div class="def-detail"></div>
+        </td>
+        <td class="feedback neutral"></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const checkBtn = document.getElementById("check-definitions");
+    const resetBtn = document.getElementById("reset-definitions");
+    const stat = document.getElementById("definitions-stat");
+
+    checkBtn.addEventListener("click", () => {
+      let correct = 0;
+      tbody.querySelectorAll("tr").forEach(tr => {
+        const select = tr.querySelector("select");
+        const feedback = tr.querySelector(".feedback");
+        const detail = tr.querySelector(".def-detail");
+        const expected = select.dataset.id;
+        const value = select.value;
+
+        select.classList.remove("select-good", "select-bad");
+        detail.innerHTML = "";
+
+        if (!value) {
+          feedback.textContent = "À compléter";
+          feedback.className = "feedback neutral";
+          return;
+        }
+
+        if (value === expected) {
+          correct++;
+          feedback.textContent = "✔ Correct";
+          feedback.className = "feedback good";
+          select.classList.add("select-good");
+        } else {
+          feedback.textContent = "✖ Faux";
+          feedback.className = "feedback bad";
+          select.classList.add("select-bad");
+
+          const chosenDef = (definitionItems.find(d => d.id === value) || {}).definition || "";
+          const correctDef = (definitionItems.find(d => d.id === expected) || {}).definition || "";
+
+          detail.innerHTML =
+            `<div class="def-wrong"><strong>Ta réponse :</strong> ${chosenDef}</div>` +
+            `<div class="def-correct"><strong>Bonne définition :</strong> ${correctDef}</div>`;
+        }
+      });
+      stat.innerHTML = `<span>Résultat : <strong>${correct}</strong> bonne(s) association(s) / ${definitionItems.length}</span>`;
+    });
+
+    resetBtn.addEventListener("click", () => {
+      tbody.querySelectorAll("tr").forEach(tr => {
+        const select = tr.querySelector("select");
+        const feedback = tr.querySelector(".feedback");
+        const detail = tr.querySelector(".def-detail");
+        select.value = "";
+        select.classList.remove("select-good", "select-bad");
+        feedback.textContent = "";
+        feedback.className = "feedback neutral";
+        detail.innerHTML = "";
+      });
+      stat.textContent = "";
+    });
+  }
+
+  // ---------- INIT VRAI/FAUX ----------
+  function initVF() {
+    const container = document.getElementById("vf-container");
+    const stat = document.getElementById("vf-stat");
+
+    vfQuestions.forEach((q, index) => {
+      const card = document.createElement("div");
+      card.className = "vf-question";
+      card.dataset.id = q.id;
+
+      card.innerHTML = `
+        <div class="vf-text"><strong>Q${index + 1}.</strong> ${q.text}</div>
+        <div class="vf-actions">
+          <button type="button" class="vf-btn" data-value="true">Vrai</button>
+          <button type="button" class="vf-btn" data-value="false">Faux</button>
+        </div>
+        <div class="vf-feedback"></div>
+      `;
+      container.appendChild(card);
+    });
+
+    container.addEventListener("click", e => {
+      const btn = e.target.closest(".vf-btn");
+      if (!btn) return;
+      const card = btn.closest(".vf-question");
+      const value = btn.getAttribute("data-value");
+
+      card.querySelectorAll(".vf-btn").forEach(b => b.classList.remove("selected"));
+      btn.classList.add("selected");
+      card.dataset.selected = value;
+      const feedback = card.querySelector(".vf-feedback");
+      feedback.textContent = "";
+      feedback.className = "vf-feedback";
+    });
+
+    const checkBtn = document.getElementById("check-vf");
+    const resetBtn = document.getElementById("reset-vf");
+
+    checkBtn.addEventListener("click", () => {
+      let correct = 0;
+      let answered = 0;
+      vfQuestions.forEach(q => {
+        const card = container.querySelector(`.vf-question[data-id="${q.id}"]`);
+        const selected = card.dataset.selected;
+        const fb = card.querySelector(".vf-feedback");
+        if (!selected) {
+          fb.textContent = "Réponds avant de corriger.";
+          fb.className = "vf-feedback";
+          return;
+        }
+        answered++;
+        const isTrue = selected === "true";
+        if (isTrue === q.answer) {
+          correct++;
+          fb.textContent = "✔ Correct – " + q.explanation;
+          fb.className = "vf-feedback good";
+        } else {
+          fb.textContent = "✖ Faux – " + q.explanation;
+          fb.className = "vf-feedback bad";
+        }
+      });
+      stat.innerHTML = `<span>Répondu : <strong>${answered}</strong> / ${vfQuestions.length} • Justes : <strong>${correct}</strong></span>`;
+    });
+
+    resetBtn.addEventListener("click", () => {
+      container.querySelectorAll(".vf-question").forEach(card => {
+        card.dataset.selected = "";
+        card.querySelectorAll(".vf-btn").forEach(b => b.classList.remove("selected"));
+        const fb = card.querySelector(".vf-feedback");
+        fb.textContent = "";
+        fb.className = "vf-feedback";
+      });
+      stat.textContent = "";
+    });
+  }
+
+  // ---------- MAPPING NOMS → ID STADE ----------
+  function mapStageNameToId(name) {
+    const n = normalizeWord(name);
+    if (!n) return null;
+    if (n.startsWith("oral")) return "oral";
+    if (n.startsWith("anal")) return "anal";
+    if (n.startsWith("phal") || n.startsWith("fall")) return "phal"; // phallique / phallic
+    if (n.includes("latenc") || n.includes("latence")) return "lat";
+    if (n.startsWith("geni") || n.startsWith("genital")) return "gen";
+    return null;
+  }
+
+  // ---------- INIT FREUD : PARTIE A (ORDRE) ----------
+  function initFreudOrder() {
+    const listEl = document.getElementById("freud-order-list");
+    const checkBtn = document.getElementById("check-freud-order");
+    const resetBtn = document.getElementById("reset-freud-order");
+    const stat = document.getElementById("freud-order-stat");
+    const solutionEl = document.getElementById("freud-order-solution");
+
+    // Création des 5 lignes (positions 1 à 5)
+    function createRows() {
+      listEl.innerHTML = "";
+      for (let i = 0; i < freudExpectedOrder.length; i++) {
+        const li = document.createElement("li");
+        li.className = "freud-item";
+        li.innerHTML = `
+          <div class="freud-left">
+            <div class="freud-position-label">Position ${i + 1} (du plus jeune au plus vieux)</div>
+            <input type="text" class="freud-input" placeholder="Nom du stade (ex. Oral)">
+          </div>
+          <div class="freud-controls">
+            <button type="button" class="freud-move-btn" data-dir="up">↑</button>
+            <button type="button" class="freud-move-btn" data-dir="down">↓</button>
+          </div>
+        `;
+        listEl.appendChild(li);
+      }
+    }
+
+    createRows();
+
+    // Déplacement des lignes
+    listEl.addEventListener("click", e => {
+      const btn = e.target.closest(".freud-move-btn");
+      if (!btn) return;
+      const dir = btn.dataset.dir;
+      const li = btn.closest(".freud-item");
+      const parent = li.parentElement;
+      const items = Array.from(parent.children);
+      const index = items.indexOf(li);
+      if (index === -1) return;
+
+      if (dir === "up" && index > 0) {
+        parent.insertBefore(li, items[index - 1]);
+      } else if (dir === "down" && index < items.length - 1) {
+        parent.insertBefore(li, items[index + 1].nextSibling);
+      }
+    });
+
+    function unlockFreudAges() {
+      const agesSection = document.getElementById("freud-ages-section");
+      const lockedText = document.getElementById("freud-ages-locked-text");
+      if (agesSection && agesSection.style.display === "none") {
+        agesSection.style.display = "block";
+      }
+      if (lockedText) {
+        lockedText.style.display = "none";
+      }
+    }
+
+    // Correction ordre
+    checkBtn.addEventListener("click", () => {
+      const items = Array.from(listEl.querySelectorAll(".freud-item"));
+      let allFilled = true;
+      const userOrder = [];
+
+      items.forEach(li => {
+        li.classList.remove("good", "bad");
+        const input = li.querySelector(".freud-input");
+        const id = mapStageNameToId(input.value);
+        if (!input.value.trim()) {
+          allFilled = false;
+        }
+        userOrder.push(id);
+      });
+
+      if (!allFilled) {
+        stat.innerHTML = `<span><span class="chip bad">Attention</span> Complète toutes les positions avant de corriger.</span>`;
+        solutionEl.innerHTML = "";
+        return;
+      }
+
+      // Feedback ligne par ligne
+      let correctCount = 0;
+      userOrder.forEach((id, idx) => {
+        const li = items[idx];
+        if (id && id === freudExpectedOrder[idx]) {
+          li.classList.add("good");
+          correctCount++;
+        } else {
+          li.classList.add("bad");
+        }
+      });
+
+      stat.innerHTML = `<span>Positions correctes : <strong>${correctCount}</strong> / ${freudExpectedOrder.length}.</span>`;
+
+      // Affichage ordre correct
+      const solutionText = freudStages
+        .map(s => s.name)
+        .join(" → ");
+
+      solutionEl.innerHTML =
+        `<span>Ordre correct :</span> ` +
+        freudStages.map(s => `<span class="freud-tag">${s.name}</span>`).join(" ");
+
+      // Débloquer la partie B (ages) après validation (même si l’ordre n’est pas parfait)
+      unlockFreudAges();
+    });
+
+    // Reset
+    resetBtn.addEventListener("click", () => {
+      stat.textContent = "";
+      solutionEl.innerHTML = "";
+      createRows();
+    });
+  }
+
+  // ---------- INIT FREUD : PARTIE B (ÂGES) ----------
+  function initFreudAges() {
+    const tbody = document.getElementById("freud-body");
+    const stat = document.getElementById("freud-stat");
+
+    freudStages.forEach(stage => {
+      const tr = document.createElement("tr");
+      const optionsHtml = freudAges.map(opt =>
+        `<option value="${opt.id}">${opt.label}</option>`
+      ).join("");
+
+      tr.innerHTML = `
+        <td class="term">${stage.name}</td>
+        <td>
+          <select data-expected="${stage.expected}">
+            <option value="">Choisis l’âge…</option>
+            ${optionsHtml}
+          </select>
+        </td>
+        <td class="feedback neutral"></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const checkBtn = document.getElementById("check-freud");
+    const resetBtn = document.getElementById("reset-freud");
+
+    checkBtn.addEventListener("click", () => {
+      let correct = 0;
+      const total = freudStages.length;
+      tbody.querySelectorAll("tr").forEach(tr => {
+        const select = tr.querySelector("select");
+        const expected = select.dataset.expected;
+        const value = select.value;
+        const fb = tr.querySelector(".feedback");
+        select.classList.remove("select-good", "select-bad");
+        if (!value) {
+          fb.textContent = "À compléter";
+          fb.className = "feedback neutral";
+          return;
+        }
+        if (value === expected) {
+          correct++;
+          fb.textContent = "✔ Correct";
+          fb.className = "feedback good";
+          select.classList.add("select-good");
+        } else {
+          fb.textContent = "✖ Faux";
+          fb.className = "feedback bad";
+          select.classList.add("select-bad");
+        }
+      });
+      stat.innerHTML = `<span>Âges corrects : <strong>${correct}</strong> / ${total}.</span>`;
+    });
+
+    resetBtn.addEventListener("click", () => {
+      tbody.querySelectorAll("tr").forEach(tr => {
+        const select = tr.querySelector("select");
+        const fb = tr.querySelector(".feedback");
+        select.value = "";
+        select.classList.remove("select-good", "select-bad");
+        fb.textContent = "";
+        fb.className = "feedback neutral";
+      });
+      stat.textContent = "";
+    });
+  }
+
+  // ---------- INIT SITUATIONS ----------
+  function initSituations() {
+    const situationText = document.getElementById("situation-text");
+    const answerInput = document.getElementById("situation-answer");
+    const feedback = document.getElementById("situation-feedback");
+    const newBtn = document.getElementById("new-situation");
+    const checkBtn = document.getElementById("check-situation");
+    const solutionBtn = document.getElementById("show-solution");
+    const counter = document.getElementById("situation-counter");
+
+    let currentIndex = null;
+    let seenCount = 0;
+
+    function pickNewSituation() {
+      if (!situations.length) return;
+      let idx;
+      if (situations.length === 1) {
+        idx = 0;
+      } else {
+        do {
+          idx = Math.floor(Math.random() * situations.length);
+        } while (idx === currentIndex);
+      }
+      currentIndex = idx;
+      const s = situations[idx];
+      situationText.textContent = s.text;
+      answerInput.value = "";
+      feedback.innerHTML = "";
+      seenCount++;
+      counter.textContent = "Situations vues : " + seenCount;
+      answerInput.focus();
+    }
+
+    function checkSituation(showOnlySolution) {
+      if (currentIndex === null) {
+        feedback.innerHTML = `<p><span class="chip info">Info</span> Clique d’abord sur « Générer une situation ».</p>`;
+        return;
+      }
+      const s = situations[currentIndex];
+      const expected = s.concepts.map(normalizeWord);
+      const rawAnswer = answerInput.value;
+      const userConcepts = rawAnswer
+        .split(/[,\;]/)
+        .map(normalizeWord)
+        .filter(Boolean);
+
+      if (!userConcepts.length && !showOnlySolution) {
+        feedback.innerHTML = `<p><span class="chip bad">Attention</span> Indique au moins un concept (ex. « déni » ou « stress »).</p>`;
+        return;
+      }
+
+      let found = 0;
+      const extra = [];
+
+      expected.forEach(e => {
+        if (userConcepts.includes(e)) {
+          found++;
+        }
+      });
+
+      userConcepts.forEach(u => {
+        if (!expected.includes(u)) {
+          extra.push(u);
+        }
+      });
+
+      let html = "";
+      if (!showOnlySolution) {
+        if (found === expected.length && extra.length === 0 && userConcepts.length > 0) {
+          html += `<p><span class="chip good">✔ Très bien</span> Tu as identifié tous les concepts attendus.</p>`;
+        } else if (found > 0) {
+          html += `<p><span class="chip info">🧩 Partiellement juste</span> Tu as trouvé une partie des concepts, mais il en manque.</p>`;
+        } else {
+          html += `<p><span class="chip bad">✖ À retravailler</span> Tu n’as pas retrouvé les concepts clés de la situation.</p>`;
+        }
+      }
+
+      html += `<p><span class="highlight">Concept(s) attendu(s) :</span> `;
+      s.concepts.forEach(c => {
+        html += `<span class="concept-tag"><strong>${c}</strong></span>`;
+      });
+      html += `</p>`;
+
+      if (!showOnlySolution && extra.length > 0) {
+        html += `<p><span class="highlight">Concept(s) en plus :</span> ${extra.map(e => `<span class="chip bad">${e}</span>`).join(" ")}</p>`;
+      }
+
+      feedback.innerHTML = html;
+    }
+
+    newBtn.addEventListener("click", pickNewSituation);
+    checkBtn.addEventListener("click", () => checkSituation(false));
+    solutionBtn.addEventListener("click", () => checkSituation(true));
+  }
+
+  // ---------- LANCEMENT ----------
+  document.addEventListener("DOMContentLoaded", () => {
+    initTabs();
+    initDefinitions();
+    initVF();
+    initFreudOrder();
+    initFreudAges();
+    initSituations();
+  });
+</script>
+</body>
+</html>

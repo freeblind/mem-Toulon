@@ -1,32 +1,436 @@
-<!DOCTYPE html><html lang="fr"><head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UE 1.1 – S1</title>
-<style>
-:root{--fg:#111;--bg:#fff;--muted:#6b7280;--brand:#111827;}
-*{box-sizing:border-box}
-body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Noto Sans',sans-serif;color:var(--fg);background:#fff;line-height:1.5}
-.container{max-width:1000px;margin:0 auto;padding:1rem}
-.breadcrumbs{font-size:.9rem;color:var(--muted);margin:1rem 0}
-.list{display:grid;gap:.5rem}
-.list a{display:flex;justify-content:space-between;align-items:center;border:1px solid #e5e7eb;border-radius:10px;padding:.75rem 1rem;text-decoration:none;color:inherit;background:#fff}
-.badge{font-size:.8rem;color:#fff;background:var(--brand);padding:.15rem .5rem;border-radius:999px}
-</style>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UE 1.1 – Psychologie (S1)</title>
+  <style>
+    :root {
+      --bg-grad: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 35%, #fdfdfd 100%);
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --border-soft: #e5e7eb;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.12);
+      --primary: #6366f1;
+      --primary-soft: #e0e7ff;
+      --accent: #22c55e;
+      --accent-soft: #dcfce7;
+      --text-main: #0f172a;
+      --text-soft: #6b7280;
+      --pill-bg: #f4f4ff;
+      --pill-border: #e0e7ff;
+      --radius-xl: 24px;
+      --radius-pill: 999px;
+      --transition: 0.18s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      background: var(--bg-grad);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .breadcrumbs {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin-bottom: 10px;
+    }
+
+    .breadcrumbs a {
+      color: var(--text-soft);
+      text-decoration: none;
+    }
+
+    .breadcrumbs a:hover {
+      text-decoration: underline;
+    }
+
+    .header-card {
+      position: relative;
+      border-radius: 28px;
+      background: var(--card-bg);
+      border: 1px solid rgba(148,163,184,0.25);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 20px 18px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+    }
+
+    .header-main {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .icon-bubble {
+      width: 70px;
+      height: 70px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #e0f2fe, #e0e7ff 45%, #ffffff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(37,99,235,0.25);
+      position: relative;
+    }
+
+    .icon-bubble::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(56,189,248,0.3);
+      right: -4px;
+      bottom: 4px;
+    }
+
+    .icon-bubble span {
+      font-size: 2rem;
+    }
+
+    .header-text h1 {
+      font-size: clamp(1.7rem, 3vw, 2.1rem);
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .header-text h1 small {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-soft);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      border-radius: var(--radius-pill);
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      background: var(--pill-bg);
+      border: 1px solid var(--pill-border);
+      color: #4b5563;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill strong {
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      max-width: 560px;
+    }
+
+    .header-floating {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+
+    .tiny-chip {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: #ecfdf5;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .soft-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #fefce8, #e0f2fe);
+      opacity: 0.75;
+    }
+
+    /* Liste d’activités */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title span.icon {
+      font-size: 1.1rem;
+    }
+
+    .section-note {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    @media (min-width: 720px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .card-link {
+      position: relative;
+      display: block;
+      border-radius: 20px;
+      border: 1px solid var(--border-soft);
+      padding: 12px 13px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.92);
+      color: inherit;
+      box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+      overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition), background var(--transition);
+    }
+
+    .card-link::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      opacity: 0;
+      background: radial-gradient(circle at 10% 0%, rgba(94,234,212,0.18), transparent 60%),
+                  radial-gradient(circle at 80% 120%, rgba(129,140,248,0.22), transparent 60%);
+      transition: opacity var(--transition);
+      z-index: -1;
+    }
+
+    .card-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 35px rgba(15,23,42,0.16);
+      border-color: rgba(129,140,248,0.7);
+      background: #ffffff;
+    }
+
+    .card-link:hover::before {
+      opacity: 1;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title span.emoji {
+      font-size: 1.1rem;
+    }
+
+    .card-badge {
+      border-radius: var(--radius-pill);
+      padding: 2px 9px;
+      font-size: 0.75rem;
+      background: var(--primary-soft);
+      color: #1e3a8a;
+      border: 1px solid rgba(79,70,229,0.3);
+      white-space: nowrap;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      margin-bottom: 8px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-soft);
+      margin-top: 2px;
+    }
+
+    .open-pill {
+      border-radius: var(--radius-pill);
+      padding: 2px 9px;
+      background: #0f172a;
+      color: #f9fafb;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .open-pill span {
+      font-size: 0.85rem;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 1px 8px;
+      font-size: 0.7rem;
+      background: #f3f4ff;
+      color: #4b5563;
+    }
+
+    @media (max-width: 640px) {
+      .header-floating {
+        position: static;
+        margin-top: 12px;
+        flex-direction: row;
+        justify-content: flex-end;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <div class="breadcrumbs"><a href="../index.html">← Semestre 1</a></div>
+<div class="page">
+  <div class="breadcrumbs">
+    <a href="../index.html">← Retour Semestre 1</a>
+  </div>
 
-    <h1>UE 1.1 <small style="color:#6b7280;font-weight:400">(S1)</small></h1>
-    <p><strong>Intitulé officiel :</strong> <em>À compléter selon le référentiel</em></p>
+  <section class="header-card">
+    <div class="header-main">
+      <div class="icon-bubble">
+        <span>🧠</span>
+      </div>
+      <div class="header-text">
+        <h1>
+          UE 1.1 – Psychologie
+          <small>(Semestre 1)</small>
+        </h1>
+        <div class="pill-row">
+          <div class="pill">
+            <span>🎓</span>
+            <span><strong>Objectif :</strong> mieux comprendre le patient et sa vie psychique</span>
+          </div>
+          <div class="pill">
+            <span>🫧</span>
+            <span>Ambiance calme, travail sur les émotions et les défenses</span>
+          </div>
+        </div>
+        <p class="subtitle">
+          Espace d’entraînement à la psychologie pour EMEM&nbsp;: concepts de base, mécanismes de défense,
+          empathie, attachement, situations cliniques… à ton rythme.
+        </p>
+      </div>
+    </div>
 
-    <h2>Activités</h2>
-    <div class="list">
-      <a class="item" href="https://create.kahoot.it/details/41488574-9c94-4b97-bd75-77decd8cfef1" target="_blank" rel="noopener">
-        <span>Kahoot – Quiz UE 1.1</span>
-        <span class="badge">ouvrir</span>
+    <div class="header-floating">
+      <span class="tiny-chip">Mode révision sereine</span>
+      <div class="soft-circle"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <span class="icon">📚</span>
+      <span>Activités interactives</span>
+    </div>
+    <p class="section-note">
+      Choisis une activité selon ton énergie du moment : quiz rapide, TD guidé plus complet, ou simple relecture.
+    </p>
+
+    <div class="grid">
+      <!-- Kahoot -->
+      <a class="card-link" href="https://create.kahoot.it/details/41488574-9c94-4b97-bd75-77decd8cfef1" target="_blank" rel="noopener">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="emoji">⚡</span>
+            <span>Kahoot – Quiz UE 1.1</span>
+          </div>
+          <span class="card-badge">Session rapide</span>
+        </div>
+        <p class="card-desc">
+          Quiz dynamique pour revoir les notions de base en psychologie : définitions, notions clés, repères simples.
+          Idéal pour te « chauffer » avant le TD.
+        </p>
+        <div class="card-footer">
+          <div class="tag-row">
+            <span class="tag">10–15 min</span>
+            <span class="tag">Réponses immédiates</span>
+          </div>
+          <span class="open-pill">
+            ouvrir
+            <span>↗</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- TD interactif -->
+      <a class="card-link" href="TD_interractif.html">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="emoji">🧘‍♀️</span>
+            <span>TD interactif – Concepts de base en psychologie</span>
+          </div>
+          <span class="card-badge">Mode tranquille</span>
+        </div>
+        <p class="card-desc">
+          Parcours guidé : définitions à remettre, vrai/faux, stades de l’enfance selon Freud, situations cliniques
+          à analyser (déni, refoulement, évitement, transfert, etc.).
+        </p>
+        <div class="card-footer">
+          <div class="tag-row">
+            <span class="tag">30–45 min</span>
+            <span class="tag">Auto-correction</span>
+            <span class="tag">Analyse de cas</span>
+          </div>
+          <span class="open-pill">
+            ouvrir
+            <span>→</span>
+          </span>
+        </div>
       </a>
     </div>
-  </div>
+  </section>
+</div>
 </body>
 </html>
