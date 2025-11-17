@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Interactions rayonnements-matière V10.6</title>
+<style>
+  html,body{height:100%;margin:0;background:#0f1218;color:#e8eefc;font-family:Arial,Helvetica,sans-serif}
+  .wrap{max-width:1120px;margin:22px auto;padding:0 16px}
+  h1{margin:0 0 6px 0;font-size:24px}
+  .subtitle{color:#9fb3d1;font-size:14px;margin-bottom:12px}
+  .panel{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;margin:8px 0 12px}
+  button,select,input[type="range"]{background:#1a2333;color:#e8eefc;border:1px solid #2c3a55;border-radius:10px;padding:8px 12px}
+  .chip{background:#0e1625;border:1px solid #26334d;color:#c6d4ec;border-radius:8px;padding:6px 10px;font-size:12px;display:inline-block}
+  canvas{width:100%;height:auto;background:#0b0f18;border:1px solid #26334d;border-radius:10px}
+  .legend,.facts{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;color:#9fb3d1;font-size:13px}
+  .facts{background:#0b1322;border:1px solid #22324f;border-radius:10px;padding:14px;justify-content:space-between;margin-top:12px}
+  .facts .col{min-width:230px;font-size:14px;line-height:1.6}
+  .facts .col strong{color:#e8eefc;font-weight:600}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;background:#0e1625;border:1px solid #26334d;border-radius:999px}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .bar{width:14px;height:3px;border-radius:2px}
+  .warn{background:#2b1b00;color:#ffcc66;border:1px solid #5a3a00;padding:8px 12px;border-radius:8px;display:none}
+  .label{font-size:12px;color:#9fb3d1}
+
+  /* Info panel */
+  .info-panel{margin-top:14px;background:#0b1322;border:1px solid #22324f;border-radius:12px;padding:14px}
+  .info-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .info-title{font-size:18px;font-weight:700;color:#e8eefc;margin:0}
+  .info-badges{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{background:#0e1625;border:1px solid #26334d;color:#c6d4ec;padding:4px 8px;border-radius:999px;font-size:12px}
+  .info-content{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:12px}
+  .info-block{background:#0f182a;border:1px solid #1f2f4a;border-radius:10px;padding:10px}
+  .info-block h3{margin:0 0 8px 0;font-size:14px;color:#cfe1ff}
+  .info-list,.util-list{margin:0;padding-left:18px;line-height:1.6}
+  .event-feed{max-height:120px;overflow:auto;border:1px dashed #2a3b60;padding:8px;border-radius:8px;background:#0a1120}
+  .event-item{font-size:13px;color:#d8e6ff;margin:2px 0}
+  .event-item b{color:#ffd56a}
+  details.formulas{background:#0a1120;border:1px solid #1e2b46;border-radius:10px;padding:8px 10px;margin-top:10px}
+  details.formulas summary{cursor:pointer;color:#cfe1ff;font-weight:600;margin:4px 0}
+  .formula{font-family:ui-monospace,Consolas,Monaco,Menlo,monospace;font-size:14px;background:#0b1426;border:1px solid #1e2b46;border-radius:8px;padding:8px 10px;margin:8px 0;line-height:1.7}
+  .formula .var{color:#a8daff;font-style:italic}
+  .formula .op{color:#ffa8d0;margin:0 3px}
+  .formula .subscript{font-size:0.85em;vertical-align:sub}
+
+  /* Spectro */
+  .spec-wrap{display:flex;flex-direction:column;gap:6px}
+  #specCanvas{width:100%;height:auto;background:#0a1120;border:1px solid #1e2b46;border-radius:10px}
+  .axis-label{font-size:12px;color:#9fb3d1}
+  .beam-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .btn{background:#1c2a44;border:1px solid #274065;color:#e8eefc;padding:8px 12px;border-radius:10px;cursor:pointer}
+
+  
+  /* Mode buttons */
+  .mode-section{margin:14px 0}
+  .mode-section-title{font-weight:600;font-size:15px;color:#c6d4ec;margin-bottom:8px}
+  .mode-buttons{display:flex;gap:10px;flex-wrap:wrap}
+  .mode-btn{background:#1a2333;color:#e8eefc;border:2px solid #2c3b57;border-radius:999px;padding:10px 18px;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s}
+  .mode-btn:hover{background:#243a55;border-color:#4a6a95}
+  .mode-btn.active{background:#2563eb;border-color:#60a5fa;box-shadow:0 0 0 2px rgba(37,99,235,0.4)}
+  
+  /* Settings toggle */
+  .settings-toggle{margin-top:14px;cursor:pointer;color:#9fb3d1;font-size:14px;display:inline-flex;align-items:center;gap:6px;font-weight:600;border:1px solid #374151;padding:8px 14px;border-radius:999px;background:#0a1120;transition:all 0.2s}
+  .settings-toggle:hover{background:#1a2333;border-color:#4a6a95}
+  .settings-toggle .icon{font-size:16px}
+  .settings-panel{margin-top:10px;border-radius:12px;border:1px solid #1f2937;padding:12px;background:#0a1120;display:none}
+  .settings-panel.open{display:block}
+  .settings-panel h4{margin:2px 0 8px 0;font-size:14px;color:#e5e7eb;font-weight:600}
+  @media (max-width: 920px){ .info-content{grid-template-columns:1fr} }
+
+  /* Debug panel */
+  .debug-panel{position:fixed;top:10px;right:10px;width:280px;background:rgba(0,0,0,0.92);border:2px solid #3b82f6;border-radius:8px;padding:12px;font-family:monospace;font-size:11px;color:#10b981;display:none;z-index:9999;max-height:90vh;overflow-y:auto}
+  .debug-panel.visible{display:block}
+  .debug-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #3b82f6}
+  .debug-title{color:#60a5fa;font-weight:bold;font-size:13px}
+  .debug-close{cursor:pointer;color:#ef4444;font-weight:bold;font-size:16px;line-height:1}
+  .debug-close:hover{color:#dc2626}
+  .debug-section{margin:8px 0;padding:6px 0;border-bottom:1px solid #1e3a8a}
+  .debug-section:last-child{border-bottom:none}
+  .debug-label{color:#60a5fa;font-weight:600;margin-bottom:3px}
+  .debug-value{color:#10b981;margin-left:8px}
+  .debug-value.warning{color:#f59e0b}
+  .debug-value.error{color:#ef4444}
+  .debug-toggle{position:fixed;top:10px;right:10px;background:#1e40af;color:#fff;border:2px solid #3b82f6;border-radius:6px;padding:8px 12px;cursor:pointer;z-index:9998;font-weight:600;font-size:12px}
+  .debug-toggle:hover{background:#1e3a8a}
+
+  /* Info additionnelle "hors cours" */
+  .hors-cours{background:#1a1f2e;border-left:3px solid #f59e0b;padding:8px 12px;margin:10px 0;border-radius:6px;font-size:13px;color:#fbbf24}
+  .hors-cours::before{content:"💡 Hors cours — ";font-weight:700}
+  .simplification{background:#1a2e1f;border-left:3px solid#10b981;padding:8px 12px;margin:10px 0;border-radius:6px;font-size:13px;color:#6ee7b7}
+  .simplification::before{content:"🎯 Pour simplifier — ";font-weight:700}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 style="text-align:center;font-size:32px;margin:20px 0 12px">Interactions rayonnements–matière</h1>
+  <div class="subtitle" style="text-align:center;font-size:13px;margin-bottom:20px">
+    Par <strong>Sébastien BEYER</strong> (<a href="mailto:sebastien.beyer@gmail.com">email</a>)<br>
+    Cours et relecture par 
+    <strong>Mme Pauline Arsac</strong>, Physicienne médicale (<a href="mailto:PAULINE.ARSAC@ch-toulon.fr">email</a>), 
+    <strong>Mr Jamel Gharbi</strong>, Manipulateur en Électroradiologie médicale (<a href="mailto:j_gharbi@hotmail.com">email</a>)
+  </div>
+
+  <div id="compatWarning" class="warn">Mode compatibilité simplifié activé.</div>
+
+  <div class="panel">
+    <button id="playBtn" title="Lecture / Pause">⏸︎ Pause</button>
+    <button id="resetBtn" title="Rejouer">↺ Rejouer</button>
+    <span>Vitesse</span>
+    <input id="speed" type="range" min="0.1" max="2" value="0.5" step="0.1" />
+    <span id="speedVal" class="chip">0.5x</span>
+  </div>
+
+  <div class="mode-section">
+    <div class="mode-section-title">📸 Photon incident (γ)</div>
+    <div class="mode-buttons">
+      <button class="mode-btn active" data-mode="photo">Photoélectrique</button>
+      <button class="mode-btn" data-mode="compton">Compton</button>
+      <button class="mode-btn" data-mode="coherent">Thomson/Rayleigh</button>
+      <button class="mode-btn" data-mode="pair">Création de paire</button>
+    </div>
+  </div>
+  
+  <div class="mode-section">
+    <div class="mode-section-title">⚡ Électron incident (e⁻)</div>
+    <div class="mode-buttons">
+      <button class="mode-btn" data-mode="brems">Freinage (Bremsstrahlung)</button>
+      <button class="mode-btn" data-mode="impactCascade">Collision é⁻–é⁻ (ionisation)</button>
+    </div>
+  </div>
+
+  <div class="settings-toggle" id="settingsToggle">
+    <span class="icon">⚙️</span> Paramètres avancés
+  </div>
+  <div class="settings-panel" id="settingsPanel">
+    <h4>⚙️ Paramètres de simulation</h4>
+    <div class="panel">
+      <span id="shellBlock"><span>Couche cible</span>
+        <select id="shellSelect">
+          <option value="K" selected>K</option>
+          <option value="L">L</option>
+          <option value="M">M</option>
+        </select>
+      </span>
+
+      <span id="pathBlock"><span>Trajectoire</span>
+        <select id="pathSide">
+          <option value="above" selected>au-dessus</option>
+          <option value="below">en dessous</option>
+        </select>
+      </span>
+
+      <span>θ</span>
+      <input id="theta" type="range" min="0" max="180" value="55" step="1" />
+      <span id="thetaVal" class="chip">55°</span>
+
+      <span>φ</span>
+      <input id="phi" type="range" min="-80" max="80" value="-20" step="1" />
+      <span id="phiVal" class="chip">-20°</span>
+
+      <span id="egBlock">Eγ (keV)</span>
+      <input id="eg" type="range" min="10" max="200" value="80" step="1" />
+      <span id="egVal" class="chip">80</span>
+    </div>
+  </div>
+
+  <div class="facts" id="factsBox">
+    <div class="col" id="zoneCol"><span class="chip">Zone :</span> <span id="zoneTxt"></span></div>
+    <div class="col" id="shellsCol"><span class="chip">Couches :</span> <span id="shellsTxt"></span></div>
+    <div class="col" id="prodCol"><span class="chip">Produits :</span> <span id="prodTxt"></span></div>
+    <div class="col" id="specCol"><span class="chip">Spectre :</span> <span id="specTxt"></span></div>
+  </div>
+
+  <canvas id="scene" width="1120" height="640" aria-label="Interactions rayonnement–matière"></canvas>
+
+  <div class="legend">
+    <span class="badge"><span class="dot" style="background:#d6d6d6"></span>Noyau</span>
+    <span class="badge"><span class="dot" style="background:#6ab7ff"></span>Électron</span>
+    <span class="badge"><span class="dot" style="background:#ff6b6b"></span>Électron de transition</span>
+    <span class="badge"><span class="dot" style="background:#f7e463"></span>Photon</span>
+    <span class="badge"><span class="bar" style="background:#6ee7b7"></span>Trajectoires</span>
+    <span class="badge"><span class="bar" style="background:#fbbf24"></span>Impact / émission</span>
+  </div>
+
+  <div class="label" style="margin-top:6px">
+    Verrous : Photo (K/L/M), Compton (M), Rayleigh (nuage), e-impact (K), freinage & paire (noyau). Eγ agit sur Compton.
+  </div>
+
+  <div id="infoPanel" class="info-panel">
+    <div class="info-header">
+      <h2 id="infoTitle" class="info-title">Interaction</h2>
+      <div class="info-badges">
+        <span id="badgeSpectre" class="pill">Spectre : —</span>
+        <span id="badgeZone" class="pill">Zone : —</span>
+      </div>
+    </div>
+
+    <div id="infoSimplification"></div>
+
+    <div class="info-content">
+      <div class="info-block">
+        <h3>À connaître</h3>
+        <ul id="infoPoints" class="info-list"></ul>
+      </div>
+      <div class="info-block">
+        <h3>Utilité en radiologie / à éviter</h3>
+        <ul id="utilPoints" class="util-list"></ul>
+      </div>
+      <div class="info-block spec-wrap">
+        <h3>Spectroscopie</h3>
+        <canvas id="specCanvas" width="520" height="170" aria-label="Spectre (qualitatif)"></canvas>
+        <div class="axis-label">Énergie (keV) — lignes = raies, aires = continuum (histogramme évolutif)</div>
+
+        <div class="beam-controls">
+          <span class="chip">Faisceau :</span>
+          <select id="beamType">
+            <option value="gamma">γ (photons)</option>
+            <option value="electron">e⁻ (électrons)</option>
+          </select>
+          <span class="chip">N événements</span>
+          <input id="beamN" type="range" min="50" max="5000" value="500" step="50"/>
+          <span id="beamNVal" class="chip">500</span>
+          <span id="EeWrap" class="chip">E_e (keV)</span>
+          <input id="Ee" type="range" min="20" max="150" value="80" step="5"/>
+          <span id="EeVal" class="chip">80 keV</span>
+          <button id="runBeam" class="btn">Simuler faisceau</button>
+        </div>
+
+        <div class="beam-controls" style="margin-top:6px">
+          <span class="chip">Réalité :</span>
+          <select id="realiteKind">
+            <option value="gamma">γ (photons)</option>
+            <option value="electron">e⁻ (électrons)</option>
+          </select>
+          <span class="chip">Taux (événements/s)</span>
+          <input id="realiteRate" type="range" min="10" max="3000" value="600" step="10"/>
+          <span id="realiteRateVal" class="chip">600/s</span>
+          <button id="realiteToggle" class="btn">Lancer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-block" style="margin-top:10px">
+      <h3>Événements pendant l'animation</h3>
+      <div id="eventFeed" class="event-feed" aria-live="polite"></div>
+      <div class="axis-label">Les lignes s'ajoutent aux collisions et émissions.</div>
+    </div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+(function(){
+  function toRad(d){ return d*Math.PI/180; }
+  function toDeg(r){ return r*180/Math.PI; }
+
+  var canvas = document.getElementById('scene');
+  var ctx = canvas.getContext && canvas.getContext('2d');
+  if(!ctx){
+    var cw = document.getElementById('compatWarning');
+    cw.style.display = 'block';
+    cw.innerHTML = 'Votre navigateur ne supporte pas le Canvas HTML5.';
+    return;
+  }
+
+  // UI refs
+  var playBtn = document.getElementById('playBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var thetaEl = document.getElementById('theta');
+  var phiEl = document.getElementById('phi');
+  var speedEl = document.getElementById('speed');
+  var egEl = document.getElementById('eg');
+  var thetaVal = document.getElementById('thetaVal');
+  var phiVal = document.getElementById('phiVal');
+  var speedVal = document.getElementById('speedVal');
+  var egVal = document.getElementById('egVal');
+  var shellSelect = document.getElementById('shellSelect');
+  var pathSide = document.getElementById('pathSide');
+
+  var zoneTxt = document.getElementById('zoneTxt');
+  var shellsTxt = document.getElementById('shellsTxt');
+  var prodTxt = document.getElementById('prodTxt');
+  var specTxt = document.getElementById('specTxt');
+
+  // Info panel refs
+  var infoTitle = document.getElementById('infoTitle');
+  var badgeSpectre = document.getElementById('badgeSpectre');
+  var badgeZone = document.getElementById('badgeZone');
+  var infoPoints = document.getElementById('infoPoints');
+  var utilPoints = document.getElementById('utilPoints');
+  var infoSimplification = document.getElementById('infoSimplification');
+  var eventFeed = document.getElementById('eventFeed');
+
+  // Spectro refs
+  var specCanvas = document.getElementById('specCanvas');
+  var specCtx = specCanvas.getContext('2d');
+
+  // Beam & Réalité
+  var beamTypeEl = document.getElementById('beamType');
+  var beamNEl = document.getElementById('beamN');
+  var beamNVal = document.getElementById('beamNVal');
+  var EeEl = document.getElementById('Ee');
+  var EeVal = document.getElementById('EeVal');
+  var EeWrap = document.getElementById('EeWrap');
+  var runBeamBtn = document.getElementById('runBeam');
+
+  var realiteKindEl = document.getElementById('realiteKind');
+  var realiteRateEl = document.getElementById('realiteRate');
+  var realiteRateVal = document.getElementById('realiteRateVal');
+  var realiteToggleBtn = document.getElementById('realiteToggle');
+
+  // Mode buttons
+  var modeBtns = document.querySelectorAll('.mode-btn');
+  
+  // Settings toggle
+  var settingsToggle = document.getElementById('settingsToggle');
+  var settingsPanel = document.getElementById('settingsPanel');
+
+  // Scene
+  var W = canvas.width, H = canvas.height;
+  var Cx = Math.floor(W*0.52), Cy = Math.floor(H*0.52);
+  var NUCLEUS_R = 16, PHOTON_R = 7, ELECTRON_R = 7;
+
+  var SHELLS = {
+    K: { r: 90,  n: 2,  color: "rgba(120,180,255,0.28)" },
+    L: { r: 160, n: 8,  color: "rgba(120,200,255,0.22)" },
+    M: { r: 230, n: 18, color: "rgba(120,220,255,0.16)" }
+  };
+  var shellOrder = ['K','L','M'];
+  var bgElectrons = [];
+
+  // Spectro state (combined histogram, no cumulative toggle)
+  var SPEC = {
+    pulses: [],
+    bins: 200,
+    hist: null
+  };
+
+  // Réalité state
+  var REALITE = { running:false, kind:'gamma', rate:600 };
+
+  function ensureHist(){
+    if(!SPEC.hist){
+      SPEC.hist = {
+        brems: new Array(SPEC.bins).fill(0),
+        photo: new Array(SPEC.bins).fill(0),
+        compton: new Array(SPEC.bins).fill(0),
+        coherent: new Array(SPEC.bins).fill(0),
+        impactCascade: new Array(SPEC.bins).fill(0),
+        pair: new Array(SPEC.bins).fill(0)
+      };
+    }
+  }
+
+  function toList(node, arr){
+    while(node.firstChild) node.removeChild(node.firstChild);
+    arr.forEach(function(t){ var li=document.createElement('li'); li.innerHTML=t; node.appendChild(li); });
+  }
+  function code(text){
+    var div=document.createElement('div'); 
+    div.className='formula'; 
+    div.innerHTML = text; 
+    return div;
+  }
+  function setBadges(spectre, zone){
+    badgeSpectre.textContent = "Spectre : " + spectre;
+    badgeZone.textContent = "Zone : " + zone;
+  }
+  function pushEventHTML(html){
+    var p=document.createElement('div'); p.className='event-item'; p.innerHTML=html; eventFeed.appendChild(p); eventFeed.scrollTop = eventFeed.scrollHeight;
+  }
+
+  function setInfo(mode){
+    var title="Interaction", points=[], util=[], formulas=[], spectre="—", zone="—", extraContent="";
+    
+    if(mode==='photo'){
+      title="Effet photoélectrique"; spectre="raies (fluorescence)"; zone="électrons internes (K/L/M)";
+      points = [
+        "Le <b>photon γ</b> est <b>entièrement absorbé</b> → éjection d'un <b>électron des couches internes</b> (fortement lié au noyau, <b>exemple : couche K</b>).",
+        "<b>Condition</b> : l'<b>énergie du photon incident</b> doit être <b>supérieure à l'énergie de liaison</b> de l'électron (E<sub>γ</sub> > W<sub>K</sub> par exemple).",
+        "<b>Vacance</b> sur la couche cible puis <b>réarrangement</b> (L→K, M→L) avec émission de <b>rayons X caractéristiques</b>.",
+        "Probabilité ↑ avec <b>Z (≈ Z³)</b> et milieux denses ; favorisé aux <b>basses tensions</b> (≈ 50–70 kV).",
+        "Améliore le <b>contraste</b> (absorption sélective os/tissus)."
+      ];
+      util = [
+        "Utile : <b>contraste osseux</b> (absorption ↑ avec Z), améliore la visibilité des structures denses.", 
+        "À éviter/excès : <b>dose patient accrue</b> si kV trop bas → optimisation kV/filtration."
+      ];
+      formulas = [
+        "<span class='var'>E</span><span class='subscript'>γ</span> <span class='op'>=</span> <span class='var'>h</span><span class='var'>ν</span> <span class='op'>=</span> <span class='var'>hc</span><span class='op'>/</span><span class='var'>λ</span>",
+        "<span class='var'>E</span><span class='subscript'>γ</span> <span class='op'>&gt;</span> <span class='var'>W</span> <span style='font-size:0.9em'>(énergie de liaison de l'électron)</span>",
+        "<span class='var'>E</span><span class='subscript'>c</span>(photoélectron) <span class='op'>=</span> <span class='var'>E</span><span class='subscript'>γ</span> <span class='op'>−</span> <span class='var'>W</span>"
+      ];
+      extraContent = "<div class='simplification'>Les électrons des couches internes (K, L) sont fortement liés au noyau, comme des billes collées près du centre. Il faut beaucoup d'énergie pour les arracher. Quand un électron interne est éjecté, les électrons des couches supérieures \"tombent\" pour combler le trou, en émettant des rayons X.</div>" +
+        "<div class='hors-cours'>En TEP (Tomographie par Émission de Positons), l'effet photoélectrique est utilisé dans les détecteurs pour absorber les photons de 511 keV issus de l'annihilation positon-électron.</div>";
+    }
+    else if(mode==='compton'){
+      title="Diffusion Compton"; spectre="continu (diffusé)"; zone="électrons périphériques (M, N)";
+      points = [
+        "Le <b>photon γ incident</b> diffuse sur un <b>électron périphérique</b> (peu lié au noyau, couches <b>externes M, N</b>) → <b>γ diffusé</b> + <b>électron Compton</b>.",
+        "<b>Condition</b> : l'<b>énergie du photon incident</b> est <b>supérieure à l'énergie de liaison</b> de l'électron périphérique (E<sub>γ</sub> > W<sub>périph.</sub>).",
+        "Prépondérant aux <b>hautes tensions</b> (>100 kV) et milieux peu denses (tissus mous).",
+        "À l'origine du <b>rayonnement diffusé</b> qui <b>dégrade le contraste</b> image.",
+        "<b>Cinématique</b> : angles liés par conservation de l'impulsion."
+      ];
+      util = [
+        "À éviter : <b>diffusé qui voile l'image</b> et augmente la dose.", 
+        "Contre-mesures : <b>grille anti-diffusé</b>, collimation serrée, air gap, kV adaptés."
+      ];
+      formulas = [
+        "<span class='var'>E</span>' <span class='op'>=</span> <span class='var'>E</span> <span class='op'>/</span> [1 <span class='op'>+</span> (<span class='var'>E</span><span class='op'>/</span><span class='var'>m</span><span class='subscript'>e</span><span class='var'>c</span>²)(1 <span class='op'>−</span> cos<span class='var'>θ</span>)]",
+        "tan<span class='var'>φ</span> <span class='op'>=</span> (<span class='var'>p</span>' sin<span class='var'>θ</span>) <span class='op'>/</span> (<span class='var'>p</span> <span class='op'>−</span> <span class='var'>p</span>' cos<span class='var'>θ</span>)"
+      ];
+      extraContent = "<div class='simplification'>Les électrons des couches externes (M, N) sont moins \"attachés\" au noyau que ceux de la couche K, comme des billes posées loin du centre. C'est plus facile de leur donner un \"coup\" et de les faire bouger, d'où l'effet Compton.</div>" +
+        "<div class='hors-cours'>L'effet Compton est utilisé en thérapie Compton pour traiter certaines tumeurs, en exploitant le dépôt d'énergie des électrons secondaires.</div>";
+    }
+    else if(mode==='coherent'){
+      title="Diffusion cohérente (Rayleigh/Thomson)"; spectre="E≈const (élastique)"; zone="nuage électronique";
+      points = [
+        "<b>Interaction élastique</b> avec le <b>nuage électronique</b> : pas d'ionisation, pas de vacance.",
+        "γ réémis <b>quasi-isoénergétique</b>, faible déviation (avant).",
+        "Contribution surtout à <b>très basse énergie</b> ; impact modeste en RX diag."
+      ];
+      util = [
+        "Impact modeste en radio diag (faible probabilité).", 
+        "Peut contribuer légèrement au voile (très basse énergie)."
+      ];
+      formulas = [
+        "<span class='var'>E</span>' <span class='op'>≈</span> <span class='var'>E</span> <span style='font-size:0.9em'>(pas de perte d'énergie significative)</span>"
+      ];
+      extraContent = "<div class='simplification'>Le photon \"rebondit\" sur le nuage d'électrons comme une balle sur un mur, sans perdre d'énergie ni arracher d'électron.</div>";
+    }
+    else if(mode==='brems'){
+      title="Rayonnement de freinage (Bremsstrahlung)"; spectre="continu caractéristique"; zone="champ du noyau";
+      points = [
+        "<b>Électron incident</b> dévié par le <b>champ électromagnétique du noyau</b> → émission d'un <b>photon de freinage</b> (rayon X continu).",
+        "Énergie dépend de l'<b>E<sub>c</sub></b> de l'électron, du <b>Z</b> de la cible, et de la <b>distance au noyau</b>.",
+        "Mécanisme principal de <b>production RX au tube</b> ; intensité >> caractéristique.",
+        "<b>Spectre continu caractéristique</b> de 0 à E<sub>max</sub>.",
+        "Trajectoire : l'électron arrive rapidement, se courbe près du noyau (comme une <b>météorite près du soleil</b>), émet le photon X en freinant, puis repart dans une nouvelle direction."
+      ];
+      util = [
+        "Utile : <b>mécanisme principal de production RX</b> au tube (spectre continu).", 
+        "Dans le patient : source de dose (électrons secondaires), d'où optimisation faisceau."
+      ];
+      formulas = [
+        "<span class='var'>E</span><span class='subscript'>c</span>(électron) <span class='op'>=</span> ½ <span class='var'>m</span> <span class='var'>v</span>²",
+        "<span class='var'>E</span><span class='subscript'>γ</span> <span class='op'>=</span> <span class='var'>h</span><span class='var'>ν</span>",
+        "<span class='var'>E</span><span class='subscript'>γ,max</span> <span class='op'>≈</span> <span class='var'>E</span><span class='subscript'>c</span>",
+        "<span class='var'>E</span><span class='subscript'>e,final</span> <span class='op'>=</span> <span class='var'>E</span><span class='subscript'>e,initial</span> <span class='op'>−</span> <span class='var'>E</span><span class='subscript'>γ</span>"
+      ];
+      extraContent = "<div class='simplification'>L'électron passe près du noyau comme une comète qui passe près du Soleil : il est dévié par la force d'attraction, ralentit, et perd de l'énergie sous forme de lumière (rayon X).</div>" +
+        "<div class='hors-cours'>Le rendement du rayonnement de freinage est proportionnel à Z·E/1000, où Z est le numéro atomique de la cible et E l'énergie de l'électron en keV. Pour le tungstène (Z=74) à 100 keV, le rendement n'est que d'environ 1%.</div>";
+    }
+    else if(mode==='impactCascade'){
+      title="Collision é⁻–é⁻ (ionisation)"; spectre="raies caractéristique de la cible"; zone="vacance K puis L→K, M→L";
+      points = [
+        "<b>Choc électron-électron</b> : deux électrons libres après impact (primaire + secondaire).",
+        "Éjection d'un <b>électron de la couche K</b> (couche la plus interne, la plus liée) → <b>vacance</b>.",
+        "<b>Réarrangement</b> : transitions L→K, M→L avec <b>émission de rayons X caractéristiques</b> (ou électron d'Auger).",
+        "<b>Spectre de raies caractéristique de la cible</b> (dépend du Z de l'atome).",
+        "Nombre d'électrons par couche respecté (K=2, L=8, M=18 dans l'illustration)."
+      ];
+      util = [
+        "Dans le patient : éjection + <b>Auger</b> → dépôt d'énergie local (dose).", 
+        "Hors imagerie : base des <b>raies X caractéristiques</b> (analyse élémentaire)."
+      ];
+      formulas = [
+        "<span class='var'>E</span><span class='subscript'>X</span>(Kα) <span class='op'>≈</span> <span class='var'>E</span><span class='subscript'>b</span>(K) <span class='op'>−</span> <span class='var'>E</span><span class='subscript'>b</span>(L)",
+        "<span class='var'>E</span><span class='subscript'>X</span>(Lα) <span class='op'>≈</span> <span class='var'>E</span><span class='subscript'>b</span>(L) <span class='op'>−</span> <span class='var'>E</span><span class='subscript'>b</span>(M)"
+      ];
+      extraContent = "<div class='simplification'>Un électron rapide percute un électron de la couche K (le plus proche du noyau) et l'éjecte. Les électrons des couches supérieures \"tombent\" pour combler le trou, en émettant des rayons X.</div>" +
+        "<div class='hors-cours'>Les électrons d'Auger sont des électrons éjectés suite au réarrangement électronique. Ils déposent leur énergie localement, ce qui est exploité en thérapie ciblée avec des radionucléides émetteurs Auger.</div>";
+    }
+    else if(mode==='pair'){
+      title="Création de paire"; spectre="2×511 keV (annihilation)"; zone="près du noyau (seuil)";
+      points = [
+        "<b>Interaction avec le noyau</b> : γ → e⁻ + e⁺ si <b>E<sub>γ</sub> ≥ 2 m<sub>e</sub> c² = 1,022 MeV</b> (dans le champ du noyau).",
+        "Le <b>positon</b> (e⁺) finit par s'<b>annihiler</b> avec un électron → <b>2 photons de 511 keV</b> opposés."
+      ];
+      util = [
+        "Pas en radiologie diag (seuil 1,022 MeV).", 
+        "Utile : <b>TEP (PET)</b> — détection en coïncidence des 2 × 511 keV ; présent en RT MV."
+      ];
+      formulas = [
+        "Seuil : <span class='var'>E</span><span class='subscript'>γ</span> <span class='op'>≥</span> 2 <span class='var'>m</span><span class='subscript'>e</span> <span class='var'>c</span>² <span class='op'>=</span> 1,022 MeV",
+        "Annihilation : e⁺ <span class='op'>+</span> e⁻ <span class='op'>→</span> 2 × 511 keV (opposés)"
+      ];
+      extraContent = "<div class='simplification'>Un photon très énergétique (>1 MeV) peut se transformer en une paire électron-positon près du noyau. Le positon finit par rencontrer un électron et les deux s'annihilent en produisant deux photons de 511 keV.</div>" +
+        "<div class='hors-cours'>En TEP, on utilise des radiotraceurs émetteurs de positons (comme le ¹⁸F-FDG). Les deux photons de 511 keV issus de l'annihilation sont détectés en coïncidence pour localiser la source d'émission.</div>";
+    }
+    
+    infoTitle.textContent=title;
+    setBadges(spectre, zone);
+    toList(infoPoints, points);
+    toList(utilPoints, util);
+    
+    // Construire le HTML complet : simplification → hors-cours → formules
+    var formulasHTML = '<details class="formulas" open style="margin-top:10px"><summary>Formules utiles</summary>';
+    formulas.forEach(function(f){ formulasHTML += '<div class="formula">' + f + '</div>'; });
+    formulasHTML += '</details>';
+    infoSimplification.innerHTML = extraContent + formulasHTML;
+    
+    while(eventFeed.firstChild) eventFeed.removeChild(eventFeed.firstChild);
+  }
+
+  function circle(x,y,r, fill, stroke, lw){
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    if(fill){ ctx.fillStyle = fill; ctx.fill(); }
+    if(stroke){ ctx.lineWidth = lw || 1; ctx.strokeStyle = stroke; ctx.stroke(); }
+  }
+  function line(x1,y1,x2,y2, color, lw, dash){
+    ctx.save();
+    if(dash && ctx.setLineDash){ ctx.setLineDash(dash); }
+    ctx.lineWidth = lw || 2; ctx.strokeStyle=color;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.restore();
+  }
+  function arrow(x1,y1,x2,y2, color, lw){
+    line(x1,y1,x2,y2,color,lw);
+    var ang = Math.atan2(y2-y1, x2-x1);
+    var L=10, Wp=6;
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2 - L*Math.cos(ang) + Wp*Math.sin(ang), y2 - L*Math.sin(ang) - Wp*Math.cos(ang));
+    ctx.lineTo(x2 - L*Math.cos(ang) - Wp*Math.sin(ang), y2 - L*Math.sin(ang) + Wp*Math.cos(ang));
+    ctx.closePath();
+    ctx.fillStyle=color; ctx.fill();
+  }
+  function label(text, x, y, color, align){
+    ctx.font = "13px Arial,Helvetica,sans-serif";
+    ctx.textAlign = align || "left";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+  }
+  function posOnShell(angle, r){ return { x: Cx + r * Math.cos(angle), y: Cy + r * Math.sin(angle) }; }
+
+  function drawPhoton(p, tag){
+    circle(p.x, p.y, PHOTON_R, "#f7e463");
+    var vx=(p.vx||0), vy=(p.vy||0), spd=Math.sqrt(vx*vx+vy*vy)||1;
+    var ux=vx/spd, uy=vy/spd, nx=-uy, ny=ux;
+    var A=5, Ls=16, N=(p.tailN||10);
+    ctx.beginPath(); ctx.strokeStyle="rgba(247,228,99,0.7)"; ctx.lineWidth=1.5;
+    for(var i=0;i<N;i++){
+      var bx=p.x - i*Ls*ux, by=p.y - i*Ls*uy, phase=(i+(p.x+p.y)*0.05);
+      var xx=bx + Math.sin(phase*1.3)*A*nx, yy=by + Math.sin(phase*1.3)*A*ny;
+      if(i===0) ctx.moveTo(xx,yy); else ctx.lineTo(xx,yy);
+    }
+    ctx.stroke();
+    if(tag) label(tag, p.x + 12, p.y - 12, "#f7e463");
+  }
+  function drawDirArrow(x, y, vx, vy, color, txt){
+    var spd=Math.sqrt(vx*vx+vy*vy)||1, ux=vx/spd, uy=vy/spd, L=70;
+    var x2=x+L*ux, y2=y+L*uy; arrow(x,y,x2,y2,color,2);
+    if(txt) label(txt, x2+8, y2, color, "left");
+  }
+
+  function drawShells(){
+    for(var s=0;s<shellOrder.length;s++){
+      var key=shellOrder[s], sh=SHELLS[key];
+      circle(Cx,Cy,sh.r,null,sh.color,1.2);
+    }
+    var offsets={K:-22,L:0,M:22};
+    for(var s2=0;s2<shellOrder.length;s2++){
+      var key2=shellOrder[s2], sh2=SHELLS[key2];
+      var xR=Cx+sh2.r, oy=offsets[key2];
+      line(xR,Cy,xR+12,Cy+oy,"rgba(159,179,209,0.8)",1.2);
+      label("Couche "+key2,xR+16,Cy+oy,"#9fb3d1","left");
+    }
+  }
+  function drawNucleus(){
+    try{ var grad=ctx.createRadialGradient(Cx,Cy,0,Cx,Cy,NUCLEUS_R*1.6);
+      grad.addColorStop(0,"#ffffff"); grad.addColorStop(1,"#d6d6d6");
+      circle(Cx,Cy,NUCLEUS_R,grad,"#7a7aaa",1);
+    }catch(e){ circle(Cx,Cy,NUCLEUS_R,"#d6d6d6","#7a7a7a",1); }
+    label("Noyau", Cx, Cy-28, "#9fb3d1", "center");
+  }
+
+  function initBgElectrons(){
+    bgElectrons.length=0;
+    for(var s=0; s<shellOrder.length; s++){
+      var key = shellOrder[s];
+      var sh = SHELLS[key];
+      var count = sh.n;
+      for(var i=0;i<count;i++){
+        bgElectrons.push({
+          id: key + "_" + i,
+          shell: key,
+          angle: (i / count) * Math.PI*2,
+          r: sh.r,
+          speed: (Math.random()<0.5?-1:1) * (0.30 + Math.random()*0.22),
+          alive: true,
+          highlight: false,
+          htag: ""
+        });
+      }
+    }
+  }
+  function cyclicDelta(a,b){
+    var d = Math.abs(a-b) % (2*Math.PI);
+    return d>Math.PI ? 2*Math.PI - d : d;
+  }
+  function findClosestElectronIdx(shell, angle){
+    var bestIdx=-1, bestD=1e9;
+    for(var i=0;i<bgElectrons.length;i++){
+      var e=bgElectrons[i];
+      if(e.alive && e.shell===shell){
+        var d=cyclicDelta(e.angle, angle);
+        if(d<bestD){ bestD=d; bestIdx=i; }
+      }
+    }
+    return bestIdx;
+  }
+  function killElectronIdx(idx){ if(idx>=0) bgElectrons[idx].alive=false; }
+  function addElectron(shell, angle){
+    var sh=SHELLS[shell];
+    bgElectrons.push({
+      id: shell + "_new_" + Math.random().toString(36).slice(2,7),
+      shell: shell,
+      angle: angle,
+      r: sh.r,
+      speed: (Math.random()<0.5?-1:1) * (0.30 + Math.random()*0.22),
+      alive: true,
+      highlight: false,
+      htag: ""
+    });
+  }
+
+  var STATE = {
+    running: true,
+    t: 0,
+    tImpact: 0,
+    collided: false,
+    flash: 0,
+    mode: 'photo',
+    targetShell: 'K',
+    side: 'above',
+    impactAngle: toRad(55),
+    boundIdx: -1,
+    targetKIdx: -1,
+    wobbleUntil: 0,
+    photon: null,
+    incidentElectron: null,
+    photoElectron: null,
+    knockedElectron: null,
+    scPhoton: null,
+    charPhotons: [],
+    gamma511a: null,
+    gamma511b: null,
+    transLK: null,
+    transML: null,
+    bremsOrbit: null,
+    bremsPhase: 0,
+    predictedImpactPos: null
+  };
+
+  // Debug variables
+  var debugLastEvents = [];
+  var debugFPS = 0;
+  var debugFrameCount = 0;
+  var debugLastFPSUpdate = 0;
+
+  function updateDebug(){
+    var dbgMode = document.getElementById('dbgMode');
+    var dbgRunning = document.getElementById('dbgRunning');
+    var dbgPhase = document.getElementById('dbgPhase');
+    var dbgTime = document.getElementById('dbgTime');
+    var dbgFPS = document.getElementById('dbgFPS');
+    var dbgPhoton = document.getElementById('dbgPhoton');
+    var dbgIncident = document.getElementById('dbgIncident');
+    var dbgPhoto = document.getElementById('dbgPhoto');
+    var dbgScattered = document.getElementById('dbgScattered');
+    var dbgXray = document.getElementById('dbgXray');
+    var dbgSpeed = document.getElementById('dbgSpeed');
+    var dbgEg = document.getElementById('dbgEg');
+    var dbgTheta = document.getElementById('dbgTheta');
+    var dbgPhi = document.getElementById('dbgPhi');
+    var dbgModeDetails = document.getElementById('dbgModeDetails');
+    
+    if(dbgMode) dbgMode.textContent = STATE.mode;
+    if(dbgRunning) dbgRunning.textContent = STATE.running ? 'OUI' : 'NON';
+    if(dbgPhase) dbgPhase.textContent = STATE.collided ? 'Post-collision' : 'Pré-collision';
+    if(dbgTime) dbgTime.textContent = STATE.t.toFixed(2);
+    if(dbgFPS) dbgFPS.textContent = debugFPS;
+    
+    if(dbgPhoton) dbgPhoton.textContent = (STATE.photon && STATE.photon.alive) ? 'Actif' : 'Inactif';
+    if(dbgIncident) dbgIncident.textContent = (STATE.incidentElectron && STATE.incidentElectron.alive) ? 'Actif' : 'Inactif';
+    if(dbgPhoto) dbgPhoto.textContent = (STATE.photoElectron && STATE.photoElectron.alive) ? 'Actif' : 'Inactif';
+    if(dbgScattered) dbgScattered.textContent = (STATE.knockedElectron && STATE.knockedElectron.alive) ? 'Actif' : 'Inactif';
+    if(dbgXray) dbgXray.textContent = STATE.charPhotons.filter(function(p){ return p.alive; }).length;
+    
+    if(dbgSpeed) dbgSpeed.textContent = speedEl.value + 'x';
+    if(dbgEg) dbgEg.textContent = egEl.value;
+    if(dbgTheta) dbgTheta.textContent = thetaEl.value;
+    if(dbgPhi) dbgPhi.textContent = phiEl.value;
+    
+    if(dbgModeDetails){
+      var details = '';
+      if(STATE.mode === 'brems'){
+        if(STATE.bremsOrbit){
+          details = 'Phase: ' + STATE.bremsPhase + ', Angle: ' + (STATE.currentAngle ? (STATE.currentAngle*180/Math.PI).toFixed(1) : '—') + '°';
+        } else {
+          details = 'Config orbite en attente';
+        }
+      } else if(STATE.mode === 'impactCascade'){
+        details = 'Cible K idx: ' + (STATE.targetKIdx >= 0 ? STATE.targetKIdx : 'aucun');
+      } else if(STATE.mode === 'compton'){
+        var Eg = parseFloat(egEl.value)||120;
+        var theta = parseFloat(thetaEl.value||"60")*Math.PI/180;
+        var me = 511.0;
+        var Eprime = Eg / (1 + (Eg/me)*(1 - Math.cos(theta)));
+        details = "E' diffusé: " + Eprime.toFixed(1) + ' keV';
+      } else {
+        details = 'tImpact: ' + STATE.tImpact.toFixed(2) + 's';
+      }
+      dbgModeDetails.textContent = details;
+    }
+    
+    // Debug spécifique bremsstrahlung
+    var dbgBremsSection = document.getElementById('dbgBremsSection');
+    if(dbgBremsSection){
+      if(STATE.mode === 'brems'){
+        dbgBremsSection.style.display = 'block';
+        
+        var dbgBremsPhase = document.getElementById('dbgBremsPhase');
+        var dbgElectronPos = document.getElementById('dbgElectronPos');
+        var dbgDistNucleus = document.getElementById('dbgDistNucleus');
+        var dbgElectronSpeed = document.getElementById('dbgElectronSpeed');
+        var dbgPhotonEmitted = document.getElementById('dbgPhotonEmitted');
+        var dbgPhotonPos = document.getElementById('dbgPhotonPos');
+        
+        if(dbgBremsPhase) dbgBremsPhase.textContent = STATE.bremsPhase || 0;
+        
+        if(STATE.incidentElectron && STATE.incidentElectron.alive){
+          var ei = STATE.incidentElectron;
+          if(dbgElectronPos) dbgElectronPos.textContent = '(' + ei.x.toFixed(0) + ', ' + ei.y.toFixed(0) + ')';
+          
+          var distToNucleus = Math.sqrt((ei.x - Cx)*(ei.x - Cx) + (ei.y - Cy)*(ei.y - Cy));
+          if(dbgDistNucleus){
+            dbgDistNucleus.textContent = distToNucleus.toFixed(1) + ' px';
+            if(distToNucleus < 40) dbgDistNucleus.className = 'debug-value warning';
+            else dbgDistNucleus.className = 'debug-value';
+          }
+          
+          var speed = Math.sqrt(ei.vx*ei.vx + ei.vy*ei.vy);
+          if(dbgElectronSpeed) dbgElectronSpeed.textContent = speed.toFixed(1);
+        } else {
+          if(dbgElectronPos) dbgElectronPos.textContent = '—';
+          if(dbgDistNucleus) dbgDistNucleus.textContent = '—';
+          if(dbgElectronSpeed) dbgElectronSpeed.textContent = '—';
+        }
+        
+        if(STATE.bremsGravSim){
+          if(dbgPhotonEmitted) dbgPhotonEmitted.textContent = STATE.bremsGravSim.photonEmitted ? 'OUI' : 'NON';
+        }
+        
+        if(STATE.scPhoton && STATE.scPhoton.alive){
+          var sp = STATE.scPhoton;
+          if(dbgPhotonPos){
+            dbgPhotonPos.textContent = '(' + sp.x.toFixed(0) + ', ' + sp.y.toFixed(0) + ') v=' + Math.sqrt(sp.vx*sp.vx + sp.vy*sp.vy).toFixed(0);
+            dbgPhotonPos.className = 'debug-value';
+          }
+        } else {
+          if(dbgPhotonPos){
+            dbgPhotonPos.textContent = 'Aucun';
+            dbgPhotonPos.className = 'debug-value error';
+          }
+        }
+      } else {
+        dbgBremsSection.style.display = 'none';
+      }
+    }
+    
+    var dbgEvents = document.getElementById('dbgEvents');
+    if(dbgEvents && debugLastEvents.length > 0){
+      dbgEvents.innerHTML = '';
+      debugLastEvents.slice(-5).forEach(function(evt){
+        var div = document.createElement('div');
+        div.style.marginBottom = '2px';
+        div.style.color = '#10b981';
+        div.textContent = '• ' + evt;
+        dbgEvents.appendChild(div);
+      });
+    }
+  }
+  
+  var originalPushEventHTML = pushEventHTML;
+  pushEventHTML = function(html){
+    originalPushEventHTML(html);
+    var text = html.replace(/<[^>]*>/g, '');
+    debugLastEvents.push(text);
+    if(debugLastEvents.length > 10) debugLastEvents.shift();
+  };
+
+  function reset(){
+    configure();
+    facts();
+    setInfo(STATE.mode);
+    setShellVisibility();
+  }
+
+  function getParams(){
+    return {
+      theta: toRad(parseFloat(thetaEl.value||"60")),
+      phi: toRad(parseFloat(phiEl.value||"-30")),
+      vPhoton: 280,
+      vElec: 220
+    };
+  }
+
+  function configure(){
+    STATE.t=0; STATE.collided=false; STATE.flash=0;
+    STATE.boundIdx=-1; STATE.targetKIdx=-1; STATE.wobbleUntil=0;
+    STATE.photon=null; STATE.incidentElectron=null; STATE.photoElectron=null; STATE.knockedElectron=null; STATE.scPhoton=null;
+    STATE.charPhotons=[]; STATE.gamma511a=null; STATE.gamma511b=null; STATE.transLK=null; STATE.transML=null;
+    initBgElectrons();
+
+    var vPhoton=280, vElec=220, side=STATE.side;
+    var angImpact=(side==='above')?STATE.impactAngle:-STATE.impactAngle;
+    var rK=SHELLS.K.r, rL=SHELLS.L.r, rM=SHELLS.M.r;
+
+    if(STATE.mode==='photo'){
+      var sh=STATE.targetShell, rT=SHELLS[sh].r;
+      var x0=-120; STATE.tImpact=(Cx + rT*Math.cos(angImpact) - x0)/vPhoton; if(STATE.tImpact<0.1)STATE.tImpact=0.1;
+      var idx=findClosestElectronIdx(sh, angImpact);
+      if(idx>=0){
+        var om=0.9; bgElectrons[idx].speed=om; bgElectrons[idx].angle=angImpact - om*STATE.tImpact; bgElectrons[idx].highlight=true; bgElectrons[idx].htag="é⁻ lié ("+sh+")"; STATE.boundIdx=idx;
+      }
+      var impactY = posOnShell(angImpact, rT).y;
+      STATE.photon={x:x0,y:impactY,vx:vPhoton,vy:0,alive:true};
+    }
+    else if(STATE.mode==='compton'){
+      var x0c=-120; STATE.tImpact=(Cx + rM*Math.cos(angImpact) - x0c)/vPhoton; if(STATE.tImpact<0.1)STATE.tImpact=0.1;
+      var idxM=findClosestElectronIdx('M', angImpact);
+      if(idxM>=0){
+        var omM=0.7; bgElectrons[idxM].speed=omM; bgElectrons[idxM].angle=angImpact - omM*STATE.tImpact; bgElectrons[idxM].highlight=true; bgElectrons[idxM].htag="é⁻ (M)"; STATE.boundIdx=idxM;
+      }
+      STATE.photon={x:-120,y:posOnShell(angImpact,rM).y,vx:vPhoton,vy:0,alive:true};
+    }
+    else if(STATE.mode==='coherent'){
+      var x0r=-120; STATE.tImpact=(Cx + rL*Math.cos(angImpact) - x0r)/vPhoton; if(STATE.tImpact<0.1)STATE.tImpact=0.1;
+      var idxL=findClosestElectronIdx('L', angImpact);
+      if(idxL>=0){
+        var omL=0.8; bgElectrons[idxL].speed=omL; bgElectrons[idxL].angle=angImpact - omL*STATE.tImpact; bgElectrons[idxL].highlight=true; bgElectrons[idxL].htag="é⁻ (cohérent)"; STATE.boundIdx=idxL;
+      }
+      STATE.photon={x:x0r,y:posOnShell(angImpact,rL).y,vx:vPhoton,vy:0,alive:true};
+    }
+    else if(STATE.mode==='pair'){
+      var ypp=(STATE.side==='above')? (Cy-30):(Cy+30);
+      var x0p=-140; STATE.tImpact=(Cx-10 - x0p)/vPhoton; if(STATE.tImpact<0.1)STATE.tImpact=0.1;
+      STATE.photon={x:x0p,y:ypp,vx:vPhoton,vy:0,alive:true};
+    }
+    else if(STATE.mode==='brems'){
+      // CONFIGURATION BREMSSTRAHLUNG - SIMULATION GRAVITATIONNELLE
+      var yb=(STATE.side==='above')? (Cy-48):(Cy+48); // Entre couche K et noyau
+      var x0b=-200; 
+      
+      // Paramètres de simulation gravitationnelle pour trajectoire hyperbolique
+      STATE.bremsGravSim = {
+        noyauX: Cx,
+        noyauY: Cy,
+        particuleX: x0b,
+        particuleY: yb,
+        vitesseX: 6.2, // Vitesse initiale augmentée pour éviter arrêt
+        vitesseY: 0.0,
+        masseParticule: 1.0,
+        masseNoyau: 110.0, // Masse augmentée pour courbure plus prononcée
+        G: 0.060, // Force augmentée pour belle courbure visible
+        dt: 0.15,
+        positions: [], // Historique des positions
+        photonEmitted: false,
+        minDist: 9999 // Distance minimale atteinte
+      };
+      
+      STATE.incidentElectron={
+        x: x0b,
+        y: yb,
+        vx: 6.2,
+        vy: 0,
+        alive: true,
+        trail: [{x: x0b, y: yb}]
+      };
+      
+      STATE.tImpact = 0.2; // Temps avant de commencer la simulation
+      STATE.bremsPhase = 0; // 0=approche initiale, 1=simulation gravitationnelle
+    }
+    else if(STATE.mode==='impactCascade'){
+      var angImpact=(STATE.side==='above')?STATE.impactAngle:-STATE.impactAngle;
+      var idxK=findClosestElectronIdx('K', angImpact);
+      if(idxK>=0){
+        bgElectrons[idxK].highlight=true; 
+        bgElectrons[idxK].htag="é⁻ cible (K)"; 
+        STATE.targetKIdx=idxK;
+        
+        var eK = bgElectrons[idxK];
+        var currentAngleK = eK.angle;
+        var currentPosK = posOnShell(currentAngleK, rK);
+        
+        var x0ic = -180;
+        var y0ic = currentPosK.y + (Math.random()-0.5)*40;
+        
+        var dx0 = currentPosK.x - x0ic;
+        var dy0 = currentPosK.y - y0ic;
+        var dist0 = Math.sqrt(dx0*dx0 + dy0*dy0);
+        var timeToImpact = dist0 / vElec;
+        STATE.tImpact = timeToImpact;
+        
+        var futureAngleK = currentAngleK + eK.speed * timeToImpact;
+        var futurePosK = posOnShell(futureAngleK, rK);
+        
+        var dxFuture = futurePosK.x - x0ic;
+        var dyFuture = futurePosK.y - y0ic;
+        var distFuture = Math.sqrt(dxFuture*dxFuture + dyFuture*dyFuture);
+        
+        STATE.incidentElectron = {
+          x: x0ic,
+          y: y0ic,
+          vx: vElec * dxFuture / distFuture,
+          vy: vElec * dyFuture / distFuture,
+          alive: true,
+          trail: [{x: x0ic, y: y0ic}]
+        };
+        
+        STATE.predictedImpactPos = futurePosK;
+        
+      } else {
+        var yic=(STATE.side==='above')? (Cy-35):(Cy+35);
+        var x0ic=-160; STATE.tImpact=2.0;
+        STATE.incidentElectron={x:x0ic,y:yic,vx:vElec,vy:0,alive:true,trail:[{x:x0ic,y:yic}]};
+      }
+    }
+  }
+
+  function update(dt){
+    var sdt = dt * parseFloat(speedEl.value || "0.5");
+    STATE.t += sdt;
+    
+    for(var i=0; i<bgElectrons.length; i++){
+      var e = bgElectrons[i];
+      if(!e.alive) continue;
+      e.angle += e.speed * sdt;
+      while(e.angle > Math.PI*2) e.angle -= Math.PI*2;
+      while(e.angle < 0) e.angle += Math.PI*2;
+    }
+    
+    if(STATE.flash>0){ STATE.flash=Math.max(0, STATE.flash - 1.6*sdt); }
+    
+    if(STATE.mode === 'photo') updatePhoto(sdt);
+    else if(STATE.mode === 'compton') updateCompton(sdt);
+    else if(STATE.mode === 'coherent') updateCoherent(sdt);
+    else if(STATE.mode === 'pair') updatePair(sdt);
+    else if(STATE.mode === 'brems') updateBrems(sdt);
+    else if(STATE.mode === 'impactCascade') updateImpact(sdt);
+    
+    stepRealite(dt);
+    
+    for(var i=0; i<STATE.charPhotons.length; i++){
+      var cp=STATE.charPhotons[i];
+      if(!cp.alive) continue;
+      cp.x+=cp.vx*sdt; cp.y+=cp.vy*sdt;
+      if(cp.x<-60||cp.x>W+60||cp.y<-60||cp.y>H+60) cp.alive=false;
+    }
+  }
+
+  function updatePhoto(sdt){
+    var p = STATE.photon;
+    if(p && p.alive){
+      if(!STATE.collided){
+        p.x += p.vx * sdt;
+        if(STATE.t >= STATE.tImpact){
+          STATE.collided = true; STATE.flash = 1.0; p.alive = false;
+          var idx = STATE.boundIdx;
+          if(idx >= 0 && bgElectrons[idx].alive){
+            var ang = bgElectrons[idx].angle;
+            var pos = posOnShell(ang, bgElectrons[idx].r);
+            killElectronIdx(idx);
+            var phi = getParams().phi; var vx = 220 * Math.cos(phi), vy = 220 * Math.sin(phi);
+            STATE.photoElectron = {x: pos.x, y: pos.y, vx: vx, vy: vy, alive: true, trail: [{x: pos.x, y: pos.y}]};
+            STATE.transLK = {start: STATE.t + 0.25, progress: 0, angle: ang, active: true, emitted: false};
+            STATE.transML = {start: STATE.t + 0.60, progress: 0, angle: ang - 0.3, active: true, emitted: false};
+            pushEventHTML("<b>Photoélectrique</b> : γ absorbé, photoélectron éjecté");
+            addLinePulse(0.40*getEmax('photo'), "Kα"); addCount('photo', 0.40*getEmax('photo'), 1.0);
+          }
+        }
+      }
+    }
+    if(STATE.photoElectron && STATE.photoElectron.alive){
+      var pe = STATE.photoElectron; pe.x += pe.vx * sdt; pe.y += pe.vy * sdt;
+      if(!pe.trail) pe.trail = []; pe.trail.push({x: pe.x, y: pe.y}); if(pe.trail.length > 120) pe.trail.shift();
+      if(pe.x < -60 || pe.x > W + 60 || pe.y < -60 || pe.y > H + 60) pe.alive = false;
+    }
+    updateTrans(STATE.transLK, 'L', 'K', 'Kα', sdt);
+    updateTrans(STATE.transML, 'M', 'L', 'Lα', sdt);
+  }
+
+  function updateCompton(sdt){
+    var ph = STATE.photon;
+    if(ph && ph.alive){
+      if(!STATE.collided){
+        ph.x += ph.vx * sdt;
+        if(STATE.t >= STATE.tImpact){
+          STATE.collided = true; STATE.flash = 1.0;
+          var idx = STATE.boundIdx;
+          if(idx >= 0 && bgElectrons[idx].alive){
+            var ang = bgElectrons[idx].angle; var pos = posOnShell(ang, SHELLS.M.r); killElectronIdx(idx);
+            var p = getParams(); var phi = p.phi, theta = p.theta;
+            STATE.scPhoton = {x: pos.x, y: pos.y, vx: 280 * Math.cos(theta), vy: 280 * Math.sin(theta), alive: true};
+            STATE.knockedElectron = {x: pos.x, y: pos.y, vx: 220 * Math.cos(phi), vy: 220 * Math.sin(phi), alive: true, trail: [{x: pos.x, y: pos.y}]};
+            pushEventHTML("<b>Compton</b> : γ diffusé + é⁻ éjecté");
+            var Eg = parseFloat(egEl.value) || 120; var me = 511.0;
+            var Eprime = Eg / (1 + (Eg / me) * (1 - Math.cos(theta)));
+            addContinuumPulse(); addCount('compton', Eprime, 1.0);
+          }
+          ph.alive = false;
+        }
+      }
+    }
+    if(STATE.scPhoton && STATE.scPhoton.alive){ var sc = STATE.scPhoton; sc.x += sc.vx * sdt; sc.y += sc.vy * sdt; if(sc.x < -60 || sc.x > W + 60 || sc.y < -60 || sc.y > H + 60) sc.alive = false; }
+    if(STATE.knockedElectron && STATE.knockedElectron.alive){ var ke = STATE.knockedElectron; ke.x += ke.vx * sdt; ke.y += ke.vy * sdt; if(!ke.trail) ke.trail = []; ke.trail.push({x: ke.x, y: ke.y}); if(ke.trail.length > 120) ke.trail.shift(); if(ke.x < -60 || ke.x > W + 60 || ke.y < -60 || ke.y > H + 60) ke.alive = false; }
+  }
+
+  function updateCoherent(sdt){
+    var ph = STATE.photon;
+    if(ph && ph.alive){
+      if(!STATE.collided){
+        ph.x += ph.vx * sdt;
+        if(STATE.t >= STATE.tImpact){
+          STATE.collided = true; STATE.flash = 0.7;
+          var idx = STATE.boundIdx;
+          if(idx >= 0){
+            var ang = bgElectrons[idx].angle; var pos = posOnShell(ang, SHELLS.L.r);
+            STATE.wobbleUntil = STATE.t + 0.3; var theta = getParams().theta;
+            STATE.scPhoton = {x: pos.x, y: pos.y, vx: 280 * Math.cos(theta), vy: 280 * Math.sin(theta), alive: true};
+            pushEventHTML("<b>Cohérent</b> : diffusion élastique, pas d'ionisation");
+            addCount('coherent', parseFloat(egEl.value) || 120, 0.6);
+          }
+          ph.alive = false;
+        }
+      }
+    }
+    if(STATE.scPhoton && STATE.scPhoton.alive){ var sc = STATE.scPhoton; sc.x += sc.vx * sdt; sc.y += sc.vy * sdt; if(sc.x < -60 || sc.x > W + 60 || sc.y < -60 || sc.y > H + 60) sc.alive = false; }
+  }
+
+  function updatePair(sdt){
+    if(STATE.photon && STATE.photon.alive){ STATE.photon.x+=STATE.photon.vx*sdt; }
+    if(!STATE.collided && STATE.t>=STATE.tImpact){
+      STATE.collided=true; STATE.flash=1.0;
+      var ix=Cx-10, iy=STATE.photon.y; var ve=170, th=getParams().theta;
+      STATE.photoElectron={x:ix,y:iy,vx:ve*Math.cos(th),vy:ve*Math.sin(th),alive:true,trail:[{x:ix,y:iy}]};
+      STATE.knockedElectron={x:ix,y:iy,vx:-ve*Math.cos(th),vy:-ve*Math.sin(th),alive:true,trail:[{x:ix,y:iy}],isPositron:true};
+      if(STATE.photon) STATE.photon.alive=false;
+      pushEventHTML("<b>Création de paire</b> près du noyau (≥1,022 MeV)");
+    }
+    if(STATE.photoElectron && STATE.photoElectron.alive){ var e3=STATE.photoElectron; e3.x+=e3.vx*sdt; e3.y+=e3.vy*sdt; if(!e3.trail) e3.trail=[]; e3.trail.push({x:e3.x,y:e3.y}); if(e3.trail.length>160) e3.trail.shift(); }
+    if(STATE.knockedElectron && STATE.knockedElectron.alive){
+      var pz=STATE.knockedElectron; pz.x+=pz.vx*sdt; pz.y+=pz.vy*sdt; if(!pz.trail) pz.trail=[]; pz.trail.push({x:pz.x,y:pz.y}); if(pz.trail.length>160) pz.trail.shift();
+      if(STATE.t>=STATE.tImpact+1.2 && !STATE.gamma511a){
+        var ax=pz.x, ay=pz.y, vg=260;
+        STATE.gamma511a={x:ax,y:ay,vx:vg,vy:0,alive:true,tailN:8}; STATE.gamma511b={x:ax,y:ay,vx:-vg,vy:0,alive:true,tailN:8};
+        pz.alive=false; pushEventHTML("<b>Annihilation</b> : 2 × 511 keV");
+        addLinePulse(511,"511 keV"); addLinePulse(511,"511 keV"); addCount('pair', 511, 1.0); addCount('pair', 511, 1.0);
+      }
+    }
+    if(STATE.gamma511a && STATE.gamma511a.alive){ var g1=STATE.gamma511a; g1.x+=g1.vx*sdt; if(g1.x<-60||g1.x>W+60) g1.alive=false; }
+    if(STATE.gamma511b && STATE.gamma511b.alive){ var g2=STATE.gamma511b; g2.x+=g2.vx*sdt; if(g2.x<-60||g2.x>W+60) g2.alive=false; }
+  }
+
+  function updateBrems(sdt){
+    var ei=STATE.incidentElectron;
+    if(!ei || !ei.alive) return;
+    
+    var sim = STATE.bremsGravSim;
+    if(!sim) return;
+    
+    // PHASE 0: Approche initiale rapide
+    if(STATE.bremsPhase === 0){
+      ei.x += ei.vx * sdt; 
+      ei.y += ei.vy * sdt;
+      if(!ei.trail) ei.trail = [];
+      ei.trail.push({x: ei.x, y: ei.y});
+      if(ei.trail.length > 250) ei.trail.shift();
+      
+      // Commencer la simulation gravitationnelle quand on est proche
+      if(STATE.t >= STATE.tImpact){
+        STATE.bremsPhase = 1;
+        STATE.collided = true;
+        STATE.flash = 1.0;
+        STATE.bremsT0 = STATE.t;
+        
+        // Initialiser la simulation
+        sim.particuleX = ei.x;
+        sim.particuleY = ei.y;
+        sim.vitesseX = 2.5; // Vitesse horizontale
+        sim.vitesseY = 0.0;
+        sim.positions = [{x: ei.x, y: ei.y}];
+        sim.photonEmitted = false;
+      }
+    }
+    // PHASE 1: Simulation gravitationnelle
+    else if(STATE.bremsPhase === 1){
+      // Faire plusieurs pas de simulation par frame pour une trajectoire fluide
+      var stepsPerFrame = 8;
+      for(var step = 0; step < stepsPerFrame; step++){
+        // 1. Calculer le vecteur distance (de la particule vers le noyau)
+        var distX = sim.noyauX - sim.particuleX;
+        var distY = sim.noyauY - sim.particuleY;
+        var distMagnitude = Math.sqrt(distX*distX + distY*distY);
+        
+        // Suivre la distance minimale
+        if(distMagnitude < sim.minDist) sim.minDist = distMagnitude;
+        
+        // Assurer une distance minimale pour éviter singularité
+        if(distMagnitude < 18) distMagnitude = 18;
+        
+        // 2. Calculer la force gravitationnelle
+        var forceMagnitude = (sim.G * sim.masseParticule * sim.masseNoyau) / (distMagnitude * distMagnitude);
+        
+        // 3. Calculer le vecteur force (direction vers le noyau)
+        var forceX = (distX / distMagnitude) * forceMagnitude;
+        var forceY = (distY / distMagnitude) * forceMagnitude;
+        
+        // 4. Mettre à jour l'accélération
+        var accelX = forceX / sim.masseParticule;
+        var accelY = forceY / sim.masseParticule;
+        
+        // 5. Mettre à jour la vitesse
+        sim.vitesseX += accelX * sim.dt;
+        sim.vitesseY += accelY * sim.dt;
+        
+        // 6. Mettre à jour la position
+        sim.particuleX += sim.vitesseX * sim.dt;
+        sim.particuleY += sim.vitesseY * sim.dt;
+        
+        // 7. Stocker la position
+        sim.positions.push({x: sim.particuleX, y: sim.particuleY});
+      }
+      
+      // ★ FREINAGE VISIBLE mais modéré ★
+      var distToNucleus = Math.sqrt((sim.particuleX - sim.noyauX)*(sim.particuleX - sim.noyauX) + (sim.particuleY - sim.noyauY)*(sim.particuleY - sim.noyauY));
+      
+      // Freinage quand proche du noyau (réduit pour éviter arrêt)
+      if(distToNucleus < 120){
+        var energyLossFactor = 1.0 - (0.020 / Math.pow(distToNucleus/45, 2));
+        energyLossFactor = Math.max(0.90, Math.min(0.999, energyLossFactor));
+        sim.vitesseX *= energyLossFactor;
+        sim.vitesseY *= energyLossFactor;
+      }
+      
+      // Mettre à jour la position de l'électron
+      ei.x = sim.particuleX;
+      ei.y = sim.particuleY;
+      ei.vx = sim.vitesseX * 80; // Échelle pour l'affichage
+      ei.vy = sim.vitesseY * 80;
+      
+      if(!ei.trail) ei.trail = [];
+      ei.trail.push({x: ei.x, y: ei.y});
+      if(ei.trail.length > 300) ei.trail.shift();
+      
+      // ★★★ ÉMISSION DU PHOTON AU PLUS PRÈS DU NOYAU ★★★
+      var currentDist = distToNucleus;
+      var timeElapsed = STATE.t - STATE.bremsT0;
+      
+      // Émettre juste APRÈS le passage au plus près (quand on commence à s'éloigner)
+      if(!sim.photonEmitted && currentDist > sim.minDist + 5 && sim.minDist < 50 && timeElapsed > 0.12){
+        sim.photonEmitted = true;
+        // Direction tangentielle à la trajectoire
+        var vx = sim.vitesseX;
+        var vy = sim.vitesseY;
+        var speed = Math.sqrt(vx*vx + vy*vy) || 1;
+        var ux = vx/speed;
+        var uy = vy/speed;
+        
+        // Ajouter une composante radiale sortante
+        var dx = ei.x - sim.noyauX;
+        var dy = ei.y - sim.noyauY;
+        var d = Math.sqrt(dx*dx + dy*dy) || 1;
+        var rx = dx/d;
+        var ry = dy/d;
+        
+        var vp = 500; // Vitesse TRÈS ÉLEVÉE pour sortie ultra-rapide
+        STATE.scPhoton = {
+          x: ei.x, 
+          y: ei.y, 
+          vx: vp*(ux*0.5 + rx*0.5), 
+          vy: vp*(uy*0.5 + ry*0.5), 
+          alive: true, 
+          label: "γ freinage"
+        };
+        pushEventHTML("<b>Freinage</b> : déviation Coulombienne → γ continu (bremsstrahlung)");
+        addContinuumPulse();
+        addBremsWeighted(120, getEmax('brems'), 0.28, 3, 1);
+      }
+      
+      // Arrêter la simulation après un certain temps ou si trop loin
+      if((STATE.t - STATE.bremsT0) > 6.0 || ei.x > W+100 || ei.y < -100 || ei.y > H+100){
+        ei.alive = false;
+      }
+    }
+    
+    // Photon de freinage se déplace et sort complètement du cadre
+    if(STATE.scPhoton && STATE.scPhoton.alive){
+      var spb = STATE.scPhoton;
+      spb.x += spb.vx * sdt; 
+      spb.y += spb.vy * sdt;
+      // Limites très larges pour que le photon sorte complètement du cadre
+      if(spb.x < -300 || spb.x > W+300 || spb.y < -300 || spb.y > H+300) spb.alive = false;
+    }
+  }
+
+  function updateImpact(sdt){
+    var ei2=STATE.incidentElectron;
+    if(ei2 && ei2.alive){
+      if(!STATE.collided){
+        ei2.x += ei2.vx * sdt; 
+        ei2.y += ei2.vy * sdt; 
+        if(!ei2.trail) ei2.trail = []; 
+        ei2.trail.push({x: ei2.x, y: ei2.y}); 
+        if(ei2.trail.length > 180) ei2.trail.shift();
+        
+        var idx = STATE.targetKIdx;
+        if(idx >= 0 && bgElectrons[idx].alive){
+          var eK = bgElectrons[idx];
+          var kpos = posOnShell(eK.angle, SHELLS.K.r);
+          var dx = ei2.x - kpos.x;
+          var dy = ei2.y - kpos.y;
+          var dist = Math.sqrt(dx*dx + dy*dy);
+          
+          if(dist < 15 || STATE.t >= STATE.tImpact){
+            STATE.collided = true; 
+            STATE.flash = 1.0;
+            
+            var collisionX = ei2.x;
+            var collisionY = ei2.y;
+            
+            killElectronIdx(idx);
+            
+            var impactAngle = Math.atan2(ei2.vy, ei2.vx);
+            var deflectAngle1 = impactAngle + 0.4;
+            var deflectAngle2 = impactAngle + Math.PI/2 + 0.2;
+            
+            var vei = 150;
+            var veK = 210;
+            
+            STATE.knockedElectron = {
+              x: collisionX,
+              y: collisionY,
+              vx: veK * Math.cos(deflectAngle2),
+              vy: veK * Math.sin(deflectAngle2),
+              alive: true,
+              trail: [{x: collisionX, y: collisionY}],
+              label: "é⁻ éjecté (K)"
+            };
+            
+            ei2.vx = vei * Math.cos(deflectAngle1);
+            ei2.vy = vei * Math.sin(deflectAngle1);
+            
+            var angK = eK.angle;
+            STATE.transLK = {start: STATE.t + 0.25, progress: 0, angle: angK, active: true, emitted: false};
+            STATE.transML = {start: STATE.t + 0.60, progress: 0, angle: angK - 0.3, active: true, emitted: false};
+            
+            pushEventHTML("<b>Ionisation é⁻–é⁻</b> : collision → 2 é⁻ libres");
+            addLinePulse(0.40*getEmax('impactCascade'), "Kα"); 
+            addCount('impactCascade', 0.40*getEmax('impactCascade'), 0.9);
+          }
+        }
+      } else {
+        ei2.x += ei2.vx * sdt; 
+        ei2.y += ei2.vy * sdt; 
+        if(!ei2.trail) ei2.trail = []; 
+        ei2.trail.push({x: ei2.x, y: ei2.y}); 
+        if(ei2.trail.length > 180) ei2.trail.shift();
+        if(ei2.x < -100 || ei2.x > W+100 || ei2.y < -100 || ei2.y > H+100) ei2.alive = false;
+      }
+    }
+    if(STATE.knockedElectron && STATE.knockedElectron.alive){
+      var ke2=STATE.knockedElectron; 
+      ke2.x+=ke2.vx*sdt; 
+      ke2.y+=ke2.vy*sdt; 
+      if(!ke2.trail) ke2.trail=[]; 
+      ke2.trail.push({x:ke2.x,y:ke2.y}); 
+      if(ke2.trail.length>180) ke2.trail.shift();
+      if(ke2.x<-100||ke2.x>W+100||ke2.y<-100||ke2.y>H+100) ke2.alive=false;
+    }
+    updateTrans(STATE.transLK, 'L', 'K', 'Kα', sdt);
+    updateTrans(STATE.transML, 'M', 'L', 'Lα', sdt);
+  }
+
+  function updateTrans(tr, sFrom, sTo, label, sdt){
+    if(!tr || !tr.active) return;
+    if(STATE.t < tr.start) return;
+    tr.progress += 0.7*sdt;
+    if(tr.progress>=1){
+      tr.progress=1; tr.active=false;
+      if(!tr.emitted){
+        tr.emitted=true;
+        var shellF=SHELLS[sFrom], shellT=SHELLS[sTo];
+        var rStart=shellF.r, rEnd=shellT.r, ang=tr.angle;
+        var endPos=posOnShell(ang, rEnd);
+        addElectron(sTo, ang);
+        var th=(Math.random()-0.5)*1.0, vp=240;
+        var photonLabel = STATE.mode === 'photo' ? label : label; // Même label pour tous
+        STATE.charPhotons.push({x:endPos.x, y:endPos.y, vx:vp*Math.cos(th), vy:vp*Math.sin(th), alive:true, label:photonLabel});
+        
+        // Texte différent selon le mode
+        if(STATE.mode === 'photo'){
+          pushEventHTML("<b>Fluorescence</b> : " + label + " émis");
+        } else if(STATE.mode === 'impactCascade'){
+          pushEventHTML("<b>Rayon X caractéristique</b> : " + label + " émis");
+        }
+        
+        if(label==='Kα'){
+          addLinePulse(0.15*getEmax(STATE.mode), "Lα"); addCount(STATE.mode, 0.15*getEmax(STATE.mode), 0.7);
+        }
+      }
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    drawShells();
+    drawNucleus();
+
+    if(STATE.flash>0){
+      ctx.save(); ctx.globalAlpha=STATE.flash*0.4;
+      circle(Cx,Cy,60,"rgba(255,200,80,0.6)");
+      ctx.restore();
+    }
+
+    for(var i=0; i<bgElectrons.length; i++){
+      var e=bgElectrons[i];
+      if(!e.alive) continue;
+      var pos=posOnShell(e.angle, e.r);
+      var col=e.highlight?"#ff6b6b":"#6ab7ff";
+      var rad=e.highlight? ELECTRON_R*1.3 : ELECTRON_R;
+      if(STATE.mode==='coherent' && STATE.wobbleUntil>STATE.t){
+        var w=Math.sin(STATE.t*30)*2; pos.x+=w; pos.y+=w;
+      }
+      circle(pos.x,pos.y,rad,col,"rgba(200,220,255,0.5)",1);
+      if(e.htag) label(e.htag, pos.x+14, pos.y-10, "#ff6b6b");
+    }
+
+    if(STATE.transLK && STATE.transLK.active){
+      var trL=STATE.transLK, pr=trL.progress, rL=SHELLS.L.r, rK=SHELLS.K.r;
+      var r=rL - (rL - rK)*pr, pos2=posOnShell(trL.angle, r);
+      circle(pos2.x,pos2.y,ELECTRON_R*1.2,"#ff6b6b","rgba(255,255,255,0.6)",1);
+      label("é⁻ (L→K)", pos2.x+12, pos2.y-8, "#ff6b6b");
+    }
+    if(STATE.transML && STATE.transML.active){
+      var trM=STATE.transML, prM=trM.progress, rM=SHELLS.M.r, rL2=SHELLS.L.r;
+      var rM2=rM - (rM - rL2)*prM, pos3=posOnShell(trM.angle, rM2);
+      circle(pos3.x,pos3.y,ELECTRON_R*1.2,"#ff6b6b","rgba(255,255,255,0.6)",1);
+      label("é⁻ (M→L)", pos3.x+12, pos3.y-8, "#ff6b6b");
+    }
+
+    function drawParticleTrail(part, col){
+      if(!part.trail || part.trail.length<2) return;
+      ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.globalAlpha=0.5;
+      ctx.beginPath();
+      for(var j=0;j<part.trail.length;j++){
+        var tp=part.trail[j];
+        if(j===0) ctx.moveTo(tp.x,tp.y); else ctx.lineTo(tp.x,tp.y);
+      }
+      ctx.stroke(); ctx.restore();
+    }
+
+    if(STATE.photon && STATE.photon.alive){ drawPhoton(STATE.photon, "γ incident"); drawDirArrow(STATE.photon.x,STATE.photon.y,STATE.photon.vx,0,"rgba(247,228,99,0.9)","dir γ"); }
+    if(STATE.incidentElectron && STATE.incidentElectron.alive){
+      var ei=STATE.incidentElectron;
+      drawParticleTrail(ei, "#6ee7b7");
+      circle(ei.x,ei.y,ELECTRON_R*1.1,"#6ab7ff","rgba(100,200,255,0.8)",1.5);
+      label("é⁻ incident", ei.x+12, ei.y-8, "#6ab7ff");
+      if(ei.vx!==0 || ei.vy!==0){ drawDirArrow(ei.x,ei.y,ei.vx,ei.vy,"rgba(110,231,183,0.9)","dir é⁻"); }
+    }
+    if(STATE.photoElectron && STATE.photoElectron.alive){
+      var pe=STATE.photoElectron;
+      drawParticleTrail(pe, "#fbbf24");
+      circle(pe.x,pe.y,ELECTRON_R*1.1,"#6ab7ff","rgba(251,191,36,0.9)",1.5);
+      label("photoélectron", pe.x+12, pe.y-8, "#6ab7ff");
+      drawDirArrow(pe.x,pe.y,pe.vx,pe.vy,"rgba(251,191,36,0.9)","");
+    }
+    if(STATE.knockedElectron && STATE.knockedElectron.alive){
+      var ke=STATE.knockedElectron;
+      drawParticleTrail(ke, "#fbbf24");
+      var keLab = ke.isPositron ? "positon (e⁺)" : (ke.label || "é⁻ diffusé");
+      var keCol = ke.isPositron ? "#ff6bb7" : "#6ab7ff";
+      circle(ke.x,ke.y,ELECTRON_R*1.1,keCol,"rgba(251,191,36,0.9)",1.5);
+      label(keLab, ke.x+12, ke.y-8, keCol);
+      drawDirArrow(ke.x,ke.y,ke.vx,ke.vy,"rgba(251,191,36,0.9)","");
+    }
+
+    if(STATE.scPhoton && STATE.scPhoton.alive){
+      var scLabel = STATE.scPhoton.label;
+      if(!scLabel){
+        if(STATE.mode==='compton') scLabel = "γ diffusé (Compton)";
+        else if(STATE.mode==='coherent') scLabel = "γ diffusé (Thomson)";
+        else if(STATE.mode==='brems') scLabel = "X freinage (continu)";
+        else scLabel = "γ sortant";
+      }
+      drawPhoton(STATE.scPhoton, scLabel);
+      drawDirArrow(STATE.scPhoton.x,STATE.scPhoton.y,STATE.scPhoton.vx,STATE.scPhoton.vy,"rgba(247,228,99,0.9)","dir γ");
+    }
+    for(var i3=0;i3<STATE.charPhotons.length;i3++){
+      var ch=STATE.charPhotons[i3]; if(!ch.alive) continue;
+      var chLabel;
+      if(STATE.mode === 'photo'){
+        chLabel = ch.label ? "X " + ch.label + " (fluorescence)" : "X caractéristique (fluorescence)";
+      } else {
+        chLabel = ch.label ? "X " + ch.label + " (caractéristique)" : "X caractéristique";
+      }
+      drawPhoton(ch, chLabel);
+      drawDirArrow(ch.x,ch.y,ch.vx,ch.vy,"rgba(247,228,99,0.9)","");
+    }
+    if(STATE.gamma511a && STATE.gamma511a.alive){ 
+      drawPhoton(STATE.gamma511a, "γ 511 keV (annihilation)");
+      drawDirArrow(STATE.gamma511a.x,STATE.gamma511a.y,STATE.gamma511a.vx,0,"rgba(247,228,99,0.9)","");
+    }
+    if(STATE.gamma511b && STATE.gamma511b.alive){ 
+      drawPhoton(STATE.gamma511b, "γ 511 keV (annihilation)");
+      drawDirArrow(STATE.gamma511b.x,STATE.gamma511b.y,STATE.gamma511b.vx,0,"rgba(247,228,99,0.9)","");
+    }
+  }
+
+  function facts(){
+    var m=STATE.mode, z="—", sh="K, L, M en orbite", pr="—", sp="—";
+    if(m==='photo'){ z="Couche "+STATE.targetShell+" (photoélectrique)"; pr="photoélectron + X caract. (Kα, Lα)"; sp="raies discrètes"; }
+    else if(m==='compton'){ z="Couche M (faible liaison)"; pr="γ diffusé + é⁻ Compton"; sp="continuum (diffusion)"; }
+    else if(m==='coherent'){ z="Nuage électronique"; pr="γ réémis (élastique)"; sp="quasi-monoénergétique"; }
+    else if(m==='pair'){ z="Champ du noyau (seuil 1,022 MeV)"; pr="e⁺ + e⁻ → 2 γ (511 keV)"; sp="2 raies à 511 keV"; }
+    else if(m==='brems'){ z="Champ du noyau (freinage)"; pr="γ continu (0→Emax)"; sp="continuum (Bremsstrahlung)"; }
+    else if(m==='impactCascade'){ z="Couche K (é⁻–é⁻)"; pr="2 é⁻ libres + X caract. (Kα, Lα)"; sp="raies discrètes"; }
+    zoneTxt.textContent=z; shellsTxt.textContent=sh; prodTxt.textContent=pr; specTxt.textContent=sp;
+  }
+
+  function setShellVisibility(){
+    var shellBlock=document.getElementById('shellBlock');
+    var pathBlock=document.getElementById('pathBlock');
+    var egBlock=document.getElementById('egBlock');
+    if(STATE.mode==='photo'){
+      shellBlock.style.display='inline'; pathBlock.style.display='inline'; egBlock.style.display='none';
+    } else if(STATE.mode==='compton'){
+      shellBlock.style.display='none'; pathBlock.style.display='inline'; egBlock.style.display='inline';
+    } else {
+      shellBlock.style.display='none'; pathBlock.style.display='inline'; egBlock.style.display='none';
+    }
+  }
+
+  function getEmax(mode){
+    if(mode==='photo') return 60;
+    if(mode==='compton') return 150;
+    if(mode==='coherent') return 120;
+    if(mode==='brems') return 150;
+    if(mode==='impactCascade') return 70;
+    if(mode==='pair') return 600;
+    return 100;
+  }
+
+  function addCount(mode, energy, weight){
+    ensureHist();
+    var bins=SPEC.bins, Emax=getEmax(mode);
+    var idx=Math.floor((energy/Emax)*bins); if(idx<0) idx=0; if(idx>=bins) idx=bins-1;
+    SPEC.hist[mode][idx] += weight;
+  }
+
+  function addBremsWeighted(cutoff, Emax, scale, exponent, weight){
+    ensureHist();
+    var bins=SPEC.bins; var h=SPEC.hist.brems;
+    for(var i=0; i<bins; i++){
+      var E = (i/bins)*Emax;
+      if(E < cutoff) continue;
+      var ratio = E/Emax; var val = scale * Math.pow(ratio, exponent) * (1 - ratio);
+      h[i] += val * weight;
+    }
+  }
+
+  function addLinePulse(E, label){
+    SPEC.pulses.push({E:E, label:label, t:0, life:2.0});
+  }
+
+  function addContinuumPulse(){
+    SPEC.pulses.push({continuum:true, t:0, life:1.5});
+  }
+
+  function drawSpectrum(){
+    ensureHist();
+    var bins=SPEC.bins, Emax=getEmax(STATE.mode);
+    var cW=specCanvas.width, cH=specCanvas.height;
+    specCtx.clearRect(0,0,cW,cH);
+
+    var modes=['photo','compton','coherent','brems','impactCascade','pair'];
+    var colors={photo:"#6ab7ff",compton:"#f7e463",coherent:"#a78bfa",brems:"#fbbf24",impactCascade:"#ff6b6b",pair:"#6ee7b7"};
+
+    var hSum=new Array(bins).fill(0);
+    for(var mi=0; mi<modes.length; mi++){
+      var m2=modes[mi], hArr=SPEC.hist[m2];
+      for(var j=0; j<bins; j++){ hSum[j]+=hArr[j]; }
+    }
+    var maxH=0; for(var k=0; k<bins; k++){ if(hSum[k]>maxH) maxH=hSum[k]; }
+    if(maxH<1e-6) maxH=1;
+
+    var pad=30, x0=pad, y0=cH-pad, w=cW-2*pad, h=cH-2*pad;
+    specCtx.strokeStyle="#374151"; specCtx.lineWidth=2;
+    specCtx.beginPath(); specCtx.moveTo(x0,y0); specCtx.lineTo(x0+w,y0); specCtx.lineTo(x0+w,y0-h); specCtx.stroke();
+
+    for(var bi=0; bi<bins; bi++){
+      var val=hSum[bi]; if(val<1e-9) continue;
+      var xB=x0+(bi/bins)*w; var barW=(w/bins)*1.1;
+      var barH=(val/maxH)*h; var yB=y0-barH;
+      specCtx.fillStyle="rgba(100,150,200,0.6)"; specCtx.fillRect(xB,yB,barW,barH);
+    }
+
+    for(var pi=SPEC.pulses.length-1; pi>=0; pi--){
+      var pulse=SPEC.pulses[pi]; pulse.t+=0.016;
+      if(pulse.t>pulse.life){ SPEC.pulses.splice(pi,1); continue; }
+      var alpha=1 - pulse.t/pulse.life;
+      if(pulse.continuum){
+        specCtx.save(); specCtx.globalAlpha=alpha*0.4;
+        specCtx.fillStyle="#fbbf24";
+        for(var b2=0; b2<bins; b2++){
+          var xB2=x0+(b2/bins)*w; var barW2=(w/bins)*1.1; var barH2=(hSum[b2]/maxH)*h; var yB2=y0-barH2;
+          specCtx.fillRect(xB2,yB2,barW2,barH2);
+        }
+        specCtx.restore();
+      } else if(pulse.E){
+        var ratio=pulse.E/Emax; if(ratio<0) ratio=0; if(ratio>1) ratio=1;
+        var xL=x0 + ratio*w; var yTop=y0-h, yBot=y0;
+        specCtx.save(); specCtx.globalAlpha=alpha; specCtx.strokeStyle="#ff6b6b"; specCtx.lineWidth=3;
+        specCtx.beginPath(); specCtx.moveTo(xL,yBot); specCtx.lineTo(xL,yTop); specCtx.stroke();
+        specCtx.font="12px Arial"; specCtx.fillStyle="#ff6b6b"; specCtx.textAlign="center"; specCtx.fillText(pulse.label||"",xL,yTop-8);
+        specCtx.restore();
+      }
+    }
+
+    specCtx.font="11px Arial"; specCtx.fillStyle="#9fb3d1"; specCtx.textAlign="center";
+    for(var tick=0; tick<=4; tick++){
+      var eT=(tick/4)*Emax; var xT=x0+(tick/4)*w; specCtx.fillText(eT.toFixed(0),xT,y0+16);
+    }
+  }
+
+  function runBeam(){
+    ensureHist();
+    var kind = beamTypeEl.value;
+    var N = parseInt(beamNEl.value||"500",10);
+    if(kind==='gamma'){
+      var Eg = parseFloat(egEl.value)||120;
+      for(var i=0;i<N;i++) simulateGamma(Eg);
+    } else {
+      var Ee = parseFloat(EeEl.value)||80;
+      for(var j=0;j<N;j++) simulateElectron(Ee);
+    }
+    drawSpectrum();
+  }
+
+  function stepRealite(dt){
+    if(!REALITE.running) return;
+    var n = Math.max(0, Math.floor(REALITE.rate * dt));
+    if(n===0) return;
+    if(REALITE.kind==='gamma'){
+      var Eg = parseFloat(egEl.value)||120;
+      for(var i=0;i<n;i++) simulateGamma(Eg);
+    } else {
+      var Ee = parseFloat(EeEl.value)||80;
+      for(var j=0;j<n;j++) simulateElectron(Ee);
+    }
+  }
+
+  function simulateGamma(Eg){
+    var r=Math.random(), p_photo=0, p_comp=0, p_ray=0, p_pair=0;
+    if(Eg<30){ p_photo=0.6; p_ray=0.3; p_comp=0.1; }
+    else if(Eg<80){ p_photo=0.25; p_ray=0.1; p_comp=0.65; }
+    else if(Eg<300){ p_photo=0.10; p_ray=0.05; p_comp=0.85; }
+    else { p_photo=0.05; p_ray=0.05; p_comp=0.85; }
+    if(Eg>=1022){ p_pair=0.05; p_comp=Math.max(0,p_comp-0.05); }
+
+    if(r < p_photo){
+      addCount('photo', 0.40*getEmax('photo'), 1);
+      if(Math.random()<0.5) addCount('photo', 0.15*getEmax('photo'), 0.6);
+    } else if(r < p_photo + p_comp){
+      var th=Math.random()*Math.PI, me=511.0; var Eprime = Eg / (1 + (Eg/me)*(1 - Math.cos(th))); addCount('compton', Eprime, 1);
+    } else if(r < p_photo + p_comp + p_ray){
+      addCount('coherent', Eg, 0.6);
+    } else if(p_pair>0 && r < p_photo + p_comp + p_ray + p_pair){
+      addCount('pair', 511, 1); addCount('pair', 511, 1);
+    } else {
+      var th2=Math.random()*Math.PI, me2=511.0; var Eprime2 = Eg / (1 + (Eg/me2)*(1 - Math.cos(th2))); addCount('compton', Eprime2, 1);
+    }
+  }
+
+  function simulateElectron(Ee){
+    addBremsWeighted(120, getEmax('brems'), 0.28, 3, 1);
+    if(Math.random()<0.55){
+      addCount('impactCascade', 0.40*getEmax('impactCascade'), 1.0);
+      if(Math.random()<0.6) addCount('impactCascade', 0.15*getEmax('impactCascade'), 0.7);
+    }
+  }
+
+  var last=0;
+  function tick(ts){
+    if(!last) last=ts;
+    var dt=Math.min(0.033,(ts-last)/1000); last=ts;
+    if(STATE.running) update(dt);
+    draw();
+    drawSpectrum();
+    
+    debugFrameCount++;
+    if(ts - debugLastFPSUpdate > 1000){
+      debugFPS = debugFrameCount;
+      debugFrameCount = 0;
+      debugLastFPSUpdate = ts;
+    }
+    updateDebug();
+    
+    requestAnimationFrame(tick);
+  }
+
+  playBtn.addEventListener('click', function(){
+    STATE.running=!STATE.running;
+    playBtn.textContent=STATE.running?"⏸︎ Pause":"▶︎ Lecture";
+  });
+  resetBtn.addEventListener('click', reset);
+  thetaEl.addEventListener('input', function(){ thetaVal.textContent=this.value+"°"; });
+  phiEl.addEventListener('input', function(){ phiVal.textContent=this.value+"°"; });
+  speedEl.addEventListener('input', function(){ speedVal.textContent=this.value+"x"; });
+  egEl.addEventListener('input', function(){ egVal.textContent=this.value; });
+  shellSelect.addEventListener('change', function(){ STATE.targetShell=this.value; reset(); });
+  pathSide.addEventListener('change', function(){ STATE.side=this.value; STATE.impactAngle=toRad(parseFloat(thetaEl.value)||60); reset(); });
+  thetaEl.addEventListener('change', function(){ STATE.impactAngle=toRad(parseFloat(this.value)||60); reset(); });
+
+  modeBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      modeBtns.forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      STATE.mode=btn.dataset.mode;
+      reset();
+    });
+  });
+
+  settingsToggle.addEventListener('click', function(){
+    settingsPanel.classList.toggle('open');
+  });
+
+  beamNEl.addEventListener('input', function(){ beamNVal.textContent=this.value; });
+  EeEl.addEventListener('input', function(){ EeVal.textContent=this.value+" keV"; });
+  realiteRateEl.addEventListener('input', function(){ realiteRateVal.textContent=this.value+"/s"; });
+  runBeamBtn.addEventListener('click', runBeam);
+  realiteToggleBtn.addEventListener('click', function(){
+    REALITE.running=!REALITE.running;
+    REALITE.kind=realiteKindEl.value;
+    REALITE.rate=parseFloat(realiteRateEl.value)||600;
+    realiteToggleBtn.textContent=REALITE.running?"Arrêter":"Lancer";
+  });
+
+  var debugToggle = document.getElementById('debugToggle');
+  var debugPanel = document.getElementById('debugPanel');
+  var debugClose = document.getElementById('debugClose');
+  if(debugToggle && debugPanel){
+    debugToggle.addEventListener('click', function(){ debugPanel.classList.toggle('visible'); });
+  }
+  if(debugClose && debugPanel){
+    debugClose.addEventListener('click', function(){ debugPanel.classList.remove('visible'); });
+  }
+
+  reset();
+  requestAnimationFrame(tick);
+  pushEventHTML("<b>Init</b> : panneau chargé, interaction = "+STATE.mode);
+})();
+</script>
+
+<button id="debugToggle" class="debug-toggle">🐛 Debug</button>
+
+<div id="debugPanel" class="debug-panel">
+  <div class="debug-header">
+    <span class="debug-title">🐛 Mode Debug</span>
+    <span class="debug-close" id="debugClose">×</span>
+  </div>
+  
+  <div class="debug-section">
+    <div class="debug-label">⚙️ État Animation</div>
+    <div>Mode: <span id="dbgMode" class="debug-value">—</span></div>
+    <div>Running: <span id="dbgRunning" class="debug-value">—</span></div>
+    <div>Phase: <span id="dbgPhase" class="debug-value">—</span></div>
+    <div>Temps: <span id="dbgTime" class="debug-value">—</span>s</div>
+    <div>FPS: <span id="dbgFPS" class="debug-value">—</span></div>
+  </div>
+  
+  <div class="debug-section">
+    <div class="debug-label">🎯 Particules</div>
+    <div>Photon: <span id="dbgPhoton" class="debug-value">—</span></div>
+    <div>Électron incident: <span id="dbgIncident" class="debug-value">—</span></div>
+    <div>Photoélectron: <span id="dbgPhoto" class="debug-value">—</span></div>
+    <div>Diffusé/Éjecté: <span id="dbgScattered" class="debug-value">—</span></div>
+    <div>Photon X: <span id="dbgXray" class="debug-value">—</span></div>
+  </div>
+  
+  <div class="debug-section">
+    <div class="debug-label">📊 Paramètres</div>
+    <div>Vitesse: <span id="dbgSpeed" class="debug-value">—</span></div>
+    <div>E<sub>γ</sub>: <span id="dbgEg" class="debug-value">—</span> keV</div>
+    <div>θ: <span id="dbgTheta" class="debug-value">—</span>°</div>
+    <div>φ: <span id="dbgPhi" class="debug-value">—</span>°</div>
+  </div>
+  
+  <div class="debug-section">
+    <div class="debug-label">🔍 Détails Mode</div>
+    <div id="dbgModeDetails" class="debug-value">—</div>
+  </div>
+  
+  <div class="debug-section" id="dbgBremsSection" style="display:none;">
+    <div class="debug-label">⚡ Bremsstrahlung Debug</div>
+    <div>Phase: <span id="dbgBremsPhase" class="debug-value">—</span></div>
+    <div>Pos électron: <span id="dbgElectronPos" class="debug-value">—</span></div>
+    <div>Distance noyau: <span id="dbgDistNucleus" class="debug-value">—</span></div>
+    <div>Vitesse: <span id="dbgElectronSpeed" class="debug-value">—</span></div>
+    <div>Photon émis: <span id="dbgPhotonEmitted" class="debug-value">—</span></div>
+    <div>Pos photon: <span id="dbgPhotonPos" class="debug-value">—</span></div>
+  </div>
