@@ -1,0 +1,3367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chaîne radiologique complète - Animations</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0b1020;
+      color: #f5f5f5;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin: 0;
+      text-align: center;
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      opacity: 0.8;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .panel {
+      background: rgba(21, 27, 48, 0.95);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), 0 0 60px rgba(96, 165, 250, 0.15);
+      max-width: 1100px;
+      width: 100%;
+      border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+      box-shadow: 0 0 10px rgba(71, 85, 105, 0.5);
+    }
+
+    button.active {
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.6);
+    }
+
+    button.secondary:hover {
+      background: linear-gradient(135deg, #5a6782 0%, #7387a3 100%);
+    }
+
+    .step-nav {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .step-btn {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 50%;
+      font-size: 0.85rem;
+      background: rgba(71, 85, 105, 0.4);
+      box-shadow: none;
+      transition: all 0.2s ease;
+    }
+
+    .step-btn:hover {
+      background: rgba(100, 116, 139, 0.6);
+      transform: scale(1.1);
+    }
+
+    .step-btn.active {
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+      box-shadow: 0 0 16px rgba(37, 99, 235, 0.8);
+      transform: scale(1.15);
+    }
+
+    .canvas-container {
+      background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 60%, #000 100%);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 16px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      max-width: 1000px;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .explanations {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 12px;
+      padding: 16px 20px;
+      line-height: 1.7;
+      border-left: 4px solid #60a5fa;
+    }
+
+    .explanations h3 {
+      color: #60a5fa;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+
+    .explanations strong {
+      color: #fbbf24;
+    }
+
+    .explanations ul {
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+
+    .explanations li {
+      margin-bottom: 8px;
+    }
+
+    .highlight-box {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .comparison-item {
+      background: rgba(30, 41, 59, 0.6);
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+
+    .comparison-item.bad {
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .comparison-item.good {
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.3rem;
+      }
+      
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>🔬 Chaîne radiologique complète</h1>
+    <p class="subtitle">De l'émission des rayons X à l'image numérique finale</p>
+
+    <div class="controls">
+      <button id="playBtn" class="secondary">▶ Lecture</button>
+      <button id="pauseBtn" class="secondary">⏸ Pause</button>
+      <button id="prevBtn" class="secondary">◀ Précédent</button>
+      <button id="nextBtn" class="secondary">Suivant ▶</button>
+      <button id="resetBtn" class="secondary">↺ Recommencer</button>
+    </div>
+
+    <div class="step-nav" id="stepNav"></div>
+
+    <div class="canvas-container">
+      <canvas id="mainCanvas" width="1000" height="600"></canvas>
+    </div>
+
+    <div class="explanations" id="explanations"></div>
+  </div>
+
+  <script>
+    // Configuration globale
+    const canvas = document.getElementById('mainCanvas');
+    const ctx = canvas.getContext('2d');
+    const explanationsDiv = document.getElementById('explanations');
+    const stepNav = document.getElementById('stepNav');
+
+    let currentStep = 0;
+    let animationRunning = false;
+    let lastTime = 0;
+    let particles = [];
+    let timeGlobal = 0;
+    let autoPlayInterval = null;
+
+    // Définition des 11 étapes (0 = vue globale, puis 1-10)
+    const steps = [
+      {
+        title: "Vue d'ensemble",
+        animate: animateStep0,
+        explanation: `
+          <h3>🔬 Vue d'ensemble de la chaîne radiologique complète</h3>
+          <p>Cette application interactive présente les <strong>10 étapes</strong> de la formation d'une image radiologique numérique, de l'émission des rayons X jusqu'à l'image finale affichée sur l'écran.</p>
+          <div class="highlight-box">
+            <strong>📋 Les 10 étapes de la chaîne :</strong>
+            <ul>
+              <li><strong>1. Émission RX</strong> : Production du faisceau de photons X</li>
+              <li><strong>2. Atténuation</strong> : Traversée et absorption par le patient</li>
+              <li><strong>3. Diffusion Compton</strong> : Déviation des photons (dégradation)</li>
+              <li><strong>4. Grille anti-diffusion</strong> : Filtration mécanique (Potter-Bucky)</li>
+              <li><strong>5. Scintillateur</strong> : Conversion RX → Lumière visible</li>
+              <li><strong>6. Photodiode</strong> : Conversion Lumière → Signal électrique</li>
+              <li><strong>7. Amplification</strong> : Augmentation du signal</li>
+              <li><strong>8. Filtrage</strong> : Élimination du bruit analogique</li>
+              <li><strong>9. Conversion A/N</strong> : Numérisation (12-16 bits)</li>
+              <li><strong>10. Traitement DSP</strong> : Corrections et optimisations</li>
+            </ul>
+          </div>
+          <p style="margin-top: 15px; color: #60a5fa;"><strong>💡 Navigation :</strong> Utilisez les boutons numérotés ci-dessus pour explorer chaque étape en détail, ou lancez la lecture automatique pour une présentation complète.</p>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Application pédagogique</strong> : Formation manipulateur en électroradiologie médicale
+          </p>
+        `
+      },
+      {
+        title: "Émission des rayons X",
+        animate: animateStep1,
+        explanation: `
+          <h3>📡 Étape 1 : Production du faisceau de rayons X</h3>
+          <p>Le <strong>tube à rayons X</strong> génère un faisceau de photons X par bombardement électronique de l'anode.</p>
+          <ul>
+            <li><strong>Cathode chauffée</strong> : émet des électrons par effet thermoïonique</li>
+            <li><strong>Haute tension</strong> : accélère les électrons (40-150 kV)</li>
+            <li><strong>Anode (tungstène)</strong> : cible des électrons, production de RX</li>
+            <li><strong>Rayonnement de freinage</strong> : énergie continue (Bremsstrahlung)</li>
+            <li><strong>Rayonnement caractéristique</strong> : pics d'énergie spécifiques</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>💡 Point clé :</strong> Le faisceau émis est homogène avant de rencontrer le patient.
+          </div>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Bushong SC. Radiologic Science for Technologists (2021) • Bushberg JT et al. The Essential Physics of Medical Imaging (2020)
+          </p>
+        `
+      },
+      {
+        title: "Traversée du patient",
+        animate: animateStep2,
+        explanation: `
+          <h3>🧍 Étape 2 : Atténuation différentielle par le patient</h3>
+          <p>Les rayons X traversent le corps et sont <strong>atténués différemment</strong> selon la densité des tissus.</p>
+          <ul>
+            <li><strong>Os / Métal</strong> : densité élevée → absorption maximale (90-95%)</li>
+            <li><strong>Tissus mous</strong> : densité moyenne → atténuation modérée (40-60%)</li>
+            <li><strong>Graisse</strong> : densité faible → faible atténuation (20-30%)</li>
+            <li><strong>Air (poumons)</strong> : densité minimale → quasi-transparence (5-10%)</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>⚖️ Loi d'atténuation :</strong> I = I₀ × e<sup>-μx</sup><br>
+            où μ = coefficient d'atténuation, x = épaisseur traversée
+          </div>
+          <p>À la sortie, le faisceau n'est <strong>plus homogène</strong> : l'intensité varie selon les structures traversées.</p>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Dance DR et al. Diagnostic Radiology Physics (2014) • IAEA Human Health Series No. 39 (2018)
+          </p>
+        `
+      },
+      {
+        title: "Rayonnement diffusé",
+        animate: animateStep3,
+        explanation: `
+          <h3>💫 Étape 3 : Diffusion Compton et dégradation du contraste</h3>
+          <p>Une partie des photons X subit l'<strong>effet Compton</strong> : déviation avec perte partielle d'énergie.</p>
+          <ul>
+            <li>Photon X + électron libre → photon dévié + électron éjecté</li>
+            <li>Le photon diffusé part dans une direction aléatoire</li>
+            <li>Il peut atteindre le détecteur <strong>hors du trajet direct</strong></li>
+            <li>Représente <strong>80-90%</strong> du rayonnement sans protection</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>⚠️ Conséquences :</strong>
+            <ul>
+              <li>Dégradation du <strong>contraste</strong> de l'image</li>
+              <li>Augmentation du <strong>bruit</strong></li>
+              <li>Flou de l'image radiologique</li>
+              <li>Nécessité d'une filtration mécanique</li>
+            </ul>
+          </div>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Johns HE, Cunningham JR. The Physics of Radiology (1983) • Klein O, Nishina Y. Zeitschrift für Physik (1929) • Chan HP, Doi K. Phys Med Biol (1985)
+          </p>
+        `
+      },
+      {
+        title: "Grille anti-diffusion",
+        animate: animateStep4,
+        explanation: `
+          <h3>🛡️ Étape 4 : Filtration par grille Potter-Bucky</h3>
+          <p>La <strong>grille anti-diffusion</strong> se place <strong>entre le patient et le détecteur</strong> pour éliminer les rayons diffusés.</p>
+          <ul>
+            <li><strong>Lamelles de plomb</strong> (0.05-0.1 mm) : absorbent les rayons obliques</li>
+            <li><strong>Espaceurs</strong> (aluminium/fibre, 0.3-0.5 mm) : laissent passer les rayons directs</li>
+            <li><strong>Orientation focalisée</strong> : lamelles pointent vers le foyer du tube</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>📊 Caractéristiques techniques :</strong>
+            <ul>
+              <li><strong>Ratio</strong> : hauteur/espacement (8:1, 12:1, 16:1)</li>
+              <li><strong>Fréquence</strong> : 40-80 lamelles/cm</li>
+              <li><strong>Efficacité</strong> : élimine 85-90% du diffusé</li>
+              <li><strong>Facteur de Bucky</strong> : dose × 2 à 5</li>
+            </ul>
+          </div>
+          <div class="comparison">
+            <div class="comparison-item bad">
+              <strong>❌ SANS GRILLE</strong><br>
+              • Diffusé superposé<br>
+              • Contraste faible<br>
+              • Image floue
+            </div>
+            <div class="comparison-item good">
+              <strong>✅ AVEC GRILLE</strong><br>
+              • Diffusé filtré<br>
+              • Contraste élevé<br>
+              • Image nette
+            </div>
+          </div>
+          <p><strong>Grille mobile</strong> : Oscille pendant l'exposition pour rendre les lamelles invisibles sur l'image.</p>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Seeram E. Computed Tomography (2015) • Moores BM et al. Radiation Doses in Diagnostic Radiology (2012) • Seibert JA. Med Phys (2004)
+          </p>
+        `
+      },
+      {
+        title: "Détecteur - Scintillateur",
+        animate: animateStep5,
+        explanation: `
+          <h3>💎 Étape 5 : Conversion RX → Lumière (Scintillateur)</h3>
+          <p>Le <strong>scintillateur</strong> convertit les rayons X en photons lumineux visibles.</p>
+          <ul>
+            <li><strong>Matériau</strong> : CsI:Tl (iodure de césium dopé thallium) ou GdO₂S (oxysulfure de gadolinium)</li>
+            <li><strong>Structure</strong> : Cristaux en aiguilles (CsI) pour meilleure résolution</li>
+            <li><strong>Épaisseur</strong> : 150-600 μm selon application</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>🔬 Processus physique :</strong>
+            <ul>
+              <li>1 photon X (≈60 keV) frappe le scintillateur</li>
+              <li>Excitation des atomes du cristal</li>
+              <li>Désexcitation → émission de <strong>photons lumineux</strong> (vert/bleu)</li>
+              <li>Rendement : 1 RX → <strong>500-3000 photons lumineux</strong></li>
+            </ul>
+          </div>
+          <p><strong>Avantages :</strong> Excellent rendement de conversion (>60%), amplification naturelle du signal, compatible avec photodiodes standard.</p>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Yaffe MJ, Rowlands JA. Phys Med Biol (1997) • Nagarkar VV et al. IEEE Trans Nucl Sci (1998) • Antonuk LE et al. Med Phys (1998)
+          </p>
+        `
+      },
+      {
+        title: "Photodiode",
+        animate: animateStep6,
+        explanation: `
+          <h3>⚡ Étape 6 : Conversion Lumière → Signal électrique</h3>
+          <p>La <strong>photodiode</strong> (silicium amorphe a-Si) convertit les photons lumineux en signal électrique.</p>
+          <ul>
+            <li><strong>Structure</strong> : Matrice de photodiodes (un par pixel)</li>
+            <li><strong>Taille pixel</strong> : 100-200 μm (radiologie standard)</li>
+            <li><strong>Matrice typique</strong> : 2048×2048 à 3072×3072 pixels</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>🔋 Principe photoélectrique :</strong>
+            <ul>
+              <li>Photons lumineux → paires électron-trou dans le semi-conducteur</li>
+              <li>Séparation des charges par champ électrique interne</li>
+              <li>Génération d'un <strong>courant proportionnel</strong> à l'intensité lumineuse</li>
+              <li>Accumulation des charges dans un condensateur (pixel)</li>
+            </ul>
+          </div>
+          <p><strong>Signal analogique :</strong> Tension variable continue (0-5V) représentant l'intensité RX reçue par chaque pixel.</p>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Street RA et al. Appl Phys Lett (1990) • Rowlands JA, Yorkston J. Handbook of Medical Imaging Vol. 1 (2000)
+          </p>
+        `
+      },
+      {
+        title: "Amplification",
+        animate: animateStep7,
+        explanation: `
+          <h3>📈 Étape 7 : Amplification du signal</h3>
+          <p>Le signal électrique issu de la photodiode est <strong>très faible</strong> (quelques mV à μV) et nécessite amplification.</p>
+          <ul>
+            <li><strong>Amplificateur à faible bruit</strong> : préserve le SNR</li>
+            <li><strong>Gain variable</strong> : ajustable selon l'exposition (kV, mAs)</li>
+            <li><strong>Adaptation d'impédance</strong> : optimise le transfert de signal</li>
+            <li><strong>Compensation</strong> : correction des variations inter-pixels</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>⚙️ Paramètres critiques :</strong>
+            <ul>
+              <li><strong>Gain</strong> : facteur de multiplication (×10 à ×10000)</li>
+              <li><strong>Bande passante</strong> : doit couvrir les fréquences utiles</li>
+              <li><strong>Bruit propre</strong> : minimisé par design électronique</li>
+              <li><strong>Linéarité</strong> : préserve les relations de densité</li>
+            </ul>
+          </div>
+          <p><strong>⚠️ Compromis :</strong> Gain trop élevé → amplifie aussi le bruit. Gain trop faible → perte d'information.</p>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Sprawls P. Physical Principles of Medical Imaging (1995) • Horowitz P, Hill W. The Art of Electronics (2015)
+          </p>
+        `
+      },
+      {
+        title: "Filtrage analogique",
+        animate: animateStep8,
+        explanation: `
+          <h3>🎚️ Étape 8 : Filtrage du bruit</h3>
+          <p>Le signal analogique contient du <strong>bruit électronique</strong> qui doit être éliminé avant numérisation.</p>
+          <div class="comparison">
+            <div class="comparison-item bad">
+              <strong>❌ SANS FILTRE</strong><br>
+              • Bruit thermique (Johnson)<br>
+              • Bruit de grenaille (shot noise)<br>
+              • Interférences EM 50/60 Hz<br>
+              • Signal instable et bruité<br>
+              • SNR faible (≈20 dB)
+            </div>
+            <div class="comparison-item good">
+              <strong>✅ AVEC FILTRE</strong><br>
+              • Bruit haute fréquence éliminé<br>
+              • Signal stable et propre<br>
+              • Contours préservés<br>
+              • SNR amélioré (≈45 dB)<br>
+              • Meilleure numérisation
+            </div>
+          </div>
+          <div class="highlight-box">
+            <strong>🔧 Types de filtres :</strong>
+            <ul>
+              <li><strong>Filtre passe-bas RC</strong> : élimine hautes fréquences (>1 MHz)</li>
+              <li><strong>Filtre actif</strong> : ampli-op avec contrôle précis de la coupure</li>
+              <li><strong>Filtre anti-repliement</strong> : prévient l'aliasing lors de l'échantillonnage</li>
+              <li><strong>Filtre adaptatif</strong> : ajuste la coupure selon le contenu</li>
+            </ul>
+          </div>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Oppenheim AV, Schafer RW. Discrete-Time Signal Processing (2009) • Motchenbacher CD, Connelly JA. Low-Noise Electronic System Design (1993)
+          </p>
+        `
+      },
+      {
+        title: "Conversion A/N",
+        animate: animateStep9,
+        explanation: `
+          <h3>🔢 Étape 9 : Numérisation (CAN)</h3>
+          <p>Le <strong>convertisseur analogique-numérique</strong> transforme le signal continu en valeurs discrètes.</p>
+          <ul>
+            <li><strong>Échantillonnage</strong> : prélèvement à intervalles réguliers (fréquence ≥ 2× Nyquist)</li>
+            <li><strong>Quantification</strong> : attribution d'une valeur numérique discrète</li>
+            <li><strong>Codage</strong> : représentation binaire (0/1)</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>📊 Résolution en radiologie :</strong>
+            <ul>
+              <li><strong>12 bits</strong> : 4 096 niveaux (0-4095) → standard radiologie</li>
+              <li><strong>14 bits</strong> : 16 384 niveaux → mammographie</li>
+              <li><strong>16 bits</strong> : 65 536 niveaux → détection dynamique maximale</li>
+            </ul>
+          </div>
+          <div class="highlight-box">
+            <strong>⚡ Caractéristiques CAN :</strong>
+            <ul>
+              <li><strong>Vitesse</strong> : 10-100 MSPS (Mega Samples Per Second)</li>
+              <li><strong>DNL/INL</strong> : non-linéarité différentielle/intégrale <0.5 LSB</li>
+              <li><strong>SNR</strong> : ≈ 6.02 × n + 1.76 dB (n = nombre de bits)</li>
+              <li><strong>Plage dynamique</strong> : 72 dB (12 bits), 84 dB (14 bits), 96 dB (16 bits)</li>
+            </ul>
+          </div>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Walden RH. IEEE J. Solid-State Circuits (1999) • Kester W. Analog-Digital Conversion, Analog Devices (2004) • Maxim Integrated AN748 (2001)
+          </p>
+        `
+      },
+      {
+        title: "Traitement numérique",
+        animate: animateStep10,
+        explanation: `
+          <h3>🖥️ Étape 10 : Traitement d'image et affichage</h3>
+          <p>Les données brutes subissent de multiples traitements pour produire l'<strong>image radiologique finale</strong>.</p>
+          <ul>
+            <li><strong>Correction de champ plat</strong> : compense les non-uniformités du détecteur</li>
+            <li><strong>Correction pixels défectueux</strong> : interpolation des pixels morts/chauds</li>
+            <li><strong>Réduction du bruit numérique</strong> : filtres 2D (médian, gaussien, bilatéral)</li>
+            <li><strong>Rehaussement des contours</strong> : masque flou, Laplacien</li>
+            <li><strong>Égalisation d'histogramme</strong> : CLAHE (Contrast Limited Adaptive Histogram Equalization)</li>
+            <li><strong>Fenêtrage (W/L)</strong> : ajustement contraste pour visualisation</li>
+          </ul>
+          <div class="highlight-box">
+            <strong>💾 Format et stockage :</strong>
+            <ul>
+              <li><strong>DICOM</strong> (Digital Imaging and Communications in Medicine)</li>
+              <li>Matrice : 2048×2048 à 4096×4096 pixels</li>
+              <li>Profondeur : 12-16 bits par pixel</li>
+              <li>Métadonnées : paramètres d'acquisition, identification patient, etc.</li>
+              <li>Compression : JPEG 2000 lossless ou lossy</li>
+            </ul>
+          </div>
+          <div class="highlight-box">
+            <strong>🎯 Résultat final :</strong> Image numérique où les structures denses (os) apparaissent <strong>claires</strong> (valeurs élevées) et les structures peu denses (air) apparaissent <strong>sombres</strong> (valeurs faibles). L'image peut être visualisée, archivée, transmise (PACS) et post-traitée sans dégradation.
+          </div>
+          <hr style="margin-top: 15px; border: none; border-top: 1px solid rgba(96, 165, 250, 0.3);">
+          <p style="font-size: 10px; color: #94a3b8; margin-top: 10px;">
+            <strong>Sources :</strong> Gonzalez RC, Woods RE. Digital Image Processing (2018) • DICOM Standard PS3.1-2021a • Mildenberger P et al. Comput Med Imaging Graph (2002)
+          </p>
+        `
+      }
+    ];
+
+    // Initialiser la navigation
+    function initStepNav() {
+      stepNav.innerHTML = '';
+      steps.forEach((step, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'step-btn';
+        // Étape 0 = symbole globe, autres = numéros
+        btn.textContent = index === 0 ? '🔬' : index;
+        btn.onclick = () => goToStep(index);
+        stepNav.appendChild(btn);
+      });
+      updateStepNav();
+    }
+
+    function updateStepNav() {
+      const btns = stepNav.querySelectorAll('.step-btn');
+      btns.forEach((btn, index) => {
+        btn.classList.toggle('active', index === currentStep);
+      });
+    }
+
+    function goToStep(index) {
+      if (index >= 0 && index < steps.length) {
+        currentStep = index;
+        updateStepNav();
+        updateExplanations();
+        resetAnimation();
+        startAnimation();
+      }
+    }
+
+    function nextStep() {
+      if (currentStep < steps.length - 1) {
+        goToStep(currentStep + 1);
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        goToStep(currentStep - 1);
+      }
+    }
+
+    function resetToStart() {
+      stopAutoPlay();
+      goToStep(0);
+    }
+
+    function updateExplanations() {
+      explanationsDiv.innerHTML = steps[currentStep].explanation;
+    }
+
+    function resetAnimation() {
+      particles = [];
+      timeGlobal = 0;
+      lastTime = 0;
+    }
+
+    function startAnimation() {
+      if (!animationRunning) {
+        animationRunning = true;
+        requestAnimationFrame(animate);
+      }
+    }
+
+    function stopAnimation() {
+      animationRunning = false;
+    }
+
+    function animate(timestamp) {
+      if (!animationRunning) return;
+
+      if (lastTime === 0) lastTime = timestamp;
+      const dt = timestamp - lastTime;
+      lastTime = timestamp;
+      timeGlobal += dt;
+
+      // Appeler l'animation de l'étape courante
+      steps[currentStep].animate(ctx, dt, timeGlobal);
+
+      requestAnimationFrame(animate);
+    }
+
+    // ============================================
+    // ANIMATIONS PAR ÉTAPE
+    // ============================================
+
+    // Étape 0 : Vue d'ensemble de toute la chaîne
+    function animateStep0(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Titre
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 18px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('CHAÎNE RADIOLOGIQUE COMPLÈTE', canvas.width / 2, 30);
+
+      const blockWidth = 180;
+      const blockHeight = 70;
+      const startX = 20;
+      const startY = 80;
+      const spacing = 10;
+
+      // Définir les blocs
+      const blocks = [
+        {name: '1. Tube\nRX', color: '#3b82f6', icon: '⚡'},
+        {name: '2. Patient\nAtténuation', color: '#8b5cf6', icon: '🧍'},
+        {name: '3. Diffusion\nCompton', color: '#a78bfa', icon: '💫'},
+        {name: '4. Grille\nAnti-diffusion', color: '#10b981', icon: '🛡️'},
+        {name: '5. Scintillateur\nRX→Lumière', color: '#14b8a6', icon: '💎'},
+        {name: '6. Photodiode\nLum→Élec', color: '#06b6d4', icon: '⚡'},
+        {name: '7. Amplification', color: '#6366f1', icon: '📈'},
+        {name: '8. Filtrage\nBruit', color: '#10b981', icon: '🎚️'},
+        {name: '9. CAN\nA→D', color: '#f97316', icon: '🔢'},
+        {name: '10. DSP\nTraitement', color: '#3b82f6', icon: '🖥️'}
+      ];
+
+      // Calculer le layout en 2 lignes
+      const blocksPerRow = 5;
+      
+      blocks.forEach((block, index) => {
+        const row = Math.floor(index / blocksPerRow);
+        const col = index % blocksPerRow;
+        const x = startX + col * (blockWidth + spacing);
+        const y = startY + row * (blockHeight + spacing + 40);
+
+        // Fond du bloc
+        ctx.fillStyle = block.color;
+        ctx.globalAlpha = 0.2;
+        roundRect(ctx, x, y, blockWidth, blockHeight, 8);
+        ctx.fill();
+        
+        // Bordure
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = block.color;
+        ctx.lineWidth = 2;
+        roundRect(ctx, x, y, blockWidth, blockHeight, 8);
+        ctx.stroke();
+
+        // Icône
+        ctx.fillStyle = block.color;
+        ctx.font = '20px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(block.icon, x + blockWidth / 2, y + 28);
+
+        // Nom
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '9px system-ui';
+        const lines = block.name.split('\n');
+        lines.forEach((line, i) => {
+          ctx.fillText(line, x + blockWidth / 2, y + blockHeight - 18 + i * 10);
+        });
+
+        // Flèche vers le suivant (sauf pour les derniers de chaque ligne et le dernier bloc)
+        if (col < blocksPerRow - 1 && index < blocks.length - 1) {
+          ctx.strokeStyle = '#64748b';
+          ctx.fillStyle = '#64748b';
+          ctx.lineWidth = 2;
+          const arrowStartX = x + blockWidth + 2;
+          const arrowEndX = x + blockWidth + spacing - 2;
+          const arrowY = y + blockHeight / 2;
+          drawArrow(ctx, arrowStartX, arrowY, arrowEndX, arrowY);
+        }
+
+        // Flèche de connexion entre bloc 5 et bloc 6 (passe dans l'espace vide entre les deux lignes)
+        if (index === 4) {
+          ctx.strokeStyle = '#64748b';
+          ctx.fillStyle = '#64748b';
+          ctx.lineWidth = 2;
+          
+          // Point de départ : en bas du bloc 5
+          const startFlowX = x + blockWidth / 2;
+          const startFlowY = y + blockHeight;
+          
+          // Espace vide entre les lignes (au milieu de cet espace)
+          const midFlowY = y + blockHeight + (spacing + 40) / 2;
+          
+          // Point d'arrivée : en haut du bloc 6 (qui est à startX, ligne 2)
+          const endFlowX = startX + blockWidth / 2;
+          const endFlowY = y + blockHeight + spacing + 40;
+          
+          // Segment 1 : Descendre du bloc 5 dans l'espace vide
+          ctx.beginPath();
+          ctx.moveTo(startFlowX, startFlowY);
+          ctx.lineTo(startFlowX, midFlowY);
+          ctx.stroke();
+          
+          // Segment 2 : Aller horizontalement vers la gauche dans l'espace vide
+          ctx.beginPath();
+          ctx.moveTo(startFlowX, midFlowY);
+          ctx.lineTo(endFlowX, midFlowY);
+          ctx.stroke();
+          
+          // Segment 3 : Remonter vers le bloc 6 avec flèche
+          drawArrow(ctx, endFlowX, midFlowY, endFlowX, endFlowY);
+        }
+      });
+
+      // Animation de flux
+      const flowPhase = (time % 3000) / 3000;
+      const flowProgress = flowPhase * (blocks.length - 1);
+      const currentBlock = Math.floor(flowProgress);
+      const blockProgress = flowProgress - currentBlock;
+
+      if (currentBlock < blocks.length) {
+        const row = Math.floor(currentBlock / blocksPerRow);
+        const col = currentBlock % blocksPerRow;
+        const x = startX + col * (blockWidth + spacing);
+        const y = startY + row * (blockHeight + spacing + 40);
+
+        // Particule animée qui circule
+        let particleX, particleY;
+        
+        if (currentBlock === 4) {
+          // Transition verticale
+          particleX = x + blockWidth / 2;
+          particleY = y + blockHeight + 2 + blockProgress * (spacing + 38);
+        } else if (col < blocksPerRow - 1 && currentBlock < blocks.length - 1) {
+          // Transition horizontale
+          particleX = x + blockWidth + 2 + blockProgress * (spacing - 4);
+          particleY = y + blockHeight / 2;
+        } else {
+          // Sur le bloc
+          particleX = x + blockWidth / 2;
+          particleY = y + blockHeight / 2;
+        }
+
+        const grad = ctx.createRadialGradient(particleX, particleY, 0, particleX, particleY, 10);
+        grad.addColorStop(0, 'rgba(96, 165, 250, 1)');
+        grad.addColorStop(0.5, 'rgba(96, 165, 250, 0.6)');
+        grad.addColorStop(1, 'rgba(96, 165, 250, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(particleX, particleY, 10, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Légende des conversions
+      const legendY = 340;
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+      roundRect(ctx, 50, legendY, 900, 100, 8);
+      ctx.fill();
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 50, legendY, 900, 100, 8);
+      ctx.stroke();
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 13px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('🔄 Conversions d\'énergie dans la chaîne :', 70, legendY + 25);
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '11px system-ui';
+      const conversions = [
+        '1→2: Énergie cinétique (électrons) → Rayons X (photons)',
+        '2→3: Atténuation différentielle selon la densité des tissus',
+        '4→5: Filtration mécanique (lamelles de plomb)',
+        '5→6: Rayons X → Photons lumineux (scintillateur CsI)',
+        '6→7: Photons lumineux → Signal électrique (photodiode a-Si)',
+        '7→10: Signal analogique → Signal numérique (CAN 12-16 bits) → Traitement DSP'
+      ];
+
+      conversions.forEach((text, i) => {
+        const col = i % 2;
+        const row = Math.floor(i / 2);
+        ctx.fillText(text, 70 + col * 450, legendY + 48 + row * 16);
+      });
+
+      // Info supplémentaire
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('Cliquez sur un numéro ci-dessus pour explorer chaque étape en détail', canvas.width / 2, legendY + 92);
+    }
+
+    // Étape 1 : Émission des rayons X
+    function animateStep1(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Tube à rayons X
+      const tubeX = 50;
+      const tubeY = 150;
+      const tubeW = 120;
+      const tubeH = 200;
+
+      // Corps du tube
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      roundRect(ctx, tubeX, tubeY, tubeW, tubeH, 15);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cathode
+      ctx.fillStyle = '#374151';
+      roundRect(ctx, tubeX + 20, tubeY + 60, 30, 80, 5);
+      ctx.fill();
+
+      // Filament chauffé (effet de rougeoiement)
+      const glowIntensity = 0.7 + 0.3 * Math.sin(time * 0.003);
+      const gradient = ctx.createRadialGradient(tubeX + 35, tubeY + 100, 5, tubeX + 35, tubeY + 100, 20);
+      gradient.addColorStop(0, `rgba(239, 68, 68, ${glowIntensity})`);
+      gradient.addColorStop(0.5, `rgba(220, 38, 38, ${glowIntensity * 0.6})`);
+      gradient.addColorStop(1, 'rgba(220, 38, 38, 0)');
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(tubeX + 35, tubeY + 100, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Anode
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(tubeX + 70, tubeY + 60);
+      ctx.lineTo(tubeX + 100, tubeY + 100);
+      ctx.lineTo(tubeX + 70, tubeY + 140);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#ea580c';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Labels
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('TUBE À RAYONS X', tubeX + tubeW / 2, tubeY - 10);
+      ctx.font = '11px system-ui';
+      ctx.fillText('Cathode', tubeX + 35, tubeY + 150);
+      ctx.fillText('Anode', tubeX + 85, tubeY + 105);
+
+      // Générer des rayons X (particules)
+      if (Math.random() < 0.3) {
+        particles.push({
+          x: tubeX + 100,
+          y: tubeY + 100 + (Math.random() - 0.5) * 40,
+          vx: 200 + Math.random() * 100,
+          vy: (Math.random() - 0.5) * 20,
+          age: 0,
+          maxAge: 3000,
+          type: 'xray'
+        });
+      }
+
+      // Dessiner et mettre à jour les rayons X
+      particles = particles.filter(p => p.age < p.maxAge);
+      particles.forEach(p => {
+        p.x += p.vx * dt / 1000;
+        p.y += p.vy * dt / 1000;
+        p.age += dt;
+
+        const alpha = 1 - p.age / p.maxAge;
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 6);
+        grad.addColorStop(0, `rgba(96, 165, 250, ${alpha})`);
+        grad.addColorStop(0.5, `rgba(59, 130, 246, ${alpha * 0.7})`);
+        grad.addColorStop(1, 'rgba(59, 130, 246, 0)');
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Noyau
+        ctx.fillStyle = `rgba(147, 197, 253, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Texte informatif
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Faisceau de photons X émis', 250, 250);
+      ctx.fillText('(homogène avant le patient)', 250, 268);
+    }
+
+    // Étape 2 : Traversée du patient
+    function animateStep2(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const patientX = 400;
+      const patientY = 100;
+
+      // Dessiner le patient (silhouette améliorée)
+      ctx.save();
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 150, 90, 160, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Tête/crâne (os dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(patientX, patientY + 30, 28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Os (colonne vertébrale - très dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(patientX - 12, patientY + 55, 24, 210);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(patientX - 12, patientY + 55, 24, 210);
+
+      // Os bassin (dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 270, 55, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Poumons (air - très peu dense)
+      ctx.fillStyle = 'rgba(30, 58, 138, 0.4)';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX - 42, patientY + 120, 32, 55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(patientX + 42, patientY + 120, 32, 55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cœur (densité moyenne)
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.5)';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 140, 22, 16, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Organe abdominal (densité moyenne-haute)
+      ctx.fillStyle = 'rgba(202, 138, 4, 0.5)';
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 210, 55, 35, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Labels
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('PATIENT', patientX, patientY - 10);
+
+      ctx.font = '8px system-ui';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('Os', patientX + 25, patientY + 35);
+      ctx.fillText('Poumons', patientX - 70, patientY + 120);
+      ctx.fillText('Cœur', patientX - 35, patientY + 145);
+      ctx.fillText('Abdomen', patientX + 70, patientY + 215);
+
+      // Générer rayons X
+      if (Math.random() < 0.25) {
+        const yPos = 150 + Math.random() * 200;
+        particles.push({
+          x: 50,
+          y: yPos,
+          vx: 180,
+          vy: 0,
+          age: 0,
+          maxAge: 5000,
+          type: 'xray-before',
+          baseY: yPos
+        });
+      }
+
+      // Mettre à jour et dessiner les particules
+      particles = particles.filter(p => p.age < p.maxAge && p.x < canvas.width - 50);
+      particles.forEach(p => {
+        p.x += p.vx * dt / 1000;
+        p.age += dt;
+
+        // Déterminer l'atténuation selon la zone traversée (ACCENTUÉE)
+        let attenuation = 1;
+        let color = [96, 165, 250];
+        
+        if (p.x > patientX - 90 && p.x < patientX + 90) {
+          // Dans le patient
+          const distFromCenter = Math.abs(p.y - (patientY + 150));
+          
+          // Crâne : très forte atténuation
+          if (Math.abs(p.x - patientX) < 30 && p.y > patientY + 5 && p.y < patientY + 55) {
+            attenuation = 0.05;
+            color = [248, 250, 252];
+          }
+          // Os colonne : très forte atténuation
+          else if (Math.abs(p.x - patientX) < 15 && p.y > patientY + 55 && p.y < patientY + 265) {
+            attenuation = 0.08;
+            color = [248, 250, 252];
+          }
+          // Os bassin : très forte atténuation
+          else if (Math.abs(p.y - (patientY + 270)) < 25 && Math.abs(p.x - patientX) < 60) {
+            attenuation = 0.07;
+            color = [248, 250, 252];
+          }
+          // Poumons : très faible atténuation (air)
+          else if ((Math.abs(p.x - (patientX - 42)) < 32 && Math.abs(p.y - (patientY + 120)) < 55) ||
+                   (Math.abs(p.x - (patientX + 42)) < 32 && Math.abs(p.y - (patientY + 120)) < 55)) {
+            attenuation = 0.92;
+            color = [96, 165, 250];
+          }
+          // Cœur : atténuation moyenne
+          else if (Math.abs(p.y - (patientY + 140)) < 18 && Math.abs(p.x - patientX) < 25) {
+            attenuation = 0.45;
+            color = [239, 68, 68];
+          }
+          // Organes abdominaux : atténuation moyenne-haute
+          else if (Math.abs(p.y - (patientY + 210)) < 40 && Math.abs(p.x - patientX) < 60) {
+            attenuation = 0.35;
+            color = [234, 179, 8];
+          }
+          // Tissus mous (muscles)
+          else {
+            attenuation = 0.55;
+            color = [148, 163, 184];
+          }
+        }
+
+        const alpha = (1 - p.age / p.maxAge) * attenuation;
+        const size = 6 * attenuation + 1;
+        
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
+        grad.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`);
+        grad.addColorStop(0.5, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.7})`);
+        grad.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Visualisation après le patient
+      const afterX = 700;
+      const intensityDisplay = [];
+      particles.forEach(p => {
+        if (p.x > patientX + 90) {
+          intensityDisplay.push({y: p.y, alpha: (1 - p.age / p.maxAge) * 
+            (p.x > patientX + 90 ? 
+              (Math.abs(p.y - (patientY + 150)) < 80 ? 0.3 : 0.7) : 1)});
+        }
+      });
+
+      // Afficher les différences d'intensité
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+      ctx.fillRect(afterX, 60, 220, 370);
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(afterX, 60, 220, 370);
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('APRÈS PATIENT', afterX + 110, 80);
+      ctx.font = '9px system-ui';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('(Atténuation différentielle)', afterX + 110, 95);
+
+      // Barre d'intensité
+      const barX = afterX + 20;
+      const barY = 120;
+      const barH = 280;
+      const barW = 180;
+
+      // Gradient pour montrer l'intensité
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(barX, barY, barW, barH);
+
+      // Zones avec différentes intensités
+      const zones = [
+        {label: 'Poumons\n(air)', y: 0, h: 70, intensity: 0.95, color: '#3b82f6'},
+        {label: 'Tissus mous', y: 70, h: 80, intensity: 0.55, color: '#94a3b8'},
+        {label: 'Organes', y: 150, h: 50, intensity: 0.35, color: '#eab308'},
+        {label: 'Os', y: 200, h: 80, intensity: 0.08, color: '#f8fafc'}
+      ];
+
+      zones.forEach(zone => {
+        const zoneY = barY + zone.y;
+        ctx.fillStyle = zone.color;
+        ctx.globalAlpha = zone.intensity;
+        ctx.fillRect(barX + 5, zoneY, barW - 10, zone.h);
+        ctx.globalAlpha = 1;
+        
+        // Bordure
+        ctx.strokeStyle = zone.color;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(barX + 5, zoneY, barW - 10, zone.h);
+
+        // Label et pourcentage
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 9px system-ui';
+        ctx.textAlign = 'left';
+        const lines = zone.label.split('\n');
+        lines.forEach((line, i) => {
+          ctx.fillText(line, barX + 12, zoneY + 18 + i * 11);
+        });
+        ctx.fillText(Math.round(zone.intensity * 100) + '% transmis', barX + 12, zoneY + zone.h - 10);
+      });
+
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(barX, barY, barW, barH);
+
+      // Légende
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Les rayons X sont atténués différemment', 50, canvas.height - 60);
+      ctx.fillText('selon la densité des tissus traversés', 50, canvas.height - 45);
+      ctx.fillText('→ Base du contraste radiologique', 50, canvas.height - 30);
+    }
+
+    // Étape 3 : Rayonnement diffusé
+    function animateStep3(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const patientX = 400;
+      const patientY = 100;
+
+      // Dessiner le patient (même schéma que l'étape 2)
+      ctx.save();
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 150, 90, 160, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Tête/crâne (os dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(patientX, patientY + 30, 28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Os (colonne vertébrale - très dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(patientX - 12, patientY + 55, 24, 210);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(patientX - 12, patientY + 55, 24, 210);
+
+      // Os bassin (dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 270, 55, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Poumons (air - très peu dense)
+      ctx.fillStyle = 'rgba(30, 58, 138, 0.3)';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX - 42, patientY + 120, 32, 55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(patientX + 42, patientY + 120, 32, 55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cœur (densité moyenne)
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.4)';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 140, 22, 16, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Organe abdominal (densité moyenne-haute)
+      ctx.fillStyle = 'rgba(202, 138, 4, 0.4)';
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 210, 55, 35, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Label
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('DIFFUSION COMPTON', patientX, patientY - 10);
+
+      // Générer rayons incidents
+      if (Math.random() < 0.2) {
+        particles.push({
+          x: 50,
+          y: 150 + Math.random() * 200,
+          vx: 200,
+          vy: 0,
+          age: 0,
+          maxAge: 3000,
+          type: 'incident',
+          scattered: false,
+          trail: [] // Pour les traces de mouvement
+        });
+      }
+
+      // Mettre à jour particules
+      particles = particles.filter(p => {
+        return p.age < p.maxAge && 
+               p.x < canvas.width - 50 && 
+               p.y > 0 && 
+               p.y < canvas.height;
+      });
+
+      particles.forEach(p => {
+        // Sauvegarder la position pour la trace
+        if (!p.trail) p.trail = [];
+        p.trail.push({x: p.x, y: p.y, age: 0});
+        
+        // Limiter la longueur de la trace
+        if (p.trail.length > 20) {
+          p.trail.shift();
+        }
+
+        // Vieillir les points de la trace
+        p.trail.forEach(point => {
+          point.age += dt;
+        });
+
+        // Si dans le patient et pas encore diffusé
+        if (!p.scattered && 
+            p.x > patientX - 80 && 
+            p.x < patientX + 80 && 
+            Math.random() < 0.02) {
+          
+          // Créer un rayon diffusé
+          p.scattered = true;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 150 + Math.random() * 100;
+          
+          particles.push({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            age: 0,
+            maxAge: 2500,
+            type: 'scattered',
+            trail: []
+          });
+        }
+
+        p.x += p.vx * dt / 1000;
+        p.y += p.vy * dt / 1000;
+        p.age += dt;
+
+        const alpha = 1 - p.age / p.maxAge;
+        const isScattered = p.type === 'scattered';
+        const color = isScattered ? [129, 140, 248] : [96, 165, 250];
+        const size = isScattered ? 4 : 5;
+
+        // Dessiner la trace de mouvement
+        if (p.trail && p.trail.length > 1) {
+          ctx.save();
+          ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.3})`;
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          for (let i = 0; i < p.trail.length; i++) {
+            const point = p.trail[i];
+            const trailAlpha = (1 - point.age / 500) * alpha * 0.4;
+            if (trailAlpha > 0) {
+              if (i === 0) {
+                ctx.moveTo(point.x, point.y);
+              } else {
+                ctx.lineTo(point.x, point.y);
+              }
+            }
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+        
+        // Dessiner la particule
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
+        grad.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.8})`);
+        grad.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Légende avec indicateurs de couleur
+      const legendX = 50;
+      const legendY = canvas.height - 60;
+
+      // Rayon incident
+      ctx.fillStyle = '#60a5fa';
+      ctx.beginPath();
+      ctx.arc(legendX, legendY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Rayons incidents (trajet direct)', legendX + 15, legendY + 4);
+
+      // Rayon diffusé
+      ctx.fillStyle = '#818cf8';
+      ctx.beginPath();
+      ctx.arc(legendX, legendY + 20, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#818cf8';
+      ctx.fillText('Rayons diffusés (effet Compton - déviés)', legendX + 15, legendY + 24);
+
+      ctx.fillStyle = '#ef4444';
+      ctx.fillText('→ Dégradation du contraste et augmentation du bruit', legendX, legendY + 42);
+    }
+
+    // Étape 4 : Grille anti-diffusion
+    function animateStep4(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const patientX = 350;
+      const patientY = 100;
+      const grilleX = 550;
+      const grilleY = 100;
+      const grilleH = 300;
+
+      // Dessiner le patient (même schéma détaillé)
+      ctx.save();
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#94a3b8';
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 150, 90, 160, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Tête/crâne (os dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(patientX, patientY + 30, 28, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Os (colonne vertébrale - très dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(patientX - 12, patientY + 55, 24, 210);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(patientX - 12, patientY + 55, 24, 210);
+
+      // Os bassin (dense)
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 270, 55, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Poumons (air - très peu dense)
+      ctx.fillStyle = 'rgba(30, 58, 138, 0.3)';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX - 42, patientY + 120, 32, 55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(patientX + 42, patientY + 120, 32, 55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cœur (densité moyenne)
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.4)';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 140, 22, 16, 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Organe abdominal (densité moyenne-haute)
+      ctx.fillStyle = 'rgba(202, 138, 4, 0.4)';
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(patientX, patientY + 210, 55, 35, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Grille anti-diffusion (AVANT le détecteur)
+      ctx.save();
+      ctx.fillStyle = 'rgba(100, 116, 139, 0.3)';
+      ctx.fillRect(grilleX, grilleY, 15, grilleH);
+
+      // Lamelles de plomb
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 20; i++) {
+        const y = grilleY + (grilleH / 20) * i;
+        ctx.beginPath();
+        ctx.moveTo(grilleX, y);
+        ctx.lineTo(grilleX + 15, y);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Labels
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 13px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('GRILLE ANTI-DIFFUSION', grilleX + 7, grilleY - 15);
+      ctx.font = '10px system-ui';
+      ctx.fillText('(Potter-Bucky)', grilleX + 7, grilleY - 2);
+
+      // Détecteur après la grille
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      roundRect(ctx, grilleX + 50, grilleY, 120, grilleH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 13px system-ui';
+      ctx.fillText('DÉTECTEUR', grilleX + 110, grilleY - 10);
+
+      // Générer rayons incidents (comme étape 3)
+      if (Math.random() < 0.2) {
+        particles.push({
+          x: 50,
+          y: 150 + Math.random() * 200,
+          vx: 200,
+          vy: 0,
+          age: 0,
+          maxAge: 5000,
+          type: 'incident',
+          scattered: false,
+          blocked: false,
+          trail: []
+        });
+      }
+
+      // Mettre à jour particules
+      particles = particles.filter(p => {
+        if (p.blocked) return false;
+        return p.age < p.maxAge && 
+               p.x < canvas.width - 50 && 
+               p.y > 0 && 
+               p.y < canvas.height;
+      });
+
+      particles.forEach(p => {
+        // Sauvegarder la position pour la trace
+        if (!p.trail) p.trail = [];
+        p.trail.push({x: p.x, y: p.y, age: 0});
+        
+        // Limiter la longueur de la trace
+        if (p.trail.length > 20) {
+          p.trail.shift();
+        }
+
+        // Vieillir les points de la trace
+        p.trail.forEach(point => {
+          point.age += dt;
+        });
+
+        // Diffusion Compton dans le patient
+        if (!p.scattered && 
+            p.x > patientX - 80 && 
+            p.x < patientX + 80 && 
+            Math.random() < 0.02) {
+          
+          // Créer un rayon diffusé
+          p.scattered = true;
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 150 + Math.random() * 100;
+          
+          particles.push({
+            x: p.x,
+            y: p.y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            age: 0,
+            maxAge: 3500,
+            type: 'scattered',
+            blocked: false,
+            trail: []
+          });
+        }
+
+        // Interaction avec la grille
+        if (p.x >= grilleX && p.x <= grilleX + 15 && !p.blocked) {
+          if (p.type === 'scattered') {
+            // Les rayons diffusés sont bloqués par la grille
+            p.blocked = true;
+            
+            // Effet visuel de blocage
+            ctx.save();
+            ctx.globalAlpha = 0.6;
+            const blockGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 15);
+            blockGrad.addColorStop(0, 'rgba(239, 68, 68, 0.8)');
+            blockGrad.addColorStop(0.5, 'rgba(239, 68, 68, 0.4)');
+            blockGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+            ctx.fillStyle = blockGrad;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Croix de blocage
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(p.x - 5, p.y - 5);
+            ctx.lineTo(p.x + 5, p.y + 5);
+            ctx.moveTo(p.x + 5, p.y - 5);
+            ctx.lineTo(p.x - 5, p.y + 5);
+            ctx.stroke();
+            ctx.restore();
+            return;
+          }
+          // Les rayons directs (non diffusés) passent à travers
+        }
+
+        if (p.blocked) return;
+
+        p.x += p.vx * dt / 1000;
+        p.y += p.vy * dt / 1000;
+        p.age += dt;
+
+        const alpha = 1 - p.age / p.maxAge;
+        const isScattered = p.type === 'scattered';
+        const color = isScattered ? [129, 140, 248] : [96, 165, 250];
+        const size = isScattered ? 4 : 5;
+
+        // Dessiner la trace de mouvement
+        if (p.trail && p.trail.length > 1) {
+          ctx.save();
+          ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.3})`;
+          ctx.lineWidth = 2;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          for (let i = 0; i < p.trail.length; i++) {
+            const point = p.trail[i];
+            const trailAlpha = (1 - point.age / 500) * alpha * 0.4;
+            if (trailAlpha > 0) {
+              if (i === 0) {
+                ctx.moveTo(point.x, point.y);
+              } else {
+                ctx.lineTo(point.x, point.y);
+              }
+            }
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+        
+        // Dessiner la particule
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size);
+        grad.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.8})`);
+        grad.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
+        
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Légende avec indicateurs de couleur
+      const legendX = 50;
+      const legendY = canvas.height - 80;
+
+      // Rayon incident
+      ctx.fillStyle = '#60a5fa';
+      ctx.beginPath();
+      ctx.arc(legendX, legendY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Rayons directs : passent à travers la grille →', legendX + 15, legendY + 4);
+
+      // Rayon diffusé
+      ctx.fillStyle = '#818cf8';
+      ctx.beginPath();
+      ctx.arc(legendX, legendY + 20, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#818cf8';
+      ctx.fillText('Rayons diffusés : trajectoires obliques', legendX + 15, legendY + 24);
+
+      // Blocage
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(legendX, legendY + 40, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ef4444';
+      ctx.fillText('Bloqués par les lamelles de plomb ✖', legendX + 15, legendY + 44);
+
+      ctx.fillStyle = '#22c55e';
+      ctx.fillText('→ Élimination de 85-90% du diffusé = Meilleur contraste !', legendX, legendY + 62);
+    }
+
+    // Étape 5 : Scintillateur
+    function animateStep5(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const scintX = 200;
+      const scintY = 100;
+      const scintW = 150;
+      const scintH = 300;
+
+      // Scintillateur principal
+      const scintGrad = ctx.createLinearGradient(scintX, scintY, scintX, scintY + scintH);
+      scintGrad.addColorStop(0, 'rgba(16, 185, 129, 0.3)');
+      scintGrad.addColorStop(0.5, 'rgba(5, 150, 105, 0.5)');
+      scintGrad.addColorStop(1, 'rgba(4, 120, 87, 0.3)');
+      ctx.fillStyle = scintGrad;
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 3;
+      roundRect(ctx, scintX, scintY, scintW, scintH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Structure en aiguilles (CsI)
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = '#6ee7b7';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < 50; i++) {
+        const x = scintX + 10 + Math.random() * (scintW - 20);
+        const y1 = scintY + 5;
+        const y2 = scintY + scintH - 5;
+        ctx.beginPath();
+        ctx.moveTo(x, y1);
+        ctx.lineTo(x + (Math.random() - 0.5) * 10, y2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Labels
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('SCINTILLATEUR', scintX + scintW / 2, scintY - 15);
+      ctx.font = '11px system-ui';
+      ctx.fillText('CsI:Tl (Iodure de césium)', scintX + scintW / 2, scintY - 0);
+
+      // ========== VUE DÉTAILLÉE (ZOOM MICROSCOPIQUE) ==========
+      const zoomX = 450;
+      const zoomY = 80;
+      const zoomW = 450;
+      const zoomH = 350;
+
+      // Cadre de la vue détaillée
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 3;
+      roundRect(ctx, zoomX, zoomY, zoomW, zoomH, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 15px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔬 VUE DÉTAILLÉE - CONVERSION RX → LUMIÈRE', zoomX + zoomW / 2, zoomY + 25);
+
+      // Cristal de scintillateur (structure hexagonale)
+      const crystalX = zoomX + 100;
+      const crystalY = zoomY + 180;
+      const crystalSize = 80;
+
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#10b981';
+      ctx.strokeStyle = '#34d399';
+      ctx.lineWidth = 2;
+      
+      // Hexagone
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i;
+        const x = crystalX + crystalSize * Math.cos(angle);
+        const y = crystalY + crystalSize * Math.sin(angle);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+
+      // Atomes du cristal
+      ctx.fillStyle = '#6ee7b7';
+      for (let i = 0; i < 12; i++) {
+        const angle = (Math.PI * 2 / 12) * i;
+        const radius = 40 + (i % 2) * 20;
+        const x = crystalX + radius * Math.cos(angle);
+        const y = crystalY + radius * Math.sin(angle);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#34d399';
+      ctx.font = '10px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('Cristal CsI', crystalX, crystalY + crystalSize + 20);
+
+      // Photon X entrant unique (animation cyclique)
+      const xrayPhase = (time % 3000) / 3000; // Cycle de 3 secondes
+      
+      if (xrayPhase < 0.3) {
+        // Phase 1 : Photon X arrive
+        const xrayX = crystalX - 150 + (xrayPhase / 0.3) * 150;
+        const xrayY = crystalY;
+
+        // Dessiner le photon X
+        const xrayGrad = ctx.createRadialGradient(xrayX, xrayY, 0, xrayX, xrayY, 12);
+        xrayGrad.addColorStop(0, 'rgba(96, 165, 250, 1)');
+        xrayGrad.addColorStop(0.5, 'rgba(59, 130, 246, 0.8)');
+        xrayGrad.addColorStop(1, 'rgba(37, 99, 235, 0)');
+        ctx.fillStyle = xrayGrad;
+        ctx.beginPath();
+        ctx.arc(xrayX, xrayY, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Noyau
+        ctx.fillStyle = '#e0f2fe';
+        ctx.beginPath();
+        ctx.arc(xrayX, xrayY, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Label
+        ctx.fillStyle = '#60a5fa';
+        ctx.font = 'bold 11px system-ui';
+        ctx.fillText('Photon X', xrayX, xrayY - 20);
+        ctx.font = '9px system-ui';
+        ctx.fillText('≈60 keV', xrayX, xrayY - 8);
+
+        // Flèche
+        ctx.strokeStyle = '#60a5fa';
+        ctx.fillStyle = '#60a5fa';
+        ctx.lineWidth = 2;
+        drawArrow(ctx, xrayX - 30, xrayY, xrayX - 15, xrayY);
+      }
+      else if (xrayPhase < 0.5) {
+        // Phase 2 : Impact et excitation
+        const impactIntensity = Math.sin((xrayPhase - 0.3) / 0.2 * Math.PI);
+        
+        // Flash d'impact
+        ctx.save();
+        ctx.globalAlpha = impactIntensity;
+        const flashGrad = ctx.createRadialGradient(crystalX, crystalY, 0, crystalX, crystalY, 60);
+        flashGrad.addColorStop(0, 'rgba(253, 224, 71, 0.8)');
+        flashGrad.addColorStop(0.5, 'rgba(250, 204, 21, 0.5)');
+        flashGrad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+        ctx.fillStyle = flashGrad;
+        ctx.beginPath();
+        ctx.arc(crystalX, crystalY, 60, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Atomes excités
+        ctx.fillStyle = `rgba(253, 224, 71, ${impactIntensity})`;
+        for (let i = 0; i < 12; i++) {
+          const angle = (Math.PI * 2 / 12) * i;
+          const radius = 40 + (i % 2) * 20;
+          const x = crystalX + radius * Math.cos(angle);
+          const y = crystalY + radius * Math.sin(angle);
+          ctx.beginPath();
+          ctx.arc(x, y, 6 * impactIntensity + 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('EXCITATION', crystalX, crystalY - 100);
+        ctx.font = '9px system-ui';
+        ctx.fillText('Atomes du cristal excités', crystalX, crystalY - 85);
+      }
+      else {
+        // Phase 3 : Émission de photons lumineux
+        const emissionPhase = (xrayPhase - 0.5) / 0.5;
+        const numPhotons = 16;
+        
+        for (let i = 0; i < numPhotons; i++) {
+          const angle = (Math.PI * 2 / numPhotons) * i + time * 0.001;
+          const distance = emissionPhase * 80;
+          const x = crystalX + distance * Math.cos(angle);
+          const y = crystalY + distance * Math.sin(angle);
+          
+          const alpha = 1 - emissionPhase;
+          const size = 6 + emissionPhase * 4;
+          
+          const lightGrad = ctx.createRadialGradient(x, y, 0, x, y, size);
+          lightGrad.addColorStop(0, `rgba(253, 224, 71, ${alpha})`);
+          lightGrad.addColorStop(0.5, `rgba(250, 204, 21, ${alpha * 0.7})`);
+          lightGrad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+          ctx.fillStyle = lightGrad;
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Noyau brillant
+          ctx.fillStyle = `rgba(254, 240, 138, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(x, y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('ÉMISSION LUMINEUSE', crystalX, crystalY - 100);
+        ctx.font = '9px system-ui';
+        ctx.fillText('500-3000 photons lumineux', crystalX, crystalY - 85);
+      }
+
+      // Bilan énergétique à droite
+      const bilanX = zoomX + zoomW - 170;
+      const bilanY = zoomY + 100;
+
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2;
+      roundRect(ctx, bilanX, bilanY, 150, 130, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('BILAN ÉNERGÉTIQUE', bilanX + 10, bilanY + 25);
+
+      ctx.font = '11px system-ui';
+      ctx.fillStyle = '#e0f2fe';
+      ctx.fillText('Entrée:', bilanX + 10, bilanY + 50);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('1 photon X', bilanX + 15, bilanY + 65);
+      ctx.fillText('≈ 60 keV', bilanX + 15, bilanY + 80);
+
+      ctx.fillStyle = '#fde047';
+      ctx.fillText('Sortie:', bilanX + 10, bilanY + 100);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('500-3000 photons', bilanX + 15, bilanY + 115);
+      ctx.fillText('lumière visible', bilanX + 15, bilanY + 128);
+
+      // Animation générale continue (en arrière-plan)
+      // Générer rayons X entrants
+      if (Math.random() < 0.15) {
+        particles.push({
+          x: 50,
+          y: scintY + 50 + Math.random() * (scintH - 100),
+          vx: 250,
+          vy: 0,
+          age: 0,
+          maxAge: 3000,
+          type: 'xray-in',
+          converted: false
+        });
+      }
+
+      // Mettre à jour particules
+      particles = particles.filter(p => {
+        if (p.type === 'light' && p.age > p.maxAge) return false;
+        if (p.type === 'xray-in' && p.x > scintX + scintW + 50) return false;
+        return p.age < p.maxAge * 1.5;
+      });
+
+      particles.forEach(p => {
+        if (p.type === 'xray-in') {
+          p.x += p.vx * dt / 1000;
+          p.age += dt;
+
+          // Conversion RX → Lumière dans le scintillateur
+          if (p.x > scintX && p.x < scintX + scintW && !p.converted) {
+            p.converted = true;
+            
+            // Créer des photons lumineux
+            const numPhotons = 8 + Math.floor(Math.random() * 12);
+            for (let i = 0; i < numPhotons; i++) {
+              const angle = Math.random() * Math.PI * 2;
+              const speed = 80 + Math.random() * 60;
+              particles.push({
+                x: p.x,
+                y: p.y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                age: 0,
+                maxAge: 800 + Math.random() * 400,
+                type: 'light'
+              });
+            }
+          }
+
+          // Dessiner RX
+          const alpha = 1 - p.age / p.maxAge;
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 5);
+          grad.addColorStop(0, `rgba(96, 165, 250, ${alpha})`);
+          grad.addColorStop(1, 'rgba(96, 165, 250, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        } 
+        else if (p.type === 'light') {
+          p.x += p.vx * dt / 1000;
+          p.y += p.vy * dt / 1000;
+          p.age += dt;
+
+          const alpha = 1 - p.age / p.maxAge;
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 4);
+          grad.addColorStop(0, `rgba(253, 224, 71, ${alpha * 0.9})`);
+          grad.addColorStop(0.6, `rgba(250, 204, 21, ${alpha * 0.6})`);
+          grad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Noyau brillant
+          ctx.fillStyle = `rgba(254, 240, 138, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Légende
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Vue générale : flux continu de conversions RX → Lumière', 50, canvas.height - 45);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillText('Vue détaillée : processus au niveau atomique (cycle 3s)', 50, canvas.height - 28);
+    }
+
+    // Étape 6 : Photodiode
+    function animateStep6(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const photoX = 400;
+      const photoY = 100;
+      const photoW = 180;
+      const photoH = 300;
+      const gridSize = 20;
+
+      // Photodiode array
+      ctx.fillStyle = '#1e3a8a';
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      roundRect(ctx, photoX, photoY, photoW, photoH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      // Grille de pixels
+      ctx.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+      ctx.lineWidth = 0.5;
+      for (let x = 0; x <= photoW; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(photoX + x, photoY);
+        ctx.lineTo(photoX + x, photoY + photoH);
+        ctx.stroke();
+      }
+      for (let y = 0; y <= photoH; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(photoX, photoY + y);
+        ctx.lineTo(photoX + photoW, photoY + y);
+        ctx.stroke();
+      }
+
+      // Labels
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('PHOTODIODE (a-Si)', photoX + photoW / 2, photoY - 15);
+      ctx.font = '11px system-ui';
+      ctx.fillText('Matrice de pixels', photoX + photoW / 2, photoY - 0);
+
+      // Signal électrique sortant (droite)
+      const signalX = photoX + photoW + 40;
+      const signalY = 250;
+      
+      // Dessiner signal analogique
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(signalX, signalY);
+      for (let i = 0; i < 200; i += 3) {
+        const x = signalX + i;
+        const y = signalY + Math.sin(i * 0.1 + time * 0.005) * 15;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Signal électrique', signalX + 20, signalY - 25);
+      ctx.font = '10px system-ui';
+      ctx.fillText('analogique (0-5V)', signalX + 20, signalY - 12);
+
+      // Générer photons lumineux entrants
+      if (Math.random() < 0.2) {
+        particles.push({
+          x: 50,
+          y: photoY + 50 + Math.random() * (photoH - 100),
+          vx: 200,
+          vy: 0,
+          age: 0,
+          maxAge: 3000,
+          type: 'light-in',
+          converted: false
+        });
+      }
+
+      // Mettre à jour particules
+      particles = particles.filter(p => p.age < p.maxAge && p.x < signalX + 250);
+
+      particles.forEach(p => {
+        if (p.type === 'light-in') {
+          p.x += p.vx * dt / 1000;
+          p.age += dt;
+
+          // Conversion en signal électrique
+          if (p.x > photoX && p.x < photoX + photoW && !p.converted) {
+            p.converted = true;
+            
+            // Flash sur le pixel touché
+            const pixelX = photoX + Math.floor((p.x - photoX) / gridSize) * gridSize;
+            const pixelY = photoY + Math.floor((p.y - photoY) / gridSize) * gridSize;
+            
+            ctx.save();
+            ctx.globalAlpha = 0.6;
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillRect(pixelX, pixelY, gridSize, gridSize);
+            ctx.restore();
+          }
+
+          // Dessiner photon
+          const alpha = 1 - p.age / p.maxAge;
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 4);
+          grad.addColorStop(0, `rgba(253, 224, 71, ${alpha})`);
+          grad.addColorStop(1, 'rgba(253, 224, 71, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Légende
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Photons lumineux → Paires électron-trou', 50, canvas.height - 45);
+      ctx.fillStyle = '#10b981';
+      ctx.fillText('→ Courant électrique proportionnel', 50, canvas.height - 28);
+    }
+
+    // Étape 7 : Amplification
+    function animateStep7(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const ampX = 450;
+      const ampY = 200;
+      const ampSize = 100;
+
+      // Amplificateur (triangle)
+      ctx.fillStyle = '#4338ca';
+      ctx.strokeStyle = '#818cf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(ampX, ampY - ampSize / 2);
+      ctx.lineTo(ampX, ampY + ampSize / 2);
+      ctx.lineTo(ampX + ampSize, ampY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Symbol A
+      ctx.fillStyle = '#e0e7ff';
+      ctx.font = 'bold 28px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('A', ampX + ampSize / 3, ampY + 10);
+
+      // Labels
+      ctx.fillStyle = '#818cf8';
+      ctx.font = 'bold 14px system-ui';
+      ctx.fillText('AMPLIFICATEUR', ampX + ampSize / 2, ampY - ampSize / 2 - 20);
+      ctx.font = '11px system-ui';
+      ctx.fillText('Gain × 100 - 10000', ampX + ampSize / 2, ampY - ampSize / 2 - 5);
+
+      // Signal entrant (faible)
+      const sigInX = ampX - 150;
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(sigInX, ampY);
+      for (let i = 0; i < 120; i += 2) {
+        const x = sigInX + i;
+        const y = ampY + Math.sin(i * 0.15 + time * 0.006) * 8;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = '10px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('Signal faible', sigInX + 60, ampY - 25);
+      ctx.fillText('(quelques mV)', sigInX + 60, ampY - 12);
+
+      // Signal sortant (amplifié)
+      const sigOutX = ampX + ampSize + 20;
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = 'rgba(16, 185, 129, 0.6)';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.moveTo(sigOutX, ampY);
+      for (let i = 0; i < 150; i += 2) {
+        const x = sigOutX + i;
+        const y = ampY + Math.sin(i * 0.15 + time * 0.006) * 25;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 11px system-ui';
+      ctx.fillText('Signal amplifié', sigOutX + 75, ampY - 40);
+      ctx.font = '10px system-ui';
+      ctx.fillText('(0-5V)', sigOutX + 75, ampY - 25);
+
+      // Particules de signal
+      if (Math.random() < 0.1) {
+        particles.push({
+          x: sigInX,
+          y: ampY,
+          vx: 120,
+          vy: 0,
+          age: 0,
+          maxAge: 2000,
+          type: 'signal',
+          size: 3,
+          amplified: false
+        });
+      }
+
+      particles = particles.filter(p => p.age < p.maxAge && p.x < sigOutX + 170);
+
+      particles.forEach(p => {
+        p.x += p.vx * dt / 1000;
+        p.age += dt;
+
+        // Amplification
+        if (p.x > ampX + ampSize && !p.amplified) {
+          p.size = 8;
+          p.amplified = true;
+        }
+
+        const alpha = 1 - p.age / p.maxAge;
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+        grad.addColorStop(0, `rgba(16, 185, 129, ${alpha})`);
+        grad.addColorStop(1, 'rgba(16, 185, 129, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Légende
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Amplification du signal sans modifier sa forme', 50, canvas.height - 45);
+      ctx.fillText('→ Amélioration du rapport signal/bruit (SNR)', 50, canvas.height - 28);
+    }
+
+    // Étape 8 : Filtrage
+    function animateStep8(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const filterX = 450;
+      const filterY = 180;
+      const filterW = 80;
+      const filterH = 120;
+
+      // Filtre
+      ctx.fillStyle = '#065f46';
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 3;
+      roundRect(ctx, filterX, filterY, filterW, filterH, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#e0e7ff';
+      ctx.font = 'bold 16px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('FILTRE', filterX + filterW / 2, filterY + filterH / 2);
+      ctx.font = '10px system-ui';
+      ctx.fillText('Passe-bas', filterX + filterW / 2, filterY + filterH / 2 + 18);
+
+      // Labels
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 14px system-ui';
+      ctx.fillText('FILTRAGE ANALOGIQUE', filterX + filterW / 2, filterY - 20);
+
+      // Zone SANS filtre (en haut)
+      const noFilterY = 60;
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.2)';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 100, noFilterY, 250, 80, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('❌ SANS FILTRE', 120, noFilterY + 20);
+
+      // Signal bruité
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(120, noFilterY + 50);
+      for (let i = 0; i < 200; i += 2) {
+        const x = 120 + i;
+        const noise = (Math.random() - 0.5) * 15;
+        const y = noFilterY + 50 + Math.sin(i * 0.1 + time * 0.005) * 8 + noise;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '10px system-ui';
+      ctx.fillText('Bruit élevé, signal instable', 120, noFilterY + 70);
+
+      // Zone AVEC filtre (en bas)
+      const withFilterY = 340;
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 2;
+      roundRect(ctx, 100, withFilterY, 250, 80, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#22c55e';
+      ctx.font = 'bold 12px system-ui';
+      ctx.fillText('✅ AVEC FILTRE', 120, withFilterY + 20);
+
+      // Signal propre
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(34, 197, 94, 0.4)';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(120, withFilterY + 50);
+      for (let i = 0; i < 200; i += 2) {
+        const x = 120 + i;
+        const y = withFilterY + 50 + Math.sin(i * 0.1 + time * 0.005) * 12;
+        ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#86efac';
+      ctx.font = '10px system-ui';
+      ctx.fillText('Signal propre et stable', 120, withFilterY + 70);
+
+      // Flèche centrale montrant le passage dans le filtre
+      ctx.strokeStyle = '#64748b';
+      ctx.fillStyle = '#64748b';
+      ctx.lineWidth = 2;
+      drawArrow(ctx, 225, 170, filterX, filterY + 30);
+      drawArrow(ctx, filterX + filterW, filterY + 90, 225, withFilterY + 20);
+
+      // Légende
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Élimination du bruit haute fréquence avant numérisation', 400, canvas.height - 45);
+      ctx.fillText('→ Amélioration significative du SNR', 400, canvas.height - 28);
+    }
+
+    // Étape 9 : Conversion A/N
+    function animateStep9(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // ========== SIGNAL ANALOGIQUE ENTRANT (PUR) ==========
+      const sigInX = 50;
+      const sigInY = 80;
+      const sigInW = 180;
+      const sigInH = 80;
+
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      roundRect(ctx, sigInX, sigInY, sigInW, sigInH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('Signal analogique', sigInX + sigInW / 2, sigInY - 8);
+      ctx.font = '9px system-ui';
+      ctx.fillText('(continu)', sigInX + sigInW / 2, sigInY + 8);
+
+      // Dessiner signal analogique pur
+      const sigCenterY = sigInY + sigInH / 2;
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      for (let x = 0; x <= sigInW - 20; x += 1) {
+        const t = x / (sigInW - 20);
+        const y = sigCenterY + Math.sin(t * Math.PI * 4 + time * 0.003) * 25;
+        if (x === 0) ctx.moveTo(sigInX + 10 + x, y);
+        else ctx.lineTo(sigInX + 10 + x, y);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // ========== CONVERTISSEUR A/N ==========
+      const adcX = 260;
+      const adcY = 60;
+      const adcW = 100;
+      const adcH = 100;
+
+      ctx.fillStyle = '#7c2d12';
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 3;
+      roundRect(ctx, adcX, adcY, adcW, adcH, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fed7aa';
+      ctx.font = 'bold 20px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('CAN', adcX + adcW / 2, adcY + adcH / 2 - 5);
+      ctx.font = '12px system-ui';
+      ctx.fillText('A → D', adcX + adcW / 2, adcY + adcH / 2 + 18);
+
+      ctx.fillStyle = '#f97316';
+      ctx.font = 'bold 14px system-ui';
+      ctx.fillText('CONVERTISSEUR A/N', adcX + adcW / 2, adcY - 15);
+      ctx.font = '10px system-ui';
+      ctx.fillText('Échantillonnage + Quantification', adcX + adcW / 2, adcY - 2);
+
+      // Flèche signal analogique vers CAN
+      ctx.strokeStyle = '#64748b';
+      ctx.fillStyle = '#64748b';
+      ctx.lineWidth = 2;
+      drawArrow(ctx, sigInX + sigInW, sigCenterY, adcX - 5, adcY + adcH / 2);
+
+      // ========== SECTION ÉCHANTILLONNAGE (après CAN) ==========
+      const samplingX = 400;
+      const samplingY = 50;
+      const samplingW = 320;
+      const samplingH = 120;
+
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2;
+      roundRect(ctx, samplingX, samplingY, samplingW, samplingH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = 'bold 13px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('1️⃣ ÉCHANTILLONNAGE', samplingX + 15, samplingY + 20);
+
+      // Signal avec points d'échantillonnage
+      const sigY = samplingY + 80;
+      const sigStartX = samplingX + 20;
+      const sigEndX = samplingX + samplingW - 20;
+      
+      // Signal continu en arrière-plan
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let x = sigStartX; x <= sigEndX; x += 2) {
+        const t = (x - sigStartX) / (sigEndX - sigStartX);
+        const y = sigY + Math.sin(t * Math.PI * 4 + time * 0.003) * 20;
+        if (x === sigStartX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Points d'échantillonnage
+      const numSamples = 12;
+      ctx.fillStyle = '#ef4444';
+      for (let i = 0; i <= numSamples; i++) {
+        const x = sigStartX + (sigEndX - sigStartX) * (i / numSamples);
+        const t = i / numSamples;
+        const y = sigY + Math.sin(t * Math.PI * 4 + time * 0.003) * 20;
+        
+        // Point d'échantillonnage
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Ligne verticale
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, sigY - 30);
+        ctx.lineTo(x, sigY + 30);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '9px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Signal continu → Points échantillonnés (Fe)', samplingX + 20, samplingY + 40);
+
+      // Flèche CAN vers échantillonnage
+      drawArrow(ctx, adcX + adcW, adcY + adcH / 2, samplingX - 5, samplingY + 60);
+
+      // ========== THÉORÈME DE SHANNON ==========
+      const shannonY = 185;
+      const shannonBoxW = 340;
+      const shannonBoxH = 150;
+
+      // Bon échantillonnage
+      const goodX = 50;
+      ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 2;
+      roundRect(ctx, goodX, shannonY, shannonBoxW, shannonBoxH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#22c55e';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('✅ BON ÉCHANTILLONNAGE', goodX + 15, shannonY + 20);
+      ctx.font = '10px system-ui';
+      ctx.fillStyle = '#86efac';
+      ctx.fillText('Fe ≥ 2 × Fmax (Théorème de Shannon)', goodX + 15, shannonY + 35);
+
+      // Signal haute fréquence bien échantillonné
+      const goodSigY = shannonY + 90;
+      const goodSigStartX = goodX + 20;
+      const goodSigEndX = goodX + shannonBoxW - 20;
+
+      // Signal original
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let x = goodSigStartX; x <= goodSigEndX; x += 1) {
+        const t = (x - goodSigStartX) / (goodSigEndX - goodSigStartX);
+        const y = goodSigY + Math.sin(t * Math.PI * 6) * 20;
+        if (x === goodSigStartX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Points d'échantillonnage (nombreux)
+      ctx.fillStyle = '#22c55e';
+      const goodNumSamples = 18;
+      for (let i = 0; i <= goodNumSamples; i++) {
+        const x = goodSigStartX + (goodSigEndX - goodSigStartX) * (i / goodNumSamples);
+        const t = i / goodNumSamples;
+        const y = goodSigY + Math.sin(t * Math.PI * 6) * 20;
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#86efac';
+      ctx.font = '9px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Signal reconstituable sans perte', goodX + 20, shannonY + 125);
+      ctx.fillText('Fe = 18 échantillons | Fmax = 3 cycles', goodX + 20, shannonY + 138);
+
+      // Mauvais échantillonnage (ALIASING)
+      const badX = 420;
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      roundRect(ctx, badX, shannonY, shannonBoxW, shannonBoxH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('❌ SOUS-ÉCHANTILLONNAGE', badX + 15, shannonY + 20);
+      ctx.font = '10px system-ui';
+      ctx.fillStyle = '#fca5a5';
+      ctx.fillText('Fe < 2 × Fmax → ALIASING !', badX + 15, shannonY + 35);
+
+      // Signal haute fréquence mal échantillonné
+      const badSigY = shannonY + 90;
+      const badSigStartX = badX + 20;
+      const badSigEndX = badX + shannonBoxW - 20;
+
+      // Signal original (même fréquence que le bon)
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let x = badSigStartX; x <= badSigEndX; x += 1) {
+        const t = (x - badSigStartX) / (badSigEndX - badSigStartX);
+        const y = badSigY + Math.sin(t * Math.PI * 6) * 20;
+        if (x === badSigStartX) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Points d'échantillonnage (trop peu)
+      const badNumSamples = 5;
+      const badPoints = [];
+      ctx.fillStyle = '#ef4444';
+      for (let i = 0; i <= badNumSamples; i++) {
+        const x = badSigStartX + (badSigEndX - badSigStartX) * (i / badNumSamples);
+        const t = i / badNumSamples;
+        const y = badSigY + Math.sin(t * Math.PI * 6) * 20;
+        badPoints.push({x, y});
+        ctx.beginPath();
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Relier les points pour montrer le faux signal reconstruit (aliasing)
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      badPoints.forEach((point, i) => {
+        if (i === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '9px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Faux signal reconstruit (aliasing)', badX + 20, shannonY + 125);
+      ctx.fillText('Fe = 5 échantillons | Fmax = 3 cycles → ERREUR', badX + 20, shannonY + 138);
+
+      // ========== SECTION 2: QUANTIFICATION (résolutions) ==========
+      const quantY = 380;
+      const quantBoxW = 155;
+      const quantBoxH = 180;
+      const quantSpacing = 12;
+
+      // Titre
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 13px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('2️⃣ QUANTIFICATION - Résolution en bits', 50, quantY - 10);
+
+      // Différentes résolutions
+      const resolutions = [
+        {bits: 2, levels: 4, color: '#ef4444', label: '2 bits'},
+        {bits: 3, levels: 8, color: '#f97316', label: '3 bits'},
+        {bits: 4, levels: 16, color: '#fbbf24', label: '4 bits'},
+        {bits: 8, levels: 256, color: '#10b981', label: '8 bits'},
+        {bits: 12, levels: 4096, color: '#3b82f6', label: '12 bits'},
+        {bits: 16, levels: 65536, color: '#8b5cf6', label: '16 bits'}
+      ];
+
+      resolutions.forEach((res, index) => {
+        const boxX = 50 + index * (quantBoxW + quantSpacing);
+        const boxY = quantY;
+
+        // Cadre
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
+        ctx.strokeStyle = res.color;
+        ctx.lineWidth = 2;
+        roundRect(ctx, boxX, boxY, quantBoxW, quantBoxH, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // Titre
+        ctx.fillStyle = res.color;
+        ctx.font = 'bold 10px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(res.label, boxX + quantBoxW / 2, boxY + 16);
+
+        // Signal quantifié
+        const sigH = 70;
+        const sigW = quantBoxW - 20;
+        const sigStartX = boxX + 10;
+        const sigTopY = boxY + 28;
+        const sigBottomY = sigTopY + sigH;
+
+        // Dessiner le signal analogique en arrière-plan (gris)
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = 0; x <= sigW; x += 2) {
+          const t = x / sigW;
+          const value = 0.5 + 0.4 * Math.sin(t * Math.PI * 3 + time * 0.003);
+          const y = sigTopY + sigH * (1 - value);
+          if (x === 0) ctx.moveTo(sigStartX + x, y);
+          else ctx.lineTo(sigStartX + x, y);
+        }
+        ctx.stroke();
+
+        // Dessiner le signal quantifié (escalier)
+        ctx.strokeStyle = res.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        let lastQuantValue = null;
+        for (let x = 0; x <= sigW; x += 3) {
+          const t = x / sigW;
+          const analogValue = 0.5 + 0.4 * Math.sin(t * Math.PI * 3 + time * 0.003);
+          // Quantifier la valeur
+          const quantValue = Math.floor(analogValue * res.levels) / res.levels;
+          const y = sigTopY + sigH * (1 - quantValue);
+          
+          if (x === 0) {
+            ctx.moveTo(sigStartX + x, y);
+            lastQuantValue = quantValue;
+          } else {
+            // Créer l'effet escalier
+            if (quantValue !== lastQuantValue) {
+              ctx.lineTo(sigStartX + x, sigTopY + sigH * (1 - lastQuantValue));
+              ctx.lineTo(sigStartX + x, y);
+            } else {
+              ctx.lineTo(sigStartX + x, y);
+            }
+            lastQuantValue = quantValue;
+          }
+        }
+        ctx.stroke();
+
+        // Niveaux
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '8px system-ui';
+        ctx.textAlign = 'center';
+        if (res.bits <= 8) {
+          ctx.fillText(res.levels + ' niveaux', boxX + quantBoxW / 2, boxY + 108);
+        } else {
+          ctx.fillText(res.levels.toLocaleString() + ' niv.', boxX + quantBoxW / 2, boxY + 108);
+        }
+
+        // Plage
+        if (res.bits <= 4) {
+          ctx.fillText('0-' + (res.levels - 1), boxX + quantBoxW / 2, boxY + 119);
+        } else if (res.bits === 8) {
+          ctx.fillText('0-255', boxX + quantBoxW / 2, boxY + 119);
+        } else {
+          ctx.font = '7px system-ui';
+          ctx.fillText('0-' + (res.levels - 1).toLocaleString(), boxX + quantBoxW / 2, boxY + 119);
+        }
+
+        // Qualité avec icône
+        ctx.fillStyle = res.bits >= 12 ? '#22c55e' : (res.bits >= 8 ? '#fbbf24' : '#ef4444');
+        ctx.font = '8px system-ui';
+        if (res.bits === 2) ctx.fillText('⚠️ Très grossier', boxX + quantBoxW / 2, boxY + 132);
+        else if (res.bits === 3) ctx.fillText('⚠️ Grossier', boxX + quantBoxW / 2, boxY + 132);
+        else if (res.bits === 4) ctx.fillText('⚡ Moyen', boxX + quantBoxW / 2, boxY + 132);
+        else if (res.bits === 8) ctx.fillText('✓ Standard', boxX + quantBoxW / 2, boxY + 132);
+        else if (res.bits === 12) ctx.fillText('✓ Radio', boxX + quantBoxW / 2, boxY + 132);
+        else if (res.bits === 16) ctx.fillText('⭐ Premium', boxX + quantBoxW / 2, boxY + 132);
+
+        // CAMEMBERT : Taille de fichier (2048×2048 pixels)
+        const pieRadius = 22;
+        const pieX = boxX + quantBoxW / 2;
+        const pieY = boxY + quantBoxH - 20;
+        const pixels = 2048 * 2048;
+        const fileSizeMB = (pixels * res.bits) / (8 * 1024 * 1024);
+        
+        // Dessiner le camembert
+        const maxSize = 16; // 16 MB pour 16 bits
+        const percentage = fileSizeMB / maxSize;
+        const endAngle = -Math.PI / 2 + (percentage * Math.PI * 2);
+        
+        // Fond gris
+        ctx.fillStyle = 'rgba(71, 85, 105, 0.3)';
+        ctx.beginPath();
+        ctx.arc(pieX, pieY, pieRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Portion colorée
+        ctx.fillStyle = res.color;
+        ctx.globalAlpha = 0.7;
+        ctx.beginPath();
+        ctx.moveTo(pieX, pieY);
+        ctx.arc(pieX, pieY, pieRadius, -Math.PI / 2, endAngle);
+        ctx.lineTo(pieX, pieY);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        
+        // Bordure
+        ctx.strokeStyle = res.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(pieX, pieY, pieRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Taille en MB au centre
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = 'bold 8px system-ui';
+        ctx.textAlign = 'center';
+        if (fileSizeMB < 1) {
+          ctx.fillText(Math.round(fileSizeMB * 1024) + ' KB', pieX, pieY + 2);
+        } else {
+          ctx.fillText(fileSizeMB.toFixed(1) + ' MB', pieX, pieY + 2);
+        }
+      });
+
+      // Légende taille fichiers
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('Taille fichier (matrice 2048×2048)', canvas.width / 2, quantY + quantBoxH + 30);
+
+      // Légende CAN (bien visible en dessous)
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 11px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('CAN : Échantillonnage temporel (Shannon) + Quantification amplitude (2^n niveaux)', canvas.width / 2, quantY + quantBoxH + 50);
+    }
+
+    // Étape 10 : Traitement numérique
+    function animateStep10(ctx, dt, time) {
+      ctx.fillStyle = '#020617';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const dspX = 80;
+      const dspY = 40;
+      const dspW = 120;
+      const dspH = 100;
+
+      // Processeur DSP
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 3;
+      roundRect(ctx, dspX, dspY, dspW, dspH, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 20px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('DSP', dspX + dspW / 2, dspY + dspH / 2 - 5);
+      ctx.font = '10px system-ui';
+      ctx.fillText('Traitement', dspX + dspW / 2, dspY + dspH / 2 + 15);
+      ctx.fillText('d\'image', dspX + dspW / 2, dspY + dspH / 2 + 28);
+
+      ctx.font = 'bold 13px system-ui';
+      ctx.fillText('TRAITEMENT NUMÉRIQUE', dspX + dspW / 2, dspY - 15);
+
+      // Animation des traitements en cours
+      const processingPhase = (time % 6000) / 6000;
+      const treatments = [
+        'Correction champ plat',
+        'Suppression bruit',
+        'Rehaussement contours',
+        'Égalisation histogramme',
+        'Fenêtrage W/L',
+        'Export DICOM'
+      ];
+      
+      const currentTreatment = Math.floor(processingPhase * treatments.length);
+      ctx.fillStyle = '#22c55e';
+      ctx.font = '9px system-ui';
+      ctx.fillText(treatments[currentTreatment], dspX + dspW / 2, dspY + dspH + 15);
+
+      // ========== IMAGE AVANT (brute) ==========
+      const imgBeforeX = 250;
+      const imgBeforeY = 50;
+      const imgW = 140;
+      const imgH = 200;
+
+      ctx.fillStyle = '#000';
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 3;
+      roundRect(ctx, imgBeforeX, imgBeforeY, imgW, imgH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('❌ AVANT TRAITEMENT', imgBeforeX + imgW / 2, imgBeforeY - 10);
+      ctx.font = '9px system-ui';
+      ctx.fillStyle = '#fca5a5';
+      ctx.fillText('(Image brute)', imgBeforeX + imgW / 2, imgBeforeY + imgH + 12);
+
+      // Dessiner image brute (avec défauts)
+      ctx.save();
+      ctx.beginPath();
+      roundRect(ctx, imgBeforeX + 5, imgBeforeY + 5, imgW - 10, imgH - 10, 5);
+      ctx.clip();
+
+      // Corps (flou et peu contrasté)
+      ctx.fillStyle = '#505050';
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.ellipse(imgBeforeX + imgW / 2, imgBeforeY + imgH / 2, 50, 80, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Os colonne (peu visible)
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = '#a0a0a0';
+      ctx.fillRect(imgBeforeX + imgW / 2 - 6, imgBeforeY + 40, 12, 100);
+
+      // Poumons (peu contrastés)
+      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = '#404040';
+      ctx.beginPath();
+      ctx.ellipse(imgBeforeX + imgW / 2 - 25, imgBeforeY + 75, 15, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(imgBeforeX + imgW / 2 + 25, imgBeforeY + 75, 15, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cœur
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = '#707070';
+      ctx.beginPath();
+      ctx.ellipse(imgBeforeX + imgW / 2, imgBeforeY + 95, 20, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // BRUIT (pixels aléatoires)
+      ctx.globalAlpha = 0.4;
+      for (let i = 0; i < 400; i++) {
+        const x = imgBeforeX + 5 + Math.random() * (imgW - 10);
+        const y = imgBeforeY + 5 + Math.random() * (imgH - 10);
+        const brightness = Math.floor(Math.random() * 100);
+        ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+
+      // Pixels défectueux (points blancs/noirs)
+      ctx.globalAlpha = 1;
+      for (let i = 0; i < 15; i++) {
+        const x = imgBeforeX + 10 + Math.random() * (imgW - 20);
+        const y = imgBeforeY + 10 + Math.random() * (imgH - 20);
+        ctx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000';
+        ctx.fillRect(x, y, 2, 2);
+      }
+
+      // Bandes de non-uniformité
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(imgBeforeX + 5, imgBeforeY + 35, imgW - 10, 3);
+      ctx.fillRect(imgBeforeX + 5, imgBeforeY + 100, imgW - 10, 2);
+
+      ctx.restore();
+
+      // Défauts annotés
+      ctx.fillStyle = '#fca5a5';
+      ctx.font = '9px system-ui';
+      ctx.textAlign = 'left';
+      const defects = [
+        '• Bruit élevé',
+        '• Pixels défectueux',
+        '• Contraste faible',
+        '• Non-uniformité',
+        '• Contours flous'
+      ];
+      defects.forEach((text, i) => {
+        ctx.fillText(text, imgBeforeX - 5, imgBeforeY + imgH + 28 + i * 11);
+      });
+
+      // ========== IMAGE APRÈS (traitée) ==========
+      const imgAfterX = 420;
+      const imgAfterY = 50;
+
+      ctx.fillStyle = '#000';
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 3;
+      roundRect(ctx, imgAfterX, imgAfterY, imgW, imgH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#22c55e';
+      ctx.font = 'bold 12px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('✅ APRÈS TRAITEMENT', imgAfterX + imgW / 2, imgAfterY - 10);
+      ctx.font = '9px system-ui';
+      ctx.fillStyle = '#86efac';
+      ctx.fillText('(Image optimisée)', imgAfterX + imgW / 2, imgAfterY + imgH + 12);
+
+      // Dessiner image traitée (nette et contrastée)
+      ctx.save();
+      ctx.beginPath();
+      roundRect(ctx, imgAfterX + 5, imgAfterY + 5, imgW - 10, imgH - 10, 5);
+      ctx.clip();
+
+      // Corps (net et contrasté)
+      ctx.fillStyle = '#606060';
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.ellipse(imgAfterX + imgW / 2, imgAfterY + imgH / 2, 50, 80, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Os colonne (bien visible, blanc)
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(imgAfterX + imgW / 2 - 6, imgAfterY + 40, 12, 100);
+
+      // Os bassin
+      ctx.beginPath();
+      ctx.ellipse(imgAfterX + imgW / 2, imgAfterY + 155, 45, 18, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tête/crâne
+      ctx.beginPath();
+      ctx.arc(imgAfterX + imgW / 2, imgAfterY + 30, 24, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Poumons (bien contrastés, sombres)
+      ctx.fillStyle = '#202020';
+      ctx.beginPath();
+      ctx.ellipse(imgAfterX + imgW / 2 - 25, imgAfterY + 75, 15, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(imgAfterX + imgW / 2 + 25, imgAfterY + 75, 15, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cœur (gris intermédiaire bien défini)
+      ctx.fillStyle = '#909090';
+      ctx.beginPath();
+      ctx.ellipse(imgAfterX + imgW / 2, imgAfterY + 95, 20, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Contours renforcés
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.ellipse(imgAfterX + imgW / 2, imgAfterY + imgH / 2, 50, 80, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.restore();
+
+      // Qualités annotées
+      ctx.fillStyle = '#86efac';
+      ctx.font = '9px system-ui';
+      ctx.textAlign = 'left';
+      const qualities = [
+        '• Bruit supprimé',
+        '• Pixels corrigés',
+        '• Contraste optimal',
+        '• Uniformité',
+        '• Contours nets'
+      ];
+      qualities.forEach((text, i) => {
+        ctx.fillText(text, imgAfterX - 5, imgAfterY + imgH + 28 + i * 11);
+      });
+
+      // Flèche de traitement avec progression
+      ctx.save();
+      ctx.strokeStyle = '#60a5fa';
+      ctx.fillStyle = '#60a5fa';
+      ctx.lineWidth = 3;
+      
+      const arrowY = imgAfterY + imgH / 2;
+      const arrowStartX = imgBeforeX + imgW + 10;
+      const arrowEndX = imgAfterX - 10;
+      const arrowProgress = Math.sin(processingPhase * Math.PI * 2) * 0.5 + 0.5;
+      
+      drawArrow(ctx, arrowStartX, arrowY, arrowEndX, arrowY);
+      
+      // Point de progression sur la flèche
+      const progressX = arrowStartX + (arrowEndX - arrowStartX) * arrowProgress;
+      const progressGrad = ctx.createRadialGradient(progressX, arrowY, 0, progressX, arrowY, 8);
+      progressGrad.addColorStop(0, 'rgba(96, 165, 250, 1)');
+      progressGrad.addColorStop(1, 'rgba(96, 165, 250, 0)');
+      ctx.fillStyle = progressGrad;
+      ctx.beginPath();
+      ctx.arc(progressX, arrowY, 8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+
+      // Flèche du DSP vers le traitement
+      ctx.strokeStyle = '#64748b';
+      ctx.fillStyle = '#64748b';
+      ctx.lineWidth = 2;
+      drawArrow(ctx, dspX + dspW, dspY + dspH / 2, imgBeforeX - 30, imgBeforeY + imgH / 2);
+
+      // Indicateur de métrique SNR (réorganisé en bas à gauche)
+      const metricsX = 50;
+      const metricsY = 300;
+      
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2;
+      roundRect(ctx, metricsX, metricsY, 200, 90, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('📊 AMÉLIORATION QUALITÉ', metricsX + 15, metricsY + 20);
+
+      ctx.font = '11px system-ui';
+      ctx.fillStyle = '#ef4444';
+      ctx.fillText('Avant  : SNR ≈ 20 dB', metricsX + 15, metricsY + 40);
+      ctx.fillStyle = '#22c55e';
+      ctx.fillText('Après : SNR ≈ 45 dB', metricsX + 15, metricsY + 55);
+      
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px system-ui';
+      ctx.fillText('Contraste : +125%', metricsX + 15, metricsY + 70);
+      ctx.fillText('Netteté : +180%', metricsX + 15, metricsY + 83);
+
+      // ÉCHELLE DE HOUNSFIELD (à droite, après les images)
+      const hunsfieldX = 590;
+      const hunsfieldY = 50;
+      const hunsfieldW = 380;
+      const hunsfieldH = 440;
+      
+      ctx.fillStyle = 'rgba(30, 41, 59, 0.9)';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 2;
+      roundRect(ctx, hunsfieldX, hunsfieldY, hunsfieldW, hunsfieldH, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 13px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('📏 ÉCHELLE DE HOUNSFIELD', hunsfieldX + hunsfieldW / 2, hunsfieldY + 20);
+      
+      ctx.font = '9px system-ui';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('(Unités Hounsfield - HU)', hunsfieldX + hunsfieldW / 2, hunsfieldY + 35);
+
+      // Échelle graduée verticale
+      const scaleX = hunsfieldX + 30;
+      const scaleY = hunsfieldY + 50;
+      const scaleH = 340;
+      const scaleW = 45;
+
+      // Fond de l'échelle avec gradient
+      const gradient = ctx.createLinearGradient(scaleX, scaleY, scaleX, scaleY + scaleH);
+      gradient.addColorStop(0, '#f8fafc');    // Blanc (os dense)
+      gradient.addColorStop(0.2, '#e2e8f0');  // Os
+      gradient.addColorStop(0.35, '#cbd5e1'); // Calcifications
+      gradient.addColorStop(0.5, '#94a3b8');  // Tissus mous
+      gradient.addColorStop(0.65, '#64748b'); // Sang
+      gradient.addColorStop(0.8, '#475569');  // Graisse
+      gradient.addColorStop(0.9, '#1e293b');  // Eau
+      gradient.addColorStop(1, '#020617');    // Air
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(scaleX, scaleY, scaleW, scaleH);
+      
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(scaleX, scaleY, scaleW, scaleH);
+
+      // Valeurs et labels clés de Hounsfield (VERSION COMPLÈTE)
+      const hunsfieldValues = [
+        {value: 3000, label: '+3000', desc: 'Os cortical dense', y: 0, color: '#f8fafc'},
+        {value: 1000, label: '+1000', desc: 'Os compact', y: 0.08, color: '#e2e8f0'},
+        {value: 400, label: '+400', desc: 'Os trabéculaire', y: 0.20, color: '#cbd5e1'},
+        {value: 130, label: '+130', desc: 'Calcifications', y: 0.32, color: '#cbd5e1'},
+        {value: 70, label: '+70', desc: 'Sang coagulé', y: 0.44, color: '#94a3b8'},
+        {value: 50, label: '+50', desc: 'Tissus mous', y: 0.52, color: '#94a3b8'},
+        {value: 30, label: '+30', desc: 'Foie, rate', y: 0.60, color: '#64748b'},
+        {value: 0, label: '0', desc: 'Eau', y: 0.72, color: '#475569'},
+        {value: -50, label: '-50', desc: 'Graisse', y: 0.84, color: '#1e293b'},
+        {value: -1000, label: '-1000', desc: 'Air / Poumons', y: 1, color: '#020617'}
+      ];
+
+      ctx.font = '10px system-ui';
+      ctx.textAlign = 'left';
+      
+      hunsfieldValues.forEach(item => {
+        const yPos = scaleY + item.y * scaleH;
+        
+        // Ligne de repère
+        ctx.strokeStyle = 'rgba(96, 165, 250, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(scaleX, yPos);
+        ctx.lineTo(scaleX + scaleW, yPos);
+        ctx.stroke();
+        
+        // Valeur HU
+        ctx.fillStyle = item.color;
+        ctx.font = 'bold 10px system-ui';
+        ctx.textAlign = 'right';
+        ctx.fillText(item.label, scaleX - 6, yPos + 4);
+        
+        // Description
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '10px system-ui';
+        ctx.textAlign = 'left';
+        ctx.fillText(item.desc, scaleX + scaleW + 12, yPos + 4);
+      });
+
+      // Explication HU
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '9px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText('Fenêtrage ajustable selon le tissu', hunsfieldX + hunsfieldW / 2, hunsfieldY + hunsfieldH - 40);
+      ctx.fillText('étudié (os, poumons, abdomen...)', hunsfieldX + hunsfieldW / 2, hunsfieldY + hunsfieldH - 27);
+      ctx.fillText('Permet d\'optimiser la visualisation', hunsfieldX + hunsfieldW / 2, hunsfieldY + hunsfieldH - 14);
+
+      // Format de sortie (en dessous de l'échelle de Hounsfield)
+      const formatX = hunsfieldX;
+      const formatY = hunsfieldY + hunsfieldH + 20;
+      
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('📁 FORMAT DE SORTIE', formatX + 10, formatY);
+      
+      ctx.font = '9px system-ui';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('• Format : DICOM (12-16 bits)', formatX + 10, formatY + 18);
+      ctx.fillText('• Matrice : 2048×2048 pixels', formatX + 10, formatY + 32);
+      ctx.fillText('• Compression : JPEG 2000', formatX + 10, formatY + 46);
+      ctx.fillText('• Taille : 8-16 MB/image', formatX + 10, formatY + 60);
+
+      // Légende
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText('Le traitement numérique transforme l\'image brute en image diagnostique exploitable', 50, canvas.height - 28);
+    }
+
+    // ============================================
+    // FONCTIONS UTILITAIRES
+    // ============================================
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function drawArrow(ctx, x1, y1, x2, y2) {
+      const headlen = 10;
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+      ctx.stroke();
+    }
+
+    // ============================================
+    // LECTURE AUTOMATIQUE
+    // ============================================
+
+    function startAutoPlay() {
+      stopAutoPlay();
+      goToStep(0);
+      autoPlayInterval = setInterval(() => {
+        if (currentStep < steps.length - 1) {
+          nextStep();
+        } else {
+          stopAutoPlay();
+        }
+      }, 5000); // 5 secondes par étape
+      
+      // Mettre à jour l'état des boutons
+      document.getElementById('playBtn').classList.add('active');
+      document.getElementById('pauseBtn').classList.remove('active');
+      document.getElementById('pauseBtn').innerHTML = '⏸ Pause';
+      document.getElementById('pauseBtn').dataset.paused = 'false';
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+      }
+      
+      // Mettre à jour l'état des boutons
+      document.getElementById('playBtn').classList.remove('active');
+    }
+
+    function togglePause() {
+      const pauseBtn = document.getElementById('pauseBtn');
+      const isPaused = pauseBtn.dataset.paused === 'true';
+      
+      if (isPaused) {
+        // Reprendre la lecture
+        startAutoPlay();
+        pauseBtn.innerHTML = '⏸ Pause';
+        pauseBtn.dataset.paused = 'false';
+        pauseBtn.classList.remove('active');
+      } else {
+        // Mettre en pause
+        stopAutoPlay();
+        pauseBtn.innerHTML = '▶ Reprendre';
+        pauseBtn.dataset.paused = 'true';
+        pauseBtn.classList.add('active');
+      }
+    }
+
+    // ============================================
+    // ÉVÉNEMENTS
+    // ============================================
+
+    document.getElementById('playBtn').addEventListener('click', startAutoPlay);
+    document.getElementById('pauseBtn').addEventListener('click', togglePause);
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      stopAutoPlay();
+      const pauseBtn = document.getElementById('pauseBtn');
+      pauseBtn.innerHTML = '⏸ Pause';
+      pauseBtn.dataset.paused = 'false';
+      pauseBtn.classList.remove('active');
+      nextStep();
+    });
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      stopAutoPlay();
+      const pauseBtn = document.getElementById('pauseBtn');
+      pauseBtn.innerHTML = '⏸ Pause';
+      pauseBtn.dataset.paused = 'false';
+      pauseBtn.classList.remove('active');
+      prevStep();
+    });
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      stopAutoPlay();
+      const pauseBtn = document.getElementById('pauseBtn');
+      pauseBtn.innerHTML = '⏸ Pause';
+      pauseBtn.dataset.paused = 'false';
+      pauseBtn.classList.remove('active');
+      resetToStart();
+    });
+
+    // ============================================
+    // INITIALISATION
+    // ============================================
+
+    initStepNav();
+    updateExplanations();
+    startAnimation();
+    
+    // Initialiser l'état du bouton pause
+    const pauseBtn = document.getElementById('pauseBtn');
+    pauseBtn.dataset.paused = 'false';
+  </script>
+</body>
+</html>
