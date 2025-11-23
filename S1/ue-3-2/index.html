@@ -1,113 +1,375 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>UE 3.2 – Physique des rayons X – S1</title>
-<style>
-/* original styles unchanged */
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UE 3.2 – Physique des rayons X</title>
+
+  <style>
+    :root {
+      --bg-grad: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 35%, #fdfdfd 100%);
+      --card-bg: rgba(255,255,255,0.96);
+      --border-soft: #e5e7eb;
+      --shadow-soft: 0 18px 40px rgba(15,23,42,0.12);
+      --text-main: #0f172a;
+      --text-soft: #6b7280;
+      --pill-bg: #f4f4ff;
+      --pill-border: #e0e7ff;
+      --radius-xl: 24px;
+      --radius-pill: 999px;
+      --transition: 0.18s ease-out;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      background: var(--bg-grad);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px 40px;
+    }
+
+    .page { width: 100%; max-width: 1100px; margin: 0 auto; }
+
+    .breadcrumbs {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin-bottom: 12px;
+    }
+
+    .breadcrumbs a {
+      color: var(--text-soft);
+      text-decoration: none;
+    }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    /* HEADER UE */
+    .header-card {
+      position: relative;
+      border-radius: 30px;
+      background: var(--card-bg);
+      border: 1px solid rgba(148,163,184,0.25);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 22px 20px;
+      margin-bottom: 24px;
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+    }
+
+    .header-main {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .icon-bubble {
+      width: 80px;
+      height: 80px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #e0f2fe, #e0e7ff 45%, #ffffff 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.2rem;
+      box-shadow: 0 10px 36px rgba(59,130,246,0.28);
+    }
+
+    .header-text h1 {
+      font-size: clamp(1.8rem, 3vw, 2.3rem);
+      font-weight: 800;
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .header-text small {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-soft);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .pill {
+      border-radius: var(--radius-pill);
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      background: var(--pill-bg);
+      border: 1px solid var(--pill-border);
+      color: #4b5563;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      color: var(--text-soft);
+      max-width: 600px;
+    }
+
+    /* TITRES DE SECTIONS */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 18px 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-note {
+      font-size: 0.85rem;
+      color: var(--text-soft);
+      margin-bottom: 14px;
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+    @media (min-width: 768px){
+      .grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    }
+
+    /* CARDS */
+    .card-link {
+      display: block;
+      border-radius: 20px;
+      border: 1px solid var(--border-soft);
+      padding: 14px 14px 12px;
+      background: rgba(255,255,255,0.94);
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+      transition: transform var(--transition),
+                  box-shadow var(--transition),
+                  border-color var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 35px rgba(15,23,42,0.16);
+      border-color: rgba(129,140,248,0.7);
+      background: #fff;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-title span.emoji { font-size: 1.2rem; }
+
+    .card-badge {
+      border-radius: var(--radius-pill);
+      padding: 2px 9px;
+      font-size: 0.75rem;
+      background: #e0e7ff;
+      color: #1e3a8a;
+      border: 1px solid rgba(79,70,229,0.4);
+    }
+
+    .card-desc {
+      font-size: 0.83rem;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+
+    .tag-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      border-radius: 999px;
+      padding: 1px 8px;
+      background: #f3f4ff;
+      font-size: 0.7rem;
+      color: #4b5563;
+    }
+
+    .open-pill {
+      border-radius: var(--radius-pill);
+      padding: 2px 9px;
+      background: #0f172a;
+      color: #fff;
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+  </style>
 </head>
+
 <body>
 <div class="page">
 
   <div class="breadcrumbs">
-    <a href="../index.html">← Semestre 1</a>
+    <a href="../index.html">← Retour Semestre 1</a>
   </div>
 
+  <!-- HEADER -->
   <section class="header-card">
-    <!-- unchanged header content -->
+    <div class="header-main">
+      <div class="icon-bubble">💡</div>
+
+      <div class="header-text">
+        <h1>UE 3.2 – Physique des rayons X <small>(S1)</small></h1>
+
+        <div class="pill-row">
+          <div class="pill"><span>⚡</span>Production des RX</div>
+          <div class="pill"><span>☢️</span>Interactions matière</div>
+          <div class="pill"><span>🧩</span>Compréhension visuelle</div>
+          <div class="pill"><span>✏️</span>Exercices interactifs</div>
+        </div>
+
+        <p class="subtitle">
+          Animations pour comprendre le fonctionnement du tube à rayons X + exercices interactifs
+          pour maîtriser la production du faisceau et la formation de l’image.
+        </p>
+      </div>
+    </div>
   </section>
 
-  <section class="sections">
 
-    <article class="section-card">
-      <header class="section-header">
-        <div class="section-title">
-          <span class="emoji">👀</span>
-          <h2>1) Compréhension – Animation</h2>
+  <!-- ANIMATIONS -->
+  <section>
+    <div class="section-title">
+      🎞️ Animations pédagogiques
+    </div>
+    <p class="section-note">À visionner avant de passer aux exercices.</p>
+
+    <div class="grid">
+
+      <a class="card-link" href="creation_img_radio_2.html">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="emoji">🖼️</span>
+            <span>Création de l’image radiologique</span>
+          </div>
+          <span class="card-badge">Animation</span>
         </div>
-        <span class="section-chip">À regarder en premier</span>
-      </header>
-      <p class="section-note">Animation purement explicative...</p>
 
-      <div class="resource-list">
-        <a class="resource-item" href="creation_img_radio_2.html">
-          <div class="resource-main">
-            <div class="resource-title">Animation – Création de l’image radiologique</div>
-            <div class="resource-desc">Visualise...</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">compréhension</span>
-              <span class="tag">animation</span>
-            </div>
-          </div>
-        </a>
+        <p class="card-desc">
+          Explication visuelle de la chaîne de production d’image : faisceau, atténuation, détection.
+        </p>
 
-        <!-- Added animation_interactions_radiation_V11.html -->
-        <a class="resource-item" href="animation_interactions_radiation_V11.html">
-          <div class="resource-main">
-            <div class="resource-title">Animation – Interactions (électron, photon, Compton…)</div>
-            <div class="resource-desc">Animation sur l’ensemble des interactions : électron, photon, effet Compton, etc.</div>
+        <div class="card-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#6b7280;">
+          <div class="tag-row">
+            <span class="tag">compréhension</span>
+            <span class="tag">rayons X</span>
           </div>
-          <div class="resource-meta">
-            <span class="badge">ouvrir</span>
-            <div class="tag-row">
-              <span class="tag">interactions</span>
-              <span class="tag">animation</span>
-            </div>
-          </div>
-        </a>
-      </div>
-    </article>
-
-    <article class="section-card">
-      <header class="section-header">
-        <div class="section-title">
-          <span class="emoji">✏️</span>
-          <h2>2) Exercices – Schéma du tube</h2>
+          <span class="open-pill">ouvrir →</span>
         </div>
-        <span class="section-chip">À faire après l’animation</span>
-      </header>
-      <p class="section-note">Ici, on n’est plus dans la simple visualisation...</p>
+      </a>
 
-      <div class="resource-list">
-        <a class="resource-item" href="exercice-schéma-tube-Rx.html">
-          <div class="resource-main">
-            <div class="resource-title">Exercice – Schéma du tube à rayons X</div>
-            <div class="resource-desc">Exercice interactif...</div>
+      <a class="card-link" href="animation_interactions_radiation_V11.html">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="emoji">🔬</span>
+            <span>Interactions RX / matière</span>
           </div>
-          <div class="resource-meta">
-            <span class="badge-soft badge">exercice</span>
-            <div class="tag-row">
-              <span class="tag">tube RX</span>
-              <span class="tag">schéma</span>
-            </div>
-          </div>
-        </a>
+          <span class="card-badge">Animation</span>
+        </div>
 
-        <!-- Added td_interractif.html -->
-        <a class="resource-item" href="td_interractif.html">
-          <div class="resource-main">
-            <div class="resource-title">TD interactif – QCM, vrai/faux, schémas, questions ouvertes</div>
-            <div class="resource-desc">Entraîne-toi avec différents types d’exercices interactifs.</div>
-          </div>
-          <div class="resource-meta">
-            <span class="badge-soft badge">exercice</span>
-            <div class="tag-row">
-              <span class="tag">QCM</span>
-              <span class="tag">Vrai/Faux</span>
-              <span class="tag">Schémas</span>
-            </div>
-          </div>
-        </a>
-      </div>
-    </article>
+        <p class="card-desc">
+          Visualisation : électron, photon, effets Compton, absorption, diffusion…
+        </p>
 
+        <div class="card-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#6b7280;">
+          <div class="tag-row">
+            <span class="tag">interactions</span>
+            <span class="tag">physique</span>
+          </div>
+          <span class="open-pill">ouvrir →</span>
+        </div>
+      </a>
+
+    </div>
   </section>
+
+
+  <!-- EXERCICES -->
+  <section style="margin-top:28px;">
+    <div class="section-title">
+      ✏️ Exercices interactifs
+    </div>
+    <p class="section-note">Après les animations, teste ta compréhension.</p>
+
+    <div class="grid">
+
+      <a class="card-link" href="exercice-schéma-tube-Rx.html">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="emoji">📘</span>
+            <span>Schéma du tube à rayons X</span>
+          </div>
+          <span class="card-badge">Exercice</span>
+        </div>
+
+        <p class="card-desc">
+          Replace les éléments du tube, comprends la trajectoire des électrons et la formation du faisceau.
+        </p>
+
+        <div class="card-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#6b7280;">
+          <div class="tag-row">
+            <span class="tag">tube RX</span>
+            <span class="tag">schéma</span>
+          </div>
+          <span class="open-pill">ouvrir →</span>
+        </div>
+      </a>
+
+      <a class="card-link" href="td_interractif.html">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="emoji">📝</span>
+            <span>TD interactif complet</span>
+          </div>
+          <span class="card-badge">Exercice</span>
+        </div>
+
+        <p class="card-desc">
+          QCM, vrai/faux, schémas, questions ouvertes : un entraînement complet et varié.
+        </p>
+
+        <div class="card-footer" style="display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:#6b7280;">
+          <div class="tag-row">
+            <span class="tag">QCM</span>
+            <span class="tag">vrai/faux</span>
+            <span class="tag">schéma</span>
+          </div>
+          <span class="open-pill">ouvrir →</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
 </div>
 </body>
 </html>
