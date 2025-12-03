@@ -1,0 +1,1610 @@
+import React, { useState, useEffect } from 'react';
+import { Check, X, ChevronRight, RotateCcw, Award, BookOpen, Brain, Heart, Shield } from 'lucide-react';
+
+// Données des exercices
+const exercisesData = {
+  cm3_vie: {
+    title: "CM3 - Les étapes de la vie",
+    icon: Heart,
+    color: "#e91e63",
+    exercises: [
+      {
+        id: "definitions",
+        type: "matching",
+        title: "Exercice 1 : Terminologie",
+        instruction: "Associez chaque définition au terme correspondant",
+        items: [
+          { definition: "Gamète mâle", answer: "Spermatozoïde" },
+          { definition: "Gamète femelle", answer: "Ovocyte" },
+          { definition: "Œuf fécondé", answer: "Zygote" },
+          { definition: "Œuf après 1ère division", answer: "Embryon" },
+          { definition: "Implantation de l'embryon dans l'utérus", answer: "Nidation" },
+          { definition: "Période de l'œuf fécondé à la fin de la 8ème semaine", answer: "Embryogénèse" },
+          { definition: "Différentiation cellulaire et apparition des organes", answer: "Organogénèse" },
+          { definition: "À partir de 9ème semaine jusqu'à la naissance", answer: "Fœtus" },
+          { definition: "Organe à l'interface entre le bébé et la mère", answer: "Placenta" },
+          { definition: "Enveloppe liquidienne où baigne le bébé", answer: "Sac amniotique" },
+          { definition: "Semaines à partir de la fécondation", answer: "Semaines de grossesse" },
+          { definition: "Semaines à partir du 1er jour des dernières règles", answer: "Semaines d'aménorrhée" }
+        ]
+      },
+      {
+        id: "vf_foetus",
+        type: "truefalse",
+        title: "Exercice 2 : Vrai ou Faux - Le fœtus",
+        items: [
+          { statement: "La ventilation pulmonaire du fœtus est inexistante", correct: true, explanation: "Le fœtus ne respire pas avec ses poumons, l'oxygénation se fait via le placenta" },
+          { statement: "La myélinisation du fœtus est complète", correct: false, explanation: "La myélinisation est incomplète à la naissance et continue après" },
+          { statement: "Le fœtus ingère du liquide amniotique et produit du colostrum", correct: false, explanation: "Il produit du méconium (premières selles), pas du colostrum qui est le lait maternel" },
+          { statement: "Le fœtus produit de l'urine", correct: true, explanation: "Le fœtus urine dans le liquide amniotique" },
+          { statement: "Le sang oxygéné venant du placenta est dévié vers les poumons du fœtus", correct: false, explanation: "Il est dévié vers le cœur gauche, le poumon est 'shunté'" },
+          { statement: "La grossesse entraîne des modifications physiques et métaboliques chez la femme enceinte", correct: true, explanation: "Modifications endocriniennes, cardiovasculaires, respiratoires, urinaires, biologiques, digestives" },
+          { statement: "Les 3 phases de l'accouchement sont : dilatation du col - Expulsion du placenta - Expulsion du fœtus", correct: false, explanation: "L'ordre correct est : dilatation du col - Expulsion du fœtus - Expulsion du placenta (délivrance)" },
+          { statement: "La délivrance est l'expulsion du fœtus", correct: false, explanation: "La délivrance est l'expulsion du placenta" }
+        ]
+      },
+      {
+        id: "vf_nouveau_ne",
+        type: "truefalse",
+        title: "Exercice 3 : Vrai ou Faux - Le nouveau-né",
+        items: [
+          { statement: "Le nouveau-né a une immaturité rénale", correct: true, explanation: "Turn-over hydrique x7/adulte et activité métabolique x2/adulte" },
+          { statement: "Le nouveau-né a une immaturité hépatique", correct: true, explanation: "Biliaire, synthèse des protéines, néoglucogénèse déficiente, chute de la glycémie" },
+          { statement: "Le nouveau-né a une immaturité endocrinienne", correct: false, explanation: "Il a une maturité endocrinienne" },
+          { statement: "Le nouveau-né n'a aucune immunité", correct: false, explanation: "Il a une immunité héritée de la mère" },
+          { statement: "Le nouveau-né a un besoin accru en magnésium et vitamine C", correct: false, explanation: "Besoins accrus en fer et vitamine D" }
+        ]
+      },
+      {
+        id: "tableau_parametres",
+        type: "table",
+        title: "Exercice 4 : Paramètres physiologiques",
+        instruction: "Complétez le tableau avec les valeurs de l'adulte et du nouveau-né",
+        headers: ["Fréquence respiratoire (/min)", "Masse Hydrique (%)", "Fréquence cardiaque (/min)", "Pression artérielle (mmHg)", "Taux hémoglobine (g/dl)"],
+        adulteAnswers: ["12 à 20", "60", "60-80", "130 max", "15"],
+        answers: ["40", "80", "120-180", "70", "15"],
+        tolerances: [5, 5, 10, 10, 2],
+        adulteTolerance: [2, 5, 5, 10, 2]
+      },
+      {
+        id: "vf_vieillissement",
+        type: "truefalse",
+        title: "Exercice 5 : Vrai ou Faux - Vieillissement",
+        items: [
+          { statement: "La ménopause correspond à un arrêt définitif du fonctionnement de l'utérus", correct: false, explanation: "C'est l'arrêt définitif du fonctionnement des ovaires" },
+          { statement: "La ménopause accroît le risque cardio-vasculaire et l'ostéoporose", correct: true, explanation: "La diminution des œstrogènes augmente ces risques" },
+          { statement: "Le dosage de l'hormone béta HCG permet de diagnostiquer le diabète", correct: false, explanation: "Il permet d'affirmer la grossesse" },
+          { statement: "On parle de vieillesse à partir de 65 ans d'après l'OMS", correct: true, explanation: "Définition de l'OMS" },
+          { statement: "La gériatrie est une science qui étudie le vieillissement dans tous les aspects", correct: false, explanation: "C'est la définition de la gérontologie. La gériatrie est la médecine des personnes âgées" },
+          { statement: "La diminution de l'audition s'appelle la presbyacousie et la diminution de la vue s'appelle la presbytie", correct: true, explanation: "Termes corrects" },
+          { statement: "Le vieillissement entraîne une diminution du métabolisme, une augmentation de l'épaisseur du myocarde et une rigidité des parois des artères", correct: true, explanation: "Modifications physiologiques du vieillissement" },
+          { statement: "La sénescence est un vieillissement cellulaire", correct: true, explanation: "Processus de vieillissement au niveau cellulaire" },
+          { statement: "La mort est provoquée le plus fréquemment par l'insuffisance cardiaque", correct: false, explanation: "Le cancer est la cause la plus fréquente" },
+          { statement: "La mort est l'absence totale de conscience, de reflexes et de ventilation", correct: true, explanation: "Critères de la mort clinique" }
+        ]
+      }
+    ]
+  },
+  cm3_homeostasie: {
+    title: "CM3 - Homéostasie et systèmes de régulation",
+    icon: Brain,
+    color: "#2196f3",
+    exercises: [
+      {
+        id: "definitions_homeo",
+        type: "open",
+        title: "Exercice 1 : Définitions",
+        instruction: "Proposez une définition pour chaque terme",
+        items: [
+          { term: "Kaliémie", answer: "Taux de potassium dans le sang" },
+          { term: "Thermorégulation", answer: "Régulation de la température corporelle" },
+          { term: "Thermogénèse", answer: "Production de chaleur" },
+          { term: "Thermolyse", answer: "Évacuation de chaleur" },
+          { term: "Barorécepteurs", answer: "Capteur barométrique" },
+          { term: "Hypotension", answer: "Tension artérielle basse" },
+          { term: "Hypertension", answer: "Tension artérielle haute" },
+          { term: "Osmorécepteurs", answer: "Détectent la variation d'osmolarité" },
+          { term: "Substances osmotiques", answer: "Substances qui exercent une force vis-à-vis d'une membrane semi-perméable" },
+          { term: "Glycémie", answer: "Concentration de sucre dans le sang" },
+          { term: "pH sanguin", answer: "pH détermine l'acidité et la basicité" },
+          { term: "Hyperhydratation", answer: "Excès d'eau dans l'organisme" }
+        ]
+      },
+      {
+        id: "qcm_eau",
+        type: "mcq",
+        title: "Exercice 2 : QCM - L'eau dans l'organisme",
+        items: [
+          { question: "L'eau représente environ ... du poids corporel d'un adulte", options: ["75%", "60%"], correct: 1 },
+          { question: "L'eau se répartit dans l'organisme dans ... secteurs", options: ["2", "3"], correct: 0 },
+          { question: "Le liquide intracellulaire (LIC) représente ... de l'eau totale du corps", options: ["33%", "67%"], correct: 1 },
+          { question: "Le liquide extracellulaire (LEC) représente ... de l'eau totale du corps", options: ["33%", "67%"], correct: 0 },
+          { question: "Le liquide interstitiel et le plasma composent le ...", options: ["LEC", "LIC"], correct: 0 },
+          { question: "L'environnement interne correspond au ...", options: ["LEC", "LIC"], correct: 0 }
+        ]
+      },
+      {
+        id: "questions_homeostasie",
+        type: "essay",
+        title: "Questions approfondies",
+        questions: [
+          {
+            q: "Citez le rôle de l'environnement intérieur",
+            a: "L'environnement intérieur permet d'approvisionner les cellules en nutriments et oxygène via le sang artériel, et permet l'élimination des déchets métaboliques vers le sang veineux."
+          },
+          {
+            q: "Définissez l'homéostasie",
+            a: "L'homéostasie permet de maintenir un équilibre interne stable. C'est un processus de régulation par lequel l'organisme maintient la stabilité des constantes dans les limites des valeurs normales."
+          },
+          {
+            q: "Citez les 3 composants de l'homéostasie",
+            a: "1. Capteur/récepteurs, 2. Centre de contrôle, 3. Effecteur"
+          },
+          {
+            q: "Explicitez le mécanisme de rétro-inhibition (rétroaction négative)",
+            a: "Mécanisme de régulation qui permet de diminuer le stimulus de départ. Si une variable augmente, le mécanisme fait en sorte de la diminuer. Si elle diminue, il la ramène à l'état de base."
+          },
+          {
+            q: "Exemplifiez le mécanisme de rétro-inhibition",
+            a: "Régulation de la glycémie : après un repas la glycémie augmente, sécrétion d'insuline pour faire entrer le glucose dans les cellules. Quand la glycémie diminue, rétrocontrôle négatif sur la production d'insuline."
+          },
+          {
+            q: "Explicitez le mécanisme de rétroaction positive",
+            a: "Mécanisme de régulation qui permet d'amplifier le stimulus de départ. Si une variable augmente, le mécanisme va faire en sorte d'augmenter encore cette variable."
+          },
+          {
+            q: "Exemplifiez le mécanisme de rétroaction positive",
+            a: "Accouchement : le bébé appuie sur le col, étirement du col, information envoyée à l'hypothalamus, sécrétion d'ocytocine qui augmente les contractions. Rétrocontrôle positif jusqu'à l'accouchement."
+          }
+        ]
+      }
+    ]
+  },
+  cm5_immunite: {
+    title: "CM5 - Le système immunitaire",
+    icon: Shield,
+    color: "#4caf50",
+    exercises: [
+      {
+        id: "definitions_immuno",
+        type: "open",
+        title: "Exercice 1 : Terminologie immunologique",
+        instruction: "Proposez une définition pour chaque terme",
+        items: [
+          { term: "Immunité", answer: "Ensemble des acteurs et des mécanismes physiologiques impliqués dans la reconnaissance du soi et du non-soi : tolérance ou rejet" },
+          { term: "Antigène", answer: "Toute substance étrangère à l'organisme déclenchant une réponse immunitaire (anticorps)" },
+          { term: "Anticorps", answer: "Protéine complexe sécrétée par les cellules immunes (lymphocyte B) et capables d'établir une liaison avec un antigène - Immunoglobuline" },
+          { term: "Cellules phagocytaires", answer: "Cellules pouvant ingérer et détruire des particules (éboueurs du système immunitaire)" },
+          { term: "Lymphocyte", answer: "Cellules qui ont un rôle majeur de défense contre les infections dans le système immunitaire" }
+        ]
+      },
+      {
+        id: "types_immunite",
+        type: "essay",
+        title: "Exercice 2 : Types d'immunité",
+        questions: [
+          {
+            q: "Explicitez les 2 types d'immunité",
+            a: "1. Immunité non spécifique : Innée, 1ère ligne de défense, granulocytes/polynucléaires et macrophages, phagocytose, réaction inflammatoire.\n2. Immunité spécifique : Acquise/adaptative, plus rapide et efficace, lymphocytes, sécrétion anticorps et cytokines."
+          }
+        ]
+      },
+      {
+        id: "organes_lymphoides",
+        type: "essay",
+        title: "Exercices 3 & 4 : Organes lymphoïdes",
+        questions: [
+          {
+            q: "Citez les organes lymphoïdes primaires et expliquez leur rôle",
+            a: "Thymus et moelle osseuse. Lieu de maturation des lymphocytes qui deviennent des lymphocytes naïfs et migrent vers les organes secondaires."
+          },
+          {
+            q: "Citez les organes lymphoïdes secondaires et expliquez leur rôle",
+            a: "Ganglions lymphatiques, rate, amygdales, végétations. Lieu de rencontre entre les antigènes (apportés par le sang) et les lymphocytes. Permettent l'activation des lymphocytes B et T et le déclenchement de la réponse immunitaire adaptative."
+          }
+        ]
+      },
+      {
+        id: "schema_organes",
+        type: "anatomy",
+        title: "Exercice 5 : Schéma des organes lymphoïdes",
+        instruction: "Identifiez les organes lymphoïdes sur le schéma",
+        organs: [
+          { id: 1, name: "Thymus", position: { top: "25%", left: "50%" } },
+          { id: 2, name: "Moelle rouge des os", position: { top: "85%", left: "48%" } },
+          { id: 3, name: "Amygdales", position: { top: "12%", left: "52%" } },
+          { id: 4, name: "Ganglions lymphatiques", position: { top: "55%", left: "42%" } },
+          { id: 5, name: "Vaisseaux lymphatiques", position: { top: "40%", left: "58%" } },
+          { id: 6, name: "Rate", position: { top: "48%", left: "35%" } }
+        ]
+      }
+    ]
+  }
+};
+
+// Composant principal
+function TDPhysiologie() {
+  const [currentModule, setCurrentModule] = useState(null);
+  const [currentExercise, setCurrentExercise] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [showResults, setShowResults] = useState(false);
+  const [score, setScore] = useState(0);
+
+  const modules = Object.entries(exercisesData);
+
+  const resetModule = () => {
+    setUserAnswers({});
+    setShowResults(false);
+    setScore(0);
+    setCurrentExercise(0);
+  };
+
+  const handleBack = () => {
+    setCurrentModule(null);
+    resetModule();
+  };
+
+  // Page d'accueil
+  if (!currentModule) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        padding: '40px 20px',
+        fontFamily: '"Crimson Pro", "Georgia", serif'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          {/* En-tête */}
+          <div style={{
+            textAlign: 'center',
+            marginBottom: '60px',
+            color: 'white'
+          }}>
+            <BookOpen size={64} style={{ marginBottom: '20px' }} />
+            <h1 style={{
+              fontSize: '3.5rem',
+              fontWeight: '700',
+              margin: '0 0 20px 0',
+              letterSpacing: '-0.02em'
+            }}>
+              TD Physiologie UE 2.5 S1
+            </h1>
+            <p style={{
+              fontSize: '1.3rem',
+              opacity: 0.9,
+              maxWidth: '600px',
+              margin: '0 auto'
+            }}>
+              Exercices interactifs de physiologie générale
+            </p>
+          </div>
+
+          {/* Modules */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+            gap: '30px'
+          }}>
+            {modules.map(([key, module]) => {
+              const Icon = module.icon;
+              return (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setCurrentModule(key);
+                    resetModule();
+                  }}
+                  style={{
+                    background: 'white',
+                    borderRadius: '20px',
+                    padding: '40px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(0,0,0,0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.1)';
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: '-50px',
+                    right: '-50px',
+                    width: '150px',
+                    height: '150px',
+                    borderRadius: '50%',
+                    background: module.color,
+                    opacity: 0.1
+                  }} />
+                  
+                  <Icon size={48} color={module.color} style={{ marginBottom: '20px' }} />
+                  
+                  <h2 style={{
+                    fontSize: '1.8rem',
+                    fontWeight: '600',
+                    margin: '0 0 15px 0',
+                    color: '#1a1a1a'
+                  }}>
+                    {module.title}
+                  </h2>
+                  
+                  <p style={{
+                    fontSize: '1rem',
+                    color: '#666',
+                    margin: '0 0 20px 0'
+                  }}>
+                    {module.exercises.length} exercice{module.exercises.length > 1 ? 's' : ''}
+                  </p>
+                  
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    color: module.color,
+                    fontWeight: '600',
+                    fontSize: '1rem'
+                  }}>
+                    Commencer
+                    <ChevronRight size={20} style={{ marginLeft: '8px' }} />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Module sélectionné
+  const module = exercisesData[currentModule];
+  const exercise = module.exercises[currentExercise];
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: `linear-gradient(135deg, ${module.color}22 0%, ${module.color}44 100%)`,
+      padding: '40px 20px',
+      fontFamily: '"Crimson Pro", "Georgia", serif'
+    }}>
+      <div style={{
+        maxWidth: '900px',
+        margin: '0 auto'
+      }}>
+        {/* Navigation */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '40px'
+        }}>
+          <button
+            onClick={handleBack}
+            style={{
+              background: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: module.color,
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = 'translateX(-3px)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'translateX(0)'}
+          >
+            ← Retour
+          </button>
+
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '12px 24px',
+            fontSize: '0.95rem',
+            fontWeight: '600',
+            color: '#666',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+          }}>
+            Exercice {currentExercise + 1} / {module.exercises.length}
+          </div>
+        </div>
+
+        {/* Barre de progression */}
+        <div style={{
+          background: 'white',
+          borderRadius: '20px',
+          padding: '8px',
+          marginBottom: '40px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{
+            height: '12px',
+            borderRadius: '12px',
+            background: module.color,
+            width: `${((currentExercise + 1) / module.exercises.length) * 100}%`,
+            transition: 'width 0.5s ease'
+          }} />
+        </div>
+
+        {/* Exercice */}
+        <ExerciseRenderer
+          exercise={exercise}
+          moduleColor={module.color}
+          userAnswers={userAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          setShowResults={setShowResults}
+          currentExercise={currentExercise}
+          setCurrentExercise={setCurrentExercise}
+          totalExercises={module.exercises.length}
+          score={score}
+          setScore={setScore}
+        />
+      </div>
+    </div>
+  );
+}
+
+// Fonction de validation intelligente
+function validateAnswer(userAnswer, correctAnswer) {
+  if (!userAnswer || !correctAnswer) return false;
+  
+  // Normalisation : minuscules, trim, suppression accents
+  const normalize = (str) => {
+    return str.toLowerCase()
+      .trim()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Supprime les accents
+      .replace(/[''']/g, "'"); // Normalise les apostrophes
+  };
+  
+  const userNorm = normalize(userAnswer);
+  const correctNorm = normalize(correctAnswer);
+  
+  // 1. Correspondance exacte
+  if (userNorm === correctNorm) return true;
+  
+  // 2. Gestion pluriel/singulier
+  const removePlural = (str) => {
+    return str
+      .replace(/s$/, '')           // pluriel simple : s
+      .replace(/x$/, '')           // pluriel : x
+      .replace(/aux$/, 'al')       // pluriel : aux -> al
+      .replace(/eaux$/, 'eau')     // pluriel : eaux -> eau
+      .replace(/eux$/, 'eu');      // pluriel : eux -> eu
+  };
+  
+  if (removePlural(userNorm) === removePlural(correctNorm)) return true;
+  
+  // 3. Validation par mots-clés (tous les mots importants doivent être présents)
+  const getKeywords = (str) => {
+    // Mots à ignorer
+    const stopWords = ['le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'et', 'ou', 'a', 'au'];
+    return str.split(/\s+/)
+      .filter(word => word.length > 2 && !stopWords.includes(word));
+  };
+  
+  const correctKeywords = getKeywords(correctNorm);
+  const userKeywords = getKeywords(userNorm);
+  
+  // Si tous les mots-clés de la réponse correcte sont dans la réponse utilisateur
+  if (correctKeywords.length > 0) {
+    const allKeywordsFound = correctKeywords.every(keyword => 
+      userKeywords.some(userKeyword => 
+        userKeyword.includes(keyword) || keyword.includes(userKeyword)
+      )
+    );
+    if (allKeywordsFound) return true;
+  }
+  
+  // 4. Correspondance partielle forte (>80% de similarité)
+  const similarity = (s1, s2) => {
+    const longer = s1.length > s2.length ? s1 : s2;
+    const shorter = s1.length > s2.length ? s2 : s1;
+    if (longer.length === 0) return 1.0;
+    
+    let matches = 0;
+    for (let i = 0; i < shorter.length; i++) {
+      if (longer.includes(shorter[i])) matches++;
+    }
+    return matches / longer.length;
+  };
+  
+  if (similarity(userNorm, correctNorm) > 0.8) return true;
+  
+  return false;
+}
+
+// Composant pour rendre les différents types d'exercices
+function ExerciseRenderer({
+  exercise,
+  moduleColor,
+  userAnswers,
+  setUserAnswers,
+  showResults,
+  setShowResults,
+  currentExercise,
+  setCurrentExercise,
+  totalExercises,
+  score,
+  setScore
+}) {
+  const exerciseAnswers = userAnswers[exercise.id] || {};
+
+  const handleNext = () => {
+    if (currentExercise < totalExercises - 1) {
+      setCurrentExercise(currentExercise + 1);
+      setShowResults(false);
+    }
+  };
+
+  const handleSubmit = () => {
+    setShowResults(true);
+    // Calcul du score
+    let correct = 0;
+    let total = 0;
+
+    if (exercise.type === 'truefalse') {
+      total = exercise.items.length;
+      exercise.items.forEach((item, i) => {
+        if (exerciseAnswers[i] === item.correct) correct++;
+      });
+    } else if (exercise.type === 'mcq') {
+      total = exercise.items.length;
+      exercise.items.forEach((item, i) => {
+        if (exerciseAnswers[i] === item.correct) correct++;
+      });
+    } else if (exercise.type === 'matching') {
+      total = exercise.items.length;
+      exercise.items.forEach((item, i) => {
+        if (validateAnswer(exerciseAnswers[i], item.answer)) correct++;
+      });
+    } else if (exercise.type === 'table') {
+      // Vérifier les réponses adultes
+      const adulteAnswers = exerciseAnswers.adulte || {};
+      const nouveauNeAnswers = exerciseAnswers.nouveauNe || {};
+      
+      // Comptabiliser les valeurs adultes
+      if (exercise.adulteAnswers) {
+        total += exercise.adulteAnswers.length;
+        exercise.adulteAnswers.forEach((answer, i) => {
+          const userVal = adulteAnswers[i] || '';
+          const userNum = parseFloat(userVal.replace(/[^0-9.-]/g, ''));
+          const correctNum = parseFloat(answer.replace(/[^0-9.-]/g, ''));
+          const tolerance = exercise.adulteTolerance ? exercise.adulteTolerance[i] : 5;
+          
+          if (Math.abs(userNum - correctNum) <= tolerance || 
+              userVal.toLowerCase().trim() === answer.toLowerCase().trim()) {
+            correct++;
+          }
+        });
+      }
+      
+      // Comptabiliser les valeurs nouveau-né
+      total += exercise.answers.length;
+      exercise.answers.forEach((answer, i) => {
+        const userVal = nouveauNeAnswers[i] || '';
+        const userNum = parseFloat(userVal.replace(/[^0-9.-]/g, ''));
+        const correctVal = parseFloat(answer.replace(/[^0-9.-]/g, ''));
+        const tolerance = exercise.tolerances[i];
+        
+        if (Math.abs(userNum - correctVal) <= tolerance ||
+            userVal.toLowerCase().trim() === answer.toLowerCase().trim()) {
+          correct++;
+        }
+      });
+    }
+
+    setScore({ correct, total });
+  };
+
+  return (
+    <div style={{
+      background: 'white',
+      borderRadius: '24px',
+      padding: '50px',
+      boxShadow: '0 20px 60px rgba(0,0,0,0.1)'
+    }}>
+      <h2 style={{
+        fontSize: '2rem',
+        fontWeight: '700',
+        marginBottom: '15px',
+        color: moduleColor
+      }}>
+        {exercise.title}
+      </h2>
+
+      {exercise.instruction && (
+        <p style={{
+          fontSize: '1.1rem',
+          color: '#666',
+          marginBottom: '40px',
+          fontStyle: 'italic'
+        }}>
+          {exercise.instruction}
+        </p>
+      )}
+
+      {/* Rendu selon le type */}
+      {exercise.type === 'matching' && (
+        <MatchingExercise
+          exercise={exercise}
+          exerciseAnswers={exerciseAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          moduleColor={moduleColor}
+        />
+      )}
+
+      {exercise.type === 'truefalse' && (
+        <TrueFalseExercise
+          exercise={exercise}
+          exerciseAnswers={exerciseAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          moduleColor={moduleColor}
+        />
+      )}
+
+      {exercise.type === 'mcq' && (
+        <MCQExercise
+          exercise={exercise}
+          exerciseAnswers={exerciseAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          moduleColor={moduleColor}
+        />
+      )}
+
+      {exercise.type === 'table' && (
+        <TableExercise
+          exercise={exercise}
+          exerciseAnswers={exerciseAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          moduleColor={moduleColor}
+        />
+      )}
+
+      {exercise.type === 'open' && (
+        <OpenExercise
+          exercise={exercise}
+          exerciseAnswers={exerciseAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          moduleColor={moduleColor}
+        />
+      )}
+
+      {exercise.type === 'essay' && (
+        <EssayExercise
+          exercise={exercise}
+          exerciseAnswers={exerciseAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          moduleColor={moduleColor}
+        />
+      )}
+
+      {exercise.type === 'anatomy' && (
+        <AnatomyExercise
+          exercise={exercise}
+          exerciseAnswers={exerciseAnswers}
+          setUserAnswers={setUserAnswers}
+          showResults={showResults}
+          moduleColor={moduleColor}
+        />
+      )}
+
+      {/* Score et boutons */}
+      {showResults && score && (
+        <div style={{
+          marginTop: '40px',
+          padding: '30px',
+          background: `${moduleColor}11`,
+          borderRadius: '16px',
+          textAlign: 'center'
+        }}>
+          <Award size={48} color={moduleColor} style={{ marginBottom: '15px' }} />
+          <div style={{
+            fontSize: '2rem',
+            fontWeight: '700',
+            color: moduleColor,
+            marginBottom: '10px'
+          }}>
+            Score : {score.correct} / {score.total}
+          </div>
+          <div style={{
+            fontSize: '1.2rem',
+            color: '#666'
+          }}>
+            {Math.round((score.correct / score.total) * 100)}% de réussite
+          </div>
+        </div>
+      )}
+
+      <div style={{
+        display: 'flex',
+        gap: '15px',
+        marginTop: '40px',
+        justifyContent: 'center'
+      }}>
+        {!showResults ? (
+          <button
+            onClick={handleSubmit}
+            style={{
+              background: moduleColor,
+              color: 'white',
+              border: 'none',
+              borderRadius: '12px',
+              padding: '16px 40px',
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 6px 20px rgba(0,0,0,0.15)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+            }}
+          >
+            Vérifier mes réponses
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => {
+                setShowResults(false);
+                setUserAnswers(prev => ({ ...prev, [exercise.id]: {} }));
+                setScore(0);
+              }}
+              style={{
+                background: 'white',
+                color: moduleColor,
+                border: `2px solid ${moduleColor}`,
+                borderRadius: '12px',
+                padding: '16px 40px',
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
+            >
+              <RotateCcw size={20} />
+              Recommencer
+            </button>
+            {currentExercise < totalExercises - 1 && (
+              <button
+                onClick={handleNext}
+                style={{
+                  background: moduleColor,
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '12px',
+                  padding: '16px 40px',
+                  fontSize: '1.1rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.15)'
+                }}
+              >
+                Exercice suivant
+                <ChevronRight size={20} />
+              </button>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Composant pour exercice de matching
+function MatchingExercise({ exercise, exerciseAnswers, setUserAnswers, showResults, moduleColor }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {exercise.items.map((item, index) => {
+        const userAnswer = exerciseAnswers[index] || '';
+        const isCorrect = validateAnswer(userAnswer, item.answer);
+
+        return (
+          <div key={index} style={{
+            padding: '25px',
+            background: showResults ? (isCorrect ? '#e8f5e9' : '#ffebee') : '#f8f9fa',
+            borderRadius: '12px',
+            border: showResults ? (isCorrect ? '2px solid #4caf50' : '2px solid #f44336') : '2px solid #e0e0e0',
+            transition: 'all 0.3s ease'
+          }}>
+            <div style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              marginBottom: '15px',
+              color: '#333'
+            }}>
+              {item.definition}
+            </div>
+            
+            <input
+              type="text"
+              value={userAnswer}
+              onChange={(e) => {
+                if (!showResults) {
+                  setUserAnswers(prev => ({
+                    ...prev,
+                    [exercise.id]: {
+                      ...prev[exercise.id],
+                      [index]: e.target.value
+                    }
+                  }));
+                }
+              }}
+              placeholder="Votre réponse..."
+              disabled={showResults}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '8px',
+                background: showResults ? 'transparent' : 'white',
+                fontFamily: 'inherit'
+              }}
+            />
+
+            {showResults && (
+              <div style={{
+                marginTop: '15px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '1rem'
+              }}>
+                {isCorrect ? (
+                  <>
+                    <Check size={20} color="#4caf50" />
+                    <span style={{ color: '#2e7d32', fontWeight: '600' }}>Correct !</span>
+                  </>
+                ) : (
+                  <>
+                    <X size={20} color="#f44336" />
+                    <span style={{ color: '#c62828' }}>
+                      Réponse attendue : <strong>{item.answer}</strong>
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Composant pour exercice Vrai/Faux
+function TrueFalseExercise({ exercise, exerciseAnswers, setUserAnswers, showResults, moduleColor }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+      {exercise.items.map((item, index) => {
+        const userAnswer = exerciseAnswers[index];
+        const isCorrect = userAnswer === item.correct;
+
+        return (
+          <div key={index} style={{
+            padding: '25px',
+            background: showResults ? (isCorrect ? '#e8f5e9' : userAnswer !== undefined ? '#ffebee' : '#f8f9fa') : '#f8f9fa',
+            borderRadius: '12px',
+            border: showResults ? (isCorrect ? '2px solid #4caf50' : userAnswer !== undefined ? '2px solid #f44336' : '2px solid #e0e0e0') : '2px solid #e0e0e0',
+            transition: 'all 0.3s ease'
+          }}>
+            <div style={{
+              fontSize: '1.1rem',
+              marginBottom: '15px',
+              color: '#333',
+              lineHeight: '1.6'
+            }}>
+              {item.statement}
+            </div>
+
+            <div style={{ display: 'flex', gap: '15px', marginBottom: showResults ? '15px' : '0' }}>
+              <button
+                onClick={() => {
+                  if (!showResults) {
+                    setUserAnswers(prev => ({
+                      ...prev,
+                      [exercise.id]: {
+                        ...prev[exercise.id],
+                        [index]: true
+                      }
+                    }));
+                  }
+                }}
+                disabled={showResults}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  border: `2px solid ${userAnswer === true ? moduleColor : '#e0e0e0'}`,
+                  borderRadius: '8px',
+                  background: userAnswer === true ? `${moduleColor}22` : 'white',
+                  color: userAnswer === true ? moduleColor : '#666',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: showResults ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Vrai
+              </button>
+              <button
+                onClick={() => {
+                  if (!showResults) {
+                    setUserAnswers(prev => ({
+                      ...prev,
+                      [exercise.id]: {
+                        ...prev[exercise.id],
+                        [index]: false
+                      }
+                    }));
+                  }
+                }}
+                disabled={showResults}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  border: `2px solid ${userAnswer === false ? moduleColor : '#e0e0e0'}`,
+                  borderRadius: '8px',
+                  background: userAnswer === false ? `${moduleColor}22` : 'white',
+                  color: userAnswer === false ? moduleColor : '#666',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: showResults ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Faux
+              </button>
+            </div>
+
+            {showResults && (
+              <div style={{
+                padding: '15px',
+                background: isCorrect ? '#c8e6c9' : '#ffcdd2',
+                borderRadius: '8px',
+                fontSize: '0.95rem',
+                color: '#333'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '8px',
+                  fontWeight: '600'
+                }}>
+                  {isCorrect ? <Check size={18} color="#2e7d32" /> : <X size={18} color="#c62828" />}
+                  <span style={{ color: isCorrect ? '#2e7d32' : '#c62828' }}>
+                    {isCorrect ? 'Correct !' : `Faux - La réponse est : ${item.correct ? 'Vrai' : 'Faux'}`}
+                  </span>
+                </div>
+                <div style={{ color: '#555', lineHeight: '1.5' }}>
+                  {item.explanation}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Composant pour QCM
+function MCQExercise({ exercise, exerciseAnswers, setUserAnswers, showResults, moduleColor }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+      {exercise.items.map((item, qIndex) => {
+        const userAnswer = exerciseAnswers[qIndex];
+        const isCorrect = userAnswer === item.correct;
+
+        return (
+          <div key={qIndex} style={{
+            padding: '25px',
+            background: '#f8f9fa',
+            borderRadius: '12px',
+            border: '2px solid #e0e0e0'
+          }}>
+            <div style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              marginBottom: '20px',
+              color: '#333'
+            }}>
+              {item.question}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {item.options.map((option, oIndex) => {
+                const isSelected = userAnswer === oIndex;
+                const isCorrectOption = oIndex === item.correct;
+                const showCorrect = showResults && isCorrectOption;
+                const showWrong = showResults && isSelected && !isCorrect;
+
+                return (
+                  <button
+                    key={oIndex}
+                    onClick={() => {
+                      if (!showResults) {
+                        setUserAnswers(prev => ({
+                          ...prev,
+                          [exercise.id]: {
+                            ...prev[exercise.id],
+                            [qIndex]: oIndex
+                          }
+                        }));
+                      }
+                    }}
+                    disabled={showResults}
+                    style={{
+                      padding: '15px 20px',
+                      border: `2px solid ${showCorrect ? '#4caf50' : showWrong ? '#f44336' : isSelected ? moduleColor : '#e0e0e0'}`,
+                      borderRadius: '8px',
+                      background: showCorrect ? '#e8f5e9' : showWrong ? '#ffebee' : isSelected ? `${moduleColor}22` : 'white',
+                      color: '#333',
+                      fontSize: '1rem',
+                      fontWeight: isSelected ? '600' : '400',
+                      cursor: showResults ? 'not-allowed' : 'pointer',
+                      textAlign: 'left',
+                      transition: 'all 0.3s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}
+                  >
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '50%',
+                      border: `2px solid ${showCorrect ? '#4caf50' : showWrong ? '#f44336' : isSelected ? moduleColor : '#ccc'}`,
+                      background: isSelected ? (showCorrect ? '#4caf50' : showWrong ? '#f44336' : moduleColor) : 'transparent',
+                      flexShrink: 0
+                    }} />
+                    <span>{option}</span>
+                    {showCorrect && <Check size={20} color="#4caf50" style={{ marginLeft: 'auto' }} />}
+                    {showWrong && <X size={20} color="#f44336" style={{ marginLeft: 'auto' }} />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Composant pour tableau
+function TableExercise({ exercise, exerciseAnswers, setUserAnswers, showResults, moduleColor }) {
+  // Les réponses utilisateur sont stockées dans un format: { adulte: {...}, nouveauNe: {...} }
+  const adulteAnswers = exerciseAnswers?.adulte || {};
+  const nouveauNeAnswers = exerciseAnswers?.nouveauNe || {};
+
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{
+        width: '100%',
+        borderCollapse: 'separate',
+        borderSpacing: '0',
+        fontSize: '0.95rem'
+      }}>
+        <thead>
+          <tr>
+            <th style={{
+              padding: '15px',
+              background: moduleColor,
+              color: 'white',
+              fontWeight: '600',
+              textAlign: 'left',
+              borderTopLeftRadius: '8px'
+            }}>
+              Paramètre
+            </th>
+            {exercise.headers.map((header, i) => (
+              <th key={i} style={{
+                padding: '15px',
+                background: moduleColor,
+                color: 'white',
+                fontWeight: '600',
+                textAlign: 'center',
+                borderTopRightRadius: i === exercise.headers.length - 1 ? '8px' : '0'
+              }}>
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {/* Ligne Adulte */}
+          <tr>
+            <td style={{
+              padding: '15px',
+              background: '#f8f9fa',
+              fontWeight: '600',
+              borderLeft: '2px solid #e0e0e0',
+              borderBottom: '2px solid #e0e0e0'
+            }}>
+              Adulte
+            </td>
+            {exercise.adulteAnswers.map((answer, i) => {
+              const userVal = adulteAnswers[i] || '';
+              const userNum = parseFloat(userVal.replace(/[^0-9.-]/g, ''));
+              const correctNum = parseFloat(answer.replace(/[^0-9.-]/g, ''));
+              const tolerance = exercise.adulteTolerance ? exercise.adulteTolerance[i] : 5;
+              const isCorrect = Math.abs(userNum - correctNum) <= tolerance || 
+                               userVal.toLowerCase().trim() === answer.toLowerCase().trim();
+
+              return (
+                <td key={i} style={{
+                  padding: '8px',
+                  background: showResults ? (isCorrect ? '#e8f5e9' : '#ffebee') : '#f8f9fa',
+                  textAlign: 'center',
+                  borderRight: i === exercise.adulteAnswers.length - 1 ? '2px solid #e0e0e0' : 'none',
+                  borderBottom: '2px solid #e0e0e0'
+                }}>
+                  <input
+                    type="text"
+                    value={userVal}
+                    onChange={(e) => {
+                      if (!showResults) {
+                        setUserAnswers(prev => ({ 
+                          ...prev, 
+                          [exercise.id]: { 
+                            ...prev[exercise.id], 
+                            adulte: { ...prev[exercise.id]?.adulte, [i]: e.target.value }
+                          } 
+                        }));
+                      }
+                    }}
+                    disabled={showResults}
+                    placeholder="..."
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: showResults ? (isCorrect ? '2px solid #4caf50' : '2px solid #f44336') : '2px solid #e0e0e0',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit',
+                      background: 'transparent'
+                    }}
+                  />
+                  {showResults && !isCorrect && (
+                    <div style={{
+                      marginTop: '8px',
+                      fontSize: '0.85rem',
+                      color: '#c62828',
+                      fontWeight: '600'
+                    }}>
+                      ✓ {answer}
+                    </div>
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+          {/* Ligne Nouveau-né */}
+          <tr>
+            <td style={{
+              padding: '15px',
+              background: 'white',
+              fontWeight: '600',
+              borderLeft: '2px solid #e0e0e0',
+              borderBottom: '2px solid #e0e0e0',
+              borderBottomLeftRadius: '8px'
+            }}>
+              Nouveau-né
+            </td>
+            {exercise.answers.map((answer, i) => {
+              const userVal = nouveauNeAnswers[i] || '';
+              const userNum = parseFloat(userVal.replace(/[^0-9.-]/g, ''));
+              const correctNum = parseFloat(answer.replace(/[^0-9.-]/g, ''));
+              const tolerance = exercise.tolerances[i];
+              const isCorrect = Math.abs(userNum - correctNum) <= tolerance ||
+                               userVal.toLowerCase().trim() === answer.toLowerCase().trim();
+
+              return (
+                <td key={i} style={{
+                  padding: '8px',
+                  background: showResults ? (isCorrect ? '#e8f5e9' : '#ffebee') : 'white',
+                  textAlign: 'center',
+                  borderRight: i === exercise.answers.length - 1 ? '2px solid #e0e0e0' : 'none',
+                  borderBottom: '2px solid #e0e0e0',
+                  borderBottomRightRadius: i === exercise.answers.length - 1 ? '8px' : '0'
+                }}>
+                  <input
+                    type="text"
+                    value={userVal}
+                    onChange={(e) => {
+                      if (!showResults) {
+                        setUserAnswers(prev => ({ 
+                          ...prev, 
+                          [exercise.id]: { 
+                            ...prev[exercise.id], 
+                            nouveauNe: { ...prev[exercise.id]?.nouveauNe, [i]: e.target.value }
+                          } 
+                        }));
+                      }
+                    }}
+                    disabled={showResults}
+                    placeholder="..."
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      border: showResults ? (isCorrect ? '2px solid #4caf50' : '2px solid #f44336') : '2px solid #e0e0e0',
+                      borderRadius: '6px',
+                      textAlign: 'center',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit',
+                      background: 'transparent'
+                    }}
+                  />
+                  {showResults && !isCorrect && (
+                    <div style={{
+                      marginTop: '8px',
+                      fontSize: '0.85rem',
+                      color: '#c62828',
+                      fontWeight: '600'
+                    }}>
+                      ✓ {answer}
+                    </div>
+                  )}
+                </td>
+              );
+            })}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Composant pour questions ouvertes courtes
+function OpenExercise({ exercise, exerciseAnswers, setUserAnswers, showResults, moduleColor }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
+      {exercise.items.map((item, index) => {
+        const userAnswer = exerciseAnswers[index] || '';
+
+        return (
+          <div key={index} style={{
+            padding: '25px',
+            background: '#f8f9fa',
+            borderRadius: '12px',
+            border: '2px solid #e0e0e0'
+          }}>
+            <div style={{
+              fontSize: '1.1rem',
+              fontWeight: '600',
+              marginBottom: '15px',
+              color: moduleColor
+            }}>
+              {item.term}
+            </div>
+
+            <textarea
+              value={userAnswer}
+              onChange={(e) => {
+                if (!showResults) {
+                  setUserAnswers(prev => ({
+                    ...prev,
+                    [exercise.id]: {
+                      ...prev[exercise.id],
+                      [index]: e.target.value
+                    }
+                  }));
+                }
+              }}
+              placeholder="Votre définition..."
+              disabled={showResults}
+              rows={3}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                fontSize: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '8px',
+                background: 'white',
+                fontFamily: 'inherit',
+                resize: 'vertical'
+              }}
+            />
+
+            {showResults && (
+              <div style={{
+                marginTop: '15px',
+                padding: '15px',
+                background: '#e3f2fd',
+                borderRadius: '8px',
+                borderLeft: `4px solid ${moduleColor}`
+              }}>
+                <div style={{
+                  fontWeight: '600',
+                  marginBottom: '8px',
+                  color: moduleColor
+                }}>
+                  Réponse attendue :
+                </div>
+                <div style={{ color: '#333', lineHeight: '1.6' }}>
+                  {item.answer}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Composant pour questions longues type dissertation
+function EssayExercise({ exercise, exerciseAnswers, setUserAnswers, showResults, moduleColor }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+      {exercise.questions.map((item, index) => {
+        const userAnswer = exerciseAnswers[index] || '';
+
+        return (
+          <div key={index} style={{
+            padding: '30px',
+            background: '#f8f9fa',
+            borderRadius: '12px',
+            border: '2px solid #e0e0e0'
+          }}>
+            <div style={{
+              fontSize: '1.2rem',
+              fontWeight: '600',
+              marginBottom: '20px',
+              color: '#333',
+              lineHeight: '1.5'
+            }}>
+              {item.q}
+            </div>
+
+            <textarea
+              value={userAnswer}
+              onChange={(e) => {
+                if (!showResults) {
+                  setUserAnswers(prev => ({
+                    ...prev,
+                    [exercise.id]: {
+                      ...prev[exercise.id],
+                      [index]: e.target.value
+                    }
+                  }));
+                }
+              }}
+              placeholder="Développez votre réponse..."
+              disabled={showResults}
+              rows={6}
+              style={{
+                width: '100%',
+                padding: '16px',
+                fontSize: '1rem',
+                border: '2px solid #e0e0e0',
+                borderRadius: '8px',
+                background: 'white',
+                fontFamily: 'inherit',
+                resize: 'vertical',
+                lineHeight: '1.6'
+              }}
+            />
+
+            {showResults && (
+              <div style={{
+                marginTop: '20px',
+                padding: '20px',
+                background: 'white',
+                borderRadius: '8px',
+                border: `2px solid ${moduleColor}`
+              }}>
+                <div style={{
+                  fontWeight: '700',
+                  marginBottom: '12px',
+                  color: moduleColor,
+                  fontSize: '1.1rem'
+                }}>
+                  Éléments de réponse :
+                </div>
+                <div style={{
+                  color: '#333',
+                  lineHeight: '1.8',
+                  whiteSpace: 'pre-line'
+                }}>
+                  {item.a}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Composant pour exercice anatomique
+function AnatomyExercise({ exercise, exerciseAnswers, setUserAnswers, showResults, moduleColor }) {
+  const [selectedOrgan, setSelectedOrgan] = useState(null);
+
+  return (
+    <div>
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '600px',
+        margin: '0 auto',
+        padding: '40px',
+        background: `linear-gradient(135deg, ${moduleColor}11, ${moduleColor}22)`,
+        borderRadius: '16px'
+      }}>
+        {/* Silhouette du corps humain simplifiée */}
+        <svg viewBox="0 0 200 400" style={{ width: '100%', height: 'auto' }}>
+          {/* Tête */}
+          <ellipse cx="100" cy="40" rx="25" ry="30" fill="#f0e5d8" stroke="#8d6e63" strokeWidth="2"/>
+          
+          {/* Corps */}
+          <rect x="75" y="65" width="50" height="80" rx="10" fill="#e3d5ca" stroke="#8d6e63" strokeWidth="2"/>
+          
+          {/* Bras */}
+          <rect x="50" y="70" width="25" height="70" rx="12" fill="#e3d5ca" stroke="#8d6e63" strokeWidth="2"/>
+          <rect x="125" y="70" width="25" height="70" rx="12" fill="#e3d5ca" stroke="#8d6e63" strokeWidth="2"/>
+          
+          {/* Jambes */}
+          <rect x="80" y="145" width="18" height="100" rx="9" fill="#e3d5ca" stroke="#8d6e63" strokeWidth="2"/>
+          <rect x="102" y="145" width="18" height="100" rx="9" fill="#e3d5ca" stroke="#8d6e63" strokeWidth="2"/>
+          
+          {/* Organes */}
+          {exercise.organs.map((organ) => {
+            const isSelected = selectedOrgan === organ.id;
+            const userAnswer = exerciseAnswers[organ.id];
+            const isCorrect = showResults && userAnswer === organ.id;
+            
+            return (
+              <g key={organ.id}>
+                <circle
+                  cx={organ.position.left.replace('%', '') * 2}
+                  cy={organ.position.top.replace('%', '') * 4}
+                  r={isSelected ? "12" : "10"}
+                  fill={showResults ? (isCorrect ? '#4caf50' : userAnswer ? '#f44336' : moduleColor) : isSelected ? moduleColor : '#2196f3'}
+                  stroke="white"
+                  strokeWidth="2"
+                  style={{
+                    cursor: showResults ? 'default' : 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onClick={() => {
+                    if (!showResults) {
+                      setSelectedOrgan(organ.id);
+                    }
+                  }}
+                />
+                <text
+                  x={organ.position.left.replace('%', '') * 2}
+                  y={organ.position.top.replace('%', '') * 4 + 5}
+                  textAnchor="middle"
+                  fill="white"
+                  fontSize="14"
+                  fontWeight="bold"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  {organ.id}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Liste des organes à identifier */}
+      <div style={{
+        marginTop: '40px',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '15px'
+      }}>
+        {exercise.organs.map((organ) => {
+          const isSelected = selectedOrgan === organ.id;
+          const userAnswer = exerciseAnswers[organ.id];
+          const isMatched = userAnswer === organ.id;
+
+          return (
+            <button
+              key={organ.id}
+              onClick={() => {
+                if (!showResults && selectedOrgan) {
+                  setUserAnswers(prev => ({
+                    ...prev,
+                    [exercise.id]: {
+                      ...prev[exercise.id],
+                      [organ.id]: selectedOrgan
+                    }
+                  }));
+                  setSelectedOrgan(null);
+                }
+              }}
+              disabled={showResults || !selectedOrgan}
+              style={{
+                padding: '15px 20px',
+                border: `2px solid ${showResults && isMatched ? '#4caf50' : isSelected ? moduleColor : '#e0e0e0'}`,
+                borderRadius: '8px',
+                background: showResults && isMatched ? '#e8f5e9' : isSelected ? `${moduleColor}22` : 'white',
+                color: '#333',
+                fontSize: '1rem',
+                fontWeight: isMatched ? '600' : '400',
+                cursor: showResults ? 'default' : selectedOrgan ? 'pointer' : 'not-allowed',
+                textAlign: 'left',
+                transition: 'all 0.3s ease',
+                opacity: showResults && !isMatched ? 0.5 : 1
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '30px',
+                  height: '30px',
+                  borderRadius: '50%',
+                  background: showResults && isMatched ? '#4caf50' : moduleColor,
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 'bold',
+                  flexShrink: 0
+                }}>
+                  {organ.id}
+                </div>
+                <span>{organ.name}</span>
+                {showResults && isMatched && <Check size={20} color="#4caf50" style={{ marginLeft: 'auto' }} />}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {selectedOrgan && !showResults && (
+        <div style={{
+          marginTop: '20px',
+          padding: '15px 20px',
+          background: `${moduleColor}22`,
+          borderRadius: '8px',
+          textAlign: 'center',
+          color: moduleColor,
+          fontWeight: '600',
+          fontSize: '1rem'
+        }}>
+          Point {selectedOrgan} sélectionné - Cliquez sur un organe pour associer
+        </div>
+      )}
+    </div>
+  );
+}
