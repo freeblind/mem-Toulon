@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Flashcards TD7 UE3.8 - Radiobiologie & Radioprotection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 140px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: pan-y;
+            overflow-x: hidden;
+        }
+
+        /* Compteur fixe en haut */
+        .score-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .score-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .score-item {
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .score-correct {
+            color: #10b981;
+        }
+
+        .score-wrong {
+            color: #ef4444;
+        }
+
+        .score-total {
+            color: #667eea;
+        }
+
+        .score-percent {
+            color: #f59e0b;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            text-align: center;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+
+        .flashcard {
+            height: 320px;
+            perspective: 1000px;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .flashcard-back {
+            background: white;
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .card-number {
+            font-weight: bold;
+            font-size: 0.9em;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+
+        .card-content {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            cursor: pointer;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        .flashcard-front .card-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.05em;
+            line-height: 1.4;
+        }
+
+        .flashcard-back .card-content {
+            font-size: 0.9em;
+            line-height: 1.5;
+            text-align: left;
+            padding-right: 5px;
+        }
+
+        .card-content::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .card-content::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+
+        .card-content::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        .hint {
+            font-size: 0.85em;
+            opacity: 0.7;
+            font-style: italic;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .correction-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .correction-buttons button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 50px;
+        }
+
+        .btn-correct {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-correct:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-wrong {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-wrong:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+        }
+
+        .correction-buttons button:active {
+            transform: translateY(0);
+        }
+
+        .correction-buttons button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .flashcard.answered-correct .flashcard-back {
+            border: 3px solid #10b981;
+        }
+
+        .flashcard.answered-wrong .flashcard-back {
+            border: 3px solid #ef4444;
+        }
+
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .controls button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 35px;
+            margin: 0 10px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 50px;
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .controls button:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 180px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .section-title {
+                font-size: 1.3em;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .flashcard {
+                height: 320px;
+            }
+
+            .controls button {
+                display: block;
+                margin: 10px auto;
+                width: 220px;
+                min-height: 55px;
+                font-size: 1.1em;
+            }
+
+            .score-container {
+                gap: 10px;
+            }
+
+            .score-item {
+                padding: 10px 12px;
+                font-size: 0.85em;
+            }
+
+            .score-value {
+                font-size: 1.3em;
+            }
+
+            .correction-buttons button {
+                font-size: 1.05em;
+                padding: 16px;
+                min-height: 55px;
+            }
+        }
+
+        /* Pour les très petits écrans */
+        @media (max-width: 380px) {
+            .flashcard {
+                height: 340px;
+            }
+
+            .score-item {
+                padding: 8px 10px;
+            }
+
+            .score-label {
+                font-size: 0.75em;
+            }
+
+            .card-content {
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Compteur fixe -->
+    <div class="score-header">
+        <div class="score-container">
+            <div class="score-item">
+                <div class="score-label">✅ J'ai bon</div>
+                <div class="score-value score-correct" id="score-correct">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">❌ J'ai faux</div>
+                <div class="score-value score-wrong" id="score-wrong">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">📊 Total répondu</div>
+                <div class="score-value score-total" id="score-total">0 / 60</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">🎯 Taux de réussite</div>
+                <div class="score-value score-percent" id="score-percent">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>📚 Flashcards TD7 UE3.8</h1>
+        <h2 style="text-align: center; color: white; margin-bottom: 30px; font-size: 1.3em;">Radiobiologie & Radioprotection</h2>
+
+        <div class="controls">
+            <button onclick="flipAll()">🔄 Retourner toutes les cartes</button>
+            <button onclick="resetAll()">↩️ Réinitialiser tout</button>
+        </div>
+
+        <!-- Section Radiobiologie -->
+        <div class="section" id="radiobiologie">
+            <div class="section-title">☢️ Radiobiologie</div>
+            <div class="cards-grid" id="radiobiologie-cards"></div>
+        </div>
+
+        <!-- Section Radioprotection -->
+        <div class="section" id="radioprotection">
+            <div class="section-title">🛡️ Radioprotection</div>
+            <div class="cards-grid" id="radioprotection-cards"></div>
+        </div>
+
+        <!-- Section Dosimétrie -->
+        <div class="section" id="dosimetrie">
+            <div class="section-title">📊 Dosimétrie & Catégorisation</div>
+            <div class="cards-grid" id="dosimetrie-cards"></div>
+        </div>
+    </div>
+
+    <script>
+        // Scores
+        let scores = {
+            correct: 0,
+            wrong: 0,
+            answered: new Set()
+        };
+
+        // Données des flashcards
+        const radiobiologieData = [
+            {
+                question: "Définissez la radiobiologie",
+                answer: "L'étude scientifique de l'effet biologique des rayonnements ionisants (RI) sur la matière vivante<br><br>OU<br><br>Etude des réactions biologiques induites par les effets des RI sur les tissus."
+            },
+            {
+                question: "Citez les 3 modes d'expositions aux rayonnements ionisants",
+                answer: "3 modes d'exposition aux RI :<br>• L'irradiation<br>• La contamination externe<br>• La contamination interne"
+            },
+            {
+                question: "Citez les 3 étapes des processus d'interaction des rayonnements ionisants avec la matière",
+                answer: "3 étapes :<br>• Étape physique<br>• Étape chimique<br>• Etape Biologique"
+            },
+            {
+                question: "Dans l'étape physique, précisez la différence entre ionisation et excitation",
+                answer: "<strong>Excitation :</strong> le transfert d'énergie du RI à la matière est insuffisant pour créer une ionisation (électron non arraché)<br><br><strong>Ionisation :</strong> le transfert d'énergie du RI à la matière est suffisant pour arracher un électron de l'atome cible/matière (perte d'1 électron = ion)"
+            },
+            {
+                question: "Citez la principale cible biologique des rayonnements ionisants dans la cellule",
+                answer: "L'ADN, molécule support de l'information génétique."
+            },
+            {
+                question: "Dans l'étape chimique, citez les 2 grands types des rayonnements ionisants sur l'ADN",
+                answer: "<strong>Effets directs :</strong> le rayonnement interagit directement avec l'ADN.<br><br><strong>Effets indirects :</strong> par production de radicaux libres à partir de l'eau."
+            },
+            {
+                question: "Expliquez la radiolyse de l'eau",
+                answer: "En réaction à l'ionisation et l'excitation (étape physique), les RI vont décomposer les molécules d'H₂O en radicaux libres toxiques : Hydrogène (H⁺) et hydroxyde (OH⁻) afin de créer des lésions sur l'ADN."
+            },
+            {
+                question: "Citez les types de lésions de l'ADN susceptibles d'être créées, suite à une exposition aux rayonnements ionisants",
+                answer: "Lésions de l'ADN :<br>• Ruptures simples brins<br>• Ruptures doubles brins<br>• Pontages<br>• Modifications de bases"
+            },
+            {
+                question: "Définissez le TLE (Transfert linéique d'énergie)",
+                answer: "Le TLE exprime le pouvoir de pénétration des rayonnements ionisants dans la matière (ou quantité d'énergie transférée à 1 particule ionisante traversant la matière par unité de distance)"
+            },
+            {
+                question: "Citez la loi de Bergonié et Tribondeau sur la Radiosensibilité des cellules",
+                answer: "La sensibilité des cellules est plus élevée si :<br>• Les cellules se multiplient beaucoup (à forte activité mitotique)<br>• Les cellules sont jeunes<br>• Les cellules sont peu différenciées (cellules souches)"
+            },
+            {
+                question: "Citez les facteurs qui influencent la survie cellulaire",
+                answer: "• Type de cellule<br>• Phase du cycle de la cellule<br>• Dose<br>• Débit de dose<br>• Type de rayonnement en lien avec le TLE<br>• L'absence de fractionnement<br>• Oxygène"
+            },
+            {
+                question: "Précisez la période du cycle cellulaire où la cellule est la plus sensible aux rayonnements",
+                answer: "En phase G2 et M (mitose)."
+            },
+            {
+                question: "Suite à une exposition aux rayonnements ionisants, citez les 3 types d'effets cellulaires possibles",
+                answer: "• Mort cellulaire<br>• Réparation et survie<br>• Mutation (transformation cancéreuse)"
+            },
+            {
+                question: "Citez le tissu, au sens anatomique, le plus radiosensible. Justifiez votre réponse",
+                answer: "Tissus embryonnaires car tissus à forte activité mitotique (loi de Bergonié et Tribondeau)"
+            },
+            {
+                question: "Citez les 2 types d'effets biologiques des rayonnements ionisants sur les tissus",
+                answer: "• Les effets déterministes (ou obligatoires)<br>• Les effets stochastiques (ou aléatoires)"
+            },
+            {
+                question: "Nommez les effets tissulaires qui apparaissent rapidement après l'exposition aux rayonnements ionisants et ceux qui apparaissent plusieurs mois ou années plus tard",
+                answer: "• Les effets précoces (Rapidement, < 6 mois)<br>• Les effets tardifs (> 6 mois)"
+            },
+            {
+                question: "Expliquez les différences entre un effet déterministe et un effet stochastique",
+                answer: "<strong>Effet déterministe :</strong> Effet à seuil et la gravité augmente avec la dose<br><br><strong>Effet stochastique :</strong> Pas de seuil, la probabilité (fréquence) augmente avec la dose"
+            },
+            {
+                question: "Définissez le fractionnement",
+                answer: "Fractionnement :<br><br>Nombre de séances réalisées pour délivrer la dose prescrite<br><br>OU<br><br>Dose / fraction"
+            },
+            {
+                question: "Définissez l'étalement",
+                answer: "Étalement :<br><br>Temps écoulé entre la première séance de traitement et la dernière séance de traitement."
+            },
+            {
+                question: "Expliquez pourquoi le fractionnement des doses est utilisé en radiothérapie",
+                answer: "Pour favoriser la réparation des tissus sains entre les séances et maximiser la destruction des cellules tumorales qui sont plus radiosensibles"
+            }
+        ];
+
+        const radioprotectionData = [
+            {
+                question: "Définir la radioprotection",
+                answer: "L'ensemble des règles, des procédures et des moyens de prévention et de surveillance visant à empêcher ou à réduire les effets nocifs des rayonnements ionisants produits sur les personnes"
+            },
+            {
+                question: "Citez la valeur de l'exposition moyenne aux rayonnements ionisants du public par an",
+                answer: "4,5 mSv/an"
+            },
+            {
+                question: "Citez les 3 grands principes de la radioprotection",
+                answer: "3 Grands principes :<br>• Justification<br>• Optimisation<br>• Limitation"
+            },
+            {
+                question: "Expliquer le principe de justification",
+                answer: "Justification de l'examen (rapport bénéfice/risque) = prescription médicale"
+            },
+            {
+                question: "Expliquer le principe d'optimisation",
+                answer: "Optimisation de l'exposition aux RI le plus faible possible (ALARA)"
+            },
+            {
+                question: "Expliquer le principe de limitation",
+                answer: "Limitation des doses individuelles aux rayonnements ionisants annuels (concernent uniquement le personnel)"
+            },
+            {
+                question: "Citez les 3 règles de la radioprotection vous permettant de réduire l'exposition aux rayonnements ionisants auxquels vous êtes exposés en tant que futur MEM",
+                answer: "3 règles de la radioprotection :<br>• Réduire le Temps d'exposition<br>• Augmenter la distance avec la source d'exposition<br>• Interposer un Écran"
+            },
+            {
+                question: "Expliquez la différence entre la contamination interne et la contamination externe. Précisez la modalité d'imagerie dans laquelle vous êtes exposés à ces contaminations",
+                answer: "<strong>Contamination externe :</strong> Source radioactive déposée au contact sur la peau<br><br><strong>Contamination interne :</strong> Source radioactive pénètre dans l'organisme = incorporation<br><br><strong>Médecine nucléaire</strong>"
+            },
+            {
+                question: "Citez 2 EPC utilisés dans les différentes modalités d'imagerie",
+                answer: "EPC :<br>• Paroi, vitre et porte plombée<br>• Signalisation lumineuse<br>• Poubelles et seringues plombées<br>• Zonage radiologique<br>• Commande à distance<br>• Stockage sécurisé des déchets radioactifs"
+            },
+            {
+                question: "Citez 2 EPI utilisés dans les différentes modalités d'imagerie",
+                answer: "EPI :<br>• Tablier plombé<br>• Lunettes / visière plombées<br>• Protège-thyroïde plombés<br>• Gants plombés"
+            },
+            {
+                question: "Nommez le dispositif permettant de mesurer la dose de rayonnements ionisants reçue par un travailleur exposé",
+                answer: "Le dosimètre"
+            },
+            {
+                question: "Expliquez la différence entre le dosimètre à lecture différée et le dosimètre à lecture instantanée",
+                answer: "<strong>Dosimètre à lecture différée :</strong><br>Mesure individuelle en temps différé de l'exposition de la dose reçue (mSv) – Valeur réglementaire<br><br><strong>Dosimètre opérationnel :</strong><br>Mesure individuelle en temps réel de la dose reçue – Alarme / Alerte"
+            },
+            {
+                question: "Précisez où et comment se porte le dosimètre à lecture différée, ainsi que la fréquence de son changement",
+                answer: "Dosimètre à lecture différée :<br><br>Porté au niveau du tronc (poitrine), sous le tablier plombé s'il y en a un, et changé tous les trois mois (périodicité du suivi dosimétrique)."
+            },
+            {
+                question: "Précisez l'objectif du zonage en radioprotection",
+                answer: "Le zonage permet une visualisation du danger d'exposition aux rayonnements ionisants auquel les travailleurs sont susceptibles d'être exposés."
+            },
+            {
+                question: "Précisez à partir de quelle zone : le port du dosimètre à lecture différée est obligatoire / le port du dosimètre à lecture instantanée est obligatoire",
+                answer: "Le dosimètre à lecture différée est obligatoire à partir de la <strong>zone surveillée</strong>.<br><br>Le dosimètre à lecture instantanée est obligatoire à partir de la <strong>zone contrôlée verte</strong>"
+            },
+            {
+                question: "Définissez une source scellée",
+                answer: "<strong>Source scellée :</strong> Source dont la structure ou le conditionnement empêche, en utilisation normale, toute dispersion de matières radioactives dans le milieu ambiant"
+            },
+            {
+                question: "Définissez une source non scellée",
+                answer: "<strong>Source non scellée :</strong> Source dont la présentation et les conditions normales d'emploi ne permettent pas de prévenir toute dispersion de substance radioactive. Elle présente, par nature, un risque de contamination et nécessite des précautions d'emploi particulières."
+            },
+            {
+                question: "Citez 4 acteurs de la radioprotection dans un établissement de santé",
+                answer: "• Le CRP<br>• Chef d'établissement<br>• Le médecin du travail<br>• Le Physicien Médical<br>• Le MEM"
+            },
+            {
+                question: "Précisez la signification des lettres CRP ou PCR",
+                answer: "<strong>PCR :</strong> Personne Compétente en Radioprotection<br><br>OU<br><br><strong>CRP :</strong> Conseiller en Radioprotection"
+            },
+            {
+                question: "Citez 2 missions du CRP",
+                answer: "• Évaluation des risques<br>• Études de postes<br>• Catégorisation des travailleurs<br>• Délimitations des zones de travail<br>• Gestion de la dosimétrie<br>• Établissement et respect des règles de radioprotection"
+            }
+        ];
+
+        const dosimetrieData = [
+            {
+                question: "En radioprotection, le personnel et les personnes sont classés selon le niveau de dose annuelle prévisible. Citez ces 3 catégories de personnes exposées aux rayonnements ionisants",
+                answer: "3 Catégories exposées aux rayonnements ionisants :<br>• Catégorie A<br>• Catégorie B<br>• Public"
+            },
+            {
+                question: "Citez la dose limite annuelle au corps entier pour un travailleur classé catégorie B",
+                answer: "Limitation annuelle Corps entier Catégorie B :<br><br><strong>≤ 6 mSv/an</strong>"
+            },
+            {
+                question: "Citez la dose limite annuelle de dose au corps entier pour un travailleur classé catégorie A",
+                answer: "Limitation annuelle Corps entier Catégorie A :<br><br><strong>> 6 mSv/an et < 20 mSv/an</strong>"
+            },
+            {
+                question: "Citez la dose limite annuelle au corps entier pour le public",
+                answer: "Limitation annuelle Corps entier Public :<br><br><strong>≤ 1 mSv/an</strong>"
+            },
+            {
+                question: "Citez la dose limite annuelle pour le cristallin pour la catégorie A et B",
+                answer: "Limitation annuelle Cristallin<br>Catégorie A et B :<br><br><strong>< 20 mSv/an</strong>"
+            },
+            {
+                question: "Définissez le débit de dose",
+                answer: "Le débit de dose est la dose reçue par unité de temps, et s'exprime en Gy/s."
+            },
+            {
+                question: "Définissez la dose absorbée (D)",
+                answer: "La dose absorbée (D) correspond à la quantité d'énergie cédée par unité de masse de matière exposée aux rayonnements ionisants avec <strong>D = E/m</strong>"
+            },
+            {
+                question: "Concernant la relation entre la dose absorbée (D), la dose équivalente (H) et le facteur de pondération du rayonnement (Wr), citez la formule",
+                answer: "Dose équivalente :<br><strong>H = W<sub>R</sub> × D</strong><br><br>OU<br><br>H = Dose absorbée (D) × Facteur pondération radiologique"
+            },
+            {
+                question: "Citez la formule de la dose Efficace (E)",
+                answer: "Dose efficace (E) :<br><br><strong>E = D × W<sub>R</sub> × W<sub>T</sub></strong><br><br>OU<br><br>E = Dose équivalente (H) × Facteur pondération tissulaire"
+            },
+            {
+                question: "Expliquez la loi de l'inverse carrée de la distance",
+                answer: "Loi de l'inverse carrée de la distance :<br><br>Lorsqu'on double la distance, on reçoit une dose <strong>4 fois moins élevée</strong>"
+            },
+            {
+                question: "Définissez le Sievert (Sv)",
+                answer: "Le sievert (de symbole Sv) est l'« unité utilisée pour donner une évaluation de l'impact des rayonnements sur l'homme »"
+            },
+            {
+                question: "Définissez le Gray (Gy)",
+                answer: "Le Gray (Gy) correspond à l'énergie moyenne déposée par un rayonnement ionisant dans une masse de matière.<br><br>C'est l'unité de la dose absorbée."
+            },
+            {
+                question: "Un MEM reçoit un débit de dose de 0,5 mSv/h. Quelle dose aura-t-il reçue après 4 heures d'exposition ?",
+                answer: "Dose reçue après 4h d'exposition :<br><br>0,5 mSv/h × 4 = <strong>2 mSv</strong>"
+            },
+            {
+                question: "En tant que MEM, vous vous situez à une distance de 2 mètres d'une source ; la dose reçue est de 6 mSv. Calculez la dose reçue si vous vous éloignez à 4 mètres",
+                answer: "Dose reçue divisée par 4 selon la loi de l'inverse carrée de la distance :<br><br><strong>1,5 mSv</strong>"
+            },
+            {
+                question: "Définissez l'Activité d'une source radioactive",
+                answer: "L'activité (A) est le nombre de désintégrations radioactives par seconde."
+            },
+            {
+                question: "Je dispose d'une source de Technétium de 600 Bq. Sa période radioactive est de t1/2 = 6h. Calculez l'activité A de la source au bout de 18 h",
+                answer: "Activité : A(n t<sub>1/2</sub>) = A₀ / 2<sup>n</sup><br><br>18h / 6h = 3 périodes<br><br>600 / 2<sup>3</sup> = 600 / 8 = <strong>75 Bq</strong>"
+            },
+            {
+                question: "Définissez la période radioactive (ou t1/2)",
+                answer: "La période radioactive (t<sub>1/2</sub> = demi-vie) est le temps nécessaire pour que la moitié des noyaux radioactifs se désintègrent."
+            },
+            {
+                question: "Le Fluor 18 a une période d'environ 2h. Une source de Fluor 18 a une activité de 80 MBq. Calculez l'activité de la source au bout de 6h",
+                answer: "Activité : A(n t<sub>1/2</sub>) = A₀ / 2<sup>n</sup><br><br>6h / 2h = 3 périodes<br><br>80 / 2<sup>3</sup> = 80 / 8 = <strong>10 MBq</strong>"
+            },
+            {
+                question: "Précisez l'unité de : L'activité radioactive / La dose absorbée / La dose équivalente ou efficace",
+                answer: "<strong>Activité :</strong> Becquerel (Bq)<br><br><strong>Dose absorbée :</strong> Gray (Gy)<br><br><strong>Dose efficace ou dose équivalente :</strong> Sievert (Sv)"
+            },
+            {
+                question: "Nommez la grandeur permettant d'estimer le risque biologique global pour l'organisme",
+                answer: "La dose efficace (E)"
+            }
+        ];
+
+        // Fonction pour créer une flashcard
+        function createFlashcard(data, index, section) {
+            const cardId = `${section}-${index}`;
+            return `
+                <div class="flashcard" data-card-id="${cardId}">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front" onclick="flipCard(this.parentElement.parentElement, event)">
+                            <div class="card-number">Q${index + 1}</div>
+                            <div class="card-content">
+                                ${data.question}
+                            </div>
+                            <div class="hint">👆 Cliquez pour voir la réponse</div>
+                        </div>
+                        <div class="flashcard-back">
+                            <div class="card-number">R${index + 1}</div>
+                            <div class="card-content" onclick="flipCard(this.parentElement.parentElement, event)">
+                                ${data.answer}
+                            </div>
+                            <div class="correction-buttons">
+                                <button class="btn-correct" onclick="answerCard(event, '${cardId}', true)">✅ J'ai bon</button>
+                                <button class="btn-wrong" onclick="answerCard(event, '${cardId}', false)">❌ J'ai faux</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Fonction pour retourner une carte
+        function flipCard(element, event) {
+            // Si le clic vient d'un bouton de correction, on ne fait rien
+            if (event && event.target.closest('.correction-buttons')) {
+                return;
+            }
+            element.classList.toggle('flipped');
+        }
+
+        // Fonction pour enregistrer une réponse
+        function answerCard(event, cardId, isCorrect) {
+            event.stopPropagation();
+            event.preventDefault();
+            
+            const card = document.querySelector(`[data-card-id="${cardId}"]`);
+            if (!card) return;
+
+            // Si déjà répondu, on annule l'ancienne réponse
+            if (scores.answered.has(cardId)) {
+                const wasCorrect = card.classList.contains('answered-correct');
+                if (wasCorrect) {
+                    scores.correct--;
+                } else {
+                    scores.wrong--;
+                }
+                card.classList.remove('answered-correct', 'answered-wrong');
+            } else {
+                scores.answered.add(cardId);
+            }
+
+            // Ajouter la nouvelle réponse
+            if (isCorrect) {
+                scores.correct++;
+                card.classList.add('answered-correct');
+                card.classList.remove('answered-wrong');
+            } else {
+                scores.wrong++;
+                card.classList.add('answered-wrong');
+                card.classList.remove('answered-correct');
+            }
+
+            updateScores();
+        }
+
+        // Fonction pour mettre à jour l'affichage des scores
+        function updateScores() {
+            document.getElementById('score-correct').textContent = scores.correct;
+            document.getElementById('score-wrong').textContent = scores.wrong;
+            document.getElementById('score-total').textContent = `${scores.answered.size} / 60`;
+            
+            const percent = scores.answered.size > 0 
+                ? Math.round((scores.correct / scores.answered.size) * 100) 
+                : 0;
+            document.getElementById('score-percent').textContent = `${percent}%`;
+        }
+
+        // Fonction pour retourner toutes les cartes
+        function flipAll() {
+            const cards = document.querySelectorAll('.flashcard');
+            cards.forEach(card => {
+                card.classList.toggle('flipped');
+            });
+        }
+
+        // Fonction pour réinitialiser toutes les cartes
+        function resetAll() {
+            if (!confirm('Êtes-vous sûr de vouloir réinitialiser tous les scores et les cartes ?')) {
+                return;
+            }
+            
+            scores = {
+                correct: 0,
+                wrong: 0,
+                answered: new Set()
+            };
+            
+            const cards = document.querySelectorAll('.flashcard');
+            cards.forEach(card => {
+                card.classList.remove('flipped', 'answered-correct', 'answered-wrong');
+            });
+            
+            updateScores();
+        }
+
+        // Initialisation des cartes au chargement de la page
+        window.onload = function() {
+            const radiobiologieContainer = document.getElementById('radiobiologie-cards');
+            const radioprotectionContainer = document.getElementById('radioprotection-cards');
+            const dosimetrieContainer = document.getElementById('dosimetrie-cards');
+
+            radiobiologieData.forEach((data, index) => {
+                radiobiologieContainer.innerHTML += createFlashcard(data, index, 'radio');
+            });
+
+            radioprotectionData.forEach((data, index) => {
+                radioprotectionContainer.innerHTML += createFlashcard(data, index, 'protection');
+            });
+
+            dosimetrieData.forEach((data, index) => {
+                dosimetrieContainer.innerHTML += createFlashcard(data, index, 'dosi');
+            });
+
+            updateScores();
+        };
+    </script>
+</body>
+</html>
