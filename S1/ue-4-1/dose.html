@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcul de Dose Interactif - Formation MEM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .exercise-section {
+            display: none;
+        }
+
+        .exercise-section.active {
+            display: block;
+        }
+
+        .scenario {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .scenario h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .success-box {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        /* Animation de la perfusion */
+        .perfusion-container {
+            position: relative;
+            width: 300px;
+            height: 500px;
+            margin: 30px auto;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .bag {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin: 20px auto;
+            background: linear-gradient(180deg, transparent 0%, #e3f2fd 100%);
+            border: 3px solid #333;
+            border-radius: 50% 50% 0 0;
+            overflow: hidden;
+        }
+
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(180deg, #64b5f6 0%, #2196f3 100%);
+            transition: height 1s ease;
+            height: 50%;
+        }
+
+        .liquid.correct {
+            background: linear-gradient(180deg, #81c784 0%, #4caf50 100%);
+        }
+
+        .liquid.too-much {
+            background: linear-gradient(180deg, #e57373 0%, #f44336 100%);
+            animation: shake 0.5s;
+        }
+
+        .liquid.too-little {
+            background: linear-gradient(180deg, #ffb74d 0%, #ff9800 100%);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .drip {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #2196f3;
+            border-radius: 50%;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+        }
+
+        .drip.active {
+            animation: drip 2s infinite;
+        }
+
+        @keyframes drip {
+            0% { top: -20px; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 350px; opacity: 0; }
+        }
+
+        .tube {
+            position: absolute;
+            width: 4px;
+            height: 150px;
+            background: linear-gradient(180deg, transparent 0%, #64b5f6 50%, transparent 100%);
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 20px;
+        }
+
+        .volume-label {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: 600;
+            border: 2px solid #667eea;
+        }
+
+        .ampoule-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+
+        .ampoule {
+            width: 70px;
+            height: 110px;
+            background: linear-gradient(180deg, #fff 0%, #e0e0e0 100%);
+            border: 3px solid #333;
+            border-radius: 10px 10px 5px 5px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .ampoule:hover:not(.added) {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .ampoule.added {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: scale(0.9);
+        }
+
+        .ampoule-type {
+            font-weight: 700;
+            font-size: 16px;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .ampoule-info {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .calculation-steps {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .calculation-steps h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .step {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .formula {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .prescription-box {
+            background: #fff;
+            border: 2px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .prescription-box h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .prescription-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .help-section {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #4caf50;
+        }
+
+        .counter-display {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Calcul de Dose Interactif</h1>
+            <p class="subtitle">Formation pour Manipulateurs en Électroradiologie Médicale</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('conversions')">📊 Conversions</button>
+            <button class="tab" onclick="showTab('perfusion')">💧 Perfusion</button>
+            <button class="tab" onclick="showTab('electrolytes')">⚗️ Électrolytes</button>
+            <button class="tab" onclick="showTab('debit')">⏱️ Débit</button>
+        </div>
+
+        <div class="content">
+            <!-- Section Conversions -->
+            <div id="conversions" class="exercise-section active">
+                <div class="scenario">
+                    <h3>Conversions de base</h3>
+                    <p>Testez vos connaissances sur les conversions essentielles.</p>
+                </div>
+
+                <div class="input-group">
+                    <label>Combien de gouttes dans 1 mL ?</label>
+                    <input type="number" id="conv1" placeholder="Entrez votre réponse">
+                </div>
+
+                <div class="input-group">
+                    <label>Une solution à <span id="conv2-percent"></span>% contient combien de grammes dans 100 mL ?</label>
+                    <input type="number" id="conv2" placeholder="Entrez votre réponse">
+                </div>
+
+                <div class="input-group">
+                    <label>Convertir <span id="conv3-value"></span> mL/h en mL/24h</label>
+                    <input type="number" id="conv3" placeholder="Entrez votre réponse">
+                </div>
+
+                <div class="input-group">
+                    <label><span id="conv4-frac"></span> de <span id="conv4-volume"></span> mL = ? mL</label>
+                    <input type="number" id="conv4" placeholder="Entrez votre réponse">
+                </div>
+
+                <button onclick="checkConversions()">Vérifier mes réponses</button>
+                <button class="btn-secondary" onclick="resetConversions()">Nouvel exercice</button>
+
+                <div id="conv-result"></div>
+            </div>
+
+            <!-- Section Perfusion -->
+            <div id="perfusion" class="exercise-section">
+                <div class="prescription-box">
+                    <h4>📋 Prescription médicale</h4>
+                    <div class="prescription-item">
+                        <strong>Patient :</strong> <span id="perf-patient"></span>
+                    </div>
+                    <div class="prescription-item">
+                        <strong>Prescription :</strong> <span id="perf-prescription"></span>
+                    </div>
+                </div>
+
+                <div class="scenario">
+                    <h3>Matériel disponible :</h3>
+                    <p style="margin: 15px 0;">Vous disposez de plusieurs types d'ampoules. À vous de calculer leur contenu et de choisir les bonnes !</p>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h4>🧪 Ampoules NaCl disponibles :</h4>
+                        <div class="ampoule-container" id="nacl-ampoules"></div>
+
+                        <h4 style="margin-top: 30px;">🧪 Ampoules KCl disponibles :</h4>
+                        <div class="ampoule-container" id="kcl-ampoules"></div>
+
+                        <div class="counter-display">
+                            <div>Ampoules NaCl cliquées : <span id="nacl-count">0</span></div>
+                            <div>Ampoules KCl cliquées : <span id="kcl-count">0</span></div>
+                        </div>
+
+                        <button onclick="validatePerfusion()">✓ Valider ma préparation</button>
+                        <button class="btn-secondary" onclick="resetPerfusion()">↻ Recommencer</button>
+                        <button class="btn-success" onclick="newPerfusionExercise()">⚡ Nouvel exercice</button>
+                    </div>
+
+                    <div>
+                        <div class="perfusion-container">
+                            <div class="volume-label" id="bag-volume">? mL</div>
+                            <div class="bag">
+                                <div class="liquid" id="liquid-level"></div>
+                            </div>
+                            <div class="drip" id="drip"></div>
+                            <div class="tube"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="perfusion-result"></div>
+            </div>
+
+            <!-- Section Électrolytes -->
+            <div id="electrolytes" class="exercise-section">
+                <div class="prescription-box">
+                    <h4>📋 Prescription médicale</h4>
+                    <div class="prescription-item">
+                        <strong>Prescription :</strong> <span id="elec-prescription"></span>
+                    </div>
+                    <div class="prescription-item">
+                        <strong>Disponible :</strong> Ampoules de <span id="elec-product"></span> <span id="elec-vol"></span>mL à <span id="elec-conc"></span>%
+                    </div>
+                </div>
+
+                <div class="calculation-steps">
+                    <div class="step">
+                        <strong>Étape 1 : Concentration de l'ampoule</strong>
+                        <div class="input-group">
+                            <label>Combien de grammes contient UNE ampoule ?</label>
+                            <input type="number" step="0.1" id="elec-step1" placeholder="? grammes">
+                        </div>
+                        <button onclick="checkElecStep(1)">Vérifier</button>
+                        <div id="elec-result1"></div>
+                    </div>
+
+                    <div class="step">
+                        <strong>Étape 2 : Volume nécessaire</strong>
+                        <div class="input-group">
+                            <label>Quel volume (en mL) faut-il prélever pour obtenir la dose prescrite ?</label>
+                            <input type="number" step="0.1" id="elec-step2" placeholder="? mL">
+                        </div>
+                        <button onclick="checkElecStep(2)">Vérifier</button>
+                        <div id="elec-result2"></div>
+                    </div>
+
+                    <div class="step">
+                        <strong>Étape 3 : Nombre d'ampoules</strong>
+                        <div class="input-group">
+                            <label>Combien d'ampoules faut-il utiliser ?</label>
+                            <input type="number" step="0.1" id="elec-step3" placeholder="? ampoules">
+                        </div>
+                        <button onclick="checkElecStep(3)">Vérifier</button>
+                        <div id="elec-result3"></div>
+                    </div>
+                </div>
+
+                <button class="btn-success" onclick="newElecExercise()">Nouvel exercice</button>
+            </div>
+
+            <!-- Section Débit -->
+            <div id="debit" class="exercise-section">
+                <div class="prescription-box">
+                    <h4>📋 Prescription médicale</h4>
+                    <div class="prescription-item">
+                        <strong>Volume à perfuser :</strong> <span id="debit-volume"></span> mL
+                    </div>
+                    <div class="prescription-item">
+                        <strong>Durée :</strong> <span id="debit-duration"></span>h
+                    </div>
+                </div>
+
+                <div class="calculation-steps">
+                    <div class="step">
+                        <strong>Étape 1 : Convertir le volume en gouttes</strong>
+                        <div class="input-group">
+                            <label><span id="debit-vol-repeat"></span> mL = ? gouttes</label>
+                            <input type="number" id="debit-step1" placeholder="? gouttes">
+                        </div>
+                        <button onclick="checkDebitStep(1)">Vérifier</button>
+                        <div id="debit-result1"></div>
+                    </div>
+
+                    <div class="step">
+                        <strong>Étape 2 : Convertir la durée en minutes</strong>
+                        <div class="input-group">
+                            <label><span id="debit-dur-repeat"></span>h = ? minutes</label>
+                            <input type="number" id="debit-step2" placeholder="? minutes">
+                        </div>
+                        <button onclick="checkDebitStep(2)">Vérifier</button>
+                        <div id="debit-result2"></div>
+                    </div>
+
+                    <div class="step">
+                        <strong>Étape 3 : Calculer le débit</strong>
+                        <div class="input-group">
+                            <label>Débit en gouttes/minute</label>
+                            <input type="number" id="debit-step3" placeholder="? gttes/min">
+                        </div>
+                        <button onclick="checkDebitStep(3)">Vérifier</button>
+                        <div id="debit-result3"></div>
+                    </div>
+                </div>
+
+                <button class="btn-success" onclick="newDebitExercise()">Nouvel exercice</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="correct-count">0</div>
+                <div class="stat-label">Réponses correctes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="total-count">0</div>
+                <div class="stat-label">Total d'essais</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="success-rate">0%</div>
+                <div class="stat-label">Taux de réussite</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let correctAnswers = 0;
+        let totalAttempts = 0;
+        
+        // Variables pour les conversions
+        let convAnswers = {
+            conv1: 20,
+            conv2: 0,
+            conv3: 0,
+            conv4: 0
+        };
+
+        // Variables pour la perfusion
+        let perfusionData = {
+            baseVolume: 1000,
+            naclTarget: 0,
+            kclTarget: 0,
+            naclAmpoules: [],
+            kclAmpoules: [],
+            naclAdded: 0,
+            kclAdded: 0,
+            naclCount: 0,
+            kclCount: 0,
+            volumeTotal: 0
+        };
+
+        // Variables pour électrolytes
+        let elecData = {
+            product: '',
+            dose: 0,
+            concentration: 0,
+            volumePerAmp: 0,
+            gramsPerAmp: 0,
+            volumeNeeded: 0,
+            ampsNeeded: 0
+        };
+
+        // Variables pour débit
+        let debitData = {
+            volume: 0,
+            duration: 0,
+            totalGouttes: 0,
+            totalMinutes: 0,
+            debit: 0,
+            debitExact: 0,
+            roundingType: '' // 'défaut' ou 'excès'
+        };
+
+        // Gestion des onglets
+        function showTab(tabName) {
+            document.querySelectorAll('.exercise-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // ===== SECTION CONVERSIONS =====
+        function generateConversions() {
+            const percentages = [10, 15, 20, 25, 30];
+            convAnswers.conv2 = percentages[Math.floor(Math.random() * percentages.length)];
+            document.getElementById('conv2-percent').textContent = convAnswers.conv2;
+
+            const debits = [25, 30, 40, 50, 60, 75, 100];
+            const debit = debits[Math.floor(Math.random() * debits.length)];
+            convAnswers.conv3 = debit * 24;
+            document.getElementById('conv3-value').textContent = debit;
+
+            const fractions = ['1/2', '1/3', '2/3', '1/4', '3/4', '2/5', '3/5'];
+            const volumes = [500, 600, 800, 900, 1000];
+            const frac = fractions[Math.floor(Math.random() * fractions.length)];
+            const vol = volumes[Math.floor(Math.random() * volumes.length)];
+            
+            const [num, denom] = frac.split('/').map(Number);
+            convAnswers.conv4 = Math.round((num / denom) * vol);
+            
+            document.getElementById('conv4-frac').textContent = frac;
+            document.getElementById('conv4-volume').textContent = vol;
+        }
+
+        function checkConversions() {
+            const conv1 = parseInt(document.getElementById('conv1').value);
+            const conv2 = parseInt(document.getElementById('conv2').value);
+            const conv3 = parseInt(document.getElementById('conv3').value);
+            const conv4 = parseInt(document.getElementById('conv4').value);
+
+            let result = '<div class="calculation-steps"><h4>Résultats :</h4>';
+            let correct = 0;
+            let total = 4;
+
+            if (conv1 === convAnswers.conv1) {
+                result += '<div class="success-box">✅ Question 1 : Correct ! 1 mL = 20 gouttes</div>';
+                correct++;
+            } else {
+                result += '<div class="error-box">❌ Question 1 : Incorrect. Réponse : 1 mL = 20 gouttes</div>';
+            }
+
+            if (conv2 === convAnswers.conv2) {
+                result += `<div class="success-box">✅ Question 2 : Correct ! ${convAnswers.conv2}% = ${convAnswers.conv2}g dans 100 mL</div>`;
+                correct++;
+            } else {
+                result += `<div class="error-box">❌ Question 2 : Incorrect. ${convAnswers.conv2}% = ${convAnswers.conv2}g dans 100 mL<br>
+                <em>Astuce : Le pourcentage indique la quantité en grammes pour 100mL</em></div>`;
+            }
+
+            if (conv3 === convAnswers.conv3) {
+                result += `<div class="success-box">✅ Question 3 : Correct ! ${convAnswers.conv3 / 24} mL/h × 24h = ${convAnswers.conv3} mL/24h</div>`;
+                correct++;
+            } else {
+                result += `<div class="error-box">❌ Question 3 : Incorrect. Réponse : ${convAnswers.conv3} mL/24h<br>
+                <em>Méthode : Multipliez les mL/h par 24</em></div>`;
+            }
+
+            if (conv4 === convAnswers.conv4) {
+                result += `<div class="success-box">✅ Question 4 : Correct ! Réponse = ${convAnswers.conv4} mL</div>`;
+                correct++;
+            } else {
+                result += `<div class="error-box">❌ Question 4 : Incorrect. Réponse : ${convAnswers.conv4} mL<br>
+                <em>Méthode : Divisez le volume par le dénominateur, puis multipliez par le numérateur</em></div>`;
+            }
+
+            result += '</div>';
+            document.getElementById('conv-result').innerHTML = result;
+
+            updateStats(correct, total);
+        }
+
+        function resetConversions() {
+            document.getElementById('conv1').value = '';
+            document.getElementById('conv2').value = '';
+            document.getElementById('conv3').value = '';
+            document.getElementById('conv4').value = '';
+            document.getElementById('conv-result').innerHTML = '';
+            generateConversions();
+        }
+
+        // ===== SECTION PERFUSION =====
+        function generatePerfusion() {
+            const patients = ['Mr Dupont', 'Mme Martin', 'Mr Bernard', 'Mme Dubois', 'Mr Petit'];
+            const solutes = ['G5%', 'NaCl 0,9%', 'Ringer Lactate'];
+            const volumes = [500, 1000];
+            
+            perfusionData.baseVolume = volumes[Math.floor(Math.random() * volumes.length)];
+            
+            const naclOptions = [
+                { conc: 10, vol: 10, grams: 1 },
+                { conc: 20, vol: 10, grams: 2 },
+                { conc: 10, vol: 20, grams: 2 },
+                { conc: 20, vol: 20, grams: 4 }
+            ];
+            
+            const kclOptions = [
+                { conc: 10, vol: 5, grams: 0.5 },
+                { conc: 20, vol: 5, grams: 1 },
+                { conc: 10, vol: 10, grams: 1 },
+                { conc: 20, vol: 10, grams: 2 }
+            ];
+            
+            const naclDoses = [2, 3, 4, 6];
+            const kclDoses = [1, 2, 3];
+            
+            perfusionData.naclTarget = naclDoses[Math.floor(Math.random() * naclDoses.length)];
+            perfusionData.kclTarget = kclDoses[Math.floor(Math.random() * kclDoses.length)];
+            
+            perfusionData.naclAmpoules = [];
+            const numNaClTypes = 2 + Math.floor(Math.random() * 2);
+            const shuffledNaCl = [...naclOptions].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < numNaClTypes; i++) {
+                const type = shuffledNaCl[i];
+                perfusionData.naclAmpoules.push(type);
+                perfusionData.naclAmpoules.push(type);
+            }
+            perfusionData.naclAmpoules.sort(() => Math.random() - 0.5);
+            
+            perfusionData.kclAmpoules = [];
+            const numKClTypes = 2;
+            const shuffledKCl = [...kclOptions].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < numKClTypes; i++) {
+                const type = shuffledKCl[i];
+                perfusionData.kclAmpoules.push(type);
+            }
+            perfusionData.kclAmpoules.sort(() => Math.random() - 0.5);
+            
+            perfusionData.naclAdded = 0;
+            perfusionData.kclAdded = 0;
+            perfusionData.naclCount = 0;
+            perfusionData.kclCount = 0;
+            perfusionData.volumeTotal = perfusionData.baseVolume;
+            
+            const solute = solutes[Math.floor(Math.random() * solutes.length)];
+            document.getElementById('perf-patient').textContent = patients[Math.floor(Math.random() * patients.length)];
+            document.getElementById('perf-prescription').textContent = 
+                `${perfusionData.baseVolume}mL de ${solute} + ${perfusionData.naclTarget}g NaCl + ${perfusionData.kclTarget}g KCl sur 24h`;
+            
+            createAmpoules();
+            updatePerfusionDisplay();
+        }
+
+        function createAmpoules() {
+            const naclContainer = document.getElementById('nacl-ampoules');
+            const kclContainer = document.getElementById('kcl-ampoules');
+            
+            naclContainer.innerHTML = '';
+            kclContainer.innerHTML = '';
+            
+            perfusionData.naclAmpoules.forEach((amp, i) => {
+                const ampDiv = document.createElement('div');
+                ampDiv.className = 'ampoule';
+                ampDiv.id = `nacl-amp-${i}`;
+                ampDiv.innerHTML = `
+                    <span class="ampoule-type">NaCl</span>
+                    <div class="ampoule-info">
+                        ${amp.vol}mL<br>
+                        ${amp.conc}%
+                    </div>
+                `;
+                ampDiv.onclick = () => addAmpoule('nacl', i);
+                naclContainer.appendChild(ampDiv);
+            });
+            
+            perfusionData.kclAmpoules.forEach((amp, i) => {
+                const ampDiv = document.createElement('div');
+                ampDiv.className = 'ampoule';
+                ampDiv.id = `kcl-amp-${i}`;
+                ampDiv.innerHTML = `
+                    <span class="ampoule-type">KCl</span>
+                    <div class="ampoule-info">
+                        ${amp.vol}mL<br>
+                        ${amp.conc}%
+                    </div>
+                `;
+                ampDiv.onclick = () => addAmpoule('kcl', i);
+                kclContainer.appendChild(ampDiv);
+            });
+        }
+
+        function addAmpoule(type, index) {
+            const amp = document.getElementById(`${type}-amp-${index}`);
+            if (amp.classList.contains('added')) return;
+            
+            if (type === 'nacl') {
+                const ampData = perfusionData.naclAmpoules[index];
+                perfusionData.naclAdded += ampData.grams;
+                perfusionData.volumeTotal += ampData.vol;
+                perfusionData.naclCount++;
+                document.getElementById('nacl-count').textContent = perfusionData.naclCount;
+            } else {
+                const ampData = perfusionData.kclAmpoules[index];
+                perfusionData.kclAdded += ampData.grams;
+                perfusionData.volumeTotal += ampData.vol;
+                perfusionData.kclCount++;
+                document.getElementById('kcl-count').textContent = perfusionData.kclCount;
+            }
+            
+            amp.classList.add('added');
+            updatePerfusionDisplay();
+            animateDrip();
+        }
+
+        function updatePerfusionDisplay() {
+            document.getElementById('bag-volume').textContent = perfusionData.volumeTotal + ' mL';
+            
+            const liquid = document.getElementById('liquid-level');
+            const percentage = Math.min((perfusionData.volumeTotal / (perfusionData.baseVolume * 1.3)) * 100, 100);
+            liquid.style.height = percentage + '%';
+        }
+
+        function animateDrip() {
+            const drip = document.getElementById('drip');
+            drip.classList.add('active');
+            setTimeout(() => {
+                drip.classList.remove('active');
+            }, 2000);
+        }
+
+        function validatePerfusion() {
+            const liquid = document.getElementById('liquid-level');
+            liquid.classList.remove('correct', 'too-much', 'too-little');
+            
+            let result = '';
+            let isCorrect = false;
+            
+            const naclOk = Math.abs(perfusionData.naclAdded - perfusionData.naclTarget) < 0.1;
+            const kclOk = Math.abs(perfusionData.kclAdded - perfusionData.kclTarget) < 0.1;
+            
+            if (naclOk && kclOk) {
+                // Calculer le débit avec la bonne règle d'arrondi
+                const exactDebit = (perfusionData.volumeTotal * 20) / 1440;
+                const decimal = exactDebit - Math.floor(exactDebit);
+                let finalDebit, roundingText;
+                
+                if (decimal < 0.5) {
+                    finalDebit = Math.floor(exactDebit);
+                    roundingText = 'PAR DÉFAUT';
+                } else {
+                    finalDebit = Math.ceil(exactDebit);
+                    roundingText = 'PAR EXCÈS';
+                }
+                
+                result = `
+                    <div class="success-box">
+                        <h4>✅ Excellente préparation !</h4>
+                        <p><strong>Composition correcte :</strong></p>
+                        <ul style="margin-left: 20px;">
+                            <li>Solution de base : ${perfusionData.baseVolume} mL</li>
+                            <li><strong>NaCl ajouté : ${perfusionData.naclAdded.toFixed(1)}g / ${perfusionData.naclTarget}g ✓</strong></li>
+                            <li><strong>KCl ajouté : ${perfusionData.kclAdded.toFixed(1)}g / ${perfusionData.kclTarget}g ✓</strong></li>
+                            <li><strong>Volume total : ${perfusionData.volumeTotal} mL</strong></li>
+                        </ul>
+                        <div class="calculation-steps" style="margin-top: 15px;">
+                            <h4>📝 Détail de votre préparation :</h4>
+                            ${generateDetailedSummary()}
+                        </div>
+                        <div class="formula" style="margin-top: 15px;">
+                            <strong>Débit à programmer :</strong><br>
+                            ${perfusionData.volumeTotal} mL / 24h = ${perfusionData.volumeTotal * 20} gouttes / 1440 min<br>
+                            = ${exactDebit.toFixed(2)} ≈ <strong>${finalDebit} gttes/min ${roundingText}</strong>
+                        </div>
+                        <div class="info-box" style="margin-top: 10px;">
+                            <strong>💡 Règle d'arrondi :</strong><br>
+                            ${decimal < 0.5 
+                                ? `Partie décimale < 0,5 → on arrondit par défaut (vers le bas)` 
+                                : `Partie décimale ≥ 0,5 → on arrondit par excès (vers le haut)`}
+                        </div>
+                    </div>
+                `;
+                liquid.classList.add('correct');
+                isCorrect = true;
+            } else if (perfusionData.naclAdded > perfusionData.naclTarget || perfusionData.kclAdded > perfusionData.kclTarget) {
+                result = `
+                    <div class="error-box">
+                        <h4>❌ SURDOSAGE - DANGER !</h4>
+                        <p><strong>Prescrit :</strong> NaCl ${perfusionData.naclTarget}g, KCl ${perfusionData.kclTarget}g</p>
+                        <p><strong>Ajouté :</strong> NaCl ${perfusionData.naclAdded.toFixed(1)}g, KCl ${perfusionData.kclAdded.toFixed(1)}g</p>
+                        <div class="warning-box">⚠️ Un surdosage d'électrolytes peut avoir des conséquences graves pour le patient !</div>
+                        ${generateDetailedSummary()}
+                    </div>
+                `;
+                liquid.classList.add('too-much');
+            } else {
+                result = `
+                    <div class="warning-box">
+                        <h4>⚠️ Sous-dosage</h4>
+                        <p><strong>Prescrit :</strong> NaCl ${perfusionData.naclTarget}g, KCl ${perfusionData.kclTarget}g</p>
+                        <p><strong>Ajouté :</strong> NaCl ${perfusionData.naclAdded.toFixed(1)}g, KCl ${perfusionData.kclAdded.toFixed(1)}g</p>
+                        <p>Il manque encore des électrolytes. Continuez à ajouter les ampoules nécessaires.</p>
+                    </div>
+                `;
+                liquid.classList.add('too-little');
+            }
+            
+            document.getElementById('perfusion-result').innerHTML = result;
+            updateStats(isCorrect ? 1 : 0, 1);
+        }
+
+        function generateDetailedSummary() {
+            let summary = '<div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0;">';
+            
+            const naclUsed = {};
+            const kclUsed = {};
+            
+            document.querySelectorAll('.ampoule.added').forEach(amp => {
+                const id = amp.id;
+                if (id.startsWith('nacl-amp-')) {
+                    const index = parseInt(id.split('-')[2]);
+                    const ampData = perfusionData.naclAmpoules[index];
+                    const key = `${ampData.vol}mL à ${ampData.conc}%`;
+                    naclUsed[key] = (naclUsed[key] || 0) + 1;
+                } else if (id.startsWith('kcl-amp-')) {
+                    const index = parseInt(id.split('-')[2]);
+                    const ampData = perfusionData.kclAmpoules[index];
+                    const key = `${ampData.vol}mL à ${ampData.conc}%`;
+                    kclUsed[key] = (kclUsed[key] || 0) + 1;
+                }
+            });
+            
+            summary += '<strong>Ampoules NaCl utilisées :</strong><ul style="margin-left: 20px;">';
+            for (let [type, count] of Object.entries(naclUsed)) {
+                const parts = type.split(' à ');
+                const vol = parseFloat(parts[0]);
+                const conc = parseFloat(parts[1]);
+                const gramsPerAmp = (vol * conc) / 100;
+                summary += `<li>${count} × ${type} = ${count} × ${gramsPerAmp}g = ${(count * gramsPerAmp).toFixed(1)}g</li>`;
+            }
+            summary += '</ul>';
+            
+            summary += '<strong>Ampoules KCl utilisées :</strong><ul style="margin-left: 20px;">';
+            for (let [type, count] of Object.entries(kclUsed)) {
+                const parts = type.split(' à ');
+                const vol = parseFloat(parts[0]);
+                const conc = parseFloat(parts[1]);
+                const gramsPerAmp = (vol * conc) / 100;
+                summary += `<li>${count} × ${type} = ${count} × ${gramsPerAmp}g = ${(count * gramsPerAmp).toFixed(1)}g</li>`;
+            }
+            summary += '</ul></div>';
+            
+            return summary;
+        }
+
+        function resetPerfusion() {
+            perfusionData.naclAdded = 0;
+            perfusionData.kclAdded = 0;
+            perfusionData.naclCount = 0;
+            perfusionData.kclCount = 0;
+            perfusionData.volumeTotal = perfusionData.baseVolume;
+            
+            document.getElementById('nacl-count').textContent = '0';
+            document.getElementById('kcl-count').textContent = '0';
+            document.getElementById('perfusion-result').innerHTML = '';
+            
+            const liquid = document.getElementById('liquid-level');
+            liquid.classList.remove('correct', 'too-much', 'too-little');
+            
+            document.querySelectorAll('.ampoule').forEach(amp => {
+                amp.classList.remove('added');
+            });
+            
+            updatePerfusionDisplay();
+        }
+
+        function newPerfusionExercise() {
+            resetPerfusion();
+            generatePerfusion();
+        }
+
+        // ===== SECTION ÉLECTROLYTES =====
+        function generateElec() {
+            const products = ['NaCl', 'KCl'];
+            
+            elecData.product = products[Math.floor(Math.random() * products.length)];
+            
+            const validCombos = [
+                { conc: 10, vol: 10, doses: [1, 2, 3] },
+                { conc: 20, vol: 10, doses: [2, 4] },
+                { conc: 10, vol: 20, doses: [2, 4] },
+                { conc: 20, vol: 20, doses: [4, 8] },
+                { conc: 20, vol: 5, doses: [1, 2] }
+            ];
+            
+            const combo = validCombos[Math.floor(Math.random() * validCombos.length)];
+            elecData.concentration = combo.conc;
+            elecData.volumePerAmp = combo.vol;
+            elecData.dose = combo.doses[Math.floor(Math.random() * combo.doses.length)];
+            
+            elecData.gramsPerAmp = (elecData.concentration * elecData.volumePerAmp) / 100;
+            elecData.volumeNeeded = (elecData.dose / elecData.concentration) * 100;
+            elecData.ampsNeeded = elecData.volumeNeeded / elecData.volumePerAmp;
+            
+            document.getElementById('elec-prescription').textContent = `${elecData.dose}g de ${elecData.product} / L`;
+            document.getElementById('elec-product').textContent = elecData.product;
+            document.getElementById('elec-vol').textContent = elecData.volumePerAmp;
+            document.getElementById('elec-conc').textContent = elecData.concentration;
+            
+            document.getElementById('elec-step1').value = '';
+            document.getElementById('elec-step2').value = '';
+            document.getElementById('elec-step3').value = '';
+            document.getElementById('elec-result1').innerHTML = '';
+            document.getElementById('elec-result2').innerHTML = '';
+            document.getElementById('elec-result3').innerHTML = '';
+        }
+
+        function checkElecStep(step) {
+            let result = '';
+            let isCorrect = false;
+
+            if (step === 1) {
+                const answer = parseFloat(document.getElementById('elec-step1').value);
+                if (Math.abs(answer - elecData.gramsPerAmp) < 0.1) {
+                    result = `
+                        <div class="success-box">
+                            ✅ Correct ! Une ampoule de ${elecData.volumePerAmp}mL à ${elecData.concentration}% contient ${elecData.gramsPerAmp}g
+                            <div class="formula">${elecData.concentration}% = ${elecData.concentration}g/100mL → ${elecData.volumePerAmp}mL = (${elecData.volumePerAmp} × ${elecData.concentration})/100 = ${elecData.gramsPerAmp}g</div>
+                        </div>
+                    `;
+                    isCorrect = true;
+                } else {
+                    result = `
+                        <div class="error-box">
+                            ❌ Incorrect. Méthode : Si 100mL contiennent ${elecData.concentration}g, combien contiennent ${elecData.volumePerAmp}mL ?
+                            <div class="formula">x = (${elecData.volumePerAmp}mL × ${elecData.concentration}g) / 100mL</div>
+                        </div>
+                    `;
+                }
+            } else if (step === 2) {
+                const answer = parseFloat(document.getElementById('elec-step2').value);
+                if (Math.abs(answer - elecData.volumeNeeded) < 0.5) {
+                    result = `
+                        <div class="success-box">
+                            ✅ Correct ! Il faut prélever ${elecData.volumeNeeded}mL
+                            <div class="formula">Si ${elecData.gramsPerAmp}g → ${elecData.volumePerAmp}mL, alors ${elecData.dose}g → x mL<br>
+                            x = (${elecData.dose} × ${elecData.volumePerAmp}) / ${elecData.gramsPerAmp} = ${elecData.volumeNeeded}mL</div>
+                        </div>
+                    `;
+                    isCorrect = true;
+                } else {
+                    result = `
+                        <div class="error-box">
+                            ❌ Incorrect. Utilisez un produit en croix : ${elecData.gramsPerAmp}g → ${elecData.volumePerAmp}mL, donc ${elecData.dose}g → ? mL
+                        </div>
+                    `;
+                }
+            } else if (step === 3) {
+                const answer = parseFloat(document.getElementById('elec-step3').value);
+                if (Math.abs(answer - elecData.ampsNeeded) < 0.1) {
+                    result = `
+                        <div class="success-box">
+                            ✅ Correct ! Il faut ${elecData.ampsNeeded} ampoule${elecData.ampsNeeded > 1 ? 's' : ''}
+                            <div class="formula">${elecData.volumeNeeded}mL / ${elecData.volumePerAmp}mL par ampoule = ${elecData.ampsNeeded} ampoule${elecData.ampsNeeded > 1 ? 's' : ''}</div>
+                        </div>
+                    `;
+                    isCorrect = true;
+                } else {
+                    result = `
+                        <div class="error-box">
+                            ❌ Incorrect. Divisez le volume nécessaire par le volume d'une ampoule
+                        </div>
+                    `;
+                }
+            }
+
+            document.getElementById(`elec-result${step}`).innerHTML = result;
+            updateStats(isCorrect ? 1 : 0, 1);
+        }
+
+        function newElecExercise() {
+            generateElec();
+        }
+
+        // ===== SECTION DÉBIT =====
+        function generateDebit() {
+            const volumes = [500, 750, 1000, 1020, 1025, 1030, 1500, 2000];
+            const durations = [8, 12, 24];
+            
+            debitData.volume = volumes[Math.floor(Math.random() * volumes.length)];
+            debitData.duration = durations[Math.floor(Math.random() * durations.length)];
+            
+            debitData.totalGouttes = debitData.volume * 20;
+            debitData.totalMinutes = debitData.duration * 60;
+            debitData.debitExact = debitData.totalGouttes / debitData.totalMinutes;
+            
+            // Appliquer la règle d'arrondi correcte
+            const decimal = debitData.debitExact - Math.floor(debitData.debitExact);
+            if (decimal < 0.5) {
+                debitData.debit = Math.floor(debitData.debitExact);
+                debitData.roundingType = 'défaut';
+            } else {
+                debitData.debit = Math.ceil(debitData.debitExact);
+                debitData.roundingType = 'excès';
+            }
+            
+            document.getElementById('debit-volume').textContent = debitData.volume;
+            document.getElementById('debit-duration').textContent = debitData.duration;
+            document.getElementById('debit-vol-repeat').textContent = debitData.volume;
+            document.getElementById('debit-dur-repeat').textContent = debitData.duration;
+            
+            document.getElementById('debit-step1').value = '';
+            document.getElementById('debit-step2').value = '';
+            document.getElementById('debit-step3').value = '';
+            document.getElementById('debit-result1').innerHTML = '';
+            document.getElementById('debit-result2').innerHTML = '';
+            document.getElementById('debit-result3').innerHTML = '';
+        }
+
+        function checkDebitStep(step) {
+            let result = '';
+            let isCorrect = false;
+
+            if (step === 1) {
+                const answer = parseInt(document.getElementById('debit-step1').value);
+                if (answer === debitData.totalGouttes) {
+                    result = `
+                        <div class="success-box">
+                            ✅ Correct !
+                            <div class="formula">${debitData.volume} mL × 20 gttes/mL = ${debitData.totalGouttes} gouttes</div>
+                        </div>
+                    `;
+                    isCorrect = true;
+                } else {
+                    result = `
+                        <div class="error-box">
+                            ❌ Incorrect. Multipliez le volume en mL par 20 (car 1 mL = 20 gouttes)
+                        </div>
+                    `;
+                }
+            } else if (step === 2) {
+                const answer = parseInt(document.getElementById('debit-step2').value);
+                if (answer === debitData.totalMinutes) {
+                    result = `
+                        <div class="success-box">
+                            ✅ Correct !
+                            <div class="formula">${debitData.duration}h × 60 min/h = ${debitData.totalMinutes} minutes</div>
+                        </div>
+                    `;
+                    isCorrect = true;
+                } else {
+                    result = `
+                        <div class="error-box">
+                            ❌ Incorrect. Multipliez le nombre d'heures par 60 minutes
+                        </div>
+                    `;
+                }
+            } else if (step === 3) {
+                const answer = parseInt(document.getElementById('debit-step3').value);
+                if (answer === debitData.debit) {
+                    const decimal = debitData.debitExact - Math.floor(debitData.debitExact);
+                    result = `
+                        <div class="success-box">
+                            ✅ Parfait !
+                            <div class="formula">
+                                ${debitData.totalGouttes} gouttes / ${debitData.totalMinutes} min = ${debitData.debitExact.toFixed(2)}<br>
+                                ≈ <strong>${debitData.debit} gttes/min PAR ${debitData.roundingType.toUpperCase()}</strong>
+                            </div>
+                            <div class="info-box" style="margin-top: 10px;">
+                                <strong>💡 Règle d'arrondi appliquée :</strong><br>
+                                ${decimal < 0.5 
+                                    ? `Partie décimale ${decimal.toFixed(2)} < 0,5 → on arrondit <strong>par défaut</strong> (vers le bas)` 
+                                    : `Partie décimale ${decimal.toFixed(2)} ≥ 0,5 → on arrondit <strong>par excès</strong> (vers le haut)`}
+                            </div>
+                        </div>
+                    `;
+                    isCorrect = true;
+                } else {
+                    result = `
+                        <div class="error-box">
+                            ❌ Incorrect. Réponse attendue : ${debitData.debit} gttes/min<br>
+                            <div class="formula" style="margin-top: 10px;">
+                                Division : ${debitData.totalGouttes} / ${debitData.totalMinutes} = ${debitData.debitExact.toFixed(2)}<br>
+                                <strong>Règle d'arrondi :</strong><br>
+                                • Si partie décimale < 0,5 → arrondir <strong>par défaut</strong> (vers le bas)<br>
+                                • Si partie décimale ≥ 0,5 → arrondir <strong>par excès</strong> (vers le haut)
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            document.getElementById(`debit-result${step}`).innerHTML = result;
+            updateStats(isCorrect ? 1 : 0, 1);
+        }
+
+        function newDebitExercise() {
+            generateDebit();
+        }
+
+        // ===== STATISTIQUES =====
+        function updateStats(correct, total) {
+            correctAnswers += correct;
+            totalAttempts += total;
+
+            const successRate = totalAttempts > 0 
+                ? Math.round((correctAnswers / totalAttempts) * 100) 
+                : 0;
+
+            document.getElementById('correct-count').textContent = correctAnswers;
+            document.getElementById('total-count').textContent = totalAttempts;
+            document.getElementById('success-rate').textContent = successRate + '%';
+        }
+
+        // Initialisation au chargement
+        window.addEventListener('load', () => {
+            generateConversions();
+            generatePerfusion();
+            generateElec();
+            generateDebit();
+        });
+    </script>
+</body>
+</html>

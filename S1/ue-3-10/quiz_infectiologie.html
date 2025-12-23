@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interactif - Infectiologie & Hygiène</title>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2d5f5d;
+            --primary-light: #3d7f7d;
+            --secondary: #e8925c;
+            --bg-main: #f8f6f1;
+            --bg-card: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-medium: #4a4a4a;
+            --text-light: #7a7a7a;
+            --success: #4a9d5f;
+            --error: #d64545;
+            --warning: #e8925c;
+            --border: #e0ddd4;
+            --shadow: rgba(45, 95, 93, 0.08);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            margin: -2rem -1.5rem 3rem;
+            padding: 3rem 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(232, 146, 92, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary);
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(232, 146, 92, 0.5);
+        }
+
+        .stats {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 20px var(--shadow);
+            border: 1px solid var(--border);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .question-number {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-weight: 400;
+        }
+
+        .question-type {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .question-type.open { background: var(--secondary); }
+        .question-type.match { background: var(--primary-light); }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-dark);
+            line-height: 1.7;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option {
+            background: var(--bg-main);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option:hover {
+            border-color: var(--primary);
+            background: white;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: var(--success);
+            color: white;
+            animation: pulse 0.5s ease;
+        }
+
+        .option.incorrect {
+            border-color: var(--error);
+            background: var(--error);
+            color: white;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .option.selected .option-letter,
+        .option.correct .option-letter,
+        .option.incorrect .option-letter {
+            background: white;
+            border-color: white;
+        }
+
+        .option.selected .option-letter {
+            color: var(--primary);
+        }
+
+        .option.correct .option-letter {
+            color: var(--success);
+        }
+
+        .option.incorrect .option-letter {
+            color: var(--error);
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            background: var(--bg-main);
+            transition: all 0.3s ease;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(45, 95, 93, 0.1);
+        }
+
+        .keywords-hint {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(232, 146, 92, 0.1);
+            border-left: 4px solid var(--secondary);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-medium);
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background: linear-gradient(135deg, rgba(74, 157, 95, 0.1) 0%, rgba(74, 157, 95, 0.05) 100%);
+            border: 2px solid var(--success);
+            color: var(--success);
+        }
+
+        .feedback.error {
+            background: linear-gradient(135deg, rgba(214, 69, 69, 0.1) 0%, rgba(214, 69, 69, 0.05) 100%);
+            border: 2px solid var(--error);
+            color: var(--error);
+        }
+
+        .feedback.partial {
+            background: linear-gradient(135deg, rgba(232, 146, 92, 0.1) 0%, rgba(232, 146, 92, 0.05) 100%);
+            border: 2px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .feedback-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feedback-content {
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .keywords-found {
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .keyword-badge {
+            padding: 0.3rem 0.8rem;
+            background: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .keyword-badge.found {
+            background: var(--success);
+            color: white;
+        }
+
+        .keyword-badge.missing {
+            background: var(--error);
+            color: white;
+        }
+
+        .button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(45, 95, 93, 0.3);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(45, 95, 93, 0.4);
+        }
+
+        .button-secondary {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(232, 146, 92, 0.3);
+        }
+
+        .button-secondary:hover {
+            background: #d67f49;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(232, 146, 92, 0.4);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .results {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .results-score {
+            font-family: 'Instrument Serif', serif;
+            font-size: 4rem;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        .results-message {
+            font-size: 1.3rem;
+            color: var(--text-medium);
+            margin-bottom: 2rem;
+        }
+
+        .results-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .result-item {
+            background: var(--bg-main);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Quiz Infectiologie & Hygiène</h1>
+            <p class="subtitle">UE 3.10 - Révision interactive</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="stats">
+                <div class="stat">Question <span id="currentQuestion">1</span>/<span id="totalQuestions">15</span></div>
+                <div class="stat">Score: <span id="currentScore">0</span>/<span id="possibleScore">0</span></div>
+            </div>
+        </header>
+
+        <div id="quizContainer"></div>
+
+        <div id="resultsContainer" class="hidden"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                type: 'mcq',
+                question: 'Quels sont les micro-organismes responsables des infections ?',
+                options: [
+                    'Bactéries, virus, champignons uniquement',
+                    'Bactéries, virus, champignons, parasites et prions (ATNC)',
+                    'Bactéries et virus uniquement',
+                    'Tous les organismes microscopiques'
+                ],
+                correct: 1,
+                explanation: 'Les 5 types de micro-organismes pathogènes sont : les bactéries, les virus, les champignons, les parasites et les agents transmissibles non conventionnels (ATNC ou prions).'
+            },
+            {
+                type: 'open',
+                question: 'Définissez ce qu\'est une infection endogène.',
+                keywords: [
+                    { main: 'propres germes', synonyms: ['propres bactéries', 'flore commensale', 'flore du patient', 'germes du patient'] },
+                    { main: 'patient', synonyms: ['malade', 'personne'] },
+                    { main: 'non pathogène', synonyms: ['non pathogènes', 'forme non pathogène', 'commensal', 'commensaux'] }
+                ],
+                minKeywords: 2,
+                explanation: 'Une infection endogène résulte d\'une contamination à partir des propres germes du patient. Les micro-organismes qui causent l\'infection étaient déjà présents sous une forme non pathogène jusqu\'alors.'
+            },
+            {
+                type: 'mcq',
+                question: 'Quel est le taux de transmission du VHB (hépatite B) par voie percutanée chez le personnel non vacciné ?',
+                options: [
+                    '0,32%',
+                    '3%',
+                    '10%',
+                    '30%'
+                ],
+                correct: 3,
+                explanation: 'Le taux de transmission du VHB par lésion percutanée est de 30% chez le personnel non vacciné, d\'où l\'importance capitale de la vaccination obligatoire. Depuis 2005, aucune séroconversion n\'a été observée chez le personnel vacciné.'
+            },
+            {
+                type: 'mcq',
+                question: 'Les précautions standard permettent de réduire le risque de transmission :',
+                options: [
+                    'Uniquement entre soignants',
+                    'Entre soignant, soigné et environnement',
+                    'Uniquement du patient vers le soignant',
+                    'Uniquement dans les chambres d\'isolement'
+                ],
+                correct: 1,
+                explanation: 'Les précautions standard visent à réduire le risque de transmission croisée des agents infectieux entre soignant, soigné et environnement, ou par exposition à un produit biologique d\'origine humaine.'
+            },
+            {
+                type: 'open',
+                question: 'Citez les 4 maillons de la chaîne épidémiologique.',
+                keywords: [
+                    { main: 'réservoirs', synonyms: ['réservoir', 'micro-organismes'] },
+                    { main: 'transmission', synonyms: ['vecteurs', 'mode de transmission', 'modes de transmission'] },
+                    { main: 'porte d\'entrée', synonyms: ['porte d entrée', 'effraction', 'voie d\'entrée'] },
+                    { main: 'hôte', synonyms: ['hote', 'patient', 'réceptif', 'facteurs de risque'] }
+                ],
+                minKeywords: 4,
+                explanation: 'Les 4 maillons sont : 1) Réservoirs (environnement, humain, animal) où les germes survivent et se multiplient, 2) Modes de transmission et vecteurs (air, gouttelettes, contact), 3) Porte d\'entrée (effraction cutanée, muqueuse, dispositif invasif), 4) Hôte réceptif (avec facteurs de risque).'
+            },
+            {
+                type: 'mcq',
+                question: 'Quelle est la différence principale entre un vaccin et un sérum ?',
+                options: [
+                    'Le vaccin est curatif, le sérum est préventif',
+                    'Le vaccin stimule une immunité active, le sérum apporte une immunité passive',
+                    'Le vaccin est plus efficace que le sérum',
+                    'Il n\'y a pas de différence'
+                ],
+                correct: 1,
+                explanation: 'Le vaccin (vaccinothérapie) stimule l\'organisme à fabriquer ses propres anticorps (immunité active, préventive, retardée mais durable). Le sérum (sérothérapie) apporte des anticorps déjà fabriqués (immunité passive, curative, immédiate mais temporaire).'
+            },
+            {
+                type: 'mcq',
+                question: 'Que signifie l\'acronyme DASRI ?',
+                options: [
+                    'Déchets d\'Activité Sans Risque Infectieux',
+                    'Déchets d\'Activité de Soins à Risque Infectieux',
+                    'Déchets des Agents en Service à Risque',
+                    'Dispositifs d\'Aide aux Soins à Risque Infectieux'
+                ],
+                correct: 1,
+                explanation: 'DASRI signifie Déchets d\'Activité de Soins à Risque Infectieux. Ces déchets nécessitent un traitement spécifique et sont incinérés.'
+            },
+            {
+                type: 'open',
+                question: 'Quelle est la condition sine qua non pour utiliser une solution hydro-alcoolique (SHA) ?',
+                keywords: [
+                    { main: 'mains propres', synonyms: ['mains visuellement propres', 'mains non souillées', 'mains sèches', 'absence de souillure'] }
+                ],
+                minKeywords: 1,
+                explanation: 'La condition sine qua non est d\'avoir des mains visuellement propres et non souillées. La SHA est inefficace sur des mains sales ou mouillées, et n\'est pas efficace contre le Clostridium difficile.'
+            },
+            {
+                type: 'mcq',
+                question: 'Combien d\'étapes comporte l\'hygiène des mains selon la technique recommandée ?',
+                options: [
+                    '5 étapes',
+                    '6 étapes',
+                    '7 étapes',
+                    '10 étapes'
+                ],
+                correct: 2,
+                explanation: 'L\'hygiène des mains comporte 7 étapes : paume contre paume, dos des mains, espaces interdigitaux, dos des doigts, pouces, ongles, poignets. Cette technique doit être réalisée avec du savon doux ou une solution hydro-alcoolique selon le contexte.'
+            },
+            {
+                type: 'open',
+                question: 'Décrivez la conduite à tenir immédiate en cas de piqûre avec un objet souillé.',
+                keywords: [
+                    { main: 'eau', synonyms: ['laver', 'nettoyer'] },
+                    { main: 'savon', synonyms: ['savon doux'] },
+                    { main: 'rincer', synonyms: ['rinçage'] },
+                    { main: 'antiseptique', synonyms: ['désinfectant', 'solution antiseptique', 'tremper'] },
+                    { main: '5 minutes', synonyms: ['5 min', 'cinq minutes', 'temps de contact'] }
+                ],
+                minKeywords: 4,
+                explanation: 'Conduite à tenir : 1) Nettoyer à l\'eau et au savon (détersion), 2) Rincer, 3) Faire tremper dans une solution antiseptique pendant 5 minutes minimum, 4) Poser un pansement de protection, 5) Prévenir immédiatement le cadre du service.'
+            },
+            {
+                type: 'mcq',
+                question: 'Dans quel délai maximum faut-il consulter un médecin référent en cas d\'AEV ?',
+                options: [
+                    '2 heures',
+                    '4 heures',
+                    '6 heures',
+                    '24 heures'
+                ],
+                correct: 1,
+                explanation: 'Le délai maximum est de 4 heures pour consulter un médecin référent en cas d\'AEV. Plus la prise en charge est précoce, plus le traitement prophylactique est efficace.'
+            },
+            {
+                type: 'mcq',
+                question: 'Parmi ces affirmations sur les gants à usage unique, laquelle est FAUSSE ?',
+                options: [
+                    'Le principe est : 1 gant / 1 patient / 1 soin',
+                    'On peut utiliser de la SHA sur des gants',
+                    'Les gants protègent à la fois le patient et le soignant',
+                    'Après retrait, une friction SHA est recommandée'
+                ],
+                correct: 1,
+                explanation: 'Il est FAUX qu\'on peut utiliser de la SHA sur des gants. La SHA dégrade le latex/vinyle et ne désinfecte pas correctement. Il faut toujours retirer les gants et réaliser une friction des mains.'
+            },
+            {
+                type: 'open',
+                question: 'Citez 3 facteurs de risque qui augmentent la gravité d\'un AEV.',
+                keywords: [
+                    { main: 'aiguille creuse', synonyms: ['aiguille longue', 'dispositif creux', 'gros calibre', 'diamètre important'] },
+                    { main: 'profonde', synonyms: ['piqûre profonde', 'blessure profonde', 'injection profonde'] },
+                    { main: 'visible', synonyms: ['sang visible', 'liquide biologique visible', 'souillure importante'] },
+                    { main: 'charge virale', synonyms: ['charge virale élevée', 'patient en phase aigüe', 'virémie élevée'] }
+                ],
+                minKeywords: 2,
+                explanation: 'Les facteurs majorants incluent : aiguille creuse et de gros diamètre, piqûre profonde, sang visible sur le dispositif, geste d\'injection (et non simple contact), patient source avec charge virale élevée, absence de port de gants (pas d\'essuyage), délai de prise en charge tardif.'
+            },
+            {
+                type: 'mcq',
+                question: 'Où jette-t-on une compresse avec une goutte de sang (hors contexte épidémique) ?',
+                options: [
+                    'DAS (déchets assimilés aux ordures ménagères)',
+                    'DASRI (déchets d\'activité de soins à risque infectieux)',
+                    'Dans un sac double',
+                    'Dans un conteneur OPCT'
+                ],
+                correct: 0,
+                explanation: 'Hors contexte épidémique ou infectieux particulier, une compresse avec une simple goutte de sang va dans les DAS (déchets assimilés aux ordures ménagères). Les DASRI sont réservés aux déchets présentant un risque infectieux avéré.'
+            },
+            {
+                type: 'open',
+                question: 'Quelles sont les 3 différences entre la flore transitoire et la flore résidente de la peau ?',
+                keywords: [
+                    { main: 'superficielle', synonyms: ['surface', 'couche superficielle', 'squames'] },
+                    { main: 'profonde', synonyms: ['couches profondes', 'derme'] },
+                    { main: 'pathogène', synonyms: ['virulente', 'dangereuse'] },
+                    { main: 'peu virulente', synonyms: ['non virulente', 'commensale', 'saprophyte'] },
+                    { main: 'variable', synonyms: ['varie', 'différente selon', 'change'] },
+                    { main: 'élimination', synonyms: ['éliminable', 'peut être éliminée', 'lavage'] }
+                ],
+                minKeywords: 3,
+                explanation: 'Flore transitoire : située en surface (squames), contient des germes pathogènes, varie selon les individus et activités, éliminable par lavage simple. Flore résidente : située dans les couches profondes, peu virulente (commensale), stable chez un individu, difficile à éliminer (nécessite désinfection).'
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answers = [];
+
+        function initQuiz() {
+            renderQuestion();
+            updateProgress();
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quizContainer');
+            const question = quizData[currentQuestionIndex];
+            
+            let html = `
+                <div class="question-card">
+                    <div class="question-header">
+                        <div class="question-number">Question ${currentQuestionIndex + 1}</div>
+                        <div class="question-type ${question.type}">
+                            ${question.type === 'mcq' ? 'QCM' : question.type === 'open' ? 'Question ouverte' : 'Appariement'}
+                        </div>
+                    </div>
+                    <div class="question-text">${question.question}</div>
+            `;
+
+            if (question.type === 'mcq') {
+                html += '<div class="options">';
+                question.options.forEach((option, index) => {
+                    html += `
+                        <div class="option" onclick="selectOption(${index})">
+                            <div class="option-letter">${String.fromCharCode(65 + index)}</div>
+                            <div>${option}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else if (question.type === 'open') {
+                html += `
+                    <textarea class="text-input" id="openAnswer" placeholder="Rédigez votre réponse ici..."></textarea>
+                    <div class="keywords-hint">
+                        💡 Astuce : Pensez aux mots-clés importants du cours. Votre réponse sera analysée en fonction des concepts essentiels.
+                    </div>
+                `;
+            }
+
+            html += `
+                <div id="feedback" class="feedback"></div>
+                <div class="button-group">
+                    <button class="button button-primary" onclick="validateAnswer()">Valider</button>
+                    ${currentQuestionIndex > 0 ? '<button class="button button-secondary" onclick="previousQuestion()">Précédent</button>' : ''}
+                </div>
+            `;
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function selectOption(index) {
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.option')[index].classList.add('selected');
+        }
+
+        function normalizeText(text) {
+            return text
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/['\-]/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function checkKeywords(userAnswer, keywords) {
+            const normalized = normalizeText(userAnswer);
+            const foundKeywords = [];
+            const missingKeywords = [];
+
+            keywords.forEach(keywordObj => {
+                const allVariants = [keywordObj.main, ...keywordObj.synonyms];
+                const found = allVariants.some(variant => {
+                    const normalizedVariant = normalizeText(variant);
+                    return normalized.includes(normalizedVariant);
+                });
+
+                if (found) {
+                    foundKeywords.push(keywordObj.main);
+                } else {
+                    missingKeywords.push(keywordObj.main);
+                }
+            });
+
+            return { foundKeywords, missingKeywords, total: keywords.length };
+        }
+
+        function validateAnswer() {
+            const question = quizData[currentQuestionIndex];
+            const feedback = document.getElementById('feedback');
+            let isCorrect = false;
+            let points = 0;
+
+            if (question.type === 'mcq') {
+                const selected = document.querySelector('.option.selected');
+                if (!selected) {
+                    alert('Veuillez sélectionner une réponse');
+                    return;
+                }
+
+                const selectedIndex = Array.from(document.querySelectorAll('.option')).indexOf(selected);
+                isCorrect = selectedIndex === question.correct;
+                points = isCorrect ? 1 : 0;
+
+                document.querySelectorAll('.option').forEach((opt, idx) => {
+                    opt.style.pointerEvents = 'none';
+                    if (idx === question.correct) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected')) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+
+                feedback.className = `feedback show ${isCorrect ? 'success' : 'error'}`;
+                feedback.innerHTML = `
+                    <div class="feedback-title">${isCorrect ? '✓ Correct !' : '✗ Incorrect'}</div>
+                    <div class="feedback-content">${question.explanation}</div>
+                `;
+            } else if (question.type === 'open') {
+                const userAnswer = document.getElementById('openAnswer').value.trim();
+                if (!userAnswer) {
+                    alert('Veuillez saisir une réponse');
+                    return;
+                }
+
+                const result = checkKeywords(userAnswer, question.keywords);
+                const percentage = (result.foundKeywords.length / result.total) * 100;
+                
+                if (result.foundKeywords.length >= question.minKeywords) {
+                    if (percentage >= 80) {
+                        isCorrect = true;
+                        points = 1;
+                    } else {
+                        points = 0.5;
+                    }
+                }
+
+                document.getElementById('openAnswer').disabled = true;
+
+                let keywordsHtml = '<div class="keywords-found">';
+                result.foundKeywords.forEach(kw => {
+                    keywordsHtml += `<span class="keyword-badge found">✓ ${kw}</span>`;
+                });
+                result.missingKeywords.forEach(kw => {
+                    keywordsHtml += `<span class="keyword-badge missing">✗ ${kw}</span>`;
+                });
+                keywordsHtml += '</div>';
+
+                const feedbackClass = isCorrect ? 'success' : (points > 0 ? 'partial' : 'error');
+                const feedbackTitle = isCorrect ? '✓ Excellente réponse !' : (points > 0 ? '⚠ Réponse partielle' : '✗ Réponse incomplète');
+
+                feedback.className = `feedback show ${feedbackClass}`;
+                feedback.innerHTML = `
+                    <div class="feedback-title">${feedbackTitle}</div>
+                    <div class="feedback-content">
+                        Mots-clés trouvés : ${result.foundKeywords.length}/${result.total}
+                        ${keywordsHtml}
+                        <p style="margin-top: 1rem;"><strong>Réponse attendue :</strong> ${question.explanation}</p>
+                    </div>
+                `;
+            }
+
+            score += points;
+            answers.push({
+                question: currentQuestionIndex,
+                correct: isCorrect,
+                points: points
+            });
+
+            updateProgress();
+
+            setTimeout(() => {
+                const buttonGroup = document.querySelector('.button-group');
+                buttonGroup.innerHTML = `
+                    <button class="button button-primary" onclick="nextQuestion()">
+                        ${currentQuestionIndex < quizData.length - 1 ? 'Question suivante →' : 'Voir les résultats'}
+                    </button>
+                `;
+            }, 100);
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+                updateProgress();
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = quizData.length;
+            document.getElementById('currentScore').textContent = Math.round(score * 10) / 10;
+            document.getElementById('possibleScore').textContent = currentQuestionIndex + 1;
+        }
+
+        function showResults() {
+            const percentage = (score / quizData.length) * 100;
+            let message = '';
+            let emoji = '';
+
+            if (percentage >= 90) {
+                message = 'Excellent ! Vous maîtrisez parfaitement le sujet.';
+                emoji = '🎉';
+            } else if (percentage >= 75) {
+                message = 'Très bien ! Quelques petites révisions et ce sera parfait.';
+                emoji = '👍';
+            } else if (percentage >= 60) {
+                message = 'Bien ! Continuez vos révisions pour consolider vos connaissances.';
+                emoji = '📚';
+            } else {
+                message = 'Poursuivez vos révisions, vous progressez !';
+                emoji = '💪';
+            }
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.className = '';
+            resultsContainer.innerHTML = `
+                <div class="question-card results">
+                    <h2 style="font-family: 'Instrument Serif', serif; font-size: 2rem; margin-bottom: 1rem;">
+                        ${emoji} Résultats du quiz
+                    </h2>
+                    <div class="results-score">${Math.round(percentage)}%</div>
+                    <div class="results-message">${message}</div>
+                    <div class="results-details">
+                        <div class="result-item">
+                            <div class="result-value">${Math.round(score * 10) / 10}/${quizData.length}</div>
+                            <div class="result-label">Score total</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value">${answers.filter(a => a.correct).length}</div>
+                            <div class="result-label">Réponses correctes</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value">${answers.filter(a => a.points > 0 && !a.correct).length}</div>
+                            <div class="result-label">Réponses partielles</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-value">${answers.filter(a => a.points === 0).length}</div>
+                            <div class="result-label">Réponses incorrectes</div>
+                        </div>
+                    </div>
+                    <div class="button-group" style="justify-content: center;">
+                        <button class="button button-primary" onclick="location.reload()">
+                            🔄 Recommencer le quiz
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.querySelector('header').style.display = 'none';
+        }
+
+        // Initialisation
+        initQuiz();
+    </script>
+</body>
+</html>

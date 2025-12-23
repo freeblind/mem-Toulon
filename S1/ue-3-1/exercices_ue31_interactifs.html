@@ -1,0 +1,1976 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercices UE 3.1 - Révision Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .mode-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .mode-qcm { background: #4CAF50; }
+        .mode-flashcard { background: #2196F3; }
+        .mode-openq { background: #FF9800; }
+        .mode-match { background: #E91E63; }
+        .mode-exam { background: #9C27B0; }
+
+        .content {
+            padding: 30px;
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .option.correct {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .option.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .flashcard {
+            perspective: 1000px;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            font-size: 1.2em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: white;
+            color: #333;
+            transform: rotateY(180deg);
+            border: 2px solid #667eea;
+        }
+
+        .input-answer {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+
+        .input-answer:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .feedback.partial {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .score-display h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .match-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .match-column {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .match-item {
+            padding: 12px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .match-item:hover {
+            border-color: #667eea;
+        }
+
+        .match-item.selected {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .match-item.matched {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+            cursor: default;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+            
+            .match-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .keyword-hint {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>UE 3.1 - Révision Interactive</h1>
+            <p>Numérisation et Techniques d'Imagerie</p>
+        </div>
+
+        <div class="mode-selector" id="modeSelector">
+            <button class="mode-btn mode-qcm" onclick="startMode('qcm')">
+                Mode QCM<br><small>Questions à choix multiples</small>
+            </button>
+            <button class="mode-btn mode-flashcard" onclick="startMode('flashcard')">
+                Mode Flashcards<br><small>Apprentissage rapide</small>
+            </button>
+            <button class="mode-btn mode-openq" onclick="startMode('openq')">
+                Questions Ouvertes<br><small>Réponses détaillées</small>
+            </button>
+            <button class="mode-btn mode-match" onclick="startMode('match')">
+                Mode Association<br><small>Relier les concepts</small>
+            </button>
+            <button class="mode-btn mode-exam" onclick="startMode('exam')">
+                Mode Examen<br><small>Conditions réelles</small>
+            </button>
+        </div>
+
+        <div class="content" id="qcmContent"></div>
+        <div class="content" id="flashcardContent"></div>
+        <div class="content" id="openqContent"></div>
+        <div class="content" id="matchContent"></div>
+        <div class="content" id="examContent"></div>
+    </div>
+
+    <script>
+        // Base de données des questions
+        const questionsData = {
+            // TD1 et TD2 - Introduction aux techniques d'imagerie
+            modalites: [
+                {
+                    id: 'mod1',
+                    question: "Quelle est la contre-indication relative à la réalisation d'une radiographie?",
+                    type: 'qcm',
+                    options: [
+                        "Port de pace-maker",
+                        "Grossesse avec accord du médecin et de la patiente informée",
+                        "Allergie aux produits de contraste iodés",
+                        "Insuffisance rénale sévère"
+                    ],
+                    correct: [1],
+                    explanation: "La grossesse est une contre-indication relative. L'examen peut être réalisé avec accord médical et consentement éclairé de la patiente."
+                },
+                {
+                    id: 'mod2',
+                    question: "Concernant le scanner, quelles sont les contre-indications à l'injection de PDC? (Plusieurs réponses possibles)",
+                    type: 'qcm',
+                    options: [
+                        "Insuffisance rénale avec clairance < 30mL/min",
+                        "Port de matériel métallique",
+                        "Hyperthyroïdie non traitée",
+                        "Allergie vraie aux produits de contraste iodés",
+                        "Claustrophobie sévère"
+                    ],
+                    correct: [0, 2, 3],
+                    explanation: "Les principales CI à l'injection de PDC iodé sont: insuffisance rénale sévère, allergie vraie aux PDC iodés, hyperthyroïdie non traitée, insuffisance cardiaque sévère, myélome multiple, et grossesse."
+                },
+                {
+                    id: 'mod3',
+                    question: "Le principe physique de la radiologie repose sur:",
+                    type: 'qcm',
+                    options: [
+                        "L'utilisation d'un champ magnétique pour aligner les protons",
+                        "L'émission de rayons gamma par le patient après injection",
+                        "L'interaction des rayons X avec la matière créant une atténuation différentielle",
+                        "L'utilisation d'ultrasons réfléchis par les tissus"
+                    ],
+                    correct: [2],
+                    explanation: "La radiologie utilise les rayons X. L'atténuation du faisceau lors de sa traversée du corps crée l'image: plus l'organe absorbe, plus il apparaît blanc."
+                },
+                {
+                    id: 'mod4',
+                    question: "Combien de temps un patient doit-il rester à distance des personnes à risque après injection d'un MRP au Tc99m?",
+                    type: 'qcm',
+                    options: [
+                        "6 à 8 heures",
+                        "12 à 24 heures",
+                        "2 à 3 jours (équivalent 8 à 10 périodes)",
+                        "1 semaine complète"
+                    ],
+                    correct: [2],
+                    explanation: "L'équivalent de 8 à 10 périodes de l'isotope, soit pour le Tc99m environ 2 à 3 jours pour protéger les femmes enceintes et nourrissons."
+                },
+                {
+                    id: 'mod5',
+                    question: "Quelle est l'unité de grandeur de l'IRM?",
+                    type: 'qcm',
+                    options: [
+                        "Le Gray (Gy)",
+                        "Le Tesla (T)",
+                        "Le Sievert (Sv)",
+                        "L'Hounsfield (HU)"
+                    ],
+                    correct: [1],
+                    explanation: "Le Tesla mesure l'intensité du champ magnétique en IRM."
+                },
+                {
+                    id: 'mod6',
+                    question: "En radiothérapie, quelles sont les contre-indications absolues? (Plusieurs réponses possibles)",
+                    type: 'qcm',
+                    options: [
+                        "Démence",
+                        "Fièvre",
+                        "Immobilisation impossible",
+                        "Cicatrisation incomplète post-chirurgie",
+                        "Grossesse au premier trimestre"
+                    ],
+                    correct: [0, 2],
+                    explanation: "Les CI absolues sont la démence et l'impossibilité d'immobilisation. La fièvre et la cicatrisation incomplète sont des CI relatives."
+                },
+                {
+                    id: 'mod7',
+                    question: "Concernant l'imagerie, associez chaque modalité à sa caractéristique:",
+                    type: 'match',
+                    pairs: [
+                        {left: "Radiographie", right: "Imagerie 2D"},
+                        {left: "Scanner", right: "Imagerie 3D avec plans sagittal, coronal, axial"},
+                        {left: "Médecine nucléaire", right: "Patient émetteur de rayonnement"},
+                        {left: "IRM", right: "Utilise un champ magnétique non ionisant"}
+                    ]
+                },
+                {
+                    id: 'mod8',
+                    question: "Décrivez le rôle du MER dans la prise en charge d'un patient pour un scanner.",
+                    type: 'open',
+                    keywords: ['accueil', 'identitovigilance', 'contre-indication', 'voie veineuse', 'PDC', 'protocole', 'radioprotection', 'qualité', 'archivage', 'explication', 'prescription', 'injection'],
+                    answer: "Le MER assure: l'accueil et l'identitovigilance, l'explication détaillée de l'examen, la vérification de la prescription, l'interrogatoire avec recherche de contre-indications, la pose de voie veineuse si besoin, l'injection de PDC si nécessaire, l'acquisition des images selon le protocole, la radioprotection, le traitement et la qualité de l'image, la cotation et l'archivage."
+                }
+            ],
+
+            // TD3 - Numérisation partie 1
+            numerisation1: [
+                {
+                    id: 'num1',
+                    question: "Un signal analogique:",
+                    type: 'qcm',
+                    options: [
+                        "Est discontinu et codé en binaire",
+                        "Prend un nombre fini de valeurs discrètes",
+                        "Est continu et peut prendre une infinité de valeurs",
+                        "Ne peut pas être mesuré avec précision"
+                    ],
+                    correct: [2],
+                    explanation: "Un signal analogique est continu et peut prendre une infinité de valeurs d'amplitude."
+                },
+                {
+                    id: 'num2',
+                    question: "La numérisation permet de:",
+                    type: 'qcm',
+                    options: [
+                        "Transformer un signal numérique en signal analogique",
+                        "Numériser un code binaire existant",
+                        "Transformer un signal analogique en signal numérique",
+                        "Créer des nombres aléatoires pour le traitement"
+                    ],
+                    correct: [2],
+                    explanation: "La numérisation convertit un signal analogique (infini) en signal numérique (fini) composé de 0 et 1."
+                },
+                {
+                    id: 'num3',
+                    question: "Le théorème de Shannon stipule que:",
+                    type: 'qcm',
+                    options: [
+                        "Fe doit être égale à Fmax du signal",
+                        "Fe doit être au minimum le double de Fmax",
+                        "Fe doit être la moitié de Fmax",
+                        "Fe n'a pas d'importance pour la qualité"
+                    ],
+                    correct: [1],
+                    explanation: "Pour reconstruire fidèlement un signal, la fréquence d'échantillonnage Fe doit être supérieure à 2 fois la fréquence maximale: Fe > 2 Fmax"
+                },
+                {
+                    id: 'num4',
+                    question: "Si le théorème de Shannon n'est pas respecté:",
+                    type: 'qcm',
+                    options: [
+                        "Le signal numérique n'existe pas du tout",
+                        "Le signal est converti sans aucune perte",
+                        "Il y a une perte d'information lors de la conversion",
+                        "Le signal devient plus précis"
+                    ],
+                    correct: [2],
+                    explanation: "Ne pas respecter Shannon entraîne une perte d'information car l'échantillonnage est insuffisant pour capturer toutes les variations du signal."
+                },
+                {
+                    id: 'num5',
+                    question: "Plus la période d'échantillonnage Te est élevée:",
+                    type: 'qcm',
+                    options: [
+                        "Plus on perd des informations",
+                        "Moins on perd des informations",
+                        "Plus la quantification sera précise",
+                        "Plus l'échantillonnage sera précis"
+                    ],
+                    correct: [0],
+                    explanation: "Un Te élevé signifie moins d'échantillons prélevés, donc plus de risque de perte d'information entre deux mesures."
+                },
+                {
+                    id: 'num6',
+                    question: "Un signal analogique est codé sur 5 bits. Combien de niveaux de gris l'image numérique aura-t-elle?",
+                    type: 'qcm',
+                    options: [
+                        "5 niveaux",
+                        "16 niveaux",
+                        "32 niveaux",
+                        "64 niveaux"
+                    ],
+                    correct: [2],
+                    explanation: "Avec 5 bits: 2^5 = 32 niveaux de gris différents."
+                },
+                {
+                    id: 'num7',
+                    question: "Pour une meilleure quantification, il faut:",
+                    type: 'qcm',
+                    options: [
+                        "Diminuer le nombre de bits",
+                        "Augmenter le nombre de bits",
+                        "Augmenter la dose délivrée",
+                        "Diminuer la fréquence d'échantillonnage"
+                    ],
+                    correct: [1],
+                    explanation: "Plus le nombre de bits est élevé, plus la quantification est précise avec davantage de niveaux de gris disponibles."
+                },
+                {
+                    id: 'num8',
+                    question: "Le CAN (Convertisseur Analogique-Numérique) permet:",
+                    type: 'qcm',
+                    options: [
+                        "L'échantillonnage et la quantification",
+                        "De convertir le signal numérique en analogique",
+                        "De convertir le signal analogique en numérique pour stockage",
+                        "De convertir le signal de l'anode en numérique"
+                    ],
+                    correct: [2],
+                    explanation: "Le CAN transforme le signal analogique en signal numérique exploitable par l'ordinateur."
+                },
+                {
+                    id: 'num9',
+                    question: "Échantillonner un signal, c'est:",
+                    type: 'qcm',
+                    options: [
+                        "Prélever des valeurs du signal analogique à intervalles réguliers",
+                        "Prélever des valeurs du signal numérique",
+                        "Associer un nombre binaire à une amplitude",
+                        "Prélever une partie des rayons X du tube"
+                    ],
+                    correct: [0],
+                    explanation: "L'échantillonnage consiste à mesurer périodiquement les valeurs du signal analogique continu."
+                },
+                {
+                    id: 'num10',
+                    question: "Quantifier un signal, c'est:",
+                    type: 'qcm',
+                    options: [
+                        "Échantillonner à intervalles réguliers",
+                        "Mesurer la période du signal",
+                        "Associer un nombre binaire à chaque valeur d'amplitude",
+                        "Calculer la fréquence d'échantillonnage"
+                    ],
+                    correct: [2],
+                    explanation: "La quantification attribue une valeur numérique (code binaire) à chaque amplitude mesurée lors de l'échantillonnage."
+                },
+                {
+                    id: 'num11',
+                    question: "Définissez le pixel et l'image numérique:",
+                    type: 'open',
+                    keywords: ['pixel', 'motif', 'élémentaire', 'matrice', 'image', 'numérique', 'fichier', 'binaire'],
+                    answer: "Le pixel est le motif élémentaire d'une matrice qui constitue l'image numérique. Une image numérique est un fichier informatique où l'image est constituée d'un ensemble de pixels répartis dans une matrice, créée, traitée et stockée sous forme binaire."
+                },
+                {
+                    id: 'num12',
+                    question: "Associez les étapes de la numérisation:",
+                    type: 'match',
+                    pairs: [
+                        {left: "Échantillonnage", right: "Prélever des valeurs à intervalles réguliers (Shannon)"},
+                        {left: "Quantification", right: "Attribuer des valeurs numériques (bits)"},
+                        {left: "Codage", right: "Représenter en binaire (0 et 1)"},
+                        {left: "Stockage", right: "Sauvegarder le fichier numérique"}
+                    ]
+                }
+            ],
+
+            // TD4 - Image numérique partie 2
+            numerisation2: [
+                {
+                    id: 'img1',
+                    question: "Quels sont les avantages d'un signal numérique par rapport à un signal analogique? (Plusieurs réponses)",
+                    type: 'qcm',
+                    options: [
+                        "Meilleur rendu car non échantillonné",
+                        "Facilité de stockage",
+                        "Image plus proche de la réalité",
+                        "Données plus facilement traitables",
+                        "Pas de perte de fidélité par rapport à l'original"
+                    ],
+                    correct: [1, 3],
+                    explanation: "Le signal numérique offre facilité de stockage et traitement, mais perd en fidélité car les valeurs sont limitées."
+                },
+                {
+                    id: 'img2',
+                    question: "La résolution d'une image est:",
+                    type: 'qcm',
+                    options: [
+                        "Le nombre total de pixels dans l'image",
+                        "La taille physique de l'image en centimètres",
+                        "Le nombre de pixels par unité de longueur (ppp)",
+                        "Le nombre de niveaux de gris"
+                    ],
+                    correct: [2],
+                    explanation: "La résolution se mesure en pixels par pouce (ppp) et détermine la capacité à distinguer deux structures proches."
+                },
+                {
+                    id: 'img3',
+                    question: "La définition d'une image est:",
+                    type: 'qcm',
+                    options: [
+                        "Le nombre de pixels par pouce",
+                        "Le nombre total de pixels en largeur × hauteur",
+                        "La taille en octets du fichier",
+                        "Le nombre de couleurs disponibles"
+                    ],
+                    correct: [1],
+                    explanation: "La définition est le nombre total de pixels composant l'image (largeur × hauteur)."
+                },
+                {
+                    id: 'img4',
+                    question: "Une image de 2560×1920 pixels a une définition de:",
+                    type: 'qcm',
+                    options: [
+                        "4,9 mégapixels",
+                        "49 mégapixels",
+                        "0,49 mégapixels",
+                        "490 kilopixels"
+                    ],
+                    correct: [0],
+                    explanation: "2560 × 1920 = 4 915 200 pixels = 4,9 × 10^6 pixels = 4,9 mégapixels"
+                },
+                {
+                    id: 'img5',
+                    question: "Le filtre passe-bas permet de:",
+                    type: 'qcm',
+                    options: [
+                        "Renforcer les contours et augmenter le bruit",
+                        "Atténuer les hautes fréquences pour lisser l'image",
+                        "Augmenter la résolution spatiale",
+                        "Durcir les bords de l'image"
+                    ],
+                    correct: [1],
+                    explanation: "Le filtre passe-bas lisse l'image en atténuant les hautes fréquences, réduisant le bruit mais diminuant aussi les détails."
+                },
+                {
+                    id: 'img6',
+                    question: "Le filtre passe-haut permet de:",
+                    type: 'qcm',
+                    options: [
+                        "Lisser l'image et réduire le bruit",
+                        "Diminuer la résolution spatiale",
+                        "Renforcer les bords mais augmenter le bruit",
+                        "Compresser l'image sans perte"
+                    ],
+                    correct: [2],
+                    explanation: "Le filtre passe-haut accentue les contours (augmente résolution spatiale) mais augmente aussi le bruit de l'image."
+                },
+                {
+                    id: 'img7',
+                    question: "Concernant l'histogramme d'une image numérique:",
+                    type: 'qcm',
+                    options: [
+                        "Il représente uniquement la luminosité moyenne",
+                        "En abscisse: valeurs numériques possibles; en ordonnée: nombre de pixels",
+                        "Il est identique pour toutes les images en 8 bits",
+                        "Il ne dépend pas de la quantification"
+                    ],
+                    correct: [1],
+                    explanation: "L'histogramme classe en abscisse les valeurs de quantification et en ordonnée le nombre de pixels ayant cette valeur."
+                },
+                {
+                    id: 'img8',
+                    question: "La compression d'image permet de:",
+                    type: 'qcm',
+                    options: [
+                        "Augmenter la qualité de l'image",
+                        "Réduire le volume/poids du fichier",
+                        "Augmenter le nombre de pixels",
+                        "Améliorer la résolution spatiale"
+                    ],
+                    correct: [1],
+                    explanation: "La compression réduit la taille du fichier pour faciliter stockage et transmission."
+                },
+                {
+                    id: 'img9',
+                    question: "Les trois critères de qualité d'une image numérique sont:",
+                    type: 'open',
+                    keywords: ['résolution spatiale', 'résolution contraste', 'signal', 'bruit', 'netteté', 'niveaux gris'],
+                    answer: "Les trois critères sont: la résolution spatiale (netteté, taille du pixel), la résolution en contraste (niveaux de gris permettant de distinguer les structures), et le rapport signal/bruit."
+                },
+                {
+                    id: 'img10',
+                    question: "Définissez pixel, voxel, matrice et bruit:",
+                    type: 'open',
+                    keywords: ['pixel', 'picture element', 'planaire', 'voxel', 'volume', '3D', 'matrice', 'colonnes', 'lignes', 'bruit', 'parasite'],
+                    answer: "Pixel: unité qui compose l'image 2D (picture-element). Voxel: pixel en volume pour l'imagerie 3D (volume-pixel). Matrice: nombre de colonnes et lignes de pixels. Bruit: parasite qui brouille l'image."
+                }
+            ],
+
+            // TD5 - Traitement et stockage
+            traitement: [
+                {
+                    id: 'trait1',
+                    question: "Le PACS (Picture Archiving and Communication System) permet:",
+                    type: 'qcm',
+                    options: [
+                        "Uniquement de stocker les images temporairement",
+                        "D'archiver, partager et gérer les images médicales",
+                        "Seulement de visualiser les images sans stockage",
+                        "De remplacer le RIS pour la gestion des rendez-vous"
+                    ],
+                    correct: [1],
+                    explanation: "Le PACS est un système complet d'archivage et de communication pour gérer les images médicales."
+                },
+                {
+                    id: 'trait2',
+                    question: "Le format DICOM (Digital Imaging and Communications in Medicine):",
+                    type: 'qcm',
+                    options: [
+                        "Est utilisé uniquement pour les images scanner",
+                        "Permet l'échange d'images sans perte de qualité ni données",
+                        "Ne contient que l'image sans métadonnées",
+                        "N'est pas compatible entre différents constructeurs"
+                    ],
+                    correct: [1],
+                    explanation: "DICOM est une norme internationale permettant l'échange d'images et données associées sans perte."
+                },
+                {
+                    id: 'trait3',
+                    question: "Le fenêtrage en scanner permet de:",
+                    type: 'qcm',
+                    options: [
+                        "Modifier la dose de rayons X délivrée",
+                        "Sélectionner une plage de densités sur l'échelle d'Hounsfield",
+                        "Changer la position du patient",
+                        "Augmenter la vitesse d'acquisition"
+                    ],
+                    correct: [1],
+                    explanation: "Le fenêtrage sélectionne une fourchette de valeurs HU pour optimiser le contraste sur les tissus d'intérêt."
+                },
+                {
+                    id: 'trait4',
+                    question: "Quel type de fenêtrage utiliseriez-vous pour visualiser une fracture osseuse au scanner?",
+                    type: 'qcm',
+                    options: [
+                        "Fenêtre parenchymateuse",
+                        "Fenêtre osseuse",
+                        "Fenêtre lung (air)",
+                        "Fenêtre molle (abdo)"
+                    ],
+                    correct: [1],
+                    explanation: "La fenêtre osseuse optimise le contraste pour les structures osseuses denses."
+                },
+                {
+                    id: 'trait5',
+                    question: "La reconstruction MIP (Maximum Intensity Pixel) est particulièrement utile pour:",
+                    type: 'qcm',
+                    options: [
+                        "Visualiser les structures hyperdenses comme les os ou les vaisseaux opacifiés",
+                        "Réduire le bruit de l'image",
+                        "Compresser les images pour l'archivage",
+                        "Mesurer précisément les angles"
+                    ],
+                    correct: [0],
+                    explanation: "Le MIP projette les pixels de plus haute intensité, idéal pour structures hyperdenses (os, uroscanner, angioscanner)."
+                },
+                {
+                    id: 'trait6',
+                    question: "Parmi ces actions, lesquelles sont des post-traitements de l'image? (Plusieurs réponses)",
+                    type: 'qcm',
+                    options: [
+                        "Recalage de la luminosité sur l'histogramme",
+                        "Zoom sur une zone d'intérêt",
+                        "Filtres passe-bas de l'image visible",
+                        "Annotation du cliché",
+                        "Filtres appliqués lors de la numérisation"
+                    ],
+                    correct: [1, 2, 3],
+                    explanation: "Les post-traitements sont appliqués sur l'image finale: zoom, filtres visuels, annotations, ajustement du contraste."
+                },
+                {
+                    id: 'trait7',
+                    question: "Quels sont les avantages du PACS? (Plusieurs réponses)",
+                    type: 'qcm',
+                    options: [
+                        "Accessibilité des images à tout moment",
+                        "Outils d'interprétation intégrés",
+                        "Aucun besoin de maintenance",
+                        "Écologique (plus de films)",
+                        "Stockage illimité sans contrainte"
+                    ],
+                    correct: [0, 1, 3],
+                    explanation: "Le PACS offre accessibilité, outils intégrés, sécurité, écologie, mais nécessite maintenance et gestion de la mémoire."
+                },
+                {
+                    id: 'trait8',
+                    question: "Les inconvénients du PACS incluent:",
+                    type: 'qcm',
+                    options: [
+                        "Impossibilité de partager les images",
+                        "Paramétrage complexe et multimodalités",
+                        "Mémoire en constante augmentation (risque de saturation)",
+                        "Images de mauvaise qualité",
+                        "Besoin de référents pour réconciliations"
+                    ],
+                    correct: [1, 2, 4],
+                    explanation: "Le PACS nécessite paramétrage expert, gestion de l'espace disque, et personnel formé pour maintenance."
+                },
+                {
+                    id: 'trait9',
+                    question: "Expliquez les fonctions principales du PACS:",
+                    type: 'open',
+                    keywords: ['archivage', 'stockage', 'images', 'comptes rendus', 'partage', 'interprétation', 'modalités', 'import', 'visualisation'],
+                    answer: "Le PACS permet: l'archivage durable des images et CR, le stockage rationnel long terme, le suivi patient, le partage sécurisé des données, l'import d'images externes, l'interprétation/relecture, le renvoi vers autres consoles, et la visibilité via le SIH."
+                },
+                {
+                    id: 'trait10',
+                    question: "Associez les post-traitements à leur fonction:",
+                    type: 'match',
+                    pairs: [
+                        {left: "Fenêtrage", right: "Optimiser contraste selon tissus d'intérêt"},
+                        {left: "MIP", right: "Projeter pixels haute intensité (vaisseaux, os)"},
+                        {left: "Filtre passe-bas", right: "Lisser image, réduire bruit"},
+                        {left: "Filtre passe-haut", right: "Renforcer contours, accentuer détails"}
+                    ]
+                }
+            ],
+
+            // TD6 - Formation de l'image et réseaux
+            reseaux: [
+                {
+                    id: 'res1',
+                    question: "Le RIS (Radiology Information System) est principalement utilisé pour:",
+                    type: 'qcm',
+                    options: [
+                        "Stocker uniquement les images médicales",
+                        "Gérer le workflow, rendez-vous, cotation et comptes rendus",
+                        "Remplacer le PACS dans l'archivage",
+                        "Traiter les images avec des filtres avancés"
+                    ],
+                    correct: [1],
+                    explanation: "Le RIS gère l'organisation radiologique: workflow, agenda, données spécifiques imagerie, comptes rendus."
+                },
+                {
+                    id: 'res2',
+                    question: "Le SIH (Système d'Information Hospitalier) concerne:",
+                    type: 'qcm',
+                    options: [
+                        "Uniquement le service de radiologie",
+                        "La gestion globale de l'hôpital (plannings, paye, facturation, communication)",
+                        "Seulement le stockage des images",
+                        "Les comptes rendus radiologiques uniquement"
+                    ],
+                    correct: [1],
+                    explanation: "Le SIH est le système d'information global de l'établissement: RH, finances, activités médicales, communication."
+                },
+                {
+                    id: 'res3',
+                    question: "Dans la chaîne d'acquisition d'une image numérique, l'ordre correct est:",
+                    type: 'qcm',
+                    options: [
+                        "Tube RX → Détecteur → Signal numérique → CAN → Image",
+                        "Tube RX → Grille anti-diffusion → Détecteur → Signal analogique → Amplificateur → CAN → Signal numérique → Unité centrale → Image",
+                        "Tube RX → Amplificateur → Détecteur → CAN → Image",
+                        "Tube RX → CAN → Signal analogique → Image"
+                    ],
+                    correct: [1],
+                    explanation: "La chaîne complète: émission RX → grille → détection → signal analogique → amplification → numérisation CAN → traitement → affichage."
+                },
+                {
+                    id: 'res4',
+                    question: "Le capteur plan contient plusieurs composants. Lequel convertit directement ou indirectement les RX en signaux électriques?",
+                    type: 'qcm',
+                    options: [
+                        "Le circuit de lecture",
+                        "La couche de détection",
+                        "L'amplificateur",
+                        "Le convertisseur analogique-numérique"
+                    ],
+                    correct: [1],
+                    explanation: "La couche de détection convertit les RX en signaux électriques (direct) ou lumineux puis électriques (indirect)."
+                },
+                {
+                    id: 'res5',
+                    question: "Concernant les composants du capteur plan, quelle est la fonction du circuit de lecture?",
+                    type: 'qcm',
+                    options: [
+                        "Convertir les RX en lumière",
+                        "Transférer les signaux électriques vers l'amplificateur",
+                        "Augmenter l'amplitude des signaux",
+                        "Numériser le signal en code binaire"
+                    ],
+                    correct: [1],
+                    explanation: "Le circuit de lecture transfère les signaux électriques du détecteur vers l'amplificateur."
+                },
+                {
+                    id: 'res6',
+                    question: "La transformée de Fourier permet:",
+                    type: 'qcm',
+                    options: [
+                        "De passer de l'espace temporel à l'espace fréquentiel",
+                        "D'amplifier le signal analogique",
+                        "De convertir directement RX en image",
+                        "De compresser les fichiers DICOM"
+                    ],
+                    correct: [0],
+                    explanation: "La transformée de Fourier convertit le signal temporel en fréquences, permettant de placer chaque information dans la matrice."
+                },
+                {
+                    id: 'res7',
+                    question: "Quelle est la différence entre résolution spatiale et résolution en contraste?",
+                    type: 'qcm',
+                    options: [
+                        "Elles sont identiques et interchangeables",
+                        "Spatiale = netteté/finesse; Contraste = niveaux de gris",
+                        "Spatiale = niveaux de gris; Contraste = netteté",
+                        "Aucune différence en imagerie numérique"
+                    ],
+                    correct: [1],
+                    explanation: "Résolution spatiale: netteté, capacité à distinguer détails proches. Résolution en contraste: nombre de niveaux de gris (bits)."
+                },
+                {
+                    id: 'res8',
+                    question: "Concernant les modalités d'imagerie, laquelle utilise un patient émetteur de rayonnement?",
+                    type: 'qcm',
+                    options: [
+                        "Scanner",
+                        "IRM",
+                        "Médecine nucléaire",
+                        "Radiographie conventionnelle"
+                    ],
+                    correct: [2],
+                    explanation: "En médecine nucléaire, le patient devient émetteur après injection du MRP (Tc99m émet des rayons gamma)."
+                },
+                {
+                    id: 'res9',
+                    question: "En radiothérapie, le scanner dosimétrique permet de:",
+                    type: 'qcm',
+                    options: [
+                        "Mesurer la dose de rayonnement ambiant",
+                        "Définir la position reproductible et cibler les cellules cancéreuses",
+                        "Calculer la créatinémie du patient",
+                        "Vérifier l'absence de métastases"
+                    ],
+                    correct: [1],
+                    explanation: "Le scanner dosimétrique définit le positionnement reproductible et identifie précisément la zone à traiter."
+                },
+                {
+                    id: 'res10',
+                    question: "Décrivez les fonctionnalités du RIS:",
+                    type: 'open',
+                    keywords: ['workflow', 'worklist', 'agenda', 'demandes', 'cotation', 'produit', 'dosimétrie', 'comptes rendus', 'activité'],
+                    answer: "Le RIS gère: le parcours patient (workflow/worklist), les demandes d'examens (agenda, prescriptions), les informations spécifiques (cotation, produits injectés, dosimétrie, CI), les comptes rendus (dictée à rendu), et l'activité du service."
+                },
+                {
+                    id: 'res11',
+                    question: "Associez chaque système à sa fonction principale:",
+                    type: 'match',
+                    pairs: [
+                        {left: "PACS", right: "Archivage et gestion des images médicales"},
+                        {left: "RIS", right: "Workflow et organisation radiologique"},
+                        {left: "SIH", right: "Gestion globale hospitalière"},
+                        {left: "DICOM", right: "Format standard d'échange d'images"}
+                    ]
+                }
+            ]
+        };
+
+        // Variables globales
+        let currentMode = '';
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let totalQuestions = 0;
+        let answers = [];
+        let startTime;
+        let timerInterval;
+        let selectedMatch1 = null;
+        let selectedMatch2 = null;
+        let matchedPairs = [];
+
+        // Fonctions utilitaires
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function getAllQuestions() {
+            let allQuestions = [];
+            Object.values(questionsData).forEach(category => {
+                allQuestions = allQuestions.concat(category);
+            });
+            return allQuestions;
+        }
+
+        function startMode(mode) {
+            currentMode = mode;
+            document.getElementById('modeSelector').style.display = 'none';
+            
+            // Masquer tous les contenus
+            document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
+            
+            // Réinitialiser les variables
+            currentQuestionIndex = 0;
+            score = 0;
+            answers = [];
+            
+            switch(mode) {
+                case 'qcm':
+                    startQCMMode();
+                    break;
+                case 'flashcard':
+                    startFlashcardMode();
+                    break;
+                case 'openq':
+                    startOpenQMode();
+                    break;
+                case 'match':
+                    startMatchMode();
+                    break;
+                case 'exam':
+                    startExamMode();
+                    break;
+            }
+        }
+
+        function startQCMMode() {
+            const allQuestions = getAllQuestions().filter(q => q.type === 'qcm');
+            currentQuestions = shuffleArray(allQuestions).slice(0, 15);
+            totalQuestions = currentQuestions.length;
+            
+            const content = document.getElementById('qcmContent');
+            content.classList.add('active');
+            displayQCMQuestion();
+        }
+
+        function displayQCMQuestion() {
+            const content = document.getElementById('qcmContent');
+            const question = currentQuestions[currentQuestionIndex];
+            
+            const progressPercent = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            
+            content.innerHTML = `
+                <h2>Mode QCM</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <p>Question ${currentQuestionIndex + 1} / ${totalQuestions}</p>
+                
+                <div class="question-card">
+                    <div class="question-number">Question ${currentQuestionIndex + 1}</div>
+                    <div class="question-text">${question.question}</div>
+                    ${question.correct.length > 1 ? '<p style="color: #666; font-size: 0.9em; font-style: italic;">Plusieurs réponses possibles</p>' : ''}
+                    <div class="options" id="options">
+                        ${question.options.map((opt, i) => `
+                            <div class="option" onclick="selectOption(${i}, ${question.correct.length > 1})" data-index="${i}">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                    <button class="btn btn-primary" onclick="validateQCM()">Valider</button>
+                </div>
+            `;
+        }
+
+        function selectOption(index, multiple) {
+            const options = document.querySelectorAll('.option');
+            
+            if (!multiple) {
+                options.forEach(opt => opt.classList.remove('selected'));
+            }
+            
+            options[index].classList.toggle('selected');
+        }
+
+        function validateQCM() {
+            const question = currentQuestions[currentQuestionIndex];
+            const selectedOptions = Array.from(document.querySelectorAll('.option.selected'))
+                .map(opt => parseInt(opt.dataset.index));
+            
+            const feedback = document.getElementById('feedback');
+            const options = document.querySelectorAll('.option');
+            
+            // Désactiver la sélection
+            options.forEach(opt => opt.style.pointerEvents = 'none');
+            
+            // Vérifier la réponse
+            const isCorrect = JSON.stringify(selectedOptions.sort()) === JSON.stringify(question.correct.sort());
+            
+            // Afficher les bonnes et mauvaises réponses
+            options.forEach((opt, i) => {
+                if (question.correct.includes(i)) {
+                    opt.classList.add('correct');
+                } else if (selectedOptions.includes(i)) {
+                    opt.classList.add('incorrect');
+                }
+            });
+            
+            if (isCorrect) {
+                score++;
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = `<strong>✓ Correct!</strong><br>${question.explanation}`;
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = `<strong>✗ Incorrect</strong><br>${question.explanation}`;
+            }
+            
+            answers.push({
+                question: question.question,
+                correct: isCorrect,
+                userAnswer: selectedOptions,
+                correctAnswer: question.correct
+            });
+            
+            // Changer le bouton
+            const navigation = document.querySelector('.navigation');
+            navigation.innerHTML = `
+                <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                <button class="btn btn-primary" onclick="nextQCMQuestion()">
+                    ${currentQuestionIndex < totalQuestions - 1 ? 'Question suivante' : 'Voir les résultats'}
+                </button>
+            `;
+        }
+
+        function nextQCMQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                displayQCMQuestion();
+            } else {
+                displayQCMResults();
+            }
+        }
+
+        function displayQCMResults() {
+            const content = document.getElementById('qcmContent');
+            const percentage = Math.round((score / totalQuestions) * 100);
+            
+            let message = '';
+            let color = '';
+            if (percentage >= 80) {
+                message = 'Excellent! Vous maîtrisez bien le sujet.';
+                color = '#4CAF50';
+            } else if (percentage >= 60) {
+                message = 'Bien! Continuez vos révisions.';
+                color = '#FF9800';
+            } else {
+                message = 'Vous devriez revoir certains points.';
+                color = '#f44336';
+            }
+            
+            content.innerHTML = `
+                <h2>Résultats du QCM</h2>
+                
+                <div class="score-display">
+                    <h2 style="color: ${color}">${score} / ${totalQuestions}</h2>
+                    <p style="font-size: 1.5em; margin: 10px 0;">${percentage}%</p>
+                    <p>${message}</p>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value">${score}</div>
+                        <div class="stat-label">Bonnes réponses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${totalQuestions - score}</div>
+                        <div class="stat-label">Erreurs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${percentage}%</div>
+                        <div class="stat-label">Taux de réussite</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px;">Détail des réponses</h3>
+                ${answers.map((ans, i) => `
+                    <div class="question-card">
+                        <div class="question-number">Question ${i + 1} ${ans.correct ? '✓' : '✗'}</div>
+                        <div class="question-text">${ans.question}</div>
+                        <div style="margin-top: 10px; color: ${ans.correct ? '#4CAF50' : '#f44336'}">
+                            ${ans.correct ? 'Réponse correcte' : 'Réponse incorrecte'}
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="startMode('qcm')">Recommencer</button>
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                </div>
+            `;
+        }
+
+        function startFlashcardMode() {
+            const allQuestions = getAllQuestions();
+            currentQuestions = shuffleArray(allQuestions).slice(0, 20);
+            totalQuestions = currentQuestions.length;
+            currentQuestionIndex = 0;
+            
+            const content = document.getElementById('flashcardContent');
+            content.classList.add('active');
+            displayFlashcard();
+        }
+
+        function displayFlashcard() {
+            const content = document.getElementById('flashcardContent');
+            const question = currentQuestions[currentQuestionIndex];
+            const progressPercent = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            
+            let answer = '';
+            if (question.type === 'qcm') {
+                const correctIndices = question.correct;
+                answer = correctIndices.map(i => question.options[i]).join('<br>');
+                answer += `<br><br><small style="color: #666;">${question.explanation}</small>`;
+            } else if (question.type === 'open') {
+                answer = question.answer;
+            } else if (question.type === 'match') {
+                answer = question.pairs.map(p => `${p.left} → ${p.right}`).join('<br>');
+            }
+            
+            content.innerHTML = `
+                <h2>Mode Flashcards</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <p>Carte ${currentQuestionIndex + 1} / ${totalQuestions}</p>
+                
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <h3>Question</h3>
+                            <p>${question.question}</p>
+                            <small style="opacity: 0.8;">Cliquez pour voir la réponse</small>
+                        </div>
+                        <div class="flashcard-back">
+                            <h3>Réponse</h3>
+                            <div>${answer}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                    <div>
+                        ${currentQuestionIndex > 0 ? '<button class="btn btn-secondary" onclick="previousFlashcard()">Précédent</button>' : ''}
+                        <button class="btn btn-primary" onclick="nextFlashcard()">
+                            ${currentQuestionIndex < totalQuestions - 1 ? 'Suivant' : 'Terminer'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function previousFlashcard() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayFlashcard();
+            }
+        }
+
+        function nextFlashcard() {
+            if (currentQuestionIndex < totalQuestions - 1) {
+                currentQuestionIndex++;
+                displayFlashcard();
+            } else {
+                const content = document.getElementById('flashcardContent');
+                content.innerHTML = `
+                    <h2>Flashcards terminées!</h2>
+                    <div class="score-display">
+                        <h2>Félicitations! 🎉</h2>
+                        <p>Vous avez parcouru ${totalQuestions} cartes.</p>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="startMode('flashcard')">Recommencer</button>
+                        <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                    </div>
+                `;
+            }
+        }
+
+        function startOpenQMode() {
+            const allQuestions = getAllQuestions().filter(q => q.type === 'open');
+            currentQuestions = shuffleArray(allQuestions).slice(0, 10);
+            totalQuestions = currentQuestions.length;
+            
+            const content = document.getElementById('openqContent');
+            content.classList.add('active');
+            displayOpenQuestion();
+        }
+
+        function displayOpenQuestion() {
+            const content = document.getElementById('openqContent');
+            const question = currentQuestions[currentQuestionIndex];
+            const progressPercent = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            
+            content.innerHTML = `
+                <h2>Questions Ouvertes</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <p>Question ${currentQuestionIndex + 1} / ${totalQuestions}</p>
+                
+                <div class="question-card">
+                    <div class="question-number">Question ${currentQuestionIndex + 1}</div>
+                    <div class="question-text">${question.question}</div>
+                    <div class="keyword-hint">
+                        💡 Mots-clés à inclure: ${question.keywords.slice(0, 3).join(', ')}...
+                    </div>
+                    <textarea class="input-answer" id="openAnswer" rows="8" placeholder="Rédigez votre réponse ici..."></textarea>
+                    <div class="feedback" id="feedback"></div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                    <button class="btn btn-primary" onclick="validateOpenAnswer()">Valider</button>
+                </div>
+            `;
+        }
+
+        function validateOpenAnswer() {
+            const question = currentQuestions[currentQuestionIndex];
+            const userAnswer = document.getElementById('openAnswer').value.toLowerCase();
+            const feedback = document.getElementById('feedback');
+            
+            // Fonction pour normaliser le texte (enlever accents, espaces multiples, etc.)
+            function normalize(text) {
+                return text.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // enlever accents
+                    .replace(/[^a-z0-9\s]/g, ' ') // enlever ponctuation
+                    .replace(/\s+/g, ' ') // espaces multiples -> un seul
+                    .trim();
+            }
+            
+            // Fonction pour vérifier si un mot-clé est présent (avec tolérance)
+            function isKeywordPresent(keyword, text) {
+                const normalizedKeyword = normalize(keyword);
+                const normalizedText = normalize(text);
+                
+                // Dictionnaire de synonymes et variantes
+                const synonyms = {
+                    'identitovigilance': ['identito', 'identification', 'identite', 'verifier identite'],
+                    'contre-indication': ['contre indication', 'contrindication', 'ci', 'recherche ci'],
+                    'voie veineuse': ['vvp', 'voie', 'perfusion', 'catheter'],
+                    'PDC': ['produit de contraste', 'pdc', 'injection', 'contraste'],
+                    'protocole': ['acquisition', 'realisation'],
+                    'radioprotection': ['protection', 'dose', 'blindage'],
+                    'qualité': ['qualite', 'traitement'],
+                    'archivage': ['stockage', 'pacs', 'sauvegarde'],
+                    'accueil': ['reception', 'prise en charge'],
+                    'prescription': ['ordonnance', 'demande'],
+                    'échantillonnage': ['echantillonnage', 'echantillon', 'prelevement'],
+                    'quantification': ['quantifier', 'bits', 'niveaux'],
+                    'signal analogique': ['analogique', 'continu'],
+                    'signal numérique': ['numerique', 'binaire', 'digital'],
+                    'pixel': ['picture element'],
+                    'voxel': ['volume pixel'],
+                    'matrice': ['lignes colonnes', 'tableau'],
+                    'résolution spatiale': ['resolution', 'nettete', 'finesse'],
+                    'résolution contraste': ['niveaux gris', 'contraste'],
+                    'bruit': ['parasite', 'artefact']
+                };
+                
+                // Chercher le mot-clé exact
+                if (normalizedText.includes(normalizedKeyword)) {
+                    return true;
+                }
+                
+                // Chercher les synonymes
+                for (let [key, variants] of Object.entries(synonyms)) {
+                    if (normalize(key) === normalizedKeyword || normalize(keyword) === normalize(key)) {
+                        for (let variant of variants) {
+                            if (normalizedText.includes(normalize(variant))) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                
+                // Chercher les mots du mot-clé séparément (ex: "voie veineuse" -> "voie" ET "veineuse")
+                const keywordParts = normalizedKeyword.split(' ').filter(p => p.length > 2);
+                if (keywordParts.length > 1) {
+                    const allPartsPresent = keywordParts.every(part => normalizedText.includes(part));
+                    if (allPartsPresent) return true;
+                }
+                
+                // Tolérance aux fautes de frappe (similitude partielle)
+                const words = normalizedText.split(' ');
+                for (let word of words) {
+                    if (word.length >= 4 && normalizedKeyword.length >= 4) {
+                        // Si le mot contient au moins 70% du mot-clé
+                        const minLength = Math.min(word.length, normalizedKeyword.length);
+                        let matchCount = 0;
+                        for (let i = 0; i < minLength; i++) {
+                            if (word[i] === normalizedKeyword[i]) matchCount++;
+                        }
+                        if (matchCount / normalizedKeyword.length >= 0.7) {
+                            return true;
+                        }
+                        
+                        // Ou si le mot-clé est contenu dans le mot
+                        if (word.includes(normalizedKeyword.substring(0, normalizedKeyword.length - 1))) {
+                            return true;
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            
+            // Compter les mots-clés présents
+            let foundKeywords = 0;
+            const totalKeywords = question.keywords.length;
+            const foundWords = [];
+            
+            question.keywords.forEach(keyword => {
+                if (isKeywordPresent(keyword, userAnswer)) {
+                    foundKeywords++;
+                    foundWords.push(keyword);
+                }
+            });
+            
+            const percentage = Math.round((foundKeywords / totalKeywords) * 100);
+            
+            let className = 'feedback ';
+            let message = '';
+            
+            if (percentage >= 60) {
+                className += 'correct';
+                message = `<strong>✓ Excellente réponse!</strong><br>Vous avez inclus ${foundKeywords}/${totalKeywords} mots-clés importants (${percentage}%).`;
+                score++;
+            } else if (percentage >= 35) {
+                className += 'partial';
+                message = `<strong>⚠ Réponse partielle</strong><br>Vous avez inclus ${foundKeywords}/${totalKeywords} mots-clés (${percentage}%). Pensez à développer davantage.`;
+            } else {
+                className += 'incorrect';
+                message = `<strong>✗ Réponse incomplète</strong><br>Vous avez inclus seulement ${foundKeywords}/${totalKeywords} mots-clés (${percentage}%). Relisez le cours.`;
+            }
+            
+            feedback.className = className + ' show';
+            feedback.innerHTML = `
+                ${message}
+                <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                    <strong>Réponse attendue:</strong><br>
+                    ${question.answer}
+                </div>
+                ${foundWords.length > 0 ? `
+                    <div style="margin-top: 10px;">
+                        <strong>Mots-clés trouvés:</strong> ${foundWords.join(', ')}
+                    </div>
+                ` : ''}
+            `;
+            
+            answers.push({
+                question: question.question,
+                correct: percentage >= 60,
+                percentage: percentage
+            });
+            
+            // Désactiver la zone de texte
+            document.getElementById('openAnswer').disabled = true;
+            
+            // Changer le bouton
+            const navigation = document.querySelector('.navigation');
+            navigation.innerHTML = `
+                <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                <button class="btn btn-primary" onclick="nextOpenQuestion()">
+                    ${currentQuestionIndex < totalQuestions - 1 ? 'Question suivante' : 'Voir les résultats'}
+                </button>
+            `;
+        }
+
+        function nextOpenQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                displayOpenQuestion();
+            } else {
+                displayOpenResults();
+            }
+        }
+
+        function displayOpenResults() {
+            const content = document.getElementById('openqContent');
+            const percentage = Math.round((score / totalQuestions) * 100);
+            
+            content.innerHTML = `
+                <h2>Résultats Questions Ouvertes</h2>
+                
+                <div class="score-display">
+                    <h2>${score} / ${totalQuestions}</h2>
+                    <p style="font-size: 1.5em; margin: 10px 0;">${percentage}%</p>
+                    <p>Réponses complètes (≥60% mots-clés)</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="startMode('openq')">Recommencer</button>
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                </div>
+            `;
+        }
+
+        function startMatchMode() {
+            const allQuestions = getAllQuestions().filter(q => q.type === 'match');
+            currentQuestions = shuffleArray(allQuestions).slice(0, 5);
+            totalQuestions = currentQuestions.length;
+            
+            const content = document.getElementById('matchContent');
+            content.classList.add('active');
+            displayMatchQuestion();
+        }
+
+        function displayMatchQuestion() {
+            const content = document.getElementById('matchContent');
+            const question = currentQuestions[currentQuestionIndex];
+            const progressPercent = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            
+            const leftItems = question.pairs.map(p => p.left);
+            const rightItems = shuffleArray(question.pairs.map(p => p.right));
+            
+            selectedMatch1 = null;
+            selectedMatch2 = null;
+            matchedPairs = [];
+            
+            content.innerHTML = `
+                <h2>Mode Association</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <p>Question ${currentQuestionIndex + 1} / ${totalQuestions}</p>
+                
+                <div class="question-card">
+                    <div class="question-text">${question.question}</div>
+                    <p style="color: #666; font-size: 0.9em; margin: 10px 0;">Cliquez sur un élément de chaque colonne pour les associer</p>
+                    
+                    <div class="match-container">
+                        <div class="match-column">
+                            <h4>Concepts</h4>
+                            ${leftItems.map((item, i) => `
+                                <div class="match-item" onclick="selectMatch('left', ${i}, '${item.replace(/'/g, "\\'")}')" data-type="left" data-index="${i}">
+                                    ${item}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="match-column">
+                            <h4>Définitions</h4>
+                            ${rightItems.map((item, i) => `
+                                <div class="match-item" onclick="selectMatch('right', ${i}, '${item.replace(/'/g, "\\'")}')" data-type="right" data-index="${i}">
+                                    ${item}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="feedback" id="matchFeedback"></div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                    <button class="btn btn-primary" onclick="nextMatchQuestion()" id="matchNextBtn" disabled>
+                        ${currentQuestionIndex < totalQuestions - 1 ? 'Question suivante' : 'Voir les résultats'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectMatch(type, index, value) {
+            const items = document.querySelectorAll(`.match-item[data-type="${type}"]`);
+            const item = items[index];
+            
+            if (item.classList.contains('matched')) return;
+            
+            if (type === 'left') {
+                if (selectedMatch1 && selectedMatch1.element !== item) {
+                    selectedMatch1.element.classList.remove('selected');
+                }
+                selectedMatch1 = {element: item, value: value, index: index};
+                item.classList.add('selected');
+            } else {
+                if (selectedMatch2 && selectedMatch2.element !== item) {
+                    selectedMatch2.element.classList.remove('selected');
+                }
+                selectedMatch2 = {element: item, value: value, index: index};
+                item.classList.add('selected');
+            }
+            
+            if (selectedMatch1 && selectedMatch2) {
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            const question = currentQuestions[currentQuestionIndex];
+            const correctPair = question.pairs.find(p => 
+                p.left === selectedMatch1.value && p.right === selectedMatch2.value
+            );
+            
+            if (correctPair) {
+                selectedMatch1.element.classList.remove('selected');
+                selectedMatch2.element.classList.remove('selected');
+                selectedMatch1.element.classList.add('matched');
+                selectedMatch2.element.classList.add('matched');
+                matchedPairs.push(correctPair);
+                
+                if (matchedPairs.length === question.pairs.length) {
+                    score++;
+                    const feedback = document.getElementById('matchFeedback');
+                    feedback.className = 'feedback correct show';
+                    feedback.textContent = '✓ Toutes les associations sont correctes! Excellent travail!';
+                    document.getElementById('matchNextBtn').disabled = false;
+                    
+                    answers.push({
+                        question: question.question,
+                        correct: true
+                    });
+                }
+            } else {
+                const feedback = document.getElementById('matchFeedback');
+                feedback.className = 'feedback incorrect show';
+                feedback.textContent = '✗ Cette association est incorrecte. Réessayez!';
+                
+                setTimeout(() => {
+                    selectedMatch1.element.classList.remove('selected');
+                    selectedMatch2.element.classList.remove('selected');
+                    feedback.classList.remove('show');
+                }, 1500);
+            }
+            
+            selectedMatch1 = null;
+            selectedMatch2 = null;
+        }
+
+        function nextMatchQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                displayMatchQuestion();
+            } else {
+                displayMatchResults();
+            }
+        }
+
+        function displayMatchResults() {
+            const content = document.getElementById('matchContent');
+            const percentage = Math.round((score / totalQuestions) * 100);
+            
+            content.innerHTML = `
+                <h2>Résultats Mode Association</h2>
+                
+                <div class="score-display">
+                    <h2>${score} / ${totalQuestions}</h2>
+                    <p style="font-size: 1.5em; margin: 10px 0;">${percentage}%</p>
+                    <p>Questions complétées parfaitement</p>
+                </div>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="startMode('match')">Recommencer</button>
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                </div>
+            `;
+        }
+
+        function startExamMode() {
+            const allQuestions = getAllQuestions().filter(q => q.type === 'qcm');
+            currentQuestions = shuffleArray(allQuestions).slice(0, 20);
+            totalQuestions = currentQuestions.length;
+            
+            const content = document.getElementById('examContent');
+            content.classList.add('active');
+            
+            startTime = Date.now();
+            score = 0;
+            answers = [];
+            
+            displayExamQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            const timerDisplay = document.getElementById('examTimer');
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                timerDisplay.textContent = `⏱️ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function displayExamQuestion() {
+            const content = document.getElementById('examContent');
+            const question = currentQuestions[currentQuestionIndex];
+            const progressPercent = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+            
+            content.innerHTML = `
+                <h2>Mode Examen</h2>
+                <div class="timer" id="examTimer">⏱️ 00:00</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <p>Question ${currentQuestionIndex + 1} / ${totalQuestions}</p>
+                
+                <div class="question-card">
+                    <div class="question-number">Question ${currentQuestionIndex + 1}</div>
+                    <div class="question-text">${question.question}</div>
+                    ${question.correct.length > 1 ? '<p style="color: #666; font-size: 0.9em; font-style: italic;">Plusieurs réponses possibles</p>' : ''}
+                    <div class="options" id="options">
+                        ${question.options.map((opt, i) => `
+                            <div class="option" onclick="selectOption(${i}, ${question.correct.length > 1})" data-index="${i}">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="confirmExitExam()">Abandonner</button>
+                    <button class="btn btn-primary" onclick="validateExamAnswer()">Suivant</button>
+                </div>
+            `;
+            
+            if (!timerInterval) {
+                startTimer();
+            }
+        }
+
+        function validateExamAnswer() {
+            const question = currentQuestions[currentQuestionIndex];
+            const selectedOptions = Array.from(document.querySelectorAll('.option.selected'))
+                .map(opt => parseInt(opt.dataset.index));
+            
+            const isCorrect = JSON.stringify(selectedOptions.sort()) === JSON.stringify(question.correct.sort());
+            
+            if (isCorrect) {
+                score++;
+            }
+            
+            answers.push({
+                question: question.question,
+                correct: isCorrect,
+                userAnswer: selectedOptions,
+                correctAnswer: question.correct,
+                options: question.options,
+                explanation: question.explanation
+            });
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex < totalQuestions) {
+                displayExamQuestion();
+            } else {
+                clearInterval(timerInterval);
+                displayExamResults();
+            }
+        }
+
+        function displayExamResults() {
+            const content = document.getElementById('examContent');
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            const percentage = Math.round((score / totalQuestions) * 100);
+            
+            let message = '';
+            let color = '';
+            if (percentage >= 80) {
+                message = 'Excellent! Vous êtes prêt pour l\'examen.';
+                color = '#4CAF50';
+            } else if (percentage >= 60) {
+                message = 'Bien! Mais revoyez certains points.';
+                color = '#FF9800';
+            } else {
+                message = 'Insuffisant. Révisez davantage.';
+                color = '#f44336';
+            }
+            
+            content.innerHTML = `
+                <h2>Résultats de l'Examen</h2>
+                
+                <div class="score-display">
+                    <h2 style="color: ${color}">${score} / ${totalQuestions}</h2>
+                    <p style="font-size: 1.5em; margin: 10px 0;">${percentage}%</p>
+                    <p>${message}</p>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value">${minutes}:${seconds.toString().padStart(2, '0')}</div>
+                        <div class="stat-label">Temps total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${score}</div>
+                        <div class="stat-label">Bonnes réponses</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${totalQuestions - score}</div>
+                        <div class="stat-label">Erreurs</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px;">Correction détaillée</h3>
+                ${answers.map((ans, i) => {
+                    const question = currentQuestions[i];
+                    return `
+                        <div class="question-card">
+                            <div class="question-number">Question ${i + 1} ${ans.correct ? '✓' : '✗'}</div>
+                            <div class="question-text">${ans.question}</div>
+                            
+                            <div style="margin-top: 15px;">
+                                ${ans.options.map((opt, j) => {
+                                    let className = '';
+                                    let icon = '';
+                                    if (ans.correctAnswer.includes(j)) {
+                                        className = 'correct';
+                                        icon = '✓ ';
+                                    } else if (ans.userAnswer.includes(j)) {
+                                        className = 'incorrect';
+                                        icon = '✗ ';
+                                    }
+                                    return `<div class="option ${className}" style="margin: 5px 0;">${icon}${opt}</div>`;
+                                }).join('')}
+                            </div>
+                            
+                            <div style="margin-top: 15px; padding: 15px; background: #f0f4ff; border-radius: 8px;">
+                                <strong>Explication:</strong><br>
+                                ${ans.explanation}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="startMode('exam')">Repasser l'examen</button>
+                    <button class="btn btn-secondary" onclick="returnToMenu()">Retour au menu</button>
+                </div>
+            `;
+        }
+
+        function confirmExitExam() {
+            if (confirm('Êtes-vous sûr de vouloir abandonner l\'examen? Votre progression sera perdue.')) {
+                clearInterval(timerInterval);
+                returnToMenu();
+            }
+        }
+
+        function returnToMenu() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            document.querySelectorAll('.content').forEach(el => {
+                el.classList.remove('active');
+                el.innerHTML = '';
+            });
+            
+            document.getElementById('modeSelector').style.display = 'grid';
+            
+            currentMode = '';
+            currentQuestions = [];
+            currentQuestionIndex = 0;
+            score = 0;
+            totalQuestions = 0;
+            answers = [];
+        }
+    </script>
+</body>
+</html>
