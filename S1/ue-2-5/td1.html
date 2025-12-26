@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD1 Physiologie Générale - Système d'Apprentissage</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .mode-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .mode-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .mode-card h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .mode-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .content {
+            padding: 40px;
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            margin: 30px 0;
+        }
+
+        .flashcard {
+            width: 100%;
+            min-height: 400px;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            min-height: 400px;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: white;
+            transform: rotateY(180deg);
+            border: 3px solid #667eea;
+        }
+
+        .flashcard-front h2 {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-back .answer {
+            color: #333;
+            font-size: 1.3em;
+            line-height: 1.6;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stats-bar {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .test-question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .test-question h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .test-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .test-option {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .test-option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .test-option.selected {
+            background: #e0e7ff;
+            border-color: #667eea;
+        }
+
+        .test-option.correct {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .test-option.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .input-answer {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin: 10px 0;
+        }
+
+        .input-answer:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 5px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 5px solid #ef4444;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .save-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        table th {
+            background: #667eea;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .matching-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .matching-item:hover {
+            border-color: #667eea;
+        }
+
+        .matching-item.selected {
+            background: #e0e7ff;
+            border-color: #667eea;
+        }
+
+        .matching-item.matched {
+            background: #d1fae5;
+            border-color: #10b981;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .matching-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin: 5px;
+        }
+
+        .flip-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9em;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TD1 - Physiologie Générale</h1>
+            <p>Système d'Apprentissage Interactif - UE 2.5 S1</p>
+        </div>
+
+        <!-- Mode Selector -->
+        <div id="modeSelector" class="mode-selector">
+            <div class="mode-card" onclick="startMode('flashcards')">
+                <div class="icon">🎴</div>
+                <h2>Mode Flashcards</h2>
+                <p>Apprentissage par cartes avec auto-évaluation</p>
+            </div>
+            <div class="mode-card" onclick="startMode('test')">
+                <div class="icon">📝</div>
+                <h2>Mode Test</h2>
+                <p>Évaluation complète avec correction</p>
+            </div>
+        </div>
+
+        <!-- Flashcards Content -->
+        <div id="flashcardsContent" class="content">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Test Content -->
+        <div id="testContent" class="content">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Database of flashcards
+        const flashcardsData = [
+            // Préfixes et suffixes
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le préfixe 'derm(ato)' ?",
+                answer: "Peau"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le préfixe 'cardio' ?",
+                answer: "Cœur"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le suffixe 'pnée' ?",
+                answer: "Respiration"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le préfixe 'osté(o)' ?",
+                answer: "Os"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le préfixe 'hémato' ?",
+                answer: "Sang"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le préfixe 'néphro' ?",
+                answer: "Rein"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le préfixe 'angio' ?",
+                answer: "Vaisseau"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie 'cyto' ?",
+                answer: "Cellule"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie le préfixe 'hypo' ?",
+                answer: "Déficient, bas"
+            },
+            { 
+                category: "Vocabulaire médical",
+                question: "Que signifie 'thoraco' ?",
+                answer: "Thorax"
+            },
+            
+            // Niveaux d'organisation
+            { 
+                category: "Organisation du corps",
+                question: "Citez les 6 niveaux d'organisation du corps humain dans l'ordre croissant",
+                answer: "1. Chimique (atome + molécule)\n2. Cellulaire\n3. Tissulaire\n4. Organique\n5. Systémique\n6. L'organisme"
+            },
+            { 
+                category: "Organisation du corps",
+                question: "Définissez la cellule dans le contexte des niveaux d'organisation",
+                answer: "Unité structurale, fonctionnelle et reproductrice de tous les organismes vivants"
+            },
+            { 
+                category: "Organisation du corps",
+                question: "Qu'est-ce qu'un tissu ?",
+                answer: "Ensemble de cellules reliées entre elles par une trame organique"
+            },
+            { 
+                category: "Organisation du corps",
+                question: "Qu'est-ce qu'un organe ?",
+                answer: "Ensemble de tissus ayant une ou plusieurs fonctions spécifiques"
+            },
+            { 
+                category: "Organisation du corps",
+                question: "Qu'est-ce qu'un système/appareil ?",
+                answer: "Ensemble d'organes qui accomplissent en commun une activité essentielle de l'organisme"
+            },
+            
+            // Niveau chimique
+            { 
+                category: "Niveau chimique",
+                question: "Définissez les lipides",
+                answer: "Molécules hydrophobes (peu solubles dans l'eau) constituées principalement de carbone et d'hydrogène avec peu d'oxygène"
+            },
+            { 
+                category: "Niveau chimique",
+                question: "Quelles sont les fonctions principales des lipides ?",
+                answer: "Stockage d'énergie, structure des membranes cellulaires, rôle hormonal et régulateur (vitamine D, hormones sexuelles)"
+            },
+            { 
+                category: "Niveau chimique",
+                question: "Citez les 3 catégories de glucides",
+                answer: "1. Monosaccharides (glucose, fructose, galactose)\n2. Disaccharides (saccharose, lactose, maltose)\n3. Polysaccharides (amidon, glycogène, cellulose)"
+            },
+            { 
+                category: "Niveau chimique",
+                question: "Définissez les protides",
+                answer: "Assemblage d'acides aminés"
+            },
+            { 
+                category: "Niveau chimique",
+                question: "Citez 5 fonctions principales des protéines",
+                answer: "1. Structure (collagène, kératine)\n2. Transport (hémoglobine, albumine)\n3. Enzymes (accélèrent réactions chimiques)\n4. Défense (anticorps)\n5. Mouvement (myosine, actine)"
+            },
+            { 
+                category: "Niveau chimique",
+                question: "Quelle est la différence entre ADN et ARN ?",
+                answer: "ADN : support de l'information génétique, double hélice\nARN : impliqué dans la synthèse des protéines"
+            },
+            { 
+                category: "Niveau chimique",
+                question: "Qu'est-ce qu'un ion ? Citez les deux types",
+                answer: "Atomes ou molécules qui possèdent une charge électrique.\nCation : ion positif (perte d'électrons, ex: Na+, K+)\nAnion : ion négatif (gain d'électrons, ex: Cl-)"
+            },
+            
+            // Niveau cellulaire
+            { 
+                category: "Niveau cellulaire",
+                question: "Citez les 4 éléments communs de la cellule",
+                answer: "1. Le noyau (contient ADN)\n2. Le cytoplasme (milieu intracellulaire)\n3. La membrane plasmique (délimite et protège)\n4. Les organites (structures dans le cytoplasme)"
+            },
+            
+            // Types de tissus
+            { 
+                category: "Tissus",
+                question: "Quelle est la fonction du tissu épithélial ? Donnez des exemples",
+                answer: "Fonctions : protection, absorption (intestin), sensibilité (bâtonnets et cônes dans l'œil), sécrétion\nExemples : trachée, épiderme, tubes digestifs, respiratoires, reproductifs, urinaires"
+            },
+            { 
+                category: "Tissus",
+                question: "Quelle est la fonction du tissu conjonctif ? Donnez des exemples",
+                answer: "Fonction : soutien et isolant\nExemples : os, cartilage, vaisseaux, poumons, foie, rate, ganglions, derme, tendons, tissu adipeux"
+            },
+            { 
+                category: "Tissus",
+                question: "Quelle est la fonction du tissu musculaire ? Citez les types",
+                answer: "Fonction : locomotion et contraction (respiration, cardiaque)\nTypes : muscles striés, lisses, cardiaques"
+            },
+            { 
+                category: "Tissus",
+                question: "Décrivez le tissu nerveux",
+                answer: "Composé de 2 systèmes cellulaires :\n- Neurones (10%) : véhiculent l'influx nerveux\n- Gliocytes (90%) : soutien, ne véhiculent pas d'influx\nRôle : transport, réception, conversion et stockage de l'information"
+            },
+            
+            // Systèmes
+            { 
+                category: "Systèmes du corps",
+                question: "Citez les 11 grands systèmes du corps humain",
+                answer: "1. Tégumentaire\n2. Squelettique\n3. Musculaire\n4. Nerveux\n5. Endocrinien\n6. Cardiovasculaire\n7. Lymphatique/immunitaire\n8. Respiratoire\n9. Digestif\n10. Urinaire\n11. Reproducteur"
+            },
+            { 
+                category: "Système digestif",
+                question: "Citez les organes du système digestif",
+                answer: "Bouche, pharynx, œsophage, estomac, intestins, foie, pancréas, vésicule biliaire"
+            },
+            { 
+                category: "Système digestif",
+                question: "Quels sont les rôles du système digestif ?",
+                answer: "Digestion, absorption des nutriments, élimination des déchets solides"
+            },
+            { 
+                category: "Système reproducteur",
+                question: "Citez les organes du système reproducteur (homme et femme)",
+                answer: "Homme : testicules, prostate, pénis\nFemme : ovaires, utérus, trompes, vagin"
+            },
+            { 
+                category: "Système reproducteur",
+                question: "Quels sont les rôles du système reproducteur ?",
+                answer: "Reproduction, production des gamètes, sécrétion d'hormones sexuelles"
+            },
+            
+            // Circulation
+            { 
+                category: "Système cardiovasculaire",
+                question: "Quelle est la différence entre artères et veines ?",
+                answer: "Artères : vaisseaux partant DU cœur vers un organe\nVeines : vaisseaux partant d'un organe vers LE cœur"
+            },
+            { 
+                category: "Système cardiovasculaire",
+                question: "Qu'est-ce que la petite circulation (circulation pulmonaire) ?",
+                answer: "Circuit cœur-poumons-cœur permettant l'oxygénation du sang"
+            },
+            { 
+                category: "Système cardiovasculaire",
+                question: "Qu'est-ce que la grande circulation (circulation systémique) ?",
+                answer: "Circuit cœur-organes-cœur permettant d'apporter O2 et nutriments aux organes"
+            },
+            { 
+                category: "Système cardiovasculaire",
+                question: "Décrivez le trajet du sang dans la petite circulation",
+                answer: "Ventricule droit → Artère pulmonaire → Poumons (échanges gazeux) → Veine pulmonaire → Oreillette gauche"
+            },
+            { 
+                category: "Système cardiovasculaire",
+                question: "Quel type de sang circule dans les artères pulmonaires ?",
+                answer: "Sang riche en CO2 et pauvre en O2 (exception : les artères pulmonaires transportent du sang désoxygéné)"
+            }
+        ];
+
+        // Test questions
+        const testQuestions = [
+            {
+                type: 'multiple-choice',
+                question: "Quel est le bon ordre des niveaux d'organisation du corps humain ?",
+                options: [
+                    "Chimique → Tissulaire → Cellulaire → Organique → Systémique → Organisme",
+                    "Chimique → Cellulaire → Tissulaire → Organique → Systémique → Organisme",
+                    "Cellulaire → Chimique → Tissulaire → Organique → Systémique → Organisme",
+                    "Chimique → Cellulaire → Organique → Tissulaire → Systémique → Organisme"
+                ],
+                correct: 1,
+                explanation: "L'ordre correct est : Chimique → Cellulaire → Tissulaire → Organique → Systémique → Organisme"
+            },
+            {
+                type: 'multiple-choice',
+                question: "Quelle est la fonction principale des lipides ?",
+                options: [
+                    "Transport de l'oxygène",
+                    "Stockage d'énergie et structure membranaire",
+                    "Contraction musculaire",
+                    "Transmission de l'influx nerveux"
+                ],
+                correct: 1,
+                explanation: "Les lipides servent au stockage d'énergie, à la structure des membranes cellulaires et au rôle hormonal."
+            },
+            {
+                type: 'multiple-choice',
+                question: "Combien y a-t-il de systèmes majeurs dans le corps humain ?",
+                options: [
+                    "8",
+                    "10",
+                    "11",
+                    "13"
+                ],
+                correct: 2,
+                explanation: "Il y a 11 grands systèmes du corps humain."
+            },
+            {
+                type: 'multiple-choice',
+                question: "Quelle est la caractéristique des artères ?",
+                options: [
+                    "Elles partent d'un organe vers le cœur",
+                    "Elles partent du cœur vers un organe",
+                    "Elles ne contiennent que du sang oxygéné",
+                    "Elles sont toujours bleues"
+                ],
+                correct: 1,
+                explanation: "Les artères sont les vaisseaux qui partent DU cœur vers un organe (attention : les artères pulmonaires transportent du sang désoxygéné !)"
+            },
+            {
+                type: 'matching',
+                question: "Associez chaque préfixe à sa signification :",
+                pairs: [
+                    { left: "cardio", right: "cœur" },
+                    { left: "néphro", right: "rein" },
+                    { left: "osté(o)", right: "os" },
+                    { left: "derm(ato)", right: "peau" }
+                ]
+            },
+            {
+                type: 'matching',
+                question: "Associez chaque type de tissu à sa fonction principale :",
+                pairs: [
+                    { left: "Tissu épithélial", right: "Protection, absorption, sécrétion" },
+                    { left: "Tissu conjonctif", right: "Soutien et isolant" },
+                    { left: "Tissu musculaire", right: "Locomotion et contraction" },
+                    { left: "Tissu nerveux", right: "Transport et stockage de l'information" }
+                ]
+            },
+            {
+                type: 'fill-in',
+                question: "Complétez : Les molécules hydrophobes constituées principalement de carbone et d'hydrogène sont appelées ___________",
+                answer: "lipides",
+                alternatives: ["lipide"]
+            },
+            {
+                type: 'fill-in',
+                question: "Complétez : L'unité structurale, fonctionnelle et reproductrice de tous les organismes vivants est la ___________",
+                answer: "cellule",
+                alternatives: []
+            },
+            {
+                type: 'multiple-choice',
+                question: "Quel type de tissu compose les muscles striés, lisses et cardiaques ?",
+                options: [
+                    "Tissu épithélial",
+                    "Tissu conjonctif",
+                    "Tissu musculaire",
+                    "Tissu nerveux"
+                ],
+                correct: 2,
+                explanation: "Le tissu musculaire compose les muscles striés, lisses et cardiaques."
+            },
+            {
+                type: 'multiple-choice',
+                question: "Dans le tissu nerveux, quel pourcentage représentent les neurones ?",
+                options: [
+                    "10%",
+                    "50%",
+                    "90%",
+                    "100%"
+                ],
+                correct: 0,
+                explanation: "Les neurones représentent 10% du tissu nerveux, les gliocytes représentent 90%."
+            },
+            {
+                type: 'matching',
+                question: "Associez chaque système à sa fonction principale :",
+                pairs: [
+                    { left: "Système digestif", right: "Nutrition, élimination des déchets" },
+                    { left: "Système respiratoire", right: "Échanges gazeux" },
+                    { left: "Système urinaire", right: "Épuration" },
+                    { left: "Système nerveux", right: "Véhiculer et stocker les informations" }
+                ]
+            },
+            {
+                type: 'multiple-choice',
+                question: "Quelle circulation concerne le circuit cœur-poumons-cœur ?",
+                options: [
+                    "Grande circulation",
+                    "Circulation systémique",
+                    "Petite circulation",
+                    "Circulation portale"
+                ],
+                correct: 2,
+                explanation: "La petite circulation (ou circulation pulmonaire) concerne le circuit cœur-poumons-cœur."
+            }
+        ];
+
+        // Learning state management
+        let learningState = {
+            flashcards: {},
+            currentIndex: 0,
+            filter: 'all',
+            isFlipped: false
+        };
+
+        // Load state from localStorage
+        function loadState() {
+            const saved = localStorage.getItem('td1_physio_learning_state');
+            if (saved) {
+                learningState = JSON.parse(saved);
+            } else {
+                // Initialize state
+                flashcardsData.forEach((card, index) => {
+                    learningState.flashcards[index] = {
+                        status: 'new', // 'new', 'known', 'review', 'unknown'
+                        reviewCount: 0
+                    };
+                });
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            localStorage.setItem('td1_physio_learning_state', JSON.stringify(learningState));
+        }
+
+        // Export state as JSON file
+        function exportState() {
+            const dataStr = JSON.stringify(learningState, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `td1_physio_progress_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // Import state from JSON file
+        function importState() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        learningState = JSON.parse(event.target.result);
+                        saveState();
+                        alert('Progression importée avec succès !');
+                        if (document.getElementById('flashcardsContent').classList.contains('active')) {
+                            renderFlashcards();
+                        }
+                    } catch (error) {
+                        alert('Erreur lors de l\'importation du fichier');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Reset progress
+        function resetProgress() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser toute votre progression ?')) {
+                flashcardsData.forEach((card, index) => {
+                    learningState.flashcards[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                });
+                learningState.currentIndex = 0;
+                saveState();
+                alert('Progression réinitialisée !');
+                renderFlashcards();
+            }
+        }
+
+        // Start mode
+        function startMode(mode) {
+            document.getElementById('modeSelector').style.display = 'none';
+            
+            if (mode === 'flashcards') {
+                document.getElementById('flashcardsContent').classList.add('active');
+                renderFlashcards();
+            } else if (mode === 'test') {
+                document.getElementById('testContent').classList.add('active');
+                renderTest();
+            }
+        }
+
+        // Return to menu
+        function returnToMenu() {
+            document.getElementById('modeSelector').style.display = 'grid';
+            document.getElementById('flashcardsContent').classList.remove('active');
+            document.getElementById('testContent').classList.remove('active');
+        }
+
+        // Get filtered flashcards
+        function getFilteredFlashcards() {
+            const indices = Object.keys(learningState.flashcards).map(Number);
+            
+            if (learningState.filter === 'all') {
+                return indices;
+            } else if (learningState.filter === 'review') {
+                return indices.filter(i => {
+                    const state = learningState.flashcards[i];
+                    return state.status === 'review' || state.status === 'unknown';
+                });
+            } else if (learningState.filter === 'new') {
+                return indices.filter(i => learningState.flashcards[i].status === 'new');
+            } else if (learningState.filter === 'known') {
+                return indices.filter(i => learningState.flashcards[i].status === 'known');
+            }
+            return indices;
+        }
+
+        // Render flashcards
+        function renderFlashcards() {
+            const container = document.getElementById('flashcardsContent');
+            const filtered = getFilteredFlashcards();
+            
+            if (learningState.currentIndex >= filtered.length) {
+                learningState.currentIndex = 0;
+            }
+            
+            const currentCardIndex = filtered[learningState.currentIndex];
+            const currentCard = flashcardsData[currentCardIndex];
+            const cardState = learningState.flashcards[currentCardIndex];
+            
+            // Calculate stats
+            const stats = {
+                total: flashcardsData.length,
+                known: Object.values(learningState.flashcards).filter(s => s.status === 'known').length,
+                review: Object.values(learningState.flashcards).filter(s => s.status === 'review').length,
+                unknown: Object.values(learningState.flashcards).filter(s => s.status === 'unknown').length,
+                new: Object.values(learningState.flashcards).filter(s => s.status === 'new').length
+            };
+            
+            container.innerHTML = `
+                <button class="btn btn-secondary" onclick="returnToMenu()" style="margin-bottom: 20px;">← Retour au menu</button>
+                
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <div class="stat-number">${stats.total}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" style="color: #10b981;">${stats.known}</div>
+                        <div class="stat-label">Acquis</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" style="color: #f59e0b;">${stats.review}</div>
+                        <div class="stat-label">À revoir</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" style="color: #ef4444;">${stats.unknown}</div>
+                        <div class="stat-label">Non acquis</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" style="color: #6b7280;">${stats.new}</div>
+                        <div class="stat-label">Nouveau</div>
+                    </div>
+                </div>
+                
+                <div class="filter-buttons">
+                    <button class="filter-btn ${learningState.filter === 'all' ? 'active' : ''}" onclick="setFilter('all')">
+                        Toutes (${flashcardsData.length})
+                    </button>
+                    <button class="filter-btn ${learningState.filter === 'new' ? 'active' : ''}" onclick="setFilter('new')">
+                        Nouvelles (${stats.new})
+                    </button>
+                    <button class="filter-btn ${learningState.filter === 'review' ? 'active' : ''}" onclick="setFilter('review')">
+                        À réviser (${stats.review + stats.unknown})
+                    </button>
+                    <button class="filter-btn ${learningState.filter === 'known' ? 'active' : ''}" onclick="setFilter('known')">
+                        Acquises (${stats.known})
+                    </button>
+                </div>
+                
+                ${filtered.length === 0 ? `
+                    <div style="text-align: center; padding: 60px; color: #666;">
+                        <div style="font-size: 3em; margin-bottom: 20px;">🎉</div>
+                        <h2>Aucune carte dans cette catégorie !</h2>
+                        <p style="margin-top: 10px;">Sélectionnez un autre filtre pour continuer.</p>
+                    </div>
+                ` : `
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${((learningState.currentIndex + 1) / filtered.length) * 100}%"></div>
+                    </div>
+                    <div style="text-align: center; color: #666; margin-bottom: 20px;">
+                        Carte ${learningState.currentIndex + 1} / ${filtered.length}
+                    </div>
+                    
+                    <span class="category-badge">${currentCard.category}</span>
+                    
+                    <div class="flashcard-container">
+                        <div class="flashcard" id="flashcard" onclick="flipCard()">
+                            <div class="flashcard-face flashcard-front">
+                                <h2>Question</h2>
+                                <p style="font-size: 1.3em; margin: 20px 0;">${currentCard.question}</p>
+                                <div class="flip-hint">👆 Cliquez pour voir la réponse</div>
+                            </div>
+                            <div class="flashcard-face flashcard-back">
+                                <h2 style="color: #667eea; margin-bottom: 20px;">Réponse</h2>
+                                <div class="answer">${currentCard.answer.replace(/\n/g, '<br>')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flashcard-controls">
+                        <button class="btn btn-success" onclick="markCard('known')" title="Je connais parfaitement">
+                            ✅ Acquis
+                        </button>
+                        <button class="btn btn-warning" onclick="markCard('review')" title="Je dois revoir">
+                            ⚠️ À revoir
+                        </button>
+                        <button class="btn btn-danger" onclick="markCard('unknown')" title="Je ne sais pas">
+                            ❌ Non acquis
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px; color: #666; font-size: 0.9em;">
+                        ${cardState.reviewCount > 0 ? `Cette carte a été revue ${cardState.reviewCount} fois` : 'Première fois que vous voyez cette carte'}
+                    </div>
+                `}
+                
+                <div class="save-controls">
+                    <button class="btn btn-primary" onclick="exportState()">💾 Exporter la progression</button>
+                    <button class="btn btn-primary" onclick="importState()">📂 Importer la progression</button>
+                    <button class="btn btn-danger" onclick="resetProgress()">🔄 Réinitialiser</button>
+                </div>
+            `;
+        }
+
+        // Flip card
+        function flipCard() {
+            const card = document.getElementById('flashcard');
+            card.classList.toggle('flipped');
+            learningState.isFlipped = !learningState.isFlipped;
+        }
+
+        // Mark card
+        function markCard(status) {
+            const filtered = getFilteredFlashcards();
+            const currentCardIndex = filtered[learningState.currentIndex];
+            
+            learningState.flashcards[currentCardIndex].status = status;
+            
+            // Update review count based on status
+            if (status === 'review') {
+                learningState.flashcards[currentCardIndex].reviewCount = 1;
+            } else if (status === 'unknown') {
+                learningState.flashcards[currentCardIndex].reviewCount = 3;
+            } else if (status === 'known') {
+                learningState.flashcards[currentCardIndex].reviewCount = 0;
+            }
+            
+            saveState();
+            
+            // Move to next card
+            learningState.currentIndex++;
+            learningState.isFlipped = false;
+            renderFlashcards();
+        }
+
+        // Set filter
+        function setFilter(filter) {
+            learningState.filter = filter;
+            learningState.currentIndex = 0;
+            renderFlashcards();
+        }
+
+        // Render test
+        function renderTest() {
+            const container = document.getElementById('testContent');
+            
+            container.innerHTML = `
+                <button class="btn btn-secondary" onclick="returnToMenu()" style="margin-bottom: 20px;">← Retour au menu</button>
+                
+                <h2 style="margin-bottom: 30px; color: #333;">Mode Test - Évaluation Complète</h2>
+                
+                <div id="testQuestions"></div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="submitTest()" id="submitBtn">Soumettre le test</button>
+                </div>
+                
+                <div id="testResults" style="display: none;"></div>
+            `;
+            
+            renderTestQuestions();
+        }
+
+        // Render test questions
+        function renderTestQuestions() {
+            const questionsContainer = document.getElementById('testQuestions');
+            let html = '';
+            
+            testQuestions.forEach((q, index) => {
+                html += `<div class="test-question" id="question-${index}">`;
+                html += `<h3>Question ${index + 1}</h3>`;
+                html += `<p style="margin: 15px 0;">${q.question}</p>`;
+                
+                if (q.type === 'multiple-choice') {
+                    html += '<div class="test-options">';
+                    q.options.forEach((option, optIndex) => {
+                        html += `
+                            <div class="test-option" onclick="selectTestOption(${index}, ${optIndex})">
+                                ${String.fromCharCode(65 + optIndex)}. ${option}
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                } else if (q.type === 'fill-in') {
+                    html += `
+                        <input type="text" class="input-answer" id="answer-${index}" placeholder="Votre réponse...">
+                    `;
+                } else if (q.type === 'matching') {
+                    html += `<p style="color: #666; margin: 10px 0;">Cliquez sur un élément à gauche, puis sur sa correspondance à droite</p>`;
+                    html += `<div class="matching-container" id="matching-${index}">`;
+                    html += '<div>';
+                    q.pairs.forEach((pair, pairIndex) => {
+                        html += `
+                            <div class="matching-item" data-side="left" data-index="${pairIndex}" onclick="selectMatching(${index}, 'left', ${pairIndex})">
+                                ${pair.left}
+                            </div>
+                        `;
+                    });
+                    html += '</div><div>';
+                    const shuffled = [...q.pairs].sort(() => Math.random() - 0.5);
+                    shuffled.forEach((pair, pairIndex) => {
+                        const originalIndex = q.pairs.findIndex(p => p.left === pair.left);
+                        html += `
+                            <div class="matching-item" data-side="right" data-index="${originalIndex}" onclick="selectMatching(${index}, 'right', ${originalIndex})">
+                                ${pair.right}
+                            </div>
+                        `;
+                    });
+                    html += '</div></div>';
+                }
+                
+                html += `<div class="feedback" id="feedback-${index}"></div>`;
+                html += '</div>';
+            });
+            
+            questionsContainer.innerHTML = html;
+        }
+
+        // Test state
+        let testState = {
+            answers: {},
+            matchingState: {}
+        };
+
+        // Select test option
+        function selectTestOption(questionIndex, optionIndex) {
+            const question = document.querySelectorAll(`#question-${questionIndex} .test-option`);
+            question.forEach(opt => opt.classList.remove('selected'));
+            question[optionIndex].classList.add('selected');
+            
+            testState.answers[questionIndex] = optionIndex;
+        }
+
+        // Select matching
+        function selectMatching(questionIndex, side, index) {
+            if (!testState.matchingState[questionIndex]) {
+                testState.matchingState[questionIndex] = { selected: null, matched: [] };
+            }
+            
+            const state = testState.matchingState[questionIndex];
+            const container = document.getElementById(`matching-${questionIndex}`);
+            const items = container.querySelectorAll('.matching-item');
+            
+            // Check if already matched
+            if (state.matched.includes(index)) return;
+            
+            if (state.selected === null) {
+                // First selection
+                state.selected = { side, index };
+                items.forEach(item => {
+                    if (item.dataset.side === side && parseInt(item.dataset.index) === index) {
+                        item.classList.add('selected');
+                    }
+                });
+            } else if (state.selected.side === side) {
+                // Same side, change selection
+                items.forEach(item => item.classList.remove('selected'));
+                state.selected = { side, index };
+                items.forEach(item => {
+                    if (item.dataset.side === side && parseInt(item.dataset.index) === index) {
+                        item.classList.add('selected');
+                    }
+                });
+            } else {
+                // Different side, check if match
+                if (state.selected.index === index) {
+                    // Correct match
+                    state.matched.push(index);
+                    items.forEach(item => {
+                        if (parseInt(item.dataset.index) === index) {
+                            item.classList.add('matched');
+                            item.classList.remove('selected');
+                        }
+                    });
+                    state.selected = null;
+                    
+                    // Store answer
+                    if (!testState.answers[questionIndex]) {
+                        testState.answers[questionIndex] = [];
+                    }
+                    testState.answers[questionIndex].push(index);
+                } else {
+                    // Wrong match - clear selection
+                    items.forEach(item => item.classList.remove('selected'));
+                    state.selected = null;
+                }
+            }
+        }
+
+        // Submit test
+        function submitTest() {
+            let score = 0;
+            let total = testQuestions.length;
+            
+            testQuestions.forEach((q, index) => {
+                const feedback = document.getElementById(`feedback-${index}`);
+                let correct = false;
+                
+                if (q.type === 'multiple-choice') {
+                    const userAnswer = testState.answers[index];
+                    correct = userAnswer === q.correct;
+                    
+                    const options = document.querySelectorAll(`#question-${index} .test-option`);
+                    options.forEach((opt, i) => {
+                        opt.classList.add('disabled');
+                        if (i === q.correct) {
+                            opt.classList.add('correct');
+                        } else if (i === userAnswer && !correct) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+                    
+                    feedback.className = `feedback show ${correct ? 'correct' : 'incorrect'}`;
+                    feedback.innerHTML = correct ? `✅ Correct ! ${q.explanation}` : `❌ Incorrect. ${q.explanation}`;
+                    
+                } else if (q.type === 'fill-in') {
+                    const userAnswer = document.getElementById(`answer-${index}`).value.trim().toLowerCase();
+                    correct = userAnswer === q.answer.toLowerCase() || q.alternatives.some(alt => userAnswer === alt.toLowerCase());
+                    
+                    feedback.className = `feedback show ${correct ? 'correct' : 'incorrect'}`;
+                    feedback.innerHTML = correct ? 
+                        `✅ Correct ! La réponse est bien "${q.answer}"` :
+                        `❌ Incorrect. La réponse attendue est "${q.answer}"`;
+                    
+                } else if (q.type === 'matching') {
+                    const matchedAll = testState.matchingState[index] && 
+                                      testState.matchingState[index].matched.length === q.pairs.length;
+                    correct = matchedAll;
+                    
+                    feedback.className = `feedback show ${correct ? 'correct' : 'incorrect'}`;
+                    feedback.innerHTML = correct ? 
+                        '✅ Toutes les associations sont correctes !' :
+                        '❌ Certaines associations sont incorrectes ou manquantes.';
+                }
+                
+                if (correct) score++;
+            });
+            
+            // Show results
+            const percentage = Math.round((score / total) * 100);
+            let message = '';
+            if (percentage >= 90) message = '🏆 Excellent ! Vous maîtrisez parfaitement le sujet !';
+            else if (percentage >= 75) message = '🎉 Très bien ! Bonne compréhension globale.';
+            else if (percentage >= 60) message = '👍 Bien ! Continuez à réviser.';
+            else message = '📚 Continuez vos efforts. Revoyez les notions importantes.';
+            
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-top: 30px; text-align: center;">
+                    <h2 style="color: #667eea; margin-bottom: 20px;">Résultats du test</h2>
+                    <div style="font-size: 3em; font-weight: bold; color: #667eea; margin: 20px 0;">
+                        ${percentage}%
+                    </div>
+                    <p style="font-size: 1.2em; color: #333; margin: 20px 0;">${message}</p>
+                    <p style="color: #666;">Score : ${score} / ${total} questions correctes</p>
+                    <button class="btn btn-primary" onclick="renderTest()" style="margin-top: 20px;">🔄 Recommencer le test</button>
+                </div>
+            `;
+            
+            document.getElementById('submitBtn').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize
+        loadState();
+    </script>
+</body>
+</html>

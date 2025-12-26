@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD Sémiologie-Pathologie : Oncologie & Membre Inférieur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            background: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        /* FLASHCARDS MODE */
+        .flashcard-controls {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            background: #f0f0f0;
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .save-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        }
+
+        .save-btn.export {
+            background: #2196F3;
+        }
+
+        .save-btn.import {
+            background: #FF9800;
+        }
+
+        .save-btn.reset {
+            background: #f44336;
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            min-height: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            border-radius: 20px;
+        }
+
+        .flashcard-back {
+            transform: rotateY(180deg);
+            background: #f8f9fa;
+        }
+
+        .flashcard-category {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .flashcard-question {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-answer {
+            font-size: 1.2em;
+            text-align: center;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .flashcard-answer ul {
+            text-align: left;
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .flashcard-answer li {
+            margin-bottom: 10px;
+        }
+
+        .evaluation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .eval-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .eval-btn.acquired {
+            background: #4CAF50;
+        }
+
+        .eval-btn.review {
+            background: #FF9800;
+        }
+
+        .eval-btn.not-acquired {
+            background: #f44336;
+        }
+
+        .eval-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* TEST MODE */
+        .test-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .question-block {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .question-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option input[type="checkbox"],
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #4CAF50;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #f44336;
+        }
+
+        .fill-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .fill-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .matching-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .matching-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+
+        .matching-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+            border-left: 4px solid #2196F3;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .explanation strong {
+            color: #1976D2;
+        }
+
+        .test-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .test-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .test-btn.submit {
+            background: #4CAF50;
+        }
+
+        .test-btn.retry {
+            background: #2196F3;
+        }
+
+        .test-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .results {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 30px auto;
+            color: white;
+        }
+
+        .score-value {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .score-message {
+            font-size: 1.3em;
+            margin: 20px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .flashcard {
+                padding: 30px 20px;
+                min-height: 350px;
+            }
+
+            .flashcard-question {
+                font-size: 1.2em;
+            }
+
+            .evaluation-buttons {
+                flex-direction: column;
+            }
+
+            .eval-btn {
+                width: 100%;
+            }
+
+            .matching-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .test-actions {
+                flex-direction: column;
+            }
+
+            .test-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 TD Sémiologie-Pathologie</h1>
+            <p>Oncologie & Pathologies du Membre Inférieur - UE 2.5 S1</p>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="switchMode('flashcards')">📚 Mode Flashcards</button>
+            <button class="mode-btn" onclick="switchMode('test')">📝 Mode Test</button>
+        </div>
+
+        <!-- MODE FLASHCARDS -->
+        <div id="flashcards-mode" class="mode-content active">
+            <div class="flashcard-controls">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="total-cards">0</h3>
+                        <p>Total</p>
+                    </div>
+                    <div class="stat-card" style="background: #4CAF50;">
+                        <h3 id="acquired-cards">0</h3>
+                        <p>Acquises</p>
+                    </div>
+                    <div class="stat-card" style="background: #FF9800;">
+                        <h3 id="review-cards">0</h3>
+                        <p>À revoir</p>
+                    </div>
+                    <div class="stat-card" style="background: #f44336;">
+                        <h3 id="not-acquired-cards">0</h3>
+                        <p>Non acquises</p>
+                    </div>
+                    <div class="stat-card" style="background: #2196F3;">
+                        <h3 id="new-cards">0</h3>
+                        <p>Nouvelles</p>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill">0%</div>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterCards('all')">Toutes les cartes</button>
+                    <button class="filter-btn" onclick="filterCards('new')">Nouvelles</button>
+                    <button class="filter-btn" onclick="filterCards('review')">À réviser</button>
+                    <button class="filter-btn" onclick="filterCards('acquired')">Acquises</button>
+                </div>
+
+                <div class="save-buttons">
+                    <button class="save-btn" onclick="saveProgress()">💾 Sauvegarder</button>
+                    <button class="save-btn export" onclick="exportProgress()">📤 Exporter</button>
+                    <button class="save-btn import" onclick="document.getElementById('import-file').click()">📥 Importer</button>
+                    <button class="save-btn reset" onclick="resetProgress()">🔄 Réinitialiser</button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importProgress(event)">
+                </div>
+            </div>
+
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div class="flashcard-face">
+                        <div class="flashcard-category" id="card-category"></div>
+                        <div class="flashcard-question" id="card-question"></div>
+                        <p style="color: #999; font-style: italic; margin-top: 20px;">Cliquez pour révéler la réponse</p>
+                    </div>
+                    <div class="flashcard-face flashcard-back">
+                        <div class="flashcard-category" id="card-category-back"></div>
+                        <div class="flashcard-answer" id="card-answer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="evaluation-buttons">
+                <button class="eval-btn acquired" onclick="evaluateCard('acquired')">✅ Acquis</button>
+                <button class="eval-btn review" onclick="evaluateCard('review')">⚠️ À revoir</button>
+                <button class="eval-btn not-acquired" onclick="evaluateCard('not-acquired')">❌ Non acquis</button>
+            </div>
+        </div>
+
+        <!-- MODE TEST -->
+        <div id="test-mode" class="mode-content">
+            <div class="test-container" id="test-questions"></div>
+            <div class="test-actions">
+                <button class="test-btn submit" onclick="submitTest()">✅ Soumettre le test</button>
+                <button class="test-btn retry hidden" id="retry-btn" onclick="retryTest()">🔄 Recommencer</button>
+            </div>
+            <div class="results" id="results">
+                <h2>Résultats du test</h2>
+                <div class="score-circle">
+                    <div class="score-value" id="score-value">0%</div>
+                    <div class="score-label">Score</div>
+                </div>
+                <div class="score-message" id="score-message"></div>
+                <p id="score-details"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DONNÉES DES FLASHCARDS
+        const flashcardsData = [
+            {
+                category: "Tumeurs osseuses",
+                question: "Quelles sont les caractéristiques des tumeurs bénignes ?",
+                answer: "• Non cancéreuses<br>• Incapables de se disséminer dans le reste de l'organisme<br>• Ne mettent pas en jeu le pronostic vital<br>• Généralement peu ou lentement évolutives"
+            },
+            {
+                category: "Tumeurs osseuses",
+                question: "Citez 5 exemples de tumeurs bénignes",
+                answer: "1. Ostéochondrome ou exostose<br>2. Enchondrome<br>3. Chondroblastome bénin<br>4. Ostéome ostéoïde<br>5. Tumeurs à cellules géantes"
+            },
+            {
+                category: "Tumeurs osseuses",
+                question: "Quelles sont les caractéristiques des tumeurs malignes ?",
+                answer: "• Cancéreuses<br>• Dissémination dans le reste de l'organisme<br>• Pronostic vital engagé<br>• Évolution rapide"
+            },
+            {
+                category: "Tumeurs osseuses",
+                question: "Citez 5 exemples de tumeurs malignes",
+                answer: "1. Ostéosarcome<br>2. Chondrosarcome<br>3. Sarcome d'Ewing<br>4. Lymphome osseux primitif<br>5. Plasmocytome solitaire"
+            },
+            {
+                category: "Tumeurs osseuses",
+                question: "Qu'est-ce qu'une tumeur osseuse primitive ?",
+                answer: "C'est une tumeur issue de l'os elle-même"
+            },
+            {
+                category: "Tumeurs osseuses",
+                question: "Qu'est-ce qu'une tumeur osseuse secondaire ?",
+                answer: "C'est une délocalisation de la tumeur primitive au niveau osseux (cancers ostéophiles : poumon, prostate, rein, sein, thyroïde)"
+            },
+            {
+                category: "Métastases osseuses",
+                question: "Définissez les métastases osseuses",
+                answer: "Ce sont des localisations osseuses d'une tumeur maligne primitive avec reproduction fidèle des caractéristiques anatomopathologiques de la tumeur initiale"
+            },
+            {
+                category: "Métastases osseuses",
+                question: "Quelles sont les 5 localisations les plus fréquentes des métastases osseuses ?",
+                answer: "1. Rachis<br>2. Bassin<br>3. Crâne<br>4. Côtes<br>5. Extrémités proximales des humérus et des fémurs (localisations distales plus rares)"
+            },
+            {
+                category: "Métastases osseuses",
+                question: "Décrivez les lésions ostéolytiques",
+                answer: "Géodes ou larges plages d'ostéolyse détruisant la corticale, sans condensation périphérique"
+            },
+            {
+                category: "Métastases osseuses",
+                question: "Décrivez les lésions ostéocondensantes",
+                answer: "Opacités arrondies ou ovalaires en tâches de bougie"
+            },
+            {
+                category: "Myélome",
+                question: "Définissez le myélome",
+                answer: "• Hémopathie maligne<br>• Prolifération plasmocytaire intramédullaire<br>• Sécrétion d'une immunoglobuline monoclonale<br>• Manifestations osseuses au premier plan"
+            },
+            {
+                category: "Fractures de la hanche",
+                question: "Quels sont les 2 types de fractures de la hanche ?",
+                answer: "1. Fracture cervicale vraie (col du fémur)<br>2. Fracture trochantérienne et sous-trochantérienne"
+            },
+            {
+                category: "Fractures du genou",
+                question: "Citez les 3 types de fractures du genou",
+                answer: "1. Fractures supracondyliennes<br>2. Fractures unicondyliennes<br>3. Fractures supra intercondyliennes"
+            },
+            {
+                category: "Entorse de cheville",
+                question: "Quels sont les signes cliniques d'une entorse de cheville ?",
+                answer: "• Douleur post-traumatique<br>• Œdème péri-malléolaire antéro-latéral<br>• Douleur à la palpation<br>• Possible craquement entendu"
+            },
+            {
+                category: "Entorse de cheville",
+                question: "Quel bilan radiologique pour une entorse de cheville ?",
+                answer: "Radiographies face et profil de la cheville pour rechercher une fracture ou un arrachement associés"
+            },
+            {
+                category: "Entorse de cheville",
+                question: "Quel est le traitement d'une entorse de cheville ?",
+                answer: "• Antalgiques<br>• Contention (4-6 semaines)<br>• Protocole RICE (Repos, Ice/glace, Compression, Élévation)<br>• Appui dès cessation de la douleur<br>• Kinésithérapie à distance"
+            },
+            {
+                category: "Fracture du col du fémur",
+                question: "Quels sont les signes cliniques d'une fracture du col du fémur ?",
+                answer: "• Forte douleur au niveau du bassin<br>• Impotence fonctionnelle<br>• Déformation (rotation externe et raccourcissement du membre)<br>• Contexte : souvent chute chez personne âgée"
+            },
+            {
+                category: "Fracture du col du fémur",
+                question: "Quel bilan radiologique pour une fracture du col du fémur ?",
+                answer: "Bassin de face + Hanche face et profil du côté atteint"
+            },
+            {
+                category: "Fracture du col du fémur",
+                question: "Quel traitement chirurgical pour une fracture trochantérienne ?",
+                answer: "Ostéosynthèse : vissage ou plaque et lame / plaque ou vis / plaque"
+            },
+            {
+                category: "Fracture du col du fémur",
+                question: "Quels sont les objectifs thérapeutiques chez la personne âgée avec fracture de hanche ?",
+                answer: "• Levée précoce<br>• Redonner son autonomie au patient<br>• Éviter les complications du décubitus"
+            },
+            {
+                category: "Entorse du genou",
+                question: "Quels sont les signes cliniques d'une entorse du genou ?",
+                answer: "• Douleur vive<br>• Craquement entendu<br>• Gonflement du genou<br>• Sensation d'instabilité<br>• Épanchement intra-articulaire<br>• Points douloureux sur l'interligne<br>• Présence de laxités"
+            },
+            {
+                category: "Entorse du genou",
+                question: "Quel bilan pour une entorse du genou ?",
+                answer: "• Radiographies face + profil du genou (recherche fracture/arrachement)<br>• IRM du genou en complément"
+            },
+            {
+                category: "Métastases osseuses - Diagnostic",
+                question: "Quels sont les signes cliniques évocateurs de métastases osseuses ?",
+                answer: "• AEG (Amaigrissement, asthénie)<br>• Douleurs osseuses d'allure inflammatoire<br>• ATCD de cancer (sein, poumon, prostate, rein, thyroïde)<br>• Syndrome inflammatoire et hypercalcémie au bilan biologique"
+            },
+            {
+                category: "Métastases osseuses - Diagnostic",
+                question: "Quel bilan radiologique en 1ère intention pour métastases osseuses ?",
+                answer: "Radiographies du rachis face + profil"
+            },
+            {
+                category: "Métastases osseuses - Diagnostic",
+                question: "Que recherche-t-on sur les radios en cas de suspicion de métastases ?",
+                answer: "• Lésions ostéolytiques : géodes<br>• Lésions ostéocondensantes : vertèbre borgne, vertèbre ivoire"
+            },
+            {
+                category: "Métastases osseuses - Diagnostic",
+                question: "Citez 3 examens d'imagerie complémentaires pour métastases osseuses",
+                answer: "1. Scintigraphie osseuse ou TEP scan<br>2. Scanner<br>3. IRM"
+            },
+            {
+                category: "Traumatologie membre supérieur",
+                question: "Quels sont les 2 os de l'avant-bras ?",
+                answer: "Radius et ulna (cubitus)"
+            },
+            {
+                category: "Traumatologie membre supérieur",
+                question: "Quelles radiographies réaliser pour un traumatisme de l'avant-bras ?",
+                answer: "Radiographie de face et de profil de l'avant-bras, comprenant les 2 articulations (coude et poignet) + clichés comparatifs si doute"
+            },
+            {
+                category: "Traumatologie membre supérieur",
+                question: "Qu'est-ce qu'une fracture de Monteggia ?",
+                answer: "Fracture de l'ulna (± radius) avec luxation de la tête radiale"
+            },
+            {
+                category: "Traumatologie du rachis",
+                question: "Quels sont les 4 points à évaluer lors d'un examen neurologique après traumatisme rachidien ?",
+                answer: "1. Douleur<br>2. Déficits sensitifs<br>3. Déficits moteurs<br>4. Déficits vésico-sphinctériens"
+            },
+            {
+                category: "Traumatologie du rachis",
+                question: "Quel document résume la prise en charge neurologique d'un traumatisme rachidien ?",
+                answer: "Fiche ASIA (échelle de déficience)"
+            },
+            {
+                category: "Traumatologie du rachis",
+                question: "Quels examens radiologiques pour un traumatisme rachidien ?",
+                answer: "• Radiologie standard : face/profil de la zone concernée<br>• Scanner : déterminer stabilité, acquisitions axiales avec reconstructions<br>• IRM : séquence STIR pour lésions ligamentaires et datation (hypersignal)"
+            },
+            {
+                category: "Traumatologie du rachis",
+                question: "Quel traitement pour une fracture vertébrale instable ?",
+                answer: "Chirurgie avec vis, tiges, cages, greffes, ciment"
+            },
+            {
+                category: "Traumatologie du rachis",
+                question: "Quels sont les 3 objectifs du traitement chirurgical d'une fracture vertébrale ?",
+                answer: "1. Réduire<br>2. Décomprimer<br>3. Stabiliser"
+            }
+        ];
+
+        // DONNÉES DES QUESTIONS DE TEST
+        const testQuestions = [
+            {
+                type: "qcm",
+                question: "Quelles sont les caractéristiques des tumeurs bénignes ? (plusieurs réponses possibles)",
+                options: [
+                    "Non cancéreuses",
+                    "Évolution rapide",
+                    "Ne mettent pas en jeu le pronostic vital",
+                    "Dissémination dans l'organisme",
+                    "Généralement peu ou lentement évolutives"
+                ],
+                correct: [0, 2, 4],
+                explanation: "Les tumeurs bénignes sont non cancéreuses, ne mettent pas en jeu le pronostic vital, et sont généralement peu ou lentement évolutives. Elles ne se disséminent pas."
+            },
+            {
+                type: "qcm",
+                question: "Parmi ces tumeurs, lesquelles sont malignes ?",
+                options: [
+                    "Ostéochondrome",
+                    "Ostéosarcome",
+                    "Enchondrome",
+                    "Sarcome d'Ewing",
+                    "Ostéome ostéoïde"
+                ],
+                correct: [1, 3],
+                explanation: "L'ostéosarcome et le sarcome d'Ewing sont des tumeurs malignes. Les autres sont bénignes."
+            },
+            {
+                type: "fill",
+                question: "Une tumeur osseuse __________ est une tumeur issue de l'os lui-même, tandis qu'une tumeur osseuse __________ est une délocalisation d'une tumeur primitive.",
+                correct: ["primitive", "secondaire"],
+                explanation: "Les tumeurs primitives naissent dans l'os, les secondaires (métastases) viennent d'ailleurs."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque localisation avec sa fréquence de métastases osseuses (1=plus fréquent, 5=moins fréquent parmi ces sites)",
+                pairs: [
+                    { term: "Rachis", match: "1 - Le plus fréquent" },
+                    { term: "Bassin", match: "2" },
+                    { term: "Crâne", match: "3" },
+                    { term: "Côtes", match: "4" },
+                    { term: "Extrémités proximales humérus/fémur", match: "5" }
+                ],
+                explanation: "L'ordre de fréquence des métastases osseuses : Rachis > Bassin > Crâne > Côtes > Extrémités proximales."
+            },
+            {
+                type: "qcm",
+                question: "Quels sont les cancers ostéophiles (qui métastasent fréquemment vers l'os) ? (plusieurs réponses)",
+                options: [
+                    "Poumon",
+                    "Estomac",
+                    "Sein",
+                    "Prostate",
+                    "Rein"
+                ],
+                correct: [0, 2, 3, 4],
+                explanation: "Les cancers ostéophiles principaux sont : Poumon, Prostate, Rein, Sein, Thyroïde."
+            },
+            {
+                type: "qcm",
+                question: "Les lésions ostéolytiques se caractérisent par :",
+                options: [
+                    "Des opacités arrondies en tâches de bougie",
+                    "Des géodes ou larges plages d'ostéolyse",
+                    "Une destruction de la corticale",
+                    "Une condensation périphérique",
+                    "Absence de condensation périphérique"
+                ],
+                correct: [1, 2, 4],
+                explanation: "Les lésions ostéolytiques sont des géodes/plages d'ostéolyse détruisant la corticale, SANS condensation périphérique."
+            },
+            {
+                type: "fill",
+                question: "Le protocole RICE pour les entorses signifie : R_____, I_____ (glace), C_____ (contention), E_____",
+                correct: ["repos", "ice", "compression", "élévation"],
+                explanation: "RICE = Repos, Ice (glace), Compression (contention), Élévation"
+            },
+            {
+                type: "qcm",
+                question: "Pour une entorse de cheville, quel bilan radiologique initial ?",
+                options: [
+                    "Radiographie face seulement",
+                    "Radiographie face et profil de la cheville",
+                    "IRM systématique",
+                    "Scanner",
+                    "Échographie"
+                ],
+                correct: [1],
+                explanation: "On réalise des radiographies face et profil pour rechercher une fracture ou un arrachement associés."
+            },
+            {
+                type: "qcm",
+                question: "Quels sont les signes cliniques d'une fracture du col du fémur ?",
+                options: [
+                    "Forte douleur au bassin",
+                    "Rotation interne du membre",
+                    "Impotence fonctionnelle",
+                    "Déformation avec rotation externe",
+                    "Allongement du membre"
+                ],
+                correct: [0, 2, 3],
+                explanation: "Fracture du col du fémur : douleur au bassin, impotence fonctionnelle, déformation avec rotation EXTERNE et raccourcissement."
+            },
+            {
+                type: "qcm",
+                question: "Pour une fracture du col du fémur chez une personne âgée, quels sont les objectifs thérapeutiques ?",
+                options: [
+                    "Immobilisation prolongée au lit",
+                    "Levée précoce",
+                    "Redonner son autonomie",
+                    "Éviter les complications du décubitus",
+                    "Attendre la consolidation spontanée"
+                ],
+                correct: [1, 2, 3],
+                explanation: "Les objectifs sont : levée précoce, redonner l'autonomie, éviter les complications du décubitus (escarres, infections, phlébites...)."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque type de lésion avec sa description radiologique",
+                pairs: [
+                    { term: "Lésions ostéolytiques", match: "Géodes détruisant la corticale" },
+                    { term: "Lésions ostéocondensantes", match: "Opacités en tâches de bougie" },
+                    { term: "Vertèbre ivoire", match: "Condensation importante de la vertèbre" }
+                ],
+                explanation: "Les lésions ostéolytiques créent des géodes, les ostéocondensantes des tâches blanches, et la vertèbre ivoire est très dense."
+            },
+            {
+                type: "fill",
+                question: "Les 2 os de l'avant-bras sont le __________ et l'__________",
+                correct: ["radius", "ulna"],
+                explanation: "L'avant-bras est composé du radius (externe) et de l'ulna ou cubitus (interne)."
+            },
+            {
+                type: "qcm",
+                question: "Qu'est-ce qu'une fracture de Monteggia ?",
+                options: [
+                    "Fracture du radius seul",
+                    "Fracture de l'ulna avec luxation de la tête radiale",
+                    "Fracture des deux os de l'avant-bras",
+                    "Luxation isolée du coude",
+                    "Fracture du poignet"
+                ],
+                correct: [1],
+                explanation: "La fracture de Monteggia associe une fracture de l'ulna (± radius) avec une luxation de la tête radiale."
+            },
+            {
+                type: "qcm",
+                question: "Lors d'un examen neurologique après traumatisme rachidien, on évalue : (plusieurs réponses)",
+                options: [
+                    "La douleur",
+                    "La glycémie",
+                    "Les déficits sensitifs",
+                    "Les déficits moteurs",
+                    "Les déficits vésico-sphinctériens"
+                ],
+                correct: [0, 2, 3, 4],
+                explanation: "Les 4 points à évaluer : Douleur, Déficits sensitifs, Déficits moteurs, Déficits vésico-sphinctériens (fiche ASIA)."
+            },
+            {
+                type: "qcm",
+                question: "Quels examens d'imagerie pour métastases osseuses ? (plusieurs réponses)",
+                options: [
+                    "Radiographies standard",
+                    "Échographie",
+                    "Scintigraphie osseuse",
+                    "IRM",
+                    "Scanner"
+                ],
+                correct: [0, 2, 3, 4],
+                explanation: "Pour les métastases osseuses : Radios standard en 1ère intention, puis scintigraphie/TEP scan, scanner, et IRM."
+            }
+        ];
+
+        // GESTION DES FLASHCARDS
+        let currentCardIndex = 0;
+        let currentFilter = 'all';
+        let cardProgress = {};
+
+        // Initialiser les progrès des cartes
+        function initializeProgress() {
+            flashcardsData.forEach((_, index) => {
+                if (!cardProgress[index]) {
+                    cardProgress[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                }
+            });
+            loadProgress();
+        }
+
+        // Charger les progrès depuis localStorage
+        function loadProgress() {
+            const saved = localStorage.getItem('td-oncologie-progress');
+            if (saved) {
+                cardProgress = JSON.parse(saved);
+            }
+        }
+
+        // Sauvegarder les progrès
+        function saveProgress() {
+            localStorage.setItem('td-oncologie-progress', JSON.stringify(cardProgress));
+            alert('✅ Progression sauvegardée !');
+            updateStats();
+        }
+
+        // Exporter les progrès
+        function exportProgress() {
+            const dataStr = JSON.stringify(cardProgress, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'td-oncologie-progress.json';
+            link.click();
+            alert('📤 Progression exportée !');
+        }
+
+        // Importer les progrès
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        cardProgress = JSON.parse(e.target.result);
+                        saveProgress();
+                        updateStats();
+                        loadCard();
+                        alert('📥 Progression importée avec succès !');
+                    } catch (error) {
+                        alert('❌ Erreur lors de l\'importation du fichier');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Réinitialiser les progrès
+        function resetProgress() {
+            if (confirm('⚠️ Êtes-vous sûr de vouloir réinitialiser toute votre progression ?')) {
+                cardProgress = {};
+                initializeProgress();
+                saveProgress();
+                currentCardIndex = 0;
+                loadCard();
+                alert('🔄 Progression réinitialisée !');
+            }
+        }
+
+        // Obtenir les cartes filtrées
+        function getFilteredCards() {
+            return flashcardsData.map((card, index) => ({ card, index }))
+                .filter(({ index }) => {
+                    const status = cardProgress[index]?.status || 'new';
+                    if (currentFilter === 'all') return true;
+                    if (currentFilter === 'new') return status === 'new';
+                    if (currentFilter === 'review') return status === 'review' || status === 'not-acquired';
+                    if (currentFilter === 'acquired') return status === 'acquired';
+                    return true;
+                });
+        }
+
+        // Filtrer les cartes
+        function filterCards(filter) {
+            currentFilter = filter;
+            currentCardIndex = 0;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            loadCard();
+            updateStats();
+        }
+
+        // Charger une carte
+        function loadCard() {
+            const filtered = getFilteredCards();
+            
+            if (filtered.length === 0) {
+                document.getElementById('card-question').innerHTML = "🎉 Aucune carte à réviser !";
+                document.getElementById('card-answer').innerHTML = "Changez de filtre ou félicitations !";
+                document.getElementById('card-category').textContent = "";
+                document.getElementById('card-category-back').textContent = "";
+                return;
+            }
+            
+            if (currentCardIndex >= filtered.length) {
+                currentCardIndex = 0;
+            }
+            
+            const { card, index } = filtered[currentCardIndex];
+            const flashcard = document.getElementById('flashcard');
+            
+            // Retirer la classe flipped si présente
+            flashcard.classList.remove('flipped');
+            
+            document.getElementById('card-category').textContent = card.category;
+            document.getElementById('card-category-back').textContent = card.category;
+            document.getElementById('card-question').innerHTML = card.question;
+            document.getElementById('card-answer').innerHTML = card.answer;
+            
+            updateStats();
+        }
+
+        // Retourner la carte
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        // Évaluer une carte
+        function evaluateCard(evaluation) {
+            const filtered = getFilteredCards();
+            if (filtered.length === 0) return;
+            
+            const { index } = filtered[currentCardIndex];
+            
+            if (evaluation === 'acquired') {
+                cardProgress[index] = { status: 'acquired', reviewCount: 0 };
+            } else if (evaluation === 'review') {
+                cardProgress[index] = { status: 'review', reviewCount: 1 };
+            } else if (evaluation === 'not-acquired') {
+                cardProgress[index] = { status: 'not-acquired', reviewCount: 3 };
+            }
+            
+            saveProgress();
+            
+            // Passer à la carte suivante
+            currentCardIndex++;
+            loadCard();
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            const total = flashcardsData.length;
+            let acquired = 0, review = 0, notAcquired = 0, newCards = 0;
+            
+            flashcardsData.forEach((_, index) => {
+                const status = cardProgress[index]?.status || 'new';
+                if (status === 'acquired') acquired++;
+                else if (status === 'review') review++;
+                else if (status === 'not-acquired') notAcquired++;
+                else if (status === 'new') newCards++;
+            });
+            
+            document.getElementById('total-cards').textContent = total;
+            document.getElementById('acquired-cards').textContent = acquired;
+            document.getElementById('review-cards').textContent = review;
+            document.getElementById('not-acquired-cards').textContent = notAcquired;
+            document.getElementById('new-cards').textContent = newCards;
+            
+            const progress = total > 0 ? Math.round((acquired / total) * 100) : 0;
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = progress + '%';
+            progressFill.textContent = progress + '%';
+        }
+
+        // Changer de mode
+        function switchMode(mode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            if (mode === 'flashcards') {
+                document.getElementById('flashcards-mode').classList.add('active');
+            } else {
+                document.getElementById('test-mode').classList.add('active');
+                loadTest();
+            }
+        }
+
+        // GESTION DU TEST
+        function loadTest() {
+            const container = document.getElementById('test-questions');
+            container.innerHTML = '';
+            
+            testQuestions.forEach((q, index) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question-block';
+                qDiv.dataset.index = index;
+                
+                let optionsHTML = '';
+                
+                if (q.type === 'qcm') {
+                    optionsHTML = `<div class="question-type">QCM</div>
+                        <div class="options">
+                            ${q.options.map((opt, i) => `
+                                <label class="option">
+                                    <input type="${q.correct.length > 1 ? 'checkbox' : 'radio'}" 
+                                           name="q${index}" 
+                                           value="${i}"
+                                           data-question="${index}">
+                                    <span>${opt}</span>
+                                </label>
+                            `).join('')}
+                        </div>`;
+                } else if (q.type === 'fill') {
+                    const blanks = q.correct.length;
+                    optionsHTML = `<div class="question-type">Question à trous</div>
+                        <div class="options">
+                            ${Array(blanks).fill(0).map((_, i) => `
+                                <input type="text" 
+                                       class="fill-input" 
+                                       placeholder="Réponse ${i + 1}"
+                                       data-question="${index}"
+                                       data-blank="${i}">
+                            `).join('')}
+                        </div>`;
+                } else if (q.type === 'matching') {
+                    optionsHTML = `<div class="question-type">Appariement</div>
+                        <div class="matching-grid">
+                            ${q.pairs.map((pair, i) => `
+                                <div class="matching-item">
+                                    <strong>${pair.term}</strong>
+                                    <select class="matching-select" data-question="${index}" data-pair="${i}">
+                                        <option value="">-- Choisir --</option>
+                                        ${q.pairs.map((p, j) => `
+                                            <option value="${j}">${p.match}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                            `).join('')}
+                        </div>`;
+                }
+                
+                qDiv.innerHTML = `
+                    <div class="question-title">Question ${index + 1} : ${q.question}</div>
+                    ${optionsHTML}
+                    <div class="explanation" id="explanation-${index}">
+                        <strong>💡 Explication :</strong> ${q.explanation}
+                    </div>
+                `;
+                
+                container.appendChild(qDiv);
+            });
+            
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('retry-btn').classList.add('hidden');
+            document.querySelector('.test-btn.submit').classList.remove('hidden');
+        }
+
+        function submitTest() {
+            let score = 0;
+            let total = testQuestions.length;
+            
+            testQuestions.forEach((q, index) => {
+                const qDiv = document.querySelector(`[data-index="${index}"]`);
+                let correct = false;
+                
+                if (q.type === 'qcm') {
+                    const selected = Array.from(qDiv.querySelectorAll('input:checked')).map(inp => parseInt(inp.value));
+                    correct = selected.length === q.correct.length && 
+                             selected.every(s => q.correct.includes(s));
+                    
+                    // Colorer les options
+                    qDiv.querySelectorAll('.option').forEach((opt, i) => {
+                        if (q.correct.includes(i)) {
+                            opt.classList.add('correct');
+                        } else if (selected.includes(i)) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+                } else if (q.type === 'fill') {
+                    const answers = Array.from(qDiv.querySelectorAll('.fill-input')).map(inp => inp.value.toLowerCase().trim());
+                    correct = answers.every((ans, i) => ans === q.correct[i].toLowerCase());
+                    
+                    qDiv.querySelectorAll('.fill-input').forEach((inp, i) => {
+                        if (inp.value.toLowerCase().trim() === q.correct[i].toLowerCase()) {
+                            inp.style.borderColor = '#4CAF50';
+                            inp.style.background = '#d4edda';
+                        } else {
+                            inp.style.borderColor = '#f44336';
+                            inp.style.background = '#f8d7da';
+                            inp.value = `❌ ${inp.value} → ✅ ${q.correct[i]}`;
+                        }
+                    });
+                } else if (q.type === 'matching') {
+                    const matches = Array.from(qDiv.querySelectorAll('.matching-select')).map(sel => parseInt(sel.value));
+                    correct = matches.every((m, i) => m === i);
+                    
+                    qDiv.querySelectorAll('.matching-select').forEach((sel, i) => {
+                        if (parseInt(sel.value) === i) {
+                            sel.style.borderColor = '#4CAF50';
+                            sel.style.background = '#d4edda';
+                        } else {
+                            sel.style.borderColor = '#f44336';
+                            sel.style.background = '#f8d7da';
+                        }
+                    });
+                }
+                
+                if (correct) score++;
+                
+                // Afficher l'explication
+                document.getElementById(`explanation-${index}`).classList.add('show');
+            });
+            
+            // Afficher les résultats
+            const percentage = Math.round((score / total) * 100);
+            document.getElementById('score-value').textContent = percentage + '%';
+            document.getElementById('score-details').textContent = `${score} / ${total} questions correctes`;
+            
+            let message = '';
+            if (percentage >= 90) {
+                message = '🎉 Excellent ! Vous maîtrisez parfaitement le sujet !';
+            } else if (percentage >= 75) {
+                message = '👏 Très bien ! Continuez ainsi !';
+            } else if (percentage >= 60) {
+                message = '👍 Bien ! Encore quelques points à revoir.';
+            } else if (percentage >= 50) {
+                message = '💪 Pas mal, mais il faut encore travailler.';
+            } else {
+                message = '📚 Continuez à réviser, vous allez y arriver !';
+            }
+            
+            document.getElementById('score-message').textContent = message;
+            document.getElementById('results').classList.add('show');
+            
+            document.querySelector('.test-btn.submit').classList.add('hidden');
+            document.getElementById('retry-btn').classList.remove('hidden');
+            
+            // Scroller vers les résultats
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function retryTest() {
+            loadTest();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialisation
+        window.onload = function() {
+            initializeProgress();
+            loadCard();
+            loadTest();
+        };
+    </script>
+</body>
+</html>

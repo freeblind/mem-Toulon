@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Interactif - Pathologies Ostéoarticulaires UE 2.5 S1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .question-section {
+            display: none;
+        }
+
+        .question-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .case-presentation {
+            background: #f0f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #0284c7;
+        }
+
+        .case-presentation h3 {
+            color: #0284c7;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            margin: 25px 0;
+        }
+
+        .option {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            margin: 12px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .option.incorrect {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .option-letter {
+            width: 35px;
+            height: 35px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            color: #667eea;
+        }
+
+        .option.selected .option-letter,
+        .option.correct .option-letter,
+        .option.incorrect .option-letter {
+            color: inherit;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .matching-left, .matching-right {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+
+        .matching-left:hover, .matching-right:hover {
+            background: #e9ecef;
+        }
+
+        .matching-left.selected, .matching-right.selected {
+            border-color: #667eea;
+            background: #e0e7ff;
+        }
+
+        .matching-left.matched, .matching-right.matched {
+            background: #d1fae5;
+            border-color: #10b981;
+            cursor: not-allowed;
+        }
+
+        .matching-left.error, .matching-right.error {
+            background: #fee2e2;
+            border-color: #ef4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            background: #667eea;
+            width: 30px;
+            border-radius: 6px;
+        }
+
+        .step-dot.completed {
+            background: #10b981;
+        }
+
+        .feedback {
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 5px solid #10b981;
+        }
+
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 5px solid #ef4444;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .score-text {
+            color: white;
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .score-message {
+            font-size: 1.5em;
+            color: #333;
+            margin: 20px 0;
+        }
+
+        .input-answer {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            margin: 10px 0;
+            transition: border-color 0.3s;
+        }
+
+        .input-answer:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .drag-drop-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .drag-zone {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 200px;
+        }
+
+        .drag-zone h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .draggable-item {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: move;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .draggable-item:hover {
+            border-color: #667eea;
+            transform: scale(1.02);
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+        }
+
+        .drop-zone {
+            background: #e0e7ff;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            min-height: 50px;
+            transition: all 0.3s;
+        }
+
+        .drop-zone.drag-over {
+            background: #c7d2fe;
+            border-color: #4f46e5;
+        }
+
+        .drop-zone.filled {
+            background: white;
+            border-style: solid;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+
+            .matching-container,
+            .drag-drop-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Quiz Interactif - Pathologies Ostéoarticulaires</h1>
+            <p>UE 2.5 S1 - IFPVPS</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <div class="content" id="quizContent">
+            <!-- Les questions seront injectées ici par JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                type: 'multiple-choice',
+                question: "L'homéostasie correspond à :",
+                options: [
+                    "La production d'énergie par les cellules",
+                    "L'élimination des déchets par les reins",
+                    "La circulation du sang dans les vaisseaux",
+                    "Le maintien de la stabilité du milieu intérieur"
+                ],
+                correct: 3,
+                explanation: "L'homéostasie est le maintien de la stabilité du milieu intérieur, permettant aux cellules de fonctionner de manière optimale."
+            },
+            {
+                id: 2,
+                type: 'multiple-choice',
+                question: "Lors d'une augmentation de la température corporelle, l'organisme réagit par :",
+                options: [
+                    "Vasoconstriction cutanée",
+                    "Frissons",
+                    "Sudation et vasodilatation",
+                    "Augmentation de la thermogenèse"
+                ],
+                correct: 2,
+                explanation: "Pour diminuer la température corporelle, l'organisme déclenche la sudation (évaporation) et la vasodilatation cutanée (augmentation de la perte de chaleur)."
+            },
+            {
+                id: 3,
+                type: 'multiple-choice',
+                question: "Quelle est la première barrière de défense de l'organisme ?",
+                options: [
+                    "Les anticorps",
+                    "La peau et les muqueuses",
+                    "Les lymphocytes T",
+                    "Les cytokines"
+                ],
+                correct: 1,
+                explanation: "La peau et les muqueuses constituent la première ligne de défense physique contre les agents pathogènes."
+            },
+            {
+                id: 4,
+                type: 'matching',
+                question: "Associez chaque terme à sa définition correcte :",
+                pairs: [
+                    { left: "Périoste", right: "Couche de tissu fibreux qui recouvre l'os", id: 0 },
+                    { left: "Tétraplégie", right: "Paralysie des quatre membres", id: 1 },
+                    { left: "Ostéophyte", right: "Excroissance osseuse au rebord articulaire", id: 2 },
+                    { left: "Impotence", right: "Impossibilité d'accomplir certains mouvements", id: 3 }
+                ]
+            },
+            {
+                id: 5,
+                type: 'matching',
+                question: "Associez chaque type de cartilage à ses localisations :",
+                pairs: [
+                    { left: "Cartilage hyalin", right: "Paroi VAS, surfaces articulaires", id: 0 },
+                    { left: "Cartilage élastique", right: "Oreille, épiglotte, larynx", id: 1 },
+                    { left: "Cartilage fibreux", right: "Disques intervertébraux, tendons", id: 2 }
+                ]
+            },
+            {
+                id: 6,
+                type: 'multiple-choice',
+                question: "Une fracture comminutive se définit par :",
+                options: [
+                    "Une fracture en spirale",
+                    "La présence de plusieurs fragments osseux (>3)",
+                    "Une fissure sans déplacement",
+                    "Un arrachement osseux"
+                ],
+                correct: 1,
+                explanation: "Une fracture comminutive présente plus de 3 fragments osseux, rendant la réduction plus complexe."
+            },
+            {
+                id: 7,
+                type: 'multiple-choice',
+                question: "Une fracture spiroïde est causée principalement par :",
+                options: [
+                    "Une compression",
+                    "Un choc direct",
+                    "Une torsion",
+                    "Une hyperextension"
+                ],
+                correct: 2,
+                explanation: "La fracture spiroïde résulte d'un mouvement de torsion qui crée un trait de fracture en spirale autour de l'os."
+            },
+            {
+                id: 8,
+                type: 'multiple-choice',
+                question: "Une fracture ouverte se définit par :",
+                options: [
+                    "Deux os cassés en même temps",
+                    "Une déformation du membre",
+                    "Une communication entre l'os fracturé et l'extérieur",
+                    "La présence de plusieurs fragments"
+                ],
+                correct: 2,
+                explanation: "Une fracture ouverte présente une plaie communiquant avec le foyer de fracture, augmentant le risque infectieux."
+            },
+            {
+                id: 9,
+                type: 'case-step-by-step',
+                question: "Cas clinique - Traumatisme moto",
+                presentation: "Un jeune homme est emmené aux urgences suite à un AVP violent en moto. Il présente une douleur importante et une déformation de la cuisse gauche avec raccourcissement et rotation de la jambe. À la palpation la cuisse est tendue.",
+                steps: [
+                    {
+                        question: "Quelle est votre hypothèse diagnostique ?",
+                        options: [
+                            "Entorse du genou",
+                            "Fracture du fémur",
+                            "Luxation de la hanche",
+                            "Contusion musculaire"
+                        ],
+                        correct: 1,
+                        explanation: "Les signes cliniques (déformation, raccourcissement, rotation, tension) sont typiques d'une fracture du fémur."
+                    },
+                    {
+                        question: "Quel bilan radiologique prescrivez-vous ?",
+                        options: [
+                            "Radio du genou face seulement",
+                            "Radio de la cuisse face + profil",
+                            "Fémur F+P incluant hanche ET genou",
+                            "Scanner du bassin"
+                        ],
+                        correct: 2,
+                        explanation: "Il faut toujours visualiser les articulations sus et sous-jacentes pour ne pas manquer une lésion associée."
+                    },
+                    {
+                        question: "Quel traitement chirurgical proposez-vous ?",
+                        options: [
+                            "Plâtre simple",
+                            "Réduction + ostéosynthèse (enclouage ou plaque)",
+                            "Traction collée",
+                            "Attelle simple"
+                        ],
+                        correct: 1,
+                        explanation: "La fracture du fémur nécessite une ostéosynthèse pour stabiliser les fragments et permettre une mobilisation précoce."
+                    }
+                ]
+            },
+            {
+                id: 10,
+                type: 'case-step-by-step',
+                question: "Cas clinique - Polyarthrite rhumatoïde",
+                presentation: "Une patiente de 50 ans consulte pour un enraidissement douloureux des articulations de ses mains et un gonflement de plusieurs articulations.",
+                steps: [
+                    {
+                        question: "Quelle est votre hypothèse diagnostique ?",
+                        options: [
+                            "Arthrose des mains",
+                            "Polyarthrite rhumatoïde",
+                            "Goutte",
+                            "Arthrite septique"
+                        ],
+                        correct: 1,
+                        explanation: "L'atteinte symétrique des mains avec enraidissement et gonflement évoque une polyarthrite rhumatoïde."
+                    },
+                    {
+                        question: "À quelle catégorie appartient cette maladie ?",
+                        options: [
+                            "Maladie infectieuse",
+                            "Maladie auto-immune",
+                            "Maladie dégénérative",
+                            "Maladie métabolique"
+                        ],
+                        correct: 1,
+                        explanation: "La polyarthrite rhumatoïde est une maladie auto-immune où le système immunitaire attaque les articulations."
+                    },
+                    {
+                        question: "Quel examen biologique est spécifique au diagnostic ?",
+                        options: [
+                            "NFS",
+                            "Glycémie",
+                            "Facteur rhumatoïde + CRP",
+                            "Ionogramme"
+                        ],
+                        correct: 2,
+                        explanation: "Le facteur rhumatoïde et le syndrome inflammatoire (CRP, VS) sont caractéristiques de la PR."
+                    }
+                ]
+            },
+            {
+                id: 11,
+                type: 'multiple-choice',
+                question: "Les critères de Vittel pour le polytraumatisé servent à :",
+                options: [
+                    "Déterminer le type de traitement chirurgical",
+                    "Décider d'un transfert vers un centre de traumatologie",
+                    "Évaluer l'autonomie du patient",
+                    "Choisir un traitement médicamenteux"
+                ],
+                correct: 1,
+                explanation: "Les critères de Vittel permettent d'identifier rapidement les polytraumatisés nécessitant une prise en charge spécialisée en trauma center."
+            },
+            {
+                id: 12,
+                type: 'multiple-choice',
+                question: "Parmi les critères physiologiques de Vittel, lequel impose un transfert :",
+                options: [
+                    "Glasgow = 15",
+                    "Pression artérielle systolique < 90 mmHg",
+                    "Fréquence respiratoire = 16/min",
+                    "Saturation en oxygène = 98% sous O2"
+                ],
+                correct: 1,
+                explanation: "Une PAS < 90 mmHg indique un état de choc nécessitant une prise en charge urgente en trauma center."
+            },
+            {
+                id: 13,
+                type: 'multiple-choice',
+                question: "Lequel des critères anatomiques suivants correspond à un critère de Vittel :",
+                options: [
+                    "Fracture simple de l'avant-bras",
+                    "Entorse de la cheville",
+                    "Hématome sous-cutané",
+                    "Fracture des deux fémurs"
+                ],
+                correct: 3,
+                explanation: "Les fractures bilatérales de fémur constituent un critère anatomique de gravité nécessitant un transfert."
+            },
+            {
+                id: 14,
+                type: 'image-identification',
+                question: "Identifiez le type de tumeur osseuse d'après la description radiologique :",
+                cases: [
+                    {
+                        description: "📸 Image radiologique : Excroissance osseuse pédiculée à la surface de l'os, avec continuité corticale et médullaire. Aspect bénin.",
+                        options: [
+                            "Ostéosarcome",
+                            "Ostéochondrome",
+                            "Métastases",
+                            "Myélome"
+                        ],
+                        correct: 1,
+                        explanation: "L'ostéochondrome est une tumeur bénigne typique, pédiculée, en continuité avec l'os normal."
+                    },
+                    {
+                        description: "📸 Image radiologique : Lésion ostéolytique agressive avec rupture de la corticale, réaction périostée en 'feu d'herbe', triangle de Codman.",
+                        options: [
+                            "Enchondrome",
+                            "Tumeur à cellules géantes",
+                            "Ostéosarcome",
+                            "Ostéochondrome"
+                        ],
+                        correct: 2,
+                        explanation: "L'ostéosarcome est une tumeur maligne avec destruction osseuse agressive et aspect radiologique typique."
+                    },
+                    {
+                        description: "📸 Image radiologique : Lésion lytique expansive de l'extrémité osseuse (épiphyse), soufflant la corticale. Aspect 'en bulle de savon'.",
+                        options: [
+                            "Métastases",
+                            "Ostéosarcome",
+                            "Tumeur à cellules géantes",
+                            "Myélome"
+                        ],
+                        correct: 2,
+                        explanation: "La tumeur à cellules géantes est typiquement lytique, expansive, localisée en épiphyse."
+                    },
+                    {
+                        description: "📸 Image radiologique : Multiples foyers ostéocondensants dans le rachis. Vertèbres 'ivoire', très blanches, denses.",
+                        options: [
+                            "Myélome multiple",
+                            "Ostéosarcome",
+                            "Métastases ostéocondensantes",
+                            "Tumeur à cellules géantes"
+                        ],
+                        correct: 2,
+                        explanation: "Les métastases ostéocondensantes créent des vertèbres denses ('ivoire'), typiques des cancers prostate/sein."
+                    }
+                ]
+            },
+            {
+                id: 15,
+                type: 'case-step-by-step',
+                question: "Cas clinique - Entorse de cheville",
+                presentation: "Une jeune patiente consulte pour une douleur post-traumatique suite à un match de hand-ball. Sa cheville s'est tordue et elle a entendu un craquement. Examen clinique : œdème minime péri-malléolaire antéro-latéral avec douleur à la palpation.",
+                steps: [
+                    {
+                        question: "Quelle est votre hypothèse diagnostique ?",
+                        options: [
+                            "Fracture de cheville",
+                            "Entorse de la cheville",
+                            "Luxation de cheville",
+                            "Tendinite d'Achille"
+                        ],
+                        correct: 1,
+                        explanation: "Les signes cliniques (traumatisme en torsion, craquement, œdème, douleur) évoquent une entorse."
+                    },
+                    {
+                        question: "Quelles radiographies prescrivez-vous ?",
+                        options: [
+                            "Pied face + profil",
+                            "Cheville face + profil",
+                            "Jambe complète",
+                            "Aucune radio nécessaire"
+                        ],
+                        correct: 1,
+                        explanation: "Les radios de cheville permettent d'éliminer une fracture ou un arrachement osseux associé."
+                    },
+                    {
+                        question: "Quel traitement préconisez-vous ?",
+                        options: [
+                            "Plâtre 6 semaines",
+                            "Chirurgie immédiate",
+                            "RICE + contention (4-6 sem) + kiné",
+                            "Repos simple sans traitement"
+                        ],
+                        correct: 2,
+                        explanation: "Le protocole RICE (Repos, Ice, Compression, Élévation) + contention et rééducation est le traitement standard."
+                    }
+                ]
+            },
+            {
+                id: 16,
+                type: 'case-step-by-step',
+                question: "Cas clinique - Fracture col du fémur",
+                presentation: "Mme Nova, 80 ans, amenée aux urgences suite à une chute. Elle présente une forte douleur au bassin à droite, avec impotence fonctionnelle et membre inférieur droit en rotation externe et adduction.",
+                steps: [
+                    {
+                        question: "Quelle est votre hypothèse diagnostique ?",
+                        options: [
+                            "Entorse de hanche",
+                            "Fracture du col du fémur",
+                            "Luxation de hanche",
+                            "Arthrose de hanche"
+                        ],
+                        correct: 1,
+                        explanation: "Chez une personne âgée, chute + douleur + rotation externe + impotence = fracture col fémur jusqu'à preuve du contraire."
+                    },
+                    {
+                        question: "Quel bilan radiologique prescrivez-vous ?",
+                        options: [
+                            "Radio de hanche seulement",
+                            "Bassin face + Hanche F+P",
+                            "Scanner thoraco-abdomino-pelvien",
+                            "IRM en urgence"
+                        ],
+                        correct: 1,
+                        explanation: "Le bassin de face permet une vue d'ensemble et la comparaison avec le côté sain. La hanche F+P précise le trait."
+                    },
+                    {
+                        question: "Quel est l'objectif thérapeutique principal chez cette patiente âgée ?",
+                        options: [
+                            "Éviter la chirurgie",
+                            "Immobilisation prolongée",
+                            "Levée précoce pour éviter complications décubitus",
+                            "Attendre consolidation spontanée"
+                        ],
+                        correct: 2,
+                        explanation: "Chez le sujet âgé, la levée précoce est cruciale pour éviter les complications du décubitus (phlébite, embolie, escarres, infection)."
+                    }
+                ]
+            },
+            {
+                id: 17,
+                type: 'case-step-by-step',
+                question: "Cas clinique - Métastases osseuses",
+                presentation: "Une patiente se présente aux urgences suite à une AEG (amaigrissement, asthénie) et des douleurs osseuses au niveau du rachis d'allure inflammatoire. ATCD de cancer du sein. Bilan biologique : syndrome inflammatoire et hypercalcémie.",
+                steps: [
+                    {
+                        question: "Quelle est votre hypothèse diagnostique ?",
+                        options: [
+                            "Arthrose rachidienne",
+                            "Infection osseuse",
+                            "Métastases osseuses",
+                            "Fracture pathologique"
+                        ],
+                        correct: 2,
+                        explanation: "AEG + douleurs osseuses + ATCD cancer + hypercalcémie = métastases osseuses très probable."
+                    },
+                    {
+                        question: "Quel examen d'imagerie en 1ère intention ?",
+                        options: [
+                            "IRM corps entier",
+                            "Radiographies du rachis F+P",
+                            "TEP scan immédiat",
+                            "Échographie"
+                        ],
+                        correct: 1,
+                        explanation: "Les radios standards sont l'examen de première intention, simple et accessible, pour visualiser les lésions osseuses."
+                    },
+                    {
+                        question: "Quels types de lésions recherchez-vous à la radio ?",
+                        options: [
+                            "Fractures récentes",
+                            "Arthrose",
+                            "Lésions ostéolytiques (géodes) ou ostéocondensantes (vertèbre ivoire)",
+                            "Hernies discales"
+                        ],
+                        correct: 2,
+                        explanation: "Les métastases peuvent être ostéolytiques (géodes, lacunes) ou ostéocondensantes (vertèbre ivoire, très dense)."
+                    }
+                ]
+            },
+            {
+                id: 18,
+                type: 'drag-drop',
+                question: "Classez les phases de consolidation d'une fracture dans l'ordre chronologique :",
+                instruction: "Glissez les phases dans le bon ordre (de 1 à 4)",
+                items: [
+                    { id: 1, text: "Formation d'un hématome (phase inflammatoire)", order: 1 },
+                    { id: 2, text: "Formation du cal fibrocartilagineux", order: 2 },
+                    { id: 3, text: "Formation du cal osseux (ossification)", order: 3 },
+                    { id: 4, text: "Remaniement osseux", order: 4 }
+                ]
+            },
+            {
+                id: 19,
+                type: 'matching',
+                question: "Associez chaque type d'os à ses exemples :",
+                pairs: [
+                    { left: "Os long", right: "Humérus, fémur, tibia", id: 0 },
+                    { left: "Os plat", right: "Crâne, sternum, scapula", id: 1 },
+                    { left: "Os court", right: "Carpe, tarse", id: 2 },
+                    { left: "Os irrégulier", right: "Vertèbres, sacrum", id: 3 }
+                ]
+            },
+            {
+                id: 20,
+                type: 'matching',
+                question: "Associez chaque type d'articulation à son degré de mobilité :",
+                pairs: [
+                    { left: "Synarthrose", right: "Articulation immobile (os du crâne)", id: 0 },
+                    { left: "Amphiarthrose", right: "Semi-mobile (symphyse pubienne)", id: 1 },
+                    { left: "Diarthrose", right: "Très mobile (genou, épaule, hanche)", id: 2 }
+                ]
+            },
+            {
+                id: 21,
+                type: 'multiple-choice',
+                question: "Combien de temps dure approximativement la phase de formation du cal osseux ?",
+                options: [
+                    "Quelques heures",
+                    "2 à 6 semaines",
+                    "6 à 12 mois",
+                    "Plusieurs années"
+                ],
+                correct: 1,
+                explanation: "La formation du cal osseux (ossification endochondrale) se produit généralement entre 2 et 6 semaines après la fracture."
+            },
+            {
+                id: 22,
+                type: 'multiple-choice',
+                question: "Quel organe est un organe lymphoïde secondaire ?",
+                options: [
+                    "Thymus",
+                    "Ganglion lymphatique",
+                    "Moelle osseuse",
+                    "Pancréas"
+                ],
+                correct: 1,
+                explanation: "Les ganglions lymphatiques sont des organes lymphoïdes secondaires où se déroule la réponse immunitaire. Le thymus et la moelle sont primaires."
+            },
+            {
+                id: 23,
+                type: 'multiple-choice',
+                question: "La bradycardie correspond à :",
+                options: [
+                    "Une fréquence cardiaque trop élevée",
+                    "Une fréquence cardiaque trop basse",
+                    "Une pression artérielle trop basse",
+                    "Une respiration trop lente"
+                ],
+                correct: 1,
+                explanation: "La bradycardie est une fréquence cardiaque inférieure à 60 battements par minute au repos chez l'adulte."
+            },
+            {
+                id: 24,
+                type: 'matching',
+                question: "Associez chaque terme à sa définition :",
+                pairs: [
+                    { left: "Pseudarthrose", right: "Absence de consolidation dans les délais normaux", id: 0 },
+                    { left: "Luxation", right: "Perte de contact entre deux surfaces articulaires", id: 1 },
+                    { left: "Ostéosynthèse", right: "Fixation de fragments osseux avec du matériel", id: 2 },
+                    { left: "Hémarthrose", right: "Épanchement de sang dans une articulation", id: 3 }
+                ]
+            },
+            {
+                id: 25,
+                type: 'drag-drop',
+                question: "Classez les 4 points d'évaluation neurologique d'un traumatisé du rachis par ordre d'importance clinique :",
+                instruction: "Tous ces points sont importants, mais classez-les selon la gravité potentielle",
+                items: [
+                    { id: 1, text: "Déficits moteurs (paralysie)", order: 1 },
+                    { id: 2, text: "Déficits sensitifs (anesthésie)", order: 2 },
+                    { id: 3, text: "Déficits vésico-sphinctériens", order: 3 },
+                    { id: 4, text: "Douleur", order: 4 }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let currentStep = 0;
+        let score = 0;
+        let answered = false;
+        let matchingSelected = null;
+        let matchedPairs = [];
+
+        function renderQuestion(questionIndex) {
+            const question = questions[questionIndex];
+            const content = document.getElementById('quizContent');
+            answered = false;
+            matchingSelected = null;
+            matchedPairs = [];
+            
+            let html = `
+                <div class="question-section active">
+                    <div class="question-header">
+                        <div class="question-number">Question ${questionIndex + 1} sur ${questions.length}</div>
+                        <div class="question-text">${question.question}</div>
+                    </div>
+            `;
+
+            if (question.type === 'case-step-by-step') {
+                html += renderCaseStepByStep(question);
+            } else if (question.type === 'multiple-choice') {
+                html += renderMultipleChoice(question);
+            } else if (question.type === 'matching') {
+                html += renderMatching(question);
+            } else if (question.type === 'image-identification') {
+                html += renderImageIdentification(question);
+            } else if (question.type === 'drag-drop') {
+                html += renderDragDrop(question);
+            }
+
+            html += `
+                <div class="feedback" id="feedback"></div>
+                <div class="buttons">
+                    ${questionIndex > 0 ? '<button class="btn btn-secondary" onclick="previousQuestion()">← Précédent</button>' : ''}
+                    ${questionIndex < questions.length - 1 ? 
+                        '<button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Suivant →</button>' : 
+                        '<button class="btn btn-primary" id="nextBtn" onclick="showResults()">Voir les résultats 🎯</button>'
+                    }
+                </div>
+            </div>
+            `;
+
+            content.innerHTML = html;
+            updateProgress();
+        }
+
+        function renderCaseStepByStep(question) {
+            let html = `
+                <div class="case-presentation">
+                    <h3>📋 Cas Clinique</h3>
+                    <p>${question.presentation}</p>
+                </div>
+                <div class="step-indicator">
+            `;
+            
+            question.steps.forEach((_, idx) => {
+                html += `<div class="step-dot ${idx === currentStep ? 'active' : ''} ${idx < currentStep ? 'completed' : ''}"></div>`;
+            });
+            
+            html += `</div>`;
+            
+            const step = question.steps[currentStep];
+            html += `
+                <div style="background: #f0f9ff; padding: 15px; border-radius: 10px; margin: 20px 0;">
+                    <strong>Étape ${currentStep + 1}/${question.steps.length} :</strong> ${step.question}
+                </div>
+                <div class="options">
+            `;
+            
+            step.options.forEach((option, index) => {
+                html += `
+                    <div class="option" onclick="selectCaseOption(${index})">
+                        <div class="option-letter">${String.fromCharCode(65 + index)}</div>
+                        <div>${option}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function renderMultipleChoice(question) {
+            let html = '<div class="options">';
+            question.options.forEach((option, index) => {
+                html += `
+                    <div class="option" onclick="selectOption(${index})">
+                        <div class="option-letter">${String.fromCharCode(65 + index)}</div>
+                        <div>${option}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function renderMatching(question) {
+            const shuffledRight = [...question.pairs.map(p => p.right)].sort(() => Math.random() - 0.5);
+            
+            let html = `
+                <p style="color: #666; margin: 20px 0;">Cliquez sur un terme à gauche, puis sur sa définition correspondante à droite.</p>
+                <div class="matching-container" id="matchingContainer">
+                    <div>
+            `;
+            
+            question.pairs.forEach((pair, idx) => {
+                html += `
+                    <div class="matching-left" data-id="${idx}" onclick="selectMatching('left', ${idx})">
+                        ${pair.left}
+                    </div>
+                `;
+            });
+            
+            html += '</div><div>';
+            
+            shuffledRight.forEach((right, idx) => {
+                const originalId = question.pairs.findIndex(p => p.right === right);
+                html += `
+                    <div class="matching-right" data-id="${originalId}" onclick="selectMatching('right', ${originalId})">
+                        ${right}
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            return html;
+        }
+
+        function renderImageIdentification(question) {
+            const caseItem = question.cases[currentStep];
+            
+            let html = `
+                <div class="step-indicator">
+            `;
+            
+            question.cases.forEach((_, idx) => {
+                html += `<div class="step-dot ${idx === currentStep ? 'active' : ''} ${idx < currentStep ? 'completed' : ''}"></div>`;
+            });
+            
+            html += `</div>
+                <div class="case-presentation">
+                    <p><strong>Image ${currentStep + 1}/${question.cases.length}</strong></p>
+                    <p>${caseItem.description}</p>
+                </div>
+                <div class="options">
+            `;
+            
+            caseItem.options.forEach((option, index) => {
+                html += `
+                    <div class="option" onclick="selectImageOption(${index})">
+                        <div class="option-letter">${String.fromCharCode(65 + index)}</div>
+                        <div>${option}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+
+        function renderDragDrop(question) {
+            const shuffled = [...question.items].sort(() => Math.random() - 0.5);
+            
+            let html = `
+                <p style="color: #666; margin: 20px 0;">${question.instruction}</p>
+                <div class="drag-drop-container">
+                    <div class="drag-zone">
+                        <h3>Phases à classer</h3>
+                        <div id="itemsZone">
+            `;
+            
+            shuffled.forEach(item => {
+                html += `
+                    <div class="draggable-item" draggable="true" data-id="${item.id}">
+                        ${item.text}
+                    </div>
+                `;
+            });
+            
+            html += `
+                        </div>
+                    </div>
+                    <div class="drag-zone">
+                        <h3>Ordre correct</h3>
+            `;
+            
+            for (let i = 1; i <= question.items.length; i++) {
+                html += `
+                    <div class="drop-zone" data-order="${i}">
+                        <strong>${i}.</strong> <span style="color: #999;">Glissez ici</span>
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="checkDragDrop()" style="margin-top: 20px;">Vérifier l'ordre</button>
+            `;
+            
+            setTimeout(() => {
+                initDragDrop();
+            }, 100);
+            
+            return html;
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+            
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach(opt => opt.classList.add('disabled'));
+            options[index].classList.add('selected');
+            
+            if (index === question.correct) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = `✅ Correct ! ${question.explanation}`;
+                options[index].classList.add('correct');
+                score++;
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = `❌ Incorrect. ${question.explanation}`;
+                options[index].classList.add('incorrect');
+                options[question.correct].classList.add('correct');
+            }
+            
+            answered = true;
+        }
+
+        function selectCaseOption(index) {
+            if (answered) return;
+            
+            const question = questions[currentQuestion];
+            const step = question.steps[currentStep];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach(opt => opt.classList.add('disabled'));
+            options[index].classList.add('selected');
+            
+            if (index === step.correct) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = `✅ Correct ! ${step.explanation}`;
+                options[index].classList.add('correct');
+                score++;
+                
+                if (currentStep < question.steps.length - 1) {
+                    setTimeout(() => {
+                        currentStep++;
+                        renderQuestion(currentQuestion);
+                    }, 2000);
+                } else {
+                    answered = true;
+                }
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = `❌ Incorrect. ${step.explanation}`;
+                options[index].classList.add('incorrect');
+                options[step.correct].classList.add('correct');
+                
+                setTimeout(() => {
+                    if (currentStep < question.steps.length - 1) {
+                        currentStep++;
+                        renderQuestion(currentQuestion);
+                    } else {
+                        answered = true;
+                    }
+                }, 2000);
+            }
+        }
+
+        function selectImageOption(index) {
+            if (answered) return;
+            
+            const question = questions[currentQuestion];
+            const caseItem = question.cases[currentStep];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            
+            options.forEach(opt => opt.classList.add('disabled'));
+            options[index].classList.add('selected');
+            
+            if (index === caseItem.correct) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = `✅ Correct ! ${caseItem.explanation}`;
+                options[index].classList.add('correct');
+                score++;
+                
+                if (currentStep < question.cases.length - 1) {
+                    setTimeout(() => {
+                        currentStep++;
+                        renderQuestion(currentQuestion);
+                    }, 2000);
+                } else {
+                    answered = true;
+                }
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = `❌ Incorrect. ${caseItem.explanation}`;
+                options[index].classList.add('incorrect');
+                options[caseItem.correct].classList.add('correct');
+                
+                setTimeout(() => {
+                    if (currentStep < question.cases.length - 1) {
+                        currentStep++;
+                        renderQuestion(currentQuestion);
+                    } else {
+                        answered = true;
+                    }
+                }, 2000);
+            }
+        }
+
+        function selectMatching(side, id) {
+            const question = questions[currentQuestion];
+            const elements = document.querySelectorAll(`.matching-${side}`);
+            
+            if (matchedPairs.some(p => p.left === id || p.right === id)) return;
+            
+            if (matchingSelected === null) {
+                matchingSelected = { side, id };
+                elements.forEach(el => {
+                    if (parseInt(el.dataset.id) === id) {
+                        el.classList.add('selected');
+                    }
+                });
+            } else if (matchingSelected.side === side) {
+                document.querySelectorAll(`.matching-${side}`).forEach(el => el.classList.remove('selected'));
+                matchingSelected = { side, id };
+                elements.forEach(el => {
+                    if (parseInt(el.dataset.id) === id) {
+                        el.classList.add('selected');
+                    }
+                });
+            } else {
+                const pair = matchingSelected.side === 'left' ? 
+                    { left: matchingSelected.id, right: id } : 
+                    { left: id, right: matchingSelected.id };
+                
+                if (pair.left === pair.right) {
+                    matchedPairs.push(pair);
+                    document.querySelector(`.matching-left[data-id="${pair.left}"]`).classList.add('matched');
+                    document.querySelector(`.matching-right[data-id="${pair.right}"]`).classList.add('matched');
+                    document.querySelectorAll('.matching-left, .matching-right').forEach(el => el.classList.remove('selected'));
+                    
+                    if (matchedPairs.length === question.pairs.length) {
+                        score++;
+                        const feedback = document.getElementById('feedback');
+                        feedback.className = 'feedback correct show';
+                        feedback.innerHTML = `✅ Parfait ! Toutes les associations sont correctes.`;
+                        answered = true;
+                    }
+                } else {
+                    document.querySelector(`.matching-left[data-id="${pair.left}"]`).classList.add('error');
+                    document.querySelector(`.matching-right[data-id="${pair.right}"]`).classList.add('error');
+                    
+                    setTimeout(() => {
+                        document.querySelectorAll('.matching-left, .matching-right').forEach(el => {
+                            el.classList.remove('selected', 'error');
+                        });
+                    }, 500);
+                }
+                
+                matchingSelected = null;
+            }
+        }
+
+        function initDragDrop() {
+            const draggables = document.querySelectorAll('.draggable-item');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', () => {
+                    draggable.classList.add('dragging');
+                });
+                
+                draggable.addEventListener('dragend', () => {
+                    draggable.classList.remove('dragging');
+                });
+            });
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+                
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    
+                    const dragging = document.querySelector('.dragging');
+                    if (dragging && !zone.classList.contains('filled')) {
+                        const existingItem = zone.querySelector('.draggable-item');
+                        if (existingItem) {
+                            document.getElementById('itemsZone').appendChild(existingItem);
+                        }
+                        
+                        zone.appendChild(dragging);
+                        zone.classList.add('filled');
+                    }
+                });
+            });
+            
+            const itemsZone = document.getElementById('itemsZone');
+            if (itemsZone) {
+                itemsZone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                });
+                
+                itemsZone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const dragging = document.querySelector('.dragging');
+                    if (dragging) {
+                        const parent = dragging.parentElement;
+                        if (parent.classList.contains('drop-zone')) {
+                            parent.classList.remove('filled');
+                        }
+                        itemsZone.appendChild(dragging);
+                    }
+                });
+            }
+        }
+
+        function checkDragDrop() {
+            const question = questions[currentQuestion];
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let correct = true;
+            
+            dropZones.forEach(zone => {
+                const item = zone.querySelector('.draggable-item');
+                const expectedOrder = parseInt(zone.dataset.order);
+                
+                if (item) {
+                    const itemId = parseInt(item.dataset.id);
+                    const itemOrder = question.items.find(i => i.id === itemId).order;
+                    
+                    if (itemOrder !== expectedOrder) {
+                        correct = false;
+                    }
+                } else {
+                    correct = false;
+                }
+            });
+            
+            const feedback = document.getElementById('feedback');
+            if (correct) {
+                feedback.className = 'feedback correct show';
+                feedback.innerHTML = `✅ Parfait ! L'ordre est correct.`;
+                score++;
+                answered = true;
+                dropZones.forEach(zone => {
+                    const item = zone.querySelector('.draggable-item');
+                    if (item) item.draggable = false;
+                });
+            } else {
+                feedback.className = 'feedback incorrect show';
+                feedback.innerHTML = `❌ L'ordre n'est pas correct. Réessayez !`;
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                currentStep = 0;
+                renderQuestion(currentQuestion);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                currentStep = 0;
+                renderQuestion(currentQuestion);
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            
+            let message = '';
+            if (percentage >= 90) message = '🏆 Excellent ! Vous maîtrisez parfaitement le sujet !';
+            else if (percentage >= 75) message = '🎉 Très bien ! Bonne compréhension globale.';
+            else if (percentage >= 60) message = '👍 Bien ! Continuez à réviser.';
+            else message = '📚 Continuez vos efforts. Revoyez les notions importantes.';
+
+            const content = document.getElementById('quizContent');
+            content.innerHTML = `
+                <div class="score-display">
+                    <div class="score-circle">
+                        <div class="score-text">${percentage}%</div>
+                    </div>
+                    <div class="score-message">${message}</div>
+                    <p style="color: #666; margin: 20px 0;">Score : ${score} / ${questions.length} questions réussies</p>
+                    <button class="btn btn-primary" onclick="restartQuiz()">🔄 Recommencer le quiz</button>
+                </div>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            currentStep = 0;
+            score = 0;
+            answered = false;
+            renderQuestion(0);
+        }
+
+        // Initialisation
+        renderQuestion(0);
+    </script>
+</body>
+</html>

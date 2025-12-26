@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD2 UE 2.5 S1 - Physiologie Générale</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .mode-btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .mode-btn:not(.active) {
+            background: white;
+            color: #667eea;
+        }
+
+        .mode-btn:hover:not(.active) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* FLASHCARDS MODE */
+        .stats-container {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stat-item.total { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .stat-item.acquired { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .stat-item.review { background: linear-gradient(135deg, #f2994a, #f2c94c); }
+        .stat-item.not-acquired { background: linear-gradient(135deg, #eb3349, #f45c43); }
+        .stat-item.new { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+
+        .stat-number {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .export-btn { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .import-btn { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .reset-btn { background: linear-gradient(135deg, #eb3349, #f45c43); }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            margin: 30px auto;
+            max-width: 800px;
+        }
+
+        .flashcard {
+            background: white;
+            min-height: 400px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            cursor: pointer;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            border: 3px solid #667eea;
+        }
+
+        .card-category {
+            background: rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .card-question, .card-answer {
+            font-size: 1.3em;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .card-answer {
+            color: #333;
+        }
+
+        .card-answer ul {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .card-answer li {
+            margin: 10px 0;
+        }
+
+        .evaluation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .eval-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .eval-btn.acquired { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .eval-btn.review { background: linear-gradient(135deg, #f2994a, #f2c94c); }
+        .eval-btn.not-acquired { background: linear-gradient(135deg, #eb3349, #f45c43); }
+
+        .eval-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* TEST MODE */
+        .test-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .question-block {
+            margin-bottom: 40px;
+            padding: 25px;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+
+        .question-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .question-type {
+            display: inline-block;
+            padding: 5px 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option input[type="checkbox"],
+        .option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option.correct {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .option.incorrect {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .fill-input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .fill-input.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .fill-input.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .matching-item {
+            padding: 15px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+        }
+
+        .matching-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .test-result {
+            margin-top: 30px;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .test-result.show {
+            display: block;
+        }
+
+        .test-result.excellent {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: white;
+        }
+
+        .test-result.good {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .test-result.average {
+            background: linear-gradient(135deg, #f2994a, #f2c94c);
+            color: white;
+        }
+
+        .test-result.poor {
+            background: linear-gradient(135deg, #eb3349, #f45c43);
+            color: white;
+        }
+
+        .score-display {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .retry-btn {
+            padding: 15px 40px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .no-cards-message {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .no-cards-message h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .mode-selector { flex-direction: column; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .flashcard { min-height: 300px; }
+            .card-face { padding: 20px; }
+            .card-question, .card-answer { font-size: 1.1em; }
+            .matching-container { grid-template-columns: 1fr; }
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            display: inline-block;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 TD N°2 - UE 2.5 S1</h1>
+            <p class="subtitle">Physiologie générale, physiologie, sémiologie et pathologies ostéoarticulaires</p>
+            
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="switchMode('flashcards', this)">
+                    🃏 Mode Flashcards
+                </button>
+                <button class="mode-btn" onclick="switchMode('test', this)">
+                    📝 Mode Test
+                </button>
+            </div>
+        </header>
+
+        <!-- FLASHCARDS MODE -->
+        <div id="flashcards-section" class="content-section active">
+            <div class="stats-container">
+                <div class="stats-grid">
+                    <div class="stat-item total">
+                        <span class="stat-number" id="total-cards">0</span>
+                        <span>Total de cartes</span>
+                    </div>
+                    <div class="stat-item acquired">
+                        <span class="stat-number" id="acquired-cards">0</span>
+                        <span>✅ Acquises</span>
+                    </div>
+                    <div class="stat-item review">
+                        <span class="stat-number" id="review-cards">0</span>
+                        <span>⚠️ À revoir</span>
+                    </div>
+                    <div class="stat-item not-acquired">
+                        <span class="stat-number" id="not-acquired-cards">0</span>
+                        <span>❌ Non acquises</span>
+                    </div>
+                    <div class="stat-item new">
+                        <span class="stat-number" id="new-cards">0</span>
+                        <span>🆕 Nouvelles</span>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar">0%</div>
+                </div>
+
+                <div class="filters">
+                    <button class="filter-btn active" onclick="filterCards('all', this)">Toutes les cartes</button>
+                    <button class="filter-btn" onclick="filterCards('new', this)">Nouvelles cartes</button>
+                    <button class="filter-btn" onclick="filterCards('review', this)">À réviser</button>
+                    <button class="filter-btn" onclick="filterCards('acquired', this)">Acquises</button>
+                </div>
+
+                <div class="card-controls">
+                    <button class="control-btn export-btn" onclick="exportProgress()">📥 Exporter</button>
+                    <label class="file-input-label" for="import-file">📤 Importer</label>
+                    <input type="file" id="import-file" accept=".json" onchange="importProgress(event)">
+                    <button class="control-btn reset-btn" onclick="resetProgress()">🔄 Réinitialiser</button>
+                </div>
+            </div>
+
+            <div id="flashcard-display"></div>
+        </div>
+
+        <!-- TEST MODE -->
+        <div id="test-section" class="content-section">
+            <div class="test-container">
+                <h2>📝 Évaluation - TD N°2</h2>
+                <div id="test-questions"></div>
+                <button class="submit-btn" onclick="submitTest()">Valider le test</button>
+                <div class="test-result" id="test-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DONNÉES DES FLASHCARDS
+        const flashcardsData = [
+            // CM3 - Les étapes de la vie
+            {
+                category: "Étapes de la vie",
+                question: "Qu'est-ce qu'un gamète mâle ?",
+                answer: "Spermatozoïde"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Qu'est-ce qu'un gamète femelle ?",
+                answer: "Ovocyte"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Comment appelle-t-on l'œuf fécondé ?",
+                answer: "Zygote"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Comment appelle-t-on l'œuf après la première division ?",
+                answer: "Embryon"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Qu'est-ce que la nidation ?",
+                answer: "L'implantation de l'embryon dans l'utérus (5ème-7ème jour)"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Qu'est-ce que l'embryogénèse ?",
+                answer: "La période de l'œuf fécondé à la fin de la 8ème semaine"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Qu'est-ce que l'organogénèse ?",
+                answer: "La différentiation cellulaire et l'apparition des organes (0 à 8 semaines)"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "À partir de quand parle-t-on de fœtus ?",
+                answer: "À partir de la 9ème semaine jusqu'à la naissance"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Quel est l'organe à l'interface entre le bébé et la mère ?",
+                answer: "Le placenta"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Comment appelle-t-on l'enveloppe liquidienne où baigne le bébé ?",
+                answer: "Le sac amniotique"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Quelle est la différence entre semaines de grossesse et semaines d'aménorrhée ?",
+                answer: "Les semaines de grossesse partent de la fécondation, les semaines d'aménorrhée partent du 1er jour des dernières règles (2 semaines de décalage)"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Le fœtus a-t-il une ventilation pulmonaire ?",
+                answer: "Non, la ventilation pulmonaire du fœtus est inexistante"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Qu'est-ce que le méconium ?",
+                answer: "C'est ce que produit le fœtus en ingérant du liquide amniotique (le colostrum est le lait maternel avant la première montée de lait)"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Quelles sont les 3 phases de l'accouchement ?",
+                answer: "1. Dilatation du col\n2. Expulsion du fœtus\n3. Expulsion du placenta (délivrance)"
+            },
+            {
+                category: "Étapes de la vie",
+                question: "Qu'est-ce que la délivrance ?",
+                answer: "L'expulsion du placenta (3ème phase de l'accouchement)"
+            },
+            {
+                category: "Nouveau-né",
+                question: "Citez 2 immaturités du nouveau-né",
+                answer: "Immaturité rénale (turn-over hydrique ×7 et activité métabolique ×2) et immaturité hépatique (biliaire, synthèse protéines, néoglucogénèse déficiente)"
+            },
+            {
+                category: "Nouveau-né",
+                question: "Le nouveau-né a-t-il une immunité ?",
+                answer: "Oui, une immunité héritée de la mère"
+            },
+            {
+                category: "Nouveau-né",
+                question: "De quoi le nouveau-né a-t-il un besoin accru ?",
+                answer: "Fer et vitamine D"
+            },
+            {
+                category: "Nouveau-né",
+                question: "Quelle est la fréquence respiratoire du nouveau-né ?",
+                answer: "40 par minute (vs 12-20 chez l'adulte)"
+            },
+            {
+                category: "Nouveau-né",
+                question: "Quelle est la masse hydrique du nouveau-né ?",
+                answer: "80% (vs 60% chez l'adulte)"
+            },
+            {
+                category: "Nouveau-né",
+                question: "Quelle est la fréquence cardiaque du nouveau-né ?",
+                answer: "120-180 par minute (vs 60-80 chez l'adulte)"
+            },
+            {
+                category: "Vieillissement",
+                question: "Qu'est-ce que la ménopause ?",
+                answer: "L'arrêt définitif du fonctionnement des ovaires (plus de sécrétions d'ovules et plus de production d'œstrogènes)"
+            },
+            {
+                category: "Vieillissement",
+                question: "Quels risques la ménopause accroît-elle ?",
+                answer: "Le risque cardio-vasculaire et l'ostéoporose"
+            },
+            {
+                category: "Vieillissement",
+                question: "Que permet de doser l'hormone béta HCG ?",
+                answer: "Elle permet d'affirmer la grossesse"
+            },
+            {
+                category: "Vieillissement",
+                question: "À partir de quel âge parle-t-on de vieillesse selon l'OMS ?",
+                answer: "65 ans"
+            },
+            {
+                category: "Vieillissement",
+                question: "Quelle est la différence entre gérontologie et gériatrie ?",
+                answer: "La gérontologie étudie le vieillissement dans tous ses aspects (biomédical, socio-économique, culturel). La gériatrie est la médecine des personnes âgées."
+            },
+            {
+                category: "Vieillissement",
+                question: "Comment appelle-t-on la diminution de l'audition ?",
+                answer: "Presbyacousie"
+            },
+            {
+                category: "Vieillissement",
+                question: "Comment appelle-t-on la diminution de la vue ?",
+                answer: "Presbytie"
+            },
+            {
+                category: "Vieillissement",
+                question: "Qu'est-ce que la sénescence ?",
+                answer: "Le vieillissement cellulaire"
+            },
+            {
+                category: "Vieillissement",
+                question: "Quelle est la cause de mort la plus fréquente ?",
+                answer: "Le cancer (plus fréquent que l'insuffisance cardiaque)"
+            },
+            {
+                category: "Vieillissement",
+                question: "Comment définit-on la mort ?",
+                answer: "L'absence totale de conscience, de reflexes et de ventilation"
+            },
+
+            // CM4 - Homéostasie
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que la kaliémie ?",
+                answer: "Le taux de potassium dans le sang"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que la thermorégulation ?",
+                answer: "La régulation de la température corporelle"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que la thermogénèse ?",
+                answer: "La production de chaleur"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que la thermolyse ?",
+                answer: "L'évacuation de chaleur"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Que sont les barorécepteurs ?",
+                answer: "Des capteurs barométriques (détectent les variations de pression)"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que l'hypotension ?",
+                answer: "Une tension artérielle basse"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que l'hypertension ?",
+                answer: "Une tension artérielle haute"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Que sont les osmorécepteurs ?",
+                answer: "Des récepteurs qui détectent la variation d'osmolarité"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Que sont les substances osmotiques ?",
+                answer: "Des substances (glucose, sodium, urée, alcool) qui exercent une force vis-à-vis d'une membrane semi-perméable"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que la glycémie ?",
+                answer: "La concentration de sucre dans le sang"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Que détermine le pH sanguin ?",
+                answer: "L'acidité et la basicité"
+            },
+            {
+                category: "Homéostasie - Définitions",
+                question: "Qu'est-ce que l'hyperhydratation ?",
+                answer: "Un excès d'eau dans l'organisme"
+            },
+            {
+                category: "Homéostasie - Eau",
+                question: "Quel pourcentage du poids corporel l'eau représente-t-elle chez l'adulte ?",
+                answer: "60%"
+            },
+            {
+                category: "Homéostasie - Eau",
+                question: "Dans combien de secteurs l'eau se répartit-elle ?",
+                answer: "2 secteurs"
+            },
+            {
+                category: "Homéostasie - Eau",
+                question: "Quel pourcentage de l'eau totale représente le LIC ?",
+                answer: "67% (Liquide IntraCellulaire)"
+            },
+            {
+                category: "Homéostasie - Eau",
+                question: "Quel pourcentage de l'eau totale représente le LEC ?",
+                answer: "33% (Liquide ExtraCellulaire)"
+            },
+            {
+                category: "Homéostasie - Eau",
+                question: "Que composent le liquide interstitiel et le plasma ?",
+                answer: "Le LEC (Liquide ExtraCellulaire)"
+            },
+            {
+                category: "Homéostasie - Eau",
+                question: "À quoi correspond l'environnement interne ?",
+                answer: "Au LEC (Liquide ExtraCellulaire)"
+            },
+            {
+                category: "Homéostasie - Concepts",
+                question: "Définissez l'homéostasie",
+                answer: "Un processus de régulation par lequel l'organisme maintient la stabilité des constantes dans les limites des valeurs normales (équilibre)"
+            },
+            {
+                category: "Homéostasie - Concepts",
+                question: "Quel est le rôle de l'environnement intérieur ?",
+                answer: "- Approvisionner les cellules en nutriments et oxygène via le sang artériel\n- Permettre l'élimination des déchets métaboliques vers le sang veineux"
+            },
+            {
+                category: "Homéostasie - Concepts",
+                question: "Quels sont les 3 composants de l'homéostasie ?",
+                answer: "1. Capteur/récepteurs\n2. Centre de contrôle\n3. Effecteur"
+            },
+            {
+                category: "Homéostasie - Mécanismes",
+                question: "Qu'est-ce que la rétro-inhibition (rétroaction négative) ?",
+                answer: "Un mécanisme de régulation qui diminue le stimulus de départ. Si une variable augmente, le mécanisme la fait diminuer, et inversement."
+            },
+            {
+                category: "Homéostasie - Mécanismes",
+                question: "Donnez un exemple de rétro-inhibition",
+                answer: "Régulation de la glycémie : après un repas, la glycémie augmente → sécrétion d'insuline pour faire entrer le glucose dans les cellules → glycémie diminue → rétrocontrôle négatif sur la production d'insuline"
+            },
+            {
+                category: "Homéostasie - Mécanismes",
+                question: "Qu'est-ce que la rétro-activation (rétroaction positive) ?",
+                answer: "Un mécanisme de régulation qui amplifie le stimulus de départ. Si une variable augmente, le mécanisme l'augmente encore plus."
+            },
+            {
+                category: "Homéostasie - Mécanismes",
+                question: "Donnez un exemple de rétro-activation",
+                answer: "L'accouchement : le bébé appuie sur le col → étirement du col → sécrétion d'ocytocine → contractions plus fortes et intenses → le bébé appuie encore plus → rétrocontrôle positif jusqu'à l'accouchement"
+            },
+
+            // CM5 - Système immunitaire
+            {
+                category: "Système immunitaire",
+                question: "Qu'est-ce que l'immunité ?",
+                answer: "L'ensemble des acteurs et mécanismes physiologiques impliqués dans la reconnaissance du 'soi' et du 'non-soi' : tolérance ou rejet"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Qu'est-ce qu'un antigène ?",
+                answer: "Toute substance étrangère à l'organisme déclenchant une réponse immunitaire (anticorps)"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Qu'est-ce qu'un anticorps ?",
+                answer: "Une protéine complexe sécrétée par les cellules immunes (lymphocyte B) capable d'établir une liaison avec un antigène - Immunoglobuline"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Que sont les cellules phagocytaires ?",
+                answer: "Des cellules pouvant ingérer et détruire des particules >0,5μm (éboueurs du système immunitaire)"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Que sont les lymphocytes ?",
+                answer: "Des cellules qui ont un rôle majeur de défense contre les infections dans le système immunitaire"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Quelles sont les caractéristiques de l'immunité non spécifique ?",
+                answer: "- Innée\n- 1ère ligne de défense\n- Granulocytes/polynucléaires et macrophages\n- Phagocytose\n- Réaction inflammatoire (rougeur, chaleur, douleur, œdème, +/- hyperthermie)"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Quelles sont les caractéristiques de l'immunité spécifique ?",
+                answer: "- Acquise - adaptative\n- Plus rapide et efficace\n- Lymphocytes\n- Sécrétion d'anticorps et cytokines (régulation et cytotoxicité)"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Quels sont les organes lymphoïdes primaires ?",
+                answer: "Le thymus et la moelle osseuse"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Quel est le rôle des organes lymphoïdes primaires ?",
+                answer: "Lieu de maturation des lymphocytes (moelle osseuse et thymus). Ils deviennent des lymphocytes naïfs et migrent vers les organes secondaires"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Quels sont les organes lymphoïdes secondaires ?",
+                answer: "Les ganglions lymphoïdes, la rate, les amygdales, les végétations"
+            },
+            {
+                category: "Système immunitaire",
+                question: "Quel est le rôle des organes lymphoïdes secondaires ?",
+                answer: "Lieu de rencontre entre les antigènes (apportés par le sang) et les lymphocytes. Ils permettent l'activation des lymphocytes B et T et le déclenchement de la réponse immunitaire adaptative"
+            }
+        ];
+
+        // DONNÉES DES QUESTIONS DE TEST
+        const testQuestions = [
+            {
+                type: "qcm",
+                question: "Parmi ces affirmations sur le fœtus, lesquelles sont VRAIES ?",
+                options: [
+                    "La ventilation pulmonaire du fœtus est inexistante",
+                    "La myélinisation du fœtus est complète",
+                    "Le fœtus produit de l'urine",
+                    "Le sang oxygéné venant du placenta est dévié vers les poumons du fœtus"
+                ],
+                correct: [0, 2],
+                explanation: "Le fœtus n'a pas de ventilation pulmonaire, sa myélinisation est incomplète, il produit bien de l'urine, et le sang oxygéné est dévié vers le cœur gauche (le poumon est 'shunté')."
+            },
+            {
+                type: "qcm",
+                question: "Concernant le nouveau-né, quelles affirmations sont VRAIES ?",
+                options: [
+                    "Le nouveau-né a une immaturité rénale",
+                    "Le nouveau-né a une immaturité hépatique",
+                    "Le nouveau-né a une immaturité endocrinienne",
+                    "Le nouveau-né n'a aucune immunité"
+                ],
+                correct: [0, 1],
+                explanation: "Le nouveau-né a une immaturité rénale et hépatique, mais il a une maturité endocrinienne et une immunité héritée de la mère."
+            },
+            {
+                type: "qcm",
+                question: "Concernant le vieillissement, quelles affirmations sont VRAIES ?",
+                options: [
+                    "La ménopause accroît le risque cardio-vasculaire et l'ostéoporose",
+                    "On parle de vieillesse à partir de 65 ans d'après l'OMS",
+                    "La diminution de l'audition s'appelle la presbyacousie",
+                    "La mort est provoquée le plus fréquemment par l'insuffisance cardiaque"
+                ],
+                correct: [0, 1, 2],
+                explanation: "Toutes sont vraies sauf la dernière : le cancer est la cause de mort la plus fréquente, pas l'insuffisance cardiaque."
+            },
+            {
+                type: "fill",
+                question: "L'eau représente environ ___% du poids corporel d'un adulte.",
+                answer: "60",
+                explanation: "L'eau représente 60% du poids corporel chez l'adulte (contre 80% chez le nouveau-né)."
+            },
+            {
+                type: "fill",
+                question: "Le liquide intracellulaire (LIC) représente ___% de l'eau totale du corps.",
+                answer: "67",
+                explanation: "Le LIC représente 67% de l'eau totale, tandis que le LEC en représente 33%."
+            },
+            {
+                type: "fill",
+                question: "La fréquence respiratoire du nouveau-né est d'environ ___ par minute.",
+                answer: "40",
+                explanation: "Le nouveau-né a une fréquence respiratoire de 40/min contre 12-20/min chez l'adulte."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque terme à sa définition correcte",
+                pairs: [
+                    { term: "Zygote", definition: "Œuf fécondé" },
+                    { term: "Nidation", definition: "Implantation de l'embryon dans l'utérus" },
+                    { term: "Organogénèse", definition: "Différentiation cellulaire et apparition des organes" },
+                    { term: "Placenta", definition: "Organe à l'interface entre le bébé et la mère" },
+                    { term: "Méconium", definition: "Ce que produit le fœtus en ingérant du liquide amniotique" }
+                ],
+                explanation: "Ces termes sont essentiels pour comprendre les étapes du développement embryonnaire et fœtal."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque terme physiologique à sa définition",
+                pairs: [
+                    { term: "Kaliémie", definition: "Taux de potassium dans le sang" },
+                    { term: "Thermogénèse", definition: "Production de chaleur" },
+                    { term: "Thermolyse", definition: "Évacuation de chaleur" },
+                    { term: "Glycémie", definition: "Concentration de sucre dans le sang" },
+                    { term: "Osmorécepteurs", definition: "Détectent la variation d'osmolarité" }
+                ],
+                explanation: "Ces termes sont fondamentaux pour comprendre l'homéostasie et la régulation physiologique."
+            },
+            {
+                type: "matching",
+                question: "Associez les organes lymphoïdes à leur rôle",
+                pairs: [
+                    { term: "Thymus", definition: "Organe lymphoïde primaire - maturation des lymphocytes T" },
+                    { term: "Moelle osseuse", definition: "Organe lymphoïde primaire - maturation des lymphocytes B" },
+                    { term: "Ganglions lymphatiques", definition: "Organe lymphoïde secondaire - activation des lymphocytes" },
+                    { term: "Rate", definition: "Organe lymphoïde secondaire - filtre le sang" }
+                ],
+                explanation: "Les organes primaires permettent la maturation, les organes secondaires permettent l'activation des lymphocytes."
+            },
+            {
+                type: "qcm",
+                question: "Quelles sont les composantes du LEC (Liquide ExtraCellulaire) ?",
+                options: [
+                    "Le liquide intracellulaire",
+                    "Le liquide interstitiel",
+                    "Le plasma",
+                    "Le cytoplasme"
+                ],
+                correct: [1, 2],
+                explanation: "Le LEC est composé du liquide interstitiel et du plasma. Il représente l'environnement interne et 33% de l'eau totale."
+            },
+            {
+                type: "fill",
+                question: "Les 3 composants de l'homéostasie sont : le capteur, le ___ de contrôle, et l'effecteur.",
+                answer: "centre",
+                explanation: "L'homéostasie fonctionne avec un capteur/récepteur, un centre de contrôle, et un effecteur."
+            },
+            {
+                type: "qcm",
+                question: "Concernant l'immunité non spécifique, quelles affirmations sont correctes ?",
+                options: [
+                    "Elle est innée",
+                    "C'est la 1ère ligne de défense",
+                    "Elle implique la phagocytose",
+                    "Elle produit des anticorps spécifiques"
+                ],
+                correct: [0, 1, 2],
+                explanation: "L'immunité non spécifique est innée, constitue la 1ère ligne de défense et utilise la phagocytose. Les anticorps spécifiques sont produits par l'immunité spécifique (acquise)."
+            },
+            {
+                type: "fill",
+                question: "L'arrêt définitif du fonctionnement des ovaires s'appelle la ___.",
+                answer: "ménopause",
+                explanation: "La ménopause correspond à l'arrêt définitif du fonctionnement des ovaires (plus de sécrétions d'ovules et plus de production d'œstrogènes)."
+            },
+            {
+                type: "qcm",
+                question: "Les 3 phases chronologiques de l'accouchement sont :",
+                options: [
+                    "Dilatation du col, Expulsion du fœtus, Délivrance (expulsion du placenta)",
+                    "Dilatation du col, Délivrance, Expulsion du fœtus",
+                    "Expulsion du fœtus, Dilatation du col, Délivrance",
+                    "Contractions, Expulsion, Délivrance"
+                ],
+                correct: [0],
+                explanation: "L'ordre correct est : 1. Dilatation du col, 2. Expulsion du fœtus, 3. Délivrance (expulsion du placenta)."
+            },
+            {
+                type: "matching",
+                question: "Associez les paramètres physiologiques au nouveau-né",
+                pairs: [
+                    { term: "Fréquence respiratoire", definition: "40/min" },
+                    { term: "Masse hydrique", definition: "80%" },
+                    { term: "Fréquence cardiaque", definition: "120-180/min" },
+                    { term: "Pression artérielle", definition: "70 mmHg" }
+                ],
+                explanation: "Ces valeurs sont significativement différentes de celles de l'adulte et reflètent l'adaptation néonatale."
+            }
+        ];
+
+        // ÉTAT DE L'APPLICATION
+        let currentMode = 'flashcards';
+        let currentCardIndex = 0;
+        let filteredCards = [];
+        let isFlipped = false;
+        let cardProgress = {};
+
+        // Initialisation au chargement
+        window.onload = function() {
+            initializeProgress();
+            updateStats();
+            filterCards('all', null);
+            generateTest();
+            // Activer manuellement le premier bouton de filtre
+            document.querySelector('.filter-btn').classList.add('active');
+        };
+
+        // GESTION DES MODES
+        function switchMode(mode, element) {
+            currentMode = mode;
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (element) {
+                element.classList.add('active');
+            }
+            
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            if (mode === 'flashcards') {
+                document.getElementById('flashcards-section').classList.add('active');
+            } else {
+                document.getElementById('test-section').classList.add('active');
+            }
+        }
+
+        // INITIALISATION DE LA PROGRESSION
+        function initializeProgress() {
+            const saved = localStorage.getItem('td2_progress');
+            if (saved) {
+                cardProgress = JSON.parse(saved);
+            } else {
+                flashcardsData.forEach((card, index) => {
+                    cardProgress[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                });
+                saveProgress();
+            }
+        }
+
+        // SAUVEGARDE DE LA PROGRESSION
+        function saveProgress() {
+            localStorage.setItem('td2_progress', JSON.stringify(cardProgress));
+        }
+
+        // MISE À JOUR DES STATISTIQUES
+        function updateStats() {
+            let total = flashcardsData.length;
+            let acquired = 0;
+            let review = 0;
+            let notAcquired = 0;
+            let newCards = 0;
+
+            Object.values(cardProgress).forEach(progress => {
+                switch(progress.status) {
+                    case 'acquired': acquired++; break;
+                    case 'review': review++; break;
+                    case 'not-acquired': notAcquired++; break;
+                    case 'new': newCards++; break;
+                }
+            });
+
+            document.getElementById('total-cards').textContent = total;
+            document.getElementById('acquired-cards').textContent = acquired;
+            document.getElementById('review-cards').textContent = review;
+            document.getElementById('not-acquired-cards').textContent = notAcquired;
+            document.getElementById('new-cards').textContent = newCards;
+
+            // Mise à jour barre de progression
+            const progress = filteredCards.length > 0 ? 
+                ((currentCardIndex + 1) / filteredCards.length * 100).toFixed(0) : 0;
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress + '%';
+        }
+
+        // FILTRAGE DES CARTES
+        function filterCards(filter, element) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (element) {
+                element.classList.add('active');
+            }
+
+            filteredCards = [];
+            flashcardsData.forEach((card, index) => {
+                const status = cardProgress[index].status;
+                
+                if (filter === 'all' || 
+                    filter === status ||
+                    (filter === 'review' && (status === 'review' || status === 'not-acquired'))) {
+                    filteredCards.push(index);
+                }
+            });
+
+            currentCardIndex = 0;
+            displayCurrentCard();
+            updateStats();
+        }
+
+        // AFFICHAGE DE LA CARTE ACTUELLE
+        function displayCurrentCard() {
+            const container = document.getElementById('flashcard-display');
+            
+            if (filteredCards.length === 0) {
+                container.innerHTML = `
+                    <div class="no-cards-message">
+                        <h3>📭 Aucune carte dans cette catégorie</h3>
+                        <p>Sélectionnez un autre filtre pour continuer l'apprentissage.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const cardIndex = filteredCards[currentCardIndex];
+            const card = flashcardsData[cardIndex];
+            isFlipped = false;
+
+            container.innerHTML = `
+                <div class="flashcard-container">
+                    <div class="flashcard" id="current-flashcard" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <div class="card-category">${card.category}</div>
+                            <div class="card-question">${card.question}</div>
+                            <p style="margin-top: 30px; font-size: 0.9em; opacity: 0.8;">
+                                Cliquez pour voir la réponse
+                            </p>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="card-category">${card.category}</div>
+                            <div class="card-answer">${formatAnswer(card.answer)}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="evaluation-buttons">
+                    <button class="eval-btn acquired" onclick="evaluateCard('acquired')">
+                        ✅ Acquis
+                    </button>
+                    <button class="eval-btn review" onclick="evaluateCard('review')">
+                        ⚠️ À revoir
+                    </button>
+                    <button class="eval-btn not-acquired" onclick="evaluateCard('not-acquired')">
+                        ❌ Non acquis
+                    </button>
+                </div>
+
+                <div class="navigation-buttons">
+                    <button class="nav-btn" onclick="previousCard()" ${currentCardIndex === 0 ? 'disabled' : ''}>
+                        ◀ Précédent
+                    </button>
+                    <span style="color: white; font-weight: bold;">
+                        ${currentCardIndex + 1} / ${filteredCards.length}
+                    </span>
+                    <button class="nav-btn" onclick="nextCard()" ${currentCardIndex >= filteredCards.length - 1 ? 'disabled' : ''}>
+                        Suivant ▶
+                    </button>
+                </div>
+            `;
+
+            updateStats();
+        }
+
+        // FORMATAGE DE LA RÉPONSE
+        function formatAnswer(answer) {
+            if (answer.includes('\n')) {
+                const lines = answer.split('\n');
+                return '<ul>' + lines.map(line => '<li>' + line + '</li>').join('') + '</ul>';
+            }
+            return answer;
+        }
+
+        // RETOURNER LA CARTE
+        function flipCard() {
+            const card = document.getElementById('current-flashcard');
+            card.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        // ÉVALUATION DE LA CARTE
+        function evaluateCard(status) {
+            const cardIndex = filteredCards[currentCardIndex];
+            
+            if (status === 'acquired') {
+                cardProgress[cardIndex].status = 'acquired';
+                cardProgress[cardIndex].reviewCount = 0;
+            } else if (status === 'review') {
+                cardProgress[cardIndex].status = 'review';
+                cardProgress[cardIndex].reviewCount = 1;
+            } else if (status === 'not-acquired') {
+                cardProgress[cardIndex].status = 'not-acquired';
+                cardProgress[cardIndex].reviewCount = 3;
+            }
+
+            saveProgress();
+            nextCard();
+        }
+
+        // CARTE SUIVANTE
+        function nextCard() {
+            if (currentCardIndex < filteredCards.length - 1) {
+                currentCardIndex++;
+                displayCurrentCard();
+            }
+        }
+
+        // CARTE PRÉCÉDENTE
+        function previousCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                displayCurrentCard();
+            }
+        }
+
+        // EXPORT DE LA PROGRESSION
+        function exportProgress() {
+            const dataStr = JSON.stringify(cardProgress, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'td2_ue25_progression.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // IMPORT DE LA PROGRESSION
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        cardProgress = JSON.parse(e.target.result);
+                        saveProgress();
+                        updateStats();
+                        displayCurrentCard();
+                        alert('✅ Progression importée avec succès !');
+                    } catch (error) {
+                        alert('❌ Erreur lors de l\'import du fichier');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // RÉINITIALISATION
+        function resetProgress() {
+            if (confirm('⚠️ Êtes-vous sûr de vouloir réinitialiser toute votre progression ?')) {
+                flashcardsData.forEach((card, index) => {
+                    cardProgress[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                });
+                saveProgress();
+                updateStats();
+                displayCurrentCard();
+                alert('✅ Progression réinitialisée !');
+            }
+        }
+
+        // GÉNÉRATION DU TEST
+        function generateTest() {
+            const container = document.getElementById('test-questions');
+            let html = '';
+
+            testQuestions.forEach((q, index) => {
+                html += `<div class="question-block" id="question-${index}">`;
+                html += `<div class="question-type">${getQuestionTypeName(q.type)}</div>`;
+                html += `<div class="question-title">${index + 1}. ${q.question}</div>`;
+
+                if (q.type === 'qcm') {
+                    html += '<div class="options">';
+                    q.options.forEach((option, i) => {
+                        html += `
+                            <label class="option">
+                                <input type="checkbox" name="q${index}" value="${i}">
+                                <span>${option}</span>
+                            </label>
+                        `;
+                    });
+                    html += '</div>';
+                } else if (q.type === 'fill') {
+                    html += `<input type="text" class="fill-input" id="fill-${index}" placeholder="Votre réponse...">`;
+                } else if (q.type === 'matching') {
+                    html += '<div class="matching-container">';
+                    q.pairs.forEach((pair, i) => {
+                        html += `
+                            <div class="matching-item">
+                                <strong>${pair.term}</strong>
+                                <select class="matching-select" id="match-${index}-${i}">
+                                    <option value="">-- Choisir --</option>
+                                    ${q.pairs.map((p, j) => `<option value="${j}">${p.definition}</option>`).join('')}
+                                </select>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                html += `<div class="explanation" id="explanation-${index}">${q.explanation}</div>`;
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        function getQuestionTypeName(type) {
+            switch(type) {
+                case 'qcm': return '☑️ QCM';
+                case 'fill': return '✏️ À compléter';
+                case 'matching': return '🔗 Appariement';
+                default: return 'Question';
+            }
+        }
+
+        // SOUMISSION DU TEST
+        function submitTest() {
+            let score = 0;
+            let totalPoints = 0;
+
+            testQuestions.forEach((q, index) => {
+                totalPoints++;
+                const explanationDiv = document.getElementById(`explanation-${index}`);
+                if (explanationDiv) {
+                    explanationDiv.classList.add('show');
+                }
+
+                if (q.type === 'qcm') {
+                    const selected = Array.from(document.querySelectorAll(`input[name="q${index}"]:checked`))
+                        .map(input => parseInt(input.value));
+                    
+                    const isCorrect = arraysEqual(selected.sort(), q.correct.sort());
+                    if (isCorrect) score++;
+
+                    document.querySelectorAll(`input[name="q${index}"]`).forEach((input, i) => {
+                        const option = input.closest('.option');
+                        if (option) {
+                            if (q.correct.includes(i)) {
+                                option.classList.add('correct');
+                            } else if (selected.includes(i)) {
+                                option.classList.add('incorrect');
+                            }
+                        }
+                    });
+                } else if (q.type === 'fill') {
+                    const input = document.getElementById(`fill-${index}`);
+                    if (input) {
+                        const userAnswer = input.value.trim().toLowerCase();
+                        const correctAnswer = q.answer.toLowerCase();
+                        
+                        if (userAnswer === correctAnswer) {
+                            score++;
+                            input.classList.add('correct');
+                        } else {
+                            input.classList.add('incorrect');
+                        }
+                    }
+                } else if (q.type === 'matching') {
+                    let allCorrect = true;
+                    q.pairs.forEach((pair, i) => {
+                        const select = document.getElementById(`match-${index}-${i}`);
+                        if (select && parseInt(select.value) !== i) {
+                            allCorrect = false;
+                        }
+                    });
+                    if (allCorrect) score++;
+                }
+            });
+
+            const percentage = (score / totalPoints * 100).toFixed(0);
+            displayTestResult(percentage, score, totalPoints);
+        }
+
+        function arraysEqual(a, b) {
+            return a.length === b.length && a.every((val, i) => val === b[i]);
+        }
+
+        // AFFICHAGE DU RÉSULTAT
+        function displayTestResult(percentage, score, total) {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.classList.add('show');
+
+            let resultClass = '';
+            let message = '';
+
+            if (percentage >= 90) {
+                resultClass = 'excellent';
+                message = '🏆 Excellent ! Vous maîtrisez parfaitement le sujet !';
+            } else if (percentage >= 70) {
+                resultClass = 'good';
+                message = '👍 Très bien ! Quelques points à revoir mais c\'est solide !';
+            } else if (percentage >= 50) {
+                resultClass = 'average';
+                message = '📚 Pas mal, mais il faut encore réviser certains points.';
+            } else {
+                resultClass = 'poor';
+                message = '💪 Courage ! Reprenez les flashcards pour mieux assimiler.';
+            }
+
+            resultDiv.className = `test-result show ${resultClass}`;
+            resultDiv.innerHTML = `
+                <h3>${message}</h3>
+                <div class="score-display">${percentage}%</div>
+                <p>Score : ${score}/${total}</p>
+                <button class="retry-btn" onclick="retryTest()">🔄 Refaire le test</button>
+            `;
+
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // RECOMMENCER LE TEST
+        function retryTest() {
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+            document.querySelectorAll('.fill-input').forEach(input => {
+                input.classList.remove('correct', 'incorrect');
+                input.value = '';
+            });
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            document.querySelectorAll('.matching-select').forEach(select => {
+                select.value = '';
+            });
+            document.querySelectorAll('.explanation').forEach(exp => {
+                exp.classList.remove('show');
+            });
+            document.getElementById('test-result').classList.remove('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

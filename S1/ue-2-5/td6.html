@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD 6 - UE 2.5 S1 - Révisions Ostéo-articulaire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .mode-btn.active {
+            background: #764ba2;
+            color: white;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        /* FLASHCARDS MODE */
+        .stats-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-card .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .flashcard-container {
+            perspective: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .flashcard {
+            width: 100%;
+            min-height: 400px;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            min-height: 400px;
+            backface-visibility: hidden;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        .card-category {
+            display: inline-block;
+            padding: 5px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+        }
+
+        .card-content {
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .card-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-acquired {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-review {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-not-acquired {
+            background: #ef4444;
+            color: white;
+        }
+
+        /* TEST MODE */
+        .test-container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e8eaff;
+        }
+
+        .option.correct {
+            border-color: #22c55e;
+            background: #dcfce7;
+        }
+
+        .option.incorrect {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+
+        .input-answer {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-answer:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .matching-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .matching-item {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .matching-item:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .matching-item.selected {
+            border-color: #667eea;
+            background: #e8eaff;
+        }
+
+        .matching-item.matched {
+            border-color: #22c55e;
+            background: #dcfce7;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .score-excellent {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        .score-good {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .score-average {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .score-poor {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .results h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .results p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .mode-selector {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .matching-container {
+                grid-template-columns: 1fr;
+            }
+
+            .card-face {
+                padding: 20px;
+                min-height: 300px;
+            }
+
+            .card-content {
+                font-size: 1.1em;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 TD N°6 - UE 2.5 S1</h1>
+            <p>Physiologie ostéoarticulaire - Révisions</p>
+        </div>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="switchMode('flashcards')">
+                📚 Mode Flashcards
+            </button>
+            <button class="mode-btn" onclick="switchMode('test')">
+                ✏️ Mode Test
+            </button>
+        </div>
+
+        <!-- FLASHCARDS MODE -->
+        <div id="flashcards-mode" class="mode-content active">
+            <div class="stats-container">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="number" id="total-cards">0</div>
+                        <div class="label">Total cartes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="new-cards">0</div>
+                        <div class="label">Nouvelles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="acquired-cards">0</div>
+                        <div class="label">Acquises</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number" id="review-cards">0</div>
+                        <div class="label">À réviser</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%">0%</div>
+                </div>
+            </div>
+
+            <div class="filters" id="filters">
+                <button class="filter-btn active" onclick="filterCards('all')">📋 Toutes les cartes</button>
+                <button class="filter-btn" onclick="filterCards('new')">🆕 Nouvelles</button>
+                <button class="filter-btn" onclick="filterCards('review')">⚠️ À réviser</button>
+                <button class="filter-btn" onclick="filterCards('acquired')">✅ Acquises</button>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="exportProgress()">💾 Exporter</button>
+                <button class="control-btn" onclick="document.getElementById('import-file').click()">
+                    📥 Importer
+                </button>
+                <input type="file" id="import-file" accept=".json" style="display: none" onchange="importProgress(event)">
+                <button class="control-btn" onclick="resetProgress()">🔄 Réinitialiser</button>
+            </div>
+
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div class="card-face card-front">
+                        <span class="card-number" id="card-number">1/1</span>
+                        <span class="card-category" id="card-category">Catégorie</span>
+                        <div class="card-content" id="card-question">Chargement...</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <span class="card-number" id="card-number-back">1/1</span>
+                        <span class="card-category" id="card-category-back">Catégorie</span>
+                        <div class="card-content" id="card-answer">Réponse...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn btn-not-acquired" onclick="rateCard('not-acquired')">
+                    ❌ Non acquis
+                </button>
+                <button class="action-btn btn-review" onclick="rateCard('review')">
+                    ⚠️ À revoir
+                </button>
+                <button class="action-btn btn-acquired" onclick="rateCard('acquired')">
+                    ✅ Acquis
+                </button>
+            </div>
+        </div>
+
+        <!-- TEST MODE -->
+        <div id="test-mode" class="mode-content">
+            <div class="test-container" id="test-container">
+                <!-- Questions will be generated here -->
+            </div>
+            <button class="submit-btn" id="submit-btn" onclick="submitTest()">
+                📝 Corriger le test
+            </button>
+
+            <div class="results" id="results">
+                <h2 id="results-title">Résultats</h2>
+                <div class="score-circle" id="score-circle">0%</div>
+                <p id="results-message">Message</p>
+                <button class="submit-btn" onclick="resetTest()">🔄 Recommencer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Flashcards data
+        const flashcardsData = [
+            // Niveaux d'organisation
+            {
+                category: "Physiologie générale",
+                question: "Quels sont les 6 niveaux d'organisation du corps humain ?",
+                answer: "1. Chimique<br>2. Cellulaire<br>3. Tissulaire<br>4. Organique (les organes)<br>5. Systèmes (les appareils)<br>6. Organisme"
+            },
+            
+            // Systèmes du corps
+            {
+                category: "Physiologie générale",
+                question: "Système nerveux : descriptif et fonction principale ?",
+                answer: "<strong>Descriptif :</strong> Central, périphérique, neurones<br><strong>Fonction :</strong> Véhiculer et stocker les informations"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Système tégumentaire : descriptif et fonction principale ?",
+                answer: "<strong>Descriptif :</strong> Peau, phanères<br><strong>Fonction :</strong> Protection (barrière)"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Système endocrinien : descriptif et fonction principale ?",
+                answer: "<strong>Descriptif :</strong> Glandes<br><strong>Fonction :</strong> Régulation"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Système immunitaire : descriptif et fonction principale ?",
+                answer: "<strong>Descriptif :</strong> Cellules immunocompétentes<br><strong>Fonction :</strong> Défense"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Système urinaire : descriptif et fonction principale ?",
+                answer: "<strong>Descriptif :</strong> Reins, uretères, vessie, urètre<br><strong>Fonction :</strong> Épuration"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Système digestif : descriptif et fonction principale ?",
+                answer: "<strong>Descriptif :</strong> Œsophage, estomac, grêle, côlon, pancréas, foie<br><strong>Fonction :</strong> Nutrition, élimination des déchets"
+            },
+
+            // Homéostasie et régulation
+            {
+                category: "Physiologie générale",
+                question: "Qu'est-ce que l'homéostasie ?",
+                answer: "Le maintien de la stabilité du milieu intérieur"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Que détectent principalement les thermorécepteurs ?",
+                answer: "La température du corps"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Comment l'organisme réagit-il lors d'une augmentation de la température corporelle ?",
+                answer: "Par sudation et vasodilatation cutanée"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Qu'est-ce que la bradycardie ?",
+                answer: "Une fréquence cardiaque trop basse"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Quelle est la première barrière de défense de l'organisme ?",
+                answer: "La peau et les muqueuses"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Citez un organe lymphoïde secondaire",
+                answer: "Le ganglion lymphatique (autres exemples : rate, amygdales)"
+            },
+            {
+                category: "Physiologie générale",
+                question: "Quel est le rôle principal des macrophages ?",
+                answer: "Phagocyter (ingérer et détruire) les agents pathogènes"
+            },
+
+            // Définitions ostéoarticulaires
+            {
+                category: "Sémiologie",
+                question: "Qu'est-ce que le périoste ?",
+                answer: "Couche de tissu fibreux qui recouvre l'os"
+            },
+            {
+                category: "Sémiologie",
+                question: "Qu'est-ce que l'étiologie ?",
+                answer: "Étude des causes des maladies"
+            },
+            {
+                category: "Sémiologie",
+                question: "Qu'est-ce que la tétraplégie ?",
+                answer: "Paralysie des quatre membres"
+            },
+            {
+                category: "Sémiologie",
+                question: "Qu'est-ce qu'un ostéophyte ?",
+                answer: "Excroissance osseuse développée au rebord des surfaces articulaires"
+            },
+            {
+                category: "Sémiologie",
+                question: "Qu'est-ce que la septicémie ?",
+                answer: "État infectieux grave dû à une infection généralisée, disséminée par voie sanguine"
+            },
+            {
+                category: "Sémiologie",
+                question: "Qu'est-ce que l'impotence fonctionnelle ?",
+                answer: "Impossibilité d'accomplir certains mouvements"
+            },
+            {
+                category: "Sémiologie",
+                question: "Qu'est-ce que l'antibiothérapie ?",
+                answer: "Utilisation thérapeutique des antibiotiques"
+            },
+
+            // Tissu cartilagineux
+            {
+                category: "Tissu cartilagineux",
+                question: "Quels sont les 3 types de tissu cartilagineux et leurs localisations ?",
+                answer: "<strong>1. Hyalin :</strong> paroi des voies aériennes supérieures, surface articulaire<br><strong>2. Élastique :</strong> oreille, épiglotte, larynx<br><strong>3. Fibreux :</strong> disques intervertébraux, insertion tendons et ligaments"
+            },
+            {
+                category: "Tissu cartilagineux",
+                question: "Quel est le rôle du tissu cartilagineux ?",
+                answer: "Réduire les frictions entre les structures osseuses"
+            },
+
+            // Types d'os
+            {
+                category: "Tissu osseux",
+                question: "Os long : rôle et exemples ?",
+                answer: "<strong>Rôle :</strong> Soutiennent le poids et favorisent le mouvement<br><strong>Exemples :</strong> Humérus, radius, ulna, fémur, fibula, tibia, phalanges, métacarpe, métatarse"
+            },
+            {
+                category: "Tissu osseux",
+                question: "Os plat : rôle et exemples ?",
+                answer: "<strong>Rôle :</strong> Protègent les organes (cerveau, cœur, organes pelviens)<br><strong>Exemples :</strong> Os crâniens, sternum, scapula, côtes"
+            },
+            {
+                category: "Tissu osseux",
+                question: "Os court : rôle et exemples ?",
+                answer: "<strong>Rôle :</strong> Stabilité et une certaine amplitude de mouvement<br><strong>Exemples :</strong> Os du carpe et du tarse"
+            },
+            {
+                category: "Tissu osseux",
+                question: "Os irrégulier : rôle et exemples ?",
+                answer: "<strong>Rôle :</strong> Protègent les organes internes<br><strong>Exemples :</strong> Vertèbres, sacrum, coccyx"
+            },
+            {
+                category: "Tissu osseux",
+                question: "Os sésamoïde : rôle et exemples ?",
+                answer: "<strong>Rôle :</strong> Protège les tendons des tensions et de l'usure<br><strong>Exemples :</strong> Patella (rotule), sésamoïdes"
+            },
+
+            // Structure osseuse
+            {
+                category: "Tissu osseux",
+                question: "Qu'est-ce que l'os spongieux ?",
+                answer: "Petits fragments d'os semblables à des épingles disposés comme un nid d'abeilles. Réduit le poids de l'os tout en lui procurant une solidité"
+            },
+            {
+                category: "Tissu osseux",
+                question: "Qu'est-ce que l'os compact ?",
+                answer: "Partie externe dense, dure et lisse de l'os. Il entoure le canal médullaire et contient vaisseaux sanguins et nerfs"
+            },
+
+            // Cellules osseuses
+            {
+                category: "Tissu osseux",
+                question: "Que sont les ostéoclastes ?",
+                answer: "Énormes cellules mobiles qui détruisent l'os (résorption osseuse)"
+            },
+            {
+                category: "Tissu osseux",
+                question: "Que sont les ostéoblastes ?",
+                answer: "Grandes cellules responsables de la formation du tissu osseux"
+            },
+            {
+                category: "Tissu osseux",
+                question: "Que sont les ostéocytes ?",
+                answer: "Cellules entretenant la trame osseuse (nutrition et remodelage)"
+            },
+
+            // Articulations
+            {
+                category: "Articulations",
+                question: "Qu'est-ce qu'une articulation ?",
+                answer: "Ensemble des éléments par lesquels les os s'unissent les uns aux autres afin de permettre les mouvements des différents segments de membres"
+            },
+            {
+                category: "Articulations",
+                question: "Synarthrose : mouvement et exemples ?",
+                answer: "<strong>Mouvement :</strong> Articulation immobile<br><strong>Exemples :</strong> Os du crâne et du nez"
+            },
+            {
+                category: "Articulations",
+                question: "Amphiarthrose : mouvement et exemples ?",
+                answer: "<strong>Mouvement :</strong> Articulation semi-mobile<br><strong>Exemples :</strong> Symphyse pubienne, articulation distale entre le tibia et la fibula, vertèbres"
+            },
+            {
+                category: "Articulations",
+                question: "Diarthrose : mouvement et exemples ?",
+                answer: "<strong>Mouvement :</strong> Mouvements variés et grandes amplitudes<br><strong>Exemples :</strong> Coude, épaule, cheville, genou, hanche"
+            },
+
+            // Éléments des diarthroses
+            {
+                category: "Articulations",
+                question: "Quel est le rôle du cartilage articulaire ?",
+                answer: "Protège les surfaces osseuses"
+            },
+            {
+                category: "Articulations",
+                question: "Qu'est-ce que la cavité articulaire ?",
+                answer: "Espace rempli de liquide synovial entre les surfaces articulaires"
+            },
+            {
+                category: "Articulations",
+                question: "Quel est le rôle du liquide synovial ?",
+                answer: "Agit comme lubrifiant de l'articulation"
+            },
+            {
+                category: "Articulations",
+                question: "Qu'est-ce que la capsule articulaire ?",
+                answer: "Sac étanche enfermant l'articulation avec le cartilage et le liquide synovial"
+            },
+            {
+                category: "Articulations",
+                question: "Quel est le rôle des ligaments ?",
+                answer: "Lier les os et limiter les mouvements dans certains plans"
+            },
+            {
+                category: "Articulations",
+                question: "Qu'est-ce qu'une bourse séreuse et quel est son rôle ?",
+                answer: "Poche remplie de liquide synovial, située entre les tendons, les muscles, les os et la peau. Elle agit comme un coussin pour réduire la friction et faciliter le mouvement des structures adjacentes"
+            },
+
+            // Fractures
+            {
+                category: "Pathologies",
+                question: "Qu'est-ce qu'une fracture ?",
+                answer: "Solution de continuité d'un os liée à un traumatisme (interruption de la structure osseuse)"
+            },
+            {
+                category: "Pathologies",
+                question: "Qu'est-ce qu'une fracture comminutive ?",
+                answer: "Fracture avec présence de plusieurs fragments osseux"
+            },
+            {
+                category: "Pathologies",
+                question: "Qu'est-ce qu'une fracture spiroïde ?",
+                answer: "Fracture en spirale causée principalement par une torsion"
+            },
+            {
+                category: "Pathologies",
+                question: "Qu'est-ce qu'une fracture transversale ?",
+                answer: "Fracture avec un trait perpendiculaire à l'axe de l'os"
+            },
+            {
+                category: "Pathologies",
+                question: "Qu'est-ce qu'une fracture ouverte ?",
+                answer: "Fracture avec communication entre l'os fracturé et l'extérieur"
+            },
+            {
+                category: "Pathologies",
+                question: "Où se rencontre typiquement une fracture tassement par compression ?",
+                answer: "Au niveau des vertèbres"
+            },
+
+            // Pathologies rhumatologiques
+            {
+                category: "Pathologies",
+                question: "Quelles sont les origines des pathologies rhumatologiques ?",
+                answer: "Infectieuses, Inflammatoires, Microcristallines, Tumorales, Métaboliques, Mécaniques, Dégénératives"
+            },
+            {
+                category: "Pathologies",
+                question: "Anatomie articulaire et pathologies associées ?",
+                answer: "<table><tr><td><strong>Cartilage articulaire</strong></td><td>Arthrose</td></tr><tr><td><strong>Synoviale</strong></td><td>Inflammation, infection (arthrite septique), tumeurs, microcristaux (goutte/CCA)</td></tr><tr><td><strong>Os sous-chondral</strong></td><td>Ostéonécrose, algodystrophie</td></tr></table>"
+            },
+            {
+                category: "Pathologies",
+                question: "Pathologies périarticulaires : quelles structures et pathologies ?",
+                answer: "<strong>Tendons :</strong> Tendinites<br><strong>Bourses :</strong> Bursites<br><strong>Ligaments :</strong> Entorses, luxations"
+            },
+
+            // Cas clinique fracture fémur
+            {
+                category: "Cas cliniques",
+                question: "Jeune homme avec AVP violent en moto : douleur importante, déformation cuisse gauche avec raccourcissement et rotation, cuisse tendue à la palpation. Hypothèse diagnostique ?",
+                answer: "Fracture du fémur"
+            },
+            {
+                category: "Cas cliniques",
+                question: "Pour confirmer une suspicion de fracture du fémur, quel bilan radiologique préconiser ?",
+                answer: "Fémur de face et profil en ayant bien les 2 articulations sus et sous-jacentes (hanche et genou)"
+            },
+            {
+                category: "Cas cliniques",
+                question: "Traitement d'une fracture du fémur ?",
+                answer: "Réduction si déplacement puis ostéosynthèse par enclouage ou plaque"
+            },
+
+            // Cas clinique polyarthrite
+            {
+                category: "Cas cliniques",
+                question: "Patiente 50 ans : enraidissement douloureux des articulations des mains + gonflement de plusieurs articulations. Hypothèse diagnostique ?",
+                answer: "Polyarthrite rhumatoïde débutante"
+            },
+            {
+                category: "Cas cliniques",
+                question: "Classification de la polyarthrite rhumatoïde ?",
+                answer: "Maladie auto-immune"
+            },
+            {
+                category: "Cas cliniques",
+                question: "Quels sont les 3 examens permettant de confirmer le diagnostic de polyarthrite rhumatoïde ?",
+                answer: "1. Examen clinique<br>2. Examens d'imagerie : radiographie, IRM<br>3. Analyses biologiques : facteur rhumatoïde, syndrome inflammatoire"
+            },
+            {
+                category: "Cas cliniques",
+                question: "Traitements de la polyarthrite rhumatoïde ?",
+                answer: "<strong>Symptomatiques :</strong> AINS, antalgiques, corticoïdes<br><strong>Locaux :</strong> Infiltrations<br><strong>De fond :</strong> Immunosuppresseurs (méthotrexate), biothérapies"
+            }
+        ];
+
+        // Test questions data
+        const testQuestions = [
+            {
+                type: "mcq",
+                question: "L'homéostasie correspond à :",
+                options: [
+                    "La production d'énergie par les cellules",
+                    "L'élimination des déchets par les reins",
+                    "La circulation du sang dans les vaisseaux",
+                    "Le maintien de la stabilité du milieu intérieur"
+                ],
+                correct: 3,
+                explanation: "L'homéostasie est le processus de régulation qui permet de maintenir la stabilité du milieu intérieur malgré les variations du milieu extérieur."
+            },
+            {
+                type: "mcq",
+                question: "Les thermorécepteurs détectent principalement :",
+                options: [
+                    "La température du corps",
+                    "La pression artérielle",
+                    "La glycémie",
+                    "La concentration en O₂ sanguin"
+                ],
+                correct: 0,
+                explanation: "Les thermorécepteurs sont des récepteurs sensoriels spécialisés dans la détection des variations de température."
+            },
+            {
+                type: "mcq",
+                question: "Lors d'une augmentation de la température corporelle, l'organisme réagit par :",
+                options: [
+                    "Vasoconstriction cutanée",
+                    "Frissons",
+                    "Sudation et vasodilatation",
+                    "Augmentation de la thermogenèse"
+                ],
+                correct: 2,
+                explanation: "Pour évacuer la chaleur, l'organisme augmente la sudation (évaporation rafraîchissante) et dilate les vaisseaux cutanés (radiation de chaleur)."
+            },
+            {
+                type: "mcq",
+                question: "La bradycardie correspond à :",
+                options: [
+                    "Une fréquence cardiaque trop élevée",
+                    "Une fréquence cardiaque trop basse",
+                    "Une pression artérielle trop basse",
+                    "Une respiration trop lente"
+                ],
+                correct: 1,
+                explanation: "La bradycardie désigne une fréquence cardiaque inférieure à 60 battements par minute."
+            },
+            {
+                type: "mcq",
+                question: "Quelle est la première barrière de défense de l'organisme ?",
+                options: [
+                    "Les anticorps",
+                    "La peau et les muqueuses",
+                    "Les lymphocytes T",
+                    "Les cytokines"
+                ],
+                correct: 1,
+                explanation: "La peau et les muqueuses constituent la première ligne de défense physique contre les agents pathogènes."
+            },
+            {
+                type: "mcq",
+                question: "Quel organe est un organe lymphoïde secondaire ?",
+                options: [
+                    "Thymus",
+                    "Ganglion lymphatique",
+                    "Moelle osseuse",
+                    "Le pancréas"
+                ],
+                correct: 1,
+                explanation: "Les ganglions lymphatiques sont des organes lymphoïdes secondaires où se déroulent les réponses immunitaires. Le thymus et la moelle osseuse sont des organes primaires."
+            },
+            {
+                type: "mcq",
+                question: "Quel est le rôle principal des macrophages ?",
+                options: [
+                    "Produire des anticorps",
+                    "Pas de rôle dans l'immunité",
+                    "Détruire directement les cellules infectées",
+                    "Phagocyter les agents pathogènes"
+                ],
+                correct: 3,
+                explanation: "Les macrophages sont des cellules phagocytaires qui ingèrent et détruisent les agents pathogènes et les débris cellulaires."
+            },
+            {
+                type: "mcq",
+                question: "Une fracture comminutive se définit par :",
+                options: [
+                    "Une fracture en spirale",
+                    "La présence de plusieurs fragments osseux",
+                    "Une fissure sans déplacement",
+                    "Un arrachement osseux"
+                ],
+                correct: 1,
+                explanation: "Une fracture comminutive est caractérisée par la fragmentation de l'os en plusieurs morceaux."
+            },
+            {
+                type: "mcq",
+                question: "Une fracture spiroïde est causée principalement par :",
+                options: [
+                    "Une compression",
+                    "Un choc direct",
+                    "Une torsion",
+                    "Une hyperextension"
+                ],
+                correct: 2,
+                explanation: "Les fractures spiroïdes sont des fractures en spirale typiquement causées par un mécanisme de torsion."
+            },
+            {
+                type: "mcq",
+                question: "Une fracture transversale se définit par :",
+                options: [
+                    "Un trait oblique",
+                    "Un trait en spirale",
+                    "Une fissure longitudinale",
+                    "Un trait perpendiculaire à l'axe de l'os"
+                ],
+                correct: 3,
+                explanation: "Une fracture transversale présente un trait de fracture perpendiculaire à l'axe longitudinal de l'os."
+            },
+            {
+                type: "mcq",
+                question: "Une fracture ouverte se définit par :",
+                options: [
+                    "Deux os cassés en même temps",
+                    "Une déformation du membre",
+                    "Une communication entre l'os fracturé et l'extérieur",
+                    "La présence de plusieurs fragments"
+                ],
+                correct: 2,
+                explanation: "Une fracture ouverte (ou exposée) est caractérisée par une communication entre le foyer de fracture et l'extérieur, avec risque infectieux majeur."
+            },
+            {
+                type: "mcq",
+                question: "Une fracture tassement par compression se rencontre typiquement :",
+                options: [
+                    "Au niveau du col du fémur",
+                    "Au niveau des côtes",
+                    "Au niveau du radius distal",
+                    "Au niveau des vertèbres"
+                ],
+                correct: 3,
+                explanation: "Les fractures par tassement sont caractéristiques des vertèbres, surtout en cas d'ostéoporose."
+            },
+            {
+                type: "fill",
+                question: "Le __________ est une couche de tissu fibreux qui recouvre l'os.",
+                answer: "périoste",
+                explanation: "Le périoste est une membrane fibro-vasculaire qui recouvre la surface externe de l'os."
+            },
+            {
+                type: "fill",
+                question: "L'__________ est l'étude des causes des maladies.",
+                answer: "étiologie",
+                explanation: "L'étiologie étudie les causes et origines des maladies."
+            },
+            {
+                type: "fill",
+                question: "Un __________ est une excroissance osseuse développée au rebord des surfaces articulaires.",
+                answer: "ostéophyte",
+                explanation: "Les ostéophytes sont des excroissances osseuses typiques de l'arthrose."
+            },
+            {
+                type: "fill",
+                question: "Le rôle du tissu cartilagineux est de réduire les __________ entre les structures osseuses.",
+                answer: "frictions",
+                explanation: "Le cartilage articulaire permet un glissement fluide des surfaces osseuses."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque type de cellule osseuse à sa fonction :",
+                pairs: [
+                    { left: "Ostéoclastes", right: "Détruisent l'os" },
+                    { left: "Ostéoblastes", right: "Forment le tissu osseux" },
+                    { left: "Ostéocytes", right: "Entretiennent la trame osseuse" }
+                ],
+                explanation: "Ces trois types cellulaires assurent le remodelage osseux constant tout au long de la vie."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque type d'articulation à son degré de mobilité :",
+                pairs: [
+                    { left: "Synarthrose", right: "Immobile" },
+                    { left: "Amphiarthrose", right: "Semi-mobile" },
+                    { left: "Diarthrose", right: "Très mobile" }
+                ],
+                explanation: "La classification des articulations se base sur leur degré de mobilité et leur structure."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque système à sa fonction principale :",
+                pairs: [
+                    { left: "Système nerveux", right: "Véhiculer les informations" },
+                    { left: "Système tégumentaire", right: "Protection (barrière)" },
+                    { left: "Système endocrinien", right: "Régulation" },
+                    { left: "Système immunitaire", right: "Défense" }
+                ],
+                explanation: "Chaque système corporel a une fonction spécifique qui contribue à l'homéostasie."
+            }
+        ];
+
+        // Flashcards state
+        let currentFilter = 'all';
+        let currentCardIndex = 0;
+        let filteredCards = [];
+        let cardStates = {};
+
+        // Initialize flashcards
+        function initFlashcards() {
+            // Load saved states or initialize
+            const saved = localStorage.getItem('cardStates');
+            if (saved) {
+                cardStates = JSON.parse(saved);
+            } else {
+                flashcardsData.forEach((_, index) => {
+                    cardStates[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                });
+            }
+            filterCards('all');
+            updateStats();
+        }
+
+        function filterCards(filter) {
+            currentFilter = filter;
+            
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Filter cards based on status
+            filteredCards = flashcardsData.map((card, index) => ({
+                card,
+                index,
+                state: cardStates[index]
+            })).filter(item => {
+                switch(filter) {
+                    case 'new': return item.state.status === 'new';
+                    case 'review': return item.state.status === 'review' || item.state.status === 'not-acquired';
+                    case 'acquired': return item.state.status === 'acquired';
+                    default: return true;
+                }
+            });
+
+            currentCardIndex = 0;
+            if (filteredCards.length > 0) {
+                displayCard();
+            } else {
+                document.getElementById('card-question').innerHTML = "Aucune carte dans cette catégorie";
+                document.getElementById('card-answer').innerHTML = "Changez de filtre pour voir d'autres cartes";
+            }
+        }
+
+        function displayCard() {
+            if (filteredCards.length === 0) return;
+
+            const { card, index } = filteredCards[currentCardIndex];
+            
+            document.getElementById('card-category').textContent = card.category;
+            document.getElementById('card-category-back').textContent = card.category;
+            document.getElementById('card-question').innerHTML = card.question;
+            document.getElementById('card-answer').innerHTML = card.answer;
+            document.getElementById('card-number').textContent = `${currentCardIndex + 1}/${filteredCards.length}`;
+            document.getElementById('card-number-back').textContent = `${currentCardIndex + 1}/${filteredCards.length}`;
+
+            // Reset flip
+            document.getElementById('flashcard').classList.remove('flipped');
+
+            updateProgress();
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function rateCard(rating) {
+            const { index } = filteredCards[currentCardIndex];
+            
+            switch(rating) {
+                case 'acquired':
+                    cardStates[index].status = 'acquired';
+                    break;
+                case 'review':
+                    cardStates[index].status = 'review';
+                    cardStates[index].reviewCount = 1;
+                    break;
+                case 'not-acquired':
+                    cardStates[index].status = 'not-acquired';
+                    cardStates[index].reviewCount = 3;
+                    break;
+            }
+
+            saveProgress();
+            
+            // Move to next card
+            if (currentCardIndex < filteredCards.length - 1) {
+                currentCardIndex++;
+                displayCard();
+            } else {
+                // Re-filter to update the deck
+                filterCards(currentFilter);
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = flashcardsData.length;
+            const acquired = Object.values(cardStates).filter(s => s.status === 'acquired').length;
+            const newCards = Object.values(cardStates).filter(s => s.status === 'new').length;
+            const review = Object.values(cardStates).filter(s => s.status === 'review' || s.status === 'not-acquired').length;
+
+            document.getElementById('total-cards').textContent = total;
+            document.getElementById('acquired-cards').textContent = acquired;
+            document.getElementById('new-cards').textContent = newCards;
+            document.getElementById('review-cards').textContent = review;
+
+            const progress = Math.round((acquired / total) * 100);
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-fill').textContent = progress + '%';
+        }
+
+        function updateProgress() {
+            const progress = Math.round(((currentCardIndex + 1) / filteredCards.length) * 100);
+            // This shows progress through current deck
+        }
+
+        function saveProgress() {
+            localStorage.setItem('cardStates', JSON.stringify(cardStates));
+        }
+
+        function exportProgress() {
+            const dataStr = JSON.stringify(cardStates, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'flashcards-progress.json';
+            a.click();
+        }
+
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    cardStates = JSON.parse(e.target.result);
+                    saveProgress();
+                    filterCards(currentFilter);
+                    updateStats();
+                    alert('Progression importée avec succès !');
+                } catch (error) {
+                    alert('Erreur lors de l\'importation du fichier');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetProgress() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser toute votre progression ?')) {
+                flashcardsData.forEach((_, index) => {
+                    cardStates[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                });
+                saveProgress();
+                filterCards('all');
+                updateStats();
+            }
+        }
+
+        // Test mode functions
+        let userAnswers = {};
+        let matchingSelections = {};
+
+        function initTest() {
+            const container = document.getElementById('test-container');
+            container.innerHTML = '';
+
+            testQuestions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.innerHTML = `
+                    <div class="question-header">Question ${index + 1}</div>
+                    <div class="question-text">${q.question}</div>
+                `;
+
+                if (q.type === 'mcq') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    q.options.forEach((option, optIndex) => {
+                        const optionDiv = document.createElement('div');
+                        optionDiv.className = 'option';
+                        optionDiv.textContent = option;
+                        optionDiv.onclick = () => selectOption(index, optIndex);
+                        optionsDiv.appendChild(optionDiv);
+                    });
+                    questionDiv.appendChild(optionsDiv);
+                } else if (q.type === 'fill') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'input-answer';
+                    input.placeholder = 'Entrez votre réponse...';
+                    input.oninput = (e) => userAnswers[index] = e.target.value.trim().toLowerCase();
+                    questionDiv.appendChild(input);
+                } else if (q.type === 'matching') {
+                    const matchingDiv = document.createElement('div');
+                    matchingDiv.className = 'matching-container';
+                    matchingDiv.id = `matching-${index}`;
+                    
+                    const leftCol = document.createElement('div');
+                    leftCol.className = 'matching-column';
+                    const rightCol = document.createElement('div');
+                    rightCol.className = 'matching-column';
+
+                    // Shuffle right column
+                    const shuffledRight = [...q.pairs].sort(() => Math.random() - 0.5);
+
+                    q.pairs.forEach((pair, pairIndex) => {
+                        const leftItem = document.createElement('div');
+                        leftItem.className = 'matching-item';
+                        leftItem.textContent = pair.left;
+                        leftItem.dataset.index = pairIndex;
+                        leftItem.onclick = () => selectMatching(index, 'left', pairIndex);
+                        leftCol.appendChild(leftItem);
+                    });
+
+                    shuffledRight.forEach((pair, pairIndex) => {
+                        const rightItem = document.createElement('div');
+                        rightItem.className = 'matching-item';
+                        rightItem.textContent = pair.right;
+                        const originalIndex = q.pairs.findIndex(p => p.right === pair.right);
+                        rightItem.dataset.index = originalIndex;
+                        rightItem.onclick = () => selectMatching(index, 'right', originalIndex);
+                        rightCol.appendChild(rightItem);
+                    });
+
+                    matchingDiv.appendChild(leftCol);
+                    matchingDiv.appendChild(rightCol);
+                    questionDiv.appendChild(matchingDiv);
+                }
+
+                const explanation = document.createElement('div');
+                explanation.className = 'explanation';
+                explanation.innerHTML = `<strong>Explication :</strong> ${q.explanation}`;
+                questionDiv.appendChild(explanation);
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            
+            const options = document.querySelectorAll(`.question-container:nth-child(${questionIndex + 1}) .option`);
+            options.forEach((opt, idx) => {
+                opt.classList.remove('selected');
+                if (idx === optionIndex) {
+                    opt.classList.add('selected');
+                }
+            });
+        }
+
+        function selectMatching(questionIndex, side, itemIndex) {
+            if (!matchingSelections[questionIndex]) {
+                matchingSelections[questionIndex] = {};
+            }
+
+            const selection = matchingSelections[questionIndex];
+            const container = document.getElementById(`matching-${questionIndex}`);
+            const items = container.querySelectorAll('.matching-item');
+
+            if (side === 'left') {
+                // Deselect previous left selection
+                items.forEach(item => {
+                    if (item.parentElement.classList.contains('matching-column') && 
+                        item.parentElement === container.firstChild) {
+                        item.classList.remove('selected');
+                    }
+                });
+                
+                selection.left = itemIndex;
+                items[itemIndex].classList.add('selected');
+            } else {
+                // Deselect previous right selection
+                items.forEach(item => {
+                    if (item.parentElement.classList.contains('matching-column') && 
+                        item.parentElement === container.lastChild) {
+                        item.classList.remove('selected');
+                    }
+                });
+                
+                selection.right = itemIndex;
+                const rightItems = container.querySelectorAll('.matching-column:last-child .matching-item');
+                rightItems.forEach(item => {
+                    if (parseInt(item.dataset.index) === itemIndex) {
+                        item.classList.add('selected');
+                    }
+                });
+            }
+
+            // If both selected, record the match
+            if (selection.left !== undefined && selection.right !== undefined) {
+                if (!userAnswers[questionIndex]) {
+                    userAnswers[questionIndex] = [];
+                }
+                userAnswers[questionIndex].push([selection.left, selection.right]);
+
+                // Mark as matched
+                items.forEach(item => {
+                    if (item.classList.contains('selected')) {
+                        item.classList.remove('selected');
+                        item.classList.add('matched');
+                    }
+                });
+
+                // Reset selection
+                delete matchingSelections[questionIndex];
+            }
+        }
+
+        function submitTest() {
+            let correct = 0;
+            const total = testQuestions.length;
+
+            testQuestions.forEach((q, index) => {
+                const questionDiv = document.querySelectorAll('.question-container')[index];
+                const explanation = questionDiv.querySelector('.explanation');
+                explanation.classList.add('show');
+
+                if (q.type === 'mcq') {
+                    const options = questionDiv.querySelectorAll('.option');
+                    options.forEach((opt, optIndex) => {
+                        if (optIndex === q.correct) {
+                            opt.classList.add('correct');
+                        }
+                        if (userAnswers[index] === optIndex && optIndex !== q.correct) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+                    if (userAnswers[index] === q.correct) {
+                        correct++;
+                    }
+                } else if (q.type === 'fill') {
+                    const input = questionDiv.querySelector('.input-answer');
+                    const userAnswer = (userAnswers[index] || '').toLowerCase().trim();
+                    const correctAnswer = q.answer.toLowerCase().trim();
+                    
+                    if (userAnswer === correctAnswer) {
+                        input.style.borderColor = '#22c55e';
+                        input.style.background = '#dcfce7';
+                        correct++;
+                    } else {
+                        input.style.borderColor = '#ef4444';
+                        input.style.background = '#fee2e2';
+                        input.value = `${userAnswer || '(vide)'} → Correct: ${q.answer}`;
+                    }
+                } else if (q.type === 'matching') {
+                    const matches = userAnswers[index] || [];
+                    let allCorrect = matches.length === q.pairs.length;
+                    
+                    matches.forEach(match => {
+                        if (match[0] !== match[1]) {
+                            allCorrect = false;
+                        }
+                    });
+
+                    if (allCorrect) {
+                        correct++;
+                    }
+                }
+            });
+
+            const score = Math.round((correct / total) * 100);
+            displayResults(score, correct, total);
+
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('test-container').style.display = 'none';
+        }
+
+        function displayResults(score, correct, total) {
+            const resultsDiv = document.getElementById('results');
+            const scoreCircle = document.getElementById('score-circle');
+            const resultsTitle = document.getElementById('results-title');
+            const resultsMessage = document.getElementById('results-message');
+
+            scoreCircle.textContent = score + '%';
+            resultsTitle.textContent = `${correct}/${total} bonnes réponses`;
+
+            if (score >= 90) {
+                scoreCircle.className = 'score-circle score-excellent';
+                resultsMessage.textContent = '🎉 Excellent travail ! Vous maîtrisez parfaitement le sujet !';
+            } else if (score >= 70) {
+                scoreCircle.className = 'score-circle score-good';
+                resultsMessage.textContent = '👍 Très bien ! Quelques révisions et ce sera parfait !';
+            } else if (score >= 50) {
+                scoreCircle.className = 'score-circle score-average';
+                resultsMessage.textContent = '📚 Pas mal, mais continuez à réviser pour améliorer votre score.';
+            } else {
+                scoreCircle.className = 'score-circle score-poor';
+                resultsMessage.textContent = '💪 Courage ! Reprenez les flashcards pour mieux comprendre.';
+            }
+
+            resultsDiv.classList.add('show');
+        }
+
+        function resetTest() {
+            userAnswers = {};
+            matchingSelections = {};
+            
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('test-container').style.display = 'block';
+            document.getElementById('submit-btn').style.display = 'block';
+            
+            initTest();
+        }
+
+        // Mode switching
+        function switchMode(mode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.mode-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            if (mode === 'flashcards') {
+                document.getElementById('flashcards-mode').classList.add('active');
+            } else {
+                document.getElementById('test-mode').classList.add('active');
+                resetTest();
+            }
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initFlashcards();
+            initTest();
+        };
+    </script>
+</body>
+</html>

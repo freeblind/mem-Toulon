@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UE 2.11 - Physique Fondamentale - Révisions Complètes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Flashcards */
+        .flashcard-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .flashcard {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            min-height: 200px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard:hover {
+            transform: scale(1.05);
+        }
+
+        .flashcard.flipped .flashcard-front {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard.flipped .flashcard-back {
+            transform: rotateY(0);
+        }
+
+        .flashcard-front, .flashcard-back {
+            backface-visibility: hidden;
+            transition: transform 0.6s;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 30px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .btn-know, .btn-unknown {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-know {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-know:hover {
+            background: #218838;
+        }
+
+        .btn-unknown {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-unknown:hover {
+            background: #c82333;
+        }
+
+        /* QCM & Vrai/Faux */
+        .qcm-question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .qcm-question h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .qcm-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .qcm-option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .qcm-option:hover {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .qcm-option.selected {
+            border-color: #667eea;
+            background: #e3e7ff;
+        }
+
+        .qcm-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .qcm-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        /* Vrai/Faux spécifique */
+        .vf-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .vf-option {
+            padding: 15px 40px;
+            background: white;
+            border: 3px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .vf-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .vf-option.vrai:hover {
+            border-color: #28a745;
+        }
+
+        .vf-option.faux:hover {
+            border-color: #dc3545;
+        }
+
+        .vf-option.selected.vrai {
+            border-color: #28a745;
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .vf-option.selected.faux {
+            border-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .vf-option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .vf-option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .check-answer-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .check-answer-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .check-answer-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Formules */
+        .formula-question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 5px solid #764ba2;
+        }
+
+        .formula-question h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+
+        .formula-builder {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #dee2e6;
+        }
+
+        .formula-display {
+            min-height: 80px;
+            background: #f8f9fa;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .formula-element {
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            margin: 0 2px;
+        }
+
+        .formula-element.fraction {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .formula-numerator, .formula-denominator {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .formula-fraction-bar {
+            width: 100%;
+            height: 2px;
+            background: #000;
+            margin: 2px 0;
+        }
+
+        .formula-element sup {
+            font-size: 0.7em;
+            vertical-align: super;
+        }
+
+        .formula-element sub {
+            font-size: 0.7em;
+            vertical-align: sub;
+        }
+
+        .formula-input {
+            width: 40px;
+            padding: 5px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        .formula-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .formula-btn {
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .formula-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .formula-btn.operator {
+            background: #764ba2;
+        }
+
+        .formula-btn.special {
+            background: #28a745;
+        }
+
+        .symbols-palette {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            margin-bottom: 15px;
+        }
+
+        .symbols-palette h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 5px;
+        }
+
+        .symbol-btn {
+            padding: 8px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            font-size: 1.2em;
+        }
+
+        .symbol-btn:hover {
+            background: #e3e7ff;
+            border-color: #667eea;
+        }
+
+        .formula-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .formula-clear {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .formula-clear:hover {
+            background: #c82333;
+        }
+
+        /* Progress */
+        .progress-container {
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e9ecef;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Saved Questions */
+        .saved-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .saved-item {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #ffc107;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+
+        /* Filters */
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Exercices */
+        .exercise-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .exercise-title {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .formula-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            border-left: 5px solid #667eea;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .answer-feedback {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+
+        .answer-feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .answer-feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .tab {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+
+            .flashcard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .formula-controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 UE 2.11 - Physique Fondamentale</h1>
+            <p>Révisions Complètes - Promo 2023/2026</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('flashcards')">📚 Flashcards</button>
+            <button class="tab" onclick="showTab('qcm')">✅ QCM</button>
+            <button class="tab" onclick="showTab('vraifaux')">✔️ Vrai/Faux</button>
+            <button class="tab" onclick="showTab('formules')">📐 Formules</button>
+            <button class="tab" onclick="showTab('exercices')">🔬 Exercices</button>
+            <button class="tab" onclick="showTab('saved')">⭐ Questions sauvegardées</button>
+            <button class="tab" onclick="showTab('stats')">📊 Statistiques</button>
+        </div>
+
+        <div class="content">
+            <!-- FLASHCARDS -->
+            <div id="flashcards" class="tab-content active">
+                <h2>Flashcards - Définitions et Concepts</h2>
+                <div class="filter-section">
+                    <button class="filter-btn active" onclick="filterFlashcards('all')">Toutes</button>
+                    <button class="filter-btn" onclick="filterFlashcards('atome')">Atome</button>
+                    <button class="filter-btn" onclick="filterFlashcards('radioactivite')">Radioactivité</button>
+                    <button class="filter-btn" onclick="filterFlashcards('ondes')">Ondes EM</button>
+                    <button class="filter-btn" onclick="filterFlashcards('interactions')">Interactions</button>
+                    <button class="filter-btn" onclick="filterFlashcards('champs')">Champs</button>
+                </div>
+
+                <div class="flashcard-container" id="flashcardContainer"></div>
+            </div>
+
+            <!-- QCM -->
+            <div id="qcm" class="tab-content">
+                <h2>QCM - Questions à Choix Multiples</h2>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="qcmProgress" style="width: 0%;">0%</div>
+                    </div>
+                </div>
+                <div id="qcmContainer"></div>
+            </div>
+
+            <!-- VRAI/FAUX -->
+            <div id="vraifaux" class="tab-content">
+                <h2>Vrai ou Faux ?</h2>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="vfProgress" style="width: 0%;">0%</div>
+                    </div>
+                </div>
+                <div id="vraiFauxContainer"></div>
+            </div>
+
+            <!-- FORMULES -->
+            <div id="formules" class="tab-content">
+                <h2>Formules à Connaître par Cœur</h2>
+                <p style="margin-bottom: 20px; color: #6c757d;">
+                    Reconstituez les formules en utilisant les symboles disponibles. Utilisez les boutons pour ajouter des éléments normaux, en indice, en exposant ou créer des fractions.
+                </p>
+                <div id="formulesContainer"></div>
+            </div>
+
+            <!-- EXERCICES -->
+            <div id="exercices" class="tab-content">
+                <h2>Exercices de Calcul</h2>
+                <div id="exercicesContainer"></div>
+            </div>
+
+            <!-- SAVED QUESTIONS -->
+            <div id="saved" class="tab-content">
+                <h2>Questions Sauvegardées</h2>
+                <p style="margin-bottom: 20px;">Retrouvez ici toutes les questions que vous avez marquées pour révision.</p>
+                <div class="saved-list" id="savedList">
+                    <p style="text-align: center; color: #6c757d;">Aucune question sauvegardée pour le moment.</p>
+                </div>
+            </div>
+
+            <!-- STATS -->
+            <div id="stats" class="tab-content">
+                <h2>Vos Statistiques</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalFlashcards">0</h3>
+                        <p>Flashcards étudiées</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="knownFlashcards">0</h3>
+                        <p>Flashcards maîtrisées</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="qcmScore">0%</h3>
+                        <p>Score QCM</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="vfScore">0%</h3>
+                        <p>Score Vrai/Faux</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="formulesScore">0%</h3>
+                        <p>Formules maîtrisées</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="savedCount">0</h3>
+                        <p>Questions sauvegardées</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DONNÉES
+        const flashcardsData = [
+            // ATOME
+            { question: "Qu'est-ce qu'un atome ?", answer: "Un atome est constitué d'un noyau (protons + neutrons) et d'électrons qui gravitent autour. L'atome est électriquement neutre.", category: "atome" },
+            { question: "Définissez le numéro atomique Z", answer: "Z est le nombre de protons dans le noyau (égal au nombre d'électrons pour un atome neutre)", category: "atome" },
+            { question: "Définissez le nombre de masse A", answer: "A est le nombre total de nucléons (protons + neutrons) dans le noyau", category: "atome" },
+            { question: "Comment calculer le nombre de neutrons ?", answer: "Nombre de neutrons = A - Z", category: "atome" },
+            { question: "Qu'est-ce que la structure lacunaire ?", answer: "C'est le grand vide qui existe entre le noyau et les électrons dans un atome", category: "atome" },
+            { question: "Qu'est-ce que la couche de valence ?", answer: "C'est la dernière couche externe du cortège électronique qui contient les électrons les plus éloignés du noyau", category: "atome" },
+            { question: "Définissez un isotope", answer: "Des isotopes sont des atomes qui ont le même nombre de protons (Z) mais un nombre de masse (A) différent", category: "atome" },
+            { question: "Qu'est-ce qu'un ion ?", answer: "Un ion est un atome qui a gagné ou perdu un ou plusieurs électrons. Il est donc chargé électriquement.", category: "atome" },
+            { question: "Différence entre cation et anion ?", answer: "Cation = ion positif (perte d'électrons). Anion = ion négatif (gain d'électrons)", category: "atome" },
+            
+            // RADIOACTIVITÉ
+            { question: "Définissez la radioactivité", answer: "C'est un phénomène naturel ou artificiel au cours duquel un noyau atomique instable se transforme en un autre noyau plus stable en émettant une ou plusieurs particules et/ou un rayonnement.", category: "radioactivite" },
+            { question: "Qu'est-ce qui cause l'instabilité d'un noyau ?", answer: "Un déséquilibre entre le nombre de protons et de neutrons dans le noyau", category: "radioactivite" },
+            { question: "Quelle est la formule de la loi de désintégration radioactive ?", answer: "N(t) = N₀ × e^(-λt) où N(t) est le nombre de noyaux restants, N₀ le nombre initial, λ la constante radioactive et t le temps", category: "radioactivite" },
+            { question: "Définissez la période radioactive T1/2", answer: "C'est le temps nécessaire pour que la moitié des noyaux radioactifs initialement présents se désintègrent. T1/2 = Ln2 / λ", category: "radioactivite" },
+            { question: "Qu'est-ce qu'une désintégration alpha (α) ?", answer: "Émission d'un noyau d'hélium (2 protons + 2 neutrons). Concerne les noyaux lourds instables.", category: "radioactivite" },
+            { question: "Qu'est-ce qu'une désintégration bêta moins (β⁻) ?", answer: "Émission d'un électron par transformation d'un neutron en proton. Concerne les noyaux avec excès de neutrons.", category: "radioactivite" },
+            { question: "Qu'est-ce qu'une désintégration bêta plus (β⁺) ?", answer: "Émission d'un positron par transformation d'un proton en neutron. Concerne les noyaux avec excès de protons.", category: "radioactivite" },
+            { question: "Qu'est-ce qu'un rayonnement gamma (γ) ?", answer: "Un rayonnement électromagnétique (photon) émis lors de la désexcitation d'un noyau. Très pénétrant.", category: "radioactivite" },
+            { question: "Que sont les isotopes ?", answer: "Atomes ayant le même Z mais des A différents", category: "radioactivite" },
+            { question: "Que sont les isobares ?", answer: "Atomes ayant le même A mais des Z différents", category: "radioactivite" },
+            
+            // ONDES ÉLECTROMAGNÉTIQUES
+            { question: "Définissez une onde électromagnétique", answer: "C'est la propagation d'un champ électrique E et d'un champ magnétique B perpendiculaires entre eux et perpendiculaires à la direction de propagation", category: "ondes" },
+            { question: "Quels sont les deux modèles de la lumière ?", answer: "Modèle ondulatoire (période, fréquence, longueur d'onde) et modèle corpusculaire/particulaire (photons, énergie)", category: "ondes" },
+            { question: "Définissez la période T", answer: "La période T est la durée au bout de laquelle le phénomène se reproduit identique à lui-même. Elle se mesure en secondes (s)", category: "ondes" },
+            { question: "Définissez la fréquence f", answer: "La fréquence correspond au nombre de périodes par seconde. f = 1/T. Elle s'exprime en Hertz (Hz)", category: "ondes" },
+            { question: "Définissez la longueur d'onde λ", answer: "La longueur d'onde λ correspond à la distance parcourue par l'onde pendant une période T. λ = c × T", category: "ondes" },
+            { question: "Quelle est la formule de l'énergie d'un photon ?", answer: "E = h × ν = h × c / λ où h est la constante de Planck, ν la fréquence et λ la longueur d'onde", category: "ondes" },
+            { question: "Qu'est-ce qu'un photon ?", answer: "Un photon est un quantum d'énergie de masse nulle, de charge nulle et se déplaçant à la vitesse de la lumière c dans le vide", category: "ondes" },
+            { question: "Citez 2 exemples d'ondes électromagnétiques", answer: "Rayons X, rayons gamma, lumière visible, infrarouges, ultraviolets, ondes radio, micro-ondes", category: "ondes" },
+            
+            // INTERACTIONS
+            { question: "Définissez l'énergie d'ionisation", answer: "C'est l'énergie minimale nécessaire pour arracher un électron orbital des atomes du milieu irradié", category: "interactions" },
+            { question: "Différence entre rayonnement ionisant et non ionisant ?", answer: "Ionisant : énergie suffisante pour arracher un électron (>12,4 eV). Non ionisant : énergie insuffisante (excitation seulement)", category: "interactions" },
+            { question: "Qu'est-ce que l'effet photoélectrique ?", answer: "Interaction d'un photon avec un électron du cortège électronique. Le photon transmet TOUTE son énergie et arrache l'électron. Le photon disparaît.", category: "interactions" },
+            { question: "Qu'est-ce que l'effet Compton ?", answer: "Interaction où un photon très énergétique transmet UNE PARTIE de son énergie à un électron considéré comme libre. L'électron est éjecté et un photon diffusé est émis.", category: "interactions" },
+            { question: "Définissez le TLE (Transfert Linéique d'Énergie)", answer: "C'est la quantité d'énergie perdue par les particules dans la matière par unité de longueur. Concerne les particules chargées (électrons, protons).", category: "interactions" },
+            { question: "Citez les 2 grands types de rayonnements ionisants", answer: "1) Particules (légères : électrons, positons ; lourdes : protons, neutrons, alpha, ions). 2) Photons (rayons X, γ)", category: "interactions" },
+            
+            // CHAMPS
+            { question: "Définissez le champ électrique E", answer: "Le champ E est une grandeur vectorielle qui se manifeste par une interaction entre 2 charges électriques. Il est dirigé dans le sens des potentiels décroissants.", category: "champs" },
+            { question: "Quelle est la formule de la force électrique ?", answer: "Fe = q × E où q est la charge et E le champ électrique", category: "champs" },
+            { question: "Comment se comportent les lignes de champ électrique ?", answer: "Pour une charge positive : centrifuge (vers l'extérieur). Pour une charge négative : centripète (vers l'intérieur)", category: "champs" },
+            { question: "Qu'est-ce qu'un champ électrique uniforme ?", answer: "Un champ E est uniforme s'il conserve en tout point la même direction, le même sens et la même valeur", category: "champs" },
+            { question: "Quelle est la relation entre Fe et E ?", answer: "Si q > 0 : Fe et E ont le même sens. Si q < 0 : Fe et E ont des sens opposés", category: "champs" },
+            { question: "Définissez le champ magnétique", answer: "C'est une région de l'espace où s'exercent des forces magnétiques. Créé par un aimant ou un courant électrique.", category: "champs" },
+            { question: "Qu'est-ce que la loi de Lorentz ?", answer: "C'est la force magnétique exercée sur une particule chargée en mouvement dans un champ magnétique : F = q × v × B", category: "champs" },
+            
+            // ONDES SONORES
+            { question: "Qu'est-ce qu'une onde sonore ?", answer: "Une onde mécanique longitudinale qui se propage par compression et décompression du milieu (besoin d'un support matériel)", category: "ondes" },
+            { question: "Quelle est la vitesse du son dans l'air ?", answer: "Environ 340 m/s (à 15°C, pression atmosphérique)", category: "ondes" },
+            { question: "Définissez les infrasons", answer: "Ondes sonores de fréquence inférieure à 20 Hz (non audibles par l'homme)", category: "ondes" },
+            { question: "Définissez les ultrasons", answer: "Ondes sonores de fréquence supérieure à 20 kHz (non audibles par l'homme)", category: "ondes" },
+            { question: "Quelle est la gamme d'audition humaine ?", answer: "Entre 20 Hz et 20 kHz", category: "ondes" },
+            { question: "De quoi dépend la vitesse du son ?", answer: "Du milieu de propagation (densité), de la température (augmente avec T), peu de la pression. Indépendante de la fréquence.", category: "ondes" },
+        ];
+
+        const qcmData = [
+            {
+                question: "Le noyau d'un atome :",
+                options: ["est chargé positivement", "est chargé négativement", "n'est pas chargé", "un atome n'a pas de noyau"],
+                correct: [0],
+                explanation: "Le noyau contient les protons (charge +) et les neutrons (neutres), donc il est chargé positivement."
+            },
+            {
+                question: "Le nuage électronique est composé de :",
+                options: ["neutrons", "protons", "électrons", "nucléons"],
+                correct: [2],
+                explanation: "Le nuage/cortège électronique est composé uniquement d'électrons qui gravitent autour du noyau."
+            },
+            {
+                question: "Un noyau de carbone ¹⁴₆C contient :",
+                options: ["6 protons", "6 neutrons", "8 protons", "8 neutrons"],
+                correct: [0, 3],
+                explanation: "Z=6 donc 6 protons. N=A-Z=14-6=8 neutrons."
+            },
+            {
+                question: "Une désintégration radioactive :",
+                options: ["Peut être spontanée", "Est une réaction nucléaire", "Est une réaction chimique", "Peut être provoquée"],
+                correct: [0, 1, 3],
+                explanation: "La radioactivité peut être spontanée ou provoquée. C'est une réaction nucléaire, pas chimique."
+            },
+            {
+                question: "La particule émise lors de la désintégration beta - est :",
+                options: ["un électron", "un photon", "un neutron", "une particule alpha"],
+                correct: [0],
+                explanation: "Beta - émet un électron (transformation neutron → proton + électron)"
+            },
+            {
+                question: "La particule alpha est :",
+                options: ["un positron", "un électron", "un rayonnement", "une particule d'hélium ⁴₂He"],
+                correct: [3],
+                explanation: "La particule alpha est un noyau d'hélium (2 protons + 2 neutrons)"
+            },
+            {
+                question: "Lors d'une désintégration, il y a conservation :",
+                options: ["du nombre de nucléons (A)", "du nombre de protons (Z)", "du nombre d'atomes", "du nombre de neutrons"],
+                correct: [0, 1],
+                explanation: "Lois de Soddy : conservation du nombre de masse A et du nombre de charge Z"
+            },
+            {
+                question: "Les ondes électromagnétiques :",
+                options: ["ont besoin d'un support matériel", "se déplacent dans le vide", "sont des ondes transversales", "sont des ondes longitudinales"],
+                correct: [1, 2],
+                explanation: "Les OEM se déplacent dans le vide et sont transversales (E et B perpendiculaires)"
+            },
+            {
+                question: "Un rayonnement ionisant :",
+                options: ["possède une énergie insuffisante", "peut arracher un électron", "a une énergie > 12,4 eV", "a une longueur d'onde < 0,1 μm"],
+                correct: [1, 2, 3],
+                explanation: "Un rayonnement ionisant a assez d'énergie (>12,4 eV) pour arracher un électron"
+            },
+            {
+                question: "L'effet photoélectrique :",
+                options: ["Le photon transmet toute son énergie", "Le photon transmet une partie de son énergie", "Le photon disparaît", "Un électron est éjecté"],
+                correct: [0, 2, 3],
+                explanation: "Dans l'effet photoélectrique, le photon donne TOUTE son énergie à l'électron et disparaît"
+            },
+            {
+                question: "Le champ électrique E :",
+                options: ["est dirigé vers les potentiels croissants", "est dirigé vers les potentiels décroissants", "est une grandeur scalaire", "est une grandeur vectorielle"],
+                correct: [1, 3],
+                explanation: "Le champ E est un vecteur dirigé vers les potentiels décroissants (+ vers -)"
+            },
+            {
+                question: "Entre deux armatures (+ et -), pour une particule de charge q < 0 :",
+                options: ["Fe et E sont de même sens", "Fe et E sont de sens opposés", "La particule est attirée vers l'armature +", "La particule est attirée vers l'armature -"],
+                correct: [1, 2],
+                explanation: "Si q<0, Fe et E sont opposés. La charge négative est attirée par l'armature positive"
+            },
+            {
+                question: "Les ondes sonores :",
+                options: ["sont des ondes mécaniques", "nécessitent un milieu matériel", "se propagent dans le vide", "ont une vitesse dans l'air ≈ 340 m/s"],
+                correct: [0, 1, 3],
+                explanation: "Les ondes sonores sont mécaniques, nécessitent un support et ne se propagent pas dans le vide"
+            },
+            {
+                question: "La gamme d'audition humaine est :",
+                options: ["< 20 Hz", "entre 20 Hz et 20 kHz", "> 20 kHz", "entre 0 et 100 Hz"],
+                correct: [1],
+                explanation: "L'oreille humaine perçoit les sons entre 20 Hz (infra) et 20 kHz (ultra)"
+            },
+            {
+                question: "La vitesse du son :",
+                options: ["dépend du milieu", "dépend de la température", "dépend peu de la pression", "dépend de la fréquence"],
+                correct: [0, 1, 2],
+                explanation: "La vitesse du son dépend du milieu et de T, peu de P, mais pas de la fréquence"
+            },
+            {
+                question: "Soit une onde lumineuse avec T = 1,50 × 10⁻¹⁵ s et c = 3 × 10⁸ m/s. La longueur d'onde vaut :",
+                options: ["λ = 450 nm", "λ = 0,45 nm", "λ = 5,25 m", "λ = 525 µm"],
+                correct: [0],
+                explanation: "λ = c × T = 3×10⁸ × 1,50×10⁻¹⁵ = 4,5×10⁻⁷ m = 450 nm"
+            },
+            {
+                question: "Le Radium 226 ²²⁶₈₈Ra subit une désintégration alpha. L'équation s'écrit :",
+                options: ["²²⁶₈₈Ra → ²²⁶₈₇Fr + ⁰₁p", "²²⁶₈₈Ra → ²²²₈₆Rn + ⁴₂He", "²²⁶₈₈Ra → ²³⁰₉₀Th + ⁴₂He", "²²⁶₈₈Ra → ²²⁸₉₂U + ²₄He"],
+                correct: [1],
+                explanation: "Désintégration α : A-4 et Z-2. 226-4=222, 88-2=86 → Radon"
+            },
+            {
+                question: "Le Carbone 15 ¹⁵₆C subit une désintégration Beta -. L'équation s'écrit :",
+                options: ["¹⁵₆C → ¹⁵₇N + ⁰₁p", "¹⁵₆C → ¹⁵₈O + ⁰₁p", "¹⁵₆C → ¹⁵₈O + ⁰₋₁e", "¹⁵₆C → ¹⁵₇N + ⁰₋₁e"],
+                correct: [3],
+                explanation: "Beta - : A inchangé, Z+1. Un neutron devient proton + électron"
+            },
+            {
+                question: "La période radioactive T1/2 est :",
+                options: ["Le nombre de noyaux radioactifs", "Le taux de désintégration", "Le temps pour que la moitié des noyaux se désintègrent", "Le nombre de désintégrations par seconde"],
+                correct: [2],
+                explanation: "T1/2 est le temps nécessaire pour que 50% des noyaux radioactifs se désintègrent"
+            },
+            {
+                question: "Les isotopes sont des atomes ayant :",
+                options: ["le même Z et A différents", "le même A et Z différents", "le même nombre de neutrons", "le même Z et même A"],
+                correct: [0],
+                explanation: "Isotopes : même nombre de protons (Z) mais nombre de masse (A) différent"
+            }
+        ];
+
+        const vraiFauxData = [
+            // ATOME
+            { question: "Dans un atome, il y a autant d'électrons que de protons", answer: true, explanation: "Un atome est électriquement neutre, donc nombre d'électrons = nombre de protons" },
+            { question: "Les isotopes ont le même nombre de masse A", answer: false, explanation: "Les isotopes ont le même Z mais des A différents" },
+            { question: "La masse de l'atome est concentrée dans le noyau", answer: true, explanation: "Les protons et neutrons représentent quasiment toute la masse, les électrons sont négligeables" },
+            { question: "Un cation est un ion négatif", answer: false, explanation: "Un cation est un ion POSITIF (perte d'électrons). L'anion est négatif." },
+            { question: "La structure lacunaire désigne le vide dans l'atome", answer: true, explanation: "C'est le grand vide entre le noyau et les électrons" },
+            
+            // RADIOACTIVITÉ
+            { question: "Tous les noyaux radioactifs sont instables", answer: true, explanation: "La radioactivité est due à l'instabilité du noyau" },
+            { question: "Une désintégration beta - émet un positron", answer: false, explanation: "Beta - émet un électron. Beta + émet un positron." },
+            { question: "La désintégration gamma émet une particule", answer: false, explanation: "Gamma émet un rayonnement électromagnétique (photon), pas une particule matérielle" },
+            { question: "Lors d'une désintégration, le nombre de nucléons est conservé", answer: true, explanation: "Loi de Soddy : conservation de A et de Z" },
+            { question: "Une particule alpha est un noyau d'hélium", answer: true, explanation: "Alpha = ⁴₂He (2 protons + 2 neutrons)" },
+            { question: "La période T1/2 est le temps pour une désintégration complète", answer: false, explanation: "T1/2 = temps pour que 50% des noyaux se désintègrent, pas 100%" },
+            { question: "À partir de Z = 84, tous les noyaux sont radioactifs", answer: true, explanation: "Pour Z > 83, tous les noyaux sont instables donc radioactifs" },
+            
+            // ONDES ÉLECTROMAGNÉTIQUES
+            { question: "Les ondes électromagnétiques ont besoin d'un support matériel", answer: false, explanation: "Les OEM se propagent dans le vide, contrairement aux ondes mécaniques" },
+            { question: "Les ondes électromagnétiques sont transversales", answer: true, explanation: "E et B sont perpendiculaires à la direction de propagation" },
+            { question: "Un photon possède une masse", answer: false, explanation: "Le photon a une masse nulle, une charge nulle et se déplace à c" },
+            { question: "La lumière visible est une onde électromagnétique", answer: true, explanation: "La lumière visible fait partie du spectre électromagnétique (380-780 nm)" },
+            { question: "La période T et la fréquence f sont inversement proportionnelles", answer: true, explanation: "f = 1/T, donc quand T augmente, f diminue" },
+            
+            // INTERACTIONS
+            { question: "Un rayonnement ionisant peut arracher un électron", answer: true, explanation: "C'est la définition : énergie suffisante (>12,4 eV) pour ioniser" },
+            { question: "L'effet photoélectrique : le photon transmet une partie de son énergie", answer: false, explanation: "Photoélectrique = TOUTE l'énergie transmise. Compton = partie seulement" },
+            { question: "Dans l'effet Compton, le photon disparaît", answer: false, explanation: "Compton : photon diffusé émis (énergie moindre). Photoélectrique : photon disparaît" },
+            { question: "Les ultrasons sont des ondes électromagnétiques", answer: false, explanation: "Les ultrasons sont des ondes MÉCANIQUES sonores (>20 kHz)" },
+            
+            // CHAMPS
+            { question: "Le champ électrique E est dirigé vers les potentiels décroissants", answer: true, explanation: "E est toujours dirigé du + vers le - (potentiels décroissants)" },
+            { question: "Si q > 0, Fe et E sont de sens opposés", answer: false, explanation: "Si q > 0 : Fe et E ont le MÊME sens. Si q < 0 : sens opposés" },
+            { question: "Le champ électrique est une grandeur vectorielle", answer: true, explanation: "E possède une direction, un sens et une valeur (grandeur vectorielle)" },
+            { question: "Le poids est négligeable devant la force électrique", answer: true, explanation: "Pour les particules chargées : P << Fe" },
+            
+            // ONDES SONORES
+            { question: "Les ondes mécaniques ont besoin d'un support matériel", answer: true, explanation: "Contrairement aux OEM, les ondes mécaniques nécessitent un milieu" },
+            { question: "Les ondes sonores se propagent dans le vide", answer: false, explanation: "Le son a besoin d'un milieu matériel (air, eau, solide)" },
+            { question: "La vitesse du son dépend de la température", answer: true, explanation: "Plus T augmente, plus la vitesse du son augmente" },
+            { question: "La vitesse du son dépend de la fréquence", answer: false, explanation: "La célérité du son est indépendante de la fréquence" },
+            { question: "L'oreille humaine perçoit les ultrasons", answer: false, explanation: "Audition humaine : 20 Hz - 20 kHz. Ultrasons > 20 kHz (non audibles)" },
+            { question: "Les infrasons ont une fréquence < 20 Hz", answer: true, explanation: "Infra < 20 Hz, Audible 20 Hz-20 kHz, Ultra > 20 kHz" },
+        ];
+
+        const formulesData = [
+            {
+                question: "Donnez la formule de la longueur d'onde en fonction de la célérité et de la période",
+                correctFormula: "λ=c×T",
+                alternatives: ["λ=cT", "λ=c.T", "λ=c*T"],
+                explanation: "λ = c × T (longueur d'onde = célérité × période)"
+            },
+            {
+                question: "Donnez la formule de la longueur d'onde en fonction de la célérité et de la fréquence",
+                correctFormula: "λ=c/f",
+                alternatives: ["λ=c÷f"],
+                explanation: "λ = c / f (longueur d'onde = célérité ÷ fréquence)"
+            },
+            {
+                question: "Donnez la formule de la fréquence en fonction de la période",
+                correctFormula: "f=1/T",
+                alternatives: [],
+                explanation: "f = 1 / T (fréquence = inverse de la période)"
+            },
+            {
+                question: "Donnez la formule de l'énergie d'un photon en fonction de h, c et λ",
+                correctFormula: "E=h×c/λ",
+                alternatives: ["E=hc/λ", "E=h.c/λ", "E=(h×c)/λ"],
+                explanation: "E = h × c / λ (énergie = constante de Planck × célérité ÷ longueur d'onde)"
+            },
+            {
+                question: "Donnez la formule de l'énergie d'un photon en fonction de h et ν",
+                correctFormula: "E=h×ν",
+                alternatives: ["E=hν", "E=h.ν", "E=h*ν"],
+                explanation: "E = h × ν (énergie = constante de Planck × fréquence)"
+            },
+            {
+                question: "Donnez la loi de désintégration radioactive",
+                correctFormula: "N(t)=N₀×e^(-λt)",
+                alternatives: ["N(t)=N₀e^(-λt)", "N(t)=N₀.e^(-λt)"],
+                explanation: "N(t) = N₀ × e^(-λt) où N₀ est le nombre initial, λ la constante radioactive"
+            },
+            {
+                question: "Donnez la formule de la période radioactive en fonction de λ",
+                correctFormula: "T₁/₂=ln2/λ",
+                alternatives: ["T₁/₂=Ln2/λ", "T₁/₂=0.693/λ"],
+                explanation: "T₁/₂ = ln2 / λ (période = ln2 ÷ constante radioactive)"
+            },
+            {
+                question: "Donnez la formule de la force électrique",
+                correctFormula: "Fe=q×E",
+                alternatives: ["Fe=qE", "Fe=q.E", "Fe=q*E"],
+                explanation: "Fe = q × E (force électrique = charge × champ électrique)"
+            },
+            {
+                question: "Donnez la formule du champ électrique entre deux plaques",
+                correctFormula: "E=U/d",
+                alternatives: ["E=U÷d"],
+                explanation: "E = U / d (champ = tension ÷ distance entre plaques)"
+            },
+            {
+                question: "Donnez la formule du nombre de neutrons",
+                correctFormula: "N=A-Z",
+                alternatives: [],
+                explanation: "N = A - Z (neutrons = nombre de masse - numéro atomique)"
+            },
+            {
+                question: "Donnez la formule de l'activité radioactive",
+                correctFormula: "A(t)=A₀×e^(-λt)",
+                alternatives: ["A(t)=A₀e^(-λt)", "A(t)=A₀.e^(-λt)"],
+                explanation: "A(t) = A₀ × e^(-λt) (activité au temps t)"
+            },
+            {
+                question: "Donnez la relation entre énergie d'un photon et longueur d'onde (forme complète)",
+                correctFormula: "E=h×c/λ",
+                alternatives: ["E=hc/λ", "E=(hc)/λ", "E=(h×c)/λ"],
+                explanation: "E = (h × c) / λ où h = 6,63×10⁻³⁴ J.s et c = 3×10⁸ m/s"
+            }
+        ];
+
+        const exercicesData = [
+            {
+                title: "Calcul de longueur d'onde",
+                question: "Soit une onde lumineuse se déplaçant dans le vide avec c = 3,00 × 10⁸ m/s. Sa période est T = 4,15 × 10⁻¹⁹ s. Calculez la longueur d'onde.",
+                formule: "λ = c × T",
+                inputs: [
+                    { label: "Célérité c (m/s)", value: "3e8", readonly: true },
+                    { label: "Période T (s)", value: "4.15e-19", readonly: true },
+                    { label: "Longueur d'onde λ (m)", id: "lambda1", placeholder: "Votre réponse" }
+                ],
+                answer: "1.25e-10",
+                tolerance: 0.01e-10,
+                unit: "m",
+                explanation: "λ = 3×10⁸ × 4,15×10⁻¹⁹ = 12,45×10⁻¹¹ = 1,25×10⁻¹⁰ m (Rayon X)"
+            },
+            {
+                title: "Calcul d'énergie de photon",
+                question: "Un photon a une longueur d'onde λ = 530 nm. Calculez son énergie en Joules puis en eV.",
+                formule: "E = h × c / λ avec h = 6,63 × 10⁻³⁴ J.s",
+                inputs: [
+                    { label: "Longueur d'onde (nm)", value: "530", readonly: true },
+                    { label: "Énergie (J)", id: "energyJ", placeholder: "Format: 3.75e-19" },
+                    { label: "Énergie (eV)", id: "energyEV", placeholder: "Format: 2.34" }
+                ],
+                answer: ["3.75e-19", "2.34"],
+                tolerance: [0.01e-19, 0.01],
+                unit: ["J", "eV"],
+                explanation: "E = (6,63×10⁻³⁴ × 3×10⁸) / (530×10⁻⁹) = 3,75×10⁻¹⁹ J = 2,34 eV"
+            },
+            {
+                title: "Composition de l'atome",
+                question: "L'atome de Fluor 17 a pour notation ¹⁷₉F. Déterminez le nombre de protons, neutrons et électrons.",
+                formule: "N = A - Z",
+                inputs: [
+                    { label: "Nombre de protons", id: "protons", placeholder: "Votre réponse" },
+                    { label: "Nombre de neutrons", id: "neutrons", placeholder: "Votre réponse" },
+                    { label: "Nombre d'électrons", id: "electrons", placeholder: "Votre réponse" }
+                ],
+                answer: ["9", "8", "9"],
+                tolerance: [0, 0, 0],
+                unit: ["", "", ""],
+                explanation: "Z=9 protons, N=17-9=8 neutrons, atome neutre donc 9 électrons"
+            },
+            {
+                title: "Distance de la foudre",
+                question: "Pendant un orage, vous voyez un éclair puis entendez le tonnerre 19 secondes après. À quelle distance la foudre a-t-elle frappé ? (vitesse du son = 340 m/s)",
+                formule: "distance = vitesse × temps",
+                inputs: [
+                    { label: "Temps (s)", value: "19", readonly: true },
+                    { label: "Vitesse du son (m/s)", value: "340", readonly: true },
+                    { label: "Distance (m)", id: "distance", placeholder: "Votre réponse" }
+                ],
+                answer: "6460",
+                tolerance: 1,
+                unit: "m",
+                explanation: "d = 340 × 19 = 6460 m = 6,46 km"
+            },
+            {
+                title: "Période radioactive",
+                question: "Un échantillon radioactif a une activité initiale de 800 Bq. Après 3 périodes T1/2, quelle sera l'activité ?",
+                formule: "A(t) = A₀ × (1/2)ⁿ où n est le nombre de périodes",
+                inputs: [
+                    { label: "Activité initiale (Bq)", value: "800", readonly: true },
+                    { label: "Nombre de périodes", value: "3", readonly: true },
+                    { label: "Activité finale (Bq)", id: "activite", placeholder: "Votre réponse" }
+                ],
+                answer: "100",
+                tolerance: 1,
+                unit: "Bq",
+                explanation: "A = 800 × (1/2)³ = 800 × 1/8 = 100 Bq"
+            }
+        ];
+
+        // VARIABLES GLOBALES
+        let stats = {
+            flashcardsStudied: 0,
+            flashcardsKnown: 0,
+            qcmAnswered: 0,
+            qcmCorrect: 0,
+            vfAnswered: 0,
+            vfCorrect: 0,
+            formulesAnswered: 0,
+            formulesCorrect: 0,
+            savedQuestions: []
+        };
+
+        let currentFormulaBuilder = null;
+
+        // Charger les stats depuis localStorage
+        function loadStats() {
+            const saved = localStorage.getItem('ue211Stats');
+            if (saved) {
+                stats = JSON.parse(saved);
+                updateStatsDisplay();
+            }
+        }
+
+        // Sauvegarder les stats
+        function saveStats() {
+            localStorage.setItem('ue211Stats', JSON.stringify(stats));
+            updateStatsDisplay();
+        }
+
+        // Mettre à jour l'affichage des stats
+        function updateStatsDisplay() {
+            document.getElementById('totalFlashcards').textContent = stats.flashcardsStudied;
+            document.getElementById('knownFlashcards').textContent = stats.flashcardsKnown;
+            document.getElementById('savedCount').textContent = stats.savedQuestions.length;
+            
+            const qcmScore = stats.qcmAnswered > 0 ? Math.round((stats.qcmCorrect / stats.qcmAnswered) * 100) : 0;
+            document.getElementById('qcmScore').textContent = qcmScore + '%';
+
+            const vfScore = stats.vfAnswered > 0 ? Math.round((stats.vfCorrect / stats.vfAnswered) * 100) : 0;
+            document.getElementById('vfScore').textContent = vfScore + '%';
+
+            const formulesScore = stats.formulesAnswered > 0 ? Math.round((stats.formulesCorrect / stats.formulesAnswered) * 100) : 0;
+            document.getElementById('formulesScore').textContent = formulesScore + '%';
+        }
+
+        // GESTION DES ONGLETS
+        function showTab(tabName) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'saved') {
+                displaySavedQuestions();
+            }
+        }
+
+        // FLASHCARDS
+        function createFlashcards(filter = 'all') {
+            const container = document.getElementById('flashcardContainer');
+            container.innerHTML = '';
+
+            const filtered = filter === 'all' ? flashcardsData : flashcardsData.filter(f => f.category === filter);
+
+            filtered.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'flashcard';
+                cardElement.innerHTML = `
+                    <div class="flashcard-front">
+                        <h3>${card.question}</h3>
+                    </div>
+                    <div class="flashcard-back">
+                        <p>${card.answer}</p>
+                        <div class="flashcard-buttons">
+                            <button class="btn-know" onclick="markAsKnown(${index}, true)">✓ Je sais</button>
+                            <button class="btn-unknown" onclick="markAsKnown(${index}, false)">✗ À revoir</button>
+                        </div>
+                    </div>
+                `;
+                
+                cardElement.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('btn-know') && !e.target.classList.contains('btn-unknown')) {
+                        this.classList.toggle('flipped');
+                        if (!stats.flashcardsStudied || stats.flashcardsStudied < flashcardsData.length) {
+                            stats.flashcardsStudied++;
+                            saveStats();
+                        }
+                    }
+                });
+
+                container.appendChild(cardElement);
+            });
+        }
+
+        function filterFlashcards(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            createFlashcards(category);
+        }
+
+        function markAsKnown(index, known) {
+            if (known) {
+                stats.flashcardsKnown++;
+            } else {
+                const card = flashcardsData[index];
+                if (!stats.savedQuestions.find(q => q.question === card.question && q.type === 'flashcard')) {
+                    stats.savedQuestions.push({
+                        type: 'flashcard',
+                        question: card.question,
+                        answer: card.answer,
+                        category: card.category
+                    });
+                }
+            }
+            saveStats();
+        }
+
+        // QCM
+        function createQCM() {
+            const container = document.getElementById('qcmContainer');
+            container.innerHTML = '';
+
+            qcmData.forEach((qcm, qIndex) => {
+                const qcmElement = document.createElement('div');
+                qcmElement.className = 'qcm-question';
+                qcmElement.innerHTML = `
+                    <h3>Question ${qIndex + 1}</h3>
+                    <p>${qcm.question}</p>
+                    <div class="qcm-options">
+                        ${qcm.options.map((opt, oIndex) => `
+                            <div class="qcm-option" data-q="${qIndex}" data-o="${oIndex}" onclick="selectOption(${qIndex}, ${oIndex}, ${qcm.correct.length > 1})">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="check-answer-btn" onclick="checkAnswer(${qIndex})">Vérifier</button>
+                    <div id="feedback-${qIndex}" style="display:none;" class="answer-feedback"></div>
+                `;
+                container.appendChild(qcmElement);
+            });
+        }
+
+        function selectOption(qIndex, oIndex, isMultiple) {
+            const option = document.querySelector(`[data-q="${qIndex}"][data-o="${oIndex}"]`);
+            
+            if (!isMultiple) {
+                document.querySelectorAll(`[data-q="${qIndex}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+            }
+            
+            option.classList.toggle('selected');
+        }
+
+        function checkAnswer(qIndex) {
+            const qcm = qcmData[qIndex];
+            const selectedOptions = Array.from(document.querySelectorAll(`[data-q="${qIndex}"].selected`))
+                .map(opt => parseInt(opt.dataset.o));
+            
+            const isCorrect = JSON.stringify(selectedOptions.sort()) === JSON.stringify(qcm.correct.sort());
+            
+            document.querySelectorAll(`[data-q="${qIndex}"]`).forEach((opt, oIndex) => {
+                if (qcm.correct.includes(oIndex)) {
+                    opt.classList.add('correct');
+                } else if (selectedOptions.includes(oIndex)) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            const feedback = document.getElementById(`feedback-${qIndex}`);
+            feedback.style.display = 'block';
+            feedback.className = 'answer-feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.innerHTML = `
+                <strong>${isCorrect ? '✓ Correct !' : '✗ Incorrect'}</strong><br>
+                ${qcm.explanation}
+            `;
+
+            stats.qcmAnswered++;
+            if (isCorrect) {
+                stats.qcmCorrect++;
+            } else {
+                if (!stats.savedQuestions.find(q => q.question === qcm.question && q.type === 'qcm')) {
+                    stats.savedQuestions.push({
+                        type: 'qcm',
+                        question: qcm.question,
+                        answer: qcm.explanation,
+                        correctAnswers: qcm.correct.map(i => qcm.options[i])
+                    });
+                }
+            }
+            
+            saveStats();
+            updateQCMProgress();
+        }
+
+        function updateQCMProgress() {
+            const progress = Math.round((stats.qcmAnswered / qcmData.length) * 100);
+            const progressBar = document.getElementById('qcmProgress');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress + '%';
+        }
+
+        // VRAI/FAUX
+        function createVraiFaux() {
+            const container = document.getElementById('vraiFauxContainer');
+            container.innerHTML = '';
+
+            vraiFauxData.forEach((vf, vfIndex) => {
+                const vfElement = document.createElement('div');
+                vfElement.className = 'qcm-question';
+                vfElement.innerHTML = `
+                    <h3>Question ${vfIndex + 1}</h3>
+                    <p>${vf.question}</p>
+                    <div class="vf-options">
+                        <div class="vf-option vrai" onclick="selectVF(${vfIndex}, true)">
+                            ✓ VRAI
+                        </div>
+                        <div class="vf-option faux" onclick="selectVF(${vfIndex}, false)">
+                            ✗ FAUX
+                        </div>
+                    </div>
+                    <button class="check-answer-btn" id="vf-btn-${vfIndex}" onclick="checkVF(${vfIndex})" disabled>Vérifier</button>
+                    <div id="vf-feedback-${vfIndex}" style="display:none;" class="answer-feedback"></div>
+                `;
+                container.appendChild(vfElement);
+            });
+        }
+
+        function selectVF(vfIndex, choice) {
+            const options = document.querySelectorAll(`#vraiFauxContainer .qcm-question:nth-child(${vfIndex + 1}) .vf-option`);
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            const selected = choice ? options[0] : options[1];
+            selected.classList.add('selected');
+            
+            document.getElementById(`vf-btn-${vfIndex}`).disabled = false;
+            
+            // Stocker la réponse
+            selected.dataset.vfAnswer = choice;
+        }
+
+        function checkVF(vfIndex) {
+            const vf = vraiFauxData[vfIndex];
+            const selected = document.querySelector(`#vraiFauxContainer .qcm-question:nth-child(${vfIndex + 1}) .vf-option.selected`);
+            
+            if (!selected) return;
+            
+            const userAnswer = selected.dataset.vfAnswer === 'true';
+            const isCorrect = userAnswer === vf.answer;
+            
+            const options = document.querySelectorAll(`#vraiFauxContainer .qcm-question:nth-child(${vfIndex + 1}) .vf-option`);
+            options.forEach((opt, index) => {
+                const isTrue = index === 0;
+                if (isTrue === vf.answer) {
+                    opt.classList.add('correct');
+                } else if (opt.classList.contains('selected')) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            const feedback = document.getElementById(`vf-feedback-${vfIndex}`);
+            feedback.style.display = 'block';
+            feedback.className = 'answer-feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            feedback.innerHTML = `
+                <strong>${isCorrect ? '✓ Correct !' : '✗ Incorrect - La bonne réponse est : ' + (vf.answer ? 'VRAI' : 'FAUX')}</strong><br>
+                ${vf.explanation}
+            `;
+
+            stats.vfAnswered++;
+            if (isCorrect) {
+                stats.vfCorrect++;
+            } else {
+                if (!stats.savedQuestions.find(q => q.question === vf.question && q.type === 'vraifaux')) {
+                    stats.savedQuestions.push({
+                        type: 'vraifaux',
+                        question: vf.question,
+                        answer: vf.explanation,
+                        correctAnswer: vf.answer ? 'VRAI' : 'FAUX'
+                    });
+                }
+            }
+            
+            document.getElementById(`vf-btn-${vfIndex}`).disabled = true;
+            saveStats();
+            updateVFProgress();
+        }
+
+        function updateVFProgress() {
+            const progress = Math.round((stats.vfAnswered / vraiFauxData.length) * 100);
+            const progressBar = document.getElementById('vfProgress');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress + '%';
+        }
+
+        // FORMULES
+        function createFormules() {
+            const container = document.getElementById('formulesContainer');
+            container.innerHTML = '';
+
+            formulesData.forEach((formule, fIndex) => {
+                const formuleElement = document.createElement('div');
+                formuleElement.className = 'formula-question';
+                formuleElement.innerHTML = `
+                    <h3>Formule ${fIndex + 1}</h3>
+                    <p>${formule.question}</p>
+                    
+                    <div class="symbols-palette">
+                        <h4>📌 Symboles disponibles (cliquez pour ajouter):</h4>
+                        <div class="symbol-grid">
+                            ${['λ', 'ν', 'μ', 'π', 'Δ', 'Σ', 'α', 'β', 'γ', 'ω', 'θ', 'ε', 'ρ', 'σ', 'τ', 
+                               'A', 'B', 'C', 'E', 'F', 'N', 'T', 'Z', 'c', 'd', 'e', 'f', 'h', 'm', 'n', 'q', 't', 'v',
+                               '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                               '+', '-', '×', '÷', '=', '(', ')'].map(sym => 
+                                `<button class="symbol-btn" onclick="addSymbol(${fIndex}, '${sym}')">${sym}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+
+                    <div class="formula-builder">
+                        <div class="formula-display" id="formula-display-${fIndex}">
+                            <span style="color: #999;">Votre formule apparaîtra ici...</span>
+                        </div>
+                        
+                        <div class="formula-controls">
+                            <button class="formula-btn" onclick="addElement(${fIndex}, 'normal')">Texte normal</button>
+                            <button class="formula-btn" onclick="addElement(${fIndex}, 'subscript')">Indice ₓ</button>
+                            <button class="formula-btn" onclick="addElement(${fIndex}, 'superscript')">Exposant ˣ</button>
+                            <button class="formula-btn special" onclick="addFraction(${fIndex})">➗ Fraction</button>
+                        </div>
+                        
+                        <div class="formula-actions">
+                            <button class="formula-clear" onclick="clearFormula(${fIndex})">🗑️ Effacer</button>
+                            <button class="check-answer-btn" onclick="checkFormula(${fIndex})">Vérifier la formule</button>
+                        </div>
+                    </div>
+
+                    <div id="formula-feedback-${fIndex}" style="display:none;" class="answer-feedback"></div>
+                `;
+                container.appendChild(formuleElement);
+            });
+        }
+
+        function addSymbol(fIndex, symbol) {
+            const display = document.getElementById(`formula-display-${fIndex}`);
+            if (display.querySelector('span[style*="color: #999"]')) {
+                display.innerHTML = '';
+            }
+            
+            const span = document.createElement('span');
+            span.textContent = symbol;
+            span.className = 'formula-element';
+            display.appendChild(span);
+        }
+
+        function addElement(fIndex, type) {
+            const display = document.getElementById(`formula-display-${fIndex}`);
+            if (display.querySelector('span[style*="color: #999"]')) {
+                display.innerHTML = '';
+            }
+            
+            const wrapper = document.createElement('span');
+            wrapper.className = 'formula-element';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'formula-input';
+            input.placeholder = type === 'normal' ? 'x' : (type === 'subscript' ? '₂' : '²');
+            input.style.width = '30px';
+            
+            if (type === 'subscript') {
+                const sub = document.createElement('sub');
+                sub.appendChild(input);
+                wrapper.appendChild(sub);
+            } else if (type === 'superscript') {
+                const sup = document.createElement('sup');
+                sup.appendChild(input);
+                wrapper.appendChild(sup);
+            } else {
+                wrapper.appendChild(input);
+            }
+            
+            display.appendChild(wrapper);
+            input.focus();
+        }
+
+        function addFraction(fIndex) {
+            const display = document.getElementById(`formula-display-${fIndex}`);
+            if (display.querySelector('span[style*="color: #999"]')) {
+                display.innerHTML = '';
+            }
+            
+            const fraction = document.createElement('span');
+            fraction.className = 'formula-element fraction';
+            
+            const numerator = document.createElement('div');
+            numerator.className = 'formula-numerator';
+            const numInput = document.createElement('input');
+            numInput.type = 'text';
+            numInput.className = 'formula-input';
+            numInput.placeholder = 'num';
+            numerator.appendChild(numInput);
+            
+            const bar = document.createElement('div');
+            bar.className = 'formula-fraction-bar';
+            
+            const denominator = document.createElement('div');
+            denominator.className = 'formula-denominator';
+            const denInput = document.createElement('input');
+            denInput.type = 'text';
+            denInput.className = 'formula-input';
+            denInput.placeholder = 'den';
+            denominator.appendChild(denInput);
+            
+            fraction.appendChild(numerator);
+            fraction.appendChild(bar);
+            fraction.appendChild(denominator);
+            
+            display.appendChild(fraction);
+            numInput.focus();
+        }
+
+        function clearFormula(fIndex) {
+            const display = document.getElementById(`formula-display-${fIndex}`);
+            display.innerHTML = '<span style="color: #999;">Votre formule apparaîtra ici...</span>';
+        }
+
+        function getFormulaText(fIndex) {
+            const display = document.getElementById(`formula-display-${fIndex}`);
+            let formula = '';
+            
+            display.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    formula += node.textContent;
+                } else if (node.classList && node.classList.contains('formula-element')) {
+                    if (node.classList.contains('fraction')) {
+                        const num = node.querySelector('.formula-numerator input').value || '';
+                        const den = node.querySelector('.formula-denominator input').value || '';
+                        formula += num + '/' + den;
+                    } else if (node.querySelector('sub')) {
+                        const mainText = node.textContent.trim();
+                        const subInput = node.querySelector('input');
+                        if (subInput) {
+                            const prefix = mainText.replace(subInput.value, '').trim();
+                            formula += prefix + '₋' + subInput.value;
+                        }
+                    } else if (node.querySelector('sup')) {
+                        const mainText = node.textContent.trim();
+                        const supInput = node.querySelector('input');
+                        if (supInput) {
+                            const prefix = mainText.replace(supInput.value, '').trim();
+                            formula += prefix + '^' + supInput.value;
+                        }
+                    } else {
+                        const input = node.querySelector('input');
+                        formula += input ? input.value : node.textContent;
+                    }
+                }
+            });
+            
+            return formula.replace(/\s+/g, '').replace(/\*/g, '×').replace(/\./g, '×');
+        }
+
+        function checkFormula(fIndex) {
+            const formule = formulesData[fIndex];
+            const userFormula = getFormulaText(fIndex);
+            
+            const normalized = userFormula.toLowerCase()
+                .replace(/\s+/g, '')
+                .replace(/\*/g, '×')
+                .replace(/×/g, '')
+                .replace(/\./g, '')
+                .replace(/₋/g, '₀')
+                .replace(/subscript/g, '');
+            
+            const correctNormalized = formule.correctFormula.toLowerCase()
+                .replace(/\s+/g, '')
+                .replace(/×/g, '')
+                .replace(/\*/g, '');
+            
+            const alternativesNormalized = formule.alternatives.map(alt => 
+                alt.toLowerCase().replace(/\s+/g, '').replace(/×/g, '').replace(/\*/g, '')
+            );
+            
+            const isCorrect = normalized === correctNormalized || alternativesNormalized.includes(normalized);
+            
+            const feedback = document.getElementById(`formula-feedback-${fIndex}`);
+            feedback.style.display = 'block';
+            feedback.className = 'answer-feedback ' + (isCorrect ? 'correct' : 'incorrect');
+            
+            if (isCorrect) {
+                feedback.innerHTML = `
+                    <strong>✓ Excellent ! Formule correcte !</strong><br>
+                    ${formule.explanation}
+                `;
+                stats.formulesCorrect++;
+            } else {
+                feedback.innerHTML = `
+                    <strong>✗ Incorrect</strong><br>
+                    La formule correcte est : <strong>${formule.correctFormula}</strong><br>
+                    ${formule.explanation}
+                `;
+                
+                if (!stats.savedQuestions.find(q => q.question === formule.question && q.type === 'formule')) {
+                    stats.savedQuestions.push({
+                        type: 'formule',
+                        question: formule.question,
+                        answer: formule.correctFormula,
+                        explanation: formule.explanation
+                    });
+                }
+            }
+            
+            stats.formulesAnswered++;
+            saveStats();
+        }
+
+        // EXERCICES
+        function createExercices() {
+            const container = document.getElementById('exercicesContainer');
+            container.innerHTML = '';
+
+            exercicesData.forEach((ex, index) => {
+                const exElement = document.createElement('div');
+                exElement.className = 'exercise-container';
+                
+                let inputsHTML = ex.inputs.map((input, i) => {
+                    const readonly = input.readonly ? 'readonly' : '';
+                    const value = input.value ? `value="${input.value}"` : '';
+                    return `
+                        <div class="input-group">
+                            <label>${input.label}:</label>
+                            <input type="text" id="${input.id || 'input-' + index + '-' + i}" 
+                                   ${readonly} ${value} placeholder="${input.placeholder || ''}">
+                        </div>
+                    `;
+                }).join('');
+
+                exElement.innerHTML = `
+                    <h3 class="exercise-title">${ex.title}</h3>
+                    <p>${ex.question}</p>
+                    <div class="formula-box">
+                        <strong>Formule :</strong> ${ex.formule}
+                    </div>
+                    ${inputsHTML}
+                    <button class="check-answer-btn" onclick="checkExercice(${index})">Vérifier</button>
+                    <div id="ex-feedback-${index}"></div>
+                `;
+                
+                container.appendChild(exElement);
+            });
+        }
+
+        function checkExercice(index) {
+            const ex = exercicesData[index];
+            const feedback = document.getElementById(`ex-feedback-${index}`);
+            
+            let allCorrect = true;
+            const answers = Array.isArray(ex.answer) ? ex.answer : [ex.answer];
+            const tolerances = Array.isArray(ex.tolerance) ? ex.tolerance : [ex.tolerance];
+            
+            answers.forEach((correctAnswer, i) => {
+                const inputId = ex.inputs.filter(inp => !inp.readonly)[i]?.id;
+                if (!inputId) return;
+                
+                const userAnswer = document.getElementById(inputId).value.trim();
+                const correctVal = parseFloat(correctAnswer);
+                const userVal = parseFloat(userAnswer);
+                const tolerance = tolerances[i];
+                
+                if (isNaN(userVal) || Math.abs(userVal - correctVal) > tolerance) {
+                    allCorrect = false;
+                }
+            });
+
+            feedback.className = 'answer-feedback ' + (allCorrect ? 'correct' : 'incorrect');
+            feedback.innerHTML = `
+                <strong>${allCorrect ? '✓ Correct !' : '✗ Incorrect'}</strong><br>
+                ${ex.explanation}
+            `;
+
+            if (!allCorrect) {
+                if (!stats.savedQuestions.find(q => q.question === ex.question && q.type === 'exercice')) {
+                    stats.savedQuestions.push({
+                        type: 'exercice',
+                        question: ex.question,
+                        answer: ex.explanation,
+                        formule: ex.formule
+                    });
+                }
+                saveStats();
+            }
+        }
+
+        // QUESTIONS SAUVEGARDÉES
+        function displaySavedQuestions() {
+            const container = document.getElementById('savedList');
+            
+            if (stats.savedQuestions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #6c757d;">Aucune question sauvegardée pour le moment.</p>';
+                return;
+            }
+
+            container.innerHTML = stats.savedQuestions.map((q, index) => `
+                <div class="saved-item">
+                    <strong>${q.type.toUpperCase()}</strong>
+                    <h4>${q.question}</h4>
+                    <p><strong>Réponse :</strong> ${q.answer}</p>
+                    ${q.formule ? `<p><strong>Formule :</strong> ${q.formule}</p>` : ''}
+                    ${q.correctAnswers ? `<p><strong>Bonnes réponses :</strong> ${q.correctAnswers.join(', ')}</p>` : ''}
+                    ${q.correctAnswer ? `<p><strong>Bonne réponse :</strong> ${q.correctAnswer}</p>` : ''}
+                    ${q.explanation ? `<p><strong>Explication :</strong> ${q.explanation}</p>` : ''}
+                    <button class="btn-know" onclick="removeSaved(${index})">Supprimer</button>
+                </div>
+            `).join('');
+        }
+
+        function removeSaved(index) {
+            stats.savedQuestions.splice(index, 1);
+            saveStats();
+            displaySavedQuestions();
+        }
+
+        // INITIALISATION
+        window.onload = function() {
+            loadStats();
+            createFlashcards();
+            createQCM();
+            createVraiFaux();
+            createFormules();
+            createExercices();
+            updateQCMProgress();
+            updateVFProgress();
+        };
+    </script>
+</body>
+</html>

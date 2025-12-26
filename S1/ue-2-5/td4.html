@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système d'Apprentissage - Traumatologie & Fractures</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        /* FLASHCARDS MODE */
+        .flashcard-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .card-wrapper {
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            border: 3px solid #667eea;
+        }
+
+        .card-category {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-bottom: 20px;
+        }
+
+        .card-question {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .card-answer {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+            color: white;
+            min-width: 120px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-acquired {
+            background: #4caf50;
+        }
+
+        .btn-review {
+            background: #ff9800;
+        }
+
+        .btn-not-acquired {
+            background: #f44336;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .control-btn.danger {
+            background: #f44336;
+        }
+
+        .control-btn.danger:hover {
+            background: #d32f2f;
+        }
+
+        /* TEST MODE */
+        .test-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .question-block {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f5f7fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .question-type {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #667eea;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option input {
+            margin-right: 10px;
+        }
+
+        .option.correct {
+            background: #c8e6c9;
+            border-color: #4caf50;
+        }
+
+        .option.incorrect {
+            background: #ffcdd2;
+            border-color: #f44336;
+        }
+
+        .fill-input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .matching-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .matching-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .matching-item {
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .matching-item:hover {
+            border-color: #667eea;
+        }
+
+        .matching-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .explanation.show {
+            display: block;
+        }
+
+        .test-results {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .test-results.show {
+            display: block;
+        }
+
+        .score {
+            font-size: 4em;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .score-message {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .submit-btn {
+            padding: 15px 40px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            background: #45a049;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .flashcard {
+                height: 350px;
+            }
+
+            .card-question {
+                font-size: 1.2em;
+            }
+
+            .card-answer {
+                font-size: 1em;
+            }
+
+            .matching-container {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .mode-btn {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎓 Système d'Apprentissage Interactif</h1>
+            <p class="subtitle">Traumatologie & Fractures - UE 2.5 S1</p>
+        </header>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="switchMode('flashcards')">
+                📚 Mode Flashcards
+            </button>
+            <button class="mode-btn" onclick="switchMode('test')">
+                ✍️ Mode Test
+            </button>
+        </div>
+
+        <!-- FLASHCARDS MODE -->
+        <div id="flashcards-mode" class="mode-content active">
+            <div class="flashcard-container">
+                <div class="stats" id="stats"></div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress">0%</div>
+                </div>
+
+                <div class="filters">
+                    <button class="filter-btn active" onclick="setFilter('all')">Toutes les cartes</button>
+                    <button class="filter-btn" onclick="setFilter('new')">Nouvelles cartes</button>
+                    <button class="filter-btn" onclick="setFilter('review')">À réviser</button>
+                    <button class="filter-btn" onclick="setFilter('acquired')">Cartes acquises</button>
+                </div>
+
+                <div class="card-wrapper">
+                    <div class="flashcard" id="flashcard" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <span class="card-category" id="category"></span>
+                            <div class="card-question" id="question"></div>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="card-answer" id="answer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-actions">
+                    <button class="action-btn btn-acquired" onclick="rateCard('acquired')">
+                        ✅ Acquis
+                    </button>
+                    <button class="action-btn btn-review" onclick="rateCard('review')">
+                        ⚠️ À revoir
+                    </button>
+                    <button class="action-btn btn-not-acquired" onclick="rateCard('not-acquired')">
+                        ❌ Non acquis
+                    </button>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="control-btn" onclick="exportProgress()">📥 Exporter</button>
+                    <button class="control-btn" onclick="document.getElementById('import-file').click()">📤 Importer</button>
+                    <button class="control-btn danger" onclick="resetProgress()">🔄 Réinitialiser</button>
+                    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)">
+                </div>
+            </div>
+        </div>
+
+        <!-- TEST MODE -->
+        <div id="test-mode" class="mode-content">
+            <div class="test-container">
+                <h2 style="margin-bottom: 30px; color: #667eea;">Évaluation des connaissances</h2>
+                <div id="test-questions"></div>
+                <button class="submit-btn" onclick="submitTest()">Valider le test</button>
+                <div class="test-results" id="test-results">
+                    <h2>Résultats</h2>
+                    <div class="score" id="final-score"></div>
+                    <div class="score-message" id="score-message"></div>
+                    <button class="submit-btn" onclick="resetTest()">Recommencer le test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de données des flashcards
+        const flashcardsData = [
+            // Définitions de base
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'une pseudarthrose ?",
+                answer: "Absence de consolidation d'une fracture dans les délais normaux"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'une fracture ?",
+                answer: "Solution de continuité d'un os liée à un traumatisme"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'une entorse ?",
+                answer: "Lésion traumatique d'un ou de plusieurs ligaments"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'une luxation ?",
+                answer: "Perte de contact entre deux surfaces articulaires"
+            },
+            {
+                category: "Définitions",
+                question: "Définition actuelle du polytraumatisé ?",
+                answer: "Patient qui présente au moins deux lésions"
+            },
+            {
+                category: "Définitions",
+                question: "Définition historique du polytraumatisé ?",
+                answer: "Patient atteint de plusieurs lésions dont au moins une met en jeu le pronostic vital à court ou moyen terme"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'une nécrose ?",
+                answer: "Mort de cellules ou tissus"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'une bénignité ?",
+                answer: "Caractère d'une maladie sans gravité (Bénin)"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'un épanchement ?",
+                answer: "Présence anormale d'un liquide ou d'un gaz dans un tissu ou cavité"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce qu'une hémarthrose ?",
+                answer: "Épanchement de sang dans une articulation"
+            },
+            {
+                category: "Définitions",
+                question: "Qu'est-ce que l'ostéosynthèse ?",
+                answer: "Procédé de fixation de fragments osseux à l'aide de matériel"
+            },
+            // Mécanismes lésionnels
+            {
+                category: "Mécanismes",
+                question: "Décrivez le traumatisme direct",
+                answer: "Fracture au point d'impact, choc direct, contusion appuyée (écrasement)"
+            },
+            {
+                category: "Mécanismes",
+                question: "Décrivez le traumatisme indirect",
+                answer: "Fracture à distance du point d'impact, transmissions de forces à distance (torsion, compression, flexion, traction)"
+            },
+            {
+                category: "Mécanismes",
+                question: "Qu'est-ce qu'une fracture de fatigue ?",
+                answer: "Fracture d'un os créé par un stress répété ou inhabituel, fracture non traumatique. La contrainte mécanique répétée excède la capacité de remodelage osseux même sur os sain (microfissure → remodelage → microfissure → fracture). Essentiellement chez les sportifs (tibia, fibula, métatarse)"
+            },
+            {
+                category: "Mécanismes",
+                question: "Qu'est-ce qu'une fracture pathologique ?",
+                answer: "Fracture suite à un traumatisme minime ou absent sur un os fragile par une lésion préexistante. Étiologies principales : tumorales, infectieuse (ostéomyélite), métabolique (ostéoporose). Localisations : fémur, vertèbres, humérus, bassin"
+            },
+            // Types de fractures
+            {
+                category: "Classification",
+                question: "Qu'est-ce qu'une fracture intra-articulaire ?",
+                answer: "Fracture qui touche directement l'articulation avec un risque élevé de complications (ex: fracture plateau tibial, fracture du radius distal impliquant le poignet)"
+            },
+            {
+                category: "Classification",
+                question: "Qu'est-ce qu'une fracture extra-articulaire ?",
+                answer: "Fracture qui n'atteint pas l'articulation avec moins de complications (ex: fracture diaphyse tibia ou humérus)"
+            },
+            // Consolidation
+            {
+                category: "Consolidation",
+                question: "Quelle est la 1ère phase de consolidation d'une fracture ?",
+                answer: "Formation d'un hématome (phase inflammatoire)"
+            },
+            {
+                category: "Consolidation",
+                question: "Quelle est la 2ème phase de consolidation d'une fracture ?",
+                answer: "Formation du cal fibrocartilagineux (amorce de la reconstruction)"
+            },
+            {
+                category: "Consolidation",
+                question: "Quelle est la 3ème phase de consolidation d'une fracture ?",
+                answer: "Formation du cal osseux (ossification endochondrale)"
+            },
+            {
+                category: "Consolidation",
+                question: "Quelle est la 4ème phase de consolidation d'une fracture ?",
+                answer: "Remaniement osseux"
+            },
+            // Polytraumatisé - Critères de Vittel
+            {
+                category: "Polytraumatisé",
+                question: "À quoi servent les critères de Vittel ?",
+                answer: "À décider d'un transfert vers un centre de traumatologie"
+            },
+            {
+                category: "Polytraumatisé",
+                question: "Quel critère physiologique impose un transfert ?",
+                answer: "Pression artérielle systolique < 90 mmHg"
+            },
+            {
+                category: "Polytraumatisé",
+                question: "Donnez un exemple de critère anatomique de Vittel",
+                answer: "Fracture des deux fémurs"
+            },
+            {
+                category: "Polytraumatisé",
+                question: "L'éjection du véhicule lors d'un AVP est-elle un critère de Vittel ?",
+                answer: "Oui, c'est un critère cinétique de Vittel"
+            },
+            {
+                category: "Polytraumatisé",
+                question: "Quel critère cinétique est important ?",
+                answer: "Chute de plus de 6 mètres"
+            },
+            {
+                category: "Polytraumatisé",
+                question: "Si un seul critère de Vittel est présent, quelle est la conduite à tenir ?",
+                answer: "Considérer le patient comme polytraumatisé et transférer en trauma center"
+            },
+            // Imagerie polytraumatisé
+            {
+                category: "Imagerie",
+                question: "Quel bilan d'imagerie pour un polytraumatisé GRADE A ?",
+                answer: "Radiographies du thorax de face et du bassin de face + FAST-ECHO (examen échographique focus sur les culs sacs naturels recherche de saignement, épanchement)"
+            },
+            {
+                category: "Imagerie",
+                question: "Quel bilan d'imagerie pour un polytraumatisé GRADE B ou C ?",
+                answer: "Body scanner : Crâne + cervical SS IV – TA artériel + AP portal – TSA si TC grave"
+            },
+            // Règles thérapeutiques
+            {
+                category: "Traitement",
+                question: "Quelles sont les 2 grandes règles thérapeutiques devant une fracture ou luxation ?",
+                answer: "1) RÉDUCTION : Obtenir un alignement des fragments ou de l'articulation\n2) STABILISATION : Éviter le déplacement secondaire et obtenir une cicatrisation en bonne position"
+            },
+            // Complications
+            {
+                category: "Complications",
+                question: "Citez 3 complications d'une fracture",
+                answer: "Infection, Vasculo-nerveuse, Syndrome de loge, Déplacement secondaire, Cals vicieux, Pseudarthrose, Arthrose, Nécrose osseuse"
+            },
+            {
+                category: "Complications",
+                question: "Qu'est-ce qu'un syndrome de loge ?",
+                answer: "Compression dans une enveloppe inextensible par hémorragie entraînant une compression"
+            },
+            {
+                category: "Complications",
+                question: "Qu'est-ce qu'un cal vicieux ?",
+                answer: "Consolidation en position anormale des fragments"
+            },
+            // Fracture de la clavicule
+            {
+                category: "Clavicule",
+                question: "Quelle est l'étiologie principale d'une fracture de clavicule ?",
+                answer: "Accident sportif - AVP"
+            },
+            {
+                category: "Clavicule",
+                question: "Quels sont les signes cliniques d'une fracture de clavicule ?",
+                answer: "Déformation - Douleur"
+            },
+            {
+                category: "Clavicule",
+                question: "Quelle est la localisation principale d'une fracture de clavicule ?",
+                answer: "1/3 moyen (80%)"
+            },
+            {
+                category: "Clavicule",
+                question: "Quelle imagerie pour une fracture de clavicule ?",
+                answer: "Radio FACE avec rayon oblique ascendant 15°"
+            },
+            {
+                category: "Clavicule",
+                question: "Quels sont les traitements d'une fracture de clavicule ?",
+                answer: "Orthopédique (anneaux) – Chirurgical (broche – plaques vis)"
+            },
+            {
+                category: "Clavicule",
+                question: "Quelles sont les complications d'une fracture de clavicule ?",
+                answer: "Atteinte thoracique (radio thoracique), Vasculo-nerveuse, Cal vicieux"
+            },
+            // Épaule
+            {
+                category: "Épaule",
+                question: "Quelles sont les 2 incidences radiologiques pour l'épaule ?",
+                answer: "Épaule – Incidence de FACE – Rotation neutre\nÉpaule – Incidence de PROFIL – Lamy"
+            },
+            {
+                category: "Épaule",
+                question: "Quel est le traitement d'une luxation de l'épaule ?",
+                answer: "Réduction de la luxation puis mise en place d'un moyen de contention (Dujarier)"
+            },
+            {
+                category: "Épaule",
+                question: "Quels examens de contrôle après traitement d'une luxation ?",
+                answer: "Radiologie de contrôle (F ou F et P) et examen neurologique"
+            },
+            // Rachis
+            {
+                category: "Rachis",
+                question: "En cas de fracture du rachis, que recherche-t-on ?",
+                answer: "Un recul ou déplacement du mur postérieur"
+            },
+            {
+                category: "Rachis",
+                question: "Où s'arrête la moelle épinière ?",
+                answer: "Au niveau de D12-L1 puis racines de la queue de cheval"
+            },
+            {
+                category: "Rachis",
+                question: "Combien y a-t-il de racines nerveuses cervicales ?",
+                answer: "8 racines de C1 à C8 pour 7 vertèbres cervicales de C1 à C7"
+            },
+            {
+                category: "Rachis",
+                question: "Qu'est-ce qu'un métamère ?",
+                answer: "Un étage de la moelle épinière intégrant son territoire d'innervation motrice et sensitive"
+            },
+            {
+                category: "Rachis",
+                question: "Une lésion avant T1 engendre quoi ?",
+                answer: "Une tétraplégie (après T1 = paraplégie)"
+            },
+            {
+                category: "Rachis",
+                question: "Quels sont les 4 points évalués lors d'un traumatisme du rachis ?",
+                answer: "1) Douleur\n2) Déficits sensitifs\n3) Déficits moteurs\n4) Déficits vésico-sphinctériens\n(Score ASIA : classement de A (déficit complet) à E (aucun déficit))"
+            },
+            {
+                category: "Rachis - Imagerie",
+                question: "Quelle est l'imagerie de première intention pour le rachis ?",
+                answer: "Radiologie standard : radiographie face/profil de la zone rachidienne concernée"
+            },
+            {
+                category: "Rachis - Imagerie",
+                question: "À quoi sert le scanner dans le traumatisme du rachis ?",
+                answer: "Permet de déterminer si la fracture est stable ou instable. Acquisition en axial (filtre standard et filtre os) – reconstruction en coronal et sagittal et 3D"
+            },
+            {
+                category: "Rachis - Imagerie",
+                question: "À quoi sert l'IRM dans le traumatisme du rachis ?",
+                answer: "Séquence STIR permet de préciser les lésions ligamentaires ou de dater les lésions (Hypersignal)"
+            },
+            {
+                category: "Rachis",
+                question: "Sans signe neurologique, comment considérer une fracture du rachis ?",
+                answer: "De principe, considérer que la fracture est instable et la manutention du patient se fait en bloc"
+            }
+        ];
+
+        // Base de données des questions de test
+        const testQuestions = [
+            // QCM
+            {
+                type: "mcq",
+                question: "Les critères de Vittel pour le polytraumatisé servent à :",
+                options: [
+                    "déterminer le type de traitement chirurgical",
+                    "décider d'un transfert vers un centre de traumatologie",
+                    "évaluer l'autonomie du patient",
+                    "choisir un traitement médicamenteux"
+                ],
+                correct: 1,
+                explanation: "Les critères de Vittel permettent d'identifier les patients nécessitant un transfert en trauma center."
+            },
+            {
+                type: "mcq",
+                question: "Parmi les critères physiologiques, lequel impose un transfert :",
+                options: [
+                    "glasgow = 15",
+                    "pression artérielle systolique < 90 mmHg",
+                    "fréquence respiratoire = 16/mn",
+                    "saturation en oxygène = 98% SOUS O2"
+                ],
+                correct: 1,
+                explanation: "Une PAS < 90 mmHg est un critère physiologique grave nécessitant un transfert."
+            },
+            {
+                type: "mcq",
+                question: "Lequel des critères anatomiques suivants correspond à un critère de Vittel :",
+                options: [
+                    "fracture simple de l'avant-bras",
+                    "entorse de la cheville",
+                    "hématome sous cutané",
+                    "fracture des deux fémurs"
+                ],
+                correct: 3,
+                explanation: "La fracture des deux fémurs est un critère anatomique grave de Vittel."
+            },
+            {
+                type: "mcq",
+                question: "Un accident de la voie publique avec éjection du véhicule :",
+                options: [
+                    "est considéré comme bénin",
+                    "ne nécessite pas de transfert",
+                    "est un critère de Vittel",
+                    "est seulement un facteur psychologique"
+                ],
+                correct: 2,
+                explanation: "L'éjection du véhicule est un critère cinétique de Vittel."
+            },
+            {
+                type: "mcq",
+                question: "Parmi les critères cinétiques, lequel est correct :",
+                options: [
+                    "chute de plus de 6 mètres",
+                    "chute de moins de 2 mètres",
+                    "collision à 30 km/h",
+                    "glissade sans traumatisme"
+                ],
+                correct: 0,
+                explanation: "Une chute de plus de 6 mètres est un critère cinétique de gravité."
+            },
+            {
+                type: "mcq",
+                question: "Si un seul critère de Vittel est présent, la conduite à tenir est :",
+                options: [
+                    "observation simple aux urgences",
+                    "sortie possible si le patient est stable",
+                    "considérer le patient comme polytraumatisé et transférer en trauma center",
+                    "attendre plusieurs heures avant décision"
+                ],
+                correct: 2,
+                explanation: "Un seul critère suffit pour considérer le patient comme polytraumatisé et justifier un transfert."
+            },
+            {
+                type: "mcq",
+                question: "La localisation principale d'une fracture de clavicule est :",
+                options: [
+                    "1/3 externe",
+                    "1/3 moyen (80%)",
+                    "1/3 interne",
+                    "uniformément répartie"
+                ],
+                correct: 1,
+                explanation: "80% des fractures de clavicule se situent au 1/3 moyen."
+            },
+            {
+                type: "mcq",
+                question: "La moelle épinière descend jusqu'à :",
+                options: [
+                    "S1",
+                    "L5",
+                    "D12-L1",
+                    "L3"
+                ],
+                correct: 2,
+                explanation: "La moelle épinière s'arrête au niveau de D12-L1, puis c'est la queue de cheval."
+            },
+            // Questions à trous
+            {
+                type: "fill",
+                question: "Une fracture est une __________ d'un os liée à un traumatisme.",
+                answer: "solution de continuité",
+                explanation: "C'est la définition exacte d'une fracture."
+            },
+            {
+                type: "fill",
+                question: "L'absence de consolidation d'une fracture dans les délais normaux s'appelle une __________.",
+                answer: "pseudarthrose",
+                explanation: "La pseudarthrose est une complication de fracture caractérisée par l'absence de consolidation."
+            },
+            {
+                type: "fill",
+                question: "Un épanchement de sang dans une articulation s'appelle une __________.",
+                answer: "hémarthrose",
+                explanation: "Hémarthrose = hémo (sang) + arthrose (articulation)."
+            },
+            {
+                type: "fill",
+                question: "Les 2 grandes règles thérapeutiques d'une fracture sont la __________ et la __________.",
+                answer: "réduction|stabilisation",
+                explanation: "Réduction pour aligner les fragments, stabilisation pour maintenir la position."
+            },
+            // Questions d'appariement
+            {
+                type: "matching",
+                question: "Associez chaque phase de consolidation à sa description :",
+                pairs: [
+                    { left: "Phase 1", right: "Formation d'un hématome (phase inflammatoire)" },
+                    { left: "Phase 2", right: "Formation du cal fibrocartilagineux" },
+                    { left: "Phase 3", right: "Formation du cal osseux" },
+                    { left: "Phase 4", right: "Remaniement osseux" }
+                ],
+                explanation: "Les 4 phases de consolidation osseuse se succèdent dans cet ordre."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque terme à sa définition :",
+                pairs: [
+                    { left: "Fracture", right: "Solution de continuité d'un os" },
+                    { left: "Entorse", right: "Lésion traumatique d'un ligament" },
+                    { left: "Luxation", right: "Perte de contact entre surfaces articulaires" },
+                    { left: "Nécrose", right: "Mort de cellules ou tissus" }
+                ],
+                explanation: "Ces définitions sont fondamentales en traumatologie."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque complication à sa description :",
+                pairs: [
+                    { left: "Cal vicieux", right: "Consolidation en position anormale" },
+                    { left: "Pseudarthrose", right: "Absence de consolidation" },
+                    { left: "Syndrome de loge", right: "Compression par hémorragie" },
+                    { left: "Infection", right: "Complication infectieuse" }
+                ],
+                explanation: "Ces complications peuvent survenir après une fracture."
+            },
+            {
+                type: "matching",
+                question: "Associez chaque grade de polytraumatisé à son bilan d'imagerie :",
+                pairs: [
+                    { left: "Grade A", right: "Radio thorax + bassin + FAST-ECHO" },
+                    { left: "Grade B", right: "Body scanner complet" },
+                    { left: "Grade C", right: "Body scanner complet" }
+                ],
+                explanation: "Le bilan d'imagerie s'adapte à la gravité du traumatisme."
+            }
+        ];
+
+        // État de l'application
+        let currentMode = 'flashcards';
+        let currentCardIndex = 0;
+        let currentFilter = 'all';
+        let isFlipped = false;
+        let cardStates = {};
+        let testAnswers = {};
+        let matchingSelections = {};
+
+        // Initialisation
+        function init() {
+            loadProgress();
+            updateStats();
+            displayCard();
+            renderTest();
+        }
+
+        // Sauvegarde/Chargement
+        function saveProgress() {
+            localStorage.setItem('traumato-progress', JSON.stringify(cardStates));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('traumato-progress');
+            if (saved) {
+                cardStates = JSON.parse(saved);
+            } else {
+                flashcardsData.forEach((_, index) => {
+                    cardStates[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                });
+            }
+        }
+
+        function exportProgress() {
+            const dataStr = JSON.stringify(cardStates, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'traumato-progress-' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+        }
+
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        cardStates = JSON.parse(e.target.result);
+                        saveProgress();
+                        updateStats();
+                        displayCard();
+                        alert('Progression importée avec succès !');
+                    } catch (error) {
+                        alert('Erreur lors de l\'importation du fichier');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function resetProgress() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser toute votre progression ?')) {
+                flashcardsData.forEach((_, index) => {
+                    cardStates[index] = {
+                        status: 'new',
+                        reviewCount: 0
+                    };
+                });
+                saveProgress();
+                currentCardIndex = 0;
+                updateStats();
+                displayCard();
+            }
+        }
+
+        // Gestion des modes
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(mode + '-mode').classList.add('active');
+        }
+
+        // Gestion des flashcards
+        function getFilteredCards() {
+            return flashcardsData.map((card, index) => ({ ...card, index }))
+                .filter(card => {
+                    const state = cardStates[card.index];
+                    switch(currentFilter) {
+                        case 'new':
+                            return state.status === 'new';
+                        case 'review':
+                            return state.reviewCount > 0 && state.status !== 'acquired';
+                        case 'acquired':
+                            return state.status === 'acquired';
+                        default:
+                            return true;
+                    }
+                });
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            currentCardIndex = 0;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            displayCard();
+            updateStats();
+        }
+
+        function displayCard() {
+            const filteredCards = getFilteredCards();
+            
+            if (filteredCards.length === 0) {
+                document.getElementById('question').textContent = 'Aucune carte dans cette catégorie';
+                document.getElementById('answer').textContent = 'Changez de filtre pour voir d\'autres cartes';
+                document.getElementById('category').textContent = '';
+                return;
+            }
+
+            if (currentCardIndex >= filteredCards.length) {
+                currentCardIndex = 0;
+            }
+
+            const card = filteredCards[currentCardIndex];
+            document.getElementById('category').textContent = card.category;
+            document.getElementById('question').textContent = card.question;
+            document.getElementById('answer').textContent = card.answer;
+            
+            if (isFlipped) {
+                flipCard();
+            }
+            
+            updateProgress();
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+        }
+
+        function rateCard(rating) {
+            const filteredCards = getFilteredCards();
+            if (filteredCards.length === 0) return;
+            
+            const card = filteredCards[currentCardIndex];
+            const state = cardStates[card.index];
+
+            switch(rating) {
+                case 'acquired':
+                    state.status = 'acquired';
+                    state.reviewCount = 0;
+                    break;
+                case 'review':
+                    state.status = 'review';
+                    state.reviewCount = Math.max(1, state.reviewCount);
+                    break;
+                case 'not-acquired':
+                    state.status = 'not-acquired';
+                    state.reviewCount = 3;
+                    break;
+            }
+
+            saveProgress();
+            
+            // Passer à la carte suivante
+            if (state.reviewCount > 0) {
+                state.reviewCount--;
+            }
+            
+            currentCardIndex++;
+            displayCard();
+            updateStats();
+        }
+
+        function updateStats() {
+            const stats = {
+                total: flashcardsData.length,
+                acquired: 0,
+                review: 0,
+                notAcquired: 0,
+                new: 0
+            };
+
+            Object.values(cardStates).forEach(state => {
+                if (state.status === 'acquired') stats.acquired++;
+                else if (state.status === 'new') stats.new++;
+                else if (state.reviewCount > 0) {
+                    if (state.status === 'not-acquired') stats.notAcquired++;
+                    else stats.review++;
+                }
+            });
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #4caf50">${stats.acquired}</div>
+                    <div class="stat-label">Acquises</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #ff9800">${stats.review}</div>
+                    <div class="stat-label">À revoir</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #f44336">${stats.notAcquired}</div>
+                    <div class="stat-label">Non acquises</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" style="color: #2196f3">${stats.new}</div>
+                    <div class="stat-label">Nouvelles</div>
+                </div>
+            `;
+        }
+
+        function updateProgress() {
+            const filteredCards = getFilteredCards();
+            const progress = filteredCards.length > 0 
+                ? ((currentCardIndex + 1) / filteredCards.length * 100).toFixed(0)
+                : 0;
+            
+            const progressBar = document.getElementById('progress');
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = `${currentCardIndex + 1}/${filteredCards.length} (${progress}%)`;
+        }
+
+        // Gestion du test
+        function renderTest() {
+            const container = document.getElementById('test-questions');
+            container.innerHTML = '';
+
+            testQuestions.forEach((q, index) => {
+                const block = document.createElement('div');
+                block.className = 'question-block';
+                block.innerHTML = `
+                    <span class="question-type">${getQuestionTypeLabel(q.type)}</span>
+                    <div class="question-title">${index + 1}. ${q.question}</div>
+                `;
+
+                if (q.type === 'mcq') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    q.options.forEach((opt, i) => {
+                        optionsDiv.innerHTML += `
+                            <label class="option" id="option-${index}-${i}">
+                                <input type="radio" name="q${index}" value="${i}" 
+                                    onchange="saveTestAnswer(${index}, ${i})">
+                                ${opt}
+                            </label>
+                        `;
+                    });
+                    block.appendChild(optionsDiv);
+                } else if (q.type === 'fill') {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'fill-input';
+                    input.placeholder = 'Votre réponse...';
+                    input.onchange = (e) => saveTestAnswer(index, e.target.value);
+                    block.appendChild(input);
+                } else if (q.type === 'matching') {
+                    const matchingDiv = document.createElement('div');
+                    matchingDiv.className = 'matching-container';
+                    
+                    const leftCol = document.createElement('div');
+                    leftCol.className = 'matching-column';
+                    const rightCol = document.createElement('div');
+                    rightCol.className = 'matching-column';
+
+                    // Mélanger la colonne de droite
+                    const rightItems = [...q.pairs].map(p => p.right).sort(() => Math.random() - 0.5);
+
+                    q.pairs.forEach((pair, i) => {
+                        leftCol.innerHTML += `
+                            <div class="matching-item" id="left-${index}-${i}" 
+                                onclick="selectMatching(${index}, 'left', ${i})">
+                                ${pair.left}
+                            </div>
+                        `;
+                    });
+
+                    rightItems.forEach((item, i) => {
+                        rightCol.innerHTML += `
+                            <div class="matching-item" id="right-${index}-${i}" 
+                                onclick="selectMatching(${index}, 'right', ${i})">
+                                ${item}
+                            </div>
+                        `;
+                    });
+
+                    matchingDiv.appendChild(leftCol);
+                    matchingDiv.appendChild(rightCol);
+                    block.appendChild(matchingDiv);
+                }
+
+                const explanation = document.createElement('div');
+                explanation.className = 'explanation';
+                explanation.id = `explanation-${index}`;
+                explanation.innerHTML = `<strong>Explication :</strong> ${q.explanation}`;
+                block.appendChild(explanation);
+
+                container.appendChild(block);
+            });
+        }
+
+        function saveTestAnswer(questionIndex, answer) {
+            testAnswers[questionIndex] = answer;
+        }
+
+        function selectMatching(questionIndex, side, itemIndex) {
+            if (!matchingSelections[questionIndex]) {
+                matchingSelections[questionIndex] = {};
+            }
+
+            const selection = matchingSelections[questionIndex];
+            const itemId = `${side}-${questionIndex}-${itemIndex}`;
+            const item = document.getElementById(itemId);
+
+            // Désélectionner si déjà sélectionné
+            if (selection[side] === itemIndex) {
+                selection[side] = null;
+                item.classList.remove('selected');
+            } else {
+                // Désélectionner l'ancien
+                if (selection[side] !== undefined) {
+                    const oldItem = document.getElementById(`${side}-${questionIndex}-${selection[side]}`);
+                    if (oldItem) oldItem.classList.remove('selected');
+                }
+                
+                selection[side] = itemIndex;
+                item.classList.add('selected');
+            }
+
+            // Si les deux côtés sont sélectionnés, enregistrer la paire
+            if (selection.left !== null && selection.right !== null) {
+                if (!testAnswers[questionIndex]) {
+                    testAnswers[questionIndex] = [];
+                }
+                
+                const question = testQuestions[questionIndex];
+                const leftText = question.pairs[selection.left].left;
+                const rightItems = [...question.pairs].map(p => p.right).sort(() => Math.random() - 0.5);
+                const rightText = rightItems[selection.right];
+                
+                testAnswers[questionIndex].push({ left: leftText, right: rightText });
+                
+                // Réinitialiser la sélection
+                document.getElementById(`left-${questionIndex}-${selection.left}`).classList.remove('selected');
+                document.getElementById(`right-${questionIndex}-${selection.right}`).classList.remove('selected');
+                selection.left = null;
+                selection.right = null;
+            }
+        }
+
+        function submitTest() {
+            let score = 0;
+            let total = testQuestions.length;
+
+            testQuestions.forEach((q, index) => {
+                const userAnswer = testAnswers[index];
+                let isCorrect = false;
+
+                if (q.type === 'mcq') {
+                    isCorrect = userAnswer === q.correct;
+                    // Marquer visuellement
+                    q.options.forEach((opt, i) => {
+                        const optElement = document.getElementById(`option-${index}-${i}`);
+                        if (i === q.correct) {
+                            optElement.classList.add('correct');
+                        } else if (i === userAnswer && !isCorrect) {
+                            optElement.classList.add('incorrect');
+                        }
+                    });
+                } else if (q.type === 'fill') {
+                    const correctAnswers = q.answer.toLowerCase().split('|');
+                    isCorrect = correctAnswers.some(ans => 
+                        userAnswer && userAnswer.toLowerCase().includes(ans.trim())
+                    );
+                } else if (q.type === 'matching') {
+                    // Vérifier les paires
+                    if (userAnswer && userAnswer.length === q.pairs.length) {
+                        isCorrect = q.pairs.every(pair => 
+                            userAnswer.some(ua => ua.left === pair.left && ua.right === pair.right)
+                        );
+                    }
+                }
+
+                if (isCorrect) score++;
+                
+                // Afficher l'explication
+                document.getElementById(`explanation-${index}`).classList.add('show');
+            });
+
+            const percentage = (score / total * 100).toFixed(0);
+            document.getElementById('final-score').textContent = `${score}/${total} (${percentage}%)`;
+            
+            let message = '';
+            if (percentage >= 90) message = '🎉 Excellent ! Vous maîtrisez parfaitement le sujet !';
+            else if (percentage >= 75) message = '👍 Très bien ! Quelques révisions et ce sera parfait !';
+            else if (percentage >= 50) message = '📚 Pas mal, mais il faut encore réviser certains points.';
+            else message = '💪 Courage ! Reprenez les flashcards pour mieux assimiler.';
+            
+            document.getElementById('score-message').textContent = message;
+            document.getElementById('test-results').classList.add('show');
+            
+            // Scroll vers les résultats
+            document.getElementById('test-results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetTest() {
+            testAnswers = {};
+            matchingSelections = {};
+            document.getElementById('test-results').classList.remove('show');
+            renderTest();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function getQuestionTypeLabel(type) {
+            switch(type) {
+                case 'mcq': return 'QCM';
+                case 'fill': return 'Question à trous';
+                case 'matching': return 'Appariement';
+                default: return '';
+            }
+        }
+
+        // Lancement de l'application
+        init();
+    </script>
+</body>
+</html>
