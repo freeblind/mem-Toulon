@@ -1509,48 +1509,18 @@
         }
 
         function selectOption(qIndex, oIndex) {
-            console.log('🔍 selectOption called with qIndex:', qIndex, 'oIndex:', oIndex);
-            
-            const qcmContainer = document.getElementById('qcmContainer');
-            const allCards = qcmContainer.querySelectorAll('.question-card');
-            console.log('🔍 Total question-cards in QCM found:', allCards.length);
-            
-            const card = allCards[qIndex];
-            console.log('🔍 Card found:', !!card);
-            
-            if (!card) {
-                console.error('❌ Card not found for index:', qIndex);
-                return; // Vérification de sécurité
-            }
-            
+            const card = document.querySelectorAll('.question-card')[qIndex];
             const options = card.querySelectorAll('.option');
-            console.log('🔍 Options found:', options.length);
-            
             const button = card.querySelector('.validate-btn');
-            console.log('🔍 Button found:', !!button);
             
             // Si déjà validé, ne rien faire
-            if (qcmAnswers[qIndex] !== null) {
-                console.log('⚠️ Question already answered');
-                return;
-            }
+            if (qcmAnswers[qIndex] !== null) return;
             
-            // Désélectionner toutes les options et sélectionner celle cliquée
             options.forEach((opt, i) => {
-                if (i === oIndex) {
-                    opt.classList.add('selected');
-                    console.log('✅ Option', i, 'selected');
-                } else {
-                    opt.classList.remove('selected');
-                }
+                opt.classList.toggle('selected', i === oIndex);
             });
             
-            if (button) {
-                button.disabled = false;
-                console.log('✅ Button enabled');
-            } else {
-                console.error('❌ Button not found');
-            }
+            button.disabled = false;
         }
 
         function validateQCM(qIndex) {
