@@ -1094,9 +1094,14 @@
         }
 
         function loadStats() {
-            const saved = localStorage.getItem('ue211_stats');
-            if (saved) {
-                stats = JSON.parse(saved);
+            try {
+                const saved = localStorage.getItem('ue211_stats');
+                if (saved && saved !== 'undefined' && saved !== 'null') {
+                    stats = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.warn('Error loading stats, resetting:', e);
+                localStorage.removeItem('ue211_stats');
             }
         }
 
@@ -1554,7 +1559,8 @@
         }
 
         function validateQCM(qIndex) {
-            const card = document.querySelectorAll('.question-card')[qIndex];
+            const qcmContainer = document.getElementById('qcmContainer');
+            const card = qcmContainer.querySelectorAll('.question-card')[qIndex];
             const options = card.querySelectorAll('.option');
             const selected = Array.from(options).findIndex(opt => opt.classList.contains('selected'));
             
