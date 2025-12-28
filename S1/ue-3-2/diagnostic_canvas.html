@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnostic Canvas & Scaling</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        h1 { color: #2c3e50; }
+        h2 { color: #3498db; margin-top: 30px; }
+        
+        .test-zone {
+            border: 3px dashed #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+            border: 2px solid #e74c3c;
+            line-height: 0;
+        }
+        
+        #testImage {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        #testCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 2px solid #2ecc71;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-card {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-card h3 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .info-card p {
+            margin: 5px 0;
+            font-family: monospace;
+            color: #555;
+        }
+        
+        .point {
+            width: 40px;
+            height: 40px;
+            background: rgba(245, 87, 108, 0.9);
+            border: 3px solid white;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .log {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        .log div {
+            margin: 5px 0;
+            padding: 3px 0;
+            border-bottom: 1px solid #34495e;
+        }
+        
+        .success { color: #2ecc71; }
+        .error { color: #e74c3c; }
+        .warning { color: #f39c12; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic Canvas & Scaling</h1>
+        <p>Outil pour diagnostiquer les problèmes de positionnement des annotations sur les images</p>
+        
+        <h2>1️⃣ Charger une image de test</h2>
+        <div class="test-zone" onclick="document.getElementById('fileInput').click()">
+            <p>📤 Cliquez pour sélectionner une image</p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div id="imageSection" style="display: none;">
+            <h2>2️⃣ Image chargée</h2>
+            
+            <div class="info-grid" id="infoGrid">
+                <!-- Rempli dynamiquement -->
+            </div>
+            
+            <div class="test-zone">
+                <div class="canvas-wrapper" id="canvasWrapper">
+                    <img id="testImage" alt="Test">
+                    <canvas id="testCanvas"></canvas>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button onclick="addRandomPoint()">➕ Ajouter un point aléatoire</button>
+                <button onclick="clearPoints()">🗑️ Effacer les points</button>
+                <button onclick="testScaling()">🔧 Tester le scaling</button>
+            </div>
+            
+            <h2>3️⃣ Instructions de test</h2>
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <strong>Comment tester :</strong>
+                <ol style="margin: 10px 0 0 20px;">
+                    <li>Cliquez sur "Ajouter un point aléatoire" plusieurs fois</li>
+                    <li>Vérifiez que les points apparaissent aux bonnes positions</li>
+                    <li>Redimensionnez la fenêtre du navigateur</li>
+                    <li>Cliquez sur "Tester le scaling" pour voir si les positions sont maintenues</li>
+                    <li>Consultez les logs ci-dessous pour les détails techniques</li>
+                </ol>
+            </div>
+            
+            <h2>4️⃣ Console de diagnostic</h2>
+            <div id="logConsole" class="log">
+                <div class="success">✅ Prêt pour les tests</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let testImage = null;
+        let testCanvas = null;
+        let testCtx = null;
+        let points = [];
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('logConsole');
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateInfoGrid() {
+            const infoGrid = document.getElementById('infoGrid');
+            
+            if (!testImage) return;
+            
+            const naturalW = testImage.naturalWidth;
+            const naturalH = testImage.naturalHeight;
+            const displayW = testImage.offsetWidth;
+            const displayH = testImage.offsetHeight;
+            const scaleX = displayW / naturalW;
+            const scaleY = displayH / naturalH;
+            
+            infoGrid.innerHTML = `
+                <div class="info-card">
+                    <h3>📏 Dimensions naturelles</h3>
+                    <p>Largeur: ${naturalW}px</p>
+                    <p>Hauteur: ${naturalH}px</p>
+                </div>
+                <div class="info-card">
+                    <h3>📐 Dimensions affichées</h3>
+                    <p>Largeur: ${displayW}px</p>
+                    <p>Hauteur: ${displayH}px</p>
+                </div>
+                <div class="info-card">
+                    <h3>🔍 Ratio de scaling</h3>
+                    <p>Scale X: ${scaleX.toFixed(4)}</p>
+                    <p>Scale Y: ${scaleY.toFixed(4)}</p>
+                </div>
+                <div class="info-card">
+                    <h3>🎨 Canvas</h3>
+                    <p>Width: ${testCanvas.width}px</p>
+                    <p>Height: ${testCanvas.height}px</p>
+                </div>
+                <div class="info-card">
+                    <h3>📊 Points annotés</h3>
+                    <p>Nombre: ${points.length}</p>
+                    <p>Mode: ${scaleX < 1 ? 'Réduit' : 'Agrandi'}</p>
+                </div>
+            `;
+        }
+        
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            log('📁 Chargement du fichier: ' + file.name);
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                testImage = document.getElementById('testImage');
+                testImage.src = event.target.result;
+                
+                testImage.onload = function() {
+                    document.getElementById('imageSection').style.display = 'block';
+                    
+                    testCanvas = document.getElementById('testCanvas');
+                    testCtx = testCanvas.getContext('2d');
+                    
+                    // Le canvas doit matcher la taille AFFICHÉE de l'image
+                    const displayW = testImage.offsetWidth;
+                    const displayH = testImage.offsetHeight;
+                    
+                    testCanvas.width = displayW;
+                    testCanvas.height = displayH;
+                    testCanvas.style.width = displayW + 'px';
+                    testCanvas.style.height = displayH + 'px';
+                    
+                    log(`✅ Image chargée: ${this.naturalWidth}x${this.naturalHeight}`, 'success');
+                    log(`📐 Affichée à: ${displayW}x${displayH}`, 'success');
+                    
+                    updateInfoGrid();
+                    
+                    // Redessiner lors du resize
+                    window.addEventListener('resize', handleResize);
+                };
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        function handleResize() {
+            if (!testImage || !testCanvas) return;
+            
+            log('🔄 Redimensionnement détecté', 'warning');
+            
+            const displayW = testImage.offsetWidth;
+            const displayH = testImage.offsetHeight;
+            
+            testCanvas.width = displayW;
+            testCanvas.height = displayH;
+            testCanvas.style.width = displayW + 'px';
+            testCanvas.style.height = displayH + 'px';
+            
+            updateInfoGrid();
+            redrawPoints();
+        }
+        
+        function addRandomPoint() {
+            if (!testImage) {
+                log('❌ Veuillez d\'abord charger une image', 'error');
+                return;
+            }
+            
+            // Coordonnées en taille NATURELLE (ce qui est sauvegardé)
+            const x = Math.random() * testImage.naturalWidth;
+            const y = Math.random() * testImage.naturalHeight;
+            
+            points.push({ x, y, number: points.length + 1 });
+            
+            log(`➕ Point ajouté: (${x.toFixed(0)}, ${y.toFixed(0)}) naturel`, 'success');
+            
+            redrawPoints();
+            updateInfoGrid();
+        }
+        
+        function redrawPoints() {
+            if (!testCanvas || !testCtx) return;
+            
+            testCtx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+            
+            const scaleX = testImage.offsetWidth / testImage.naturalWidth;
+            const scaleY = testImage.offsetHeight / testImage.naturalHeight;
+            
+            log(`🎨 Redessine avec scale: ${scaleX.toFixed(4)} x ${scaleY.toFixed(4)}`);
+            
+            points.forEach(point => {
+                // Convertir coordonnées naturelles -> affichées
+                const displayX = point.x * scaleX;
+                const displayY = point.y * scaleY;
+                
+                // Dessiner le cercle
+                testCtx.beginPath();
+                testCtx.arc(displayX, displayY, 20, 0, 2 * Math.PI);
+                testCtx.fillStyle = 'rgba(245, 87, 108, 0.9)';
+                testCtx.fill();
+                testCtx.strokeStyle = 'white';
+                testCtx.lineWidth = 3;
+                testCtx.stroke();
+                
+                // Dessiner le numéro
+                testCtx.fillStyle = 'white';
+                testCtx.font = 'bold 16px Arial';
+                testCtx.textAlign = 'center';
+                testCtx.textBaseline = 'middle';
+                testCtx.fillText(point.number, displayX, displayY);
+            });
+        }
+        
+        function clearPoints() {
+            points = [];
+            if (testCtx) {
+                testCtx.clearRect(0, 0, testCanvas.width, testCanvas.height);
+            }
+            log('🗑️ Tous les points effacés', 'warning');
+            updateInfoGrid();
+        }
+        
+        function testScaling() {
+            if (!testImage) {
+                log('❌ Veuillez d\'abord charger une image', 'error');
+                return;
+            }
+            
+            log('🔧 Test de scaling...', 'warning');
+            
+            const naturalW = testImage.naturalWidth;
+            const naturalH = testImage.naturalHeight;
+            const displayW = testImage.offsetWidth;
+            const displayH = testImage.offsetHeight;
+            const scaleX = displayW / naturalW;
+            const scaleY = displayH / naturalH;
+            
+            log(`Naturel: ${naturalW}x${naturalH}`);
+            log(`Affiché: ${displayW}x${displayH}`);
+            log(`Scale: ${scaleX.toFixed(4)} x ${scaleY.toFixed(4)}`);
+            
+            if (Math.abs(scaleX - scaleY) > 0.01) {
+                log('⚠️ ATTENTION: Les ratios X et Y diffèrent!', 'warning');
+            }
+            
+            if (scaleX === 1 && scaleY === 1) {
+                log('✅ Pas de scaling (affichage 100%)', 'success');
+            } else if (scaleX < 1) {
+                log(`📉 Image réduite à ${(scaleX * 100).toFixed(1)}%`, 'success');
+            } else {
+                log(`📈 Image agrandie à ${(scaleX * 100).toFixed(1)}%`, 'success');
+            }
+            
+            // Test avec un point fictif
+            const testPoint = { x: naturalW / 2, y: naturalH / 2 };
+            const displayPoint = {
+                x: testPoint.x * scaleX,
+                y: testPoint.y * scaleY
+            };
+            
+            log(`Point test (centre de l'image):`);
+            log(`  Naturel: (${testPoint.x.toFixed(0)}, ${testPoint.y.toFixed(0)})`);
+            log(`  Affiché: (${displayPoint.x.toFixed(0)}, ${displayPoint.y.toFixed(0)})`);
+        }
+    </script>
+</body>
+</html>

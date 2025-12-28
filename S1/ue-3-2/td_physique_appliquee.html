@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD Physique Appliquée - UE 3.2 S1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #dee2e6;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1em;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -3px;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #2c3e50;
+        }
+
+        .nav-tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            background: white;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .td-section {
+            display: none;
+        }
+
+        .td-section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border-left: 5px solid #3498db;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .question-card:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            transform: translateX(5px);
+        }
+
+        .question-header {
+            background: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .question-badge {
+            background: rgba(255,255,255,0.3);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .question-part {
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .question-text {
+            font-size: 1.05em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        textarea.answer-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .options-container {
+            margin-top: 15px;
+        }
+
+        .option {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #3498db;
+            background: #f0f7ff;
+            transform: translateX(5px);
+        }
+
+        .option input[type="checkbox"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .controls {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 20px 30px;
+            border-top: 3px solid #dee2e6;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            height: 100%;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .schema-indicator {
+            background: #f39c12;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
+            .controls {
+                padding: 15px;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9em;
+            }
+        }
+
+        .export-format {
+            margin: 10px 0;
+        }
+
+        .export-format label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .export-format input[type="radio"] {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Physique Appliquée UE 3.2 S1</h1>
+            <p>Travaux Dirigés - EMEM</p>
+        </div>
+
+        <div class="nav-tabs" id="navTabs">
+            <!-- Tabs générés dynamiquement -->
+        </div>
+
+        <div class="content">
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalQuestions">0</div>
+                    <div class="stat-label">Questions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="answeredQuestions">0</div>
+                    <div class="stat-label">Répondues</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="progressPercent">0%</div>
+                    <div class="stat-label">Progression</div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+
+            <div id="tdSections">
+                <!-- Sections générées dynamiquement -->
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-success" onclick="saveProgress()">💾 Sauvegarder</button>
+            <button class="btn btn-primary" onclick="loadProgress()">📂 Charger</button>
+            <button class="btn btn-warning" onclick="exportAnswers()">📄 Exporter</button>
+            <button class="btn btn-danger" onclick="resetAll()">🔄 Réinitialiser</button>
+        </div>
+    </div>
+
+    <script>
+        // Données des TDs
+        const tdsData = {
+  "td1_production_rx": {
+    "title": "TD N°1",
+    "date": "21/11/2024",
+    "questions": [
+      {
+        "id": 1,
+        "title": "QUESTION 1",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Définissez les rayons X"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Définissez les rayonnements ionisants"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Précisez la différence entre les rayons X et Gamma"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 2,
+        "title": "QUESTION 2",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Complétez la phrase ci-dessous"
+          },
+          {
+            "type": "question",
+            "text": "La production des RX fait suite à une ……………………………………………………………. ……………………………………….contre une ………………………………………………….."
+          },
+          {
+            "type": "text",
+            "text": "Citez les 2 modes de production des rayons X"
+          },
+          {
+            "type": "question",
+            "text": "1 :  ………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "2 : ……………………………………………………………………………………………………….."
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Précisez le phénomène produisant majoritairement les rayons X"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 3,
+        "title": "QUESTION 3",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Nommez le phénomène ci-dessous"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Explicitez ce phénomène"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Cochez la case sous le spectre correspondant au phénomène nommé en 1 de cette question"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 4,
+        "title": "QUESTION 4",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Nommez le phénomène ci-dessous"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Explicitez ce phénomène"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Cochez la case sous le spectre correspondant au phénomène nommé en 1 de cette question"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 6,
+        "title": "QUESTION 6",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Pour chaque étape de la production des RX dans le tube à RX, précisez dans la case correspondante :"
+          },
+          {
+            "type": "text",
+            "text": "Localisation de l’étape"
+          },
+          {
+            "type": "text",
+            "text": "Effet concerné par cette étape"
+          },
+          {
+            "type": "text",
+            "text": "Mécanisme de l’effet concerné"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 8,
+        "title": "QUESTION 8",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Positionnez sur le schéma ci-dessous :"
+          },
+          {
+            "type": "text",
+            "text": "Foyer thermique"
+          },
+          {
+            "type": "text",
+            "text": "Foyer optique"
+          },
+          {
+            "type": "text",
+            "text": "Renseignez le tableau ci-dessous"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 9,
+        "title": "QUESTION 9",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Complétez le texte à trou ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "Le générateur regroupe tous les circuits ……………………….. et …………………… qui alimentent le tube à RX"
+          },
+          {
+            "type": "question",
+            "text": "Son rôle :"
+          },
+          {
+            "type": "question",
+            "text": "Appliquer une ……………….. U (….) au tube"
+          },
+          {
+            "type": "question",
+            "text": "Chauffer la cathode pour obtenir l’……………………….. I (……) désirée dans le tube"
+          },
+          {
+            "type": "question",
+            "text": "Déterminer le temps de l’………………. (……)"
+          },
+          {
+            "type": "question",
+            "text": "Assurer la ………………. du tube (U, I et exposition acceptables pour le tube)"
+          },
+          {
+            "type": "question",
+            "text": "Il est contenu dans une ………………  ……………….. et contrôlé par un ……………  … ………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 10,
+        "title": "QUESTION 10",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Définissez l’image radiante"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Citez les 3 facteurs influant l’atténuation des rayons X dans la matière organique"
+          },
+          {
+            "type": "question",
+            "text": "1 - ………………………………………………………………………………………………………..."
+          },
+          {
+            "type": "question",
+            "text": "2 - ………………………………………………………………………………………………………..."
+          },
+          {
+            "type": "question",
+            "text": "3 - ………………………………………………………………………………………………………..."
+          },
+          {
+            "type": "text",
+            "text": "Reliez les différents niveaux de gris (colonne de gauche) avec les milieux organiques correspondant (colonne de droite)"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 11,
+        "title": "QUESTION 11",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Nommez le phénomène ci-dessous"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Explicitez ce phénomène"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 12,
+        "title": "QUESTION 12",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Nommez le phénomène ci-dessous"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Explicitez ce phénomène"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 13,
+        "title": "QUESTION 13",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Renseignez le tableau ci-dessous :"
+          }
+        ],
+        "has_schema": false
+      }
+    ]
+  },
+  "td2_dose": {
+    "title": "TD N°2",
+    "date": "29/11/2024",
+    "questions": [
+      {
+        "id": 1,
+        "title": "QUESTION 1",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Renseignez le tableau ci-dessous :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 2,
+        "title": "QUESTION 2",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Précisez la signification des 3 acronymes ci-dessous"
+          },
+          {
+            "type": "question",
+            "text": "NRD : ………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "VGD : ………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "NRL : ………………………………………………………………………………………………."
+          },
+          {
+            "type": "text",
+            "text": "Précisez la finalité des NRD et VGD"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Précisez la méthode statistique utilisé pour :"
+          },
+          {
+            "type": "question",
+            "text": "NRD : ……………………………………………………….………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "VGD : ……………………………………………………….………………………………………."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 3,
+        "title": "QUESTION 3",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Complétez la phrase ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "Le principe d’optimisation consiste à trouver un ………………………………entre …………………   ………………………….  et   ……………………………"
+          },
+          {
+            "type": "text",
+            "text": "Précisez les 4 acteurs intervenant dans une démarche d’optimisation en radiologie"
+          },
+          {
+            "type": "question",
+            "text": "1……………………………………………………………………………………………………………2……………………………………………………………………………………………………………3……………………………………………………………………………………………………………4……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Précisez la démarche d’optimisation mise en place dans chacun des cas ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "NRL > NRD : ………………………………………………….………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "VGD < NRL < NRD : ………………………………………….………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "NRL < VGD de plus de 20%  : …………………………….………………………………………."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 4,
+        "title": "QUESTION 4",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Renseignez le tableau ci-dessous :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 5,
+        "title": "QUESTION 5",
+        "parts": [
+          {
+            "type": "question",
+            "text": "A partir du signal ci-dessous :"
+          },
+          {
+            "type": "text",
+            "text": "Précisez la période"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Calculez la fréquence en Hz"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Dessinez sa représentation selon le spectre de Fourier"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 6,
+        "title": "QUESTION 6",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante."
+          }
+        ],
+        "has_schema": false
+      }
+    ]
+  },
+  "td3_scanographie": {
+    "title": "TD N°3",
+    "date": "04/12/2024",
+    "questions": [
+      {
+        "id": 1,
+        "title": "QUESTION 1",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Complétez cette phrase à trou"
+          },
+          {
+            "type": "question",
+            "text": "Le scanner est une technique d’imagerie par …………………………… qui utilise les ………………………… pour créer des images ………………, …………………………….. et parfois ………………………………….."
+          },
+          {
+            "type": "text",
+            "text": "Précisez les 2 acronymes utilisés pour la scanographie"
+          },
+          {
+            "type": "question",
+            "text": "…………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 2,
+        "title": "QUESTION 2",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Précisez le lien entre l’UH et les pixels et voxels de l’image scanographique"
+          },
+          {
+            "type": "question",
+            "text": "PIXEL / UH : ………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "VOXEL / UH : …………………………………………………………………………………………….."
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 3,
+        "title": "QUESTION 3",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Expliquez le concept de l’échelle d’Hounsfield"
+          },
+          {
+            "type": "question",
+            "text": "…………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "…………………………………………………………………………………………………………………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Précisez la signification de l’acronyme UH"
+          },
+          {
+            "type": "question",
+            "text": "UH : ……………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Donnez les valeurs UH des zones anatomiques ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "OS :………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "EAU :………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "AIR :………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Renseignez le tableau ci-dessous"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 5,
+        "title": "QUESTION 5",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Explicitez les 4 systèmes constituant la chaine scanographique :"
+          },
+          {
+            "type": "question",
+            "text": "1…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "2…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "3…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "4…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 6,
+        "title": "QUESTION 6",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 7,
+        "title": "QUESTION 7",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Complétez ce texte à trou concernant les caractéristiques d’un générateur scanographique"
+          },
+          {
+            "type": "question",
+            "text": "Haute tension continue délivrée : ……. à ………kV"
+          },
+          {
+            "type": "question",
+            "text": "Intensité constante : ……. à ……….mA"
+          },
+          {
+            "type": "question",
+            "text": "Puissance totale de ……… à …….. kW"
+          },
+          {
+            "type": "text",
+            "text": "Précisez les 2 caractéristiques de performance d’un tube à RX scanographique"
+          },
+          {
+            "type": "question",
+            "text": "1…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "2…………………………………………………………………………………………………………."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 8,
+        "title": "QUESTION 8",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Complétez ce texte à trou"
+          },
+          {
+            "type": "text",
+            "text": "Un scanner à rotation continue dispose de 2 détecteurs."
+          },
+          {
+            "type": "question",
+            "text": "Un détecteur …………………… positionné à la sortie du tube qui est une …………………… d’ ………………….. et mesure les ……………………. de …………….. scanographiques."
+          },
+          {
+            "type": "question",
+            "text": "Des détecteurs …………………….. appelés ………………….. et positionnés …………….. le patient. Le rôle de ces détecteurs est de recueillir les Rx ayant ………………….. le patient et de ……………………. ce faisceau émergent en ……………… …………………………..."
+          },
+          {
+            "type": "text",
+            "text": "Citez les 3 technologies de détecteurs secondaires utilisés en scanographie"
+          },
+          {
+            "type": "question",
+            "text": "1…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "2…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "3…………………………………………………………………………………………………………."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 9,
+        "title": "QUESTION 9",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Renseignez le tableau ci-dessous concernant les 2 filtrations scanographiques"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 10,
+        "title": "QUESTION 10",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Attribuez à chacun des collimateurs les caractéristiques ci-dessous lui correspondant :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 11,
+        "title": "QUESTION 11",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Identifiez le mode d’acquisition scanographiques au vu des caractéristiques listées :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 12,
+        "title": "QUESTION 12",
+        "parts": [
+          {
+            "type": "question",
+            "text": "A partir de l’image de cette interface de scanner, renseignez le tableau ci-après :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 13,
+        "title": "QUESTION 13",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Citez les 2 indicateurs dosimétriques scanographiques avec leur unité"
+          },
+          {
+            "type": "question",
+            "text": "1…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "2…………………………………………………………………………………………………………."
+          }
+        ],
+        "has_schema": false
+      }
+    ]
+  },
+  "td4_chaine_radio": {
+    "title": "TD N°4",
+    "date": "",
+    "questions": [
+      {
+        "id": 1,
+        "title": "QUESTION 1",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Renseignez le tableau ci-dessous :"
+          },
+          {
+            "type": "text",
+            "text": "Entourez la réponse exacte, afin de compléter chacune de ces affirmations"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 2,
+        "title": "QUESTION 2",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Renseignez le tableau ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "Renseignez le tableau ci-dessous :"
+          },
+          {
+            "type": "text",
+            "text": "Précisez pour chacune de ces études si le choix des cellules est correct"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 3,
+        "title": "QUESTION 3",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Renseignez le tableau ci-dessous :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 4,
+        "title": "QUESTION 4",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 5,
+        "title": "QUESTION 5",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Précisez le nom du détecteur ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Explicitez les 4 étapes ci-dessous en vous aidant du schéma ci-dessus :"
+          },
+          {
+            "type": "question",
+            "text": "Etape 1 : expliquez les phénomènes physiques au niveau de l’écran primaire ……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Etape 2 : expliquez le phénomène physique entre l’écran primaire et secondaire ………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Etape 3 : expliquez les phénomènes physiques au niveau de l’écran secondaire ……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Etape 4 : expliquez le phénomène physique au niveau du capteur CCD (hors schéma) ……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Précisez :"
+          },
+          {
+            "type": "text",
+            "text": "L’intérêt de ce type de détecteur"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "2 activités radiologiques utilisant ce type de détecteur"
+          },
+          {
+            "type": "question",
+            "text": "1…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "2…………………………………………………………………………………………………………."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 6,
+        "title": "QUESTION 6",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Précisez le nom du détecteur ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Explicitez les 2 étapes ci-dessous en vous aidant des schémas ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "Etape 1 : expliquez les phénomènes physiques lors de l’acquisition de l’information ……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Etape 2 : expliquez le phénomène physique lors de la lecture de l’information"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 7,
+        "title": "QUESTION 7",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Précisez le nom du détecteur ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Explicitez les 3 étapes ci-dessous en vous aidant des schémas ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "Etape 1 et 2 : expliquez les phénomènes physiques au niveau de la couche de détection selon le 2 types de détecteur (conversion directe ou indirecte) en vous aidant des schémas :"
+          },
+          {
+            "type": "question",
+            "text": "CONVERSION DIRECTE :"
+          },
+          {
+            "type": "question",
+            "text": "Etape 1 :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Etape 2 :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "CONVERSION INDIRECTE :"
+          },
+          {
+            "type": "question",
+            "text": "Etape 1 :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Etape 2 :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "Etape 3 : expliquez les phénomènes physiques au niveau de la matrice TFT du détecteur en vous aidant du schéma ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 8,
+        "title": "QUESTION 8",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Complétez les trous dans le tableau ci-après"
+          }
+        ],
+        "has_schema": false
+      }
+    ]
+  },
+  "td5_revisions": {
+    "title": "TD N°5",
+    "date": "17/12/2024",
+    "questions": [
+      {
+        "id": 1,
+        "title": "QUESTION 1",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Concernant la définition des rayons X, complétez le texte à trous ci-dessous"
+          },
+          {
+            "type": "question",
+            "text": "Les rayons X sont des ………………. ………………………………………………. à haute …………………………. dont la longueur d’……………. est comprise entre ……… picomètres et ………. Nanomètres."
+          },
+          {
+            "type": "question",
+            "text": "Les ………………………………. (X et gamma) sont dits …………………………….. car ils émettent des rayons d’…………………………….. suffisantes pour transformer les ……………………… qu’ils traversent en ………………., pouvant rendre ………………… la matière."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 2,
+        "title": "QUESTION 2",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Entourez la réponse exacte, afin de compléter chacune de ces affirmations"
+          },
+          {
+            "type": "question",
+            "text": "Concernant la production des rayons X au sein du tube à rayons X, mettez dans l’ordre chronologique les différentes étapes proposées ci-dessous :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 3,
+        "title": "QUESTION 3",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Nommez les 2 types d’interaction émettrices de rayons X"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Expliquez le mécanisme de chacune de ces interactions"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 4,
+        "title": "QUESTION 4",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 5,
+        "title": "QUESTION 5",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Concernant l’effet photoélectrique, complétez le texte à trous ci-dessous en intégrant les mots de la liste suivante :"
+          },
+          {
+            "type": "text",
+            "text": "Electron – Energie - Fluorescence – Incident – Inférieure – Ionisé – Liaison – Photon – Réarrangement électronique - Toute"
+          },
+          {
+            "type": "question",
+            "text": "L’effet photoélectrique se produit lorsqu’un ……………………. X cède ……………… son ……………… à un …………………… de l’atome."
+          },
+          {
+            "type": "question",
+            "text": "Le transfert ne peut se faire que si l’énergie de ……………………….. de l’électron concerné est ……………………………. à l’énergie du photon X ……………………….."
+          },
+          {
+            "type": "question",
+            "text": "L’atome est ainsi …………………… et excité et son retour à l’équilibre par ……………………….……………………………… s’accompagne de l’émission de photon de ……………………………."
+          },
+          {
+            "type": "question",
+            "text": "Concernant l’effet Compton, complétez le texte à trous ci-dessous en intégrant les mots de la liste suivante :"
+          },
+          {
+            "type": "text",
+            "text": "Autre – Compton - Diffusé – Disparait – Faiblement – Interaction – Négligeable – Nouveau – Partie – Transmise."
+          },
+          {
+            "type": "question",
+            "text": "L’effet Compton résulte de l’…………………………………. entre le photon X incident et un électron ……………………………………… lié d’un atome."
+          },
+          {
+            "type": "question",
+            "text": "L’énergie de liaison de l’électron est ……………………………… par rapport à l’énergie du photon incident"
+          },
+          {
+            "type": "question",
+            "text": "Lors de l’interaction le photon X ……………………………………….."
+          },
+          {
+            "type": "question",
+            "text": "Une ……………………… de son énergie est cédée à l’électron éjecté appelé électron ………………………."
+          },
+          {
+            "type": "question",
+            "text": "L’……………………… partie de son énergie est ……………………………………… sous forme d’un ………………………………. photon appelé photon …………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 6,
+        "title": "QUESTION 6",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Citez les 2 parties composant un capteur plan"
+          },
+          {
+            "type": "question",
+            "text": "…………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "…………………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Précisez le rôle de chacune de ces parties"
+          },
+          {
+            "type": "question",
+            "text": "1.………………………………………………………………………………………………………….……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "2………………………………………………………………………………………………………….."
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 7,
+        "title": "QUESTION 7",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Concernant la chaine d’acquisition radiologique, entourez la réponse exacte, afin de compléter chacune des affirmations ci-dessous :"
+          },
+          {
+            "type": "question",
+            "text": "Concernant la chaine d’acquisition scanographique, entourez la réponse exacte, afin de compléter chacune des affirmations ci-dessous :"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 8,
+        "title": "QUESTION 8",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Expliquez le concept de l’échelle d’Hounsfield en précisant la valeur de référence"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Explicitez les 3 zones de l’échelle d’Hounsfield"
+          },
+          {
+            "type": "question",
+            "text": "1………………………………………………………………………………………………………….."
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "2………………………………………………………………………………………………………….."
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "3…………………………………………………………………………………………………………."
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Expliquez le concept du fenêtrage"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Citez les 2 paramètres utilisés par le fenêtrage"
+          },
+          {
+            "type": "question",
+            "text": "1………………………………………………………………………………………………………….."
+          },
+          {
+            "type": "question",
+            "text": "2………………………………………………………………………………………………………….."
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 9,
+        "title": "QUESTION 9",
+        "parts": [
+          {
+            "type": "text",
+            "text": "Précisez pour chaque paramètre scanographique, dans le tableau ci-dessous, s’il s’agit d’un paramètre d’acquisition ou d’un paramètre de reconstruction en cochant la case correspondante"
+          }
+        ],
+        "has_schema": false
+      },
+      {
+        "id": 10,
+        "title": "QUESTION 10",
+        "parts": [
+          {
+            "type": "question",
+            "text": "Pour chacune des modalités ci-dessous, citez les indicateurs de doses en précisant leur unité :"
+          },
+          {
+            "type": "text",
+            "text": "En imagerie de projection"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Précisez le système utilisé pour recueillir ces indicateurs de doses"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Citez l’outil de référence au niveau national utilisé pour comparer les indicateurs de doses recueillis lors des examens radiologiques"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "text",
+            "text": "Précisez l’intérêt de cet outil dans les pratiques radiologiques"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          },
+          {
+            "type": "question",
+            "text": "……………………………………………………………………………………………………………"
+          }
+        ],
+        "has_schema": false
+      }
+    ]
+  }
+};
+
+        let currentTD = '';
+        let answers = {};
+
+        // Initialisation
+        function init() {
+            loadAnswersFromStorage();
+            createTabs();
+            createSections();
+            switchTab(Object.keys(tdsData)[0]);
+            updateStats();
+        }
+
+        function createTabs() {
+            const navTabs = document.getElementById('navTabs');
+            
+            Object.keys(tdsData).forEach(tdKey => {
+                const td = tdsData[tdKey];
+                const tab = document.createElement('button');
+                tab.className = 'nav-tab';
+                tab.textContent = td.title || tdKey;
+                tab.onclick = () => switchTab(tdKey);
+                navTabs.appendChild(tab);
+            });
+        }
+
+        function createSections() {
+            const container = document.getElementById('tdSections');
+            
+            Object.keys(tdsData).forEach(tdKey => {
+                const td = tdsData[tdKey];
+                const section = document.createElement('div');
+                section.className = 'td-section';
+                section.id = `section-${tdKey}`;
+                
+                // Filtrer les questions sans schéma
+                const textualQuestions = td.questions.filter(q => !q.has_schema);
+                
+                textualQuestions.forEach(question => {
+                    const questionCard = createQuestionCard(tdKey, question);
+                    section.appendChild(questionCard);
+                });
+                
+                container.appendChild(section);
+            });
+        }
+
+        function createQuestionCard(tdKey, question) {
+            const card = document.createElement('div');
+            card.className = 'question-card';
+            
+            const header = document.createElement('div');
+            header.className = 'question-header';
+            header.innerHTML = `
+                <span>${question.title}</span>
+                <span class="question-badge">${question.parts.length} partie${question.parts.length > 1 ? 's' : ''}</span>
+            `;
+            card.appendChild(header);
+            
+            question.parts.forEach((part, index) => {
+                const partDiv = document.createElement('div');
+                partDiv.className = 'question-part';
+                
+                if (part.type === 'question' || part.type === 'text') {
+                    const questionText = document.createElement('div');
+                    questionText.className = 'question-text';
+                    questionText.textContent = part.text.replace(/…+/g, '______');
+                    partDiv.appendChild(questionText);
+                    
+                    // Si la question contient des pointillés, créer un champ de réponse
+                    if (part.text.includes('………') || part.text.includes('______')) {
+                        const answerKey = `${tdKey}-q${question.id}-p${index}`;
+                        const input = document.createElement('textarea');
+                        input.className = 'answer-input';
+                        input.placeholder = 'Votre réponse...';
+                        input.value = answers[answerKey] || '';
+                        input.oninput = (e) => {
+                            answers[answerKey] = e.target.value;
+                            updateStats();
+                            saveToStorage();
+                        };
+                        partDiv.appendChild(input);
+                    }
+                } else if (part.type === 'option') {
+                    const optionsContainer = partDiv.querySelector('.options-container') || document.createElement('div');
+                    optionsContainer.className = 'options-container';
+                    
+                    const option = document.createElement('div');
+                    option.className = 'option';
+                    
+                    const answerKey = `${tdKey}-q${question.id}-${part.text.substring(0, 1)}`;
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = answers[answerKey] || false;
+                    checkbox.onchange = (e) => {
+                        answers[answerKey] = e.target.checked;
+                        updateStats();
+                        saveToStorage();
+                    };
+                    
+                    const label = document.createElement('span');
+                    label.textContent = part.text;
+                    
+                    option.appendChild(checkbox);
+                    option.appendChild(label);
+                    optionsContainer.appendChild(option);
+                    partDiv.appendChild(optionsContainer);
+                }
+                
+                card.appendChild(partDiv);
+            });
+            
+            return card;
+        }
+
+        function switchTab(tdKey) {
+            currentTD = tdKey;
+            
+            // Mettre à jour les tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Mettre à jour les sections
+            document.querySelectorAll('.td-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`section-${tdKey}`).classList.add('active');
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            const totalQuestions = Object.values(tdsData).reduce((sum, td) => 
+                sum + td.questions.filter(q => !q.has_schema).length, 0
+            );
+            
+            const answeredQuestions = Object.keys(answers).filter(key => {
+                const answer = answers[key];
+                return (typeof answer === 'string' && answer.trim().length > 0) || 
+                       (typeof answer === 'boolean' && answer);
+            }).length;
+            
+            const progressPercent = totalQuestions > 0 
+                ? Math.round((answeredQuestions / totalQuestions) * 100) 
+                : 0;
+            
+            document.getElementById('totalQuestions').textContent = totalQuestions;
+            document.getElementById('answeredQuestions').textContent = answeredQuestions;
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+            document.getElementById('progressFill').textContent = progressPercent + '%';
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('td_physique_answers', JSON.stringify(answers));
+        }
+
+        function loadAnswersFromStorage() {
+            const stored = localStorage.getItem('td_physique_answers');
+            if (stored) {
+                answers = JSON.parse(stored);
+            }
+        }
+
+        function saveProgress() {
+            const dataStr = JSON.stringify(answers, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TD_Physique_Sauvegarde_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            alert('✅ Sauvegarde téléchargée !');
+        }
+
+        function loadProgress() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        answers = JSON.parse(event.target.result);
+                        saveToStorage();
+                        location.reload();
+                    } catch (error) {
+                        alert('❌ Erreur de chargement du fichier');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function exportAnswers() {
+            let output = '# RÉPONSES - TD PHYSIQUE APPLIQUÉE UE 3.2 S1\n\n';
+            output += `Date d'export: ${new Date().toLocaleString('fr-FR')}\n\n`;
+            output += '═'.repeat(80) + '\n\n';
+            
+            Object.keys(tdsData).forEach(tdKey => {
+                const td = tdsData[tdKey];
+                output += `\n## ${td.title}\n`;
+                output += `${td.date ? 'Date: ' + td.date : ''}\n\n`;
+                
+                td.questions.filter(q => !q.has_schema).forEach(question => {
+                    output += `### ${question.title}\n\n`;
+                    
+                    question.parts.forEach((part, index) => {
+                        const answerKey = `${tdKey}-q${question.id}-p${index}`;
+                        if (answers[answerKey]) {
+                            output += `**${part.text.substring(0, 100)}...**\n`;
+                            output += `Réponse: ${answers[answerKey]}\n\n`;
+                        }
+                    });
+                    
+                    output += '\n' + '-'.repeat(80) + '\n\n';
+                });
+            });
+            
+            const blob = new Blob([output], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TD_Physique_Reponses_${new Date().toISOString().split('T')[0]}.txt`;
+            a.click();
+            alert('✅ Réponses exportées !');
+        }
+
+        function resetAll() {
+            if (confirm('⚠️ Voulez-vous vraiment réinitialiser toutes vos réponses ?')) {
+                answers = {};
+                saveToStorage();
+                location.reload();
+            }
+        }
+
+        // Démarrage
+        init();
+    </script>
+</body>
+</html>
