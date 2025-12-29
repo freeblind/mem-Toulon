@@ -1,0 +1,1911 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>15 cas – Raisonnement clinique (données à remplir + validation)</title>
+  <style>
+    :root { --ok:#1b5e20; --bad:#b71c1c; --muted:#666; --bg:#f6f7fb; --card:#fff; --border:#e6e6ef; --warn:#8a6d00; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);margin:0;padding:18px;color:#111;}
+    .wrap{max-width:1180px;margin:0 auto;}
+    .top{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,.04);}
+    h1{font-size:18px;margin:0;}
+    .meta{color:var(--muted);font-size:13px;line-height:1.35;}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    button{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 12px;cursor:pointer;}
+    button.primary{background:#111;color:#fff;border-color:#111;}
+    button:disabled{opacity:.5;cursor:not-allowed;}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0;}
+    .pill{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 10px;font-size:13px;}
+    .pill input{margin:0;}
+    .scenario h2{font-size:16px;margin:0 0 8px 0;}
+    .scenario pre{white-space:pre-wrap;margin:0;background:#fafafa;border:1px dashed var(--border);border-radius:12px;padding:10px;font-size:14px;line-height:1.45;}
+    table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:14px;border:1px solid var(--border);background:#fff;}
+    th,td{vertical-align:top;border-bottom:1px solid var(--border);border-right:1px solid var(--border);padding:10px;}
+    th:last-child, td:last-child{border-right:none;}
+    tr:last-child td{border-bottom:none;}
+    th{background:#fbfbfe;text-align:left;font-size:13px;}
+    textarea{width:100%;min-height:74px;resize:vertical;border:1px solid var(--border);border-radius:10px;padding:8px;font-size:14px;line-height:1.35;box-sizing:border-box;}
+    .status{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px;flex-wrap:wrap;}
+    .tag{font-weight:750;}
+    .tag.ok{color:var(--ok);}
+    .tag.bad{color:var(--bad);}
+    .tag.warn{color:var(--warn);}
+    .override{display:inline-flex;gap:6px;align-items:center;color:var(--muted);}
+    .missing{color:var(--muted);font-size:12px;margin-top:6px;display:none;}
+    .match{color:var(--muted);font-size:12px;margin-top:6px;}
+    details{margin-top:10px;}
+    details summary{cursor:pointer;color:#111;font-weight:650;}
+    .corrGrid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px;}
+    .corrItem{border:1px solid var(--border);border-radius:12px;padding:10px;background:#fff;}
+    .corrItem b{display:block;margin-bottom:6px;}
+    .corrItem .k{color:var(--muted);font-size:13px;line-height:1.35;}
+    .foot{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:12px;}
+    code{background:#f1f1f8;border:1px solid var(--border);padding:1px 6px;border-radius:8px;}
+    .tiny{font-size:12px;color:var(--muted);}
+  
+    /* --- Correction panel (more visible) --- */
+    #corrDetails{border:2px solid var(--border); border-radius:16px; background:#fff; padding:10px; margin-top:12px;}
+    #corrDetails[open]{box-shadow:0 8px 28px rgba(0,0,0,.08);}
+    #corrDetails summary{
+      list-style:none;
+      padding:12px 14px;
+      border:2px solid #111;
+      border-radius:14px;
+      background:#111;
+      color:#fff;
+      font-size:14px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    #corrDetails summary::-webkit-details-marker{display:none;}
+    #corrDetails summary:before{content:"✅  "; font-weight:900;}
+    #corrDetails summary:after{content:"↘"; font-weight:900; opacity:.95;}
+    #corrDetails[open] summary:after{content:"↗";}
+    #corrDetails summary:hover{filter:brightness(1.05);}
+
+    .corrItem{border:1px solid var(--border); border-radius:14px; padding:12px; background:#fff;}
+    .corrItem b{font-size:14px;}
+    .corrSect{border:1px solid var(--border); border-radius:12px; padding:10px; margin-top:10px; background:#fbfbfe;}
+    .corrTitle{font-weight:850; font-size:13px; margin-bottom:6px; letter-spacing:.2px;}
+    .corrText{font-size:13px; line-height:1.45; color:#222;}
+    .corrSplit{display:grid; grid-template-columns:1fr; gap:10px; margin-top:10px;}
+
+  
+    /* corrDetails closed hint */
+    #corrDetails{background:transparent;}
+    #corrDetails:not([open]){border-color:rgba(0,0,0,.25);}
+  
+    /* --- Correction button (colored) override --- */
+    #corrDetails summary{
+      border:2px solid #0b5;            /* green */
+      background:linear-gradient(135deg, #0b5, #09f); /* green -> blue */
+      color:#fff;
+    }
+    #corrDetails summary:hover{filter:brightness(1.07);}
+    #corrDetails[open] summary{border-color:#09f;}
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="card" style="flex:1 1 650px;">
+      <h1>15 cas cliniques – tableau à remplir (données dans l’ordre + validation)</h1>
+      <div class="meta">
+        Tu remplis la colonne <b>Donnée pertinente</b> (une donnée par ligne, dans l’ordre du texte), puis <b>Analyse</b>, <b>Problèmes</b>, <b>Actions MEM</b>.<br/>
+        ✅ Validation <b>en direct</b> (si la donnée est reconnue) + bouton <b>Vérifier</b> pour un bilan. Sinon : <b>Valider manuellement</b>.
+      </div>
+    </div>
+    <div class="card controls" style="flex:1 1 450px; justify-content:flex-end;">
+      <button id="prevBtn">◀ Cas</button>
+      <button id="nextBtn">Cas ▶</button>
+      <button id="checkBtn" class="primary">Vérifier</button>
+      <button id="addRowBtn">+ Ligne</button>
+      <button id="resetBtn">Réinitialiser</button>
+    </div>
+  </div>
+
+  <div class="card row" style="align-items:center;">
+    <div class="pill"><input type="checkbox" id="optCase" checked> <label for="optCase">Casse stricte</label></div>
+    <div class="pill"><input type="checkbox" id="optAccents" checked> <label for="optAccents">Accents stricts</label></div>
+    <div class="pill"><input type="checkbox" id="optPlural" checked> <label for="optPlural">Tolérance pluriel</label></div>
+    <div class="pill"><input type="checkbox" id="optShowKeys"> <label for="optShowKeys">Afficher mots-clés attendus</label></div>
+    <div class="pill"><input type="checkbox" id="optRandomMode" checked> <label for="optRandomMode">Mode cas aléatoire</label></div>
+    <div class="pill"><span class="meta" id="progressTxt"></span></div>
+  </div>
+
+  <div class="card scenario">
+    <h2 id="exTitle"></h2>
+    <pre id="exScenario"></pre>
+
+    <details>
+      <summary>Consigne</summary>
+      <div class="meta" style="margin-top:8px;">
+        1) Découpe le texte en <b>données</b> (âge, mécanisme, symptômes, constantes, clinique, contexte, prescription…).<br/>
+        2) Mets-les <b>dans l’ordre</b> (une donnée par ligne).<br/>
+        3) Pour chaque donnée : analyse → problèmes → actions MEM.
+      </div>
+    </details>
+
+    <details id="corrDetails">
+      <summary>Proposition de correction (autocorrection) — clic pour voir</summary>
+      <div class="meta" style="margin-top:8px;">
+        Tu compares avec ta proposition. La correction suit l’ordre du texte (certaines infos proches peuvent être regroupées).
+      </div>
+      <div id="corrBox" class="corrGrid"></div>
+    </details>
+  </div>
+
+  <div class="card">
+    <table id="grid"></table>
+    <div class="tiny" style="margin-top:8px;">
+      Conseil : pour activer la validation auto, écris 2–6 mots d’ancrage dans “Donnée pertinente” (ex : <code>SpO₂ 91%</code>, <code>grossesse possible</code>, <code>AVK</code>, <code>VVP</code>, <code>injecté iodé</code>…).
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="meta" id="scoreTxt"></div>
+    <div class="meta">Rappel : le système est imparfait → l’autocorrection reste importante.</div>
+  </div>
+</div>
+
+<script>
+// ---------- Utilities ----------
+function stripAccents(s){ return s.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+function normText(s, opts){
+  let t = (s ?? "").toString();
+  if(!opts.strictCase) t = t.toLowerCase();
+  if(!opts.strictAccents) t = stripAccents(t);
+  t = t.replace(/\s+/g, " ").trim();
+  return t;
+}
+function variantsForKeyword(kw, opts){
+  const out = new Set([kw]);
+  if(opts.allowPlural){
+    if(kw.endsWith("s") && kw.length>3) out.add(kw.slice(0,-1));
+    if(!kw.endsWith("s")) out.add(kw+"s");
+  }
+  return [...out];
+}
+function groupsSatisfied(text, groups, opts){
+  const t = normText(text, opts);
+  let ok = 0;
+  for(const group of (groups||[])){
+    let groupOk = false;
+    for(const rawKw of group){
+      const kw = normText(rawKw, opts);
+      for(const v of variantsForKeyword(kw, opts)){
+        if(v && t.includes(v)){ groupOk = true; break; }
+      }
+      if(groupOk) break;
+    }
+    if(groupOk) ok++;
+  }
+  return ok;
+}
+function cellIsOk(text, groups, opts){
+  const t = normText(text, opts);
+  const missing = [];
+  for(const group of (groups || [])){
+    let groupOk = false;
+    for(const rawKw of group){
+      const kw = normText(rawKw, opts);
+      for(const v of variantsForKeyword(kw, opts)){
+        if(v && t.includes(v)){ groupOk = true; break; }
+      }
+      if(groupOk) break;
+    }
+    if(!groupOk) missing.push(group);
+  }
+  return { ok: missing.length===0, missing };
+}
+function escapeHtml(s){
+  return (s??"").toString()
+    .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;").replaceAll("'","&#39;");
+}
+function isRandomMode(){ return document.getElementById("optRandomMode")?.checked === true; }
+function getOpts(){
+  return {
+    strictCase: document.getElementById("optCase").checked,
+    strictAccents: document.getElementById("optAccents").checked,
+    allowPlural: document.getElementById("optPlural").checked,
+    showKeys: document.getElementById("optShowKeys").checked
+  };
+}
+function corr(analysis, problems, actions){ return {analysis, problems, actions}; }
+function item(label, matchGroups, analysisGroups, problemsGroups, actionsGroups, correction){
+  return { label, matchGroups, analysisGroups, problemsGroups, actionsGroups, correction };
+}
+
+
+// ---------- Banque générique (tous cas) : reconnaissance de données fréquentes ----------
+const GLOBAL_BANK = [
+  item("IMC/obésité", [["IMC"],["obésité","obesite","kg/m²","kg/m2"]],
+    [["installation"],["qualité","qualite"]],
+    [["mouvement"],["douleur"],["artefact"]],
+    [["calage"],["aide"],["adapter"]],
+    corr("IMC élevé : installation/immobilité parfois difficiles.",
+         "Risque mouvements/artefacts, douleur à la mobilisation.",
+         "Calage, aide au positionnement, explications, limiter reprises.")),
+  item("À jeun / dernier repas", [["à jeun","a jeun","dernier repas","mangé","mange"]],
+    [["contexte"],["tolérance","tolerance"]],
+    [["vomissement"],["malaise"]],
+    [["adapter"],["surveillance"],["prévenir","prevenir"]],
+    corr("Statut à jeun : donnée de contexte importante.",
+         "Risque vomissement/aspiration si nausées.",
+         "Adapter installation et vigilance, prévenir l’équipe si besoin.")),
+  item("Épilepsie", [["épilepsie","epilepsie"],["crise","antiépilept","antiepilept"]],
+    [["risque"],["sécurité","securite"]],
+    [["crise"],["chute"],["mouvement"]],
+    [["sécuriser"],["prévenir","prevenir"]],
+    corr("ATCD épilepsie : risque de crise (stress/fatigue).",
+         "Crise → mouvements / interruption / chute.",
+         "Sécuriser, prévenir l’équipe, vigilance.")),
+  item("Barrière linguistique", [["parle peu","français limité","francais limite","ne comprend pas","interprète","interprete"]],
+    [["communication"],["coopération","cooperation"]],
+    [["mauvaise coopération","cooperation"],["reprise","répéter","repeter"]],
+    [["reformuler"],["démontrer","demontrer"],["interprète","interprete"]],
+    corr("Consignes potentiellement mal comprises.",
+         "Mouvements → reprises → dose/temps ↑.",
+         "Reformuler, démontrer, interprète si possible.")),
+  item("Perte de connaissance / somnolence", [["perte de connaissance","inconscient","somnolent","GCS","glasgow"]],
+    [["fragilité","fragilite"],["surveillance"]],
+    [["aggravation"],["chute"]],
+    [["surveiller"],["aide"]],
+    corr("Altération vigilance = fragilité.",
+         "Risque dégradation / sécurité.",
+         "Surveillance, assistance au transfert, ne pas laisser seul.")),
+  item("Cinétique élevée / polytrauma", [["haute cinétique","haute cinetique","polytrauma","haute énergie","haute energie","haute vitesse"]],
+    [["gravité","gravite"],["urgence"]],
+    [["instabilité","instabilite"],["aggravation"]],
+    [["organisation"],["prioriser"],["sécuriser","securiser"]],
+    corr("Cinétique élevée = risque lésions multiples.",
+         "Dégradation possible.",
+         "Organisation/circuit urgence, sécurité, limiter temps.")),
+  item("Allergie", [["allergie","allerg"],["iode","latex","médic","medic"]],
+    [["interrogatoire"],["risque"]],
+    [["réaction","reaction"]],
+    [["tracer"],["surveillance"],["informer"]],
+    corr("Allergies = donnée clé à tracer.",
+         "Risque de réaction.",
+         "Tracer, informer, surveillance.")),
+  item("Injection iodée", [["inject"],["iode","produit de contraste","PDC"]],
+    [["VVP"],["rein","DFG","créat","creat"]],
+    [["extravasation"],["réaction","reaction"]],
+    [["surveiller"],["check-list"],["matériel d'urgence","O2","adrénaline","adrenaline"]],
+    corr("Injection iodée : prérequis + surveillance.",
+         "Extravasation/réaction.",
+         "Check-list, surveillance, matériel d’urgence.")),
+  item("Risque de chute", [["risque"],["chute","tomber"],["impotence","appui","ne peut"]],
+    [["sécurité","securite"]],
+    [["chute"],["aggravation"]],
+    [["aide"],["barrières","barrieres"],["consignes"]],
+    corr("Mobilité diminuée = risque de chute.",
+         "Chute/trauma secondaire.",
+         "Aide au transfert, barrières, consignes.")),
+  ,
+  item("Envie d’uriner / besoin d’aller aux toilettes", [["uriner","toilette","pause toilette","envie"]],
+    [["besoin"],["dignité","dignite"],["coopération","cooperation"]],
+    [["manque de coopération","cooperation"],["mouvement","tortille","flou","artefact"],["accident","souillure"]],
+    [["proposer bassin","bassin","urinal"],["pause"],["rassurer"],["préserver intimité","intimite"],["protéger table","alèse","alese"]],
+    corr("Besoin d’uriner = donnée importante (dignité + sécurité + coopération).",
+         "Risque tortillement → flou / reprises; risque accident et gêne.",
+         "Proposer bassin/urinal/pause si possible, préserver intimité, protéger la table (alèse), rassurer.")),
+
+  item("Froid / besoin de couverture", [["froid","frisson","grellot"],["couverture","plaide","drap"]],
+    [["confort"],["coopération","cooperation"]],
+    [["tremblement","bouge","mouvement","artefact"],["inconfort"]],
+    [["couvrir"],["adapter température","temperature"],["rassurer"]],
+    corr("Froid → tremblements et inconfort.",
+         "Tremblements → flou / reprises; inconfort.",
+         "Proposer couverture/drap, adapter température, rassurer.")),
+
+  item("Chaud / transpiration", [["chaud","transpire","sueur"]],
+    [["confort"],["anxiété","anxiete"]],
+    [["malaise"],["mouvement"]],
+    [["adapter"],["essuyer"],["surveillance"]],
+    corr("Chaud/transpiration = inconfort, possible malaise.",
+         "Risque malaise/mouvements.",
+         "Adapter confort, surveillance, prévenir si malaise.")),
+
+  item("Tenue difficile à enlever (bijoux, ceinture, couches)", [["tenue"],["difficile","impossible"],["bijou","bague","chaine","ceinture","corset","couches"]],
+    [["organisation"],["temps"]],
+    [["retard"],["mouvement"],["artefact"]],
+    [["expliquer"],["aide"],["respect intimité","intimite"],["sécuriser objets","objets"]],
+    corr("Tenue complexe = impact sur installation et timing.",
+         "Retard/mouvements/artefacts si précipitation.",
+         "Expliquer, aider (intimité), sécuriser bijoux/objets personnels.")),
+
+  item("Comportement difficile (colère / 'je sais tout')", [["colérique","colerique","énervé","enerve","agressif","je sais","sais ce que j'ai","sais mieux"]],
+    [["relation"],["coopération","cooperation"]],
+    [["refus"],["manque de coopération","cooperation"],["mouvement"]],
+    [["reformuler"],["cadre"],["rassurer"],["temps"],["si besoin renfort","renfort"]],
+    corr("Attitude difficile peut gêner l’examen.",
+         "Refus/coopération limitée → mouvements → reprises.",
+         "Reformuler calmement, poser un cadre, rassurer, prendre le temps; renfort si besoin."))
+
+];
+
+// ---------- 15 cases ----------
+const EX = [
+  {
+    title: "Cas 1 – Urgences : douleur cheville (radio standard)",
+    scenario:
+`Monsieur R., 47 ans, chute en descendant un trottoir. Il se tord la cheville droite (mouvement en inversion).
+Il décrit une douleur vive, la cheville gonfle rapidement, il ne peut pas prendre appui.
+
+ATCD : diabète de type 2 (traité), pas d’allergie connue.
+Douleur : EVA 7/10
+TA 138/84 – FC 96 – SpO₂ 98% – T° 37,2°C
+Cheville droite : œdème, hématome latéral, douleur à la palpation de la malléole externe.
+Prescription : radiographie cheville droite (face + profil + incidence en mortaise).
+IMC : 22 kg/m².
+Il/elle parle peu français.
+Il/elle demande si l’examen sera remboursé (inquiet/inquiète).`,
+    bank: [
+      item("Âge/adulte (47 ans)", [["47","ans"],["monsieur"]],
+        [["adulte"],["contexte"]],
+        [["aucun","vital","immédiat","immediat"]],
+        [["identité","identite","bracelet"]],
+        corr("Contexte adulte, pas de spécificité pédiatrique.",
+             "—",
+             "Vérifier identité / prescription, installation.")),
+      item("Chute + torsion/inversion cheville", [["chute","trottoir"],["tord","torsion","inversion"],["cheville"]],
+        [["entorse","fracture"],["ligament","malléole","malleole"]],
+        [["douleur"],["aggravation","déplacement","deplacement"]],
+        [["sécurité","securite","transfert"],["immobil","limiter"]],
+        corr("Mécanisme inversion → entorse latérale fréquente; fracture à éliminer.",
+             "Douleur aiguë, risque aggravation si mobilisation/appui.",
+             "Transfert sécurisé, limiter mobilisations, maintien/immobilisation, explications.")),
+      item("Douleur + EVA 7/10", [["EVA","7/10"],["douleur"]],
+        [["douleur"],["stress","anxiété","anxiete"]],
+        [["agitation","inconfort"],["manque de coopération","cooperation","mauvaise cooperation"]],
+        [["rassurer","expliquer"],["transmettre","antalgi"]],
+        corr("Douleur significative; l’anxiété peut majorer douleur.",
+             "Inconfort, agitation/manque de coopération possible.",
+             "Communication rassurante, manipulations douces, relai IDE pour antalgie.")),
+      item("Gonflement/œdème rapide", [["gonfle","œdème","oedeme"],["rapid"]],
+        [["inflamm","hématome","hematome"],["entorse","fracture"]],
+        [["compression"],["douleur"]],
+        [["surveillance"],["installer","confort"]],
+        corr("Œdème rapide → inflammation/saignement local.",
+             "Douleur, possible compression, limitation mobilité.",
+             "Surveillance douleur/œdème, confort, éviter appui.")),
+      item("Impossibilité d’appui", [["impossible","ne peut"],["appui","marche"]],
+        [["impotence"],["lésion","lesion","sévère","severe"]],
+        [["risque","chute"],["aggravation"]],
+        [["aide","transfert"],["consignes","non-appui","non appui"]],
+        corr("Impotence fonctionnelle = lésion possiblement importante.",
+             "Risque de chute, aggravation si appui.",
+             "Aide au transfert, sécuriser, consignes de non-appui.")),
+      item("ATCD diabète type 2", [["diabète","diabete"],["type 2","T2"]],
+        [["infection","cicatr","peau"],["risque"]],
+        [["infection"],["plaie","retard"]],
+        [["vérifier","verifier","peau"],["hygiène","hygiene"],["transmettre"]],
+        corr("Diabète → fragilité cutanée, cicatrisation plus lente.",
+             "Risque infectieux si plaie; surveillance peau.",
+             "Vérifier intégrité cutanée, hygiène/asepsie si soin, transmettre.")),
+      item("Constantes stables (SpO₂ 98% / T° 37,2)", [["SpO","98"],["37,2","T°","temperature"]],
+        [["pas","détresse","detresse"]],
+        [["aucun","vital"]],
+        [["surveillance"]],
+        corr("Pas de détresse vitale immédiate.",
+             "—",
+             "Surveillance standard pendant transfert/examen.")),
+      item("Douleur malléole externe + hématome", [["malléole","malleole"],["hématome","hematome"]],
+        [["fracture","Ottawa"],["radio","justifiée","justifiee"]],
+        [["suspicion","fracture"],["douleur"]],
+        [["incidence","mortaise"],["collimation","ALARA"]],
+        corr("Critère en faveur de fracture possible (Ottawa) → radiographie indiquée.",
+             "Suspicion fracture.",
+             "Incidences prescrites, collimation, éviter répétitions.")),
+      item("Prescription radio cheville (face/profil/mortaise)", [["prescription","radio"],["cheville"],["mortaise"]],
+        [["diagnostic"],["urgence"]],
+        [["organisation"]],
+        [["identité","identite"],["radioprotection","ALARA","collimation"]],
+        corr("Examen nécessaire au diagnostic.",
+             "—",
+             "Vérifier identité/prescription, radioprotection (ALARA, collimation), installation.")),
+      item("Risque de chute pendant transfert/examen", [["risque"],["chute"],["transfert","table"]],
+        [["impossibilité","appui"],["douleur"]],
+        [["chute"],["aggravation","blessure"]],
+        [["barrières","barrieres"],["aide","surveiller"]],
+        corr("Douleur + impotence → risque de chute en salle.",
+             "Chute/traumatisme secondaire.",
+             "Aide active, barrières, freins, expliquer de ne pas se lever.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 2 – Douleur abdominale : TDM abdomino-pelvien injecté (appendicite ? + grossesse ?)",
+    scenario:
+`Madame S., 32 ans, consulte pour douleur de la fosse iliaque droite depuis 12 h, nausées, fièvre 38,2°C.
+Elle est consciente, anxieuse. Elle n’a pas d’ATCD connu, mais dit “je ne suis pas sûre de ne pas être enceinte”.
+Douleur : EVA 8/10
+TA 112/70 – FC 102 – SpO₂ 99%
+Prescription : TDM abdomino-pelvien avec injection de produit de contraste iodé (suspicion appendicite).
+IMC : 35 kg/m².
+Dernier repas : il y a 30 min.
+Il/elle parle peu français.
+Il/elle est calme et très poli(e).`,
+    bank: [
+      item("32 ans : âge de procréer", [["32","ans"],["madame"]],
+        [["âge de procréer","procréer","procreer"],["grossesse","possible"]],
+        [["grossesse"],["irradiation"]],
+        [["interroger","DDR","règles","regles"],["test","hCG","βHCG"],["informer","médecin","medecin"]],
+        corr("32 ans = âge de procréer → question grossesse systématique.",
+             "Risque fœtal si irradiation; enjeu médico-légal.",
+             "Interroger DDR, test si besoin, informer médecin/manipulateur, adapter protocole.")),
+      item("Douleur FID 12 h", [["douleur"],["fosse iliaque","FID","droite"],["12"]],
+        [["appendicite","abdomen aigu"],["urgence"]],
+        [["douleur"],["urgence"]],
+        [["installation","confort"],["surveillance"]],
+        corr("Localisation FID + durée → appendicite/abdomen aigu probable.",
+             "Douleur aiguë, urgence diagnostique.",
+             "Installer confortablement, surveillance, limiter déplacements.")),
+      item("Nausées", [["nausée","nausee"]],
+        [["vom","déshydrat","deshydrat"],["risque"]],
+        [["déshydrat","deshydrat"],["aspiration"]],
+        [["position"],["surveillance"],["prévenir","prevenir"]],
+        corr("Nausées ± vomissements.",
+             "Risque déshydratation/aspiration/malaise.",
+             "Position adaptée, surveillance, prévenir si vomit.")),
+      item("Fièvre 38,2°C", [["fièvre","fievre"],["38,2","38.2"]],
+        [["infection","inflamm"]],
+        [["infection"],["aggravation"]],
+        [["surveillance"],["transmettre"]],
+        corr("Fièvre compatible infection/inflammation (appendicite).",
+             "Risque aggravation infectieuse.",
+             "Surveillance paramètres, transmettre à l’équipe.")),
+      item("Anxiété / manque de coopération possible", [["anxi","angoisse","stress"]],
+        [["anxiété","anxiete"],["douleur"]],
+        [["manque de coopération","cooperation"],["mouvement","artefact"],["répéter","repeter"]],
+        [["expliquer","rassurer"],["technique","respiration"],["immobiliser"]],
+        corr("Anxiété peut gêner la coopération (apnée, immobilité).",
+             "Mouvements → artefacts → répétition → dose ↑.",
+             "Explications simples, rassurer, guider la respiration/apnée, installer/stabiliser.")),
+      item("Grossesse incertaine", [["pas sûre","pas sure","incertaine"],["enceinte","grossesse"]],
+        [["DDR","règles","regles","test","hCG","βHCG"]],
+        [["irradiation"],["fœtus","foetus","embryon"]],
+        [["informer","médecin","medecin"],["alternative","echo","échographie","ALARA"]],
+        corr("Grossesse possible → irradiation + PDC à discuter.",
+             "Risque fœtal + médico-légal.",
+             "Alerter, vérifier DDR/test, adapter/alternative si possible, ALARA.")),
+      item("EVA 8/10", [["EVA","8/10"],["douleur"]],
+        [["douleur"],["intense"]],
+        [["agitation"],["malaise"]],
+        [["confort"],["transmettre","antalgi"]],
+        corr("Douleur intense.",
+             "Agitation/malaise possible.",
+             "Manipulation douce, confort, relai IDE antalgie.")),
+      item("TA 112/70 – FC 102", [["TA","112/70"],["FC","102"]],
+        [["tachycard"],["douleur","fièvre","fievre","déshydrat","deshydrat"]],
+        [["déshydrat","deshydrat"],["aggravation"]],
+        [["surveillance"],["transmettre"]],
+        corr("FC élevée compatible douleur/fièvre/déshydratation.",
+             "Risque de dégradation.",
+             "Surveillance, transmettre.")),
+      item("Prescription : TDM injecté iodé", [["TDM","scanner"],["iode","produit de contraste","PDC"]],
+        [["fonction rénale","creatinin","allerg"],["extravasation"]],
+        [["réaction","allerg"],["IR","insuffisance rénale","rein"],["extravasation"]],
+        [["interroger"],["surveiller"],["matériel d'urgence","O2","adrénaline","adrenaline"]],
+        corr("Scanner injecté → check allergie + rein + voie veineuse.",
+             "Allergie, IR, extravasation.",
+             "Interrogatoire, vérifications, surveillance pendant/après, matériel d’urgence.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 3 – Traumatisme genou : personne âgée (radio genou)",
+    scenario:
+`Monsieur B., 68 ans, glisse sur un sol mouillé et chute sur le genou gauche.
+Douleur EVA 7/10, genou très gonflé, hématome, chaleur locale. Il ne peut pas prendre appui.
+ATCD : HTA traitée. TA 148/86 – FC 94 – SpO₂ 96% – T° 37,4°C.
+Il est anxieux et demande à se lever pour uriner.
+Prescription : radiographie genou gauche en urgence.
+IMC : 27 kg/m².
+Dernier repas : il y a 4 h.
+Il/elle dit devoir uriner rapidement.
+Il/elle a chaud et transpire.`,
+    bank: [
+      item("68 ans : fracture/fragilité", [["68","ans"]],
+        [["personne âgée","agee"],["fracture"]],
+        [["fracture"],["aggravation"]],
+        [["manipulation","douce"],["immobil","aide"]],
+        corr("Âge ↑ → fragilité, fracture possible.",
+             "Risque fracture/déplacement si mobilisation.",
+             "Manipulations prudentes, immobilisation relative, aide transferts.")),
+      item("Chute sur genou", [["chute","glisse"],["genou"]],
+        [["fracture","luxation","entorse"]],
+        [["douleur"],["aggravation"]],
+        [["sécurité","transfert"],["immobil"]],
+        corr("Traumatisme direct → fracture/entorse possible.",
+             "Douleur, aggravation.",
+             "Transfert sécurisé, limiter mobilisations.")),
+      item("Gonflement + hématome + chaleur", [["gonfl","hématome","hematome","chaleur"]],
+        [["inflamm","hémarthrose","hemarthrose"]],
+        [["compression"],["douleur"]],
+        [["surveillance"],["confort"]],
+        corr("Inflammation/saignement local possible.",
+             "Douleur, compression, limitation.",
+             "Surveillance, confort.")),
+      item("Impossibilité d’appui", [["ne peut","impossible"],["appui"]],
+        [["impotence"]],
+        [["risque","chute"]],
+        [["aide"],["barrières","barrieres"]],
+        corr("Impotence fonctionnelle.",
+             "Risque chute secondaire.",
+             "Aide active, barrières, consignes.")),
+      item("Anxiété / coopération", [["anx","angoisse"]],
+        [["anxiété","anxiete"]],
+        [["mouvement","artefact"],["répéter","repeter"]],
+        [["rassurer","expliquer"],["immobiliser"]],
+        corr("Anxiété → agitation possible.",
+             "Artefacts → reprises.",
+             "Rassurer, expliquer, stabiliser.")),
+      item("Envie d’uriner + veut se lever", [["uriner","toilette","envie"],["se lever","lever"]],
+        [["risque"],["chute"]],
+        [["chute"],["aggravation"]],
+        [["urinal","bassin"],["prévenir","IDE"],["ne pas se lever"]],
+        corr("Risque chute si se lève.",
+             "Chute secondaire.",
+             "Proposer bassin/urinal, prévenir IDE, sécuriser.")),
+      item("Prescription radio genou urgence", [["prescription","radio"],["genou"],["urgence"]],
+        [["diagnostic"]],
+        [["organisation"]],
+        [["identité","identite"],["ALARA","collimation"]],
+        corr("Examen urgent.",
+             "—",
+             "Vérifier identité/prescription, collimation, limiter reprises.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 4 – Douleur épaule : luxation probable + grossesse possible",
+    scenario:
+`Madame L., 28 ans, chute pendant un match de handball sur l’épaule droite.
+Douleur EVA 9/10, épaule déformée, bras tenu contre elle (rotation interne), impossibilité de mobilisation.
+Elle n’a pas d’ATCD. Cycles irréguliers, pas de contraception, “je ne suis pas certaine de ne pas être enceinte”.
+TA 118/74 – FC 88 – SpO₂ 99% – T° 36,8°C.
+Prescription : radiographie épaule droite (face + profil) en urgence.
+IMC : 31 kg/m².
+Dernier repas : ce matin.
+Il/elle comprend le français mais répond lentement.
+Il/elle parle beaucoup et pose beaucoup de questions.`,
+    bank: [
+      item("28 ans : âge de procréer", [["28","ans"]],
+        [["âge de procréer","grossesse"]],
+        [["grossesse"],["radioprotection"]],
+        [["interroger","DDR"],["test","hCG"],["protection","plomb"],["informer","médecin","medecin"]],
+        corr("Âge de procréer → question grossesse systématique.",
+             "Risque irradiation si grossesse.",
+             "Interrogatoire DDR/test si besoin, informer, ALARA.")),
+      item("Chute sport + épaule déformée", [["handball","sport"],["épaule","epaule"],["déform","deform"]],
+        [["luxation"],["fracture"]],
+        [["douleur"],["aggravation"]],
+        [["maintien","écharpe","echarpe"],["manipulation douce"]],
+        corr("Luxation probable; fracture possible.",
+             "Douleur intense, aggravation si mobilisation.",
+             "Maintenir bras, manipulations douces, installation.")),
+      item("Rotation interne + immobilité", [["rotation interne","interne"],["ne peut","mobiliser"]],
+        [["luxation"]],
+        [["mouvement","artefact"]],
+        [["stabiliser"],["expliquer","rassurer"]],
+        corr("Posture antalgique compatible luxation.",
+             "Mouvements → artefacts/répétitions.",
+             "Stabiliser, expliquer positions, rassurer.")),
+      item("EVA 9/10", [["EVA","9/10"]],
+        [["douleur","intense"]],
+        [["malaise"],["manque de coopération","cooperation"]],
+        [["transmettre","antalgi"],["confort"]],
+        corr("Douleur très intense.",
+             "Malaise/agitation possibles.",
+             "Relai antalgie, confort, rythme adapté.")),
+      item("Grossesse incertaine", [["pas certaine","pas sûre","pas sure"],["enceinte","grossesse"]],
+        [["DDR","test","hCG"]],
+        [["irradiation"],["fœtus","foetus"]],
+        [["informer","médecin","medecin"],["alternative","ALARA"]],
+        corr("Grossesse possible → irradiation à discuter.",
+             "Risque fœtal.",
+             "Alerter, adapter/alternative si possible, ALARA.")),
+      item("Prescription radio épaule face+profil", [["prescription","radio"],["épaule","epaule"],["profil","face"]],
+        [["positionnement douloureux"]],
+        [["artefact"],["répéter","repeter"]],
+        [["aide positionnement"],["collimation","ALARA"],["sécurité"]],
+        corr("Positionnement peut être douloureux.",
+             "Mouvements → reprises.",
+             "Aide au positionnement, ALARA, rassurer.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 5 – Traumatisme crânien : sous AVK (TDM cérébrale)",
+    scenario:
+`Madame B., 76 ans, chute à domicile. Hématome du cuir chevelu, céphalées.
+Traitement : AVK pour fibrillation auriculaire. Elle est confuse et agitée.
+TA 136/78 – FC 88 – SpO₂ 97% – T° 36,9°C.
+Prescription : TDM cérébrale sans injection en urgence.
+IMC : 35 kg/m².
+Dernier repas : il y a 4 h.
+Il/elle arrive fatigué(e) (nuit blanche).`,
+    bank: [
+      item("76 ans (fragilité)", [["76","ans"]],
+        [["risque"],["complications"]],
+        [["chute"],["aggravation"]],
+        [["sécuriser"],["accompagnement"]],
+        corr("Âge ↑ → risque complications.",
+             "Chute secondaire/aggravation.",
+             "Sécuriser, accompagner, barrières.")),
+      item("Chute + hématome cuir chevelu + céphalées", [["chute"],["hématome","hematome"],["céphal","cephal"]],
+        [["hémorragie intracrânienne","hemorragie"],["traumatisme crânien","cranien"]],
+        [["hémorragie","hemorragie"],["aggravation"]],
+        [["surveillance neurologique","neurolog"],["immobiliser"]],
+        corr("Trauma crânien → hémorragie à éliminer.",
+             "Risque hémorragie intracrânienne.",
+             "Surveillance, immobiliser si besoin.")),
+      item("AVK/anticoagulant", [["AVK","anticoagul"]],
+        [["risque hémorragique","hemorrag"]],
+        [["urgence"],["hémorragie","hemorragie"]],
+        [["prioriser"],["transmettre"]],
+        corr("AVK majore risque hémorragique.",
+             "Hémorragie possible.",
+             "Prioriser examen, transmettre info.")),
+      item("Confusion + agitation", [["confus","agit"]],
+        [["mouvements"],["artefact"]],
+        [["chute"],["répéter","repeter","dose"]],
+        [["rassurer"],["immobiliser"],["renfort","IDE"]],
+        corr("Agitation → mouvements → reprises.",
+             "Risque chute, dose ↑.",
+             "Rassurer, immobiliser, renfort, sécuriser table.")),
+      item("TDM cérébrale urgence", [["TDM","scanner"],["cérébr","cerebr"],["urgence"]],
+        [["diagnostic"]],
+        [["organisation"]],
+        [["identité","identite"],["ALARA","collimation"]],
+        corr("Examen urgent.",
+             "—",
+             "Vérifier identité/prescription, ALARA, limiter reprises.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 6 – Dyspnée + douleur thoracique : angio-scanner (EP ?)",
+    scenario:
+`Monsieur P., 59 ans, dyspnée brutale et douleur thoracique. Anxieux, polypnéique.
+ATCD : HTA, tabagisme. VVP posée aux urgences.
+TA 150/92 – FC 110 – SpO₂ 91% à l’air ambiant – T° 37,0°C.
+Prescription : angio-TDM thoracique injecté (suspicion embolie pulmonaire).
+IMC : 31 kg/m².`,
+    bank: [
+      item("Dyspnée + SpO₂ 91% (hypoxie)", [["dysp","essouff"],["SpO","91"]],
+        [["hypoxie"],["urgence"]],
+        [["détresse","detresse"],["malaise"]],
+        [["O2","oxygène","oxygene"],["surveillance"],["semi-assise","semi assise"]],
+        corr("SpO₂ basse → hypoxie.",
+             "Risque décompensation.",
+             "O₂ selon protocole/prescription, surveillance, position semi-assise.")),
+      item("Douleur thoracique / EP suspectée", [["douleur thoracique"],["EP","embolie"]],
+        [["embolie pulmonaire","EP"]],
+        [["aggravation"]],
+        [["prioriser"],["surveillance"]],
+        corr("Tableau compatible EP.",
+             "Risque aggravation.",
+             "Prioriser examen, surveillance.")),
+      item("FC 110 tachycardie", [["FC","110"],["tachy"]],
+        [["hypoxie","douleur","stress"]],
+        [["aggravation"]],
+        [["monitoring","surveillance"],["transmettre"]],
+        corr("Tachycardie fréquente en EP/hypoxie.",
+             "Risque de dégradation.",
+             "Surveillance et transmission.")),
+      item("VVP (angio injecté)", [["VVP","voie veineuse"]],
+        [["injecteur","débit","debit"]],
+        [["extravasation"],["allerg"]],
+        [["vérifier calibre","calibre","18G","20G"],["surveiller"],["matériel d'urgence","O2"]],
+        corr("Angio nécessite VVP adaptée.",
+             "Extravasation/allergie possibles.",
+             "Vérifier VVP, surveiller, matériel d’urgence.")),
+      item("Anxiété / apnée difficile", [["anx","angoisse"],["polypn","polypnee"]],
+        [["coopération","cooperation","apnée","apnee"]],
+        [["artefact"],["répéter","repeter"]],
+        [["expliquer apnée","apnée","apnee"],["rassurer"]],
+        corr("Angio nécessite consignes d’apnée.",
+             "Mouvements → reprises.",
+             "Expliquer/entraîner apnée, rassurer.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 7 – Lombalgie après chute : suspicion fracture vertébrale (radio/CT)",
+    scenario:
+`Monsieur D., 72 ans, chute dans l’escalier. Douleur lombaire intense, impossibilité de se relever seul.
+ATCD : ostéoporose connue. EVA 8/10.
+TA 140/82 – FC 98 – SpO₂ 97% – T° 36,7°C.
+Prescription : radiographie rachis lombaire en urgence, puis TDM si besoin.
+IMC : 35 kg/m².
+Il/elle dit devoir uriner rapidement.
+Il/elle se montre très sûr(e) de lui/elle (“je sais ce que j’ai”).`,
+    bank: [
+      item("72 ans + ostéoporose", [["72","ans"],["ostéoporose","osteoporose"]],
+        [["fracture"],["tassement"]],
+        [["fracture"],["aggravation"]],
+        [["manipulation","douce"],["immobiliser"]],
+        corr("Ostéoporose → fractures vertébrales possibles.",
+             "Instabilité/aggravation si mobilisation.",
+             "Manipulations prudentes, limiter flexion, immobilisation relative.")),
+      item("Chute escalier", [["chute"],["escalier"]],
+        [["traumatisme"],["fracture"]],
+        [["douleur"],["aggravation"]],
+        [["transfert","sécurisé","securise"],["aide"]],
+        corr("Traumatisme potentiellement important.",
+             "Aggravation si mobilisation brusque.",
+             "Transfert sécurisé, aide.")),
+      item("EVA 8/10 lombalgie", [["lomb"],["EVA","8/10"]],
+        [["douleur"],["coopération","cooperation"]],
+        [["mouvement","artefact"]],
+        [["antalgi","transmettre"],["confort"],["stabiliser"]],
+        corr("Douleur → risque mouvements.",
+             "Artefacts/répétitions.",
+             "Confort, relai antalgie, stabiliser.")),
+      item("Radio puis TDM si besoin", [["radiographie"],["TDM","scanner"]],
+        [["diagnostic"],["étapes","etapes"]],
+        [["organisation"]],
+        [["identité","identite"],["ALARA","collimation"]],
+        corr("Imagerie en 2 temps selon résultats.",
+             "—",
+             "Organiser, vérifier prescription, ALARA.")),
+    ],
+    defaultRows: 21
+  },
+
+  {
+    title: "Cas 8 – Colique néphrétique : TDM sans injection (douleur + hématurie)",
+    scenario:
+`Madame A., 41 ans, douleur lombaire droite irradiant vers l’aine, par crises, avec nausées.
+Bandelette urinaire : hématurie +++. EVA 9/10.
+TA 124/78 – FC 104 – SpO₂ 99% – T° 37,1°C.
+Prescription : TDM abdomino-pelvien sans injection (lithiase ?).
+IMC : 27 kg/m².
+Dernier repas : il y a 1 h.
+Il/elle comprend le français mais répond lentement.
+Dernières règles : il y a environ 6 semaines (incertain).
+Tenue compliquée à enlever (plusieurs couches / bijoux).`,
+    bank: [
+      item("Douleur lombaire irradiant aine", [["douleur"],["lomb"],["aine","irradi"]],
+        [["colique néphrétique","lithiase"]],
+        [["douleur"],["malaise"]],
+        [["confort"],["position"],["transmettre","antalgi"]],
+        corr("Tableau typique colique néphrétique.",
+             "Douleur très intense, malaise possible.",
+             "Confort, relai antalgie, surveillance.")),
+      item("Hématurie +++", [["hématurie","hematurie"]],
+        [["lithiase"],["saignement"]],
+        [["complication"]],
+        [["transmettre"],["surveillance"]],
+        corr("Hématurie compatible lithiase.",
+             "Complication possible.",
+             "Transmettre, surveiller.")),
+      item("EVA 9/10", [["EVA","9/10"]],
+        [["douleur"],["agitation"]],
+        [["mouvement","artefact"],["répéter","repeter"]],
+        [["rassurer"],["stabiliser"],["expliquer"]],
+        corr("Douleur extrême → bouge.",
+             "Artefacts → reprises.",
+             "Rassurer, stabiliser autant que possible.")),
+      item("TDM sans injection", [["TDM","scanner"],["sans injection"]],
+        [["irradiation"],["ALARA"]],
+        [["dose"]],
+        [["ALARA","collimation"],["limiter reprises"]],
+        corr("Scanner = dose non négligeable.",
+             "Irradiation.",
+             "ALARA, collimation, limiter reprises.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 9 – AVC suspect : scanner cérébral en urgence",
+    scenario:
+`Monsieur K., 63 ans, déficit moteur brusque du bras droit et troubles de la parole depuis 1 h.
+ATCD : diabète, HTA. Conscient mais inquiet.
+TA 170/96 – FC 92 – SpO₂ 97%.
+Prescription : TDM cérébrale + angio-TDM (AVC ?).
+IMC : 22 kg/m².
+Dernier repas : il y a 30 min.
+ATCD : maladie de Parkinson.
+Il/elle est colérique depuis l’attente.`,
+    bank: [
+      item("Début il y a 1 h", [["1 h","1h"],["depuis"]],
+        [["urgence"],["fenêtre thérapeutique","fenetre"]],
+        [["perte de chance"]],
+        [["prioriser"],["coordination"],["rapidité","rapidite"]],
+        corr("Temps critique (thrombolyse/thrombectomie).",
+             "Perte de chance si retard.",
+             "Prioriser, circuit court, communication.")),
+      item("Déficit moteur + troubles parole", [["déficit","deficit"],["parole","aphasie"]],
+        [["AVC"],["urgence"]],
+        [["aggravation"],["risque chute"]],
+        [["surveillance"],["sécuriser","securiser"],["rassurer"]],
+        corr("Compatible AVC.",
+             "Aggravation possible; risque chute si se lève.",
+             "Surveiller, sécuriser, rassurer.")),
+      item("TA 170/96", [["TA","170/96"]],
+        [["HTA"],["stress"]],
+        [["complications"]],
+        [["transmettre"],["surveillance"]],
+        corr("HTA importante.",
+             "Complications possibles.",
+             "Transmettre, surveiller.")),
+      item("Angio-TDM injecté", [["angio"],["inject"],["TDM","scanner"]],
+        [["injection","iode"]],
+        [["allerg","rein"],["extravasation"]],
+        [["VVP"],["check-list"],["matériel d'urgence","O2"]],
+        corr("Injection iodée : vérifs nécessaires.",
+             "Allergie/IR/extravasation.",
+             "VVP adaptée, interrogatoire, surveillance, matériel urgence.")),
+    ],
+    defaultRows: 21
+  },
+
+  {
+    title: "Cas 10 – Pédiatrie : suspicion pneumonie (radio thorax) + coopération",
+    scenario:
+`Enfant M., 5 ans, fièvre 39°C, toux, respiration rapide. Parents très anxieux.
+SpO₂ 94% à l’air ambiant. L’enfant pleure et refuse de rester immobile.
+Prescription : radiographie thorax face + profil.
+Le parent dit que l’enfant a très peur du bruit.
+Poids : 24 kg – Taille : 125 cm.
+Tenue compliquée à enlever (plusieurs couches / bijoux).`,
+    bank: [
+      item("Enfant 5 ans", [["enfant"],["5 ans","5ans"]],
+        [["pédiatrie","dose","ALARA"]],
+        [["radiosensibilité","sensibilite"]],
+        [["paramètres pédiatriques","pediatriques"],["collimation","ALARA"]],
+        corr("Pédiatrie : radiosensibilité ↑.",
+             "Dose si reprises.",
+             "Paramètres pédiatriques, collimation, ALARA.")),
+      item("Fièvre 39 + toux", [["fièvre","fievre","39"],["toux"]],
+        [["infection"],["pneumonie"]],
+        [["détresse","detresse"]],
+        [["surveillance"],["transmettre"]],
+        corr("Suspicion infection respiratoire.",
+             "Risque détresse si aggravation.",
+             "Surveillance et transmission.")),
+      item("SpO₂ 94%", [["SpO","94"]],
+        [["hypoxie"]],
+        [["aggravation"]],
+        [["surveillance"],["O2","oxygène","oxygene"]],
+        corr("Saturation un peu basse.",
+             "Aggravation possible.",
+             "Surveillance, O₂ selon protocole.")),
+      item("Parents anxieux", [["parents"],["anx"]],
+        [["communication"]],
+        [["mauvaise coopération","cooperation"]],
+        [["expliquer"],["rassurer"],["impliquer parent","parent"],["tablier"]],
+        corr("Anxiété parentale influence l’enfant.",
+             "Coopération difficile → reprises.",
+             "Expliquer, rassurer, impliquer parent avec protection si présence.")),
+      item("Enfant bouge/pleure", [["pleure","refuse"],["immobile","bouge","mouvement"]],
+        [["artefact"],["reprise"]],
+        [["dose"],["examen non diagnostic"]],
+        [["distraction","jeu"],["immobiliser"],["réduire temps","temps"]],
+        corr("Mouvements → flou → reprises.",
+             "Dose ↑, examen non diagnostique.",
+             "Distraction/jeu, immobilisation douce, réduire temps.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 11 – Poignet : suspicion scaphoïde (radio)",
+    scenario:
+`Monsieur S., 24 ans, chute sur la main (FOOSH) lors d’un skate.
+Douleur du poignet, douleur à la tabatière anatomique, œdème. EVA 6/10.
+Prescription : radiographies poignet + scaphoïde (incidences dédiées).
+Pas à jeun (a mangé juste avant de venir).
+Tenue compliquée à enlever (plusieurs couches / bijoux).`,
+    bank: [
+      item("Chute FOOSH", [["FOOSH","main"],["skate","chute"]],
+        [["fracture scaphoïde","scaphoide"]],
+        [["douleur"],["aggravation"]],
+        [["immobiliser"],["positionnement"]],
+        corr("FOOSH + tabatière → scaphoïde à suspecter.",
+             "Fracture possible.",
+             "Immobiliser, incidences dédiées, manipulations douces.")),
+      item("Tabatière anatomique douloureuse", [["tabatière","tabatiere"]],
+        [["suspicion scaphoïde","scaphoide"]],
+        [["fracture"]],
+        [["incidences scaphoïde","scaphoide"],["collimation"]],
+        corr("Signe clinique évocateur scaphoïde.",
+             "Fracture.",
+             "Incidences dédiées, collimation, limiter reprises.")),
+      item("Incidences dédiées prescrites", [["incidence","dédiée","dediee"],["scapho"]],
+        [["qualité image","qualite"]],
+        [["douleur positionnement"],["artefact"]],
+        [["aide positionnement"],["rassurer"]],
+        corr("Positionnement parfois douloureux.",
+             "Mouvements → artefacts.",
+             "Aider au positionnement, rassurer.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 12 – Chute personne âgée : douleur hanche (fracture col fémur ?)",
+    scenario:
+`Madame T., 84 ans, chute de sa hauteur. Douleur hanche droite, membre raccourci en rotation externe.
+EVA 8/10. TA 152/90 – FC 96 – SpO₂ 95%.
+Prescription : radiographie bassin + hanche droite en urgence.
+Dernier repas : ce matin.
+Il/elle parle peu français.
+ATCD : maladie d’Alzheimer (stade débutant).
+Le témoin rapporte une brève perte de connaissance.
+Il/elle est colérique depuis l’attente.`,
+    bank: [
+      item("84 ans", [["84","ans"]],
+        [["fracture"],["risque"]],
+        [["aggravation"],["douleur"]],
+        [["transfert","sécurisé","securise"],["confort"]],
+        corr("Âge ↑ → fracture fréquente.",
+             "Risque aggravation.",
+             "Transfert prudent, confort, relai antalgie.")),
+      item("Raccourcissement + rotation externe", [["raccourci"],["rotation externe"]],
+        [["fracture col fémur","col femur","fémur","femur"]],
+        [["fracture"],["douleur"]],
+        [["immobiliser"],["manipulation","douce"]],
+        corr("Signes typiques fracture col fémur.",
+             "Fracture douloureuse.",
+             "Immobiliser, manipulations très prudentes.")),
+      item("Risque escarres / points d’appui", [["escar"],["points d'appui","points d appui","immobile"]],
+        [["prévention"],["peau"]],
+        [["escarre"],["douleur"]],
+        [["installer"],["surveiller points d'appui","points d appui"]],
+        corr("Immobillité → escarres.",
+             "Escarres/douleur.",
+             "Installer, surveiller points d’appui, couverture.")),
+    ],
+    defaultRows: 21
+  },
+
+  {
+    title: "Cas 13 – IRM genou : sécurité (claustrophobie / métal)",
+    scenario:
+`Monsieur J., 35 ans, douleur chronique du genou, suspicion lésion méniscale.
+Prescription : IRM genou.
+Il dit être claustrophobe et porte un piercing. Il a un ancien éclat métallique au niveau de l’œil (travailleur métallurgie) selon ses dires.
+À jeun depuis 8 h.
+Il/elle dit devoir uriner rapidement.
+Il/elle est claustrophobe.`,
+    bank: [
+      item("IRM : métal/objets", [["IRM"],["métal","metal","piercing","éclat","eclat"]],
+        [["contre-indication","CI"],["sécurité","securite"]],
+        [["projectile"],["brûlure","brulure"],["artefact"]],
+        [["questionnaire"],["retirer"],["radio orbites","orbites"],["informer"]],
+        corr("IRM = champ magnétique : métaux à vérifier.",
+             "Risque projectile/brûlure/artefacts; éclat oculaire = risque majeur.",
+             "Questionnaire IRM, retirer piercing, radio orbites si doute, informer équipe.")),
+      item("Claustrophobie", [["claustro"]],
+        [["anxiété","anxiete"]],
+        [["mouvement"],["arrêt examen","arret"]],
+        [["expliquer"],["musique"],["poire"],["prévoir sédation","sedation"]],
+        corr("Claustrophobie → mouvements/arrêt.",
+             "Examen incomplet/artefacts.",
+             "Expliquer, rassurer, moyens de confort, prévenir pour sédation si besoin.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 14 – Allergie connue au produit iodé : angio-scanner",
+    scenario:
+`Madame C., 52 ans, suspicion dissection aortique.
+Prescription : angio-TDM thoraco-abdominal injecté.
+Elle rapporte une réaction allergique sévère lors d’un scanner injecté il y a 3 ans (urticaire généralisé, dyspnée).
+Dernier repas : il y a 4 h.
+Dernières règles : il y a environ 6 semaines (incertain).`,
+    bank: [
+      item("Angio-TDM injecté (urgence)", [["angio"],["TDM","scanner"],["inject"]],
+        [["urgence"],["diagnostic"]],
+        [["allergie"],["réaction","reaction"]],
+        [["check-list"],["matériel d'urgence","O2","adrénaline","adrenaline"]],
+        corr("Examen urgent, injection iodée.",
+             "Risque réaction allergique.",
+             "Préparer matériel d’urgence, surveillance, équipe informée.")),
+      item("ATCD allergie iodée sévère", [["réaction","allerg"],["dyspnée","dyspnee","urticaire"],["3 ans","scanner injecté","injecte"]],
+        [["prémédication","premedication"],["alternative"],["contre-indication"]],
+        [["anaphylaxie"],["détresse","detresse"]],
+        [["informer","médecin","medecin"],["protocole allergie"],["surveillance"]],
+        corr("Allergie sévère = donnée critique.",
+             "Risque anaphylaxie.",
+             "Alerter médecin, protocole (prémédication/alternative), surveillance, matériel urgence.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 15 – Scanner injecté : insuffisance rénale / metformine",
+    scenario:
+`Monsieur E., 66 ans, bilan d’extension d’un cancer. Prescription : TDM thoraco-abdomino-pelvien injecté iodé.
+ATCD : diabète sous metformine, insuffisance rénale chronique (dernier DFG à 42 ml/min).
+Il est stable, pas d’allergie connue.
+IMC : 27 kg/m².
+Dernier repas : il y a 30 min.
+Le/la patient(e) est désorienté(e) dans le temps.
+Il/elle a chaud et transpire.`,
+    bank: [
+      item("TDM injecté iodé", [["TDM","scanner"],["inject"],["iode"]],
+        [["PDC"],["rein","créatinin","creatinin"]],
+        [["néphrotoxic","extravasation","allerg"]],
+        [["vérifier DFG","DFG","créatinin","creatinin"],["surveillance"]],
+        corr("Injection iodée nécessite vérif fonction rénale.",
+             "Risque néphrotoxicité/extravasation/allergie.",
+             "Vérifier DFG/créatinin, surveillance, protocole local.")),
+      item("DFG 42 (IRC)", [["DFG","42"],["insuffisance rénale","IR","chronique"]],
+        [["risque"],["adaptation"]],
+        [["aggravation rénale","renale"]],
+        [["informer","médecin","medecin"],["hydratation"],["alternative"]],
+        corr("DFG bas = vigilance iode.",
+             "Aggravation rénale possible.",
+             "Alerter, adaptation (hydratation/dose/alternative), tracer.")),
+      item("Diabète + metformine", [["metformine"],["diab"]],
+        [["protocole"],["vigilance"]],
+        [["complication"],["médicamenteuse","medicamenteuse"]],
+        [["informer","médecin","medecin"],["consignes"],["patient"]],
+        corr("Metformine + IR + iode = point de vigilance (selon protocole).",
+             "Complication si IR s’aggrave.",
+             "Appliquer consignes/protocoles, informer patient, tracer.")),
+      item("Pas d’allergie connue", [["pas"],["allerg"]],
+        [["info"],["vérifier","verifier"]],
+        [["réaction possible","reaction"]],
+        [["tracer"],["surveillance"]],
+        corr("Rassurant mais pas une garantie.",
+             "Réaction toujours possible.",
+             "Tracer, surveillance pendant/après injection.")),
+    ],
+    defaultRows: 21
+  },
+,
+  {
+    title: "Cas 16 – Contrôle radiographique sous plâtre : avant-bras (urgence neurovasculaire)",
+    scenario:
+`Monsieur N., 19 ans, fracture du radius traitée par réduction puis mise en plâtre (avant-bras).
+Il revient pour un contrôle radiographique de face + profil.
+Depuis la mise en plâtre : douleur qui augmente, fourmillements des doigts, doigts froids et pâles.
+Il est anxieux et bouge beaucoup à cause de la douleur.
+Prescription : radiographie avant-bras sous plâtre.
+IMC : 27 kg/m².
+À jeun depuis 8 h.
+Plâtre réalisé il y a 48 h.
+Doigts parfois engourdis par moments (épisodes brefs).
+Il/elle dit avoir froid et demande une couverture.`,
+    bank: [
+      item("Plâtre avant-bras (contrôle)", [["plâtre","platre"],["avant-bras","avant bras"],["contrôle","controle","radio"]],
+        [["contrôle"],["qualité","qualite"]],
+        [["douleur positionnement"],["mouvement","artefact"]],
+        [["aide positionnement"],["immobiliser"],["ALARA","collimation"]],
+        corr("Contrôle sous plâtre : positionnement parfois limité, qualité image à optimiser sans reprises.",
+             "Douleur + mouvements → artefacts → reprises.",
+             "Aide au positionnement, caler le membre, collimation/ALARA, rythme adapté.")),
+      item("Douleur qui augmente", [["douleur"],["augmente","aggrave","aggrav"]],
+        [["alerte"],["complication"]],
+        [["compartiment","ischémie","ischemie"],["urgence"]],
+        [["transmettre","urgence"],["surveillance"],["ne pas serrer"]],
+        corr("Douleur croissante sous plâtre = signe d’alerte (plâtre trop serré / syndrome des loges).",
+             "Risque ischémie / syndrome des loges.",
+             "Alerter immédiatement, surveiller, ne pas minimiser, organiser prise en charge rapide.")),
+      item("Paresthésies / fourmillements", [["fourmil","paresth"]],
+        [["compression","nerf"]],
+        [["déficit neurologique","deficit"]],
+        [["transmettre"],["surveillance neurovasculaire","neurovasc","sensibilité","sensibilite"]],
+        corr("Fourmillements → possible compression nerveuse.",
+             "Déficit sensitif/moteur possible.",
+             "Surveillance neurovasculaire (sensibilité/motricité), transmission urgente.")),
+      item("Doigts froids/pâles", [["doigts"],["froid","pâle","pale"]],
+        [["ischémie","ischemie"],["compression"]],
+        [["urgence"],["nécrose","necrose"]],
+        [["alerter"],["surveiller pouls","pouls","capillar","recoloration"]],
+        corr("Froid/pâleur = suspicion de souffrance vasculaire.",
+             "Risque ischémie/nécrose.",
+             "Alerter immédiatement, vérifier recoloration/pouls si protocole, ne pas retarder.")),
+      item("Anxiété / bouge", [["anx","angoisse"],["bouge","mouvement"]],
+        [["coopération","cooperation"]],
+        [["artefact"],["répéter","repeter"],["dose"]],
+        [["rassurer"],["explications"],["calage"]],
+        corr("Douleur/anxiété → bouge → images floues.",
+             "Reprises → dose ↑ / perte de temps.",
+             "Rassurer, expliquer étapes, caler, demander aide si besoin.")),
+    ],
+    defaultRows: 21
+  },
+
+  {
+    title: "Cas 17 – Traumatisme rachidien : suspicion paraplégie (TDM rachis)",
+    scenario:
+`Monsieur F., 33 ans, chute d’un échafaudage (≈3 m). Douleur dorsale importante.
+Il dit ne plus sentir ses jambes et ne peut pas les bouger. Il est très anxieux.
+Il arrive sur plan dur avec collier cervical.
+TA 128/76 – FC 112 – SpO₂ 98% – T° 36,6°C.
+Prescription : TDM rachis complet (cervical + dorsal + lombaire) en urgence.
+Il/elle dit devoir uriner rapidement.
+Le/la patient(e) a vomi une fois après l’accident.`,
+    bank: [
+      item("Chute hauteur (3 m)", [["chute"],["3 m","3m","échafaudage","echafaudage"]],
+        [["traumatisme sévère","severe"],["rachis"]],
+        [["lésion","lesion"],["aggravation"]],
+        [["immobiliser"],["transfert sécurisé","securise"],["renfort"]],
+        corr("Chute de hauteur = mécanisme à haute énergie → suspicion lésion rachidienne.",
+             "Risque aggravation neurologique si mobilisation.",
+             "Immobilisation stricte, transfert à plusieurs, coordination équipe.")),
+      item("Paraplégie / déficit jambes", [["ne plus sentir","plus sentir","jambes"],["ne peut","bouger"]],
+        [["déficit neurologique","deficit"],["urgence"]],
+        [["aggravation"],["détresse","detresse"]],
+        [["alerter"],["surveillance"],["immobilisation stricte"]],
+        corr("Déficit moteur/sensitif = urgence neuro.",
+             "Aggravation possible, complications.",
+             "Alerter, immobilisation stricte, surveillance, limiter temps et manipulations.")),
+      item("Plan dur + collier cervical", [["plan dur","plan"],["collier"]],
+        [["immobilisation"]],
+        [["escarres"],["douleur"]],
+        [["protéger points d'appui","points d appui","points d'appui"],["transfert glissé","glisse"]],
+        corr("Immobilisation nécessaire mais inconfort/risque d’escarres si prolongée.",
+             "Douleurs/points d’appui.",
+             "Transfert glissé à plusieurs, protéger points d’appui, efficacité.")),
+      item("FC 112 (stress/douleur)", [["FC","112"]],
+        [["douleur","stress"]],
+        [["aggravation"]],
+        [["surveillance"],["transmettre"]],
+        corr("Tachycardie compatible douleur/stress.",
+             "Dégradation possible selon contexte.",
+             "Surveillance, transmission.")),
+      item("TDM rachis complet urgence", [["TDM","scanner"],["rachis"],["urgence"]],
+        [["diagnostic"],["rapidité","rapidite"]],
+        [["dose"],["répéter","repeter"]],
+        [["ALARA","collimation"],["éviter reprises","reprises"],["organisation"]],
+        corr("Examen urgent, souvent long (multi-segments).",
+             "Dose non négligeable si reprises.",
+             "ALARA, collimation adaptée, organisation, limiter mouvements.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 18 – Polytraumatisme : scanner corps entier (trauma scan)",
+    scenario:
+`Madame G., 45 ans, accident de voiture à haute cinétique. Douleur thoracique et abdominale, hématomes.
+Elle est consciente mais très algique et nauséeuse. VVP 18G posée.
+TA 98/60 – FC 126 – SpO₂ 95% sous O₂.
+Prescription : TDM corps entier injecté (trauma scan) en urgence.
+IMC : 35 kg/m².
+Cinétique élevée : choc direct selon les secours.
+Dernières règles : il y a environ 2 semaines.`,
+    bank: [
+      item("Accident haute énergie", [["accident","voiture"],["haute","cinétique","cinetique"]],
+        [["polytrauma"],["urgence"]],
+        [["aggravation"],["instabilité"]],
+        [["prioriser"],["coordination"],["sécurité","securite"]],
+        corr("Mécanisme violent → polytraumatisme.",
+             "Risque de dégradation rapide.",
+             "Circuit urgence, coordination, sécuriser patient.")),
+      item("TA 98/60 + FC 126 (instable)", [["TA","98/60"],["FC","126"]],
+        [["choc"],["instabilité","instabilite"]],
+        [["syncope"],["arrêt","arret"]],
+        [["surveillance"],["alerter"],["ne pas laisser seul"]],
+        corr("Signes possibles de choc.",
+             "Risque malaise/arrêt.",
+             "Surveillance rapprochée, alerter, ne pas laisser seul.")),
+      item("Nausées", [["naus"]],
+        [["risque aspiration"]],
+        [["vomissement"],["aspiration"]],
+        [["position"],["prévenir","prevenir"],["surveillance"]],
+        corr("Nausées → risque vomissements.",
+             "Aspiration possible.",
+             "Position adaptée, vigilance, prévenir équipe.")),
+      item("O₂ en cours", [["O2","oxyg"]],
+        [["détresse","detresse"]],
+        [["désaturation","desaturation"]],
+        [["surveillance"],["matériel","materiel"]],
+        corr("O₂ suggère fragilité respiratoire.",
+             "Désaturation possible.",
+             "Surveillance SpO₂, matériel prêt, transfert rapide.")),
+      item("Trauma scan injecté", [["corps entier","trauma"],["inject"],["TDM","scanner"]],
+        [["iode"],["VVP"],["rein","allerg"]],
+        [["extravasation"],["allergie"],["IR"]],
+        [["vérifier VVP","18G","perméabilité","permeabilite"],["check-list"],["matériel d'urgence","adrénaline","adrenaline"]],
+        corr("Trauma scan = injection à haut débit.",
+             "Extravasation/allergie/IR.",
+             "Vérifier VVP, check-list, surveillance, matériel urgence.")),
+    ],
+    defaultRows: 22
+  },
+
+  {
+    title: "Cas 19 – Embolie pulmonaire chez femme enceinte : imagerie urgente",
+    scenario:
+`Madame R., 30 ans, enceinte de 28 SA, dyspnée brutale, douleur thoracique.
+FC 118 – SpO₂ 92% à l’air ambiant. Elle est très anxieuse.
+Prescription : discussion d’imagerie pour suspicion d’embolie pulmonaire (angio-TDM vs scintigraphie).
+IMC : 35 kg/m².
+Il/elle est calme et très poli(e).`,
+    bank: [
+      item("Grossesse 28 SA", [["enceinte","grossesse"],["28","SA"]],
+        [["radioprotection"],["décision","decision"]],
+        [["irradiation fœtale","foetale"]],
+        [["informer"],["tracer"],["ALARA"]],
+        corr("Grossesse = facteur clé → choix d’imagerie et radioprotection.",
+             "Risque irradiation fœtale.",
+             "Information/traçabilité, ALARA, coordination avec médecin.")),
+      item("Dyspnée + SpO₂ 92%", [["dysp","SpO","92"]],
+        [["hypoxie"],["urgence"]],
+        [["détresse","detresse"]],
+        [["surveillance"],["O2","oxygène","oxygene"],["position"]],
+        corr("Hypoxie = urgence.",
+             "Risque décompensation.",
+             "Surveillance, O₂ selon protocole, position adaptée.")),
+      item("Anxiété", [["anx","angoisse"]],
+        [["coopération","cooperation"]],
+        [["mouvement"],["répéter","repeter"]],
+        [["rassurer"],["expliquer"]],
+        corr("Anxiété peut gêner coopération/apnée.",
+             "Artefacts → reprises.",
+             "Rassurer, guider respiration.")),
+      item("Choix d’examen (angio vs autre)", [["angio","scinti","scintigraphie","discussion"]],
+        [["bénéfice/risque"],["protocole"]],
+        [["retard"],["perte de chance"]],
+        [["coordination"],["prioriser"],["tracer"]],
+        corr("Décision d’imagerie doit être rapide et tracée.",
+             "Perte de chance si retard.",
+             "Coordination, priorisation, traçabilité.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 20 – Pneumothorax suspect : radio thorax (patient douloureux)",
+    scenario:
+`Monsieur V., 27 ans, douleur thoracique brutale après effort, dyspnée.
+SpO₂ 93% à l’air ambiant, FC 108. Il est très douloureux, peine à inspirer à fond.
+Prescription : radiographie thorax face + profil en urgence (pneumothorax ?).
+IMC : 31 kg/m².
+À jeun depuis 8 h.
+Il/elle dit avoir froid et demande une couverture.`,
+    bank: [
+      item("Douleur thoracique + dyspnée", [["douleur thoracique"],["dysp"]],
+        [["pneumothorax"],["urgence"]],
+        [["détresse","detresse"]],
+        [["surveillance"],["position"],["alerter"]],
+        corr("Tableau compatible pneumothorax.",
+             "Risque dégradation respiratoire.",
+             "Surveillance, position, alerter si aggravation.")),
+      item("SpO₂ 93% + FC 108", [["SpO","93"],["FC","108"]],
+        [["hypoxie"],["stress"]],
+        [["aggravation"]],
+        [["surveillance"],["transmettre"]],
+        corr("Saturation basse et tachycardie.",
+             "Risque aggravation.",
+             "Surveillance et transmission.")),
+      item("Inspiration difficile (coopération)", [["peine"],["inspirer","apnée","apnee"]],
+        [["qualité image","qualite"]],
+        [["artefact"],["reprise"]],
+        [["expliquer"],["entrainer"],["adapter position"]],
+        corr("Difficile de tenir l’inspiration → qualité image.",
+             "Reprises possibles.",
+             "Expliquer/entraîner, adapter position, limiter reprises.")),
+      item("Radio thorax urgence", [["radio"],["thorax"],["urgence"]],
+        [["diagnostic"]],
+        [["organisation"]],
+        [["identité","identite"],["collimation","ALARA"]],
+        corr("Examen urgent.",
+             "—",
+             "Vérifier identité/prescription, collimation/ALARA.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 21 – Corps étranger métallique : IRM contre-indiquée ?",
+    scenario:
+`Monsieur H., 40 ans, lombalgies chroniques, prescription IRM lombaire.
+Il travaille en mécanique et dit avoir eu “des petits éclats” au niveau des mains. Il a aussi un stent coronarien récent (il ne sait plus la date).
+Il est inquiet et demande si c’est dangereux.
+IMC : 27 kg/m².
+Il/elle parle peu français.
+Il/elle porte un piercing (oublié au départ).`,
+    bank: [
+      item("IRM lombaire prescrite", [["IRM"],["lomb"]],
+        [["sécurité","securite"],["questionnaire"]],
+        [["CI"],["accident"]],
+        [["interroger"],["vérifier documents","verifier"],["tracer"]],
+        corr("IRM = nécessité d’un questionnaire sécurité complet.",
+             "Risque en cas d’implant/métal non compatible.",
+             "Interrogatoire ciblé, vérifier cartes/compte-rendu, tracer.")),
+      item("Stent coronarien récent (date inconnue)", [["stent"],["récent","recent"],["ne sait"]],
+        [["compatibilité","compatibilite"],["délai","delai"]],
+        [["risque"],["CI"]],
+        [["demander carte","carte"],["contacter cardiologie","cardio"],["reporter si besoin"]],
+        corr("Implant récent : compatibilité et délai à vérifier.",
+             "Risque si non compatible / délai non respecté.",
+             "Demander carte d’implant, vérifier type/date, contacter si besoin, reporter si doute.")),
+      item("Éclats métalliques (mains)", [["éclat","eclat"],["métal","metal"],["mains"]],
+        [["artefact"],["risque"]],
+        [["brûlure","brulure"],["projectile"]],
+        [["retirer objets"],["inspection peau","peau"],["protection"]],
+        corr("Métal superficiel peut chauffer ou migrer.",
+             "Brûlure/artefacts.",
+             "Vérifier, retirer objets, inspection, appliquer protocole.")),
+      item("Inquiétude (communication)", [["inquiet"],["dangereux"]],
+        [["relation"],["explication"]],
+        [["mauvaise coopération","cooperation"]],
+        [["rassurer"],["expliquer procédure","procedure"]],
+        corr("Anxiété → coopération difficile.",
+             "Mouvements/arrêt examen.",
+             "Expliquer, rassurer, donner consignes.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 22 – Scanner injecté : extravasation pendant injection",
+    scenario:
+`Madame Y., 58 ans, TDM abdomino-pelvien injecté pour bilan oncologique.
+Pendant l’injection, elle se plaint d’une douleur vive au point de ponction, le bras gonfle.
+Elle devient anxieuse et veut retirer son bras de l’injecteur.
+IMC : 27 kg/m².
+Dernier repas : ce matin.
+Il/elle parle peu français.`,
+    bank: [
+      item("Injection iodée en cours", [["inject"],["iode"],["TDM","scanner"]],
+        [["surveillance injection"]],
+        [["extravasation"],["allergie"]],
+        [["surveiller"],["stop injection","arrêter","arreter"],["alerter"]],
+        corr("Injection = surveillance active.",
+             "Extravasation/allergie possibles.",
+             "Surveiller, arrêter si douleur/gonflement, alerter, protocole local.")),
+      item("Douleur point de ponction + gonflement", [["douleur"],["ponction"],["gonfl"]],
+        [["extravasation"]],
+        [["nécrose","necrose"],["compartiment"]],
+        [["arrêter injection","arreter"],["surélever","surelever"],["froid","chaud"],["tracer"]],
+        corr("Tableau typique d’extravasation.",
+             "Risque lésion tissulaire.",
+             "Arrêter injection, évaluer, surélever, appliquer protocole (froid/chaud), tracer.")),
+      item("Anxiété / veut bouger", [["anx"],["retirer","bouger"]],
+        [["sécurité","securite"]],
+        [["blessure"],["chute"]],
+        [["rassurer"],["tenir bras"],["aide"]],
+        corr("Réaction de retrait = risque blessure/arrachement.",
+             "Traumatisme local.",
+             "Rassurer, maintenir doucement, demander aide.")),
+    ],
+    defaultRows: 19
+  },
+
+  {
+    title: "Cas 23 – Radiographie thorax au lit : patient en réanimation",
+    scenario:
+`Monsieur Z., 61 ans, en réanimation, intubé-ventilé. Drain thoracique en place.
+Prescription : radiographie thorax portable de contrôle.
+Le patient est sédaté, perfusions et câbles multiples. Risque d’extubation accidentelle lors des mobilisations.
+IMC : 27 kg/m².
+Cinétique élevée : choc direct selon les secours.
+Il/elle est seul(e) (pas d’accompagnant).`,
+    bank: [
+      item("Radio thorax portable", [["portable"],["radio"],["thorax"]],
+        [["organisation"],["hygiène","hygiene"]],
+        [["exposition entourage"],["dose"]],
+        [["zone dégagée","degager"],["protéger entourage","proteger"],["collimation","ALARA"]],
+        corr("Radio portable nécessite organisation et radioprotection.",
+             "Exposition de l’entourage si mal gérée.",
+             "Dégager zone, collimation, protéger/éloigner si possible, ALARA.")),
+      item("Intubé-ventilé + câbles/perfusions", [["intub","ventil"],["câble","cable","perfusion"]],
+        [["sécurité","securite"]],
+        [["extubation"],["arrachement"]],
+        [["travailler à deux","deux"],["prévenir équipe","equipe"],["mobilisation minimale"]],
+        corr("Nombreux dispositifs → risque d’arrachement.",
+             "Extubation/arrachement perfusions.",
+             "Travailler à deux, prévenir équipe, mobiliser minimalement.")),
+      item("Drain thoracique (contrôle position)", [["drain"]],
+        [["contrôle"],["position"]],
+        [["déplacement","deplacement"]],
+        [["installation"],["éviter traction","traction"]],
+        corr("Radio souvent pour vérifier position drain/tubes.",
+             "Déplacement possible si traction.",
+             "Installer sans traction, vigilance aux lignes.")),
+    ],
+    defaultRows: 19
+  },
+
+  {
+    title: "Cas 24 – Traumatisme cervical : collier + douleur, radio/CT",
+    scenario:
+`Madame Q., 38 ans, accident de vélo. Douleur cervicale, paresthésies des mains.
+Collier cervical posé. Elle est très anxieuse et veut enlever le collier car “ça gêne”.
+Prescription : TDM cervical en urgence.
+IMC : 35 kg/m².
+Il/elle parle peu français.
+Le/la patient(e) a vomi une fois après l’accident.
+Cycles menstruels irréguliers.
+Tenue compliquée à enlever (plusieurs couches / bijoux).`,
+    bank: [
+      item("Douleur cervicale + paresthésies mains", [["cervical"],["paresth","mains"]],
+        [["lésion rachis","rachis"],["déficit","deficit"]],
+        [["aggravation"],["paralysie"]],
+        [["immobilisation stricte"],["alerter"],["surveillance"]],
+        corr("Paresthésies = signe neuro → urgence.",
+             "Aggravation neurologique possible.",
+             "Immobilisation stricte, alerter, surveillance.")),
+      item("Veut enlever collier (cooperation)", [["enlever"],["collier"],["gêne","gene"]],
+        [["coopération","cooperation"]],
+        [["mouvement"],["aggravation"]],
+        [["expliquer"],["rassurer"],["surveiller"]],
+        corr("Refus du collier = risque de mouvements dangereux.",
+             "Aggravation lésion.",
+             "Expliquer l’intérêt, rassurer, surveiller, demander renfort.")),
+      item("TDM cervical urgence", [["TDM","scanner"],["cervical"],["urgence"]],
+        [["diagnostic"]],
+        [["dose"],["répéter","repeter"]],
+        [["ALARA","collimation"],["éviter reprises"],["sécurité","securite"]],
+        corr("TDM cervical en urgence.",
+             "Dose si reprises.",
+             "ALARA, collimation, immobilité, sécuriser.")),
+    ],
+    defaultRows: 20
+  },
+
+  {
+    title: "Cas 25 – Suspicion hémorragie digestive : TDM injectée (stabilité + VVP)",
+    scenario:
+`Monsieur A., 54 ans, méléna et malaise. Pâleur, sueurs.
+TA 92/58 – FC 124 – SpO₂ 97%. Il est nauséeux.
+Prescription : angio-TDM abdominal injecté (recherche saignement actif). VVP posée mais fragile (petites veines).
+IMC : 27 kg/m².
+Dernier repas : il y a 4 h.`,
+    bank: [
+      item("TA 92/58 + FC 124 (instable)", [["TA","92/58"],["FC","124"]],
+        [["choc"],["urgence"]],
+        [["syncope"],["arrêt","arret"]],
+        [["surveillance"],["alerter"],["ne pas laisser seul"]],
+        corr("Hypotension + tachycardie = instabilité.",
+             "Risque malaise/arrêt.",
+             "Surveillance rapprochée, alerter, sécuriser patient.")),
+      item("Méléna / suspicion saignement", [["méléna","melena"],["saign"]],
+        [["hémorragie","hemorragie"]],
+        [["aggravation"],["choc"]],
+        [["prioriser"],["transmettre"]],
+        corr("Saignement digestif possible.",
+             "Aggravation/choc.",
+             "Prioriser, transmettre.")),
+      item("Nausées", [["naus"]],
+        [["risque aspiration"]],
+        [["vomissement"],["aspiration"]],
+        [["position"],["surveillance"]],
+        corr("Nausées → vigilance aspiration.",
+             "Aspiration possible.",
+             "Position adaptée, surveillance.")),
+      item("Angio-TDM abdominal injecté", [["angio"],["abdominal"],["inject"],["TDM","scanner"]],
+        [["injection haut débit"],["VVP"]],
+        [["extravasation"],["échec","echec"]],
+        [["vérifier VVP"],["renforcer voie","grosse veine"],["alerter"]],
+        corr("Angio nécessite débit élevé : VVP adaptée.",
+             "Extravasation/échec si voie fragile.",
+             "Vérifier perméabilité/calibre; alerter si voie insuffisante; protocole local.")),
+    ],
+    defaultRows: 20
+  }];
+
+const HEADERS = ["Donnée pertinente (à remplir)", "Analyse", "Problèmes réels ou potentiels", "Actions relevant du rôle du MEM"];
+
+// ---------- State / storage ----------
+let idx = 0;
+function base(){ return "RC15_EX"+idx+"_"; }
+function save(k,v){ try{ localStorage.setItem(k,v);}catch(e){} }
+function load(k){ try{ return localStorage.getItem(k)||"";}catch(e){ return ""; } }
+
+function getRowCount(){
+  const ex = EX[idx];
+  const v = load(base()+"rows");
+  const n = v ? parseInt(v,10) : ex.defaultRows;
+  return isFinite(n) && n>0 ? n : ex.defaultRows;
+}
+function setRowCount(n){ save(base()+"rows", String(n)); }
+
+function addRow(){
+  const n = getRowCount();
+  setRowCount(n+1);
+  buildGrid();
+}
+
+function resetExercise(){
+  try{
+    const prefix = base();
+    const keys = [];
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(k && k.startsWith(prefix)) keys.push(k);
+    }
+    keys.forEach(k => localStorage.removeItem(k));
+  }catch(e){}
+  setRowCount(EX[idx].defaultRows);
+  document.getElementById("scoreTxt").textContent = "";
+  buildCorrection();
+  buildGrid();
+}
+
+// ---------- Matching ----------
+function bestMatch(dataText){
+  const ex = EX[idx];
+  const opts = getOpts();
+  const t = normText(dataText, opts);
+  if(!t) return null;
+
+  function scan(list){
+    let best = null;
+    for(const it of (list || [])){
+      const totalGroups = (it.matchGroups||[]).length;
+      if(totalGroups === 0) continue;
+      const hit = groupsSatisfied(t, it.matchGroups, opts);
+      const score = hit / totalGroups;
+      if(best === null || score > best.score){
+        best = { item: it, score, hit, total: totalGroups };
+      }
+    }
+    if(!best) return null;
+    const okByGroups = best.hit >= Math.max(2, Math.ceil(best.total * 0.66));
+    const okByScore = best.score >= 0.75 && best.total <= 2;
+    return (okByGroups || okByScore) ? best : null;
+  }
+
+  // 1) d'abord le cas
+  let found = scan(ex.bank);
+  // 2) sinon la banque générique
+  if(!found) found = scan(GLOBAL_BANK);
+  return found;
+}
+
+function updateDataMatchRow(r){
+  const dId = `d_${idx}_${r}`;
+  const dataTxt = (document.getElementById(dId)?.value) || "";
+  const m = document.getElementById(dId+"_match");
+  if(!m) return;
+  const mm = bestMatch(dataTxt);
+  m.textContent = mm ? `Correspondance détectée : ${mm.item.label}` : "Correspondance : (non détectée — validation auto désactivée)";
+  m.style.color = mm ? "var(--ok)" : "var(--muted)";
+}
+
+function validateCell(r, kind){
+  const opts = getOpts();
+  const dId = `d_${idx}_${r}`;
+  const dataTxt = (document.getElementById(dId)?.value) || "";
+  const match = bestMatch(dataTxt);
+  const spec = match ? match.item : null;
+
+  const id = `t_${idx}_${r}_${kind}`;
+  const ta = document.getElementById(id);
+  const cb = document.getElementById(id+"_ov");
+  const tag = document.getElementById(id+"_tag");
+  const miss = document.getElementById(id+"_miss");
+  const manual = cb && cb.checked;
+
+  if(!spec){
+    const ok = manual;
+    if(tag){
+      tag.textContent = ok ? "OK (manuel)" : (ta && ta.value.trim() ? "Manuel" : "—");
+      tag.className = "tag " + (ok ? "ok" : (ta && ta.value.trim() ? "warn" : ""));
+    }
+    if(miss){
+      if(!ok && (ta && ta.value.trim())){
+        miss.textContent = "Astuce : mets plus de mots d’ancrage dans “Donnée pertinente” ou coche “Valider manuellement”.";
+        miss.style.display = "block";
+      } else {
+        miss.textContent = "";
+        miss.style.display = "none";
+      }
+    }
+    return ok;
+  }
+
+  const groups = (kind==="analysis") ? spec.analysisGroups
+               : (kind==="problems") ? spec.problemsGroups
+               : spec.actionsGroups;
+
+  const res = cellIsOk(ta ? ta.value : "", groups, opts);
+  const ok = manual || res.ok;
+
+  if(tag){
+    tag.textContent = ok ? "OK" : (ta && ta.value.trim() ? "À compléter" : "—");
+    tag.className = "tag " + (ok ? "ok" : (ta && ta.value.trim() ? "bad" : ""));
+  }
+  if(miss){
+    if(!ok && (ta && ta.value.trim())){
+      if(opts.showKeys){
+        const expected = (groups||[]).map(g => "["+g.join(" / ")+"]").join(" + ");
+        miss.textContent = "Mots-clés attendus : " + expected;
+      } else {
+        miss.textContent = "Indice : ajoute 2–6 mots d’ancrage (hypothèse / risque / action).";
+      }
+      miss.style.display = "block";
+    } else {
+      miss.textContent = "";
+      miss.style.display = "none";
+    }
+  }
+  return ok;
+}
+
+function validateRow(r){
+  const okA = validateCell(r, "analysis");
+  const okP = validateCell(r, "problems");
+  const okAc = validateCell(r, "actions");
+  return okA && okP && okAc;
+}
+
+// ---------- Correction panel ----------
+function buildCorrection(){
+  const ex = EX[idx];
+  const corrBox = document.getElementById("corrBox");
+  corrBox.innerHTML = "";
+
+  // Ordre : on trie selon l’apparition dans le texte (meilleur effort)
+  const scenarioNorm = stripAccents((ex.scenario||"").toLowerCase());
+  function firstPos(it){
+    let best = 1e9;
+    for(const group of (it.matchGroups||[])){
+      for(const kw of group){
+        const k = stripAccents((kw||"").toLowerCase());
+        const p = scenarioNorm.indexOf(k);
+        if(p !== -1 && p < best) best = p;
+      }
+    }
+    return best;
+  }
+
+  // On affiche la banque du cas + (en plus) les items génériques réellement présents dans le texte
+  const extra = (GLOBAL_BANK || []).filter(it => firstPos(it) < 1e9);
+  const all = (ex.bank||[]).concat(extra);
+
+  // Dé-duplication par label (si jamais)
+  const seen = new Set();
+  const uniq = [];
+  for(const it of all){
+    const key = (it.label || "").toLowerCase();
+    if(seen.has(key)) continue;
+    seen.add(key);
+    uniq.push(it);
+  }
+
+  const items = uniq.sort((a,b) => firstPos(a) - firstPos(b));
+
+  items.forEach((it) => {
+    const div = document.createElement("div");
+    div.className = "corrItem";
+    div.innerHTML = `
+      <b>${escapeHtml(it.label)}</b>
+
+      <div class="corrSplit">
+        <div class="corrSect">
+          <div class="corrTitle">Analyse</div>
+          <div class="corrText">${escapeHtml(it.correction?.analysis || "—")}</div>
+        </div>
+
+        <div class="corrSect">
+          <div class="corrTitle">Problèmes</div>
+          <div class="corrText">${escapeHtml(it.correction?.problems || "—")}</div>
+        </div>
+
+        <div class="corrSect">
+          <div class="corrTitle">Actions MEM</div>
+          <div class="corrText">${escapeHtml(it.correction?.actions || "—")}</div>
+        </div>
+
+        ${document.getElementById("optShowKeys").checked ? `
+          <div class="corrSect">
+            <div class="corrTitle">Mots-clés (reconnaissance)</div>
+            <div class="corrText">${escapeHtml((it.matchGroups||[]).map(g => "["+g.join(" / ")+"]").join(" + "))}</div>
+          </div>
+        ` : ""}
+      </div>
+    `;
+    corrBox.appendChild(div);
+  });
+}
+
+// ---------- UI build ----------
+function updateHeader(){
+  const ex = EX[idx];
+  document.getElementById("exTitle").textContent = ex.title;
+  document.getElementById("exScenario").textContent = ex.scenario;
+  document.getElementById("progressTxt").textContent = `Cas ${idx+1} / ${EX.length}`;
+
+  const rand = isRandomMode();
+  const prev = document.getElementById("prevBtn");
+  const next = document.getElementById("nextBtn");
+
+  if(rand){
+    prev.style.display = "none";
+    next.textContent = "Cas aléatoire";
+    next.disabled = (EX.length <= 1);
+  }else{
+    prev.style.display = "";
+    prev.textContent = "◀ Cas";
+    next.textContent = "Cas ▶";
+    prev.disabled = idx === 0;
+    next.disabled = idx === EX.length-1;
+  }
+
+  document.getElementById("scoreTxt").textContent = "";
+}
+
+function buildGrid(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  const thead = document.createElement("thead");
+  const trh = document.createElement("tr");
+  HEADERS.forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h;
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh);
+  grid.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  const n = getRowCount();
+
+  for(let r=0; r<n; r++){
+    const tr = document.createElement("tr");
+
+    const tdData = document.createElement("td");
+    const dId = `d_${idx}_${r}`;
+    const dTa = document.createElement("textarea");
+    dTa.id = dId;
+    dTa.placeholder = "Ex : “EVA 7/10”, “grossesse possible”, “VVP posée”, “SpO₂ 91%”, “AVK”…";
+    dTa.value = load(base()+dId) || "";
+    dTa.addEventListener("input", () => {
+      save(base()+dId, dTa.value);
+      updateDataMatchRow(r);
+      validateRow(r);
+    });
+
+    const match = document.createElement("div");
+    match.className = "match";
+    match.id = dId+"_match";
+
+    tdData.appendChild(dTa);
+    tdData.appendChild(match);
+    tr.appendChild(tdData);
+
+    const cols = [
+      { kind:"analysis", label:"Analyse" },
+      { kind:"problems", label:"Problèmes" },
+      { kind:"actions", label:"Actions" },
+    ];
+
+    cols.forEach((col) => {
+      const td = document.createElement("td");
+
+      const id = `t_${idx}_${r}_${col.kind}`;
+      const ta = document.createElement("textarea");
+      ta.id = id;
+      ta.placeholder = col.label;
+      ta.value = load(base()+id) || "";
+
+      let tmr = null;
+      ta.addEventListener("input", () => {
+        save(base()+id, ta.value);
+        if(tmr) clearTimeout(tmr);
+        tmr = setTimeout(() => validateCell(r, col.kind), 180);
+      });
+
+      const status = document.createElement("div");
+      status.className = "status";
+      status.innerHTML = `
+        <span class="tag" id="${id}_tag">—</span>
+        <label class="override"><input type="checkbox" id="${id}_ov"> Valider manuellement</label>
+      `;
+
+      const miss = document.createElement("div");
+      miss.className = "missing";
+      miss.id = `${id}_miss`;
+
+      td.appendChild(ta);
+      td.appendChild(status);
+      td.appendChild(miss);
+      tr.appendChild(td);
+
+      setTimeout(() => {
+        const cb = document.getElementById(id+"_ov");
+        const saved = load(base()+id+"_ov");
+        if(cb) cb.checked = (saved === "1");
+        if(cb){
+          cb.addEventListener("change", () => {
+            save(base()+id+"_ov", cb.checked ? "1" : "0");
+            validateCell(r, col.kind);
+          });
+        }
+      }, 0);
+    });
+
+    tbody.appendChild(tr);
+
+    setTimeout(() => {
+      updateDataMatchRow(r);
+      validateRow(r);
+    }, 0);
+  }
+
+  grid.appendChild(tbody);
+}
+
+function checkAll(){
+  const n = getRowCount();
+  let total = n * 3;
+  let okCount = 0;
+
+  for(let r=0; r<n; r++){
+    if(validateCell(r, "analysis")) okCount++;
+    if(validateCell(r, "problems")) okCount++;
+    if(validateCell(r, "actions")) okCount++;
+  }
+
+  document.getElementById("scoreTxt").textContent = `Résultat : ${okCount} / ${total} cases validées (auto + manuel).`;
+}
+
+function loadCase(newIdx){
+  idx = Math.max(0, Math.min(EX.length-1, newIdx));
+  if(!load(base()+"rows")) save(base()+"rows", String(EX[idx].defaultRows));
+  updateHeader();
+  buildCorrection();
+  buildGrid();
+}
+function go(delta){ loadCase(idx + delta); }
+function goRandom(){
+  if(EX.length <= 1) return;
+  let r = idx;
+  while(r === idx){ r = Math.floor(Math.random()*EX.length); }
+  loadCase(r);
+}
+
+// Buttons
+document.getElementById("prevBtn").addEventListener("click", () => { if(isRandomMode()) goRandom(); else go(-1); });
+document.getElementById("nextBtn").addEventListener("click", () => { if(isRandomMode()) goRandom(); else go(1); });
+document.getElementById("checkBtn").addEventListener("click", checkAll);
+document.getElementById("addRowBtn").addEventListener("click", () => { 
+  const n = getRowCount(); 
+  setRowCount(n+1); 
+  buildGrid(); 
+});
+document.getElementById("resetBtn").addEventListener("click", resetExercise);
+
+// Options
+["optCase","optAccents","optPlural","optShowKeys"].forEach(id => {
+  document.getElementById(id).addEventListener("change", () => {
+    document.getElementById("scoreTxt").textContent = "";
+    buildCorrection();
+    buildGrid();
+  });
+});
+
+// Random mode toggle
+document.getElementById("optRandomMode").addEventListener("change", () => {
+  document.getElementById("scoreTxt").textContent = "";
+  updateHeader();
+  if(isRandomMode()) goRandom();
+});
+
+// init
+if(!load(base()+"rows")) save(base()+"rows", String(EX[idx].defaultRows));
+if(isRandomMode()) goRandom();
+else loadCase(0);
+</script>
+</body>
+</html>
