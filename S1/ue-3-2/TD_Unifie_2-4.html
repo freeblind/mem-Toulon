@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD Complet - UE 3.2 S1 - Imagerie Radiologique</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .td-selector { display: flex; gap: 10px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
+        .td-btn { padding: 12px 25px; border: 2px solid white; border-radius: 25px; background: transparent; color: white; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .td-btn:hover, .td-btn.active { background: white; color: #667eea; }
+        .td-btn.td2 { border-color: #11998e; } .td-btn.td2:hover, .td-btn.td2.active { background: #11998e; color: white; }
+        .td-btn.td3 { border-color: #667eea; } .td-btn.td3:hover, .td-btn.td3.active { background: #667eea; color: white; }
+        .td-btn.td4 { border-color: #1e3c72; } .td-btn.td4:hover, .td-btn.td4.active { background: #1e3c72; color: white; }
+        .td-btn.random { border-color: #e74c3c; } .td-btn.random:hover, .td-btn.random.active { background: #e74c3c; color: white; }
+        .progress-bar { background: #f0f0f0; height: 8px; margin: 20px 30px; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); width: 0%; transition: width 0.5s ease; }
+        .question-container { padding: 30px; display: none; }
+        .question-container.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .question-header { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 5px solid #667eea; }
+        .question-number { color: #667eea; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; color: #333; }
+        .theme-section { background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%); padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #667eea; }
+        .theme-title { font-weight: bold; color: #667eea; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px; }
+        .td-badge { display: inline-block; padding: 5px 12px; border-radius: 15px; font-size: 0.8em; font-weight: 600; margin-right: 10px; }
+        .td-badge.td2 { background: #11998e; color: white; }
+        .td-badge.td3 { background: #667eea; color: white; }
+        .td-badge.td4 { background: #1e3c72; color: white; }
+        .answer-input { width: 100%; min-height: 100px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; font-family: inherit; resize: vertical; }
+        .answer-input:focus { outline: none; border-color: #667eea; }
+        .button-group { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 30px; border: none; border-radius: 8px; font-size: 1em; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #6c757d; color: white; } .btn-secondary:hover { background: #5a6268; }
+        .btn-success { background: #28a745; color: white; } .btn-success:hover { background: #218838; }
+        .feedback { margin-top: 20px; padding: 15px; border-radius: 10px; display: none; }
+        .feedback.show { display: block; }
+        .feedback.correct { background: #d4edda; border: 2px solid #28a745; color: #155724; }
+        .feedback.incorrect { background: #f8d7da; border: 2px solid #dc3545; color: #721c24; }
+        .feedback.accepted { background: #d1ecf1; border: 2px solid #17a2b8; color: #0c5460; }
+        .solution { margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .mcq-options { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .mcq-option { display: flex; align-items: center; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .mcq-option:hover { border-color: #667eea; background: #f8f9fa; }
+        .mcq-option input { width: 20px; height: 20px; margin-right: 15px; cursor: pointer; }
+        .mcq-option.selected { border-color: #667eea; background: #e7f1ff; }
+        .navigation { display: flex; justify-content: space-between; padding: 30px; background: #f8f9fa; border-top: 1px solid #e0e0e0; }
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; text-align: left; border: 2px solid #e0e0e0; }
+        th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        td input[type="text"], td textarea { width: 100%; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; }
+        .solution-row { background: #fff3cd !important; font-style: italic; color: #856404; display: none; }
+        .solution-row.show { display: table-row; }
+        .text-gap-container { display: inline-block; min-width: 80px; margin: 0 5px; }
+        .text-gap { border: none; border-bottom: 2px solid #667eea; padding: 5px; width: 100px; text-align: center; background: transparent; }
+        .text-gap-solution { display: none; color: #28a745; font-weight: bold; margin-left: 10px; }
+        .text-gap-solution.show { display: inline; }
+        .text-to-fill { line-height: 2.5; font-size: 1.1em; }
+        .stats { padding: 30px; background: #f8f9fa; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2.5em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; margin-top: 10px; }
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+        .nav-card { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+        .pitch-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
+        .pitch-card { background: white; padding: 15px; border-radius: 10px; border: 2px solid #e0e0e0; text-align: center; }
+        @media (max-width: 768px) { .header h1 { font-size: 1.5em; } .button-group, .navigation { flex-direction: column; } .btn { width: 100%; } .pitch-box, .td-selector { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 TD Complet - UE 3.2 S1</h1>
+            <p>Physique appliquée et technologie en imagerie radiologique</p>
+            <div class="td-selector">
+                <button class="td-btn td2" onclick="selectTD('td2')">TD2 - Ostéo/Doses/Scanner</button>
+                <button class="td-btn td3" onclick="selectTD('td3')">TD3 - Chaîne Radiologique</button>
+                <button class="td-btn td4" onclick="selectTD('td4')">TD4 - Scanographie</button>
+                <button class="td-btn random" onclick="startRandomMode()">🎲 Mode Aléatoire</button>
+            </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+        <!-- PAGE ACCUEIL -->
+        <div class="question-container active" id="home">
+            <div class="question-header">
+                <div class="question-number">🏠 Bienvenue</div>
+                <div class="question-text">Sélectionnez un TD ci-dessus pour commencer ou utilisez le mode aléatoire pour réviser toutes les questions dans le désordre.</div>
+            </div>
+            <div class="nav-grid">
+                <div class="nav-card" style="border-left: 4px solid #11998e;"><h4 style="color: #11998e;">🦴 TD2 - 14 questions</h4><p>Ostéodensitométrie, Indicateurs de dose, Analyse spectrale, Scanographie</p></div>
+                <div class="nav-card" style="border-left: 4px solid #667eea;"><h4 style="color: #667eea;">📷 TD3 - 7 questions</h4><p>Chaîne radiologique, Scopie/Graphie, Détecteurs, Paramètres d'acquisition</p></div>
+                <div class="nav-card" style="border-left: 4px solid #1e3c72;"><h4 style="color: #1e3c72;">🖥️ TD4 - 9 questions</h4><p>Scanographie avancée, Modes d'acquisition, Pitch, Artéfacts</p></div>
+            </div>
+        </div>
+
+        <!-- Questions will be loaded dynamically -->
+        <div id="questionsContainer"></div>
+
+        <!-- STATISTIQUES -->
+        <div class="question-container" id="stats">
+            <div class="stats">
+                <h2>🎉 Statistiques</h2>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">Réponses correctes</div></div>
+                    <div class="stat-card"><div class="stat-value" id="acceptedAnswers">0</div><div class="stat-label">Réponses acceptées</div></div>
+                    <div class="stat-card"><div class="stat-value" id="totalScore">0%</div><div class="stat-label">Score total</div></div>
+                </div>
+                <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; color: white;">
+                    <h3>🏆 Score Final</h3>
+                    <div style="font-size: 3em; font-weight: bold;" id="finalScoreDisplay">0 / 0</div>
+                </div>
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="resetQuiz()">🔄 Recommencer</button>
+                    <button class="btn btn-secondary" onclick="goHome()">🏠 Accueil</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display: none;">← Précédent</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display: none;">Suivant →</button>
+        </div>
+    </div>
+
+    <script>
+        // ============ DATA ============
+        const questionsData = {
+            td2: [
+                { id: 'td2_q1', theme: '🦴 Ostéodensitométrie', title: 'Question 1 - Tableau', text: 'Ostéodensitométrie - Bases', type: 'table',
+                  fields: [
+                    {q: 'Définition de l\'ostéodensitométrie', sol: 'Examen médical mesurant la densité osseuse (DMO)'},
+                    {q: 'Signification de l\'acronyme DMO', sol: 'Densité Minérale Osseuse, en gramme/cm²'},
+                    {q: 'Principe physique (loi)', sol: 'Loi d\'absorption – mesure de l\'atténuation d\'un faisceau de photons'},
+                    {q: 'Technologie radiologique', sol: 'Absorption biphotonique - Émission de photons X à 2 énergies différentes'},
+                    {q: 'Énergies utilisées', sol: '70/140 kV ou 100/140 kV'},
+                    {q: 'Obtention des énergies', sol: 'Variation de la tension du tube ou tension constante avec filtration par terre rare'},
+                    {q: '3 géométries de faisceau', sol: 'Faisceau droit, Faisceau en éventail étroit, Faisceau en éventail large'},
+                    {q: '2 types de détecteur', sol: 'Conversion indirecte (RX→lumière→signal) et Conversion directe (RX→signal)'}
+                  ]},
+                { id: 'td2_q2', theme: '📊 Indicateurs de Dose', title: 'Question 2 - Tableau', text: 'Indicateurs dosimétriques en radiologie', type: 'table',
+                  fields: [
+                    {q: 'Indicateur dosimétrique en radiologie', sol: 'Produit Dose Surface (PDS)'},
+                    {q: 'Unité', sol: 'mGy.cm²'},
+                    {q: 'Valeur transmise', sol: 'Dose délivrée au patient'},
+                    {q: 'Document mentionnant cet indicateur', sol: 'Compte rendu radiologique'},
+                    {q: 'Procédé de recueil', sol: 'Chambre d\'ionisation ou Calculateur intégré'},
+                    {q: 'Référence de comparaison', sol: 'Niveaux de Référence Diagnostique (NRD)'},
+                    {q: 'Intérêt', sol: 'Évaluer ses pratiques'},
+                    {q: 'Dose à l\'entrée', sol: 'Énergie en un point à la peau du patient'},
+                    {q: 'Comment estimer la dose à l\'entrée', sol: 'Tension, charge, DFP × facteur de rétrodiffusion'},
+                    {q: 'Facteurs de rétrodiffusion', sol: '1,1 enfants | 1,3 adultes (60-80kV) | 1,5 haute tension (120-140kV)'}
+                  ]},
+                { id: 'td2_q3', theme: '📊 Indicateurs de Dose', title: 'Question 3 - Tableau', text: 'Indicateurs dosimétriques par modalité', type: 'table',
+                  fields: [
+                    {q: 'Scanographie', sol: 'IDSV (mGy) - Indice de Dose Scanographique Volumique | PDL (mGy.cm)'},
+                    {q: 'Imagerie radioguidée', sol: 'PDS (Gy.cm²) | Temps de scopie | Kerma (mGy)'},
+                    {q: 'Médecine nucléaire', sol: 'Activité (MBq) | IDSV (mGy) | PDL (mGy.cm)'},
+                    {q: 'Mammographie', sol: 'DMG (mGy) - Dose Glandulaire Moyenne'}
+                  ]},
+                { id: 'td2_q4', theme: '📊 Optimisation', title: 'Question 4', text: 'NRD, VGD et NRL - Significations et objectifs', type: 'open',
+                  solution: '<strong>NRD:</strong> Niveaux de Référence Diagnostique<br><strong>VGD:</strong> Valeur Guide Diagnostique<br><strong>NRL:</strong> Niveaux de Référence Local<br><br><strong>Objectifs:</strong> Définir les modalités d\'évaluation des doses, définir les niveaux de référence nationaux, transmettre les données à l\'IRSN'},
+                { id: 'td2_q5', theme: '📊 Optimisation', title: 'Question 5', text: 'Démarche d\'optimisation', type: 'open',
+                  solution: '<strong>1.</strong> Compromis entre qualité image et dose<br><strong>2.</strong> Les 4 acteurs: Physicien médical, Radiologue, Manipulateur, Ingénieur d\'application<br><strong>3.</strong> NRL > NRD: Démarche d\'optimisation prioritaire<br><strong>4.</strong> VGD < NRL < NRD: Démarche pour atteindre la VGD<br><strong>5.</strong> NRL < VGD de 20%: Évaluation de la qualité image'},
+                { id: 'td2_q6', theme: '📈 Analyse Spectrale', title: 'Question 6', text: 'Analyse spectrale et spectre de Fourier', type: 'open',
+                  solution: '<strong>Analyse spectrale:</strong> Trouver toutes les sinusoïdes qui contribuent au signal: identifier fréquences et amplitudes.<br><strong>Spectre de Fourier:</strong> Représentation graphique fréquences/amplitudes d\'un signal périodique.'},
+                { id: 'td2_q7', theme: '📈 Analyse Spectrale', title: 'Question 7 - Vrai/Faux', text: 'Spectre de Fourier', type: 'trueFalse',
+                  items: [
+                    {text: 'Sur un spectre de Fourier, le 1er pic (f0) = FONDAMENTAL et les autres = HARMONIQUES', answer: 'true'},
+                    {text: 'Le spectre de Fourier représente un signal périodique ET non périodique', answer: 'false'},
+                    {text: 'Seul le signal sinusoïdal est simple, les autres sont une somme de sinusoïdes', answer: 'true'},
+                    {text: 'Le spectre du signal CRÉNEAU possède 1 seul pic appelé harmonique', answer: 'false'}
+                  ]},
+                { id: 'td2_q8', theme: '📈 Analyse Spectrale', title: 'Question 8 - Calcul', text: 'Signal de période T = 4 ms : Calculer la fréquence', type: 'open',
+                  solution: '<strong>Période:</strong> T = 4 ms = 4×10⁻³ s = 0,004 s<br><strong>Fréquence:</strong> f = 1/T = 1/(4×10⁻³) = <strong>250 Hz</strong>'},
+                { id: 'td2_q9', theme: '🔬 Scanographie', title: 'Question 9 - Texte à trous', text: 'Le scanner - Définition', type: 'fillGaps',
+                  gaps: [
+                    {text: 'Le scanner est une technique d\'imagerie par', sol: 'rotation'},
+                    {text: 'qui utilise les', sol: 'photons X'},
+                    {text: 'pour créer des images', sol: 'axiales'},
+                    {text: '', sol: 'anatomiques'},
+                    {text: 'et parfois', sol: 'fonctionnelles'},
+                    {text: 'TDM =', sol: 'Tomodensitométrie'},
+                    {text: 'CT =', sol: 'Computerized Tomography'}
+                  ]},
+                { id: 'td2_q10', theme: '🔬 Scanographie', title: 'Question 10', text: 'Quelles sont les 2 propriétés du scanner ?', type: 'open',
+                  solution: '<strong>Propriété 1:</strong> Mesure de densité des volumes élémentaires à partir de l\'atténuation RX.<br><strong>Propriété 2:</strong> Reconstruction d\'une image en coupe à partir des projections transversales.'},
+                { id: 'td2_q11', theme: '🔬 Scanographie', title: 'Question 11', text: 'Échelle de Hounsfield', type: 'open',
+                  solution: '<strong>Échelle de Hounsfield:</strong> Compare les densités en se référant à l\'eau.<br><strong>UH:</strong> Unités Hounsfield = Nombre CT<br><strong>Valeurs:</strong> OS = +1000 | EAU = 0 | AIR = -1000'},
+                { id: 'td2_q12', theme: '🔬 Scanographie', title: 'Question 12', text: 'Le fenêtrage en scanographie', type: 'open',
+                  solution: '<strong>Fenêtrage:</strong> Zoom en contraste sur une portion de l\'échelle de Hounsfield.<br><strong>Paramètres:</strong> WL (Window Level) = niveau | WW (Window Width) = largeur'},
+                { id: 'td2_q13', theme: '🔬 Scanographie', title: 'Question 13 - Tableau', text: 'Comparer les scanners 1ère, 3ème et 6ème génération', type: 'table',
+                  fields: [
+                    {q: 'Configuration 1ère gén', sol: 'Tube RX + 1 seul détecteur'},
+                    {q: 'Configuration 3ème gén', sol: 'Détecteurs en arc de cercle centrés sur le foyer'},
+                    {q: 'Configuration 6ème gén', sol: 'Améliorations des appareils 3ème génération'},
+                    {q: 'Mouvement 1ère gén', sol: 'Translation + rotation degré par degré'},
+                    {q: 'Mouvement 3ème gén', sol: 'Rotation seule (plus de translation)'},
+                    {q: 'Mouvement 6ème gén', sol: 'Rotation continue, multibarrettes'}
+                  ]},
+                { id: 'td2_q14', theme: '🔬 Scanographie', title: 'Question 14 - Tableau', text: 'Scanner en imagerie spectrale', type: 'table',
+                  fields: [
+                    {q: 'Bitube', sol: '2 tubes perpendiculaires émettant à 80 et 140 kV'},
+                    {q: 'kV switching', sol: 'Émission alternative 80/140 kV par rotation'},
+                    {q: 'Succession de rotation', sol: 'Une rotation à 80 kV et l\'autre à 140 kV'},
+                    {q: 'Twin beam', sol: 'Faisceau X 120 kV subdivisé par des filtres différents'},
+                    {q: 'Superposition détecteurs', sol: 'Couche sup: énergies faibles | Couche inf: énergies élevées'},
+                    {q: 'Comptage photonique', sol: 'Discrimination énergétique des photons'}
+                  ]}
+            ],
+            td3: [
+                { id: 'td3_q1', theme: '📷 Chaîne Radiologique', title: 'Question 1', text: 'Facteurs de qualité image et éléments additionnels', type: 'open',
+                  solution: '<strong>Les 4 facteurs:</strong> 1) kV/mAs (constantes), 2) Type radiographie, 3) Corpulence patient, 4) Flous divers.<br><strong>Éléments additionnels:</strong> Diaphragme, Cône, Air-Gap (Groedel), Grilles, Compression, Filtres compensatoires.'},
+                { id: 'td3_q2', theme: '📷 Chaîne Radiologique', title: 'Question 2 - Tableau', text: 'Différencier Scopie et Graphie', type: 'table',
+                  fields: [
+                    {q: 'Type d\'image - Scopie', sol: 'Image dynamique / en temps réel'},
+                    {q: 'Type d\'image - Graphie', sol: 'Image statique (instant T)'},
+                    {q: 'Sauvegarde - Scopie', sol: 'Image non sauvegardée'},
+                    {q: 'Sauvegarde - Graphie', sol: 'Image figée et sauvegardée'},
+                    {q: 'Irradiation - Scopie', sol: 'Moins irradiante (faible mA)'},
+                    {q: 'Irradiation - Graphie', sol: 'Image coupée par la cellule'},
+                    {q: 'Qualité - Scopie', sol: 'Moins bonne qualité image'},
+                    {q: 'Qualité - Graphie', sol: 'Meilleure qualité image'}
+                  ]},
+                { id: 'td3_q3', theme: '📷 Détecteurs', title: 'Question 3', text: 'Amplificateur de Brillance - 4 étapes', type: 'open',
+                  solution: '<strong>Nom:</strong> Amplificateur de Brillance (IA II)<br><strong>4 étapes:</strong> 1. Conversion RX→lumière (écran CsI), 2. Conversion lumière→électrons (photocathode), 3. Accélération et focalisation (25-35 kV), 4. Conversion électrons→lumière (écran de sortie)'},
+                { id: 'td3_q4', theme: '📷 Détecteurs', title: 'Question 4 - Tableau', text: 'Capteur Plan (FPXD)', type: 'table',
+                  fields: [
+                    {q: 'Nom complet', sol: 'Flat Panel X-ray Detector'},
+                    {q: 'Couche de conversion', sol: 'Scintillateur (CsI ou Gd2O2S) ou Sélénium amorphe'},
+                    {q: 'Matrice TFT', sol: 'Thin Film Transistor - Matrice de pixels pour lecture'},
+                    {q: '2 circuits', sol: 'Circuit adressage (gate driver) + Circuit lecture (data line)'}
+                  ]},
+                { id: 'td3_q5', theme: '⚙️ Paramètres', title: 'Question 5 - Tableau', text: 'kV, mA, s, mAs', type: 'table',
+                  fields: [
+                    {q: 'kV - Dénomination', sol: 'Tension'},
+                    {q: 'mA - Dénomination', sol: 'Intensité'},
+                    {q: 's - Dénomination', sol: 'Temps de pose'},
+                    {q: 'mAs - Dénomination', sol: 'Charge'},
+                    {q: 'kV - Production RX', sol: 'Énergie et pénétration'},
+                    {q: 'mA/s/mAs - Production RX', sol: 'Quantité RX'},
+                    {q: 'kV - Qualité image', sol: 'Contraste + Noircissement'},
+                    {q: 'mA/s - Qualité image', sol: 'Rapport S/B'}
+                  ]},
+                { id: 'td3_q6', theme: '⚙️ Tube RX', title: 'Question 6 - Vrai/Faux', text: 'Foyers et Anode', type: 'trueFalse',
+                  items: [
+                    {text: 'L\'anode tournante permet de dissiper la chaleur plus efficacement', answer: 'true'},
+                    {text: 'L\'angle d\'anode influence la taille du foyer optique', answer: 'true'},
+                    {text: 'Le foyer optique est plus petit que le foyer thermique', answer: 'true'},
+                    {text: 'Un petit foyer améliore la résolution spatiale de l\'image', answer: 'true'},
+                    {text: 'Le petit foyer sera utilisé pour les membres et la pédiatrie', answer: 'true'},
+                    {text: 'Le grand foyer sera utilisé pour les zones épaisses et péristaltiques', answer: 'true'}
+                  ]},
+                { id: 'td3_q7', theme: '⚙️ Paramétrage', title: 'Question 7 - Tableau', text: 'Techniques 2 points vs 1 point + Cellules', type: 'table',
+                  fields: [
+                    {q: '2 points (kV + mAs manuels)', sol: 'DIRECT - Organe sur détecteur'},
+                    {q: '1 point (kV manuel + cellules)', sol: 'POTTER - Détecteur dans potter'},
+                    {q: 'Nombre de cellules', sol: '3 : 2 latérales + 1 centrale'},
+                    {q: 'Rôle des cellules', sol: 'Stopper RX quand nombre suffisant'},
+                    {q: 'Sélectionnées par', sol: 'MEM selon cliché'},
+                    {q: 'Technologie', sol: 'Chambre ionisation → courant → condensateur → coupe RX'}
+                  ]}
+            ],
+            td4: [
+                { id: 'td4_q1', theme: '🖥️ Scanographie', title: 'Question 1', text: 'Les 4 systèmes de la chaîne scanographique', type: 'open',
+                  solution: '<strong>1. Système de production RX:</strong> Générateur HT, Tube RX, Filtres, Collimateurs<br><strong>2. Système de détection:</strong> Détecteur primaire (chambre ionisation), Détecteurs secondaires (barrettes)<br><strong>3. Système informatique:</strong> Console, Reconstruction, Traitement images<br><strong>4. Système patient:</strong> Table, Statif (rotor/stator)'},
+                { id: 'td4_q2', theme: '🖥️ Scanographie', title: 'Question 2 - Vrai/Faux', text: 'Caractéristiques des scanners modernes', type: 'trueFalse',
+                  items: [
+                    {text: 'Les scanners actuels sont de 3ème génération, rotation continue, hélicoïdal et multi barrettes', answer: 'true'},
+                    {text: 'Le transfert électrique se fait par WIFI', answer: 'false'},
+                    {text: 'Le transfert des données se fait via SLIP RING ou WIFI', answer: 'true'},
+                    {text: 'Le stator est la partie mobile du statif', answer: 'false'},
+                    {text: 'Le rotor est la partie fixe du statif', answer: 'false'},
+                    {text: 'Un scanner mono-barrette a 1 seule couronne de détecteur dans l\'axe Z', answer: 'true'},
+                    {text: 'Un scanner « 64 barrettes » possède 32 rangées de détecteurs dans l\'axe Z', answer: 'false'}
+                  ]},
+                { id: 'td4_q3', theme: '🖥️ Scanographie', title: 'Question 3 - Texte à trous', text: 'Caractéristiques du générateur scanographique', type: 'fillGaps',
+                  gaps: [
+                    {text: 'Haute tension continue: __ à __ kV', sol: '70 à 140'},
+                    {text: 'Intensité constante: __ à __ mA', sol: '10 à 1000'},
+                    {text: 'Puissance totale: __ à __ kW', sol: '50 à 60'}
+                  ]},
+                { id: 'td4_q4', theme: '🖥️ Scanographie', title: 'Question 4 - Texte à trous', text: 'Les détecteurs scanographiques', type: 'fillGaps',
+                  gaps: [
+                    {text: 'Détecteur __ (sortie tube) = chambre d\'ionisation', sol: 'primaire'},
+                    {text: 'Mesure les indicateurs de __', sol: 'dose'},
+                    {text: 'Détecteurs __ (barrettes) après le patient', sol: 'secondaires'},
+                    {text: 'Transformer en signal __', sol: 'électrique'}
+                  ]},
+                { id: 'td4_q5', theme: '🖥️ Scanographie', title: 'Question 5 - Tableau', text: 'Les 2 filtrations scanographiques', type: 'table',
+                  fields: [
+                    {q: 'Filtre 1 - Nom', sol: 'Filtre plat'},
+                    {q: 'Filtre 1 - Localisation', sol: 'En sortie du tube'},
+                    {q: 'Filtre 1 - Rôle', sol: 'Homogénéiser - Durcissement - Alu min 2,5mm'},
+                    {q: 'Filtre 2 - Nom', sol: 'Filtre papillon'},
+                    {q: 'Filtre 2 - Localisation', sol: 'Entre filtre plat et collimateur'},
+                    {q: 'Filtre 2 - Rôle', sol: 'Homogénéiser l\'irradiation - Morphologie'}
+                  ]},
+                { id: 'td4_q6', theme: '🖥️ Scanographie', title: 'Question 6 - Tableau', text: 'Les collimateurs', type: 'table',
+                  fields: [
+                    {q: 'Collimateur PRIMAIRE (1-Sortie tube, 3-Après filtrage, 5-Ouverture champ x/y, 7-Épaisseur collimation z)', sol: '1 – 3 – 5 – 7'},
+                    {q: 'Collimateur SECONDAIRE (2-Devant détecteur, 4-Limite pénombres, 6-Affine profil z)', sol: '2 – 4 – 6'}
+                  ]},
+                { id: 'td4_q7', theme: '🖥️ Scanographie', title: 'Question 7 - Tableau', text: 'Modes d\'acquisition scanographiques', type: 'table',
+                  fields: [
+                    {q: 'Rotation continue + Table fixe + Interventionnel/Perfusion', sol: 'Mode CINÉ - Acquisition continue sur même zone'},
+                    {q: '1 rotation + Table fixe + Coupe après coupe', sol: 'Mode SÉQUENTIEL - Cœur, Crâne'},
+                    {q: 'Tube fixe + Table déplacement + Face et profil', sol: 'Mode RADIO/SCOUT/TOPOGRAMME - Repérage, Modulation mA'},
+                    {q: 'Rotation continue + Table déplacement + Conventionnel/Oncologie/Urgence', sol: 'Mode HÉLICOÏDAL - Volume en 1 acquisition'}
+                  ]},
+                { id: 'td4_q8', theme: '🖥️ Scanographie', title: 'Question 8', text: 'Le Pitch en scanographie', type: 'open',
+                  solution: '<strong>Pitch:</strong> Rapport entre l\'avancement de table par rotation et l\'épaisseur de collimation.<br><strong>Formule:</strong> Pitch = Avancement table / Collimation<br><strong>P&lt;1:</strong> Chevauchement (surirradiation)<br><strong>P=1:</strong> Coupes jointives<br><strong>P&gt;1:</strong> Espacement (interpolation nécessaire)'},
+                { id: 'td4_q9', theme: '🖥️ Scanographie', title: 'Question 9', text: 'Citez 3 artéfacts en scanographie et leurs causes', type: 'open',
+                  solution: '<strong>1. Artéfacts métalliques:</strong> Stries dues aux implants métalliques<br><strong>2. Artéfacts de mouvement:</strong> Flou dû au mouvement du patient<br><strong>3. Artéfacts de durcissement:</strong> Bandes sombres entre structures denses'}
+            ]
+        };
+        let currentTD = null;
+        let currentQuestionIndex = 0;
+        let questionOrder = [];
+        let isRandomMode = false;
+        let answers = { correct: 0, accepted: 0, total: 0, answered: new Set() };
+
+        // ============ RENDER QUESTIONS ============
+        function renderQuestion(q, td) {
+            let html = '<div class="question-container" id="' + q.id + '" data-td="' + td + '">';
+            html += '<div class="question-header">';
+            html += '<span class="td-badge ' + td + '">' + td.toUpperCase() + '</span>';
+            html += '<div class="theme-section"><div class="theme-title">' + q.theme + '</div></div>';
+            html += '<div class="question-number">' + q.title + '</div>';
+            html += '<div class="question-text"><strong>' + q.text + '</strong></div></div>';
+
+            if (q.type === 'table') {
+                html += '<div class="table-container"><table><thead><tr><th>Question</th><th>Votre réponse</th></tr></thead><tbody>';
+                q.fields.forEach((f, i) => {
+                    html += '<tr><td><strong>' + f.q + '</strong></td><td><input type="text" id="' + q.id + '_' + i + '" placeholder="Votre réponse"></td></tr>';
+                    html += '<tr class="solution-row"><td colspan="2" class="solution-cell">💡 ' + f.sol + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            } else if (q.type === 'trueFalse') {
+                q.items.forEach((item, i) => {
+                    html += '<div style="margin-bottom: 30px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;"><strong>' + (i+1) + '. ' + item.text + '</strong></div>';
+                    html += '<div class="mcq-options">';
+                    html += '<label class="mcq-option"><input type="radio" name="' + q.id + '_' + i + '" value="true"><span>VRAI</span></label>';
+                    html += '<label class="mcq-option"><input type="radio" name="' + q.id + '_' + i + '" value="false"><span>FAUX</span></label>';
+                    html += '</div></div>';
+                });
+            } else if (q.type === 'fillGaps') {
+                html += '<div class="text-to-fill">';
+                q.gaps.forEach((g, i) => {
+                    html += '<p>' + g.text + ' <span class="text-gap-container"><input type="text" id="' + q.id + '_' + i + '" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_' + q.id + '_' + i + '">' + g.sol + '</span></span></p>';
+                });
+                html += '</div>';
+            } else {
+                html += '<textarea class="answer-input" id="' + q.id + '_answer" placeholder="Tapez votre réponse ici..."></textarea>';
+            }
+
+            html += '<div class="button-group">';
+            html += '<button class="btn btn-primary" onclick="checkQuestion(\'' + q.id + '\')">Vérifier</button>';
+            html += '<button class="btn btn-success" onclick="acceptAnswer(\'' + q.id + '\')">Accepter</button>';
+            html += '</div>';
+            html += '<div class="feedback" id="feedback_' + q.id + '"></div></div>';
+            return html;
+        }
+
+        function initQuestions() {
+            let html = '';
+            Object.keys(questionsData).forEach(td => {
+                questionsData[td].forEach(q => { html += renderQuestion(q, td); });
+            });
+            document.getElementById('questionsContainer').innerHTML = html;
+        }
+
+        // ============ NAVIGATION ============
+        function selectTD(td) {
+            currentTD = td;
+            isRandomMode = false;
+            questionOrder = questionsData[td].map(q => q.id);
+            currentQuestionIndex = 0;
+            answers = { correct: 0, accepted: 0, total: questionOrder.length, answered: new Set() };
+            document.querySelectorAll('.td-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.td-btn.' + td).classList.add('active');
+            showQuestion(questionOrder[0]);
+            updateNavButtons();
+            updateProgress();
+        }
+
+        function startRandomMode() {
+            isRandomMode = true;
+            currentTD = 'random';
+            questionOrder = [];
+            Object.keys(questionsData).forEach(td => {
+                questionsData[td].forEach(q => questionOrder.push(q.id));
+            });
+            for (let i = questionOrder.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questionOrder[i], questionOrder[j]] = [questionOrder[j], questionOrder[i]];
+            }
+            currentQuestionIndex = 0;
+            answers = { correct: 0, accepted: 0, total: questionOrder.length, answered: new Set() };
+            document.querySelectorAll('.td-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('.td-btn.random').classList.add('active');
+            showQuestion(questionOrder[0]);
+            updateNavButtons();
+            updateProgress();
+        }
+
+        function showQuestion(questionId) {
+            document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active'));
+            const question = document.getElementById(questionId);
+            if (question) question.classList.add('active');
+        }
+
+        function goHome() {
+            currentTD = null;
+            questionOrder = [];
+            document.querySelectorAll('.td-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active'));
+            document.getElementById('home').classList.add('active');
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function updateProgress() {
+            if (questionOrder.length > 0) {
+                const progress = (currentQuestionIndex / questionOrder.length) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
+        }
+
+        function updateNavButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            if (!currentTD) { prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; return; }
+            prevBtn.style.display = currentQuestionIndex > 0 ? 'block' : 'none';
+            nextBtn.textContent = currentQuestionIndex >= questionOrder.length - 1 ? 'Voir statistiques →' : 'Suivant →';
+            nextBtn.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questionOrder.length - 1) {
+                currentQuestionIndex++;
+                showQuestion(questionOrder[currentQuestionIndex]);
+            } else { showStats(); }
+            updateNavButtons();
+            updateProgress();
+        }
+
+        function previousQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion(questionOrder[currentQuestionIndex]);
+            }
+            updateNavButtons();
+            updateProgress();
+        }
+
+        function showStats() {
+            document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active'));
+            document.getElementById('stats').classList.add('active');
+            document.getElementById('correctAnswers').textContent = answers.correct;
+            document.getElementById('acceptedAnswers').textContent = answers.accepted;
+            const total = answers.correct + answers.accepted;
+            const percentage = answers.total > 0 ? Math.round((total / answers.total) * 100) : 0;
+            document.getElementById('totalScore').textContent = percentage + '%';
+            document.getElementById('finalScoreDisplay').textContent = total + ' / ' + answers.total;
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        // ============ CHECK FUNCTIONS ============
+        function getQuestionData(id) {
+            for (let td of Object.keys(questionsData)) {
+                const q = questionsData[td].find(q => q.id === id);
+                if (q) return q;
+            }
+            return null;
+        }
+
+        function checkQuestion(id) {
+            const q = getQuestionData(id);
+            const feedback = document.getElementById('feedback_' + id);
+            
+            if (q.type === 'table' || q.type === 'fillGaps') {
+                document.querySelectorAll('#' + id + ' .solution-row').forEach(row => row.classList.add('show'));
+                document.querySelectorAll('#' + id + ' .text-gap-solution').forEach(sol => sol.classList.add('show'));
+                feedback.classList.remove('correct', 'incorrect', 'accepted');
+                feedback.classList.add('show', 'correct');
+                feedback.innerHTML = '<strong>✅ Solutions affichées !</strong> Comparez vos réponses.';
+                if (!answers.answered.has(id)) { answers.correct++; answers.answered.add(id); }
+            } else if (q.type === 'trueFalse') {
+                const selectedAnswers = [];
+                q.items.forEach((_, i) => {
+                    const selected = document.querySelector('input[name="' + id + '_' + i + '"]:checked');
+                    selectedAnswers.push(selected ? selected.value : null);
+                });
+                if (selectedAnswers.includes(null)) {
+                    feedback.classList.remove('correct', 'incorrect');
+                    feedback.classList.add('show', 'incorrect');
+                    feedback.innerHTML = '<strong>⚠️</strong> Répondez à toutes les affirmations.';
+                    return;
+                }
+                const isCorrect = q.items.every((item, i) => item.answer === selectedAnswers[i]);
+                feedback.classList.remove('correct', 'incorrect', 'accepted');
+                feedback.classList.add('show');
+                if (!answers.answered.has(id)) {
+                    if (isCorrect) {
+                        feedback.classList.add('correct');
+                        feedback.innerHTML = '<strong>✅ Parfait !</strong>';
+                        answers.correct++;
+                        answers.answered.add(id);
+                    } else {
+                        feedback.classList.add('incorrect');
+                        let txt = '<strong>❌ Erreur(s)</strong><br>Solutions: ';
+                        txt += q.items.map((item, i) => (i+1) + ': ' + (item.answer === 'true' ? 'VRAI' : 'FAUX')).join(', ');
+                        feedback.innerHTML = txt;
+                    }
+                }
+            } else {
+                feedback.classList.remove('correct', 'incorrect', 'accepted');
+                feedback.classList.add('show', 'correct');
+                feedback.innerHTML = '<strong>✅ Voici la solution :</strong>' + (q.solution ? '<div class="solution">' + q.solution + '</div>' : '');
+                if (!answers.answered.has(id)) { answers.correct++; answers.answered.add(id); }
+            }
+        }
+
+        function acceptAnswer(id) {
+            const q = getQuestionData(id);
+            const feedback = document.getElementById('feedback_' + id);
+            if (!answers.answered.has(id)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'accepted');
+                feedback.innerHTML = '<strong>✓ Acceptée</strong>' + (q && q.solution ? '<div class="solution">' + q.solution + '</div>' : '');
+                document.querySelectorAll('#' + id + ' .solution-row').forEach(row => row.classList.add('show'));
+                document.querySelectorAll('#' + id + ' .text-gap-solution').forEach(sol => sol.classList.add('show'));
+                answers.accepted++;
+                answers.answered.add(id);
+            }
+        }
+
+        function resetQuiz() {
+            document.querySelectorAll('textarea, input[type="text"]').forEach(input => { input.value = ''; });
+            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => input.checked = false);
+            document.querySelectorAll('.feedback').forEach(fb => fb.classList.remove('show', 'correct', 'incorrect', 'accepted'));
+            document.querySelectorAll('.mcq-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.solution-row').forEach(row => row.classList.remove('show'));
+            document.querySelectorAll('.text-gap-solution').forEach(sol => sol.classList.remove('show'));
+            answers = { correct: 0, accepted: 0, total: questionOrder.length, answered: new Set() };
+            currentQuestionIndex = 0;
+            if (isRandomMode) startRandomMode();
+            else if (currentTD && currentTD !== 'random') selectTD(currentTD);
+            else goHome();
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'radio') {
+                const option = e.target.closest('.mcq-option');
+                if (option) {
+                    document.querySelectorAll('input[name="' + e.target.name + '"]').forEach(input => {
+                        const opt = input.closest('.mcq-option');
+                        if (opt) opt.classList.remove('selected');
+                    });
+                    option.classList.add('selected');
+                }
+            }
+        });
+
+        // Initialize
+        initQuestions();
+        goHome();
+    </script>
+</body>
+</html>

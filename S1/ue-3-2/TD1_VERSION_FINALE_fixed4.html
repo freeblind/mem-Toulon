@@ -1,0 +1,2881 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD1 - Production des Rayons X - Version Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            height: 8px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .question-container {
+            padding: 30px;
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .answer-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .feedback.accepted {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+
+        .solution {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .solution h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .mcq-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .mcq-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mcq-option:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .mcq-option input[type="checkbox"],
+        .mcq-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .mcq-option.selected {
+            border-color: #667eea;
+            background: #e7f1ff;
+        }
+
+        .mcq-option.correct-answer {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .mcq-option.wrong-answer {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 2px solid #e0e0e0;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        td input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+
+        td input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .solution-row {
+            background: #fff3cd !important;
+            font-style: italic;
+            color: #856404;
+            display: none;
+        }
+
+        .solution-row.show {
+            display: table-row;
+        }
+
+        .solution-cell {
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .text-gap-container {
+            display: inline-block;
+            position: relative;
+            min-width: 150px;
+            margin: 0 5px;
+        }
+
+        .text-gap {
+            border: none;
+            border-bottom: 2px solid #667eea;
+            padding: 5px 10px;
+            width: 150px;
+            text-align: center;
+            font-size: 1em;
+            background: transparent;
+        }
+
+        .text-gap:focus {
+            outline: none;
+            border-bottom: 2px solid #764ba2;
+        }
+
+        .text-gap.correct {
+            color: #28a745;
+            border-bottom-color: #28a745;
+        }
+
+        .text-gap.incorrect {
+            color: #dc3545;
+            text-decoration: line-through;
+            border-bottom-color: #dc3545;
+        }
+
+        .text-gap-solution {
+            display: none;
+            color: #28a745;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .text-gap-solution.show {
+            display: inline;
+        }
+
+        .text-to-fill {
+            line-height: 2.5;
+            font-size: 1.1em;
+        }
+
+        .matching-game {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .matching-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .matching-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .matching-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .matching-item.selected {
+            background: #e7f1ff;
+            border-color: #667eea;
+        }
+
+        .stats {
+            padding: 30px;
+            background: #f8f9fa;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .schema-upload {
+            margin-top: 30px;
+            padding: 30px;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+
+        .schema-preview {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        .annotation-form {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .annotation-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        .annotation-list {
+            margin-top: 20px;
+        }
+
+        .annotation-item {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .upload-area {
+            text-align: center;
+            padding: 40px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #e7f1ff;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+
+        .image-container-wrapper {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .schema-image-display {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .annotation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        .label-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 100px;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .label-number-display {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .label-input {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .delete-label {
+            padding: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .matching-game {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 TD N°1 - Production des Rayons X</h1>
+            <p>UE 3.2 S1 - Version Interactive Complète</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Question 1 -->
+        <div class="question-container active" id="question1">
+            <div class="question-header">
+                <div class="question-number">Question 1</div>
+                <div class="question-text">
+                    <strong>Définir l'atome et sa composition</strong><br><br>
+                    Décrivez l'atome, sa composition, et l'énergie de liaison dans le modèle de Bohr.
+                </div>
+            </div>
+
+            <textarea class="answer-input" id="answer1" placeholder="Tapez votre réponse ici..."></textarea>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(1)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(1)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback1"></div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-container" id="question2">
+            <div class="question-header">
+                <div class="question-number">Question 2</div>
+                <div class="question-text">
+                    <strong>Définitions fondamentales</strong><br><br>
+                    1. Définissez les rayons X<br>
+                    2. Définissez les rayonnements ionisants<br>
+                    3. Précisez la différence entre les rayons X et Gamma
+                </div>
+            </div>
+
+            <textarea class="answer-input" id="answer2" placeholder="Tapez votre réponse ici..."></textarea>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(2)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(2)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback2"></div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-container" id="question3">
+            <div class="question-header">
+                <div class="question-number">Question 3</div>
+                <div class="question-text">
+                    <strong>Production des rayons X</strong><br><br>
+                    1. Complétez : "La production des RX fait suite à une _______ contre une _______"<br>
+                    2. Citez les 2 modes de production des rayons X<br>
+                    3. Précisez le phénomène produisant majoritairement les rayons X
+                </div>
+            </div>
+
+            <textarea class="answer-input" id="answer3" placeholder="Tapez votre réponse ici..."></textarea>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(3)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(3)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback3"></div>
+        </div>
+
+        <!-- Question 4 - Vrai/Faux -->
+        <div class="question-container" id="question4">
+            <div class="question-header">
+                <div class="question-number">Question 4 - Vrai/Faux</div>
+                <div class="question-text">
+                    <strong>Rayonnement de freinage (Bremsstrahlung)</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Le rayonnement de freinage produit un spectre continu</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q4_1" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q4_1" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Le rayonnement caractéristique produit un spectre discontinu (raies)</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q4_2" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q4_2" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Moins de 1% de l'énergie est convertie en rayons X</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q4_3" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q4_3" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTrueFalse(4, ['true', 'true', 'true'])">Vérifier mes réponses</button>
+            </div>
+
+            <div class="feedback" id="feedback4"></div>
+        </div>
+
+        <!-- Question 5 - Vrai/Faux -->
+        <div class="question-container" id="question5">
+            <div class="question-header">
+                <div class="question-number">Question 5 - Vrai/Faux</div>
+                <div class="question-text">
+                    <strong>Spectres des rayons X</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Le spectre de freinage est continu et dépend de la tension (kV)</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q5_1" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q5_1" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Les raies caractéristiques dépendent du matériau de l'anode (ex: tungstène)</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q5_2" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q5_2" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTrueFalse(5, ['true', 'true'])">Vérifier mes réponses</button>
+            </div>
+
+            <div class="feedback" id="feedback5"></div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-container" id="question6">
+            <div class="question-header">
+                <div class="question-number">Question 6</div>
+                <div class="question-text">
+                    <strong>Schéma du tube à rayons X</strong><br><br>
+                    Uploadez et annotez
+                </div>
+            </div>
+
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone6" onclick="document.getElementById('imageUpload6').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader</strong></p>
+                </div>
+                <input type="file" id="imageUpload6" accept="image/*" style="display: none;" onchange="loadSchemaImage(6, event)">
+                
+                <div id="modeSelector6" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Choisissez le mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(6, 'annotation')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📍</div>
+                                <strong>Annotation</strong>
+                            </button>
+                            <button class="btn btn-primary" onclick="selectMode(6, 'questions')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📝</div>
+                                <strong>Questions</strong>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="imageWorkspace6" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions6" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <strong>Mode</strong>
+                    </div>
+
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage6" class="schema-image-display">
+                        <canvas id="annotationCanvas6" class="annotation-canvas"></canvas>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3>Questions et Réponses</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn6" onclick="addManualQuestion(6)" style="display: none; margin-bottom: 15px;">
+                            ➕ Ajouter une question
+                        </button>
+                        <div id="labelsList6"></div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(6)">🗑️ Tout effacer</button>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 7 - Tableau avec solutions -->
+        <div class="question-container" id="question7">
+            <div class="question-header">
+                <div class="question-number">Question 7 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Étapes de production des RX dans le tube</strong><br><br>
+                    Pour chaque étape, précisez : localisation, effet concerné, mécanisme
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ÉTAPE</th>
+                            <th>LOCALISATION</th>
+                            <th>EFFET</th>
+                            <th>MÉCANISME</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1 - Émission des e⁻</strong></td>
+                            <td><input type="text" id="q7_1_loc" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_1_eff" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_1_mec" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Cathode (filament)</td>
+                            <td class="solution-cell">Effet thermoélectronique</td>
+                            <td class="solution-cell">Chauffage du filament par courant</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2 - Différence de Potentiel (DDP)</strong></td>
+                            <td><input type="text" id="q7_2_loc" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_2_eff" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_2_mec" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Entre cathode et anode</td>
+                            <td class="solution-cell">Accélération des électrons</td>
+                            <td class="solution-cell">Haute tension (kV) appliquée</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3 - Production des RX</strong></td>
+                            <td><input type="text" id="q7_3_loc" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_3_eff" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_3_mec" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Anode (cible)</td>
+                            <td class="solution-cell">Freinage et ionisation</td>
+                            <td class="solution-cell">Bremsstrahlung + rayonnement caractéristique</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4 - Orientation des RX</strong></td>
+                            <td><input type="text" id="q7_4_loc" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_4_eff" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_4_mec" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Anode (angle)</td>
+                            <td class="solution-cell">Effet talon (heel effect)</td>
+                            <td class="solution-cell">Inclinaison de l'anode (12-17°)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5 - Filtration des RX</strong></td>
+                            <td><input type="text" id="q7_5_loc" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_5_eff" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_5_mec" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Fenêtre du tube</td>
+                            <td class="solution-cell">Filtration inhérente et ajoutée</td>
+                            <td class="solution-cell">Absorption des RX de basse énergie</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6 - Focalisation du faisceau RX</strong></td>
+                            <td><input type="text" id="q7_6_loc" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_6_eff" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q7_6_mec" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Collimateur</td>
+                            <td class="solution-cell">Limitation du faisceau</td>
+                            <td class="solution-cell">Diaphragmes réglables</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable7()">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(7)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback7"></div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-container" id="question8">
+            <div class="question-header">
+                <div class="question-number">Question 8</div>
+                <div class="question-text">
+                    <strong>Identification d'éléments</strong><br><br>
+                    Uploadez et annotez
+                </div>
+            </div>
+
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone8" onclick="document.getElementById('imageUpload8').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader</strong></p>
+                </div>
+                <input type="file" id="imageUpload8" accept="image/*" style="display: none;" onchange="loadSchemaImage(8, event)">
+                
+                <div id="modeSelector8" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Choisissez le mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(8, 'annotation')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📍</div>
+                                <strong>Annotation</strong>
+                            </button>
+                            <button class="btn btn-primary" onclick="selectMode(8, 'questions')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📝</div>
+                                <strong>Questions</strong>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="imageWorkspace8" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions8" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <strong>Mode</strong>
+                    </div>
+
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage8" class="schema-image-display">
+                        <canvas id="annotationCanvas8" class="annotation-canvas"></canvas>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3>Questions et Réponses</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn8" onclick="addManualQuestion(8)" style="display: none; margin-bottom: 15px;">
+                            ➕ Ajouter une question
+                        </button>
+                        <div id="labelsList8"></div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(8)">🗑️ Tout effacer</button>
+                        <button class="btn btn-success" onclick="acceptAnswer(8)">Considérer comme bonne</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 9 - Tableau avec solutions -->
+        <div class="question-container" id="question9">
+            <div class="question-header">
+                <div class="question-number">Question 9 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Foyers thermique et optique</strong><br><br>
+                    Renseignez le tableau ci-dessous
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type de foyer</th>
+                            <th>Autre nom</th>
+                            <th>Correspondance</th>
+                            <th>Dimensions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Foyer thermique</strong></td>
+                            <td><input type="text" id="q9_ft_nom" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q9_ft_corr" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q9_ft_dim" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Foyer réel</td>
+                            <td class="solution-cell">Surface de bombardement / impact</td>
+                            <td class="solution-cell">Plusieurs mm² (large)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Foyer Optique</strong></td>
+                            <td><input type="text" id="q9_fo_nom" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q9_fo_corr" placeholder="Votre réponse"></td>
+                            <td><input type="text" id="q9_fo_dim" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Foyer apparent / effectif</td>
+                            <td class="solution-cell">Surface projetée</td>
+                            <td class="solution-cell">< 1 mm² (petit)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable9()">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(9)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback9"></div>
+        </div>
+
+        <!-- Question 10 - Texte à trous avec corrections inline -->
+        <div class="question-container" id="question10">
+            <div class="question-header">
+                <div class="question-number">Question 10 - Texte à trous</div>
+                <div class="question-text">
+                    <strong>Le générateur de rayons X</strong><br><br>
+                    Complétez le texte ci-dessous :
+                </div>
+            </div>
+
+            <div class="text-to-fill">
+                <p>Le générateur regroupe tous les circuits 
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_1" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_1">électriques</span>
+                    </span>
+                    et 
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_2" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_2">électroniques</span>
+                    </span>
+                    qui alimentent le tube à RX
+                </p>
+
+                <p style="margin-top: 20px;"><strong>Son rôle :</strong></p>
+                
+                <p>Appliquer une 
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_3" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_3">haute tension</span>
+                    </span>
+                    U (
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_4" class="text-gap" style="width: 80px;" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_4">kV</span>
+                    </span>
+                    ) au tube
+                </p>
+
+                <p>Chauffer la cathode pour obtenir l'
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_5" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_5">intensité</span>
+                    </span>
+                    I (
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_6" class="text-gap" style="width: 80px;" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_6">mA</span>
+                    </span>
+                    ) désirée dans le tube
+                </p>
+
+                <p>Déterminer le temps de l'
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_7" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_7">exposition</span>
+                    </span>
+                    (
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_8" class="text-gap" style="width: 80px;" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_8">s</span>
+                    </span>
+                    )
+                </p>
+
+                <p>Assurer la 
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_9" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_9">protection</span>
+                    </span>
+                    du tube (U, I et exposition acceptables pour le tube)
+                </p>
+
+                <p>Il est contenu dans une 
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_10" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_10">cuve</span>
+                    </span>
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_11" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_11">blindée</span>
+                    </span>
+                    et contrôlé par un 
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_12" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_12">pupitre</span>
+                    </span>
+                    <span class="text-gap-container">
+                        <input type="text" id="q10_13" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q10_13">de commande</span>
+                    </span>
+                </p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTextGaps()">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(10)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback10"></div>
+        </div>
+
+        <!-- Question 11 -->
+        <div class="question-container" id="question11">
+            <div class="question-header">
+                <div class="question-number">Question 11</div>
+                <div class="question-text">
+                    <strong>Image radiante et atténuation</strong><br><br>
+                    1. Définissez l'image radiante<br>
+                    2. Citez les 3 facteurs influant l'atténuation des rayons X dans la matière organique<br>
+                    3. Reliez les niveaux de gris avec les milieux organiques correspondants
+                </div>
+            </div>
+
+            <textarea class="answer-input" id="answer11" placeholder="Tapez votre réponse ici..."></textarea>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(11)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(11)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback11"></div>
+        </div>
+
+        <!-- Question 12 -->
+        <div class="question-container" id="question12">
+            <div class="question-header">
+                <div class="question-number">Question 12</div>
+                <div class="question-text">
+                    <strong>Effet d'interaction RX-matière (1)</strong><br><br>
+                    Uploadez et annotez
+                </div>
+            </div>
+
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone12" onclick="document.getElementById('imageUpload12').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader</strong></p>
+                </div>
+                <input type="file" id="imageUpload12" accept="image/*" style="display: none;" onchange="loadSchemaImage(12, event)">
+                
+                <div id="modeSelector12" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Choisissez le mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(12, 'annotation')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📍</div>
+                                <strong>Annotation</strong>
+                            </button>
+                            <button class="btn btn-primary" onclick="selectMode(12, 'questions')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📝</div>
+                                <strong>Questions</strong>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="imageWorkspace12" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions12" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <strong>Mode</strong>
+                    </div>
+
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage12" class="schema-image-display">
+                        <canvas id="annotationCanvas12" class="annotation-canvas"></canvas>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3>Questions et Réponses</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn12" onclick="addManualQuestion(12)" style="display: none; margin-bottom: 15px;">
+                            ➕ Ajouter une question
+                        </button>
+                        <div id="labelsList12"></div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(12)">🗑️ Tout effacer</button>
+                        <button class="btn btn-success" onclick="acceptAnswer(12)">Considérer comme bonne</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 13 -->
+        <div class="question-container" id="question13">
+            <div class="question-header">
+                <div class="question-number">Question 13</div>
+                <div class="question-text">
+                    <strong>Effet d'interaction RX-matière (2)</strong><br><br>
+                    Uploadez et annotez
+                </div>
+            </div>
+
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone13" onclick="document.getElementById('imageUpload13').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader</strong></p>
+                </div>
+                <input type="file" id="imageUpload13" accept="image/*" style="display: none;" onchange="loadSchemaImage(13, event)">
+                
+                <div id="modeSelector13" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Choisissez le mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(13, 'annotation')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📍</div>
+                                <strong>Annotation</strong>
+                            </button>
+                            <button class="btn btn-primary" onclick="selectMode(13, 'questions')" style="padding: 20px;">
+                                <div style="font-size: 2em;">📝</div>
+                                <strong>Questions</strong>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="imageWorkspace13" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions13" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <strong>Mode</strong>
+                    </div>
+
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage13" class="schema-image-display">
+                        <canvas id="annotationCanvas13" class="annotation-canvas"></canvas>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3>Questions et Réponses</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn13" onclick="addManualQuestion(13)" style="display: none; margin-bottom: 15px;">
+                            ➕ Ajouter une question
+                        </button>
+                        <div id="labelsList13"></div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(13)">🗑️ Tout effacer</button>
+                        <button class="btn btn-success" onclick="acceptAnswer(13)">Considérer comme bonne</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question 14 - Tableau -->
+        <div class="question-container" id="question14">
+            <div class="question-header">
+                <div class="question-number">Question 14 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Comparaison des effets photoélectrique et Compton</strong><br><br>
+                    Renseignez le tableau ci-dessous
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Caractéristique</th>
+                            <th>Votre réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Effet prépondérant aux basses tensions (50-70 kV)</strong></td>
+                            <td><input type="text" id="q14_1" placeholder="Quel effet ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Photoélectrique</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Effet prépondérant aux hautes tensions (> 100 kV)</strong></td>
+                            <td><input type="text" id="q14_2" placeholder="Quel effet ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Compton</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Effet favorisé dans les milieux peu denses (graisse, tissus mous...)</strong></td>
+                            <td><input type="text" id="q14_3" placeholder="Quel effet ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Compton</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Origine du rayonnement diffusé</strong></td>
+                            <td><input type="text" id="q14_4" placeholder="Quel effet ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Compton</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable14()">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(14)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback14"></div>
+        </div>
+
+        <!-- Question 15 - Tableau -->
+        <div class="question-container" id="question15">
+            <div class="question-header">
+                <div class="question-number">Question 15 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Ostéodensitométrie</strong><br><br>
+                    Renseignez le tableau ci-dessous
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Votre réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Définition de l'ostéodensitométrie</strong></td>
+                            <td><input type="text" id="q15_1" placeholder="Définition"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Mesure de la densité minérale osseuse (DMO)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Signification de l'acronyme DMO</strong></td>
+                            <td><input type="text" id="q15_2" placeholder="DMO = ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Densité Minérale Osseuse</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Principe physique de l'ostéodensitométrie (loi)</strong></td>
+                            <td><input type="text" id="q15_3" placeholder="Quelle loi ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Loi d'atténuation exponentielle (Beer-Lambert)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Technologie radiologique de l'ostéodensitométrie</strong></td>
+                            <td><input type="text" id="q15_4" placeholder="Technologie"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Absorptiométrie biphotonique à rayons X (DEXA / DXA)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Énergies utilisées</strong></td>
+                            <td><input type="text" id="q15_5" placeholder="Énergies"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Deux énergies différentes (basse et haute)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Obtention des énergies</strong></td>
+                            <td><input type="text" id="q15_6" placeholder="Comment ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Filtration du faisceau de rayons X</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3 géométries de faisceau possibles</strong></td>
+                            <td><input type="text" id="q15_7" placeholder="3 géométries"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Crayon (pencil beam), Éventail (fan beam), Conique (cone beam)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2 types de détecteur</strong></td>
+                            <td><input type="text" id="q15_8" placeholder="2 types"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Détecteur à scintillation, Détecteur gazeux</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable15()">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(15)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback15"></div>
+        </div>
+
+        <!-- Page Schémas Supplémentaires -->
+        <div class="question-container" id="question16">
+            <div style="padding: 40px;">
+                <h2 style="color: #667eea; text-align: center; margin-bottom: 30px;">
+                    📚 Ajoutez vos schémas et questions supplémentaires
+                </h2>
+                
+                <div id="extrasList"></div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="addExtra()" style="font-size: 1.1em; padding: 15px 30px;">
+                        ➕ Ajouter un schéma avec questions
+                    </button>
+                    <button class="btn btn-primary" onclick="addTextOnly()" style="font-size: 1.1em; padding: 15px 30px; margin-left: 15px;">
+                        📝 Ajouter des questions sans schéma
+                    </button>
+                </div>
+                
+                <div class="nav-buttons" style="margin-top: 40px;">
+                    <button class="nav-btn" onclick="navigateTo(15)">← Précédent</button>
+                    <button class="nav-btn" onclick="navigateTo(17)">Suivant (Export) →</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Export final -->
+        <div class="question-container" id="question17">
+            <div style="padding: 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; margin-bottom: 30px;">
+                <h2 style="margin-bottom: 20px;">📥 Exporter tous mes schémas et réponses</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1em;">Cliquez ci-dessous pour générer un fichier contenant toutes vos annotations et réponses des questions avec images</p>
+                <button class="btn" style="background: white; color: #667eea; font-size: 1.2em; padding: 15px 40px;" onclick="exportHTML()">🌐 EXPORTER EN HTML COMPLET</button>
+            </div>
+                <div class="nav-buttons" style="margin-top: 40px;">
+                    <button class="nav-btn" onclick="navigateTo(16)">← Précédent</button>
+                    <button class="nav-btn" onclick="navigateTo(18)">Voir statistiques →</button>
+                </div>
+
+        </div>
+
+        <!-- Statistiques finales -->
+        <div class="question-container" id="question18">
+            <div class="stats">
+                <h2>🎉 Statistiques de votre TD</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="correctAnswers">0</div>
+                        <div class="stat-label">Réponses correctes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="acceptedAnswers">0</div>
+                        <div class="stat-label">Réponses acceptées</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalScore">0%</div>
+                        <div class="stat-label">Score total</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 30px;" onclick="resetQuiz()">Recommencer le TD</button>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">← Précédent</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Suivant →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 18;
+        let answers = {
+            correct: 0,
+            accepted: 0,
+            total: 15,
+            answered: new Set()
+        };
+
+        let annotations = {};
+
+        // Système de schémas avec choix de mode
+        let schemaData = {
+            6: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null },
+            8: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null },
+            12: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null },
+            13: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null }
+        };
+
+        function loadSchemaImage(questionNum, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('schemaImage' + questionNum);
+                schemaData[questionNum].image = e.target.result;
+                img.src = e.target.result;
+                
+                img.onload = function() {
+                    document.getElementById('uploadZone' + questionNum).style.display = 'none';
+                    document.getElementById('modeSelector' + questionNum).style.display = 'block';
+                };
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function selectMode(questionNum, mode) {
+            schemaData[questionNum].mode = mode;
+            
+            document.getElementById('modeSelector' + questionNum).style.display = 'none';
+            document.getElementById('imageWorkspace' + questionNum).style.display = 'block';
+            
+            const canvas = document.getElementById('annotationCanvas' + questionNum);
+            const img = document.getElementById('schemaImage' + questionNum);
+            
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            
+            schemaData[questionNum].canvas = canvas;
+            schemaData[questionNum].ctx = canvas.getContext('2d');
+            
+            if (mode === 'annotation') {
+                canvas.onclick = function(e) { handleCanvasClick(questionNum, e); };
+                canvas.style.cursor = 'crosshair';
+                document.getElementById('modeInstructions' + questionNum).innerHTML = 
+                    '<strong>📍 Mode Annotation</strong> Cliquez sur l\'image pour placer des numéros.';
+                document.getElementById('addQuestionBtn' + questionNum).style.display = 'none';
+            } else {
+                canvas.onclick = null;
+                canvas.style.cursor = 'default';
+                document.getElementById('modeInstructions' + questionNum).innerHTML = 
+                    '<strong>📝 Mode Questions/Réponses</strong> Utilisez le bouton ci-dessous.';
+                document.getElementById('addQuestionBtn' + questionNum).style.display = 'block';
+            }
+        }
+
+        function handleCanvasClick(questionNum, event) {
+            const data = schemaData[questionNum];
+            if (!data.canvas || !data.image) return;
+            
+            const rect = data.canvas.getBoundingClientRect();
+            const scaleX = data.canvas.width / rect.width;
+            const scaleY = data.canvas.height / rect.height;
+            
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            const labelNumber = data.labels.length + 1;
+            
+            data.points.push({ x: x, y: y, number: labelNumber });
+            data.labels.push({ number: labelNumber, question: '', answer: '' });
+            
+            redrawAnnotations(questionNum);
+            renderLabels(questionNum);
+        }
+
+        function redrawAnnotations(questionNum) {
+            const data = schemaData[questionNum];
+            if (!data.ctx || !data.canvas) return;
+            
+            const ctx = data.ctx;
+            ctx.clearRect(0, 0, data.canvas.width, data.canvas.height);
+            
+            data.points.forEach(function(point) {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 20, 0, 2 * Math.PI);
+                ctx.fillStyle = 'rgba(102, 126, 234, 0.9)';
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(point.number, point.x, point.y);
+            });
+        }
+
+        function renderLabels(questionNum) {
+            const data = schemaData[questionNum];
+            const container = document.getElementById('labelsList' + questionNum);
+            
+            container.innerHTML = '';
+            
+            data.labels.forEach(function(label, index) {
+                const item = document.createElement('div');
+                item.className = 'label-item';
+                item.innerHTML = '<div class="label-number-display">' + label.number + '</div>' +
+                    '<div style="flex: 1;">' +
+                    '<input type="text" class="label-input" placeholder="Question" value="' + label.question + '" ' +
+                    'onchange="updateLabel(' + questionNum + ', ' + index + ', \'question\', this.value)" style="margin-bottom: 8px; width: 100%;">' +
+                    '<input type="text" class="label-input" placeholder="Réponse" value="' + label.answer + '" ' +
+                    'onchange="updateLabel(' + questionNum + ', ' + index + ', \'answer\', this.value)" style="width: 100%;">' +
+                    '</div>' +
+                    '<button class="delete-label" onclick="deleteLabel(' + questionNum + ', ' + index + ')">🗑️</button>';
+                container.appendChild(item);
+            });
+        }
+
+        function updateLabel(questionNum, index, field, value) {
+            schemaData[questionNum].labels[index][field] = value;
+        }
+
+        function deleteLabel(questionNum, index) {
+            schemaData[questionNum].labels.splice(index, 1);
+            schemaData[questionNum].points.splice(index, 1);
+            
+            schemaData[questionNum].labels.forEach(function(label, i) {
+                label.number = i + 1;
+                schemaData[questionNum].points[i].number = i + 1;
+            });
+            
+            redrawAnnotations(questionNum);
+            renderLabels(questionNum);
+        }
+
+        function addManualQuestion(questionNum) {
+            const data = schemaData[questionNum];
+            const labelNumber = data.labels.length + 1;
+            data.labels.push({ number: labelNumber, question: '', answer: '' });
+            renderLabels(questionNum);
+        }
+
+        function clearAllLabels(questionNum) {
+            if (confirm('Voulez-vous vraiment tout effacer ?')) {
+                schemaData[questionNum].points = [];
+                schemaData[questionNum].labels = [];
+                redrawAnnotations(questionNum);
+                renderLabels(questionNum);
+            }
+        }
+        // Gestion des schémas/questions supplémentaires
+        let extrasCount = 0;
+        let extrasData = {};
+
+        function addExtra() {
+            extrasCount++;
+            const id = 'extra' + extrasCount;
+            
+            extrasData[id] = {
+                type: 'schema',
+                points: [],
+                labels: [],
+                canvas: null,
+                ctx: null,
+                image: null,
+                mode: null
+            };
+            
+            createExtraHTML(id, 'schema');
+        }
+
+        function addTextOnly() {
+            extrasCount++;
+            const id = 'extra' + extrasCount;
+            
+            extrasData[id] = {
+                type: 'text',
+                labels: []
+            };
+            
+            createExtraHTML(id, 'text');
+        }
+
+        function createExtraHTML(id, type) {
+            const container = document.getElementById('extrasList');
+            const div = document.createElement('div');
+            div.id = 'extra_' + id;
+            div.className = 'question-container';
+            div.style.display = 'block';
+            div.style.marginBottom = '30px';
+            
+            let html = '<div class="question-header">' +
+                '<div class="question-number">Extra #' + extrasCount + '</div>' +
+                '<div class="question-text">' +
+                '<input type="text" id="title_' + id + '" placeholder="Titre" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1.1em;">' +
+                '</div></div>';
+            
+            if (type === 'schema') {
+                html += '<div class="schema-upload">' +
+                    '<div class="upload-area" id="uploadZone_' + id + '" onclick="document.getElementById(\'upload_' + id + '\').click()">' +
+                    '<div class="upload-icon">📤</div><p><strong>Cliquez pour uploader</strong></p></div>' +
+                    '<input type="file" id="upload_' + id + '" accept="image/*" style="display: none;" onchange="loadExtra(\''+id+'\', event)">' +
+                    '<div id="modeSelector_' + id + '" style="display: none; margin: 20px 0;">' +
+                    '<div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">' +
+                    '<h3 style="color: #667eea;">Mode :</h3>' +
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">' +
+                    '<button class="btn btn-primary" onclick="selectExtraMode(\''+id+'\', \'annotation\')" style="padding: 20px;">📍 Annotation</button>' +
+                    '<button class="btn btn-primary" onclick="selectExtraMode(\''+id+'\', \'questions\')" style="padding: 20px;">📝 Questions</button>' +
+                    '</div></div></div>' +
+                    '<div id="workspace_' + id + '" style="display: none; margin-top: 20px;">' +
+                    '<div id="instructions_' + id + '" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">Mode</div>' +
+                    '<div class="image-container-wrapper">' +
+                    '<img id="img_' + id + '" class="schema-image-display">' +
+                    '<canvas id="canvas_' + id + '" class="annotation-canvas"></canvas></div>' +
+                    '<div style="margin-top: 20px;"><h3>Questions</h3>' +
+                    '<button class="btn btn-primary" id="addBtn_' + id + '" onclick="addExtraQuestion(\''+id+'\')" style="display: none; margin-bottom: 15px;">➕ Ajouter</button>' +
+                    '<div id="labels_' + id + '"></div></div>' +
+                    '<button class="btn btn-danger" onclick="clearExtraLabels(\''+id+'\')">🗑️ Effacer</button>' +
+                    '</div></div>';
+            } else {
+                html += '<div style="margin-top: 20px;"><h3>Questions</h3>' +
+                    '<button class="btn btn-primary" onclick="addExtraQuestion(\''+id+'\')" style="margin-bottom: 15px;">➕ Ajouter une question</button>' +
+                    '<div id="labels_' + id + '"></div></div>';
+            }
+            
+            html += '<div style="text-align: center; margin-top: 15px;">' +
+                '<button class="btn btn-danger" onclick="deleteExtra(\''+id+'\')">🗑️ Supprimer</button></div>';
+            
+            div.innerHTML = html;
+            container.appendChild(div);
+        }
+
+        function loadExtra(id, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                extrasData[id].image = e.target.result;
+                document.getElementById('img_' + id).src = e.target.result;
+                document.getElementById('img_' + id).onload = function() {
+                    document.getElementById('uploadZone_' + id).style.display = 'none';
+                    document.getElementById('modeSelector_' + id).style.display = 'block';
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function selectExtraMode(id, mode) {
+            extrasData[id].mode = mode;
+            document.getElementById('modeSelector_' + id).style.display = 'none';
+            document.getElementById('workspace_' + id).style.display = 'block';
+            
+            const canvas = document.getElementById('canvas_' + id);
+            const img = document.getElementById('img_' + id);
+            
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            
+            extrasData[id].canvas = canvas;
+            extrasData[id].ctx = canvas.getContext('2d');
+            
+            if (mode === 'annotation') {
+                canvas.onclick = function(e) { handleExtraClick(id, e); };
+                canvas.style.cursor = 'crosshair';
+                document.getElementById('instructions_' + id).innerHTML = '<strong>📍 Annotation</strong> Cliquez sur l\'image.';
+                document.getElementById('addBtn_' + id).style.display = 'none';
+            } else {
+                canvas.onclick = null;
+                canvas.style.cursor = 'default';
+                document.getElementById('instructions_' + id).innerHTML = '<strong>📝 Questions</strong>';
+                document.getElementById('addBtn_' + id).style.display = 'block';
+            }
+        }
+
+        function handleExtraClick(id, event) {
+            const data = extrasData[id];
+            const rect = data.canvas.getBoundingClientRect();
+            const scaleX = data.canvas.width / rect.width;
+            const scaleY = data.canvas.height / rect.height;
+            
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            const num = data.labels.length + 1;
+            data.points.push({ x: x, y: y, number: num });
+            data.labels.push({ number: num, question: '', answer: '' });
+            
+            redrawExtra(id);
+            renderExtraLabels(id);
+        }
+
+        function redrawExtra(id) {
+            const data = extrasData[id];
+            if (!data.ctx) return;
+            
+            data.ctx.clearRect(0, 0, data.canvas.width, data.canvas.height);
+            
+            if (data.points) {
+                data.points.forEach(function(p) {
+                    data.ctx.beginPath();
+                    data.ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                    data.ctx.fillStyle = 'rgba(102, 126, 234, 0.9)';
+                    data.ctx.fill();
+                    data.ctx.strokeStyle = 'white';
+                    data.ctx.lineWidth = 3;
+                    data.ctx.stroke();
+                    
+                    data.ctx.fillStyle = 'white';
+                    data.ctx.font = 'bold 16px Arial';
+                    data.ctx.textAlign = 'center';
+                    data.ctx.textBaseline = 'middle';
+                    data.ctx.fillText(p.number, p.x, p.y);
+                });
+            }
+        }
+
+        function renderExtraLabels(id) {
+            const data = extrasData[id];
+            const container = document.getElementById('labels_' + id);
+            container.innerHTML = '';
+            
+            data.labels.forEach(function(label, idx) {
+                const item = document.createElement('div');
+                item.className = 'label-item';
+                item.innerHTML = '<div class="label-number-display">' + label.number + '</div>' +
+                    '<div style="flex: 1;">' +
+                    '<input type="text" class="label-input" placeholder="Question" value="' + label.question + '" ' +
+                    'onchange="updateExtraLabel(\''+id+'\', '+idx+', \'question\', this.value)" style="margin-bottom: 8px; width: 100%;">' +
+                    '<input type="text" class="label-input" placeholder="Réponse" value="' + label.answer + '" ' +
+                    'onchange="updateExtraLabel(\''+id+'\', '+idx+', \'answer\', this.value)" style="width: 100%;">' +
+                    '</div>' +
+                    '<button class="delete-label" onclick="deleteExtraLabel(\''+id+'\', '+idx+')">🗑️</button>';
+                container.appendChild(item);
+            });
+        }
+
+        function updateExtraLabel(id, idx, field, value) {
+            extrasData[id].labels[idx][field] = value;
+        }
+
+        function deleteExtraLabel(id, idx) {
+            extrasData[id].labels.splice(idx, 1);
+            if (extrasData[id].points) {
+                extrasData[id].points.splice(idx, 1);
+                extrasData[id].labels.forEach(function(l, i) {
+                    l.number = i + 1;
+                    extrasData[id].points[i].number = i + 1;
+                });
+                redrawExtra(id);
+            }
+            renderExtraLabels(id);
+        }
+
+        function addExtraQuestion(id) {
+            const num = extrasData[id].labels.length + 1;
+            extrasData[id].labels.push({ number: num, question: '', answer: '' });
+            renderExtraLabels(id);
+        }
+
+        function clearExtraLabels(id) {
+            if (confirm('Tout effacer ?')) {
+                extrasData[id].labels = [];
+                if (extrasData[id].points) extrasData[id].points = [];
+                redrawExtra(id);
+                renderExtraLabels(id);
+            }
+        }
+
+        function deleteExtra(id) {
+            if (confirm('Supprimer ?')) {
+                document.getElementById('extra_' + id).remove();
+                delete extrasData[id];
+            }
+        }
+        function exportHTML() {
+            // Cloner le document
+            const clone = document.documentElement.cloneNode(true);
+            
+            // Copier les valeurs des champs (input/textarea/select) dans le clone
+            document.querySelectorAll('input, textarea, select').forEach(function(src) {
+                if (!src.id) return;
+                const target = clone.querySelector('#' + CSS.escape(src.id));
+                if (!target) return;
+
+                if (src.tagName === 'TEXTAREA') {
+                    target.value = src.value;
+                    target.textContent = src.value;
+                } else if (src.tagName === 'SELECT') {
+                    target.value = src.value;
+                } else if (src.tagName === 'INPUT') {
+                    const t = (src.type || '').toLowerCase();
+                    // Ignorer les input type="file" - on ne peut pas copier leur valeur
+                    if (t === 'file') {
+                        return;
+                    } else if (t === 'checkbox' || t === 'radio') {
+                        target.checked = src.checked;
+                        if (src.checked) target.setAttribute('checked', 'checked');
+                        else target.removeAttribute('checked');
+                    } else {
+                        target.value = src.value;
+                        target.setAttribute('value', src.value);
+                    }
+                }
+            });
+
+            // Rendre toutes les pages visibles dans l'export (format document)
+            clone.querySelectorAll('.question-container').forEach(function(q) {
+                q.classList.remove('active');
+                q.style.display = 'block';
+            });
+
+            // Masquer la navigation et la barre de progression dans l'export
+            const nav = clone.querySelector('.navigation');
+            if (nav) nav.style.display = 'none';
+            const progress = clone.querySelector('.progress-bar');
+            if (progress) progress.style.display = 'none';
+
+            // Masquer les pages "Export" et "Statistiques" dans le fichier exporté
+            const q17 = clone.querySelector('#question17');
+            if (q17) q17.style.display = 'none';
+            const q18 = clone.querySelector('#question18');
+            if (q18) q18.style.display = 'none';
+
+            
+            // Fonction pour injecter les données d'une question
+            function injectQuestion(qNum, data) {
+                if (!data || !data.labels || data.labels.length === 0) return;
+                
+                const workspace = clone.querySelector('#imageWorkspace' + qNum);
+                if (!workspace) return;
+                
+                // Masquer upload et sélecteur
+                const upload = clone.querySelector('#uploadZone' + qNum);
+                if (upload) upload.style.display = 'none';
+                
+                const selector = clone.querySelector('#modeSelector' + qNum);
+                if (selector) selector.style.display = 'none';
+                
+                // Afficher workspace
+                workspace.style.display = 'block';
+                
+                // Image
+                const img = clone.querySelector('#schemaImage' + qNum);
+                if (img && data.image) img.src = data.image;
+                
+                // Canvas
+                if (data.mode === 'annotation' && data.points && data.points.length > 0) {
+                    const canvas = clone.querySelector('#annotationCanvas' + qNum);
+                    if (canvas) {
+                        const tempCanvas = document.createElement('canvas');
+                        const sourceImg = document.getElementById('schemaImage' + qNum);
+                        if (sourceImg && sourceImg.naturalWidth) {
+                            tempCanvas.width = sourceImg.naturalWidth;
+                            tempCanvas.height = sourceImg.naturalHeight;
+                            const ctx = tempCanvas.getContext('2d');
+                            
+                            data.points.forEach(function(p) {
+                                ctx.beginPath();
+                                ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                                ctx.fillStyle = 'rgba(102, 126, 234, 0.9)';
+                                ctx.fill();
+                                ctx.strokeStyle = 'white';
+                                ctx.lineWidth = 3;
+                                ctx.stroke();
+                                ctx.fillStyle = 'white';
+                                ctx.font = 'bold 16px Arial';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(p.number, p.x, p.y);
+                            });
+                            
+                            const imgData = tempCanvas.toDataURL();
+                            canvas.outerHTML = '<img src="' + imgData + '" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">';
+                        }
+                    }
+                }
+                
+                // Labels - Mode exercice interactif (réponses cachées)
+                const labelsList = clone.querySelector('#labelsList' + qNum);
+                if (labelsList) {
+                    labelsList.innerHTML = '';
+                    data.labels.forEach(function(label, idx) {
+                        const div = document.createElement('div');
+                        div.className = 'label-item export-exercise-item';
+                        div.setAttribute('data-answer', label.answer || '');
+                        div.id = 'export_label_q' + qNum + '_' + idx;
+                        div.innerHTML = '<div class="label-number-display">' + label.number + '</div>' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-weight: bold; margin-bottom: 8px; color: #333;">Q: ' + (label.question || 'Non renseignée') + '</div>' +
+                            '<div class="export-answer-zone">' +
+                            '<input type="text" class="export-answer-input" placeholder="Votre réponse..." ' +
+                            'style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;" ' +
+                            'data-correct="' + encodeURIComponent(label.answer || '') + '">' +
+                            '<button class="btn btn-primary export-check-btn" style="margin-top: 8px; padding: 8px 16px;" ' +
+                            'onclick="checkExportAnswer(this)">Vérifier</button>' +
+                            '<div class="export-feedback" style="display: none; margin-top: 8px; padding: 10px; border-radius: 8px;"></div>' +
+                            '</div>' +
+                            '</div>';
+                        labelsList.appendChild(div);
+                    });
+                }
+                
+                // Masquer boutons SAUF les boutons de vérification d'export
+                const btns = workspace.querySelectorAll('button:not(.export-check-btn)');
+                btns.forEach(function(btn) { btn.style.display = 'none'; });
+            }
+            
+            // Injecter Q6, 8, 12, 13
+            [6, 8, 12, 13].forEach(function(q) {
+                injectQuestion(q, schemaData[q]);
+            });
+            
+            // Injecter les extras
+            Object.keys(extrasData).forEach(function(id) {
+                const data = extrasData[id];
+                if (!data.labels || data.labels.length === 0) return;
+                
+                const extraDiv = clone.querySelector('#extra_' + id);
+                if (!extraDiv) return;
+                
+                // Titre
+                const titleInput = clone.querySelector('#title_' + id);
+                if (titleInput) {
+                    const title = titleInput.value || 'Extra';
+                    titleInput.outerHTML = '<div style="font-size: 1.2em; font-weight: bold; color: #667eea;">' + title + '</div>';
+                }
+                
+                if (data.type === 'schema') {
+                    // Masquer upload et sélecteur
+                    const upload = clone.querySelector('#uploadZone_' + id);
+                    if (upload) upload.style.display = 'none';
+                    
+                    const selector = clone.querySelector('#modeSelector_' + id);
+                    if (selector) selector.style.display = 'none';
+                    
+                    // Afficher workspace
+                    const workspace = clone.querySelector('#workspace_' + id);
+                    if (workspace) {
+                        workspace.style.display = 'block';
+                        
+                        // Image
+                        const img = clone.querySelector('#img_' + id);
+                        if (img && data.image) img.src = data.image;
+                        
+                        // Canvas
+                        if (data.mode === 'annotation' && data.points && data.points.length > 0) {
+                            const canvas = clone.querySelector('#canvas_' + id);
+                            if (canvas) {
+                                const tempCanvas = document.createElement('canvas');
+                                const sourceImg = document.getElementById('img_' + id);
+                                if (sourceImg && sourceImg.naturalWidth) {
+                                    tempCanvas.width = sourceImg.naturalWidth;
+                                    tempCanvas.height = sourceImg.naturalHeight;
+                                    const ctx = tempCanvas.getContext('2d');
+                                    
+                                    data.points.forEach(function(p) {
+                                        ctx.beginPath();
+                                        ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                                        ctx.fillStyle = 'rgba(102, 126, 234, 0.9)';
+                                        ctx.fill();
+                                        ctx.strokeStyle = 'white';
+                                        ctx.lineWidth = 3;
+                                        ctx.stroke();
+                                        ctx.fillStyle = 'white';
+                                        ctx.font = 'bold 16px Arial';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(p.number, p.x, p.y);
+                                    });
+                                    
+                                    const imgData = tempCanvas.toDataURL();
+                                    canvas.outerHTML = '<img src="' + imgData + '" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">';
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Labels - Mode exercice interactif pour extras
+                const labelsList = clone.querySelector('#labels_' + id);
+                if (labelsList) {
+                    labelsList.innerHTML = '';
+                    data.labels.forEach(function(label, idx) {
+                        const div = document.createElement('div');
+                        div.className = 'label-item export-exercise-item';
+                        div.setAttribute('data-answer', label.answer || '');
+                        div.id = 'export_label_' + id + '_' + idx;
+                        div.innerHTML = '<div class="label-number-display">' + label.number + '</div>' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-weight: bold; margin-bottom: 8px;">Q: ' + (label.question || 'Non renseignée') + '</div>' +
+                            '<div class="export-answer-zone">' +
+                            '<input type="text" class="export-answer-input" placeholder="Votre réponse..." ' +
+                            'style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;" ' +
+                            'data-correct="' + encodeURIComponent(label.answer || '') + '">' +
+                            '<button class="btn btn-primary export-check-btn" style="margin-top: 8px; padding: 8px 16px;" ' +
+                            'onclick="checkExportAnswer(this)">Vérifier</button>' +
+                            '<div class="export-feedback" style="display: none; margin-top: 8px; padding: 10px; border-radius: 8px;"></div>' +
+                            '</div>' +
+                            '</div>';
+                        labelsList.appendChild(div);
+                    });
+                }
+                
+                // Masquer boutons SAUF les boutons de vérification d'export
+                const btns = extraDiv.querySelectorAll('button:not(.export-check-btn)');
+                btns.forEach(function(btn) { btn.style.display = 'none'; });
+            });
+            
+            // Masquer page extras et navigation
+            const pageExtras = clone.querySelector('#pageExtras');
+            if (pageExtras) pageExtras.style.display = 'none';
+            
+            const navBtns = clone.querySelectorAll('.nav-btn');
+            navBtns.forEach(function(btn) { btn.style.display = 'none'; });
+            
+            // Ajouter le script de vérification des réponses pour l'export
+            const exportScript = document.createElement('script');
+            exportScript.textContent = `
+                // Fonction de normalisation pour la comparaison tolérante
+                function normalizeText(text) {
+                    if (!text) return '';
+                    return text
+                        .toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\\u0300-\\u036f]/g, '') // Supprime les accents
+                        .replace(/[-_]/g, ' ') // Remplace tirets et underscores par espaces
+                        .replace(/['']/g, "'") // Normalise les apostrophes
+                        .replace(/\\s+/g, ' ') // Multiple espaces -> un seul
+                        .trim();
+                }
+                
+                // Fonction de vérification de réponse
+                function checkExportAnswer(button) {
+                    const container = button.parentElement;
+                    const input = container.querySelector('.export-answer-input');
+                    const feedback = container.querySelector('.export-feedback');
+                    const userAnswer = input.value;
+                    const correctAnswer = decodeURIComponent(input.getAttribute('data-correct'));
+                    
+                    if (!userAnswer.trim()) {
+                        feedback.style.display = 'block';
+                        feedback.style.background = '#fff3cd';
+                        feedback.style.border = '2px solid #ffc107';
+                        feedback.style.color = '#856404';
+                        feedback.innerHTML = '⚠️ Veuillez entrer une réponse';
+                        return;
+                    }
+                    
+                    const normalizedUser = normalizeText(userAnswer);
+                    const normalizedCorrect = normalizeText(correctAnswer);
+                    
+                    // Vérification avec tolérance
+                    const isCorrect = normalizedUser === normalizedCorrect || 
+                                      normalizedCorrect.includes(normalizedUser) ||
+                                      normalizedUser.includes(normalizedCorrect);
+                    
+                    feedback.style.display = 'block';
+                    
+                    if (isCorrect) {
+                        feedback.style.background = '#d4edda';
+                        feedback.style.border = '2px solid #28a745';
+                        feedback.style.color = '#155724';
+                        feedback.innerHTML = '✅ Correct ! <strong>' + correctAnswer + '</strong>';
+                        input.style.borderColor = '#28a745';
+                        input.style.background = '#d4edda';
+                    } else {
+                        feedback.style.background = '#f8d7da';
+                        feedback.style.border = '2px solid #dc3545';
+                        feedback.style.color = '#721c24';
+                        feedback.innerHTML = '❌ Incorrect. La réponse attendue était : <strong>' + correctAnswer + '</strong>';
+                        input.style.borderColor = '#dc3545';
+                        input.style.background = '#f8d7da';
+                    }
+                }
+                
+                // Permettre la validation avec Entrée
+                document.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && e.target.classList.contains('export-answer-input')) {
+                        const btn = e.target.parentElement.querySelector('.export-check-btn');
+                        if (btn) btn.click();
+                    }
+                });
+            `;
+            clone.querySelector('body').appendChild(exportScript);
+            
+            // Télécharger
+            const html = '<!DOCTYPE html>' + clone.outerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'TD1_Complet_' + new Date().toISOString().slice(0,10) + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Export HTML réussi !');
+        }
+
+
+        // Mots-clés pour la vérification des réponses
+        const keywords = {
+            1: ['atome', 'noyau', 'électron', 'proton', 'neutron', 'énergie', 'liaison', 'bohr', 'couche'],
+            2: ['rayons x', 'électromagnétique', 'ionisant', 'électron', 'gamma', 'noyau', 'cortège'],
+            3: ['décélération', 'freinage', 'électron', 'cible', 'anode', 'tungstène', 'bremsstrahlung', 'caractéristique'],
+            11: ['image', 'radiante', 'atténuation', 'énergie', 'épaisseur', 'densité', 'numéro atomique']
+        };
+
+        const solutions = {
+            1: "L'atome est la plus petite partie d'un élément chimique. Il est composé d'un noyau (protons + neutrons) au centre et d'électrons qui gravitent autour sur des couches électroniques. Dans le modèle de Bohr, les électrons tournent sur des orbites définies. L'énergie de liaison est l'énergie nécessaire pour arracher un électron de sa couche.",
+            2: "Les rayons X sont des ondes électromagnétiques de haute énergie (photons). Les rayonnements ionisants sont des rayonnements capables d'arracher des électrons aux atomes, créant des ions. Différence X/Gamma : les rayons X proviennent du cortège électronique (freinage ou réarrangement), tandis que les rayons Gamma proviennent du noyau atomique.",
+            3: "La production des RX fait suite à une décélération brutale d'électrons contre une cible (anode). Les 2 modes de production sont : 1) Le rayonnement de freinage (Bremsstrahlung) qui produit un spectre continu, 2) Le rayonnement caractéristique qui produit un spectre discontinu (raies). Le phénomène majoritaire est le rayonnement de freinage (>99%).",
+            11: "L'image radiante est l'image formée après atténuation différentielle des rayons X par les tissus traversés. Les 3 facteurs d'atténuation sont : 1) L'énergie des rayons X, 2) L'épaisseur du milieu traversé, 3) La densité et le numéro atomique du milieu. Niveaux de gris : Noir = air, Gris foncé = graisse, Gris moyen = tissus mous, Gris clair = os, Blanc = métal."
+        };
+
+        const textGapsSolutions = [
+            'électriques', 'électroniques', 'haute tension', 'kV',
+            'intensité', 'mA', 'exposition', 's',
+            'protection', 'cuve', 'blindée', 'pupitre', 'de commande'
+        ];
+
+        function updateProgress() {
+            const progress = ((currentQuestion - 1) / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showQuestion(questionNumber) {
+            if (questionNumber < 1 || questionNumber > totalQuestions) {
+                return;
+            }
+
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+            
+            const questionElement = document.getElementById('question' + questionNumber);
+            if (questionElement) {
+                questionElement.classList.add('active');
+            }
+            
+            currentQuestion = questionNumber;
+            updateProgress();
+
+            document.getElementById('prevBtn').style.display = questionNumber === 1 ? 'none' : 'block';
+            
+            if (questionNumber === totalQuestions) {
+                document.getElementById('nextBtn').style.display = 'none';
+            } else if (questionNumber === 17) {
+                document.getElementById('nextBtn').textContent = 'Voir statistiques →';
+                document.getElementById('nextBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').textContent = 'Suivant →';
+                document.getElementById('nextBtn').style.display = 'block';
+            }
+
+            // Mettre à jour les statistiques quand on arrive à la page 18
+            if (questionNumber === 18) {
+                document.getElementById('correctAnswers').textContent = answers.correct;
+                document.getElementById('acceptedAnswers').textContent = answers.accepted;
+                const totalScore = Math.round(((answers.correct + answers.accepted) / answers.total) * 100);
+                document.getElementById('totalScore').textContent = totalScore + '%';
+            }
+
+        }
+
+        function navigateTo(questionNumber) {
+            showQuestion(questionNumber);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                showQuestion(currentQuestion + 1);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 1) {
+                showQuestion(currentQuestion - 1);
+            }
+        }
+
+        function checkAnswer(questionNumber) {
+            const answer = document.getElementById('answer' + questionNumber).value.toLowerCase();
+            const feedback = document.getElementById('feedback' + questionNumber);
+            const keywordList = keywords[questionNumber];
+
+            if (!answer.trim()) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez saisir une réponse avant de vérifier.';
+                return;
+            }
+
+            let matchCount = 0;
+            keywordList.forEach(keyword => {
+                if (answer.includes(keyword.toLowerCase())) {
+                    matchCount++;
+                }
+            });
+
+            const threshold = Math.ceil(keywordList.length * 0.35);
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!answers.answered.has(questionNumber)) {
+                if (matchCount >= threshold) {
+                    feedback.classList.add('correct');
+                    feedback.innerHTML = `
+                        <strong>✅ Bonne réponse !</strong><br>
+                        Vous avez identifié ${matchCount} éléments clés sur ${keywordList.length}.
+                        <div class="solution">
+                            <h4>Solution complète :</h4>
+                            ${solutions[questionNumber]}
+                        </div>
+                    `;
+                    answers.correct++;
+                    answers.answered.add(questionNumber);
+                } else {
+                    feedback.classList.add('incorrect');
+                    feedback.innerHTML = `
+                        <strong>❌ Réponse incomplète</strong><br>
+                        Vous avez identifié ${matchCount} éléments clés sur ${keywordList.length}. Il en faut au moins ${threshold}.
+                        <div class="solution">
+                            <h4>Solution complète :</h4>
+                            ${solutions[questionNumber]}
+                        </div>
+                    `;
+                }
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = `
+                    <strong>✅ Déjà validée</strong>
+                    <div class="solution">
+                        <h4>Solution complète :</h4>
+                        ${solutions[questionNumber]}
+                    </div>
+                `;
+            }
+        }
+
+        function acceptAnswer(questionNumber) {
+            const feedback = document.getElementById('feedback' + questionNumber);
+            
+            if (!answers.answered.has(questionNumber)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'accepted');
+                
+                if (solutions[questionNumber]) {
+                    feedback.innerHTML = `
+                        <strong>✓ Réponse acceptée</strong><br>
+                        Votre réponse a été considérée comme correcte.
+                        <div class="solution">
+                            <h4>Solution complète pour référence :</h4>
+                            ${solutions[questionNumber]}
+                        </div>
+                    `;
+                } else {
+                    feedback.innerHTML = `
+                        <strong>✓ Réponse acceptée</strong><br>
+                        Votre réponse a été considérée comme correcte.
+                    `;
+                }
+                
+                answers.accepted++;
+                answers.answered.add(questionNumber);
+            } else {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'accepted');
+                feedback.innerHTML = '<strong>✓ Déjà validée</strong><br>Cette question a déjà été validée.';
+            }
+        }
+
+        function checkTrueFalse(questionNumber, correctAnswers) {
+            const selectedAnswers = [];
+            correctAnswers.forEach((_, index) => {
+                const name = `q${questionNumber}_${index + 1}`;
+                const selected = document.querySelector(`input[name="${name}"]:checked`);
+                selectedAnswers.push(selected ? selected.value : null);
+            });
+
+            const feedback = document.getElementById('feedback' + questionNumber);
+
+            if (selectedAnswers.includes(null)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez répondre à toutes les affirmations.';
+                return;
+            }
+
+            const isCorrect = correctAnswers.every((answer, index) => answer === selectedAnswers[index]);
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!answers.answered.has(questionNumber)) {
+                if (isCorrect) {
+                    feedback.classList.add('correct');
+                    feedback.innerHTML = '<strong>✅ Parfait !</strong><br>Toutes les affirmations sont correctes.';
+                    answers.correct++;
+                    answers.answered.add(questionNumber);
+                } else {
+                    feedback.classList.add('incorrect');
+                    let correctText = '<strong>❌ Une ou plusieurs réponses sont incorrectes</strong><br>Solutions : ';
+                    correctText += correctAnswers.map((ans, i) => `Affirmation ${i + 1} : ${ans === 'true' ? 'VRAI' : 'FAUX'}`).join(', ');
+                    feedback.innerHTML = correctText;
+                }
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTable7() {
+            const feedback = document.getElementById('feedback7');
+            let allFilled = true;
+
+            for (let i = 1; i <= 6; i++) {
+                const loc = document.getElementById(`q7_${i}_loc`).value.trim();
+                const eff = document.getElementById(`q7_${i}_eff`).value.trim();
+                const mec = document.getElementById(`q7_${i}_mec`).value.trim();
+
+                if (!loc || !eff || !mec) {
+                    allFilled = false;
+                }
+            }
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!allFilled) {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les champs du tableau.';
+                return;
+            }
+
+            // Afficher toutes les lignes de solution
+            document.querySelectorAll('#question7 .solution-row').forEach(row => {
+                row.classList.add('show');
+            });
+
+            if (!answers.answered.has(7)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = `<strong>✅ Tableau complété !</strong><br>Les réponses attendues sont maintenant visibles en jaune sous chaque ligne.`;
+                answers.correct++;
+                answers.answered.add(7);
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTable9() {
+            const feedback = document.getElementById('feedback9');
+            const ft_nom = document.getElementById('q9_ft_nom').value.trim();
+            const ft_corr = document.getElementById('q9_ft_corr').value.trim();
+            const ft_dim = document.getElementById('q9_ft_dim').value.trim();
+            const fo_nom = document.getElementById('q9_fo_nom').value.trim();
+            const fo_corr = document.getElementById('q9_fo_corr').value.trim();
+            const fo_dim = document.getElementById('q9_fo_dim').value.trim();
+
+            if (!ft_nom || !ft_corr || !ft_dim || !fo_nom || !fo_corr || !fo_dim) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les champs du tableau.';
+                return;
+            }
+
+            // Afficher les solutions
+            document.querySelectorAll('#question9 .solution-row').forEach(row => {
+                row.classList.add('show');
+            });
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!answers.answered.has(9)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Tableau complété !</strong><br>Les réponses attendues sont maintenant visibles en jaune sous chaque ligne.';
+                answers.correct++;
+                answers.answered.add(9);
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTextGaps() {
+            const feedback = document.getElementById('feedback10');
+            let allFilled = true;
+            let correctCount = 0;
+
+            for (let i = 1; i <= 13; i++) {
+                const input = document.getElementById(`q10_${i}`);
+                const value = input.value.toLowerCase().trim();
+                const solution = textGapsSolutions[i - 1].toLowerCase();
+
+                if (!value) {
+                    allFilled = false;
+                    continue;
+                }
+
+                // Vérification stricte : doit contenir au moins 50% des caractères de la solution
+                const isCorrect = solution.includes(value) || value.includes(solution.split(' ')[0]);
+                
+                input.classList.remove('correct', 'incorrect');
+                if (isCorrect) {
+                    input.classList.add('correct');
+                    correctCount++;
+                } else {
+                    input.classList.add('incorrect');
+                    document.getElementById(`sol_q10_${i}`).classList.add('show');
+                }
+            }
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!allFilled) {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les trous du texte.';
+                return;
+            }
+
+            if (!answers.answered.has(10)) {
+                const percentage = (correctCount / 13) * 100;
+                if (percentage >= 70) {
+                    feedback.classList.add('correct');
+                    feedback.innerHTML = `<strong>✅ Excellente réponse !</strong><br>Score : ${Math.round(percentage)}% (${correctCount}/13 correct) - Les bonnes réponses sont en vert.`;
+                    answers.correct++;
+                    answers.answered.add(10);
+                } else {
+                    feedback.classList.add('incorrect');
+                    feedback.innerHTML = `<strong>❌ À améliorer</strong><br>Score : ${Math.round(percentage)}% (${correctCount}/13 correct). Vos erreurs sont barrées en rouge, les bonnes réponses sont en vert à côté.`;
+                }
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTable14() {
+            const feedback = document.getElementById('feedback14');
+            const answers14 = [];
+            
+            for (let i = 1; i <= 4; i++) {
+                const value = document.getElementById(`q14_${i}`).value.trim();
+                answers14.push(value);
+            }
+
+            if (answers14.some(a => !a)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les champs du tableau.';
+                return;
+            }
+
+            // Afficher les solutions
+            document.querySelectorAll('#question14 .solution-row').forEach(row => {
+                row.classList.add('show');
+            });
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!answers.answered.has(14)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Tableau complété !</strong><br>Les réponses attendues sont maintenant visibles en jaune sous chaque ligne.';
+                answers.correct++;
+                answers.answered.add(14);
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTable15() {
+            const feedback = document.getElementById('feedback15');
+            const answers15 = [];
+            
+            for (let i = 1; i <= 8; i++) {
+                const value = document.getElementById(`q15_${i}`).value.trim();
+                answers15.push(value);
+            }
+
+            if (answers15.some(a => !a)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les champs du tableau.';
+                return;
+            }
+
+            // Afficher les solutions
+            document.querySelectorAll('#question15 .solution-row').forEach(row => {
+                row.classList.add('show');
+            });
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!answers.answered.has(15)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Tableau complété !</strong><br>Les réponses attendues sont maintenant visibles en jaune sous chaque ligne.';
+                answers.correct++;
+                answers.answered.add(15);
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function handleSchemaUpload(event, questionNumber) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('schemaPreview' + questionNumber);
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    document.getElementById('annotationForm' + questionNumber).classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addAnnotation(questionNumber) {
+            const number = document.getElementById('annotationNumber' + questionNumber).value;
+            const answer = document.getElementById('annotationAnswer' + questionNumber).value;
+
+            if (!number || !answer) {
+                alert('Veuillez remplir tous les champs');
+                return;
+            }
+
+            if (!annotations[questionNumber]) {
+                annotations[questionNumber] = [];
+            }
+
+            annotations[questionNumber].push({ number, answer });
+
+            const listDiv = document.getElementById('annotationList' + questionNumber);
+            const annotationHTML = `
+                <div class="annotation-item">
+                    <strong>N°${number}</strong> : <span style="color: #28a745;">${answer}</span>
+                </div>
+            `;
+            listDiv.innerHTML += annotationHTML;
+
+            document.getElementById('annotationNumber' + questionNumber).value = '';
+            document.getElementById('annotationAnswer' + questionNumber).value = '';
+        }
+
+        function exportAllSchemas() {
+            let exportContent = '# TD1 - Export complet de mes réponses\n\n';
+            exportContent += `Date : ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}\n\n`;
+            exportContent += '=' + '='.repeat(60) + '\n\n';
+
+            // Question 6
+            if (annotations[6] && annotations[6].length > 0) {
+                const title6 = document.getElementById('schemaTitle6')?.value || 'Tube à rayons X';
+                exportContent += `## QUESTION 6 : ${title6}\n\n`;
+                annotations[6].forEach(ann => {
+                    exportContent += `**${ann.number}** : ${ann.answer}\n`;
+                });
+                exportContent += '\n' + '-'.repeat(60) + '\n\n';
+            }
+
+            // Question 8
+            const el1 = document.getElementById('element1_q8')?.value;
+            const zones1 = document.getElementById('zones1_q8')?.value;
+            const el2 = document.getElementById('element2_q8')?.value;
+            const zones2 = document.getElementById('zones2_q8')?.value;
+            
+            if (el1 || zones1 || el2 || zones2) {
+                exportContent += `## QUESTION 8 : Identification d'éléments\n\n`;
+                if (el1) exportContent += `**Élément 1** : ${el1}\n`;
+                if (zones1) exportContent += `Zones anatomiques : ${zones1}\n\n`;
+                if (el2) exportContent += `**Élément 2** : ${el2}\n`;
+                if (zones2) exportContent += `Zones anatomiques : ${zones2}\n`;
+                exportContent += '\n' + '-'.repeat(60) + '\n\n';
+            }
+
+            // Question 12
+            const name12 = document.getElementById('effect_name_q12')?.value;
+            const explain12 = document.getElementById('effect_explain_q12')?.value;
+            
+            if (name12 || explain12) {
+                exportContent += `## QUESTION 12 : Effet d'interaction RX-matière\n\n`;
+                if (name12) exportContent += `**Nom de l'effet** : ${name12}\n\n`;
+                if (explain12) exportContent += `**Explication** :\n${explain12}\n`;
+                exportContent += '\n' + '-'.repeat(60) + '\n\n';
+            }
+
+            // Question 13
+            const name13 = document.getElementById('effect_name_q13')?.value;
+            const explain13 = document.getElementById('effect_explain_q13')?.value;
+            
+            if (name13 || explain13) {
+                exportContent += `## QUESTION 13 : Effet d'interaction RX-matière\n\n`;
+                if (name13) exportContent += `**Nom de l'effet** : ${name13}\n\n`;
+                if (explain13) exportContent += `**Explication** :\n${explain13}\n`;
+                exportContent += '\n' + '-'.repeat(60) + '\n\n';
+            }
+
+            if (exportContent.includes('QUESTION')) {
+                const blob = new Blob([exportContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'TD1_Export_Complet_' + new Date().toISOString().slice(0,10) + '.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+                alert('✅ Export réussi ! Fichier téléchargé.');
+            } else {
+                alert('⚠️ Aucune réponse à exporter. Complétez au moins une question avec image.');
+            }
+        }
+
+        function exportSchema(questionNumber) {
+            let exportContent = '';
+            const title = document.getElementById('schemaTitle' + questionNumber)?.value || 'Question ' + questionNumber;
+            
+            exportContent += `# ${title}\n\n`;
+            exportContent += `Date : ${new Date().toLocaleDateString('fr-FR')}\n\n`;
+
+            if (questionNumber === 6) {
+                if (!annotations[6] || annotations[6].length === 0) {
+                    alert('Aucune annotation à exporter');
+                    return;
+                }
+                exportContent += `## Annotations\n\n`;
+                annotations[6].forEach(ann => {
+                    exportContent += `**${ann.number}** : ${ann.answer}\n`;
+                });
+            } else if (questionNumber === 8) {
+                const el1 = document.getElementById('element1_q8').value;
+                const zones1 = document.getElementById('zones1_q8').value;
+                const el2 = document.getElementById('element2_q8').value;
+                const zones2 = document.getElementById('zones2_q8').value;
+                
+                if (!el1 || !zones1 || !el2 || !zones2) {
+                    alert('Veuillez remplir tous les champs');
+                    return;
+                }
+
+                exportContent += `## Identification des éléments\n\n`;
+                exportContent += `**Élément 1** : ${el1}\n`;
+                exportContent += `Zones anatomiques : ${zones1}\n\n`;
+                exportContent += `**Élément 2** : ${el2}\n`;
+                exportContent += `Zones anatomiques : ${zones2}\n`;
+            } else if (questionNumber === 12 || questionNumber === 13) {
+                const name = document.getElementById('effect_name_q' + questionNumber).value;
+                const explain = document.getElementById('effect_explain_q' + questionNumber).value;
+                
+                if (!name || !explain) {
+                    alert('Veuillez remplir tous les champs');
+                    return;
+                }
+
+                exportContent += `## Effet d'interaction RX-matière\n\n`;
+                exportContent += `**Nom de l'effet** : ${name}\n\n`;
+                exportContent += `**Explication** :\n${explain}\n`;
+            }
+
+            const blob = new Blob([exportContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Question_' + questionNumber + '_export.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('Export réussi !');
+            
+            if (!answers.answered.has(questionNumber)) {
+                answers.accepted++;
+                answers.answered.add(questionNumber);
+            }
+        }
+
+        function showStats() {
+            showQuestion(16);
+            document.getElementById('nextBtn').textContent = 'Voir les statistiques →';
+        }
+
+        function showFinalStats() {
+            showQuestion(18);
+            document.getElementById('correctAnswers').textContent = answers.correct;
+            document.getElementById('acceptedAnswers').textContent = answers.accepted;
+            const totalScore = Math.round(((answers.correct + answers.accepted) / answers.total) * 100);
+            document.getElementById('totalScore').textContent = totalScore + '%';
+        }
+
+        function resetQuiz() {
+            currentQuestion = 1;
+            answers = { correct: 0, accepted: 0, total: 15, answered: new Set() };
+            annotations = {};
+            
+            document.querySelectorAll('textarea, input[type="text"]').forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => input.checked = false);
+            document.querySelectorAll('.feedback').forEach(fb => {
+                fb.classList.remove('show', 'correct', 'incorrect', 'accepted');
+            });
+            document.querySelectorAll('.mcq-option').forEach(opt => {
+                opt.classList.remove('correct-answer', 'wrong-answer', 'selected');
+            });
+            document.querySelectorAll('.text-gap-solution').forEach(sol => {
+                sol.classList.remove('show');
+            });
+            document.querySelectorAll('.solution-row').forEach(row => {
+                row.classList.remove('show');
+            });
+            
+            document.querySelectorAll('[id^="schemaPreview"]').forEach(preview => {
+                preview.style.display = 'none';
+            });
+            document.querySelectorAll('[id^="annotationForm"]').forEach(form => {
+                form.classList.remove('active');
+            });
+            document.querySelectorAll('[id^="annotationList"]').forEach(list => {
+                list.innerHTML = '';
+            });
+            
+            showQuestion(1);
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' || e.target.type === 'radio') {
+                const option = e.target.closest('.mcq-option');
+                if (e.target.type === 'checkbox') {
+                    option.classList.toggle('selected', e.target.checked);
+                } else {
+                    document.querySelectorAll(`input[name="${e.target.name}"]`).forEach(input => {
+                        input.closest('.mcq-option').classList.remove('selected');
+                    });
+                    if (e.target.checked) {
+                        option.classList.add('selected');
+                    }
+                }
+            }
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

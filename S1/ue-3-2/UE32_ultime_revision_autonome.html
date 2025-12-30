@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>UE 3.2 S1 — Ultime révision (autonome)</title>
+<style>
+  :root {
+    --bg: #0b0f14; --panel:#101824; --panel2:#0f1722;
+    --text:#e7edf6; --muted:#9fb0c6; --accent:#7dd3fc;
+    --ok:#22c55e; --ko:#f97316; --bad:#ef4444; --line:#213044;
+    --chip:#1b2a40;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--sans);background:linear-gradient(180deg,#070a0f, var(--bg));color:var(--text);}
+  header{position:sticky;top:0;z-index:9;background:rgba(11,15,20,.85);backdrop-filter: blur(10px);border-bottom:1px solid var(--line);}
+  .bar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;flex-wrap:wrap}
+  .title{display:flex;flex-direction:column;gap:2px}
+  .title b{font-size:14px;letter-spacing:.2px}
+  .title span{font-size:12px;color:var(--muted)}
+  .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  button, .btn {
+    border:1px solid var(--line); background:linear-gradient(180deg,#162336,#111b2a);
+    color:var(--text); padding:8px 10px; border-radius:12px; cursor:pointer; font-weight:600;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  button:hover{border-color:#2a3a53}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  input[type="text"], textarea, select {
+    background:#0c1420;border:1px solid var(--line);color:var(--text);border-radius:12px;
+    padding:10px 12px;outline:none;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus{border-color:#35517a;}
+  textarea{min-height:110px;resize:vertical;}
+  .layout{display:grid;grid-template-columns:310px 1fr;gap:12px;max-width:1300px;margin:12px auto;padding:0 12px;}
+  @media (max-width: 980px){ .layout{grid-template-columns:1fr} }
+  .panel{background:linear-gradient(180deg,var(--panel),#0c1320);border:1px solid var(--line);border-radius:18px;box-shadow: 0 10px 30px rgba(0,0,0,.35);}
+  .sidebar{padding:12px}
+  .main{padding:14px}
+  .secTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 10px}
+  .secTitle h2{margin:0;font-size:14px}
+  .secTitle .mini{font-size:12px;color:var(--muted)}
+  .tdList{display:flex;flex-direction:column;gap:8px}
+  .tdBtn{justify-content:space-between;width:100%}
+  .pill{font-size:12px;background:var(--chip);border:1px solid var(--line);padding:3px 8px;border-radius:999px;color:var(--muted)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .grow{flex:1}
+  .qHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .qHeader h1{margin:0;font-size:18px;line-height:1.2}
+  .qHeader .meta{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .chip{font-size:12px;background:var(--chip);border:1px solid var(--line);padding:5px 10px;border-radius:999px;color:var(--muted)}
+  .qBody{display:grid;grid-template-columns: 1fr;gap:10px}
+  .hint{font-size:12px;color:var(--muted);line-height:1.35}
+  .hr{height:1px;background:var(--line);margin:10px 0}
+  .correction{white-space:pre-wrap;font-family:var(--sans);line-height:1.35;background:#0b1320;border:1px solid var(--line);padding:12px;border-radius:14px}
+  .schemaGrid{display:grid;grid-template-columns: repeat(auto-fill, minmax(160px,1fr));gap:10px}
+  .schemaCard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#09101b}
+  .schemaCard img{width:100%;height:140px;object-fit:cover;display:block}
+  .schemaCard .cap{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px}
+  .schemaCard .cap span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .kbd{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .statusOk{color:var(--ok)}
+  .statusKo{color:var(--ko)}
+  .statusNone{color:var(--muted)}
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#0b1320;border:1px solid var(--line);
+     padding:10px 12px;border-radius:14px;color:var(--text);box-shadow:0 12px 35px rgba(0,0,0,.45);display:none;z-index:999}
+  dialog{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#0f1724,#0b1320);color:var(--text);width:min(820px, 95vw);}
+  dialog::backdrop{background:rgba(0,0,0,.6)}
+  .dlgHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px}
+  .dlgHead b{font-size:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width: 780px){ .grid2{grid-template-columns:1fr} }
+  .small{font-size:12px;color:var(--muted)}
+  .danger{border-color: rgba(239, 68, 68, .6)}
+  .linklike{background:transparent;border:1px solid transparent;color:var(--accent);padding:0;border-radius:0}
+  .linklike:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="title">
+      <b>UE 3.2 S1 — Ultime révision (offline)</b>
+      <span>55 questions (TD1→TD5) • Ajout de schémas & Q/R • Export autonome • Généré le 2025-12-29 14:27:23</span>
+    </div>
+    <div class="actions">
+      <button id="btnAdd">➕ Ajouter (Q/R + schéma)</button>
+      <button id="btnExport">⬇ Exporter le fichier complet</button>
+      <button id="btnReset" class="danger" title="Réinitialise uniquement ta progression locale">Réinitialiser progression</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="panel sidebar">
+    <div class="secTitle">
+      <h2>Navigation</h2>
+      <span class="mini"><span class="kbd">Ctrl</span>+<span class="kbd">K</span> : chercher</span>
+    </div>
+    <div class="row">
+      <input id="search" class="grow" type="text" placeholder="Chercher un mot-clé, un effet, un indicateur…"/>
+      <button id="btnRandom" title="Question au hasard">🎲</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <select id="filter">
+        <option value="all">Tout</option>
+        <option value="todo">À faire</option>
+        <option value="ok">Je sais</option>
+        <option value="ko">À revoir</option>
+        <option value="custom">Mes questions</option>
+      </select>
+      <span id="count" class="pill">…</span>
+    </div>
+
+    <div class="hr"></div>
+    <div class="tdList" id="tdList"></div>
+
+    <div class="hr"></div>
+    <div class="hint">
+      <div><b>Sauvegarde :</b> automatique dans ton navigateur (localStorage).</div>
+      <div style="margin-top:6px"><b>Export :</b> crée un <i>nouveau</i> fichier HTML autonome, qui inclut aussi tes schémas (en base64) et tes Q/R personnalisées.</div>
+    </div>
+  </aside>
+
+  <main class="panel main">
+    <div id="qView"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<dialog id="dlgAdd">
+  <form method="dialog" id="addForm">
+    <div class="dlgHead">
+      <b>Ajouter une question / réponse + schéma (optionnel)</b>
+      <button value="cancel">✕</button>
+    </div>
+    <div class="grid2">
+      <div>
+        <label class="small">Section</label><br/>
+        <select id="addSection"></select>
+      </div>
+      <div>
+        <label class="small">Tags (séparés par des virgules)</label><br/>
+        <input id="addTags" type="text" placeholder="ex: Compton, photoélectrique, PDS, CTDIvol…"/>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <label class="small">Question</label><br/>
+      <textarea id="addQuestion" required placeholder="Écris ta question ici…"></textarea>
+    </div>
+    <div style="margin-top:10px">
+      <label class="small">Réponse attendue (pour la vérification automatique)</label><br/>
+      <textarea id="addAnswer" placeholder="Écris la réponse attendue (exacte)."></textarea>
+      <div class="small" style="margin-top:6px">
+        Vérification par défaut = <b>casse & accents stricts</b>. Option pluriel ci-dessous.
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label class="small"><input type="checkbox" id="addPlural" checked/> Tolérer le pluriel simple (s/es)</label>
+      <label class="small"><input type="checkbox" id="addContains"/> Accepter si ma réponse <i>contient</i> la réponse attendue</label>
+    </div>
+    <div style="margin-top:10px">
+      <label class="small">Correction / explication (optionnel)</label><br/>
+      <textarea id="addCorrection" placeholder="Ajoute une explication, un rappel, une formule…"></textarea>
+    </div>
+    <div style="margin-top:10px">
+      <label class="small">Schéma (image) — optionnel</label><br/>
+      <input id="addSchema" type="file" accept="image/*"/>
+      <div class="small">L’image sera intégrée dans l’export (pas de lien externe).</div>
+      <div id="addSchemaPreview" style="margin-top:8px"></div>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:flex-end">
+      <button value="cancel" class="btn">Annuler</button>
+      <button id="btnSaveAdd" value="default">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgExport">
+  <form method="dialog">
+    <div class="dlgHead">
+      <b>Exporter le fichier complet</b>
+      <button value="cancel">✕</button>
+    </div>
+    <div class="hint">
+      L’export génère un <b>nouveau</b> fichier HTML autonome contenant :
+      <ul>
+        <li>toutes les questions TD1→TD5</li>
+        <li>tes questions personnalisées</li>
+        <li>tes schémas (images encodées)</li>
+        <li>ta progression (Je sais / À revoir) et tes notes de réponse</li>
+      </ul>
+    </div>
+    <div class="row" style="margin-top:10px;justify-content:flex-end">
+      <button value="cancel">Annuler</button>
+      <button id="btnDoExport" value="default">Créer et télécharger</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+
+/* ====== Données (intégrées) ====== */
+const BUILTIN = {"TD1": {"title": "TD1 — Production des rayons X / Générateur / Tube", "questions": [{"id": "TD1-Q1", "num": 1, "question": "Institut de Formation Public Varois des Professions de Santé - N° de déclaration d’activité 93.83.04918.83 (cet enregistrement ne vaut pas agrément de l’Etat) - FINESS EJ : 83 000 904 9 - SIRET : 130 016 561 000 24 - Code APE 8412Z - DATADOCK : 0014425 - DPC : 1073", "correction": "Institut de Formation Public Varois des Professions de Santé - N° de déclaration d’activité 93.83.04918.83 (cet enregistrement ne vaut\npas agrément de l’Etat) - FINESS EJ : 83 000 904 9 - SIRET : 130 016 561 000 24 - Code APE 8412Z - DATADOCK : 0014425 - DPC : 1073\nSiège administratif : 32 av. Becquerel, ZI Toulon Est, 83130 La Garde – Tel : 04 94 14 72 14\nDéfinir l’atome et sa composition :\nL’atome est la plus petite division d’un élément dans lequel l’identité chimique est maintenue\n- D’un noyau dense : qui contient des protons (chargés positivement) et des neutrons (neutres)\n- D’un nuage d’électrons (chargés négativement)\nDans l’atome de Bohr (physicien),annotez les flèches :\ncouche de Valence\ncouche K = couche fondamentale\nDans le modèle de Bohr, les orbites des éléctrons sont à distance fixe du noyau. Chaque\nélectron occupe un état d’énergie fixe, ce qui confère à l’atome des couches électronique\nauxquelles on assigne les lettres K, L, M, N, O, P.\nLa couche K est la aplus profonde (proche du noyau) se nomme la couche fonfamentale.\nLa couche électronique la plus externe se nomme la couche de Valence.\nDefinir l’énergie de liaison :\nL’énergie necessaire pour retirer un éléctron complètement de l’atome est appelée énergie de\nliaison (par convention les énergies de liaison sont négatives et augmentent avec la proximité\ndu la couche au noyau)\nL’énergie de laison augmente avec le nombre de protons dans le noyau et dépend donc du\nnombre atomique (Z)\nQuel est le phénomène quand l’atome reçoit un apport extérieur d’énergie :\n2\n- Si l’energie est suffisante l’électron est rejeté du cortège électronique on parle alors\nd’ionisation\n- On a besoin d’un transfert énergétique équivalent ou supérieur à son énergie de liaison\nCette énergie peut donnée par un photon ou une forme corpusculaire d’une radiation ionisante.\n- Si l’électron reste lié à l’atome mais est projeté sur une couche externe on dit que l’atome est\nexcité.", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q2", "num": 2, "question": "Définissez les rayons X Ondes électromagnétiques (oem) à haute fréquence, longueur d’onde entre 5 picomètres et 10", "correction": "Définissez les rayons X\nOndes électromagnétiques (oem) à haute fréquence, longueur d’onde entre 5 picomètres et 10\nnanomètres, ce qui les classe dans les rayonnements ionisants\nOndes électromagnétiques se propagent en ligne droite, mais leur trajectoire peut être déviée par des obstacles.\nLes ondes électromagnétiques sont caractérisées par leur longueur d’onde, leur fréquence et leur énergie par\nphoton.\nUn rayonnement correspond à l’énergie qui traverse l’espace ou la matière.\n- Électromagnétique : rayonnement qui est issu de différents champs électromagnétiques comme les\nondes radioélectriques, les ondes lumineuses, visibles ou invisibles et les rayons X et gamma.\n- Corpusculaire : radiations dues aux particules : protons, électrons ou neutrons.\nDéfinissez les rayonnements ionisants\nLes rayonnements (X et gamma) sont dits ionisants car ils émettent des rayons d’E suffisantes pour\ntransformer les atomes qu’ils traversent en ions, pouvant rendre instable la matière.\nUn atome instable va chercher à se stabiliser en émettant différents rayonnements (Alpha, béta - / +, Rx et\nGamma)\nPrécisez la différence entre les rayons X et Gamma\nLeur différence vient de leur mode de production :\n- Les rayons X prennent naissance dans le nuage électronique de l’atome\n- Les rayons Gamma sont produits dans la structure de l’atome\n3", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q3", "num": 3, "question": "Complétez la phrase ci-dessous La production des RX fait suite à une interaction d’électrons de forte énergie cinétique contre une", "correction": "Complétez la phrase ci-dessous\nLa production des RX fait suite à une interaction d’électrons de forte énergie cinétique contre une\ncible métallique dense\nCitez les 2 modes de production des rayons X\n2 modes de production des RX :\nInteraction électron-noyau (effet de freinage)\nInteraction électron-électron (réarrangement électronique)\nPrécisez le phénomène produisant majoritairement les rayons X\nInteraction électron-noyau (effet de freinage)", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q4", "num": 4, "question": "1. Nommez le phénomène ci-dessous Interaction électron – électron : réarrangement électronique", "correction": "1. Nommez le phénomène ci-dessous\nInteraction électron – électron : réarrangement électronique\n2. Explicitez ce phénomène\n4\nEnergie e– incident > Energie e- liaison => expulsion de l’e- => réarrangement électronique par\ncascade électronique avec émission de rayons X émanant de la différence d’Energie de liaison\nentre les 2 couches\n3. Cochez la case sous le spectre correspondant au phénomène nommé en 1 de cette\nquestion\nSpectre de raies", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q5", "num": 5, "question": "1. Nommez le phénomène ci-dessous Interaction électron – noyau : effet de freinage", "correction": "1. Nommez le phénomène ci-dessous\nInteraction électron – noyau : effet de freinage\n2. Explicitez ce phénomène\n5\nPassage d’un e- au voisinage d’un noyau, il est attiré par ce dernier - Il subit ainsi une déviation\nimportante et perd une partie de son énergie sous forme de rayonnement électromagnétique dit «\nrayonnement de freinage »\n3. Cochez la case sous le spectre correspondant au phénomène nommé en 1 de cette question\nSpectre continue", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q6", "num": 6, "question": "Annotez ce schéma en reportant en face de chaque chiffre la réponse attendue 1. Cathode", "correction": "Annotez ce schéma en reportant en face de chaque chiffre la réponse attendue\n1. Cathode\n2. Filament\n3. Ddp\n4. Filtre\n5. Diaphragme\n6. Rayons X\n7. Système de refroidissement\n8. Anode\n9. Enceinte\n10. Gaine plombée\n6", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q7", "num": 7, "question": "Pour chaque étape de la production des RX dans le tube à RX, précisez dans la case correspondante : - Localisation de l’étape, effet concerné par cette étape, mécanisme de l’effet concerné", "correction": "Pour chaque étape de la production des RX dans le tube à RX, précisez dans la case correspondante :\n- Localisation de l’étape, effet concerné par cette étape, mécanisme de l’effet concerné\nETAPE LOCALISATION EFFET MECANISME\n1 – Emission des Au niveau de la cathode Effet Edison Filament en tungstène L’émission\ne- via des filaments en ou mécanisme chauffé par un courant, électronique est\ntungstène de thermo- créant un nuage proportionnelle à la\nionisation électronique autour du surface du filament\nfilament (e- arrachés au et à l’intensité de\nfilament) chauffage\n2 – Différence de Entre la cathode et Mise en Mise en place d’une DDP + la DDP est\nPotentiel (DDP) l’anode dans une mouvement et élevée (de 40 à 150 kV) élevée +\nenceinte en verre ou précipitation l’accélération des e-\nrègne le vide des e- vers HT – cathode / HT + est importante +\nl’anode anode les RX seront\n(attirés) énergétiques et\npénétrants\n3 – Production Au niveau de l’anode Effet de e- percutent l’anode Anode Z élevé\ndes RX freinage +++ (dense) – t° fusion\nInteraction électron-noyau élevée – bonne\nRéarrangement +++ conduction\nélectronique thermique\nInteraction électron-\nélectron\n4 – Orientation Au niveau de l’anode Réflexion Inclinaison de la piste de\ndes RX l’anode (angle de l’anode)\n5 – Filtration des A la sortie de l’enceinte Effet talon Faisceau RX hétérogène du 60 à 120 kV: 2 mm\nRX (hétérogénéité fait hétérogénéité de Al\ndu faisceau) l’émission thermique\n(filament) et de la piste de >120 kV : 2 mm Cu\nl’anode Al\nMise en place d’un filtre (Al\nou Al/Cu) éliminé les RX\nfaible énergie et\nhomogénéiser le faisceau\n6 – Focalisation Au niveau du Délimitation Lames métalliques stoppant Effet accentué par\ndu faisceau RX diaphragme du champ les RX des localisateurs\nd’irradiation\n7", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q8", "num": 8, "question": "1. Identifiez les 2 éléments numérotés sur la photographie ci-dessous Identification", "correction": "1. Identifiez les 2 éléments numérotés sur la photographie ci-dessous\nIdentification\n1 – Grand foyer\n2 - Petit foyer\n2. Pour chacun de ces éléments, précisez la typologie des zones anatomiques radiographiées\nTypologie zones anatomiques\n1 – zones anatomiques épaisses et péristaltiques (pulmonaire – digestif) – sans\nrecherche de définition\n2 - zones anatomiques peu épaisses, statique (os des membres) - recherche d’une bonne\ndéfinition (qualité fine) de l’image", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q9", "num": 9, "question": "1. Positionnez sur le schéma ci-dessous : - Foyer thermique", "correction": "1. Positionnez sur le schéma ci-dessous :\n- Foyer thermique\n- Foyer optique\n8\n2. Renseignez le tableau ci-dessous\nAutre nom Correspondance Dimensions\nFoyer thermique Foyer réel Au point d’impact des Déterminées par la\ne- sur le disque de taille du filament et\nl’anode (source Rx) inclinaison de la piste\nde l’anode (angle de\nl’anode)\nFoyer Optique Foyer virtuel A la projection Forme carré –\ngéométrique du foyer détermine la définition\nthermique de l’image (résolution\nspatiale)", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q10", "num": 10, "question": "Complétez le texte à trou ci-dessous : Le générateur regroupe tous les circuits électroniques et électriques qui alimentent le tube à RX", "correction": "Complétez le texte à trou ci-dessous :\nLe générateur regroupe tous les circuits électroniques et électriques qui alimentent le tube à RX\nSon rôle :\nAppliquer une tension U (kV) au tube\nChauffer la cathode pour obtenir l’intensité I(mA) désirée dans le tube\nDéterminer le temps de l’exposition (s)\nAssurer la sécurité du tube (U, I et exposition acceptables pour le tube)\nIl est contenu dans une armoire électrique et contrôlée par un pupitre de commande", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q11", "num": 11, "question": "1. Définissez l’image radiante L’image radiante est formée par les différences d’atténuation du faisceau de Rx dans les milieux", "correction": "1. Définissez l’image radiante\nL’image radiante est formée par les différences d’atténuation du faisceau de Rx dans les milieux\ntraversés, se traduisant au niveau de l’image radiologique par des différences de niveaux de gris\n2. Citez les 3 facteurs influant l’atténuation des rayons X dans la matière organique\n3 facteurs :\n1 l’épaisseur des objets\n9\n2 leur composition physique et chimique - leur densité\n3 l’énergie des rayons X\n3. Reliez les différents niveaux de gris (colonne de gauche) avec les milieux organiques\ncorrespondant (colonne de droite)\nNiveaux de gris / milieux organiques", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q12", "num": 12, "question": "1. Nommez l’effet produit ci-dessous Effet PHOTOELECTRIQUE", "correction": "1. Nommez l’effet produit ci-dessous\nEffet PHOTOELECTRIQUE\n2. Explicitez cet effet :\n1. Effet se produisant quand photon X cède toute son énergie à un e- de l’atome\nLe transfert d’E est possible seulement si E liaison de l’e- < à l’E du photon X incident\nL’atome ionisé et excité revient à l’équilibre par arrangement électronique s’accompagnant de\nl’émission d’un photon de fluorescence\n10", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q13", "num": 13, "question": "3. Nommez l’effet produit ci-dessous : Effet COMPTON", "correction": "3. Nommez l’effet produit ci-dessous :\nEffet COMPTON\n4. Explicitez cet effet :\nEffet résultant de l’interaction entre le photon X incident et un e- faiblement lié d’un atome – E de liaison\nnégligeable par rapport à l’E du photon incident – e- des couches périphériques\nLors de l’interaction le photon X disparait.\nUne partie de son E est cédée à l’e- éjecté appelé e- Compton\nL’autre partie de son E est transmise sous forme d’un nouveau photon appelé photon diffusé", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD1-Q14", "num": 14, "question": "Renseignez le tableau ci-dessous : Effet est prépondérant aux basses tensions (50-70 kV) Effet photoélectrique", "correction": "Renseignez le tableau ci-dessous :\nEffet est prépondérant aux basses tensions (50-70 kV) Effet photoélectrique\nEffet est prépondérant aux hautes tensions (> 100 kV) Effet Compton\nEffet favorisé dans les milieux peu denses (graisse, tissus Effet Compton\nmous, …)\nOrigine du rayonnement diffusé Patient\n11", "isFlash": false, "keywords": [], "type": "long"}]}, "TD2": {"title": "TD2 — Ostéodensitométrie / Indicateurs de dose / Analyse spectrale / Types de scanner", "questions": [{"id": "TD2-Q1", "num": 1, "question": "Renseignez le tableau ci-dessous : Définition de l’ostéodensitométrie Examen médical mesurant la densité osseuse (DMO)", "correction": "Renseignez le tableau ci-dessous :\nDéfinition de l’ostéodensitométrie Examen médical mesurant la densité osseuse (DMO)\nSignification de l’acronyme DMO Densité Minérale Osseuse, en gramme/cm²\nPrincipe physique de Loi d’absorption – méthode basée sur la mesure de\nl’ostéodensitométrie (loi) l’atténuation d’un faisceau de photons par la matière\nTechnologie radiologique de Absorption biphotonique - Emission de photons X\nl’ostéodensitométrie possédant 2 énergies différentes en direction d’un\nsite osseux (rachis, fémur ou extrémité inférieure du\nradius) permet la mesure de leur absorption\ndifférentielle.\nEnergies utilisées 70/140 kV ou 100/140 kV\nObtention des énergies Variation de la tension du tube ou tension constante\navec filtration par terre rare\n3 géométries de faisceau Faisceau droit\npossibles Faisceau en éventail étroit\nFaisceau en éventail large\n2 types de détecteur Conversion indirecte (Rx -> lumière -> signal\nélectrique) Scintillateur et photodiode\nConversion directe (Rx -> signal électrique) semi-\nconducteur\n2", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q2", "num": 2, "question": "Renseignez le tableau ci-dessous : Indicateur dosimétrique en radiologie Produit Dose Surface (PDS)", "correction": "Renseignez le tableau ci-dessous :\nIndicateur dosimétrique en radiologie Produit Dose Surface (PDS)\nUnité de cet indicateur dosimétrique mGy.cm²\nValeur transmise par cet indicateur Dose délivrée au patient\ndosimétrique\nDocument mentionnant obligatoirement cet Compte rendu radiologique\nindicateur\nProcédé de recueil de cet indicateur Chambre d’ionisation ou\ndosimétrique\nCalculateur intégré\nRéférence de comparaison de la valeur de cet Niveaux de Référence diagnostic (NRD)\nindicateur\nIntérêt de cet indicateur dosimétrique Evaluer ses pratiques\nDéfinir la dose à l’entrée Energie en un point à la peau du patient\nComment estimer la dose à l’entrée Tension, charge, DFP (distance foyer-peau) x\npar facteur de rétrodiffusion\nQuels sont les facteurs de rétrodiffusion 1,1 pour les enfants\n1,3 pour les adultes (60-80KV)\n1,5 en haute tensio (120-140 KV)\nQuels sont les 2 paramêtres utilisés pour Dose à l’entrée (De) et le PDS (produit dose\nestimer la dose délivrée au patient en surface)\nradiologie\n3", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q3", "num": 3, "question": "Pour les autres modalités en imagerie médicale, nommer les indicateurs dosimétriques et leurs unités: Scanographie IDSV (mGy) indice de dose scanographique volumique", "correction": "Pour les autres modalités en imagerie médicale, nommer les indicateurs dosimétriques et leurs unités:\nScanographie IDSV (mGy) indice de dose scanographique volumique\nPDL (mGy.cm) produit dose longueur\nImagerie radioguidée PDS (Gy.cm2) produit dose surface\nTemps de scopie\nKerma (mGy)\nMédecine nucléaire Activité (MBq)\nIDSV (mGy)\nPDL (mGy.cm)\nMammographie DMG (mGy) dose glandulaire moyenne", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q4", "num": 4, "question": "Précisez la signification des 3 acronymes ci-dessous : NRD : Niveaux de Référence Diagnostique", "correction": "Précisez la signification des 3 acronymes ci-dessous :\nNRD : Niveaux de Référence Diagnostique\nVGD : Valeur Guide Diagnostique\nNRL : Niveaux de Référence Local\nDonner les objectifs des NRD :\nDéfinir les modalités de réalisation des évaluations des doses de rayonnements ionisants\ndélivrées aux patients.\nDéfinir les niveaaux de référence diagnostiques (grandeurs dosimétriques et valeurs\nnumériques) en vigueur au niveau national pour les actes d’imagerie présentant un enjeu de\nradioprotection pour les patients.\nDemander aux responsables des activités d’imagerie médicale :\n4\n- De procéder à des évaluations dosimétriques périodiques comprenant un recueil de données\net leur analyse.\n- De transmettre les données recueillies à l’IRSN\n- De mettre en œuvre une démarche d’optimisation des expositions des patients, portant\nprioritairement sur les actes pour lesquels les valeurs médianes des grandeurs dosimétriques\nrelevées sont supérieures au NRD\nPour quels dispositifs d’imagerie, les NRD sont obligatoires :\nTous les dispositifs d’imagerie, fixes et mobiles sont concernées : en imagerie\nconventionnelle, imagerie interventionnelle, cardiologie et bloc opératoire, scanner et\nmédecine nucléaire.\nQuelles sont les règles générales des NRD :\n- Une évaluation porte sur un dispositif donné\n- Un acte donné\n- Sur au moins 30 patients consécutits présentant un IMC compris entre 18 et 35 inclus à\nl’exception des actes réalisés sur la tête\n- Les évaluations sont réalisées au moins tous les 12mois, pour au moins deux actes choisis\nparmi ceux listés\nPrécisez la finalité des NRD et VGD\nOutils dans la démarche d’optimisation des doses délivrées au patient\nPrécisez la méthode statistique utilisé pour :\nNRD : méthode statistique du 75ème centile sur un groupe de patients types\nVGD : méthode statistique de la médiane\n5", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q5", "num": 5, "question": "1. Complétez la phrase ci-dessous : Le principe d’optimisation consiste à trouver un compromis entre qualité image et dose", "correction": "1. Complétez la phrase ci-dessous :\nLe principe d’optimisation consiste à trouver un compromis entre qualité image et dose\n2. Précisez les 4 acteurs intervenant dans une démarche d’optimisation en radiologie\nPhysicien médical\nRadiologue\nManipulateur\nIngénieur d’application\n3. Précisez la démarche d’optimisation mise en place dans chacun des cas ci-dessous :\nNRL > NRD : démarche d’optimisation prioritaire pour avoir des pratiques < aux NRD\nVGD < NRL< NRD : Démarche d’optimisation pour atteindre la VGD\nNRL< VGD de plus de 20% : évaluation de la qualité image\n6", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q6", "num": 6, "question": "Définir l’analyse spectrale : L’analyse spectrale d’un signal consiste à trouver toutes les sinusoïdes qui contribuent", "correction": "Définir l’analyse spectrale :\nL’analyse spectrale d’un signal consiste à trouver toutes les sinusoïdes qui contribuent\nsignificativement au signal : identifier les fréquences et les amplitudes des sinusoïdes\nassociées\nDéfinir le spectre de Fourier :\nSpectre de Fourier ou spectre fréquentiel est une représentation graphique permettant de\nvisualiser ces deux grandeurs ou les fréquences sont en abscisses et les amplitudes en\nordonnées du signal périodique.", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q7", "num": 7, "question": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante.", "correction": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case\ncorrespondante.\nVRAI FAUX\nSur un spectre de Fourier le 1er pic (f0) se nomme le FONDAMENTAL et\nX\nles autres pics (f1, f2, …) les HARMONIQUES\nLe spectre de Fourier est une représentation d’un signal aussi bien\npériodique que non périodique X\nUniquement possible pour un signal périodique\nSeul le signal sinusoïdal est simple, les autres signaux périodiques sont\nX\nune somme de sinusoïdes\nLe spectre de Fourier du signal CRENEAU possède 1 seul pic appelé\nl’harmonique X\nSomme de 4 sinusoïdes de fréquences différentes\n7", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q8", "num": 8, "question": "A partir du signal ci-dessous : 1. Précisez la période", "correction": "A partir du signal ci-dessous :\n1. Précisez la période\nPériode 4 ms ou 4.10-3 s ou 0.004 s\n2. Calculez la fréquence en Hz\nFréquence f =1 / T soit f = 1 / 4.10-3= 250 Hz\n3. Dessinez sa représentation selon le spectre de Fourier\n8", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q9", "num": 9, "question": "1. Complétez cette phrase à trou Le scanner est une technique d’imagerie par …………………………… qui utilise les", "correction": "1. Complétez cette phrase à trou\nLe scanner est une technique d’imagerie par …………………………… qui utilise les\n………………………… pour créer des images ………………, …………………………….. et\nparfois …………………………………..\nLe scanner est une technique d’imagerie par rotation qui utilise les photons X pour créer des\nimages axiales, anatomiques et parfois fonctionnelles\n2. Précisez les 2 acronymes utilisés pour la scanographie\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\nTDM : Tomodensitométrie\nCT : Computerized Tomography", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q10", "num": 10, "question": "Quelles sont les 2 propriétés du scanner : 1)…………………………………………………………………………………………………………", "correction": "Quelles sont les 2 propriétés du scanner :\n1)…………………………………………………………………………………………………………\n………………………………………………………………………………………………………….\n2)………………………………………………………………………………………………………..\n……………………………………………………………………………………………………………\nLa mesure de densité des volumes élémentaires d’une coupe à partir de l’atténuation d’un\nfaisceau de RX.\nLa reconstruction d’une image en coupe du corps humain à partir des différentes projections\ntransversales obtenues par le système constituant l’appareillage.\n9", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q11", "num": 11, "question": "1. Expliquez le concept de l’échelle d’Hounsfield ……………………………………………………………………………………………………………", "correction": "1. Expliquez le concept de l’échelle d’Hounsfield\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\nComparer l‘ensemble des densités présentes dans le corps\nElaboration d’une échelle classant ces différentes densités en se référant à la valeur de\nl’absorption de l’eau.\nIl propose ensuite une méthode d’observation (fenêtrage) qui permet de centrer l’étude en\ncontraste sur une portion précise l’échelle de Hounsfield\n2. Précisez la signification de l’acronyme UH\nUH : ……………………………………………………………………………………………………\nUH = Unités Hounsfield = Nombre CT = NCT\n10\n3. Donnez les valeurs UH des zones anatomiques ci-dessous :\nOS :………………………………………………………………………………………………………\nEAU :………………………………………………………………………………………………………\nAIR :………………………………………………………………………………………………………\nOS : + 1000\nEAU : 0\nAIR : - 1000\n4. Renseignez le tableau ci-dessous\nValeurs UH Structures anatomiques\nStructures peu denses Partie négative de l’échelle Parenchymes pulmonaires\nTissus dits mous 100 à +100 UH Graisse, foie, reins, cerveau\n…)\nStructures denses +100 UH à plusieurs milliers Os et calcifications\nd’UH\n11", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q12", "num": 12, "question": "1. Définissez la notion de FENETRAGE en scanographie ……………………………………………………………………………………………………………", "correction": "1. Définissez la notion de FENETRAGE en scanographie\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n= zoom en contraste – Centrer l’étude en contraste sur une portion de l’échelle de Hounsfield\npour compenser les limites physiologiques de l’œil humain\n2. Paramètres du fenêtrage\na. Citez les 2 paramètres caractérisant ce fenêtrage\n1………………………………………………………………………………………………………….\n2………………………………………………………………………………………………………….\n1. Son niveau : WL ou Window Level\n2. Sa largeur : WW ou Window widt\n12\nb. Positionnez ces 2 paramètres sur le schéma ci -dessous", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q13", "num": 13, "question": "Comparer un scanner de 1ère , 3ème et de 6ème génération : 1ère génération 3ème génération 6ème génération", "correction": "Comparer un scanner de 1ère , 3ème et de 6ème génération :\n1ère génération 3ème génération 6ème génération\n1970 1980 Aujourd’hui\nEnsemble tube à rayons X Plus de mouvement de Amélioration successives\net un seul détecteur translation des appareils de 3ème\nMouvement de translation, Détecteurs disposés en arc génération\npuis l’ensemble effectue une de cercle centré sur le foyer La rotation continue, les\nrotation de degré en degré du tube detecteurs multibarettes et\nafin d’acquérir toutes les Ensemble tube-barrette de l’arrivées des configurations\nprojections ainsi qu’une détecteurs demeurent matricielles\ntranslation solidaires entre eux et\neffectuent donc un seul\nmouvement de rotation\n13", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD2-Q14", "num": 14, "question": "L’évolution du scanner en imagerie spectrale, expliquer cette nouvelle technologie : Technologie à l’émission Exploitation de deux faisceaaux X d’énergie différentes", "correction": "L’évolution du scanner en imagerie spectrale, expliquer cette nouvelle technologie :\nTechnologie à l’émission Exploitation de deux faisceaaux X d’énergie différentes\ncouplés à des détecteurs intégratifs\nBitube 2 tubes placés à la perpendiculaires émettant 2 énergies\ndifférentes à 80 et 140 kV\nKv switching Emission alternative de RX d’énergie différente (80 et\n140 kV par rotation\nSucession de rotation Une rotation à 80 kV et l’autre à 140 kV\nEmission twin beam Faisceau X à 120 kV subdivisé en 2 faisceaux par des\nfiltres différents\nTechnologie de détection\nSuperposition de détecteurs Couche supérieure : détection des énergies faibles\nintégratifs Couche inférieure : détection des énergies élévées\nMais de sensibilité différentes\nDétecteurs à comptage Capables de discriminer les photons du point de vue\nphonique énergétique ce qui permettrait d’assurer une\ndécomposition spectrale et donc une sélectivivé\nmatérielle plus précise venant ainsi élargir encore\ndavantage les applications potentielles\n14", "isFlash": false, "keywords": [], "type": "long"}]}, "TD3": {"title": "TD3 — Chaîne radiologique (imagerie de projection)", "questions": [{"id": "TD3-Q1", "num": 1, "question": "Nommer tous les éléments qui composent la table radiologique : 2", "correction": "Nommer tous les éléments qui composent la table radiologique :\n2", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q2", "num": 2, "question": "Quels sont les 4 facteurs dépendant de la qualité image : 1) KV/mAs : constantes de la machine", "correction": "Quels sont les 4 facteurs dépendant de la qualité image :\n1) KV/mAs : constantes de la machine\n2) Type de radiographie (partie molle, transit)\n3) Corpulence du patient\n4) Flou divers\nNommer les éléments additionnels pour améliorer l’image :\nDiaphragme\nCône localisateur\nAir-Gap ou technique de Groedel\nLes grilles\nDispositifs de compression (sangle, ballon, pelle de compression ou compression naturelle par la\nposition en procubitus\nLes filtres compensatoires (sortie de tube ou au contact du patient)", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q3", "num": 3, "question": "Différencier le mode scopie du mode graphie : Scopie ou radioscopie ou fluoroscopie Graphie ou radiographie", "correction": "Différencier le mode scopie du mode graphie :\nScopie ou radioscopie ou fluoroscopie Graphie ou radiographie\nImage dynamique Image statique (instant T)\nImage en temps réel Image figée dans le temps et dans l’espace\nImage non sauvegardée Image sauvegardée\nImage moins irradiante : faible mA (flux de Rx en Image coupée par la cellule\ncontinu) toutefois attention au temps de scopie Meilleure qualité image\nMoins bonne qualité image\n3", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q4", "num": 4, "question": "1. Précisez le nom du détecteur ci-dessous : ………………………………………………………………………………………………………………", "correction": "1. Précisez le nom du détecteur ci-dessous :\n………………………………………………………………………………………………………………\nAmplificateur de Brillance\n2. Explicitez les 4 étapes ci-dessous en vous aidant du schéma ci-dessus :\nEtape 1 : expliquez les phénomènes physiques au niveau de l’écran primaire\n……………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 1 : Ecran primaire composé d’une fenêtre d’entrée, d’un écran luminescent (conversion\ndes Rx en photons lumineux) et une photocathode (conversion des photons lumineux en e-)\nEtape 2 : expliquez le phénomène physique entre l’écran primaire et secondaire\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n4\nEtape 2 : Focalisation et accélération des électrons : tube ou règne un vide poussé : les e- y sont\naccélérés (ddp 10 à 30 kV) et focalisés par les lentilles électrostatiques vers l’écran secondaire\nEtape 3 : expliquez les phénomènes physiques au niveau de l’écran secondaire\n……………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 3 : Ecran secondaire : conversion des e- en photons lumineux – Image obtenue est\ninversée et de petite taille\nEtape 4 : expliquez le phénomène physique au niveau du capteur CCD (hors schéma)\n……………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 4 : Capteur CCD (Charge Couple Devise) : transformer l’information lumineuse de l’écran\nsecondaire en signal vidéo\n3. Précisez :\na. L’intérêt de ce type de détecteur\n………………………………………………………………………………………………………………\nEtude dynamique de repérage\nb. 2 activités radiologiques utilisant ce type de détecteur\n1………………………………………………………………………………………………………….\n2………………………………………………………………………………………………………….\n1. Scopie en salle de radiologie conventionnelle sur table télécommandée\n5\n2. Sur appareil bloc opératoire", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q5", "num": 5, "question": "1. Précisez le nom du détecteur ci-dessous : ………………………………………………………………………………………………………………", "correction": "1. Précisez le nom du détecteur ci-dessous :\n………………………………………………………………………………………………………………\nERLM : Ecran Radio Luminescent à Mémoire\n2. Explicitez les 2 étapes ci-dessous en vous aidant des schémas ci-dessous :\n6\nEtape 1 : expliquez les phénomènes physiques lors de l’acquisition de l’information\n……………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 1 : Acquisition de l’information : phase d’intégration et de mémorisation\nCréation de l’image latente :\n- Interaction des RX avec le cristal du capteur entrainant une éjection d’e- qui vont y être\npiégés\n- Le cristal est dans un état énergétique « instable » correspondant à l’image latente.\n7\nEtape 2 : expliquez le phénomène physique lors de la lecture de l’information\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\n……………………………………………………………………………………………………………\nEtape 2 : Lecture de l’information : phase d’exploitation et de lecture\nRévélation de l’image latente sous forme de fluorescence en forçant le retour à la stabilité du\ncristal en utilisant un laser.\n- La cassette est mise dans une machine (développeur) qui va ouvrir la cassette et un laser\nva balayer point par point, ligne par ligne, l’écran de manière à libérer progressivement les\ne- piégés.\n- Ce retour à la stabilité s’accompagne de l’émission de photons lumineux (fluorescence),\nconvertis en signal électrique (photodiode) numérisable.\n8", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q6", "num": 6, "question": "1. Précisez le nom du détecteur ci-dessous : ………………………………………………………………………………………………………………", "correction": "1. Précisez le nom du détecteur ci-dessous :\n………………………………………………………………………………………………………………\nCapteur plan\n1. Explicitez les 3 étapes ci-dessous en vous aidant des schémas ci-dessous :\nEtape 1 et 2 : expliquez les phénomènes physiques au niveau de la couche de\ndétection selon le 2 types de détecteur (conversion directe ou indirecte) en vous\naidant des schémas :\nCONVERSION DIRECTE : RX convertis en charges électriques\n9\nEtape 1 :\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 1 : ddp (5 et 6 kV) dans la couche de détection entre l’électrode supérieure + et l’électrode\ncollectrice\nEtape 2 :\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 2 : exposition aux rayons X – Interaction dans le semi-conducteur créant une paire de « trou-\nélectron » - les e- attirés vers électrode supérieur et le trou + est attiré vers l’électrode inférieure\ncollectrice du TFT créant une image latente\n10\nCONVERSION INDIRECTE : RX convertis en photons lumineux\nEtape 1 :\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 1 : exposition - le scintillateur transforme les RX en lumière (effet photoélectrique)\nEtape 2 :\n………………………………………………………………………………………………………………\n11\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 2 : conversion en charge électrique – Photons lumineux sont convertis en charge électrique\npar la trame de photodiode\nEtape 3 : expliquez les phénomènes physiques au niveau de la matrice TFT du\ndétecteur en vous aidant du schéma ci-dessous :\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n12\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\n………………………………………………………………………………………………………………\nEtape 3 : Lecture TFT et naissance du signal\nMatrice TFT (thin film transistor = transistor à couche mince) : création d’un signal numérique\nLes charges collectées sont emmagasinées dans les capacités.\nLeur décharge progressive se fait par fermeture commandée (fermeture du circuit pour circulation\ndu courant) des transistors pour obtenir un signal électrique propre pour chaque ligne de la\nmatrice.\nLes signaux créés sont ensuite regroupés pour former un signal global qui sera amplifié, numérisé\npuis converti en image à l’écran (dans un délai de 5s environ)\n2 circuits spécifiques pour organiser l’extraction des données électriques de la matrice TFT :\n- Circuit adressage : commande la libération des charges électriques des capacités de\nstockage\n- Circuit de lecture : récupération des charges collectées, les guide vers les amplificateurs\npuis vers le CAN (convertisseur Analogique Numérique) pour aboutir au signal numérique\n13", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q7", "num": 7, "question": "1. Renseignez le tableau ci-dessous : kV mA S mAs", "correction": "1. Renseignez le tableau ci-dessous :\nkV mA S mAs\nDénomination Tension Intensité Temps de pose Charge\ndu paramètre\ncorrespondant\nCorrespond à La valeur de la ddp L’intensité de Au temps Intensité mA x le\n……… émise dans le tube chauffage du d’exposition temps d’exposition\npour accélérer les filament pour s\ne- émis par le l’émission des e-\nfilament\nInfluence sur L’énergie des RX et La quantité des RX, La quantité des RX, La quantité de RX\nla production leur pouvoir de plus on chauffe plus le temps est produits\npénétration dans la plus d’e- sont émis long plus d’e- sont\nde RX\nmatière et donc de RX émis et donc de RX\nInfluence sur Le contraste (1) Le rapport Signal / Le rapport Signal / Le noircissement\nla qualité de Bruit (3) Bruit (3) (4)\nLe noircissement\nl’image\n(2)\n(1) : kV bas = fort contraste / kV élevé = bas contraste\n(2) : kV bas = peu pénétrant - sous exposition / kV élevé = sur pénétrant – sur exposition\n(3) : mA bas : moins de signal - majoration du bruit / mA élevé : plus de signal – minoration\ndu bruit\n(4) : mAs bas = noircissement faible / mAs élevé = noircissement élevé\n14\n2. Entourez la réponse exacte, afin de compléter chacune de ces affirmations\nLe foyer utilisé pour une tension > 70kV est ……… Petit foyer Grand foyer\nLe foyer utilisé pour une tension < 70kV est ……… Petit foyer Grand foyer\nLe temps de pose avec le petit foyer est ………….. Majoré Court\nLe temps de pose avec le grand foyer est ………….. Majoré Court\nLe flou géométrique avec le petit foyer est ……… Majoré Faible\nLe flou géométrique avec le grand foyer est ……… Majoré Faible\nLa définition de l’image avec le petit foyer est …… Faible Fine\nLa définition de l’image avec le grand foyer est … Faible Fine\nLe petit foyer sera utilisé pour les zones Epaisses Peu épaisses\nanatomiques …………………………………………….. Péristaltiques Statique\nGrande surface Petite surface\nLe grand foyer sera utilisé pour les zones Epaisses Peu épaisses\nanatomiques …………………………………………….. Péristaltiques Statique\nGrande surface Petite surface\nLe petit foyer sera utilisé pour l’imagerie …………. Ostéoarticulaire Digestive -\nPulmonaire\nLe grand foyer sera utilisé pour l’imagerie ……… Ostéoarticulaire Digestive -\nPulmonaire\n15", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q8", "num": 8, "question": "1. Renseignez le tableau ci-dessous : TECHNIQUE DE PARAMETRAGE TECHNIQUE DE REALISATION", "correction": "1. Renseignez le tableau ci-dessous :\nTECHNIQUE DE PARAMETRAGE TECHNIQUE DE REALISATION\nTechnique à 2 points : réglage manuel des kV – mAs DIRECT\nOrgane radiographié posé\ndirectement sur le détecteur\nTechnique à 1 point : réglage manuel des Kv et POTTER\nutilisation des cellules\nDétecteur dans le potter\n2. Renseignez le tableau ci-dessous :\nNombre de cellules 3 : 2 latérales et 1 centrale\nRôle des cellules Stopper les RX quand leur\nnombre est suffisant pour la\nqualité de l’image souhaitée\nLes cellules sont sélectionnées par ……………………… MEM selon le cliché à réaliser\nTechnologie des cellules Chambre d’ionisation produit un\ncourant induit qui va charger un\ncondensateur, quand la tension\ndu courant atteint la tension de\n16\nréférence calibrée le\ncondensateur se décharge et\ncoupe émission Rx (1)\n(1) Possibilité pour le MEM d’influer sur cette tension de référence en fonction de la corpulence du\npatient\n3. Précisez pour chacune de ces études si le choix des cellules est correct\nNON\nNON\nOUI OUI\nOUI OUI OUI OUI\nProthèse en métal Mauvais centrage – cellule\npas de cellule hors zone d’interet", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q9", "num": 9, "question": "Renseignez le tableau ci-dessous : Précisez dans chacune", "correction": "Renseignez le tableau ci-dessous :\nPrécisez dans chacune\ndes cases ci-cotés les 2\nEffet photoélectrique Effet Compton\neffets prédominants\nlors de l’interaction RX-\nmatière\nPour chaque effet, précisez :\nLe niveau de la valeur Z Milieu Z élevé (I - Ba - Ca) Milieu Z peu élevé (C-H-O-N)\ndu milieu concerné par\nl’effet\n17\nLe niveau de la valeur Photon basse énergie (50-70 Photons haute énergie (>\nde l’énergie des kV) 100 kV)\nphotons concernés par\nl’effet\nLe niveau de densité Milieux denses Milieux peu denses\ndes milieux concernés\npar l’effet\nLes tissus concernés Os Tissu mou, graisse\npar l’effet\nLe couche des e- Couches profondes (proche Couche externe\nconcernés par l’effet noyau)", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD3-Q10", "num": 10, "question": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante.", "correction": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case\ncorrespondante.\nVRAI FAUX\nL’agrandissement d’un objet augmente si on l’éloigne du détecteur et\ninversement\nX\nThorax en Procubitus pour réduire la taille du cœur\nL’agrandissement d’un objet diminue si on approche le tube de cet objet\net inversement\nInverse plus on éloigne le tube de l’objet plus celui-ci diminue et inversement\nX\nplus on approche l’objet du tube plus on l’agrandit\nRx thorax à 1m50 - 1m80 de Face pour diminuer taille projection Ps pour qu’ils\nentrent dans la cassette – Profil G : éviter agrandissement Ps D / Ps G et\ndiminuer la silhouette cardiaque)\nSi la projection de l’objet sur le détecteur est perpendiculaire la forme de\nl’objet sera modifiée X\nElle ne sera pas modifiée\n18\nSi la projection de l’objet sur le détecteur est oblique la forme de l’objet ne\nsera pas modifiée X\nElle sera modifiée : distorsion - déformation de l’objet\nSi l’objet n’est pas parallèle au détecteur, la forme de l’objet sera modifiée\nX\nEn imagerie de projection, le volume radiographié est projeté en 3D\nX\nEn 2D : Superposition\nLes règles d’optique radiologique sont l’agrandissement et la déformation\nX\n19\nInstitut de Formation Public Varois des Professions de Santé - N° de déclaration d’activité 93.83.04918.83 (cet enregistrement ne vaut pas agrément de l’Etat) - FINESS EJ : 83 000 904 9 - SIRET : 130 016 561 000 24 -\nCode APE 8412Z - DATADOCK : 0014425 - DPC : 1073\nSiège administratif : 32 av. Becquerel, ZI Toulon Est, 83130 La Garde – Tel : 04 94 14 72 14", "isFlash": false, "keywords": [], "type": "long"}]}, "TD4": {"title": "TD4 — Scanographie (chaîne, paramètres, dose, reconstruction)", "questions": [{"id": "TD4-Q1", "num": 1, "question": "Explicitez les 4 systèmes constituant la chaine scanographique : 1………………………………………………………………………………………………………….", "correction": "Explicitez les 4 systèmes constituant la chaine scanographique :\n1………………………………………………………………………………………………………….\n………………………………………………………………………………………………………………\n2………………………………………………………………………………………………………….\n………………………………………………………………………………………………………………\n3………………………………………………………………………………………………………….\n………………………………………………………………………………………………………………\n4………………………………………………………………………………………………………….\n………………………………………………………………………………………………………………\n1. Système d'acquisition : Tube à rayons X, un générateur, des détecteurs, et un statif\n2. Système de traitement des données : Systèmes de reconstruction, des filtres de\nreconstruction, une matrice, ...\n3. Système de restitution et de visualisation des données : une console, fenêtrage de\nl'image\n4. Système de communication et d'archivage : enregistrement des données sur différents\nsupports de gestion et stockage (PACS)", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q2", "num": 2, "question": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case correspondante.", "correction": "Pour chaque affirmation ci-dessous, cochez « Vrai » ou « Faux » dans la case\ncorrespondante.\nVRAI FAUX\nLes scanners d’aujourd’hui sont de 3ème génération, à rotation continue,\nX\nau pas hélicoïdal spiralé et multi barrettes\nSur ces scanners, le transfert électrique se fait par l’intermédiaire de la\nWIFI\nX\nLe transfert du courant aux éléments du statif mobile se fait par l’intermédiaire de bagues\ncollectrices (frotteurs ou slip ring) glissant l’une sur l’autre, une partie étant fixée sur la partie\nmobile du statif et l’autre sur la partie fixe\n2\nLe transfert des données se fait via les SLIP RING ou la WIFI X\nLe stator est la partie mobile du statif\nX\nPartie fixe comprend : Le tunnel généralement de 70 cm de diamètre - Les éléments de contrôle\nmécanique pour les différents mouvements du statif. - Les éléments de réception et de\ntransmission de données numériques et d’alimentation électrique.\nLe rotor est la partie fixe du statif\nX\nPartie mobile comprend : Le générateur de haute tension - Le tube à rayons X. - Les circuits\nde refroidissements. - Le système de détection et l’électronique associée. - Quelques\nprocesseurs rapides et le système de transmission de données\nUn scanner mono-barrette est un scanner ayant 1 seule couronne de\nX\ndétecteur dans l’axe Z\nUn scanner dit « 64 barrettes » est un scanner possédant dans l’axe Z 32\nrangées de détecteurs X\nIll possède 64 rangées de détecteurs dans l’axe Z", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q3", "num": 3, "question": "1. Complétez ce texte à trou concernant les caractéristiques d’un générateur scanographique", "correction": "1. Complétez ce texte à trou concernant les caractéristiques d’un générateur\nscanographique\nHaute tension continue délivrée : ……. à ………kV\nIntensité constante : ……. à ……….mA\nPuissance totale de ……… à …….. kW\nHaute tension continue délivrée : 70 à 140 kV\nIntensité constante : 10 à 1000 mA\nPuissance totale de 50 à 60 kW\n3\n2. Précisez les 2 caractéristiques de performance d’un tube à RX scanographique\n1………………………………………………………………………………………………………….\n2………………………………………………………………………………………………………….\n1. Absorber de fortes contraintes thermiques (capacité thermique : 3 à 7 MUC – tube en Rx :\n0,3 MUC)\n2. Dissiper de fortes chaleurs (dissipation thermique importante : 0,1 MUC / min)", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q4", "num": 4, "question": "1. Complétez ce texte à trou Un scanner à rotation continue dispose de 2 détecteurs.", "correction": "1. Complétez ce texte à trou\nUn scanner à rotation continue dispose de 2 détecteurs.\nUn détecteur …………………… positionné à la sortie du tube qui est\nune …………………… d’ ………………….. et mesure les ……………………. de ……………..\nscanographiques.\nDes détecteurs …………………….. appelés ………………….. et positionnés ……………..\nle patient. Le rôle de ces détecteurs est de recueillir les Rx ayant ………………….. le\npatient et de ……………………. ce faisceau émergent en ………………\n…………………………...\nUn scanner à rotation continue dispose de 2 détecteurs.\nUn détecteur primaire positionné à la sortie du tube qui est une chambre d’ionisation et mesure les\nindicateurs de doses scanographiques.\nDes détecteurs secondaires appelés barrettes et positionnés après le patient. Le rôle de ces détecteurs\nest de recueillir les Rayons X ayant traversé le patient et de transformer ce faisceau émergent en signal\nélectrique.\n2. Citez les 3 technologies de détecteurs secondaires utilisés en scanographie\n1………………………………………………………………………………………………………….\n2………………………………………………………………………………………………………….\n3………………………………………………………………………………………………………….\n1. Chambres d’ionisation au Xénon\n4\n2. Détecteurs solides\nIntégratif : intégration de l’intensité de RX ayant traversé le cristal\n3. Détecteurs à comptage photonique\nA conversion direct : RX convertis en charges électriques\nInteraction des rayons X avec le semi-conducteur créant des paires de « trou-électron » - les\ne- attirés vers l’anode et le trou + est attiré vers la cathode\nNon intégratif : mesure directement et individuellement le nombre et énergie des RX\nAmélioration résolution spatiale, en contraste et réduction de la dose", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q5", "num": 5, "question": "Renseignez le tableau ci-dessous concernant les 2 filtrations scanographiques Dénomination de la Localisation de la filtration Rôle de la filtration", "correction": "Renseignez le tableau ci-dessous concernant les 2 filtrations scanographiques\nDénomination de la Localisation de la filtration Rôle de la filtration\nfiltration\n1 Filtre plat En sortie du tube Homogénéiser le faisceau\nRx en sortie de tube\n(Arrêt des Rx mous) –\nProcessus de « Durcissement\n5\ndu faisceau » - en aluminium\n(minima 2,5 mm)\n2 Filtre papillon Entre le filtre plan et le Homogénéiser l’irradiation\ncollimateur primaire dans le volume\nForme adaptée à la morphologie\ndu patient", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q6", "num": 6, "question": "Attribuez à chacun des collimateurs les caractéristiques ci-dessous lui correspondant : 1 Situé à la sortie du tube", "correction": "Attribuez à chacun des collimateurs les caractéristiques ci-dessous lui correspondant :\n1 Situé à la sortie du tube\n2 Placé devant le détecteur\n3 Positionné après le filtrage\n4 Limite les pénombres radiologiques\n5 Délimitation de l’ouverture du champ (x,y)\n6 Affine le profil de coupe (en z)\n7 Epaisseur de collimation (z)\nCOLLIMATEUR NUMEROS DES CARACTERISTIQUES ASSOCIEES\nCollimateur PRIMAIRE 1 – 3 – 5 - 7\nCollimateur SECONDAIRE 2 – 4 - 6\n6", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q7", "num": 7, "question": "Identifiez le mode d’acquisition scanographiques au vu des caractéristiques listées : Mode RADIO /", "correction": "Identifiez le mode d’acquisition scanographiques au vu des caractéristiques listées :\nMode RADIO /\nacquisition CINE SEQUENTIEL SCOUT/ HELICOIDAL\nTOPOGRAMME\nTube-détecteur Rotation 1 rotation Fixe Rotation\ncontinue continue\nTable Fixe Fixe Déplacement Déplacement\nAcquisition Continue sur la Coupe après Face et profil Exploration d’un\nmême zone coupe volume en une\nseule\nacquisition\nInterventionnel Une seule Image de Conventionnel\nUtilisation Perfusion région repérage Oncologie\nanatomique en Modulation des Urgence\n1 seule rotation mA Pédiatrie\n(cœur- crane)\n7", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q8", "num": 8, "question": "A partir de l’image de cette interface de scanner, renseignez le tableau ci-après : ODM : Organ Dose Modulation", "correction": "A partir de l’image de cette interface de scanner, renseignez le tableau ci-après :\nODM : Organ Dose Modulation\nNombre total d’images 245\nacquises\nMode d’acquisition HELICOIDAL Tube-détecteur rotation continue\n– Table en déplacement\nS pour au-dessus du zéro\nPosition de départ S30 30 pour 30 mm au-dessus du\nzéro\nI pour au-dessous du zéro\nPosition de fin I275 275 pour 275 mm au-dessous du\nzéro\nEpaisseur nominale 1,25 mm 32 coupes par rotation –\ncouplage de 2 barrettes de 0,625\npour faire une coupe\nCollimation de 40 mm (32x1,25)\nPitch 1,375 Coupes disjonctives Interpolation\nTension 120 kV Pénétration du faisceau X\nAdapté à la région anatomique et\népaisseur\nIntensité maximale 450 mA Charge : mAs – Quantité de RX\némis\n8\nCorrespond au diamètre du\nChamp d’acquisition Large body champ d’acquisition dans le plan\nXY.\n• Large Body = 50 cm\n• Small Body = 35 cm\n• Head = 25 cm\nVitesse de rotation du 0,4 s Temps mis par le tube pour faire\ntube une rotation complète de 360°\nDurée de l’acquisition 2,7 s Durée d’émission des RX\nDéfinir le pitch : correspond au déplacement de la table\nExpliciter les différents pitch :\nPitch < 1 Pitch = 1 Pitch > 1\nCoupes chevauchées Coupes jointives Coupes dis jointives\nBelle qualité image Bonne qualité image Mauvaise qualité image\nBelle reconstruction Bonne reconstruction Perte d’information\nTrès irradiant Moins irradiant que le pitch Moins de signal (calcul\ninférieur à 1 informatique par le\nprocesseur vectoriel pour\ncréer l’image\n9\nDonner les différents champs de vue en acquisition scanner :\nLarge Body (50 cm)\nSmall Body (35 cm)\nHead (25 cm)", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q9", "num": 9, "question": "Donner le mot qui correspond à la définition : Matrice Représente la surface en 2D avec des lignes et des colonnes", "correction": "Donner le mot qui correspond à la définition :\nMatrice Représente la surface en 2D avec des lignes et des colonnes\nImage Constitué de niveau de gris\nPixel Représente l’unité de surface\nVoxel Représente l’unité de surface + l’épaisseur de coupe\nDéfinir la reconstruction de l’image :\nC’est l’étape de traitement entre la détection de l’information la visualisation de l’image\nCiter les étapes de la reconstruction de l’image\nTraitement via calcul matriciel\nProfil d’atténuation : ensemble de signaux électriques fourni par la totalité des détecteurs par\nun angle de rotation donné,\nEnregistrement d’une série de profils d’atténuation résultants de la traversée de la même\ncoupe selon différents angles de rotation = 1000 mesures par rotation\nImportance de multiplier les incidences et en déterminer un coefficient satisfaisant moyen\nObtenir une image scanner points par points avec les différentes densités\nDétection via les détecteurs\nRecueil de l’information : amplifier le signal, numériser le signal, émettre un signal électrique\nLa totalité des projections mesurées par les détecteurs sont regroupées dans un même\nensemble appelé SINOGRAMME\nVisualisation : matrice image et fenêtre UH\nMesure de la densité de chaque pixel de la matrice (calcul matriciel)\n10\nCiter les 2 méthodes analytiques de la reconstruction :\nRétro projection par transformée de Fourier\nMéthode algébrique dite itérative", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q10", "num": 10, "question": "Donner le mot qui correspond à la définition concernant les facteurs de qualité de l’image : Signal Intensité du voxel (nombre caractérisant la mesure physique)", "correction": "Donner le mot qui correspond à la définition concernant les facteurs de qualité de l’image :\nSignal Intensité du voxel (nombre caractérisant la mesure physique)\nBruit Signal aléatoire provenant du système, de l’environnement\nRapport S/B Facteur qui conditionne la qualité de l’image\nRésolution de Différenciation des structures à faible contraste\ncontraste\nRésolution spatiale Distinction de petites structures à fort contraste et des objets proches\nRésolution Capacité à la machine à acquérir rapidement des données\ntemporelle", "isFlash": false, "keywords": [], "type": "long"}, {"id": "TD4-Q11", "num": 11, "question": "Définir les différents artéfacts : 1)métallique 2 )mouvement 3) moulin à vent", "correction": "Définir les différents artéfacts :\n1)métallique 2 )mouvement 3) moulin à vent\n11", "isFlash": false, "keywords": [], "type": "long"}]}, "TD5": {"title": "Révisions Générales", "questions": [{"id": "td5-q1", "num": 1, "question": "Définir l'atome et sa composition (révision)", "correction": "Voir TD1-Q1 pour réponse complète", "type": "flash", "keywords": ["atome", "noyau", "protons", "neutrons", "électrons", "couches"], "isFlash": true}, {"id": "td5-q2", "num": 2, "question": "2 types d'interaction émettrices de RX: nommer et expliciter mécanismes", "correction": "Voir TD1-Q5, TD1-Q6, TD1-Q7 pour réponses complètes", "type": "flash", "keywords": ["freinage", "bremsstrahlung", "caractéristique", "fluorescence", "électron", "noyau"], "isFlash": true}, {"id": "td5-q3", "num": 3, "question": "Annoter schéma tube RX (10 éléments) - Révision", "correction": "Voir TD1-Q8 pour réponse complète", "type": "flash", "keywords": ["cathode", "filament", "anode", "ddp", "filtre", "diaphragme", "rayons", "refroidissement", "enceinte", "gaine"], "isFlash": true}, {"id": "td5-q4", "num": 4, "question": "3 paramètres d'exposition + influence sur faisceau RX", "correction": "3 PARAMÈTRES D'EXPOSITION:\n\n1. kV (TENSION):\n   - Influence: Énergie des photons X\n   - Pouvoir de pénétration\n   - Contraste (kV↑ = contraste↓)\n\n2. mA (INTENSITÉ):\n   - Influence: Quantité d'e⁻ et de photons X\n   - Rapport Signal/Bruit\n   - Noircissement\n\n3. s (TEMPS DE POSE):\n   - Influence: Quantité de photons X\n   - Charge totale (mAs = mA × s)\n   - Durée exposition", "type": "flash", "keywords": ["kV", "tension", "énergie", "pénétration", "mA", "quantité", "photons", "temps", "pose"], "isFlash": true}, {"id": "td5-q5", "num": 5, "question": "Expliquer l'effet photoélectrique (révision)", "correction": "Voir TD1-Q14 pour réponse complète", "type": "flash", "keywords": ["photoélectrique", "photon", "électron", "énergie", "ionisation", "fluorescence"], "isFlash": true}, {"id": "td5-q6", "num": 6, "question": "Échelle Hounsfield: concept, UH, valeurs (os, eau, air)", "correction": "ÉCHELLE HOUNSFIELD:\n\nCONCEPT:\n- Comparer densités du corps\n- Référence: Absorption de l'EAU\n- Unités Hounsfield (UH) = Nombre CT (NCT)\n\nVALEURS CLÉS:\n- OS: +1000 UH (structures denses)\n- EAU: 0 UH (référence)\n- AIR: -1000 UH (structures peu denses)\n\nZONES:\n- Structures peu denses: Négative (poumons)\n- Tissus mous: -100 à +100 UH\n- Structures denses: +100 à plusieurs milliers UH", "type": "flash", "keywords": ["Hounsfield", "UH", "densité", "atténuation", "eau", "référence", "1000", "-1000"], "isFlash": true}]}};
+
+/* ====== Persistance ====== */
+const LS_KEY = "UE32_ULTIME_REVISION_V1";
+const defaultState = {
+  customQuestions: [],
+  attachments: {}, // qid -> [{name,dataUrl,addedAt}]
+  progress: {}, // qid -> {status:"ok"|"ko"|null, myAnswer:"", updatedAt}
+  settings: {
+    strictCase: true,
+    strictAccents: true
+  }
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return structuredClone(defaultState);
+    const parsed = JSON.parse(raw);
+    // migration légère
+    return Object.assign(structuredClone(defaultState), parsed);
+  } catch(e) {
+    console.warn(e);
+    return structuredClone(defaultState);
+  }
+}
+function saveState() {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+}
+function structuredClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+let state = loadState();
+
+/* ====== Helpers ====== */
+const $ = (sel) => document.querySelector(sel);
+const el = (tag, attrs={}, children=[]) => {
+  const n = document.createElement(tag);
+  for (const [k,v] of Object.entries(attrs)) {
+    if(k==="class") n.className = v;
+    else if(k==="html") n.innerHTML = v;
+    else if(k==="text") n.textContent = v;
+    else if(k.startsWith("on") && typeof v === "function") n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  for (const c of children) n.append(c);
+  return n;
+};
+function toast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.style.display = "block";
+  clearTimeout(toast._to);
+  toast._to = setTimeout(()=>t.style.display="none", 2300);
+}
+
+function nowISO() {
+  return new Date().toISOString();
+}
+
+function listAllQuestions() {
+  const all = [];
+  for (const [tdKey, td] of Object.entries(BUILTIN)) {
+    for (const q of td.questions) {
+      all.push({...q, tdKey, sectionTitle: td.title, builtin:true});
+    }
+  }
+  for (const q of state.customQuestions) {
+    all.push({...q, tdKey: q.tdKey || "CUSTOM", sectionTitle: q.sectionTitle || "Mes questions", builtin:false});
+  }
+  return all;
+}
+
+function getStatus(qid) {
+  return state.progress[qid]?.status ?? null;
+}
+function setStatus(qid, status) {
+  state.progress[qid] = state.progress[qid] || {status:null,myAnswer:"",updatedAt:null};
+  state.progress[qid].status = status;
+  state.progress[qid].updatedAt = nowISO();
+  saveState();
+}
+
+function setMyAnswer(qid, txt) {
+  state.progress[qid] = state.progress[qid] || {status:null,myAnswer:"",updatedAt:null};
+  state.progress[qid].myAnswer = txt;
+  state.progress[qid].updatedAt = nowISO();
+  saveState();
+}
+
+function getMyAnswer(qid) {
+  return state.progress[qid]?.myAnswer ?? "";
+}
+
+function getAttachments(qid) {
+  return state.attachments[qid] || [];
+}
+function addAttachment(qid, fileName, dataUrl) {
+  state.attachments[qid] = state.attachments[qid] || [];
+  state.attachments[qid].push({name:fileName, dataUrl, addedAt: nowISO()});
+  saveState();
+}
+function removeAttachment(qid, idx) {
+  const arr = state.attachments[qid] || [];
+  arr.splice(idx,1);
+  state.attachments[qid] = arr;
+  saveState();
+}
+
+/* ====== Filtre + sélection ====== */
+let currentList = [];
+let currentIndex = 0;
+
+function applyFilters() {
+  const q = $("#search").value.trim();
+  const filter = $("#filter").value;
+
+  const all = listAllQuestions();
+
+  const qNorm = q.toLowerCase();
+  const filtered = all.filter(item => {
+    const text = (item.question + "\n" + (item.correction||"") + "\n" + (item.answerExpected||"") + "\n" + (item.keywords||[]).join(" ")).toLowerCase();
+    const matchesSearch = !qNorm || text.includes(qNorm);
+
+    const status = getStatus(item.id);
+    const isCustom = !item.builtin;
+
+    let matchesFilter = true;
+    if(filter==="todo") matchesFilter = (status===null);
+    if(filter==="ok") matchesFilter = (status==="ok");
+    if(filter==="ko") matchesFilter = (status==="ko");
+    if(filter==="custom") matchesFilter = isCustom;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  currentList = filtered;
+  $("#count").textContent = filtered.length + " items";
+  renderTDList();
+  if(filtered.length===0) {
+    renderEmpty();
+    return;
+  }
+  // keep current if possible
+  const curId = currentList[currentIndex]?.id;
+  let keepIdx = filtered.findIndex(x=>x.id===curId);
+  if(keepIdx<0) keepIdx = 0;
+  currentIndex = keepIdx;
+  renderQuestion();
+}
+
+function renderEmpty() {
+  $("#qView").innerHTML = "";
+  $("#qView").append(
+    el("div", {class:"hint"}, [
+      el("div", {html:"Aucune question ne correspond au filtre / à la recherche."}),
+      el("div", {html:"Astuce : enlève le filtre, ou clique sur <b>Ajouter</b> pour créer tes propres Q/R." , style:"margin-top:8px"})
+    ])
+  );
+}
+
+function statusLabel(status) {
+  if(status==="ok") return '<span class="statusOk">Je sais</span>';
+  if(status==="ko") return '<span class="statusKo">À revoir</span>';
+  return '<span class="statusNone">À faire</span>';
+}
+
+function renderTDList() {
+  const root = $("#tdList");
+  root.innerHTML = "";
+
+  // compute counts by TD
+  const counts = {};
+  for (const item of currentList) {
+    const key = item.tdKey;
+    counts[key] = counts[key] || {total:0, ok:0, ko:0, todo:0};
+    counts[key].total++;
+    const st = getStatus(item.id);
+    if(st==="ok") counts[key].ok++;
+    else if(st==="ko") counts[key].ko++;
+    else counts[key].todo++;
+  }
+
+  const order = ["TD1","TD2","TD3","TD4","TD5","CUSTOM"];
+  for (const tdKey of order) {
+    // show only if present
+    const c = counts[tdKey];
+    if(!c) continue;
+
+    const title = tdKey==="CUSTOM" ? "Mes questions" : (BUILTIN[tdKey]?.title || tdKey);
+    const btn = el("button", {class:"tdBtn"}, [
+      el("span", {text: title}),
+      el("span", {class:"pill", html:`${c.ok} OK • ${c.ko} rev. • ${c.todo} à faire`})
+    ]);
+    btn.addEventListener("click", () => {
+      // jump to first question of this TD
+      const idx = currentList.findIndex(x=>x.tdKey===tdKey);
+      if(idx>=0) {
+        currentIndex = idx;
+        renderQuestion();
+      }
+    });
+    root.append(btn);
+  }
+}
+
+function renderQuestion() {
+  const item = currentList[currentIndex];
+  if(!item) return renderEmpty();
+
+  const status = getStatus(item.id);
+  const metaChips = [
+    el("span", {class:"chip", html:`${item.tdKey}`}),
+    el("span", {class:"chip", html:statusLabel(status)}),
+    el("span", {class:"chip", html:`#${currentIndex+1}/${currentList.length}`})
+  ];
+  if(item.keywords && item.keywords.length) metaChips.push(el("span", {class:"chip", text:`tags: ${item.keywords.slice(0,4).join(", ")}${item.keywords.length>4?"…":""}`}));
+
+  const navRow = el("div", {class:"row"}, [
+    el("button", {id:"prevBtn", html:"◀︎ Préc."}),
+    el("button", {id:"nextBtn", html:"Suiv. ▶︎"}),
+    el("button", {id:"randBtn2", html:"🎲"}),
+    el("span", {class:"grow"}),
+    el("button", {id:"markOk", html:"✅ Je sais"}),
+    el("button", {id:"markKo", html:"🟠 À revoir"})
+  ]);
+
+  const header = el("div", {class:"qHeader"}, [
+    el("div", {}, [
+      el("h1", {text: item.question}),
+      el("div", {class:"hint", html: item.sectionTitle})
+    ]),
+    el("div", {class:"meta"}, metaChips)
+  ]);
+
+  const schemaBox = renderSchemas(item.id);
+
+  const myAnswer = el("textarea", {id:"myAnswer", placeholder:"Ta réponse / tes notes (sauvegardé automatiquement)…"});
+  myAnswer.value = getMyAnswer(item.id);
+  myAnswer.addEventListener("input", () => setMyAnswer(item.id, myAnswer.value));
+
+  const checkArea = el("div", {});
+  if(!item.builtin) {
+    // custom question: allow auto-check if answerExpected exists
+    const expected = item.answerExpected || "";
+    const opts = item.checkOptions || {plural:true, contains:false};
+    const btnCheck = el("button", {html:"Vérifier ma réponse"});
+
+    btnCheck.addEventListener("click", () => {
+      const mine = myAnswer.value.trim();
+      if(!expected.trim()) {
+        toast("Aucune réponse attendue pour vérifier (tu peux la définir en ré-ajoutant la question).");
+        return;
+      }
+      const ok = checkAnswer(mine, expected, opts);
+      toast(ok ? "✅ Correct (selon les règles)" : "❌ Pas identique (selon les règles)");
+      setStatus(item.id, ok ? "ok" : "ko");
+      renderTDList();
+      renderQuestion();
+    });
+    checkArea.append(
+      el("div", {class:"hint", html:`<b>Réponse attendue</b> (pour vérif auto) : <span class="kbd">${escapeHtml(expected).slice(0,120)}${expected.length>120?"…":""}</span>`}),
+      el("div", {style:"margin-top:8px"}, [btnCheck])
+    );
+  }
+
+  const correctionText = item.builtin ? (item.correction || "") : (item.correction || "");
+  const correctionBlock = el("div", {class:"correction", id:"corr", style:"display:none"}, [
+    el("div", {class:"hint", html:"Correction / rappel :"}),
+    el("div", {html: escapeHtml(correctionText).replace(/\n/g,"<br/>")})
+  ]);
+  const btnToggleCorr = el("button", {id:"toggleCorr", html:"👁️ Afficher la correction"});
+  btnToggleCorr.addEventListener("click", () => {
+    const show = correctionBlock.style.display==="none";
+    correctionBlock.style.display = show ? "block" : "none";
+    btnToggleCorr.innerHTML = show ? "🙈 Masquer la correction" : "👁️ Afficher la correction";
+  });
+
+  const topButtons = el("div", {class:"row"}, [
+    btnToggleCorr,
+    el("span", {class:"grow"}),
+    el("label", {class:"btn"}, [
+      el("span", {text:"📎 Ajouter un schéma"}),
+      el("input", {type:"file", accept:"image/*", style:"display:none", id:"fileAttach"})
+    ]),
+    el("button", {id:"btnDeleteCustom", html:"🗑️ Supprimer (si perso)", style:"display:none"})
+  ]);
+
+  const view = $("#qView");
+  view.innerHTML = "";
+  view.append(header, navRow, el("div", {class:"hr"}), topButtons, schemaBox, el("div", {class:"hr"}),
+              el("div", {class:"hint", html:"<b>Ta réponse / tes notes</b> (tu peux écrire comme tu veux : liste, schéma, formules…)" }),
+              myAnswer);
+  if(checkArea.childNodes.length) {
+    view.append(el("div", {class:"hr"}), checkArea);
+  }
+  view.append(el("div", {class:"hr"}), correctionBlock);
+
+  // nav handlers
+  $("#prevBtn").disabled = currentIndex===0;
+  $("#nextBtn").disabled = currentIndex===currentList.length-1;
+  $("#prevBtn").onclick = () => { currentIndex = Math.max(0, currentIndex-1); renderQuestion(); };
+  $("#nextBtn").onclick = () => { currentIndex = Math.min(currentList.length-1, currentIndex+1); renderQuestion(); };
+  $("#randBtn2").onclick = () => { gotoRandom(); };
+  $("#markOk").onclick = () => { setStatus(item.id, "ok"); toast("Marqué : Je sais"); renderTDList(); renderQuestion(); };
+  $("#markKo").onclick = () => { setStatus(item.id, "ko"); toast("Marqué : À revoir"); renderTDList(); renderQuestion(); };
+
+  // attachments upload
+  $("#fileAttach").addEventListener("change", async (ev) => {
+    const file = ev.target.files?.[0];
+    if(!file) return;
+    const dataUrl = await fileToDataURL(file);
+    addAttachment(item.id, file.name, dataUrl);
+    toast("Schéma ajouté");
+    renderQuestion();
+  });
+
+  // delete custom
+  if(!item.builtin) {
+    const del = $("#btnDeleteCustom");
+    del.style.display = "inline-flex";
+    del.onclick = () => {
+      const idx = state.customQuestions.findIndex(q=>q.id===item.id);
+      if(idx>=0) {
+        if(confirm("Supprimer définitivement cette question personnalisée ?")) {
+          state.customQuestions.splice(idx,1);
+          delete state.progress[item.id];
+          delete state.attachments[item.id];
+          saveState();
+          toast("Question supprimée");
+          applyFilters();
+        }
+      }
+    };
+  }
+}
+
+function renderSchemas(qid) {
+  const att = getAttachments(qid);
+  const box = el("div", {}, []);
+  if(att.length===0) {
+    box.append(el("div", {class:"hint", html:"Aucun schéma associé à cette question pour l’instant."}));
+    return box;
+  }
+  const grid = el("div", {class:"schemaGrid"}, []);
+  att.forEach((a, idx) => {
+    const card = el("div", {class:"schemaCard"}, [
+      el("img", {src:a.dataUrl, alt:a.name}),
+      el("div", {class:"cap"}, [
+        el("span", {text:a.name}),
+        el("button", {html:"✕", title:"Retirer ce schéma"})
+      ])
+    ]);
+    card.querySelector("button").addEventListener("click", () => {
+      removeAttachment(qid, idx);
+      toast("Schéma retiré");
+      renderQuestion();
+    });
+    grid.append(card);
+  });
+  box.append(el("div", {class:"hint", html:"Schémas associés :"}), grid);
+  return box;
+}
+
+function escapeHtml(s) {
+  return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+}
+
+async function fileToDataURL(file) {
+  return await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ====== Vérification pour les questions perso ====== */
+function checkAnswer(mine, expected, opts) {
+  // règles : accents & casse stricts par défaut (mine === expected) sauf options
+  mine = (mine ?? "").trim();
+  expected = (expected ?? "").trim();
+  if(!mine || !expected) return false;
+
+  // Option "contains"
+  if(opts?.contains) {
+    // Containment strict (casse + accents) ; plural option applied to expected variants
+    return containsWithPlural(mine, expected, !!opts?.plural);
+  }
+  // Equality strict + variantes pluriel
+  if(mine === expected) return true;
+  if(opts?.plural) {
+    const variants = pluralVariants(expected);
+    return variants.includes(mine);
+  }
+  return false;
+}
+
+function pluralVariants(s) {
+  // simple variants: add/remove trailing s/es (very basic)
+  const v = new Set([s]);
+  if(s.endsWith("s")) v.add(s.slice(0,-1));
+  if(s.endsWith("es")) v.add(s.slice(0,-2));
+  v.add(s + "s");
+  v.add(s + "es");
+  return Array.from(v);
+}
+
+function containsWithPlural(mine, expected, plural) {
+  if(mine.includes(expected)) return true;
+  if(!plural) return false;
+  for(const v of pluralVariants(expected)) {
+    if(mine.includes(v)) return true;
+  }
+  return false;
+}
+
+/* ====== Ajout question perso ====== */
+function openAddDialog() {
+  const dlg = $("#dlgAdd");
+  const sel = $("#addSection");
+  sel.innerHTML = "";
+  // built-in sections + custom bucket
+  for(const [k,td] of Object.entries(BUILTIN)) {
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.textContent = td.title;
+    sel.append(opt);
+  }
+  const opt2 = document.createElement("option");
+  opt2.value = "CUSTOM";
+  opt2.textContent = "Mes questions (hors TD)";
+  sel.append(opt2);
+
+  $("#addForm").reset();
+  $("#addSchemaPreview").innerHTML = "";
+  $("#addSchema").value = "";
+  delete $("#addSchemaPreview").dataset.dataUrl;
+  delete $("#addSchemaPreview").dataset.name;
+  dlg.showModal();
+}
+
+$("#addSchema").addEventListener("change", async (ev) => {
+  const file = ev.target.files?.[0];
+  const prev = $("#addSchemaPreview");
+  prev.innerHTML = "";
+  delete prev.dataset.dataUrl;
+  delete prev.dataset.name;
+  if(!file) return;
+  const dataUrl = await fileToDataURL(file);
+  const img = el("img", {src:dataUrl, style:"max-width:100%;border:1px solid var(--line);border-radius:14px"});
+  prev.append(img);
+  prev.dataset.dataUrl = dataUrl;
+  prev.dataset.name = file.name;
+});
+
+$("#btnSaveAdd").addEventListener("click", (ev) => {
+  ev.preventDefault();
+
+  const section = $("#addSection").value;
+  const qText = $("#addQuestion").value.trim();
+  if(!qText) {
+    toast("Question vide.");
+    return;
+  }
+  const id = "CUST-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,7);
+  const tags = $("#addTags").value.split(",").map(s=>s.trim()).filter(Boolean);
+
+  const answerExpected = $("#addAnswer").value.trim();
+  const correction = $("#addCorrection").value.trim();
+
+  const newQ = {
+    id,
+    num: null,
+    tdKey: section==="CUSTOM" ? "CUSTOM" : section,
+    sectionTitle: section==="CUSTOM" ? "Mes questions" : (BUILTIN[section]?.title || section),
+    question: qText,
+    correction: correction,
+    isFlash: true,
+    keywords: tags,
+    type: "custom",
+    answerExpected,
+    checkOptions: {
+      plural: $("#addPlural").checked,
+      contains: $("#addContains").checked
+    }
+  };
+
+  state.customQuestions.push(newQ);
+
+  // schema preview optional
+  const prev = $("#addSchemaPreview");
+  if(prev.dataset.dataUrl) {
+    addAttachment(id, prev.dataset.name || "schema", prev.dataset.dataUrl);
+  }
+
+  saveState();
+  $("#dlgAdd").close();
+  toast("Question ajoutée");
+  applyFilters();
+  // jump to newly added
+  const idx = currentList.findIndex(x=>x.id===id);
+  if(idx>=0) {
+    currentIndex = idx;
+    renderQuestion();
+  }
+});
+
+/* ====== Export ====== */
+function buildExportHTML() {
+  const exportState = state;
+  const exportBuiltin = BUILTIN;
+  // On reconstruit un fichier complet en ré-injectant ces deux objets.
+  const currentDoc = document.documentElement.outerHTML;
+
+  // Remplacer la définition BUILTIN et l'initialisation state
+  const replaced = currentDoc
+    .replace(/const BUILTIN = ([\s\S]*?);[\s]*\n\n\/\* ====== Persistance ====== \*\//, 
+             "const BUILTIN = " + JSON.stringify(exportBuiltin) + ";\n\n/* ====== Persistance ====== */")
+    .replace(/let state = loadState\(\);/, 
+             "let state = (function(){ try { return " + JSON.stringify(exportState) + "; } catch(e){ return loadState(); } })();\n  saveState();");
+  return replaced;
+}
+
+function doExport() {
+  const html = buildExportHTML();
+  const blob = new Blob([html], {type:"text/html;charset=utf-8"});
+  const a = document.createElement("a");
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  a.download = `UE32_ultime_revision_${y}-${m}-${dd}.html`;
+  a.href = URL.createObjectURL(blob);
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  }, 0);
+  toast("Export lancé");
+}
+
+/* ====== Raccourcis clavier ====== */
+document.addEventListener("keydown", (ev) => {
+  if((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase()==="k") {
+    ev.preventDefault();
+    $("#search").focus();
+  }
+  if(ev.key==="ArrowLeft") {
+    if(currentIndex>0) { currentIndex--; renderQuestion(); }
+  }
+  if(ev.key==="ArrowRight") {
+    if(currentIndex<currentList.length-1) { currentIndex++; renderQuestion(); }
+  }
+});
+
+function gotoRandom() {
+  if(currentList.length===0) return;
+  currentIndex = Math.floor(Math.random()*currentList.length);
+  renderQuestion();
+}
+
+/* ====== Wiring UI ====== */
+$("#search").addEventListener("input", () => applyFilters());
+$("#filter").addEventListener("change", () => applyFilters());
+$("#btnRandom").addEventListener("click", () => gotoRandom());
+$("#btnAdd").addEventListener("click", () => openAddDialog());
+$("#btnExport").addEventListener("click", () => $("#dlgExport").showModal());
+$("#btnDoExport").addEventListener("click", (ev) => { ev.preventDefault(); $("#dlgExport").close(); doExport(); });
+
+$("#btnReset").addEventListener("click", () => {
+  if(confirm("Réinitialiser uniquement ta progression et tes notes ? (Tes questions perso et schémas restent.)")) {
+    state.progress = {};
+    saveState();
+    toast("Progression réinitialisée");
+    applyFilters();
+  }
+});
+
+// initial render
+applyFilters();
+renderQuestion();
+</script>
+
+</body>
+</html>

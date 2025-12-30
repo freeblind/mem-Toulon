@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD3 - Chaîne Radiologique en Imagerie de Projection - Version Interactive</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .progress-bar { background: #f0f0f0; height: 8px; margin: 20px 30px; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); width: 0%; transition: width 0.5s ease; }
+        .question-container { padding: 30px; display: none; }
+        .question-container.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .question-header { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 5px solid #667eea; }
+        .question-number { color: #667eea; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; color: #333; }
+        .answer-input { width: 100%; min-height: 120px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; font-family: inherit; resize: vertical; transition: border-color 0.3s; }
+        .answer-input:focus { outline: none; border-color: #667eea; }
+        .button-group { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 30px; border: none; border-radius: 8px; font-size: 1em; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .feedback { margin-top: 20px; padding: 15px; border-radius: 10px; display: none; animation: slideDown 0.3s; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .feedback.show { display: block; }
+        .feedback.correct { background: #d4edda; border: 2px solid #28a745; color: #155724; }
+        .feedback.incorrect { background: #f8d7da; border: 2px solid #dc3545; color: #721c24; }
+        .feedback.accepted { background: #d1ecf1; border: 2px solid #17a2b8; color: #0c5460; }
+        .solution { margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .solution h4 { color: #856404; margin-bottom: 10px; }
+        .mcq-options { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .mcq-option { display: flex; align-items: center; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .mcq-option:hover { border-color: #667eea; background: #f8f9fa; }
+        .mcq-option input[type="checkbox"], .mcq-option input[type="radio"] { width: 20px; height: 20px; margin-right: 15px; cursor: pointer; }
+        .mcq-option.selected { border-color: #667eea; background: #e7f1ff; }
+        .navigation { display: flex; justify-content: space-between; padding: 30px; background: #f8f9fa; border-top: 1px solid #e0e0e0; }
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        th, td { padding: 15px; text-align: left; border: 2px solid #e0e0e0; }
+        th { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; }
+        td input[type="text"] { width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; font-size: 0.95em; }
+        td input[type="text"]:focus { outline: none; border-color: #667eea; }
+        .solution-row { background: #fff3cd !important; font-style: italic; color: #856404; display: none; }
+        .solution-row.show { display: table-row; }
+        .solution-cell { font-weight: 500; font-size: 0.9em; }
+        .schema-upload { margin-top: 30px; padding: 30px; border: 3px dashed #667eea; border-radius: 15px; background: #f8f9fa; }
+        .upload-area { text-align: center; padding: 40px; cursor: pointer; transition: background 0.3s; }
+        .upload-area:hover { background: #e7f1ff; }
+        .upload-icon { font-size: 3em; color: #667eea; margin-bottom: 15px; }
+        .image-container-wrapper { position: relative; display: inline-block; max-width: 100%; }
+        .schema-image-display { display: block; max-width: 100%; height: auto; }
+        .annotation-canvas { position: absolute; top: 0; left: 0; cursor: crosshair; z-index: 10; pointer-events: auto; }
+        .label-item { display: grid; grid-template-columns: 60px 1fr 100px; gap: 15px; align-items: center; padding: 15px; background: #f8f9fa; border-radius: 10px; margin-bottom: 12px; }
+        .label-number-display { width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2em; }
+        .label-input { padding: 12px; border: 2px solid #dee2e6; border-radius: 8px; font-size: 1em; }
+        .delete-label { padding: 10px; background: #e74c3c; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .nav-btn { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin: 5px; }
+        .nav-btn:hover { background: #764ba2; }
+        .nav-buttons { text-align: center; margin-top: 20px; }
+        .stats { padding: 30px; background: #f8f9fa; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2.5em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; margin-top: 10px; }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.5em; }
+            .button-group { flex-direction: column; }
+            .btn { width: 100%; }
+            .navigation { flex-direction: column; gap: 15px; }
+            table { font-size: 0.85em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 TD N°3 - Chaîne Radiologique en Imagerie de Projection</h1>
+            <p>UE 3.2 S1 - Version Interactive Complète</p>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Question 1 - Schéma Table Radiologique -->
+        <div class="question-container active" id="question1">
+            <div class="question-header">
+                <div class="question-number">Question 1</div>
+                <div class="question-text">
+                    <strong>Nommer tous les éléments qui composent la table radiologique</strong><br><br>
+                    Uploadez le schéma de la table radiologique et identifiez tous ses éléments (tube à rayons X, collimateur, colonne, plateau, chariot, cadre, bâti, capteur plan, etc.)
+                </div>
+            </div>
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone1" onclick="document.getElementById('imageUpload1').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader le schéma de la table radiologique</strong></p>
+                </div>
+                <input type="file" id="imageUpload1" accept="image/*" style="display: none;" onchange="loadSchemaImage(1, event)">
+                <div id="modeSelector1" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Choisissez le mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(1, 'annotation')" style="padding: 20px;">📍 Annotation</button>
+                            <button class="btn btn-primary" onclick="selectMode(1, 'questions')" style="padding: 20px;">📝 Questions</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="imageWorkspace1" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions1" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><strong>Mode</strong></div>
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage1" class="schema-image-display">
+                        <canvas id="annotationCanvas1" class="annotation-canvas"></canvas>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h3>Éléments identifiés</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn1" onclick="addManualQuestion(1)" style="display: none; margin-bottom: 15px;">➕ Ajouter un élément</button>
+                        <div id="labelsList1"></div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(1)">🗑️ Tout effacer</button>
+                        <button class="btn btn-success" onclick="acceptAnswer(1)">Considérer comme bonne</button>
+                    </div>
+                </div>
+            </div>
+            <div class="feedback" id="feedback1"></div>
+        </div>
+
+        <!-- Question 2 - Facteurs qualité image -->
+        <div class="question-container" id="question2">
+            <div class="question-header">
+                <div class="question-number">Question 2</div>
+                <div class="question-text">
+                    <strong>Facteurs de qualité image et éléments additionnels</strong><br><br>
+                    1. Quels sont les 4 facteurs dépendant de la qualité image ?<br>
+                    2. Nommer les éléments additionnels pour améliorer l'image
+                </div>
+            </div>
+            <textarea class="answer-input" id="answer2" placeholder="Tapez votre réponse ici..."></textarea>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(2)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(2)">Considérer comme bonne</button>
+            </div>
+            <div class="feedback" id="feedback2"></div>
+        </div>
+
+        <!-- Question 3 - Scopie vs Graphie -->
+        <div class="question-container" id="question3">
+            <div class="question-header">
+                <div class="question-number">Question 3 - Tableau comparatif</div>
+                <div class="question-text">
+                    <strong>Différencier le mode scopie du mode graphie</strong>
+                </div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Caractéristique</th><th>Scopie (Radioscopie)</th><th>Graphie (Radiographie)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Type d'image</strong></td><td><input type="text" id="q3_scopie_1" placeholder="Réponse"></td><td><input type="text" id="q3_graphie_1" placeholder="Réponse"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Image dynamique / en temps réel</td><td class="solution-cell">Image statique (instant T)</td></tr>
+                        <tr><td><strong>Sauvegarde</strong></td><td><input type="text" id="q3_scopie_2" placeholder="Réponse"></td><td><input type="text" id="q3_graphie_2" placeholder="Réponse"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Image non sauvegardée</td><td class="solution-cell">Image figée et sauvegardée</td></tr>
+                        <tr><td><strong>Irradiation</strong></td><td><input type="text" id="q3_scopie_3" placeholder="Réponse"></td><td><input type="text" id="q3_graphie_3" placeholder="Réponse"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Moins irradiante (faible mA) - Attention temps scopie</td><td class="solution-cell">Image coupée par la cellule</td></tr>
+                        <tr><td><strong>Qualité image</strong></td><td><input type="text" id="q3_scopie_4" placeholder="Réponse"></td><td><input type="text" id="q3_graphie_4" placeholder="Réponse"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Moins bonne qualité image</td><td class="solution-cell">Meilleure qualité image</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(3)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(3)">Considérer comme bonnes</button>
+            </div>
+            <div class="feedback" id="feedback3"></div>
+        </div>
+
+        <!-- Question 4 - Amplificateur de Brillance -->
+        <div class="question-container" id="question4">
+            <div class="question-header">
+                <div class="question-number">Question 4 - Amplificateur de Brillance</div>
+                <div class="question-text">
+                    <strong>1. Précisez le nom du détecteur</strong><br>
+                    <strong>2. Explicitez les 4 étapes du fonctionnement</strong>
+                </div>
+            </div>
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone4" onclick="document.getElementById('imageUpload4').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader le schéma de l'amplificateur de brillance</strong></p>
+                </div>
+                <input type="file" id="imageUpload4" accept="image/*" style="display: none;" onchange="loadSchemaImage(4, event)">
+                <div id="modeSelector4" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(4, 'annotation')" style="padding: 20px;">📍 Annotation</button>
+                            <button class="btn btn-primary" onclick="selectMode(4, 'questions')" style="padding: 20px;">📝 Questions</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="imageWorkspace4" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions4" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><strong>Mode</strong></div>
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage4" class="schema-image-display">
+                        <canvas id="annotationCanvas4" class="annotation-canvas"></canvas>
+                    </div>
+                    <div style="margin-top: 20px;"><h3>Questions et Réponses</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn4" onclick="addManualQuestion(4)" style="display: none; margin-bottom: 15px;">➕ Ajouter</button>
+                        <div id="labelsList4"></div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(4)">🗑️ Effacer</button>
+                        <button class="btn btn-success" onclick="acceptAnswer(4)">Considérer comme bonne</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-container" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px;">Étapes de l'amplificateur de brillance</h3>
+                <table>
+                    <thead><tr><th>Étape</th><th>Votre explication</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Étape 1 : Écran primaire</strong></td><td><input type="text" id="q4_etape1" placeholder="Phénomènes physiques"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Fenêtre d'entrée + écran luminescent (RX→photons) + photocathode (photons→e-)</td></tr>
+                        <tr><td><strong>Étape 2 : Entre écrans</strong></td><td><input type="text" id="q4_etape2" placeholder="Phénomènes physiques"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Focalisation et accélération e- : tube vide, ddp 10-30 kV, lentilles électrostatiques</td></tr>
+                        <tr><td><strong>Étape 3 : Écran secondaire</strong></td><td><input type="text" id="q4_etape3" placeholder="Phénomènes physiques"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Conversion e- en photons lumineux - Image inversée et petite</td></tr>
+                        <tr><td><strong>Étape 4 : Capteur CCD</strong></td><td><input type="text" id="q4_etape4" placeholder="Phénomènes physiques"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">CCD : transformation info lumineuse en signal vidéo</td></tr>
+                        <tr><td><strong>Intérêt</strong></td><td><input type="text" id="q4_interet" placeholder="Réponse"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Étude dynamique de repérage</td></tr>
+                        <tr><td><strong>2 activités</strong></td><td><input type="text" id="q4_activites" placeholder="Réponse"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">1. Scopie table télécommandée 2. Appareil bloc opératoire</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(4)">Vérifier</button>
+                <button class="btn btn-success" onclick="acceptAnswer(4)">Accepter</button>
+            </div>
+            <div class="feedback" id="feedback4"></div>
+        </div>
+
+        <!-- Question 5 - ERLM -->
+        <div class="question-container" id="question5">
+            <div class="question-header">
+                <div class="question-number">Question 5 - ERLM (Écran Radio Luminescent à Mémoire)</div>
+                <div class="question-text">
+                    <strong>1. Précisez le nom du détecteur</strong><br>
+                    <strong>2. Explicitez les 2 étapes du fonctionnement</strong>
+                </div>
+            </div>
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone5" onclick="document.getElementById('imageUpload5').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader le schéma ERLM</strong></p>
+                </div>
+                <input type="file" id="imageUpload5" accept="image/*" style="display: none;" onchange="loadSchemaImage(5, event)">
+                <div id="modeSelector5" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(5, 'annotation')" style="padding: 20px;">📍 Annotation</button>
+                            <button class="btn btn-primary" onclick="selectMode(5, 'questions')" style="padding: 20px;">📝 Questions</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="imageWorkspace5" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions5" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><strong>Mode</strong></div>
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage5" class="schema-image-display">
+                        <canvas id="annotationCanvas5" class="annotation-canvas"></canvas>
+                    </div>
+                    <div style="margin-top: 20px;"><h3>Questions</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn5" onclick="addManualQuestion(5)" style="display: none; margin-bottom: 15px;">➕ Ajouter</button>
+                        <div id="labelsList5"></div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(5)">🗑️ Effacer</button>
+                        <button class="btn btn-success" onclick="acceptAnswer(5)">Accepter</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-container" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px;">Étapes ERLM</h3>
+                <table>
+                    <thead><tr><th>Étape</th><th>Votre explication</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Étape 1 : Acquisition</strong></td><td><textarea id="q5_etape1" placeholder="Phase d'intégration et mémorisation" style="width:100%;min-height:60px;padding:10px;"></textarea></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Interaction RX/cristal → éjection e- piégés → état instable = image latente</td></tr>
+                        <tr><td><strong>Étape 2 : Lecture</strong></td><td><textarea id="q5_etape2" placeholder="Phase de lecture" style="width:100%;min-height:60px;padding:10px;"></textarea></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Laser balaye écran → libération e- → fluorescence → signal électrique → numérisation</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(5)">Vérifier</button>
+                <button class="btn btn-success" onclick="acceptAnswer(5)">Accepter</button>
+            </div>
+            <div class="feedback" id="feedback5"></div>
+        </div>
+
+        <!-- Question 6 - Capteur Plan -->
+        <div class="question-container" id="question6">
+            <div class="question-header">
+                <div class="question-number">Question 6 - Capteur Plan</div>
+                <div class="question-text">
+                    <strong>Conversion directe et indirecte + Matrice TFT</strong>
+                </div>
+            </div>
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone6" onclick="document.getElementById('imageUpload6').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Cliquez pour uploader le schéma du capteur plan</strong></p>
+                </div>
+                <input type="file" id="imageUpload6" accept="image/*" style="display: none;" onchange="loadSchemaImage(6, event)">
+                <div id="modeSelector6" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <h3 style="color: #667eea;">Mode :</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(6, 'annotation')" style="padding: 20px;">📍 Annotation</button>
+                            <button class="btn btn-primary" onclick="selectMode(6, 'questions')" style="padding: 20px;">📝 Questions</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="imageWorkspace6" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions6" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><strong>Mode</strong></div>
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage6" class="schema-image-display">
+                        <canvas id="annotationCanvas6" class="annotation-canvas"></canvas>
+                    </div>
+                    <div style="margin-top: 20px;"><h3>Questions</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn6" onclick="addManualQuestion(6)" style="display: none; margin-bottom: 15px;">➕ Ajouter</button>
+                        <div id="labelsList6"></div>
+                    </div>
+                    <div style="margin-top: 20px;"><button class="btn btn-danger" onclick="clearAllLabels(6)">🗑️ Effacer</button></div>
+                </div>
+            </div>
+            <div class="table-container" style="margin-top: 30px;">
+                <h3 style="margin-bottom: 15px; color: #dc3545;">CONVERSION DIRECTE : RX → charges électriques</h3>
+                <table>
+                    <tbody>
+                        <tr><td><strong>Étape 1</strong></td><td><input type="text" id="q6_direct_1" placeholder="DDP dans couche détection"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">DDP (5-6 kV) entre électrode sup + et électrode collectrice</td></tr>
+                        <tr><td><strong>Étape 2</strong></td><td><input type="text" id="q6_direct_2" placeholder="Exposition"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">RX → interaction semi-conducteur (Se) → paire trou-électron → image latente</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px; color: #28a745;">CONVERSION INDIRECTE : RX → photons lumineux</h3>
+                <table>
+                    <tbody>
+                        <tr><td><strong>Étape 1</strong></td><td><input type="text" id="q6_indirect_1" placeholder="Scintillateur"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Scintillateur (CsI) transforme RX en lumière</td></tr>
+                        <tr><td><strong>Étape 2</strong></td><td><input type="text" id="q6_indirect_2" placeholder="Photodiode"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Photons → charge électrique par photodiodes</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px; color: #667eea;">Matrice TFT</h3>
+                <table>
+                    <tbody>
+                        <tr><td><strong>Lecture TFT</strong></td><td><textarea id="q6_tft" placeholder="Création signal numérique" style="width:100%;min-height:60px;padding:10px;"></textarea></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Charges dans capacités → décharge par transistors → signal → CAN → image (~5s)</td></tr>
+                        <tr><td><strong>2 circuits</strong></td><td><input type="text" id="q6_circuits" placeholder="Adressage et lecture"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">1. Circuit adressage (gate driver) 2. Circuit lecture (data line)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(6)">Vérifier</button>
+                <button class="btn btn-success" onclick="acceptAnswer(6)">Accepter</button>
+            </div>
+            <div class="feedback" id="feedback6"></div>
+        </div>
+
+        <!-- Question 7 - Paramètres kV, mA, s, mAs -->
+        <div class="question-container" id="question7">
+            <div class="question-header">
+                <div class="question-number">Question 7 - Paramètres d'acquisition</div>
+                <div class="question-text"><strong>kV, mA, s, mAs</strong></div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Caractéristique</th><th>kV</th><th>mA</th><th>s</th><th>mAs</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Dénomination</strong></td>
+                            <td><input type="text" id="q7_kv_nom" placeholder="Nom"></td>
+                            <td><input type="text" id="q7_ma_nom" placeholder="Nom"></td>
+                            <td><input type="text" id="q7_s_nom" placeholder="Nom"></td>
+                            <td><input type="text" id="q7_mas_nom" placeholder="Nom"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Tension</td><td class="solution-cell">Intensité</td><td class="solution-cell">Temps de pose</td><td class="solution-cell">Charge</td></tr>
+                        <tr><td><strong>Correspond à</strong></td>
+                            <td><input type="text" id="q7_kv_corr" placeholder="Définition"></td>
+                            <td><input type="text" id="q7_ma_corr" placeholder="Définition"></td>
+                            <td><input type="text" id="q7_s_corr" placeholder="Définition"></td>
+                            <td><input type="text" id="q7_mas_corr" placeholder="Définition"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">DDP pour accélérer e-</td><td class="solution-cell">Chauffage filament</td><td class="solution-cell">Temps exposition</td><td class="solution-cell">mA × s</td></tr>
+                        <tr><td><strong>Production RX</strong></td>
+                            <td><input type="text" id="q7_kv_prod" placeholder="Effet"></td>
+                            <td><input type="text" id="q7_ma_prod" placeholder="Effet"></td>
+                            <td><input type="text" id="q7_s_prod" placeholder="Effet"></td>
+                            <td><input type="text" id="q7_mas_prod" placeholder="Effet"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Énergie et pénétration</td><td class="solution-cell">Quantité RX</td><td class="solution-cell">Quantité RX</td><td class="solution-cell">Quantité RX</td></tr>
+                        <tr><td><strong>Qualité image</strong></td>
+                            <td><input type="text" id="q7_kv_qual" placeholder="Effet"></td>
+                            <td><input type="text" id="q7_ma_qual" placeholder="Effet"></td>
+                            <td><input type="text" id="q7_s_qual" placeholder="Effet"></td>
+                            <td><input type="text" id="q7_mas_qual" placeholder="Effet"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Contraste + Noircissement</td><td class="solution-cell">Rapport S/B</td><td class="solution-cell">Rapport S/B</td><td class="solution-cell">Noircissement</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(7)">Vérifier</button>
+                <button class="btn btn-success" onclick="acceptAnswer(7)">Accepter</button>
+            </div>
+            <div class="feedback" id="feedback7"></div>
+        </div>
+
+        <!-- Question 8 - Vrai/Faux Foyers et Anode -->
+        <div class="question-container" id="question8">
+            <div class="question-header">
+                <div class="question-number">Question 8 - Vrai ou Faux</div>
+                <div class="question-text">
+                    <strong>Répondez par VRAI ou FAUX aux affirmations suivantes concernant les foyers et l'anode</strong>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>1. L'anode tournante permet de dissiper la chaleur plus efficacement</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q8_1" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q8_1" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>2. L'angle d'anode influence la taille du foyer optique</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q8_2" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q8_2" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>3. Le foyer optique est plus petit que le foyer thermique</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q8_3" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q8_3" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>4. Un petit foyer améliore la résolution spatiale de l'image</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q8_4" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q8_4" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>5. Le petit foyer sera utilisé pour l'imagerie ostéoarticulaire</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q8_5" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q8_5" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>6. Le grand foyer sera utilisé pour les zones épaisses et péristaltiques</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q8_6" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q8_6" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTrueFalse(8, ['true','true','true','true','true','true'])">Vérifier</button>
+            </div>
+            <div class="feedback" id="feedback8"></div>
+        </div>
+
+        <!-- Question 9 - Techniques de paramétrage -->
+        <div class="question-container" id="question9">
+            <div class="question-header">
+                <div class="question-number">Question 9 - Techniques de paramétrage</div>
+                <div class="question-text"><strong>Technique à 2 points vs 1 point + Cellules</strong></div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Technique</th><th>Réalisation</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>2 points (kV + mAs manuels)</strong></td><td><input type="text" id="q9_2pts" placeholder="Technique"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">DIRECT - Organe sur détecteur</td></tr>
+                        <tr><td><strong>1 point (kV manuel + cellules)</strong></td><td><input type="text" id="q9_1pt" placeholder="Technique"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">POTTER - Détecteur dans potter</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container" style="margin-top: 20px;">
+                <h3>Les cellules</h3>
+                <table>
+                    <tbody>
+                        <tr><td><strong>Nombre de cellules</strong></td><td><input type="text" id="q9_nb" placeholder="Nombre"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">3 : 2 latérales + 1 centrale</td></tr>
+                        <tr><td><strong>Rôle</strong></td><td><input type="text" id="q9_role" placeholder="Rôle"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Stopper RX quand nombre suffisant</td></tr>
+                        <tr><td><strong>Sélectionnées par</strong></td><td><input type="text" id="q9_select" placeholder="Par qui"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">MEM selon cliché</td></tr>
+                        <tr><td><strong>Technologie</strong></td><td><textarea id="q9_techno" placeholder="Technologie" style="width:100%;min-height:50px;padding:10px;"></textarea></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Chambre ionisation → courant → condensateur → coupe émission RX</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(9)">Vérifier</button>
+                <button class="btn btn-success" onclick="acceptAnswer(9)">Accepter</button>
+            </div>
+            <div class="feedback" id="feedback9"></div>
+        </div>
+
+        <!-- Question 10 - Choix cellules (schéma) -->
+        <div class="question-container" id="question10">
+            <div class="question-header">
+                <div class="question-number">Question 10 - Choix des cellules</div>
+                <div class="question-text"><strong>Analysez si le choix des cellules est correct pour chaque situation</strong></div>
+            </div>
+            <div class="schema-upload">
+                <div class="upload-area" id="uploadZone10" onclick="document.getElementById('imageUpload10').click()">
+                    <div class="upload-icon">📤</div>
+                    <p><strong>Uploader les images de choix de cellules</strong></p>
+                </div>
+                <input type="file" id="imageUpload10" accept="image/*" style="display: none;" onchange="loadSchemaImage(10, event)">
+                <div id="modeSelector10" style="display: none; margin: 20px 0;">
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <button class="btn btn-primary" onclick="selectMode(10, 'annotation')" style="padding: 20px;">📍 Annotation</button>
+                            <button class="btn btn-primary" onclick="selectMode(10, 'questions')" style="padding: 20px;">📝 Questions</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="imageWorkspace10" style="display: none; margin-top: 20px;">
+                    <div id="modeInstructions10" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;"><strong>Mode</strong></div>
+                    <div class="image-container-wrapper">
+                        <img id="schemaImage10" class="schema-image-display">
+                        <canvas id="annotationCanvas10" class="annotation-canvas"></canvas>
+                    </div>
+                    <div style="margin-top: 20px;"><h3>Analyses</h3>
+                        <button class="btn btn-primary" id="addQuestionBtn10" onclick="addManualQuestion(10)" style="display: none; margin-bottom: 15px;">➕ Ajouter</button>
+                        <div id="labelsList10"></div>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <button class="btn btn-danger" onclick="clearAllLabels(10)">🗑️ Effacer</button>
+                        <button class="btn btn-success" onclick="acceptAnswer(10)">Accepter</button>
+                    </div>
+                </div>
+            </div>
+            <div class="feedback" id="feedback10"></div>
+        </div>
+
+        <!-- Question 11 - Effets photoélectrique et Compton -->
+        <div class="question-container" id="question11">
+            <div class="question-header">
+                <div class="question-number">Question 11 - Effets d'interaction RX-matière</div>
+                <div class="question-text"><strong>Effet photoélectrique vs Effet Compton</strong></div>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Caractéristique</th><th>Effet photoélectrique</th><th>Effet Compton</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Valeur Z du milieu</strong></td><td><input type="text" id="q11_photo_z" placeholder="Z"></td><td><input type="text" id="q11_compton_z" placeholder="Z"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Z élevé (I-Ba-Ca)</td><td class="solution-cell">Z peu élevé (C-H-O-N)</td></tr>
+                        <tr><td><strong>Énergie photons</strong></td><td><input type="text" id="q11_photo_e" placeholder="Énergie"></td><td><input type="text" id="q11_compton_e" placeholder="Énergie"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Basse énergie (50-70 kV)</td><td class="solution-cell">Haute énergie (>100 kV)</td></tr>
+                        <tr><td><strong>Densité milieux</strong></td><td><input type="text" id="q11_photo_d" placeholder="Densité"></td><td><input type="text" id="q11_compton_d" placeholder="Densité"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Milieux denses</td><td class="solution-cell">Milieux peu denses</td></tr>
+                        <tr><td><strong>Tissus concernés</strong></td><td><input type="text" id="q11_photo_t" placeholder="Tissus"></td><td><input type="text" id="q11_compton_t" placeholder="Tissus"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Os</td><td class="solution-cell">Tissus mous, graisse</td></tr>
+                        <tr><td><strong>Couche e- concernés</strong></td><td><input type="text" id="q11_photo_c" placeholder="Couche"></td><td><input type="text" id="q11_compton_c" placeholder="Couche"></td></tr>
+                        <tr class="solution-row"><td>💡</td><td class="solution-cell">Couches profondes (noyau)</td><td class="solution-cell">Couche externe</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(11)">Vérifier</button>
+                <button class="btn btn-success" onclick="acceptAnswer(11)">Accepter</button>
+            </div>
+            <div class="feedback" id="feedback11"></div>
+        </div>
+
+        <!-- Question 12 - Vrai/Faux Optique radiologique -->
+        <div class="question-container" id="question12">
+            <div class="question-header">
+                <div class="question-number">Question 12 - Vrai/Faux</div>
+                <div class="question-text"><strong>Optique radiologique et géométrie de projection</strong></div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>L'agrandissement augmente si on éloigne l'objet du détecteur</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q12_1" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q12_1" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>L'agrandissement diminue si on approche le tube de l'objet</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q12_2" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q12_2" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>Si projection perpendiculaire, la forme sera modifiée</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q12_3" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q12_3" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>Si projection oblique, la forme ne sera pas modifiée</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q12_4" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q12_4" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>Si l'objet n'est pas parallèle au détecteur, forme modifiée</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q12_5" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q12_5" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>En imagerie de projection, le volume est projeté en 3D</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q12_6" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q12_6" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            <div style="margin-bottom: 20px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
+                    <strong>Les règles d'optique sont l'agrandissement et la déformation</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option"><input type="radio" name="q12_7" value="true"><span>VRAI</span></label>
+                    <label class="mcq-option"><input type="radio" name="q12_7" value="false"><span>FAUX</span></label>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTrueFalse(12, ['true','false','false','false','true','false','true'])">Vérifier</button>
+            </div>
+            <div class="feedback" id="feedback12"></div>
+        </div>
+
+        <!-- Page Schémas Supplémentaires -->
+        <div class="question-container" id="question13">
+            <div style="padding: 40px;">
+                <h2 style="color: #667eea; text-align: center; margin-bottom: 30px;">📚 Ajoutez vos schémas et questions supplémentaires</h2>
+                <div id="extrasList"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="addExtra()" style="font-size: 1.1em; padding: 15px 30px;">➕ Ajouter un schéma avec questions</button>
+                    <button class="btn btn-primary" onclick="addTextOnly()" style="font-size: 1.1em; padding: 15px 30px; margin-left: 15px;">📝 Ajouter des questions sans schéma</button>
+                </div>
+                <div class="nav-buttons" style="margin-top: 40px;">
+                    <button class="nav-btn" onclick="navigateTo(12)">← Précédent</button>
+                    <button class="nav-btn" onclick="navigateTo(14)">Export →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export final -->
+        <div class="question-container" id="question14">
+            <div style="padding: 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px; margin-bottom: 30px;">
+                <h2 style="margin-bottom: 20px;">📥 Exporter tous mes schémas et réponses</h2>
+                <p style="margin-bottom: 30px; font-size: 1.1em;">Cliquez pour générer un fichier HTML complet</p>
+                <button class="btn" style="background: white; color: #667eea; font-size: 1.2em; padding: 15px 40px;" onclick="exportHTML()">🌐 EXPORTER EN HTML</button>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="navigateTo(13)">← Précédent</button>
+                <button class="nav-btn" onclick="navigateTo(15)">Statistiques →</button>
+            </div>
+        </div>
+
+        <!-- Statistiques finales -->
+        <div class="question-container" id="question15">
+            <div class="stats">
+                <h2>🎉 Statistiques de votre TD</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="correctAnswers">0</div>
+                        <div class="stat-label">Réponses correctes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="acceptedAnswers">0</div>
+                        <div class="stat-label">Réponses acceptées</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalScore">0%</div>
+                        <div class="stat-label">Score total</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 30px;" onclick="resetQuiz()">Recommencer le TD</button>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">← Précédent</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Suivant →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 15;
+        let answers = { correct: 0, accepted: 0, total: 12, answered: new Set() };
+        let annotations = {};
+
+        let schemaData = {
+            1: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null },
+            4: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null },
+            5: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null },
+            6: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null },
+            10: { points: [], labels: [], canvas: null, ctx: null, image: null, mode: null }
+        };
+
+        function loadSchemaImage(questionNum, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('schemaImage' + questionNum);
+                schemaData[questionNum].image = e.target.result;
+                img.src = e.target.result;
+                img.onload = function() {
+                    document.getElementById('uploadZone' + questionNum).style.display = 'none';
+                    document.getElementById('modeSelector' + questionNum).style.display = 'block';
+                };
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        function selectMode(questionNum, mode) {
+            schemaData[questionNum].mode = mode;
+            document.getElementById('modeSelector' + questionNum).style.display = 'none';
+            document.getElementById('imageWorkspace' + questionNum).style.display = 'block';
+            const canvas = document.getElementById('annotationCanvas' + questionNum);
+            const img = document.getElementById('schemaImage' + questionNum);
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            schemaData[questionNum].canvas = canvas;
+            schemaData[questionNum].ctx = canvas.getContext('2d');
+            if (mode === 'annotation') {
+                canvas.onclick = function(e) { handleCanvasClick(questionNum, e); };
+                canvas.style.cursor = 'crosshair';
+                document.getElementById('modeInstructions' + questionNum).innerHTML = '<strong>📍 Mode Annotation</strong> - Cliquez sur l\'image';
+                document.getElementById('addQuestionBtn' + questionNum).style.display = 'none';
+            } else {
+                canvas.onclick = null;
+                canvas.style.cursor = 'default';
+                document.getElementById('modeInstructions' + questionNum).innerHTML = '<strong>📝 Mode Questions</strong> - Ajoutez ci-dessous';
+                document.getElementById('addQuestionBtn' + questionNum).style.display = 'block';
+            }
+        }
+
+        function handleCanvasClick(questionNum, event) {
+            const data = schemaData[questionNum];
+            const rect = data.canvas.getBoundingClientRect();
+            const scaleX = data.canvas.width / rect.width;
+            const scaleY = data.canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            const labelNumber = data.labels.length + 1;
+            data.points.push({ x: x, y: y, number: labelNumber });
+            data.labels.push({ number: labelNumber, question: '', answer: '' });
+            redrawAnnotations(questionNum);
+            renderLabels(questionNum);
+        }
+
+        function redrawAnnotations(questionNum) {
+            const data = schemaData[questionNum];
+            if (!data.ctx) return;
+            data.ctx.clearRect(0, 0, data.canvas.width, data.canvas.height);
+            data.points.forEach(function(point) {
+                data.ctx.beginPath();
+                data.ctx.arc(point.x, point.y, 20, 0, 2 * Math.PI);
+                data.ctx.fillStyle = 'rgba(102, 126, 234, 0.9)';
+                data.ctx.fill();
+                data.ctx.strokeStyle = 'white';
+                data.ctx.lineWidth = 3;
+                data.ctx.stroke();
+                data.ctx.fillStyle = 'white';
+                data.ctx.font = 'bold 16px Arial';
+                data.ctx.textAlign = 'center';
+                data.ctx.textBaseline = 'middle';
+                data.ctx.fillText(point.number, point.x, point.y);
+            });
+        }
+
+        function renderLabels(questionNum) {
+            const data = schemaData[questionNum];
+            const container = document.getElementById('labelsList' + questionNum);
+            container.innerHTML = '';
+            data.labels.forEach(function(label, index) {
+                const item = document.createElement('div');
+                item.className = 'label-item';
+                item.innerHTML = '<div class="label-number-display">' + label.number + '</div>' +
+                    '<div style="flex: 1;">' +
+                    '<input type="text" class="label-input" placeholder="Question/Élément" value="' + label.question + '" onchange="updateLabel(' + questionNum + ', ' + index + ', \'question\', this.value)" style="margin-bottom: 8px; width: 100%;">' +
+                    '<input type="text" class="label-input" placeholder="Réponse" value="' + label.answer + '" onchange="updateLabel(' + questionNum + ', ' + index + ', \'answer\', this.value)" style="width: 100%;">' +
+                    '</div>' +
+                    '<button class="delete-label" onclick="deleteLabel(' + questionNum + ', ' + index + ')">🗑️</button>';
+                container.appendChild(item);
+            });
+        }
+
+        function updateLabel(questionNum, index, field, value) {
+            schemaData[questionNum].labels[index][field] = value;
+        }
+
+        function deleteLabel(questionNum, index) {
+            schemaData[questionNum].labels.splice(index, 1);
+            schemaData[questionNum].points.splice(index, 1);
+            schemaData[questionNum].labels.forEach(function(label, i) {
+                label.number = i + 1;
+                schemaData[questionNum].points[i].number = i + 1;
+            });
+            redrawAnnotations(questionNum);
+            renderLabels(questionNum);
+        }
+
+        function addManualQuestion(questionNum) {
+            const data = schemaData[questionNum];
+            const labelNumber = data.labels.length + 1;
+            data.labels.push({ number: labelNumber, question: '', answer: '' });
+            renderLabels(questionNum);
+        }
+
+        function clearAllLabels(questionNum) {
+            if (confirm('Tout effacer ?')) {
+                schemaData[questionNum].points = [];
+                schemaData[questionNum].labels = [];
+                redrawAnnotations(questionNum);
+                renderLabels(questionNum);
+            }
+        }
+
+        // Extras
+        let extrasCount = 0;
+        let extrasData = {};
+
+        function addExtra() {
+            extrasCount++;
+            const id = 'extra' + extrasCount;
+            extrasData[id] = { type: 'schema', points: [], labels: [], canvas: null, ctx: null, image: null, mode: null };
+            createExtraHTML(id, 'schema');
+        }
+
+        function addTextOnly() {
+            extrasCount++;
+            const id = 'extra' + extrasCount;
+            extrasData[id] = { type: 'text', labels: [] };
+            createExtraHTML(id, 'text');
+        }
+
+        function createExtraHTML(id, type) {
+            const container = document.getElementById('extrasList');
+            const div = document.createElement('div');
+            div.id = 'extra_' + id;
+            div.className = 'question-container';
+            div.style.display = 'block';
+            div.style.marginBottom = '30px';
+            let html = '<div class="question-header"><div class="question-number">Extra #' + extrasCount + '</div><div class="question-text"><input type="text" id="title_' + id + '" placeholder="Titre" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px;"></div></div>';
+            if (type === 'schema') {
+                html += '<div class="schema-upload"><div class="upload-area" id="uploadZone_' + id + '" onclick="document.getElementById(\'upload_' + id + '\').click()"><div class="upload-icon">📤</div><p><strong>Uploader</strong></p></div><input type="file" id="upload_' + id + '" accept="image/*" style="display: none;" onchange="loadExtra(\''+id+'\', event)"><div id="modeSelector_' + id + '" style="display: none; margin: 20px 0;"><div style="background: #f8f9fa; padding: 20px; border-radius: 10px;"><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;"><button class="btn btn-primary" onclick="selectExtraMode(\''+id+'\', \'annotation\')" style="padding: 20px;">📍</button><button class="btn btn-primary" onclick="selectExtraMode(\''+id+'\', \'questions\')" style="padding: 20px;">📝</button></div></div></div><div id="workspace_' + id + '" style="display: none; margin-top: 20px;"><div id="instructions_' + id + '" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">Mode</div><div class="image-container-wrapper"><img id="img_' + id + '" class="schema-image-display"><canvas id="canvas_' + id + '" class="annotation-canvas"></canvas></div><div style="margin-top: 20px;"><h3>Questions</h3><button class="btn btn-primary" id="addBtn_' + id + '" onclick="addExtraQuestion(\''+id+'\')" style="display: none; margin-bottom: 15px;">➕</button><div id="labels_' + id + '"></div></div><button class="btn btn-danger" onclick="clearExtraLabels(\''+id+'\')">🗑️</button></div></div>';
+            } else {
+                html += '<div style="margin-top: 20px;"><h3>Questions</h3><button class="btn btn-primary" onclick="addExtraQuestion(\''+id+'\')" style="margin-bottom: 15px;">➕ Ajouter</button><div id="labels_' + id + '"></div></div>';
+            }
+            html += '<div style="text-align: center; margin-top: 15px;"><button class="btn btn-danger" onclick="deleteExtra(\''+id+'\')">🗑️ Supprimer</button></div>';
+            div.innerHTML = html;
+            container.appendChild(div);
+        }
+
+        function loadExtra(id, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                extrasData[id].image = e.target.result;
+                document.getElementById('img_' + id).src = e.target.result;
+                document.getElementById('img_' + id).onload = function() {
+                    document.getElementById('uploadZone_' + id).style.display = 'none';
+                    document.getElementById('modeSelector_' + id).style.display = 'block';
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function selectExtraMode(id, mode) {
+            extrasData[id].mode = mode;
+            document.getElementById('modeSelector_' + id).style.display = 'none';
+            document.getElementById('workspace_' + id).style.display = 'block';
+            const canvas = document.getElementById('canvas_' + id);
+            const img = document.getElementById('img_' + id);
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            extrasData[id].canvas = canvas;
+            extrasData[id].ctx = canvas.getContext('2d');
+            if (mode === 'annotation') {
+                canvas.onclick = function(e) { handleExtraClick(id, e); };
+                canvas.style.cursor = 'crosshair';
+                document.getElementById('instructions_' + id).innerHTML = '<strong>📍 Annotation</strong>';
+                document.getElementById('addBtn_' + id).style.display = 'none';
+            } else {
+                canvas.onclick = null;
+                canvas.style.cursor = 'default';
+                document.getElementById('instructions_' + id).innerHTML = '<strong>📝 Questions</strong>';
+                document.getElementById('addBtn_' + id).style.display = 'block';
+            }
+        }
+
+        function handleExtraClick(id, event) {
+            const data = extrasData[id];
+            const rect = data.canvas.getBoundingClientRect();
+            const scaleX = data.canvas.width / rect.width;
+            const scaleY = data.canvas.height / rect.height;
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            const num = data.labels.length + 1;
+            data.points.push({ x: x, y: y, number: num });
+            data.labels.push({ number: num, question: '', answer: '' });
+            redrawExtra(id);
+            renderExtraLabels(id);
+        }
+
+        function redrawExtra(id) {
+            const data = extrasData[id];
+            if (!data.ctx) return;
+            data.ctx.clearRect(0, 0, data.canvas.width, data.canvas.height);
+            if (data.points) {
+                data.points.forEach(function(p) {
+                    data.ctx.beginPath();
+                    data.ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                    data.ctx.fillStyle = 'rgba(102, 126, 234, 0.9)';
+                    data.ctx.fill();
+                    data.ctx.strokeStyle = 'white';
+                    data.ctx.lineWidth = 3;
+                    data.ctx.stroke();
+                    data.ctx.fillStyle = 'white';
+                    data.ctx.font = 'bold 16px Arial';
+                    data.ctx.textAlign = 'center';
+                    data.ctx.textBaseline = 'middle';
+                    data.ctx.fillText(p.number, p.x, p.y);
+                });
+            }
+        }
+
+        function renderExtraLabels(id) {
+            const data = extrasData[id];
+            const container = document.getElementById('labels_' + id);
+            container.innerHTML = '';
+            data.labels.forEach(function(label, idx) {
+                const item = document.createElement('div');
+                item.className = 'label-item';
+                item.innerHTML = '<div class="label-number-display">' + label.number + '</div><div style="flex: 1;"><input type="text" class="label-input" placeholder="Question" value="' + label.question + '" onchange="updateExtraLabel(\''+id+'\', '+idx+', \'question\', this.value)" style="margin-bottom: 8px; width: 100%;"><input type="text" class="label-input" placeholder="Réponse" value="' + label.answer + '" onchange="updateExtraLabel(\''+id+'\', '+idx+', \'answer\', this.value)" style="width: 100%;"></div><button class="delete-label" onclick="deleteExtraLabel(\''+id+'\', '+idx+')">🗑️</button>';
+                container.appendChild(item);
+            });
+        }
+
+        function updateExtraLabel(id, idx, field, value) { extrasData[id].labels[idx][field] = value; }
+        function deleteExtraLabel(id, idx) {
+            extrasData[id].labels.splice(idx, 1);
+            if (extrasData[id].points) {
+                extrasData[id].points.splice(idx, 1);
+                extrasData[id].labels.forEach(function(l, i) { l.number = i + 1; extrasData[id].points[i].number = i + 1; });
+                redrawExtra(id);
+            }
+            renderExtraLabels(id);
+        }
+        function addExtraQuestion(id) { const num = extrasData[id].labels.length + 1; extrasData[id].labels.push({ number: num, question: '', answer: '' }); renderExtraLabels(id); }
+        function clearExtraLabels(id) { if (confirm('Effacer ?')) { extrasData[id].labels = []; if (extrasData[id].points) extrasData[id].points = []; redrawExtra(id); renderExtraLabels(id); } }
+        function deleteExtra(id) { if (confirm('Supprimer ?')) { document.getElementById('extra_' + id).remove(); delete extrasData[id]; } }
+
+        // Keywords and solutions
+        const keywords = {
+            2: ['kv', 'mas', 'constantes', 'corpulence', 'patient', 'flou', 'diaphragme', 'cône', 'grille', 'compression', 'filtre', 'air-gap', 'groedel']
+        };
+        const solutions = {
+            2: "Les 4 facteurs: 1) kV/mAs (constantes), 2) Type radiographie, 3) Corpulence patient, 4) Flous divers. Éléments additionnels: Diaphragme, Cône, Air-Gap (Groedel), Grilles, Compression, Filtres compensatoires."
+        };
+
+        function updateProgress() {
+            const progress = ((currentQuestion - 1) / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showQuestion(questionNumber) {
+            if (questionNumber < 1 || questionNumber > totalQuestions) return;
+            document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active'));
+            const questionElement = document.getElementById('question' + questionNumber);
+            if (questionElement) questionElement.classList.add('active');
+            currentQuestion = questionNumber;
+            updateProgress();
+            document.getElementById('prevBtn').style.display = questionNumber === 1 ? 'none' : 'block';
+            if (questionNumber === totalQuestions) {
+                document.getElementById('nextBtn').style.display = 'none';
+            } else if (questionNumber === 14) {
+                document.getElementById('nextBtn').textContent = 'Statistiques →';
+                document.getElementById('nextBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').textContent = 'Suivant →';
+                document.getElementById('nextBtn').style.display = 'block';
+            }
+            if (questionNumber === 15) {
+                document.getElementById('correctAnswers').textContent = answers.correct;
+                document.getElementById('acceptedAnswers').textContent = answers.accepted;
+                const totalScore = Math.round(((answers.correct + answers.accepted) / answers.total) * 100);
+                document.getElementById('totalScore').textContent = totalScore + '%';
+            }
+        }
+
+        function navigateTo(questionNumber) { showQuestion(questionNumber); }
+        function nextQuestion() { if (currentQuestion < totalQuestions) showQuestion(currentQuestion + 1); }
+        function previousQuestion() { if (currentQuestion > 1) showQuestion(currentQuestion - 1); }
+
+        function checkAnswer(questionNumber) {
+            const answer = document.getElementById('answer' + questionNumber).value.toLowerCase();
+            const feedback = document.getElementById('feedback' + questionNumber);
+            const keywordList = keywords[questionNumber];
+            if (!answer.trim()) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️</strong> Veuillez saisir une réponse.';
+                return;
+            }
+            let matchCount = 0;
+            keywordList.forEach(keyword => { if (answer.includes(keyword.toLowerCase())) matchCount++; });
+            const threshold = Math.ceil(keywordList.length * 0.35);
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+            if (!answers.answered.has(questionNumber)) {
+                if (matchCount >= threshold) {
+                    feedback.classList.add('correct');
+                    feedback.innerHTML = '<strong>✅ Bonne réponse !</strong> ' + matchCount + '/' + keywordList.length + ' éléments.<div class="solution"><h4>Solution :</h4>' + solutions[questionNumber] + '</div>';
+                    answers.correct++;
+                    answers.answered.add(questionNumber);
+                } else {
+                    feedback.classList.add('incorrect');
+                    feedback.innerHTML = '<strong>❌ Incomplet</strong> ' + matchCount + '/' + keywordList.length + '<div class="solution"><h4>Solution :</h4>' + solutions[questionNumber] + '</div>';
+                }
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong><div class="solution">' + solutions[questionNumber] + '</div>';
+            }
+        }
+
+        function acceptAnswer(questionNumber) {
+            const feedback = document.getElementById('feedback' + questionNumber);
+            if (!answers.answered.has(questionNumber)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'accepted');
+                feedback.innerHTML = '<strong>✓ Acceptée</strong>';
+                if (solutions[questionNumber]) feedback.innerHTML += '<div class="solution">' + solutions[questionNumber] + '</div>';
+                answers.accepted++;
+                answers.answered.add(questionNumber);
+            } else {
+                feedback.classList.add('show', 'accepted');
+                feedback.innerHTML = '<strong>✓ Déjà validée</strong>';
+            }
+        }
+
+        function checkTrueFalse(questionNumber, correctAnswers) {
+            const selectedAnswers = [];
+            correctAnswers.forEach((_, index) => {
+                const name = 'q' + questionNumber + '_' + (index + 1);
+                const selected = document.querySelector('input[name="' + name + '"]:checked');
+                selectedAnswers.push(selected ? selected.value : null);
+            });
+            const feedback = document.getElementById('feedback' + questionNumber);
+            if (selectedAnswers.includes(null)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️</strong> Répondez à tout.';
+                return;
+            }
+            const isCorrect = correctAnswers.every((answer, index) => answer === selectedAnswers[index]);
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+            if (!answers.answered.has(questionNumber)) {
+                if (isCorrect) {
+                    feedback.classList.add('correct');
+                    feedback.innerHTML = '<strong>✅ Parfait !</strong>';
+                    answers.correct++;
+                    answers.answered.add(questionNumber);
+                } else {
+                    feedback.classList.add('incorrect');
+                    let txt = '<strong>❌ Erreur(s)</strong><br>Solutions: ';
+                    txt += correctAnswers.map((ans, i) => (i+1) + ': ' + (ans === 'true' ? 'VRAI' : 'FAUX')).join(', ');
+                    feedback.innerHTML = txt;
+                }
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTable(questionNumber) {
+            const feedback = document.getElementById('feedback' + questionNumber);
+            document.querySelectorAll('#question' + questionNumber + ' .solution-row').forEach(row => row.classList.add('show'));
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+            if (!answers.answered.has(questionNumber)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Solutions affichées !</strong> Comparez vos réponses.';
+                answers.correct++;
+                answers.answered.add(questionNumber);
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function resetQuiz() {
+            currentQuestion = 1;
+            answers = { correct: 0, accepted: 0, total: 12, answered: new Set() };
+            document.querySelectorAll('textarea, input[type="text"]').forEach(input => { input.value = ''; });
+            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => input.checked = false);
+            document.querySelectorAll('.feedback').forEach(fb => fb.classList.remove('show', 'correct', 'incorrect', 'accepted'));
+            document.querySelectorAll('.mcq-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.solution-row').forEach(row => row.classList.remove('show'));
+            showQuestion(1);
+        }
+
+        // Export HTML
+        function exportHTML() {
+            const clone = document.documentElement.cloneNode(true);
+            document.querySelectorAll('input, textarea, select').forEach(function(src) {
+                if (!src.id) return;
+                const target = clone.querySelector('#' + CSS.escape(src.id));
+                if (!target) return;
+                if (src.tagName === 'TEXTAREA') { target.value = src.value; target.textContent = src.value; }
+                else if (src.tagName === 'INPUT') {
+                    const t = (src.type || '').toLowerCase();
+                    if (t === 'file') return;
+                    else if (t === 'checkbox' || t === 'radio') {
+                        target.checked = src.checked;
+                        if (src.checked) target.setAttribute('checked', 'checked');
+                        else target.removeAttribute('checked');
+                    } else { target.value = src.value; target.setAttribute('value', src.value); }
+                }
+            });
+            clone.querySelectorAll('.question-container').forEach(function(q) { q.classList.remove('active'); q.style.display = 'block'; });
+            const nav = clone.querySelector('.navigation'); if (nav) nav.style.display = 'none';
+            const progress = clone.querySelector('.progress-bar'); if (progress) progress.style.display = 'none';
+            const q14 = clone.querySelector('#question14'); if (q14) q14.style.display = 'none';
+            const q15 = clone.querySelector('#question15'); if (q15) q15.style.display = 'none';
+
+            function injectQuestion(q, data) {
+                if (!data || !data.image) return;
+                const uploadZone = clone.querySelector('#uploadZone' + q); if (uploadZone) uploadZone.style.display = 'none';
+                const modeSelector = clone.querySelector('#modeSelector' + q); if (modeSelector) modeSelector.style.display = 'none';
+                const workspace = clone.querySelector('#imageWorkspace' + q);
+                if (workspace) {
+                    workspace.style.display = 'block';
+                    const img = clone.querySelector('#schemaImage' + q); if (img) img.src = data.image;
+                    if (data.mode === 'annotation' && data.points && data.points.length > 0) {
+                        const canvas = clone.querySelector('#annotationCanvas' + q);
+                        if (canvas) {
+                            const tempCanvas = document.createElement('canvas');
+                            const sourceImg = document.getElementById('schemaImage' + q);
+                            if (sourceImg && sourceImg.naturalWidth) {
+                                tempCanvas.width = sourceImg.naturalWidth;
+                                tempCanvas.height = sourceImg.naturalHeight;
+                                const ctx = tempCanvas.getContext('2d');
+                                data.points.forEach(function(p) {
+                                    ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                                    ctx.fillStyle = 'rgba(102, 126, 234, 0.9)'; ctx.fill();
+                                    ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.stroke();
+                                    ctx.fillStyle = 'white'; ctx.font = 'bold 16px Arial';
+                                    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                                    ctx.fillText(p.number, p.x, p.y);
+                                });
+                                const imgData = tempCanvas.toDataURL();
+                                canvas.outerHTML = '<img src="' + imgData + '" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">';
+                            }
+                        }
+                    }
+                }
+                const labelsList = clone.querySelector('#labelsList' + q);
+                if (labelsList && data.labels) {
+                    labelsList.innerHTML = '';
+                    data.labels.forEach(function(label) {
+                        const div = document.createElement('div');
+                        div.className = 'label-item';
+                        div.innerHTML = '<div class="label-number-display">' + label.number + '</div><div style="flex: 1;"><div style="font-weight: bold; margin-bottom: 8px;">Q: ' + (label.question || '-') + '</div><div class="export-answer-zone"><input type="text" class="export-answer-input" placeholder="Réponse..." style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" data-correct="' + encodeURIComponent(label.answer || '') + '"><button class="btn btn-primary export-check-btn" style="margin-top: 8px; padding: 8px 16px;" onclick="checkExportAnswer(this)">Vérifier</button><div class="export-feedback" style="display: none; margin-top: 8px; padding: 10px; border-radius: 8px;"></div></div></div>';
+                        labelsList.appendChild(div);
+                    });
+                }
+                if (workspace) { const btns = workspace.querySelectorAll('button:not(.export-check-btn)'); btns.forEach(function(btn) { btn.style.display = 'none'; }); }
+            }
+            [1, 4, 5, 6, 10].forEach(function(q) { injectQuestion(q, schemaData[q]); });
+
+            Object.keys(extrasData).forEach(function(id) {
+                const data = extrasData[id];
+                if (!data.labels || data.labels.length === 0) return;
+                const extraDiv = clone.querySelector('#extra_' + id); if (!extraDiv) return;
+                const titleInput = clone.querySelector('#title_' + id);
+                if (titleInput) { const title = titleInput.value || 'Extra'; titleInput.outerHTML = '<div style="font-size: 1.2em; font-weight: bold; color: #667eea;">' + title + '</div>'; }
+                if (data.type === 'schema') {
+                    const upload = clone.querySelector('#uploadZone_' + id); if (upload) upload.style.display = 'none';
+                    const selector = clone.querySelector('#modeSelector_' + id); if (selector) selector.style.display = 'none';
+                    const workspace = clone.querySelector('#workspace_' + id);
+                    if (workspace) {
+                        workspace.style.display = 'block';
+                        const img = clone.querySelector('#img_' + id); if (img && data.image) img.src = data.image;
+                        if (data.mode === 'annotation' && data.points && data.points.length > 0) {
+                            const canvas = clone.querySelector('#canvas_' + id);
+                            if (canvas) {
+                                const tempCanvas = document.createElement('canvas');
+                                const sourceImg = document.getElementById('img_' + id);
+                                if (sourceImg && sourceImg.naturalWidth) {
+                                    tempCanvas.width = sourceImg.naturalWidth; tempCanvas.height = sourceImg.naturalHeight;
+                                    const ctx = tempCanvas.getContext('2d');
+                                    data.points.forEach(function(p) {
+                                        ctx.beginPath(); ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                                        ctx.fillStyle = 'rgba(102, 126, 234, 0.9)'; ctx.fill();
+                                        ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.stroke();
+                                        ctx.fillStyle = 'white'; ctx.font = 'bold 16px Arial';
+                                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(p.number, p.x, p.y);
+                                    });
+                                    canvas.outerHTML = '<img src="' + tempCanvas.toDataURL() + '" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">';
+                                }
+                            }
+                        }
+                    }
+                }
+                const labelsList = clone.querySelector('#labels_' + id);
+                if (labelsList) {
+                    labelsList.innerHTML = '';
+                    data.labels.forEach(function(label) {
+                        const div = document.createElement('div');
+                        div.className = 'label-item';
+                        div.innerHTML = '<div class="label-number-display">' + label.number + '</div><div style="flex: 1;"><div style="font-weight: bold; margin-bottom: 8px;">Q: ' + (label.question || '-') + '</div><div class="export-answer-zone"><input type="text" class="export-answer-input" placeholder="Réponse..." style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;" data-correct="' + encodeURIComponent(label.answer || '') + '"><button class="btn btn-primary export-check-btn" style="margin-top: 8px; padding: 8px 16px;" onclick="checkExportAnswer(this)">Vérifier</button><div class="export-feedback" style="display: none; margin-top: 8px; padding: 10px; border-radius: 8px;"></div></div></div>';
+                        labelsList.appendChild(div);
+                    });
+                }
+                const btns = extraDiv.querySelectorAll('button:not(.export-check-btn)'); btns.forEach(function(btn) { btn.style.display = 'none'; });
+            });
+            clone.querySelectorAll('.nav-btn').forEach(function(btn) { btn.style.display = 'none'; });
+
+            const exportScript = document.createElement('script');
+            exportScript.textContent = 'function normalizeText(t){if(!t)return"";return t.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/[-_]/g," ").replace(/\\s+/g," ").trim();}function checkExportAnswer(btn){const c=btn.parentElement;const i=c.querySelector(".export-answer-input");const f=c.querySelector(".export-feedback");const u=i.value;const cor=decodeURIComponent(i.getAttribute("data-correct"));if(!u.trim()){f.style.display="block";f.style.background="#fff3cd";f.style.border="2px solid #ffc107";f.style.color="#856404";f.innerHTML="⚠️ Entrez une réponse";return;}const nu=normalizeText(u);const nc=normalizeText(cor);const ok=nu===nc||nc.includes(nu)||nu.includes(nc);f.style.display="block";if(ok){f.style.background="#d4edda";f.style.border="2px solid #28a745";f.style.color="#155724";f.innerHTML="✅ Correct ! <strong>"+cor+"</strong>";i.style.borderColor="#28a745";i.style.background="#d4edda";}else{f.style.background="#f8d7da";f.style.border="2px solid #dc3545";f.style.color="#721c24";f.innerHTML="❌ Attendu: <strong>"+cor+"</strong>";i.style.borderColor="#dc3545";i.style.background="#f8d7da";}}document.addEventListener("keypress",function(e){if(e.key==="Enter"&&e.target.classList.contains("export-answer-input")){const b=e.target.parentElement.querySelector(".export-check-btn");if(b)b.click();}});';
+            clone.querySelector('body').appendChild(exportScript);
+
+            const html = '<!DOCTYPE html>' + clone.outerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'TD3_Complet_' + new Date().toISOString().slice(0,10) + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('✅ Export HTML réussi !');
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' || e.target.type === 'radio') {
+                const option = e.target.closest('.mcq-option');
+                if (option) {
+                    if (e.target.type === 'checkbox') {
+                        option.classList.toggle('selected', e.target.checked);
+                    } else {
+                        document.querySelectorAll('input[name="' + e.target.name + '"]').forEach(input => {
+                            const opt = input.closest('.mcq-option');
+                            if (opt) opt.classList.remove('selected');
+                        });
+                        if (e.target.checked) option.classList.add('selected');
+                    }
+                }
+            }
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

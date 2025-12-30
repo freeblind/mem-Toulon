@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD2 - Ostéodensitométrie, Doses, Scanner - Version Interactive</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            height: 8px;
+            margin: 20px 30px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .question-container {
+            padding: 30px;
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #11998e;
+        }
+
+        .question-number {
+            color: #11998e;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .answer-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .feedback.accepted {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+
+        .solution {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .solution h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .mcq-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .mcq-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mcq-option:hover {
+            border-color: #11998e;
+            background: #f8f9fa;
+        }
+
+        .mcq-option input[type="checkbox"],
+        .mcq-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        .mcq-option.selected {
+            border-color: #11998e;
+            background: #e7f9f7;
+        }
+
+        .mcq-option.correct-answer {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .mcq-option.wrong-answer {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            padding: 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: 2px solid #e0e0e0;
+        }
+
+        th {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        td input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+
+        td input[type="text"]:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+
+        .solution-row {
+            background: #fff3cd !important;
+            font-style: italic;
+            color: #856404;
+            display: none;
+        }
+
+        .solution-row.show {
+            display: table-row;
+        }
+
+        .solution-cell {
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .text-gap-container {
+            display: inline-block;
+            position: relative;
+            min-width: 150px;
+            margin: 0 5px;
+        }
+
+        .text-gap {
+            border: none;
+            border-bottom: 2px solid #11998e;
+            padding: 5px 10px;
+            width: 150px;
+            text-align: center;
+            font-size: 1em;
+            background: transparent;
+        }
+
+        .text-gap:focus {
+            outline: none;
+            border-bottom: 2px solid #38ef7d;
+        }
+
+        .text-gap.correct {
+            color: #28a745;
+            border-bottom-color: #28a745;
+        }
+
+        .text-gap.incorrect {
+            color: #dc3545;
+            text-decoration: line-through;
+            border-bottom-color: #dc3545;
+        }
+
+        .text-gap-solution {
+            display: none;
+            color: #28a745;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .text-gap-solution.show {
+            display: inline;
+        }
+
+        .text-to-fill {
+            line-height: 2.5;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            padding: 30px;
+            background: #f8f9fa;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #11998e;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .theme-section {
+            background: linear-gradient(135deg, #11998e22 0%, #38ef7d22 100%);
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #11998e;
+        }
+
+        .theme-title {
+            font-weight: bold;
+            color: #11998e;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            table {
+                font-size: 0.85em;
+            }
+        }
+
+        /* Styles pour schema upload */
+        .schema-upload {
+            margin-top: 20px;
+            padding: 20px;
+            border: 3px dashed #11998e;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+
+        .upload-area {
+            text-align: center;
+            padding: 40px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #e7f9f7;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #11998e;
+            margin-bottom: 15px;
+        }
+
+        .image-container-wrapper {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .schema-image-display {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .annotation-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        .label-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 80px;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .label-number-display {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .label-input {
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 100%;
+        }
+
+        .delete-label {
+            padding: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 TD N°2 - Ostéodensitométrie, Doses & Scanner</h1>
+            <p>UE 3.2 S1 - Version Interactive Complète</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Question 1 - Tableau Ostéodensitométrie -->
+        <div class="question-container active" id="question1">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">🦴 Thème : Ostéodensitométrie</div>
+                </div>
+                <div class="question-number">Question 1 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Ostéodensitométrie - Bases</strong><br><br>
+                    Renseignez le tableau ci-dessous :
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Votre réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Définition de l'ostéodensitométrie</strong></td>
+                            <td><input type="text" id="q1_1" placeholder="Votre réponse"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Examen médical mesurant la densité osseuse (DMO)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Signification de l'acronyme DMO</strong></td>
+                            <td><input type="text" id="q1_2" placeholder="DMO = ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Densité Minérale Osseuse, en gramme/cm²</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Principe physique de l'ostéodensitométrie (loi)</strong></td>
+                            <td><input type="text" id="q1_3" placeholder="Quelle loi ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Loi d'absorption – méthode basée sur la mesure de l'atténuation d'un faisceau de photons par la matière</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Technologie radiologique de l'ostéodensitométrie</strong></td>
+                            <td><input type="text" id="q1_4" placeholder="Technologie ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Absorption biphotonique - Émission de photons X à 2 énergies différentes vers un site osseux (rachis, fémur ou radius) pour mesurer l'absorption différentielle</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Énergies utilisées</strong></td>
+                            <td><input type="text" id="q1_5" placeholder="Énergies ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 70/140 kV ou 100/140 kV</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Obtention des énergies</strong></td>
+                            <td><input type="text" id="q1_6" placeholder="Comment ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Variation de la tension du tube ou tension constante avec filtration par terre rare</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3 géométries de faisceau possibles</strong></td>
+                            <td><input type="text" id="q1_7" placeholder="Géométries ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Faisceau droit, Faisceau en éventail étroit, Faisceau en éventail large</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2 types de détecteur</strong></td>
+                            <td><input type="text" id="q1_8" placeholder="Types ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Conversion indirecte (RX → lumière → signal électrique : scintillateur + photodiode) et Conversion directe (RX → signal électrique : semi-conducteur)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(1, 8)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(1)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback1"></div>
+        </div>
+
+        <!-- Question 2 - Tableau Indicateurs de dose -->
+        <div class="question-container" id="question2">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">📊 Thème : Indicateurs de Dose en Radiologie</div>
+                </div>
+                <div class="question-number">Question 2 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Indicateurs dosimétriques en radiologie</strong><br><br>
+                    Renseignez le tableau ci-dessous :
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Votre réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Indicateur dosimétrique en radiologie</strong></td>
+                            <td><input type="text" id="q2_1" placeholder="Quel indicateur ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Produit Dose Surface (PDS)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Unité de cet indicateur dosimétrique</strong></td>
+                            <td><input type="text" id="q2_2" placeholder="Unité ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 mGy.cm²</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Valeur transmise par cet indicateur</strong></td>
+                            <td><input type="text" id="q2_3" placeholder="Que mesure-t-il ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Dose délivrée au patient</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Document mentionnant obligatoirement cet indicateur</strong></td>
+                            <td><input type="text" id="q2_4" placeholder="Quel document ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Compte rendu radiologique</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Procédé de recueil de cet indicateur</strong></td>
+                            <td><input type="text" id="q2_5" placeholder="Comment ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Chambre d'ionisation ou Calculateur intégré</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Référence de comparaison de la valeur</strong></td>
+                            <td><input type="text" id="q2_6" placeholder="Référence ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Niveaux de Référence Diagnostique (NRD)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Intérêt de cet indicateur</strong></td>
+                            <td><input type="text" id="q2_7" placeholder="Intérêt ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Évaluer ses pratiques</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Définir la dose à l'entrée</strong></td>
+                            <td><input type="text" id="q2_8" placeholder="Définition ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Énergie en un point à la peau du patient</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Comment estimer la dose à l'entrée</strong></td>
+                            <td><input type="text" id="q2_9" placeholder="Estimation ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Tension, charge, DFP (distance foyer-peau) × facteur de rétrodiffusion</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Facteurs de rétrodiffusion</strong></td>
+                            <td><input type="text" id="q2_10" placeholder="Valeurs ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 1,1 pour enfants | 1,3 pour adultes (60-80 kV) | 1,5 en haute tension (120-140 kV)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(2, 10)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(2)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback2"></div>
+        </div>
+
+        <!-- Question 3 - Indicateurs autres modalités -->
+        <div class="question-container" id="question3">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">📊 Thème : Indicateurs de Dose en Radiologie</div>
+                </div>
+                <div class="question-number">Question 3 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Indicateurs dosimétriques par modalité</strong><br><br>
+                    Pour chaque modalité, nommer les indicateurs dosimétriques et leurs unités :
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Modalité</th>
+                            <th>Indicateurs et unités</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Scanographie</strong></td>
+                            <td><input type="text" id="q3_1" placeholder="Indicateurs ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 IDSV (mGy) - Indice de Dose Scanographique Volumique | PDL (mGy.cm) - Produit Dose Longueur</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Imagerie radioguidée</strong></td>
+                            <td><input type="text" id="q3_2" placeholder="Indicateurs ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 PDS (Gy.cm²) | Temps de scopie | Kerma (mGy)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Médecine nucléaire</strong></td>
+                            <td><input type="text" id="q3_3" placeholder="Indicateurs ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Activité (MBq) | IDSV (mGy) | PDL (mGy.cm)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mammographie</strong></td>
+                            <td><input type="text" id="q3_4" placeholder="Indicateurs ?"></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 DMG (mGy) - Dose Glandulaire Moyenne</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(3, 4)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(3)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback3"></div>
+        </div>
+
+        <!-- Question 4 - NRD -->
+        <div class="question-container" id="question4">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">📊 Thème : Optimisation des Doses</div>
+                </div>
+                <div class="question-number">Question 4</div>
+                <div class="question-text">
+                    <strong>NRD, VGD et NRL</strong><br><br>
+                    1. Précisez la signification des 3 acronymes ci-dessous<br>
+                    2. Donnez les objectifs des NRD
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">NRD :</label>
+                <input type="text" id="q4_nrd" class="answer-input" style="min-height: 50px;" placeholder="Signification de NRD...">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">VGD :</label>
+                <input type="text" id="q4_vgd" class="answer-input" style="min-height: 50px;" placeholder="Signification de VGD...">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">NRL :</label>
+                <input type="text" id="q4_nrl" class="answer-input" style="min-height: 50px;" placeholder="Signification de NRL...">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Objectifs des NRD :</label>
+                <textarea class="answer-input" id="q4_obj" placeholder="Objectifs des NRD..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(4)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(4)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback4"></div>
+        </div>
+
+        <!-- Question 5 - Optimisation -->
+        <div class="question-container" id="question5">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">📊 Thème : Optimisation des Doses</div>
+                </div>
+                <div class="question-number">Question 5</div>
+                <div class="question-text">
+                    <strong>Démarche d'optimisation</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">1. Complétez : Le principe d'optimisation consiste à trouver un compromis entre...</label>
+                <input type="text" id="q5_1" class="answer-input" style="min-height: 50px;" placeholder="Compromis entre...">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">2. Précisez les 4 acteurs intervenant dans une démarche d'optimisation :</label>
+                <textarea class="answer-input" id="q5_2" placeholder="Les 4 acteurs..."></textarea>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">3. Démarche si NRL > NRD :</label>
+                <input type="text" id="q5_3" class="answer-input" style="min-height: 50px;" placeholder="Démarche ?">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">4. Démarche si VGD < NRL < NRD :</label>
+                <input type="text" id="q5_4" class="answer-input" style="min-height: 50px;" placeholder="Démarche ?">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">5. Démarche si NRL < VGD de plus de 20% :</label>
+                <input type="text" id="q5_5" class="answer-input" style="min-height: 50px;" placeholder="Démarche ?">
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(5)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(5)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback5"></div>
+        </div>
+
+        <!-- Question 6 - Analyse spectrale -->
+        <div class="question-container" id="question6">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">📈 Thème : Analyse Spectrale</div>
+                </div>
+                <div class="question-number">Question 6</div>
+                <div class="question-text">
+                    <strong>Analyse spectrale et spectre de Fourier</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Définir l'analyse spectrale :</label>
+                <textarea class="answer-input" id="q6_1" placeholder="Définition de l'analyse spectrale..."></textarea>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Définir le spectre de Fourier :</label>
+                <textarea class="answer-input" id="q6_2" placeholder="Définition du spectre de Fourier..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(6)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(6)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback6"></div>
+        </div>
+
+        <!-- Question 7 - Vrai/Faux Analyse spectrale -->
+        <div class="question-container" id="question7">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">📈 Thème : Analyse Spectrale</div>
+                </div>
+                <div class="question-number">Question 7 - Vrai/Faux</div>
+                <div class="question-text">
+                    <strong>Spectre de Fourier</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Sur un spectre de Fourier, le 1er pic (f0) se nomme le FONDAMENTAL et les autres pics (f1, f2, …) les HARMONIQUES</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_1" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_1" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Le spectre de Fourier est une représentation d'un signal aussi bien périodique que non périodique</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_2" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_2" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Seul le signal sinusoïdal est simple, les autres signaux périodiques sont une somme de sinusoïdes</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_3" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_3" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 15px;">
+                    <strong>Le spectre de Fourier du signal CRÉNEAU possède 1 seul pic appelé l'harmonique</strong>
+                </div>
+                <div class="mcq-options">
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_4" value="true">
+                        <span><strong>VRAI</strong></span>
+                    </label>
+                    <label class="mcq-option">
+                        <input type="radio" name="q7_4" value="false">
+                        <span><strong>FAUX</strong></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTrueFalse(7, ['true', 'false', 'true', 'false'])">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(7)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback7"></div>
+        </div>
+
+        <!-- Question 8 - Calcul fréquence -->
+        <div class="question-container" id="question8">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">📈 Thème : Analyse Spectrale</div>
+                </div>
+                <div class="question-number">Question 8 - Calcul</div>
+                <div class="question-text">
+                    <strong>À partir d'un signal de période T = 4 ms :</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">1. Précisez la période en différentes notations :</label>
+                <input type="text" id="q8_1" class="answer-input" style="min-height: 50px;" placeholder="Période = ...">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">2. Calculez la fréquence en Hz :</label>
+                <input type="text" id="q8_2" class="answer-input" style="min-height: 50px;" placeholder="Votre calcul...">
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(8)">Vérifier ma réponse</button>
+                <button class="btn btn-success" onclick="acceptAnswer(8)">Considérer comme bonne</button>
+            </div>
+
+            <div class="feedback" id="feedback8"></div>
+        </div>
+
+        <!-- Question 9 - Scanner texte à trous -->
+        <div class="question-container" id="question9">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">🔬 Thème : Scanographie</div>
+                </div>
+                <div class="question-number">Question 9 - Texte à trous</div>
+                <div class="question-text">
+                    <strong>Le scanner - Définition</strong><br><br>
+                    Complétez la phrase ci-dessous :
+                </div>
+            </div>
+
+            <div class="text-to-fill">
+                <p>Le scanner est une technique d'imagerie par 
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_1" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_1">rotation</span>
+                    </span>
+                    qui utilise les 
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_2" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_2">photons X</span>
+                    </span>
+                    pour créer des images 
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_3" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_3">axiales</span>
+                    </span>
+                    , 
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_4" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_4">anatomiques</span>
+                    </span>
+                    et parfois 
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_5" class="text-gap" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_5">fonctionnelles</span>
+                    </span>
+                </p>
+
+                <p style="margin-top: 30px;"><strong>2. Précisez les 2 acronymes utilisés pour la scanographie :</strong></p>
+                <p style="margin-top: 15px;">
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_6" class="text-gap" style="width: 100px;" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_6">TDM</span>
+                    </span>
+                    : 
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_7" class="text-gap" style="width: 200px;" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_7">Tomodensitométrie</span>
+                    </span>
+                </p>
+                <p style="margin-top: 15px;">
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_8" class="text-gap" style="width: 100px;" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_8">CT</span>
+                    </span>
+                    : 
+                    <span class="text-gap-container">
+                        <input type="text" id="q9_9" class="text-gap" style="width: 250px;" placeholder="...">
+                        <span class="text-gap-solution" id="sol_q9_9">Computerized Tomography</span>
+                    </span>
+                </p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTextGaps9()">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(9)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback9"></div>
+        </div>
+
+        <!-- Question 10 - Propriétés du scanner -->
+        <div class="question-container" id="question10">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">🔬 Thème : Scanographie</div>
+                </div>
+                <div class="question-number">Question 10</div>
+                <div class="question-text">
+                    <strong>Quelles sont les 2 propriétés du scanner ?</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Propriété 1 :</label>
+                <textarea class="answer-input" id="q10_1" placeholder="Première propriété..."></textarea>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Propriété 2 :</label>
+                <textarea class="answer-input" id="q10_2" placeholder="Deuxième propriété..."></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(10)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(10)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback10"></div>
+        </div>
+
+        <!-- Question 11 - Échelle de Hounsfield -->
+        <div class="question-container" id="question11">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">🔬 Thème : Scanographie</div>
+                </div>
+                <div class="question-number">Question 11</div>
+                <div class="question-text">
+                    <strong>Échelle de Hounsfield</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">1. Expliquez le concept de l'échelle de Hounsfield :</label>
+                <textarea class="answer-input" id="q11_1" placeholder="Concept de l'échelle..."></textarea>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">2. Signification de l'acronyme UH :</label>
+                <input type="text" id="q11_2" class="answer-input" style="min-height: 50px;" placeholder="UH = ...">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">3. Donnez les valeurs UH :</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label>OS :</label>
+                        <input type="text" id="q11_os" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;" placeholder="?">
+                    </div>
+                    <div>
+                        <label>EAU :</label>
+                        <input type="text" id="q11_eau" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;" placeholder="?">
+                    </div>
+                    <div>
+                        <label>AIR :</label>
+                        <input type="text" id="q11_air" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;" placeholder="?">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(11)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(11)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback11"></div>
+        </div>
+
+        <!-- Question 12 - Fenêtrage -->
+        <div class="question-container" id="question12">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">🔬 Thème : Scanographie</div>
+                </div>
+                <div class="question-number">Question 12</div>
+                <div class="question-text">
+                    <strong>Le fenêtrage en scanographie</strong>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">1. Définissez la notion de FENÊTRAGE en scanographie :</label>
+                <textarea class="answer-input" id="q12_1" placeholder="Définition du fenêtrage..."></textarea>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">2. Citez les 2 paramètres caractérisant ce fenêtrage :</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label>Paramètre 1 :</label>
+                        <input type="text" id="q12_p1" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;" placeholder="?">
+                    </div>
+                    <div>
+                        <label>Paramètre 2 :</label>
+                        <input type="text" id="q12_p2" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;" placeholder="?">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkAnswer(12)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(12)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback12"></div>
+        </div>
+
+        <!-- Question 13 - Générations de scanner -->
+        <div class="question-container" id="question13">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">🔬 Thème : Scanographie</div>
+                </div>
+                <div class="question-number">Question 13 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Comparer un scanner de 1ère, 3ème et 6ème génération</strong>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Caractéristique</th>
+                            <th>1ère génération (1970)</th>
+                            <th>3ème génération (1980)</th>
+                            <th>6ème génération (Aujourd'hui)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Configuration</strong></td>
+                            <td><input type="text" id="q13_1a" placeholder="..."></td>
+                            <td><input type="text" id="q13_1b" placeholder="..."></td>
+                            <td><input type="text" id="q13_1c" placeholder="..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Tube RX + 1 seul détecteur</td>
+                            <td class="solution-cell">Détecteurs en arc de cercle centrés sur le foyer</td>
+                            <td class="solution-cell">Améliorations des appareils 3ème génération</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mouvement</strong></td>
+                            <td><input type="text" id="q13_2a" placeholder="..."></td>
+                            <td><input type="text" id="q13_2b" placeholder="..."></td>
+                            <td><input type="text" id="q13_2c" placeholder="..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td><em>💡 Solution :</em></td>
+                            <td class="solution-cell">Translation + rotation degré par degré</td>
+                            <td class="solution-cell">Rotation seule (plus de translation)</td>
+                            <td class="solution-cell">Rotation continue, détecteurs multibarrettes, configurations matricielles</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable13()">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(13)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback13"></div>
+        </div>
+
+        <!-- Question 14 - Scanner spectral -->
+        <div class="question-container" id="question14">
+            <div class="question-header">
+                <div class="theme-section">
+                    <div class="theme-title">🔬 Thème : Scanographie</div>
+                </div>
+                <div class="question-number">Question 14 - Tableau à compléter</div>
+                <div class="question-text">
+                    <strong>Scanner en imagerie spectrale</strong><br><br>
+                    Expliquez les différentes technologies :
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Technologie</th>
+                            <th>Principe</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2" style="background: #e7f9f7; font-weight: bold;">TECHNOLOGIE À L'ÉMISSION</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bitube</strong></td>
+                            <td><input type="text" id="q14_1" placeholder="Principe..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 2 tubes placés perpendiculairement émettant 2 énergies différentes à 80 et 140 kV</td>
+                        </tr>
+                        <tr>
+                            <td><strong>kV switching</strong></td>
+                            <td><input type="text" id="q14_2" placeholder="Principe..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Émission alternative de RX d'énergie différente (80 et 140 kV) par rotation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Succession de rotation</strong></td>
+                            <td><input type="text" id="q14_3" placeholder="Principe..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Une rotation à 80 kV et l'autre à 140 kV</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Twin beam</strong></td>
+                            <td><input type="text" id="q14_4" placeholder="Principe..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Faisceau X à 120 kV subdivisé en 2 faisceaux par des filtres différents</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="background: #e7f9f7; font-weight: bold;">TECHNOLOGIE DE DÉTECTION</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Superposition de détecteurs</strong></td>
+                            <td><input type="text" id="q14_5" placeholder="Principe..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Détecteurs de sensibilité différente. Couche supérieure : énergies faibles. Couche inférieure : énergies élevées</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Détecteurs à comptage photonique</strong></td>
+                            <td><input type="text" id="q14_6" placeholder="Principe..."></td>
+                        </tr>
+                        <tr class="solution-row">
+                            <td colspan="2" class="solution-cell">💡 Discrimination énergétique des photons permettant une décomposition spectrale et une sélectivité matérielle plus précise</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="checkTable(14, 6)">Vérifier mes réponses</button>
+                <button class="btn btn-success" onclick="acceptAnswer(14)">Considérer comme bonnes</button>
+            </div>
+
+            <div class="feedback" id="feedback14"></div>
+        </div>
+
+        <!-- Page de navigation -->
+        <div class="question-container" id="question15">
+            <div class="question-header">
+                <div class="question-number">📋 Navigation rapide</div>
+                <div class="question-text">
+                    Cliquez sur une question pour y accéder directement :
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div style="background: #e7f9f7; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #11998e; margin-bottom: 10px;">🦴 Ostéodensitométrie</h4>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(1)">Q1 - Bases ostéodensitométrie</button>
+                </div>
+                <div style="background: #fff3cd; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #856404; margin-bottom: 10px;">📊 Indicateurs de Dose</h4>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(2)">Q2 - Indicateurs dosimétriques</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(3)">Q3 - Par modalité</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(4)">Q4 - NRD, VGD, NRL</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(5)">Q5 - Optimisation</button>
+                </div>
+                <div style="background: #d4edda; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #155724; margin-bottom: 10px;">📈 Analyse Spectrale</h4>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(6)">Q6 - Définitions</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(7)">Q7 - Vrai/Faux</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(8)">Q8 - Calcul fréquence</button>
+                </div>
+                <div style="background: #d1ecf1; padding: 15px; border-radius: 10px;">
+                    <h4 style="color: #0c5460; margin-bottom: 10px;">🔬 Scanner</h4>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(9)">Q9 - Définition</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(10)">Q10 - Propriétés</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(11)">Q11 - Hounsfield</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(12)">Q12 - Fenêtrage</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(13)">Q13 - Générations</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 5px;" onclick="navigateTo(14)">Q14 - Scanner spectral</button>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn btn-primary" onclick="navigateTo(17)">📷 Ajouter schémas/questions</button>
+                <button class="btn btn-warning" onclick="exportHTML()">📤 Exporter en HTML</button>
+                <button class="btn btn-success" onclick="showFinalStats()">📊 Voir mes statistiques</button>
+            </div>
+        </div>
+
+        <!-- Page Extras - Schémas personnalisés -->
+        <div class="question-container" id="question17">
+            <div class="question-header">
+                <div class="question-number">📷 Ajouter des schémas et questions</div>
+                <div class="question-text">
+                    Ajoutez vos propres schémas à annoter ou questions supplémentaires
+                </div>
+            </div>
+
+            <div style="margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="addSchema()">📷 Ajouter un schéma</button>
+                <button class="btn btn-secondary" onclick="addTextOnly()">📝 Ajouter des questions</button>
+            </div>
+
+            <div id="extrasList"></div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn btn-secondary" onclick="navigateTo(15)">📋 Retour à la navigation</button>
+                <button class="btn btn-warning" onclick="exportHTML()">📤 Exporter en HTML</button>
+            </div>
+        </div>
+
+        <!-- Page statistiques finales -->
+        <div class="question-container" id="question18">
+            <div class="stats">
+                <h2>🎉 Statistiques finales</h2>
+                <p style="margin-top: 10px; color: #666;">Voici votre performance sur ce TD</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="correctAnswers">0</div>
+                        <div class="stat-label">Réponses correctes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="acceptedAnswers">0</div>
+                        <div class="stat-label">Réponses acceptées</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalScore">0%</div>
+                        <div class="stat-label">Score total</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); border-radius: 15px; color: white;">
+                    <h3 style="margin-bottom: 10px;">🏆 Score Final</h3>
+                    <div style="font-size: 3em; font-weight: bold;" id="finalScoreDisplay">0 / 14</div>
+                    <p style="margin-top: 10px; opacity: 0.9;">questions validées</p>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="resetQuiz()">🔄 Recommencer le TD</button>
+                    <button class="btn btn-secondary" onclick="navigateTo(15)">📋 Retour à la navigation</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display: none;">← Précédent</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Suivant →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 18;
+        let answers = {
+            correct: 0,
+            accepted: 0,
+            total: 14,
+            answered: new Set()
+        };
+        
+        let extrasData = {};
+        let extrasCount = 0;
+
+        // Mots-clés pour la vérification des réponses
+        const keywords = {
+            4: ['nrd', 'niveau', 'référence', 'diagnostique', 'vgd', 'valeur', 'guide', 'nrl', 'local', 'dose', 'optimisation', 'évaluation'],
+            5: ['qualité', 'image', 'dose', 'compromis', 'physicien', 'radiologue', 'manipulateur', 'ingénieur', 'optimisation'],
+            6: ['sinusoïde', 'fréquence', 'amplitude', 'spectre', 'fourier', 'signal', 'périodique'],
+            8: ['4', 'ms', '250', 'hz', 'fréquence', 'période'],
+            10: ['densité', 'volume', 'atténuation', 'coupe', 'reconstruction', 'image', 'projection'],
+            11: ['hounsfield', 'densité', 'uh', 'unité', 'eau', '1000', '0', 'os', 'air', 'échelle'],
+            12: ['fenêtrage', 'contraste', 'window', 'level', 'width', 'wl', 'ww', 'hounsfield']
+        };
+
+        const solutions = {
+            4: `<strong>NRD :</strong> Niveaux de Référence Diagnostique<br><strong>VGD :</strong> Valeur Guide Diagnostique<br><strong>NRL :</strong> Niveaux de Référence Local<br><br><strong>Objectifs des NRD :</strong><br>- Définir les modalités de réalisation des évaluations des doses<br>- Définir les niveaux de référence diagnostiques en vigueur au niveau national<br>- Demander aux responsables de procéder à des évaluations dosimétriques périodiques<br>- Transmettre les données à l'IRSN<br>- Mettre en œuvre une démarche d'optimisation prioritaire si valeurs > NRD`,
+            5: `<strong>1.</strong> Compromis entre <em>qualité image</em> et <em>dose</em><br><br><strong>2. Les 4 acteurs :</strong> Physicien médical, Radiologue, Manipulateur, Ingénieur d'application<br><br><strong>3. NRL > NRD :</strong> Démarche d'optimisation prioritaire pour avoir des pratiques < aux NRD<br><strong>4. VGD < NRL < NRD :</strong> Démarche d'optimisation pour atteindre la VGD<br><strong>5. NRL < VGD de plus de 20% :</strong> Évaluation de la qualité image`,
+            6: `<strong>Analyse spectrale :</strong> Consiste à trouver toutes les sinusoïdes qui contribuent significativement au signal : identifier les fréquences et les amplitudes des sinusoïdes associées.<br><br><strong>Spectre de Fourier :</strong> Représentation graphique permettant de visualiser fréquences (en abscisses) et amplitudes (en ordonnées) d'un signal périodique.`,
+            8: `<strong>Période :</strong> T = 4 ms = 4×10⁻³ s = 0,004 s<br><br><strong>Fréquence :</strong> f = 1/T = 1/(4×10⁻³) = <em>250 Hz</em>`,
+            10: `<strong>Propriété 1 :</strong> La mesure de densité des volumes élémentaires d'une coupe à partir de l'atténuation d'un faisceau de RX.<br><br><strong>Propriété 2 :</strong> La reconstruction d'une image en coupe du corps humain à partir des différentes projections transversales obtenues par le système.`,
+            11: `<strong>Échelle de Hounsfield :</strong> Compare l'ensemble des densités présentes dans le corps. Élaboration d'une échelle classant ces différentes densités en se référant à la valeur de l'absorption de l'eau. Méthode d'observation (fenêtrage) permettant de centrer l'étude en contraste sur une portion précise de l'échelle.<br><br><strong>UH :</strong> Unités Hounsfield = Nombre CT = NCT<br><br><strong>Valeurs UH :</strong> OS = +1000 | EAU = 0 | AIR = -1000`,
+            12: `<strong>Fenêtrage :</strong> = zoom en contraste. Centrer l'étude en contraste sur une portion de l'échelle de Hounsfield pour compenser les limites physiologiques de l'œil humain.<br><br><strong>2 paramètres :</strong><br>1. Son niveau : WL (Window Level)<br>2. Sa largeur : WW (Window Width)`
+        };
+
+        function updateProgress() {
+            const progress = ((currentQuestion - 1) / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function showQuestion(questionNumber) {
+            if (questionNumber < 1 || questionNumber > totalQuestions) {
+                return;
+            }
+
+            document.querySelectorAll('.question-container').forEach(q => {
+                q.classList.remove('active');
+            });
+            
+            const questionElement = document.getElementById('question' + questionNumber);
+            if (questionElement) {
+                questionElement.classList.add('active');
+            }
+            
+            currentQuestion = questionNumber;
+            updateProgress();
+
+            document.getElementById('prevBtn').style.display = questionNumber === 1 ? 'none' : 'block';
+            
+            if (questionNumber === totalQuestions) {
+                document.getElementById('nextBtn').style.display = 'none';
+            } else if (questionNumber === 15) {
+                document.getElementById('nextBtn').textContent = 'Voir statistiques →';
+                document.getElementById('nextBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').textContent = 'Suivant →';
+                document.getElementById('nextBtn').style.display = 'block';
+            }
+
+            if (questionNumber === 16) {
+                document.getElementById('correctAnswers').textContent = answers.correct;
+                document.getElementById('acceptedAnswers').textContent = answers.accepted;
+                const totalScore = Math.round(((answers.correct + answers.accepted) / answers.total) * 100);
+                document.getElementById('totalScore').textContent = totalScore + '%';
+            }
+        }
+
+        function navigateTo(questionNumber) {
+            showQuestion(questionNumber);
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                showQuestion(currentQuestion + 1);
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 1) {
+                showQuestion(currentQuestion - 1);
+            }
+        }
+
+        function checkAnswer(questionNumber) {
+            const feedback = document.getElementById('feedback' + questionNumber);
+            const keywordList = keywords[questionNumber];
+            
+            let allText = '';
+            document.querySelectorAll(`#question${questionNumber} input[type="text"], #question${questionNumber} textarea`).forEach(input => {
+                allText += ' ' + input.value.toLowerCase();
+            });
+
+            if (!allText.trim()) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez saisir une réponse avant de vérifier.';
+                return;
+            }
+
+            let matchCount = 0;
+            if (keywordList) {
+                keywordList.forEach(keyword => {
+                    if (allText.includes(keyword.toLowerCase())) {
+                        matchCount++;
+                    }
+                });
+            }
+
+            const threshold = keywordList ? Math.ceil(keywordList.length * 0.3) : 0;
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!answers.answered.has(questionNumber)) {
+                if (matchCount >= threshold) {
+                    feedback.classList.add('correct');
+                    feedback.innerHTML = `
+                        <strong>✅ Bonne réponse !</strong><br>
+                        Vous avez identifié ${matchCount} éléments clés sur ${keywordList ? keywordList.length : 0}.
+                        <div class="solution">
+                            <h4>Solution complète :</h4>
+                            ${solutions[questionNumber] || 'Voir la correction ci-dessus.'}
+                        </div>
+                        <div class="button-group" style="margin-top: 15px;">
+                            <button class="btn btn-success" onclick="acceptAnswer(${questionNumber})">✓ Valider cette réponse</button>
+                        </div>
+                    `;
+                } else {
+                    feedback.classList.add('incorrect');
+                    feedback.innerHTML = `
+                        <strong>❌ Réponse incomplète</strong><br>
+                        Vous avez identifié ${matchCount} éléments clés. Il en faut au moins ${threshold}.
+                        <div class="solution">
+                            <h4>Solution complète :</h4>
+                            ${solutions[questionNumber] || 'Voir la correction ci-dessus.'}
+                        </div>
+                        <div class="button-group" style="margin-top: 15px;">
+                            <button class="btn btn-success" onclick="acceptAnswer(${questionNumber})">✓ Considérer comme bonne quand même</button>
+                        </div>
+                    `;
+                }
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = `
+                    <strong>✅ Déjà validée</strong>
+                    <div class="solution">
+                        <h4>Solution complète :</h4>
+                        ${solutions[questionNumber] || 'Voir la correction ci-dessus.'}
+                    </div>
+                `;
+            }
+        }
+
+        function acceptAnswer(questionNumber) {
+            const feedback = document.getElementById('feedback' + questionNumber);
+            
+            if (!answers.answered.has(questionNumber)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'accepted');
+                
+                if (solutions[questionNumber]) {
+                    feedback.innerHTML = `
+                        <strong>✓ Réponse acceptée</strong><br>
+                        Votre réponse a été considérée comme correcte.
+                        <div class="solution">
+                            <h4>Solution complète pour référence :</h4>
+                            ${solutions[questionNumber]}
+                        </div>
+                    `;
+                } else {
+                    feedback.innerHTML = `
+                        <strong>✓ Réponse acceptée</strong><br>
+                        Votre réponse a été considérée comme correcte.
+                    `;
+                }
+                
+                answers.accepted++;
+                answers.answered.add(questionNumber);
+            } else {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'accepted');
+                feedback.innerHTML = '<strong>✓ Déjà validée</strong><br>Cette question a déjà été validée.';
+            }
+
+            // Afficher les solutions du tableau si applicable
+            document.querySelectorAll(`#question${questionNumber} .solution-row`).forEach(row => {
+                row.classList.add('show');
+            });
+        }
+
+        function checkTrueFalse(questionNumber, correctAnswers) {
+            const selectedAnswers = [];
+            correctAnswers.forEach((_, index) => {
+                const name = `q${questionNumber}_${index + 1}`;
+                const selected = document.querySelector(`input[name="${name}"]:checked`);
+                selectedAnswers.push(selected ? selected.value : null);
+            });
+
+            const feedback = document.getElementById('feedback' + questionNumber);
+
+            if (selectedAnswers.includes(null)) {
+                feedback.classList.remove('correct', 'incorrect');
+                feedback.classList.add('show', 'incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez répondre à toutes les affirmations.';
+                return;
+            }
+
+            const isCorrect = correctAnswers.every((answer, index) => answer === selectedAnswers[index]);
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!answers.answered.has(questionNumber)) {
+                if (isCorrect) {
+                    feedback.classList.add('correct');
+                    feedback.innerHTML = '<strong>✅ Parfait !</strong><br>Toutes les affirmations sont correctes.';
+                    answers.correct++;
+                    answers.answered.add(questionNumber);
+                } else {
+                    feedback.classList.add('incorrect');
+                    let correctText = '<strong>❌ Une ou plusieurs réponses sont incorrectes</strong><br><br><strong>Corrections :</strong><br>';
+                    correctText += '1. VRAI - Le 1er pic (f0) = Fondamental, les autres = Harmoniques<br>';
+                    correctText += '2. FAUX - Uniquement possible pour un signal périodique<br>';
+                    correctText += '3. VRAI - Seul le signal sinusoïdal est simple<br>';
+                    correctText += '4. FAUX - Le créneau est une somme de plusieurs sinusoïdes';
+                    correctText += '<div class="button-group" style="margin-top: 15px;"><button class="btn btn-success" onclick="acceptAnswer(' + questionNumber + ')">✓ Considérer comme bonne quand même</button></div>';
+                    feedback.innerHTML = correctText;
+                }
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTable(questionNumber, numFields) {
+            const feedback = document.getElementById('feedback' + questionNumber);
+            let allFilled = true;
+
+            for (let i = 1; i <= numFields; i++) {
+                const input = document.getElementById(`q${questionNumber}_${i}`);
+                if (input && !input.value.trim()) {
+                    allFilled = false;
+                }
+            }
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!allFilled) {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les champs du tableau.';
+                return;
+            }
+
+            document.querySelectorAll(`#question${questionNumber} .solution-row`).forEach(row => {
+                row.classList.add('show');
+            });
+
+            if (!answers.answered.has(questionNumber)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Tableau complété !</strong><br>Les réponses attendues sont maintenant visibles en jaune sous chaque ligne.<div class="button-group" style="margin-top: 15px;"><button class="btn btn-success" onclick="acceptAnswer(' + questionNumber + ')">✓ Valider cette réponse</button></div>';
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTable13() {
+            const feedback = document.getElementById('feedback13');
+            let allFilled = true;
+
+            ['1a', '1b', '1c', '2a', '2b', '2c'].forEach(id => {
+                const input = document.getElementById(`q13_${id}`);
+                if (input && !input.value.trim()) {
+                    allFilled = false;
+                }
+            });
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!allFilled) {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les champs du tableau.';
+                return;
+            }
+
+            document.querySelectorAll('#question13 .solution-row').forEach(row => {
+                row.classList.add('show');
+            });
+
+            if (!answers.answered.has(13)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Tableau complété !</strong><br>Les réponses attendues sont maintenant visibles en jaune.<div class="button-group" style="margin-top: 15px;"><button class="btn btn-success" onclick="acceptAnswer(13)">✓ Valider cette réponse</button></div>';
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function checkTextGaps9() {
+            const feedback = document.getElementById('feedback9');
+            let allFilled = true;
+
+            for (let i = 1; i <= 9; i++) {
+                const input = document.getElementById(`q9_${i}`);
+                if (input && !input.value.trim()) {
+                    allFilled = false;
+                }
+            }
+
+            feedback.classList.remove('correct', 'incorrect', 'accepted');
+            feedback.classList.add('show');
+
+            if (!allFilled) {
+                feedback.classList.add('incorrect');
+                feedback.innerHTML = '<strong>⚠️ Attention</strong><br>Veuillez remplir tous les champs.';
+                return;
+            }
+
+            // Afficher les solutions
+            for (let i = 1; i <= 9; i++) {
+                const solution = document.getElementById(`sol_q9_${i}`);
+                if (solution) {
+                    solution.classList.add('show');
+                }
+            }
+
+            if (!answers.answered.has(9)) {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Texte complété !</strong><br>Les réponses attendues sont maintenant visibles en vert.<div class="button-group" style="margin-top: 15px;"><button class="btn btn-success" onclick="acceptAnswer(9)">✓ Valider cette réponse</button></div>';
+            } else {
+                feedback.classList.add('correct');
+                feedback.innerHTML = '<strong>✅ Déjà validée</strong>';
+            }
+        }
+
+        function showFinalStats() {
+            showQuestion(18);
+            document.getElementById('correctAnswers').textContent = answers.correct;
+            document.getElementById('acceptedAnswers').textContent = answers.accepted;
+            const totalAnswered = answers.correct + answers.accepted;
+            const totalScore = Math.round((totalAnswered / answers.total) * 100);
+            document.getElementById('totalScore').textContent = totalScore + '%';
+            document.getElementById('finalScoreDisplay').textContent = totalAnswered + ' / ' + answers.total;
+        }
+
+        function resetQuiz() {
+            currentQuestion = 1;
+            answers = { correct: 0, accepted: 0, total: 14, answered: new Set() };
+            
+            document.querySelectorAll('textarea, input[type="text"]').forEach(input => {
+                input.value = '';
+                input.classList.remove('correct', 'incorrect');
+            });
+            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(input => input.checked = false);
+            document.querySelectorAll('.feedback').forEach(fb => {
+                fb.classList.remove('show', 'correct', 'incorrect', 'accepted');
+            });
+            document.querySelectorAll('.mcq-option').forEach(opt => {
+                opt.classList.remove('correct-answer', 'wrong-answer', 'selected');
+            });
+            document.querySelectorAll('.text-gap-solution').forEach(sol => {
+                sol.classList.remove('show');
+            });
+            document.querySelectorAll('.solution-row').forEach(row => {
+                row.classList.remove('show');
+            });
+            
+            showQuestion(1);
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' || e.target.type === 'radio') {
+                const option = e.target.closest('.mcq-option');
+                if (option) {
+                    if (e.target.type === 'checkbox') {
+                        option.classList.toggle('selected', e.target.checked);
+                    } else {
+                        document.querySelectorAll(`input[name="${e.target.name}"]`).forEach(input => {
+                            const opt = input.closest('.mcq-option');
+                            if (opt) opt.classList.remove('selected');
+                        });
+                        if (e.target.checked) {
+                            option.classList.add('selected');
+                        }
+                    }
+                }
+            }
+        });
+
+        // === FONCTIONS POUR LES EXTRAS ===
+        function addSchema() {
+            extrasCount++;
+            const id = 'extra' + extrasCount;
+            
+            extrasData[id] = {
+                type: 'schema',
+                labels: [],
+                points: [],
+                image: null,
+                mode: null
+            };
+            
+            createExtraHTML(id, 'schema');
+        }
+
+        function addTextOnly() {
+            extrasCount++;
+            const id = 'extra' + extrasCount;
+            
+            extrasData[id] = {
+                type: 'text',
+                labels: []
+            };
+            
+            createExtraHTML(id, 'text');
+        }
+
+        function createExtraHTML(id, type) {
+            const container = document.getElementById('extrasList');
+            const div = document.createElement('div');
+            div.id = 'extra_' + id;
+            div.className = 'question-container';
+            div.style.display = 'block';
+            div.style.marginBottom = '30px';
+            div.style.border = '2px solid #11998e';
+            div.style.borderRadius = '15px';
+            
+            let html = '<div class="question-header">' +
+                '<div class="question-number">Extra #' + extrasCount + '</div>' +
+                '<div class="question-text">' +
+                '<input type="text" id="title_' + id + '" placeholder="Titre" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1.1em;">' +
+                '</div></div>';
+            
+            if (type === 'schema') {
+                html += '<div class="schema-upload">' +
+                    '<div class="upload-area" id="uploadZone_' + id + '" onclick="document.getElementById(\'upload_' + id + '\').click()">' +
+                    '<div class="upload-icon">📤</div><p><strong>Cliquez pour uploader une image</strong></p></div>' +
+                    '<input type="file" id="upload_' + id + '" accept="image/*" style="display: none;" onchange="loadExtra(\''+id+'\', event)">' +
+                    '<div id="modeSelector_' + id + '" style="display: none; margin: 20px 0;">' +
+                    '<div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">' +
+                    '<h3 style="color: #11998e;">Choisissez le mode :</h3>' +
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">' +
+                    '<button class="btn btn-primary" onclick="selectExtraMode(\''+id+'\', \'annotation\')" style="padding: 20px;">📍 Annotation</button>' +
+                    '<button class="btn btn-primary" onclick="selectExtraMode(\''+id+'\', \'questions\')" style="padding: 20px;">📝 Questions</button>' +
+                    '</div></div></div>' +
+                    '<div id="workspace_' + id + '" style="display: none; margin-top: 20px;">' +
+                    '<div id="instructions_' + id + '" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">Mode</div>' +
+                    '<div class="image-container-wrapper">' +
+                    '<img id="img_' + id + '" class="schema-image-display">' +
+                    '<canvas id="canvas_' + id + '" class="annotation-canvas"></canvas></div>' +
+                    '<div style="margin-top: 20px;"><h3>Questions</h3>' +
+                    '<button class="btn btn-primary" id="addBtn_' + id + '" onclick="addExtraQuestion(\''+id+'\')" style="display: none; margin-bottom: 15px;">➕ Ajouter une question</button>' +
+                    '<div id="labels_' + id + '"></div></div>' +
+                    '<button class="btn btn-danger" onclick="clearExtraLabels(\''+id+'\')">🗑️ Effacer les annotations</button>' +
+                    '</div></div>';
+            } else {
+                html += '<div style="margin-top: 20px; padding: 20px;"><h3>Questions</h3>' +
+                    '<button class="btn btn-primary" onclick="addExtraQuestion(\''+id+'\')" style="margin-bottom: 15px;">➕ Ajouter une question</button>' +
+                    '<div id="labels_' + id + '"></div></div>';
+            }
+            
+            html += '<div style="text-align: center; margin-top: 15px; padding: 15px;">' +
+                '<button class="btn btn-danger" onclick="deleteExtra(\''+id+'\')">🗑️ Supprimer cette section</button></div>';
+            
+            div.innerHTML = html;
+            container.appendChild(div);
+        }
+
+        function loadExtra(id, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                extrasData[id].image = e.target.result;
+                document.getElementById('img_' + id).src = e.target.result;
+                document.getElementById('img_' + id).onload = function() {
+                    document.getElementById('uploadZone_' + id).style.display = 'none';
+                    document.getElementById('modeSelector_' + id).style.display = 'block';
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function selectExtraMode(id, mode) {
+            extrasData[id].mode = mode;
+            document.getElementById('modeSelector_' + id).style.display = 'none';
+            document.getElementById('workspace_' + id).style.display = 'block';
+            
+            const canvas = document.getElementById('canvas_' + id);
+            const img = document.getElementById('img_' + id);
+            
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            
+            extrasData[id].canvas = canvas;
+            extrasData[id].ctx = canvas.getContext('2d');
+            
+            if (mode === 'annotation') {
+                canvas.onclick = function(e) { handleExtraClick(id, e); };
+                canvas.style.cursor = 'crosshair';
+                document.getElementById('instructions_' + id).innerHTML = '<strong>📍 Mode Annotation</strong> - Cliquez sur l\'image pour placer des numéros';
+                document.getElementById('addBtn_' + id).style.display = 'none';
+            } else {
+                canvas.onclick = null;
+                canvas.style.cursor = 'default';
+                document.getElementById('instructions_' + id).innerHTML = '<strong>📝 Mode Questions</strong> - Ajoutez vos questions manuellement';
+                document.getElementById('addBtn_' + id).style.display = 'block';
+            }
+        }
+
+        function handleExtraClick(id, event) {
+            const data = extrasData[id];
+            const rect = data.canvas.getBoundingClientRect();
+            const scaleX = data.canvas.width / rect.width;
+            const scaleY = data.canvas.height / rect.height;
+            
+            const x = (event.clientX - rect.left) * scaleX;
+            const y = (event.clientY - rect.top) * scaleY;
+            
+            const num = data.labels.length + 1;
+            data.points.push({ x: x, y: y, number: num });
+            data.labels.push({ number: num, question: '', answer: '' });
+            
+            redrawExtra(id);
+            renderExtraLabels(id);
+        }
+
+        function redrawExtra(id) {
+            const data = extrasData[id];
+            if (!data.ctx) return;
+            
+            data.ctx.clearRect(0, 0, data.canvas.width, data.canvas.height);
+            
+            if (data.points) {
+                data.points.forEach(function(p) {
+                    data.ctx.beginPath();
+                    data.ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                    data.ctx.fillStyle = 'rgba(17, 153, 142, 0.9)';
+                    data.ctx.fill();
+                    data.ctx.strokeStyle = 'white';
+                    data.ctx.lineWidth = 3;
+                    data.ctx.stroke();
+                    
+                    data.ctx.fillStyle = 'white';
+                    data.ctx.font = 'bold 16px Arial';
+                    data.ctx.textAlign = 'center';
+                    data.ctx.textBaseline = 'middle';
+                    data.ctx.fillText(p.number, p.x, p.y);
+                });
+            }
+        }
+
+        function renderExtraLabels(id) {
+            const data = extrasData[id];
+            const container = document.getElementById('labels_' + id);
+            container.innerHTML = '';
+            
+            data.labels.forEach(function(label, idx) {
+                const item = document.createElement('div');
+                item.className = 'label-item';
+                item.innerHTML = '<div class="label-number-display">' + label.number + '</div>' +
+                    '<div style="flex: 1;">' +
+                    '<input type="text" class="label-input" placeholder="Question" value="' + (label.question || '') + '" ' +
+                    'onchange="updateExtraLabel(\'' + id + '\', ' + idx + ', \'question\', this.value)" style="margin-bottom: 8px;">' +
+                    '<input type="text" class="label-input" placeholder="Réponse" value="' + (label.answer || '') + '" ' +
+                    'onchange="updateExtraLabel(\'' + id + '\', ' + idx + ', \'answer\', this.value)">' +
+                    '</div>' +
+                    '<button class="delete-label" onclick="deleteExtraLabel(\'' + id + '\', ' + idx + ')">🗑️</button>';
+                container.appendChild(item);
+            });
+        }
+
+        function updateExtraLabel(id, idx, field, value) {
+            extrasData[id].labels[idx][field] = value;
+        }
+
+        function deleteExtraLabel(id, idx) {
+            extrasData[id].labels.splice(idx, 1);
+            if (extrasData[id].points && extrasData[id].points[idx]) {
+                extrasData[id].points.splice(idx, 1);
+            }
+            extrasData[id].labels.forEach(function(l, i) {
+                l.number = i + 1;
+                if (extrasData[id].points && extrasData[id].points[i]) {
+                    extrasData[id].points[i].number = i + 1;
+                }
+            });
+            redrawExtra(id);
+            renderExtraLabels(id);
+        }
+
+        function addExtraQuestion(id) {
+            const num = extrasData[id].labels.length + 1;
+            extrasData[id].labels.push({ number: num, question: '', answer: '' });
+            renderExtraLabels(id);
+        }
+
+        function clearExtraLabels(id) {
+            if (confirm('Tout effacer ?')) {
+                extrasData[id].labels = [];
+                if (extrasData[id].points) extrasData[id].points = [];
+                redrawExtra(id);
+                renderExtraLabels(id);
+            }
+        }
+
+        function deleteExtra(id) {
+            if (confirm('Supprimer cette section ?')) {
+                document.getElementById('extra_' + id).remove();
+                delete extrasData[id];
+            }
+        }
+
+        // === EXPORT HTML ===
+        function exportHTML() {
+            const clone = document.documentElement.cloneNode(true);
+            
+            // Copier les valeurs des champs
+            document.querySelectorAll('input, textarea, select').forEach(function(src) {
+                if (!src.id) return;
+                const target = clone.querySelector('#' + CSS.escape(src.id));
+                if (!target) return;
+
+                if (src.tagName === 'TEXTAREA') {
+                    target.value = src.value;
+                    target.textContent = src.value;
+                } else if (src.tagName === 'INPUT') {
+                    const t = (src.type || '').toLowerCase();
+                    if (t === 'file') return;
+                    if (t === 'checkbox' || t === 'radio') {
+                        target.checked = src.checked;
+                        if (src.checked) target.setAttribute('checked', 'checked');
+                        else target.removeAttribute('checked');
+                    } else {
+                        target.value = src.value;
+                        target.setAttribute('value', src.value);
+                    }
+                }
+            });
+
+            // Afficher toutes les questions
+            clone.querySelectorAll('.question-container').forEach(function(q) {
+                q.classList.remove('active');
+                q.style.display = 'block';
+            });
+
+            // Masquer navigation et progress
+            const nav = clone.querySelector('.navigation');
+            if (nav) nav.style.display = 'none';
+            const progress = clone.querySelector('.progress-bar');
+            if (progress) progress.style.display = 'none';
+
+            // Masquer pages navigation et stats (mais PAS la page extras si elle a du contenu)
+            const q15 = clone.querySelector('#question15');
+            if (q15) q15.style.display = 'none';
+            const q18 = clone.querySelector('#question18');
+            if (q18) q18.style.display = 'none';
+            
+            // Pour la page extras (q17), on la garde visible seulement si elle a du contenu
+            const q17 = clone.querySelector('#question17');
+            const hasExtras = Object.keys(extrasData).some(function(id) {
+                return extrasData[id].labels && extrasData[id].labels.length > 0;
+            });
+            
+            if (q17) {
+                if (hasExtras) {
+                    // Garder visible mais masquer les boutons d'ajout
+                    q17.style.display = 'block';
+                    const addBtns = q17.querySelectorAll('.btn-primary, .btn-secondary');
+                    addBtns.forEach(function(btn) {
+                        if (btn.textContent.includes('Ajouter') || btn.textContent.includes('Retour') || btn.textContent.includes('Exporter')) {
+                            btn.style.display = 'none';
+                        }
+                    });
+                    // Masquer le header de la page extras
+                    const header = q17.querySelector('.question-header');
+                    if (header) header.style.display = 'none';
+                } else {
+                    q17.style.display = 'none';
+                }
+            }
+
+            // Injecter les extras avec leurs données
+            Object.keys(extrasData).forEach(function(id) {
+                const data = extrasData[id];
+                if (!data.labels || data.labels.length === 0) return;
+                
+                const extraDiv = clone.querySelector('#extra_' + id);
+                if (!extraDiv) return;
+                
+                // Afficher le div extra
+                extraDiv.style.display = 'block';
+                
+                // Titre
+                const titleInput = clone.querySelector('#title_' + id);
+                if (titleInput) {
+                    const title = document.getElementById('title_' + id).value || 'Extra';
+                    titleInput.outerHTML = '<div style="font-size: 1.2em; font-weight: bold; color: #11998e;">' + title + '</div>';
+                }
+                
+                if (data.type === 'schema') {
+                    // Masquer upload et sélecteur
+                    const upload = clone.querySelector('#uploadZone_' + id);
+                    if (upload) upload.style.display = 'none';
+                    
+                    const selector = clone.querySelector('#modeSelector_' + id);
+                    if (selector) selector.style.display = 'none';
+                    
+                    // Afficher workspace
+                    const workspace = clone.querySelector('#workspace_' + id);
+                    if (workspace) {
+                        workspace.style.display = 'block';
+                        
+                        // Image
+                        const img = clone.querySelector('#img_' + id);
+                        if (img && data.image) img.src = data.image;
+                        
+                        // Canvas - convertir en image statique
+                        if (data.mode === 'annotation' && data.points && data.points.length > 0) {
+                            const canvas = clone.querySelector('#canvas_' + id);
+                            if (canvas) {
+                                const tempCanvas = document.createElement('canvas');
+                                const sourceImg = document.getElementById('img_' + id);
+                                if (sourceImg && sourceImg.naturalWidth) {
+                                    tempCanvas.width = sourceImg.naturalWidth;
+                                    tempCanvas.height = sourceImg.naturalHeight;
+                                    const ctx = tempCanvas.getContext('2d');
+                                    
+                                    data.points.forEach(function(p) {
+                                        ctx.beginPath();
+                                        ctx.arc(p.x, p.y, 20, 0, 2 * Math.PI);
+                                        ctx.fillStyle = 'rgba(17, 153, 142, 0.9)';
+                                        ctx.fill();
+                                        ctx.strokeStyle = 'white';
+                                        ctx.lineWidth = 3;
+                                        ctx.stroke();
+                                        ctx.fillStyle = 'white';
+                                        ctx.font = 'bold 16px Arial';
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'middle';
+                                        ctx.fillText(p.number, p.x, p.y);
+                                    });
+                                    
+                                    const imgData = tempCanvas.toDataURL();
+                                    canvas.outerHTML = '<img src="' + imgData + '" style="position: absolute; top: 0; left: 0; width: 100%; height: auto;">';
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Labels - Mode exercice interactif
+                const labelsList = clone.querySelector('#labels_' + id);
+                if (labelsList) {
+                    labelsList.innerHTML = '';
+                    data.labels.forEach(function(label, idx) {
+                        const div = document.createElement('div');
+                        div.className = 'label-item export-exercise-item';
+                        div.innerHTML = '<div class="label-number-display">' + label.number + '</div>' +
+                            '<div style="flex: 1;">' +
+                            '<div style="font-weight: bold; margin-bottom: 8px;">Q: ' + (label.question || 'Non renseignée') + '</div>' +
+                            '<div class="export-answer-zone">' +
+                            '<input type="text" class="export-answer-input" placeholder="Votre réponse..." ' +
+                            'style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1em;" ' +
+                            'data-correct="' + encodeURIComponent(label.answer || '') + '">' +
+                            '<button class="btn btn-primary export-check-btn" style="margin-top: 8px; padding: 8px 16px;" ' +
+                            'onclick="checkExportAnswer(this)">Vérifier</button>' +
+                            '<div class="export-feedback" style="display: none; margin-top: 8px; padding: 10px; border-radius: 8px;"></div>' +
+                            '</div>' +
+                            '</div>';
+                        labelsList.appendChild(div);
+                    });
+                }
+                
+                // Masquer boutons de modification
+                const btns = extraDiv.querySelectorAll('button:not(.export-check-btn)');
+                btns.forEach(function(btn) { btn.style.display = 'none'; });
+            });
+
+            // Ajouter le script de vérification pour l'export
+            const exportScript = document.createElement('script');
+            exportScript.textContent = `
+                function normalizeText(text) {
+                    if (!text) return '';
+                    return text.toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/\\s+/g, ' ').trim();
+                }
+                
+                function checkExportAnswer(button) {
+                    const container = button.parentElement;
+                    const input = container.querySelector('.export-answer-input');
+                    const feedback = container.querySelector('.export-feedback');
+                    const userAnswer = input.value;
+                    const correctAnswer = decodeURIComponent(input.getAttribute('data-correct'));
+                    
+                    if (!userAnswer.trim()) {
+                        feedback.style.display = 'block';
+                        feedback.style.background = '#fff3cd';
+                        feedback.style.border = '2px solid #ffc107';
+                        feedback.style.color = '#856404';
+                        feedback.innerHTML = '⚠️ Veuillez entrer une réponse';
+                        return;
+                    }
+                    
+                    const normalizedUser = normalizeText(userAnswer);
+                    const normalizedCorrect = normalizeText(correctAnswer);
+                    
+                    const isCorrect = normalizedUser === normalizedCorrect || 
+                                      normalizedCorrect.includes(normalizedUser) ||
+                                      normalizedUser.includes(normalizedCorrect);
+                    
+                    feedback.style.display = 'block';
+                    
+                    if (isCorrect) {
+                        feedback.style.background = '#d4edda';
+                        feedback.style.border = '2px solid #28a745';
+                        feedback.style.color = '#155724';
+                        feedback.innerHTML = '✅ Correct ! <strong>' + correctAnswer + '</strong>';
+                        input.style.borderColor = '#28a745';
+                        input.style.background = '#d4edda';
+                    } else {
+                        feedback.style.background = '#f8d7da';
+                        feedback.style.border = '2px solid #dc3545';
+                        feedback.style.color = '#721c24';
+                        feedback.innerHTML = '❌ Incorrect. Réponse attendue : <strong>' + correctAnswer + '</strong>';
+                        input.style.borderColor = '#dc3545';
+                        input.style.background = '#f8d7da';
+                    }
+                }
+                
+                document.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && e.target.classList.contains('export-answer-input')) {
+                        const btn = e.target.parentElement.querySelector('.export-check-btn');
+                        if (btn) btn.click();
+                    }
+                });
+            `;
+            clone.querySelector('body').appendChild(exportScript);
+            
+            // Télécharger
+            const html = '<!DOCTYPE html>' + clone.outerHTML;
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'TD2_Export_' + new Date().toISOString().slice(0,10) + '.html';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Export HTML réussi !');
+        }
+
+        updateProgress();
+    </script>
+</body>
+</html>

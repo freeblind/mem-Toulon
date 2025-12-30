@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TD4 - Scanographie - UE 3.2 S1</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .progress-bar { background: #f0f0f0; height: 8px; margin: 20px 30px; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); width: 0%; transition: width 0.5s ease; }
+        .question-container { padding: 30px; display: none; }
+        .question-container.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .question-header { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 5px solid #1e3c72; }
+        .question-number { color: #1e3c72; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; }
+        .question-text { font-size: 1.1em; line-height: 1.6; color: #333; }
+        .answer-input { width: 100%; min-height: 100px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1em; font-family: inherit; resize: vertical; }
+        .answer-input:focus { outline: none; border-color: #1e3c72; }
+        .button-group { display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 30px; border: none; border-radius: 8px; font-size: 1em; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+        .btn-primary { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(30, 60, 114, 0.4); }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .feedback { margin-top: 20px; padding: 15px; border-radius: 10px; display: none; }
+        .feedback.show { display: block; }
+        .feedback.correct { background: #d4edda; border: 2px solid #28a745; color: #155724; }
+        .feedback.incorrect { background: #f8d7da; border: 2px solid #dc3545; color: #721c24; }
+        .feedback.accepted { background: #d1ecf1; border: 2px solid #17a2b8; color: #0c5460; }
+        .solution { margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .solution h4 { color: #856404; margin-bottom: 10px; }
+        .mcq-options { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .mcq-option { display: flex; align-items: center; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; }
+        .mcq-option:hover { border-color: #1e3c72; background: #f8f9fa; }
+        .mcq-option input { width: 20px; height: 20px; margin-right: 15px; cursor: pointer; }
+        .mcq-option.selected { border-color: #1e3c72; background: #e7f1ff; }
+        .mcq-option.correct-answer { border-color: #28a745; background: #d4edda; }
+        .mcq-option.wrong-answer { border-color: #dc3545; background: #f8d7da; }
+        .navigation { display: flex; justify-content: space-between; padding: 30px; background: #f8f9fa; border-top: 1px solid #e0e0e0; }
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: white; }
+        th, td { padding: 12px; text-align: left; border: 2px solid #e0e0e0; }
+        th { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; font-size: 0.9em; }
+        td input[type="text"] { width: 100%; padding: 8px; border: 2px solid #e0e0e0; border-radius: 5px; }
+        .solution-row { background: #fff3cd !important; font-style: italic; color: #856404; display: none; }
+        .solution-row.show { display: table-row; }
+        .text-gap-container { display: inline-block; min-width: 80px; margin: 0 5px; }
+        .text-gap { border: none; border-bottom: 2px solid #1e3c72; padding: 5px; width: 80px; text-align: center; background: transparent; }
+        .text-gap.correct { color: #28a745; border-bottom-color: #28a745; }
+        .text-gap.incorrect { color: #dc3545; border-bottom-color: #dc3545; }
+        .text-gap-solution { display: none; color: #28a745; font-weight: bold; margin-left: 10px; }
+        .text-gap-solution.show { display: inline; }
+        .text-to-fill { line-height: 2.5; font-size: 1.1em; }
+        .stats { padding: 30px; background: #f8f9fa; text-align: center; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2.5em; font-weight: bold; color: #1e3c72; }
+        .stat-label { color: #666; margin-top: 10px; }
+        .schema-upload { margin-top: 20px; padding: 30px; border: 3px dashed #1e3c72; border-radius: 15px; background: #f8f9fa; }
+        .upload-area { text-align: center; padding: 40px; cursor: pointer; }
+        .upload-area:hover { background: #e7f1ff; }
+        .upload-icon { font-size: 3em; color: #1e3c72; margin-bottom: 15px; }
+        .info-box { background: #e7f3ff; border: 2px solid #1e3c72; border-radius: 10px; padding: 20px; margin: 20px 0; }
+        .info-box h4 { color: #1e3c72; margin-bottom: 10px; }
+        .info-box.hidden { display: none; }
+        .pitch-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
+        .pitch-card { background: white; padding: 15px; border-radius: 10px; border: 2px solid #e0e0e0; text-align: center; }
+        .pitch-card h5 { color: #1e3c72; margin-bottom: 10px; }
+        @media (max-width: 768px) { .header h1 { font-size: 1.5em; } .button-group { flex-direction: column; } .btn { width: 100%; } .navigation { flex-direction: column; gap: 15px; } .pitch-box { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ TD N°4 - Scanographie</h1>
+            <p>UE 3.2 S1 - Physique appliquée et technologie en imagerie radiologique</p>
+            <p style="font-size: 0.9em; margin-top: 10px;">Lundi 15 décembre 2025</p>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+        <!-- Q1-Q6 identiques... -->
+        <div class="question-container active" id="question1">
+            <div class="question-header"><div class="question-number">Question 1</div><div class="question-text"><strong>Explicitez les 4 systèmes constituant la chaîne scanographique</strong></div></div>
+            <div style="margin-bottom: 20px;"><label style="font-weight: 600; color: #1e3c72;">1. Premier système :</label><textarea class="answer-input" id="answer1_1" placeholder="Nom et composants..." style="min-height: 80px; margin-top: 10px;"></textarea></div>
+            <div style="margin-bottom: 20px;"><label style="font-weight: 600; color: #1e3c72;">2. Deuxième système :</label><textarea class="answer-input" id="answer1_2" placeholder="Nom et composants..." style="min-height: 80px; margin-top: 10px;"></textarea></div>
+            <div style="margin-bottom: 20px;"><label style="font-weight: 600; color: #1e3c72;">3. Troisième système :</label><textarea class="answer-input" id="answer1_3" placeholder="Nom et composants..." style="min-height: 80px; margin-top: 10px;"></textarea></div>
+            <div style="margin-bottom: 20px;"><label style="font-weight: 600; color: #1e3c72;">4. Quatrième système :</label><textarea class="answer-input" id="answer1_4" placeholder="Nom et composants..." style="min-height: 80px; margin-top: 10px;"></textarea></div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkAnswer(1)">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(1)">Accepter</button></div>
+            <div class="feedback" id="feedback1"></div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="question-container" id="question2">
+            <div class="question-header"><div class="question-number">Question 2 - Vrai/Faux</div><div class="question-text"><strong>Caractéristiques des scanners modernes</strong></div></div>
+            <div style="margin-bottom: 25px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"><strong>Les scanners d'aujourd'hui sont de 3ème génération, à rotation continue, hélicoïdal et multi barrettes</strong></div><div class="mcq-options"><label class="mcq-option"><input type="radio" name="q2_1" value="true"><span>VRAI</span></label><label class="mcq-option"><input type="radio" name="q2_1" value="false"><span>FAUX</span></label></div></div>
+            <div style="margin-bottom: 25px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"><strong>Le transfert électrique se fait par WIFI</strong></div><div class="mcq-options"><label class="mcq-option"><input type="radio" name="q2_2" value="true"><span>VRAI</span></label><label class="mcq-option"><input type="radio" name="q2_2" value="false"><span>FAUX</span></label></div></div>
+            <div style="margin-bottom: 25px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"><strong>Le transfert des données se fait via SLIP RING ou WIFI</strong></div><div class="mcq-options"><label class="mcq-option"><input type="radio" name="q2_3" value="true"><span>VRAI</span></label><label class="mcq-option"><input type="radio" name="q2_3" value="false"><span>FAUX</span></label></div></div>
+            <div style="margin-bottom: 25px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"><strong>Le stator est la partie mobile du statif</strong></div><div class="mcq-options"><label class="mcq-option"><input type="radio" name="q2_4" value="true"><span>VRAI</span></label><label class="mcq-option"><input type="radio" name="q2_4" value="false"><span>FAUX</span></label></div></div>
+            <div style="margin-bottom: 25px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"><strong>Le rotor est la partie fixe du statif</strong></div><div class="mcq-options"><label class="mcq-option"><input type="radio" name="q2_5" value="true"><span>VRAI</span></label><label class="mcq-option"><input type="radio" name="q2_5" value="false"><span>FAUX</span></label></div></div>
+            <div style="margin-bottom: 25px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"><strong>Un scanner mono-barrette a 1 seule couronne de détecteur dans l'axe Z</strong></div><div class="mcq-options"><label class="mcq-option"><input type="radio" name="q2_6" value="true"><span>VRAI</span></label><label class="mcq-option"><input type="radio" name="q2_6" value="false"><span>FAUX</span></label></div></div>
+            <div style="margin-bottom: 25px;"><div style="padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;"><strong>Un scanner « 64 barrettes » possède 32 rangées de détecteurs dans l'axe Z</strong></div><div class="mcq-options"><label class="mcq-option"><input type="radio" name="q2_7" value="true"><span>VRAI</span></label><label class="mcq-option"><input type="radio" name="q2_7" value="false"><span>FAUX</span></label></div></div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkTrueFalse(2, ['true','false','true','false','false','true','false'])">Vérifier</button></div>
+            <div class="feedback" id="feedback2"></div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="question-container" id="question3">
+            <div class="question-header"><div class="question-number">Question 3</div><div class="question-text"><strong>Caractéristiques du générateur scanographique</strong></div></div>
+            <div class="text-to-fill">
+                <p>Haute tension continue : <span class="text-gap-container"><input type="text" id="q3_1" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q3_1">70</span></span> à <span class="text-gap-container"><input type="text" id="q3_2" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q3_2">140</span></span> kV</p>
+                <p>Intensité constante : <span class="text-gap-container"><input type="text" id="q3_3" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q3_3">10</span></span> à <span class="text-gap-container"><input type="text" id="q3_4" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q3_4">1000</span></span> mA</p>
+                <p>Puissance totale : <span class="text-gap-container"><input type="text" id="q3_5" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q3_5">50</span></span> à <span class="text-gap-container"><input type="text" id="q3_6" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q3_6">60</span></span> kW</p>
+            </div>
+            <h4 style="color: #1e3c72; margin: 30px 0 15px;">2 caractéristiques de performance du tube RX :</h4>
+            <textarea class="answer-input" id="q3_tube1" style="min-height: 60px; margin-bottom: 15px;" placeholder="Caractéristique 1..."></textarea>
+            <textarea class="answer-input" id="q3_tube2" style="min-height: 60px;" placeholder="Caractéristique 2..."></textarea>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkQuestion3()">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(3)">Accepter</button></div>
+            <div class="feedback" id="feedback3"></div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="question-container" id="question4">
+            <div class="question-header"><div class="question-number">Question 4</div><div class="question-text"><strong>Les détecteurs scanographiques</strong></div></div>
+            <div class="text-to-fill">
+                <p>Un scanner dispose de 2 détecteurs.</p>
+                <p>Un détecteur <span class="text-gap-container"><input type="text" id="q4_1" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_1">primaire</span></span> (à la sortie du tube) = <span class="text-gap-container"><input type="text" id="q4_2" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_2">chambre</span></span> d'<span class="text-gap-container"><input type="text" id="q4_3" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_3">ionisation</span></span> → mesure les <span class="text-gap-container"><input type="text" id="q4_4" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_4">indicateurs</span></span> de <span class="text-gap-container"><input type="text" id="q4_5" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_5">dose</span></span>.</p>
+                <p>Des détecteurs <span class="text-gap-container"><input type="text" id="q4_6" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_6">secondaires</span></span> (<span class="text-gap-container"><input type="text" id="q4_7" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_7">barrettes</span></span>) positionnés <span class="text-gap-container"><input type="text" id="q4_8" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_8">après</span></span> le patient → recueillir les RX ayant <span class="text-gap-container"><input type="text" id="q4_9" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_9">traversé</span></span> le patient et <span class="text-gap-container"><input type="text" id="q4_10" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_10">transformer</span></span> en <span class="text-gap-container"><input type="text" id="q4_11" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_11">signal</span></span> <span class="text-gap-container"><input type="text" id="q4_12" class="text-gap" placeholder="..."><span class="text-gap-solution" id="sol_q4_12">électrique</span></span>.</p>
+            </div>
+            <h4 style="color: #1e3c72; margin: 30px 0 15px;">3 technologies de détecteurs secondaires :</h4>
+            <input type="text" id="q4_tech1" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; margin-bottom: 10px;" placeholder="1...">
+            <input type="text" id="q4_tech2" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px; margin-bottom: 10px;" placeholder="2...">
+            <input type="text" id="q4_tech3" style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 5px;" placeholder="3...">
+            <div class="button-group"><button class="btn btn-primary" onclick="checkQuestion4()">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(4)">Accepter</button></div>
+            <div class="feedback" id="feedback4"></div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="question-container" id="question5">
+            <div class="question-header"><div class="question-number">Question 5</div><div class="question-text"><strong>Les 2 filtrations scanographiques</strong></div></div>
+            <div class="table-container"><table><thead><tr><th></th><th>Nom</th><th>Localisation</th><th>Rôle</th></tr></thead><tbody>
+                <tr><td><strong>1</strong></td><td><input type="text" id="q5_1_nom" placeholder="..."></td><td><input type="text" id="q5_1_loc" placeholder="..."></td><td><input type="text" id="q5_1_role" placeholder="..."></td></tr>
+                <tr class="solution-row"><td>💡</td><td>Filtre plat</td><td>En sortie du tube</td><td>Homogénéiser - Durcissement - Alu min 2,5mm</td></tr>
+                <tr><td><strong>2</strong></td><td><input type="text" id="q5_2_nom" placeholder="..."></td><td><input type="text" id="q5_2_loc" placeholder="..."></td><td><input type="text" id="q5_2_role" placeholder="..."></td></tr>
+                <tr class="solution-row"><td>💡</td><td>Filtre papillon</td><td>Entre filtre plat et collimateur</td><td>Homogénéiser l'irradiation - Morphologie</td></tr>
+            </tbody></table></div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkTable(5)">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(5)">Accepter</button></div>
+            <div class="feedback" id="feedback5"></div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="question-container" id="question6">
+            <div class="question-header"><div class="question-number">Question 6</div><div class="question-text"><strong>Les collimateurs</strong><br>Attribuez les caractéristiques : 1-Sortie tube, 2-Devant détecteur, 3-Après filtrage, 4-Limite pénombres, 5-Ouverture champ (x,y), 6-Affine profil (z), 7-Épaisseur collimation (z)</div></div>
+            <div class="table-container"><table><thead><tr><th>Collimateur</th><th>Numéros</th></tr></thead><tbody>
+                <tr><td><strong>PRIMAIRE</strong></td><td><input type="text" id="q6_p" placeholder="Ex: 1-2-3"></td></tr>
+                <tr class="solution-row"><td>💡</td><td>1 – 3 – 5 – 7</td></tr>
+                <tr><td><strong>SECONDAIRE</strong></td><td><input type="text" id="q6_s" placeholder="Ex: 4-5-6"></td></tr>
+                <tr class="solution-row"><td>💡</td><td>2 – 4 – 6</td></tr>
+            </tbody></table></div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkTable(6)">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(6)">Accepter</button></div>
+            <div class="feedback" id="feedback6"></div>
+        </div>
+
+        <!-- Q7 - CORRIGÉ selon le doc étudiant -->
+        <div class="question-container" id="question7">
+            <div class="question-header"><div class="question-number">Question 7</div><div class="question-text"><strong>Modes d'acquisition scanographiques</strong><br>Identifiez le mode d'acquisition et finissez de remplir le tableau</div></div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Mode acquisition</th><th>Tube-détecteur</th><th>Table</th><th>Acquisition</th><th>Utilisation</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="q7_mode1" placeholder="?" style="width:100%"></td>
+                            <td>Rotation continue</td>
+                            <td>Fixe</td>
+                            <td><input type="text" id="q7_acq1" placeholder="?" style="width:100%"></td>
+                            <td>Interventionnel, Perfusion</td>
+                        </tr>
+                        <tr class="solution-row"><td colspan="5">💡 Mode: CINÉ | Acquisition: Continue sur la même zone</td></tr>
+                        <tr>
+                            <td><input type="text" id="q7_mode2" placeholder="?" style="width:100%"></td>
+                            <td>1 rotation</td>
+                            <td>Fixe</td>
+                            <td>Coupe après coupe</td>
+                            <td><input type="text" id="q7_util2" placeholder="?" style="width:100%"></td>
+                        </tr>
+                        <tr class="solution-row"><td colspan="5">💡 Mode: SÉQUENTIEL | Utilisation: Cœur, Crâne</td></tr>
+                        <tr>
+                            <td><input type="text" id="q7_mode3" placeholder="?" style="width:100%"></td>
+                            <td><input type="text" id="q7_tube3" placeholder="?" style="width:100%"></td>
+                            <td>Déplacement</td>
+                            <td>Face et profil</td>
+                            <td>Image de repérage, Modulation mA</td>
+                        </tr>
+                        <tr class="solution-row"><td colspan="5">💡 Mode: RADIO / SCOUT / TOPOGRAMME | Tube: Fixe</td></tr>
+                        <tr>
+                            <td><input type="text" id="q7_mode4" placeholder="?" style="width:100%"></td>
+                            <td>Rotation continue</td>
+                            <td>Déplacement</td>
+                            <td><input type="text" id="q7_acq4" placeholder="?" style="width:100%"></td>
+                            <td>Conventionnel, Oncologie, Urgence, Pédiatrie</td>
+                        </tr>
+                        <tr class="solution-row"><td colspan="5">💡 Mode: HÉLICOÏDAL | Acquisition: Volume en 1 acquisition</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkTable(7)">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(7)">Accepter</button></div>
+            <div class="feedback" id="feedback7"></div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="question-container" id="question8">
+            <div class="question-header"><div class="question-number">Question 8</div><div class="question-text"><strong>Analyse d'interface scanner</strong><br>Renseignez et expliquez le tableau</div></div>
+            <div class="schema-upload"><div class="upload-area" onclick="document.getElementById('img8').click()"><div class="upload-icon">📤</div><p><strong>Uploader l'interface</strong></p></div><input type="file" id="img8" accept="image/*" style="display:none" onchange="loadImg(8,event)"><div id="prev8" style="display:none;margin-top:20px"><img id="imgD8" style="max-width:100%;border-radius:10px"></div></div>
+            <div class="table-container" style="margin-top:30px"><table><thead><tr><th>Paramètre</th><th>Valeur</th><th>Explication</th></tr></thead><tbody>
+                <tr><td><strong>Nb images</strong></td><td><input type="text" id="q8_1"></td><td><input type="text" id="q8_1e"></td></tr><tr class="solution-row"><td>💡</td><td>245</td><td>-</td></tr>
+                <tr><td><strong>Mode</strong></td><td><input type="text" id="q8_2"></td><td><input type="text" id="q8_2e"></td></tr><tr class="solution-row"><td>💡</td><td>HÉLICOÏDAL</td><td>Rotation + Table déplacement</td></tr>
+                <tr><td><strong>Position départ</strong></td><td><input type="text" id="q8_3"></td><td><input type="text" id="q8_3e"></td></tr><tr class="solution-row"><td>💡</td><td>S30</td><td>30mm au-dessus du zéro</td></tr>
+                <tr><td><strong>Position fin</strong></td><td><input type="text" id="q8_4"></td><td><input type="text" id="q8_4e"></td></tr><tr class="solution-row"><td>💡</td><td>I275</td><td>275mm au-dessous du zéro</td></tr>
+                <tr><td><strong>Épaisseur</strong></td><td><input type="text" id="q8_5"></td><td><input type="text" id="q8_5e"></td></tr><tr class="solution-row"><td>💡</td><td>1,25 mm</td><td>32 coupes × 0,625</td></tr>
+                <tr><td><strong>Pitch</strong></td><td><input type="text" id="q8_6"></td><td><input type="text" id="q8_6e"></td></tr><tr class="solution-row"><td>💡</td><td>1,375</td><td>Coupes disjonctives</td></tr>
+                <tr><td><strong>Tension</strong></td><td><input type="text" id="q8_7"></td><td><input type="text" id="q8_7e"></td></tr><tr class="solution-row"><td>💡</td><td>120 kV</td><td>Pénétration faisceau</td></tr>
+                <tr><td><strong>Intensité</strong></td><td><input type="text" id="q8_8"></td><td><input type="text" id="q8_8e"></td></tr><tr class="solution-row"><td>💡</td><td>450 mA</td><td>Quantité RX</td></tr>
+                <tr><td><strong>Champ</strong></td><td><input type="text" id="q8_9"></td><td><input type="text" id="q8_9e"></td></tr><tr class="solution-row"><td>💡</td><td>Large Body</td><td>50 cm</td></tr>
+                <tr><td><strong>Rotation</strong></td><td><input type="text" id="q8_10"></td><td><input type="text" id="q8_10e"></td></tr><tr class="solution-row"><td>💡</td><td>0,4 s</td><td>360°</td></tr>
+                <tr><td><strong>Durée</strong></td><td><input type="text" id="q8_11"></td><td><input type="text" id="q8_11e"></td></tr><tr class="solution-row"><td>💡</td><td>2,7 s</td><td>Émission RX</td></tr>
+            </tbody></table></div>
+            <div class="info-box" style="margin-top:30px"><h4>📐 Le Pitch</h4><p><strong>Pitch = (vitesse table × temps rotation) / épaisseur coupe</strong></p><div class="pitch-box"><div class="pitch-card"><h5>Pitch &lt; 1</h5><p>Chevauchées<br>Haute qualité<br><strong style="color:#dc3545">Irradiant</strong></p></div><div class="pitch-card"><h5>Pitch = 1</h5><p>Jointives<br>Bonne qualité</p></div><div class="pitch-card"><h5>Pitch &gt; 1</h5><p>Disjonctives<br>Perte info<br><strong style="color:#28a745">Moins irradiant</strong></p></div></div></div>
+            <div class="info-box"><h4>📏 Champs de vue</h4><ul style="margin-left:20px"><li><strong>Large Body</strong> = 50 cm</li><li><strong>Small Body</strong> = 35 cm</li><li><strong>Head</strong> = 25 cm</li></ul></div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkTable(8)">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(8)">Accepter</button></div>
+            <div class="feedback" id="feedback8"></div>
+        </div>
+
+        <!-- Q9 -->
+        <div class="question-container" id="question9">
+            <div class="question-header"><div class="question-number">Question 9</div><div class="question-text"><strong>Reconstruction de l'image</strong></div></div>
+            <div class="table-container"><table><thead><tr><th>Définition</th><th>Terme</th></tr></thead><tbody>
+                <tr><td>Surface 2D avec lignes et colonnes</td><td><input type="text" id="q9_1"></td></tr><tr class="solution-row"><td colspan="2">💡 Matrice</td></tr>
+                <tr><td>Constitué de niveaux de gris</td><td><input type="text" id="q9_2"></td></tr><tr class="solution-row"><td colspan="2">💡 Image</td></tr>
+                <tr><td>Unité de surface</td><td><input type="text" id="q9_3"></td></tr><tr class="solution-row"><td colspan="2">💡 Pixel</td></tr>
+                <tr><td>Unité de surface + épaisseur coupe</td><td><input type="text" id="q9_4"></td></tr><tr class="solution-row"><td colspan="2">💡 Voxel</td></tr>
+            </tbody></table></div>
+            <h4 style="color:#1e3c72;margin:30px 0 15px">Définir la reconstruction :</h4>
+            <textarea class="answer-input" id="q9_def" placeholder="Définition..."></textarea>
+            <h4 style="color:#1e3c72;margin:30px 0 15px">2 méthodes analytiques :</h4>
+            <input type="text" id="q9_m1" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:5px;margin-bottom:10px" placeholder="1...">
+            <input type="text" id="q9_m2" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:5px" placeholder="2...">
+            <div class="button-group"><button class="btn btn-primary" onclick="checkQ9()">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(9)">Accepter</button></div>
+            <div class="feedback" id="feedback9"></div>
+        </div>
+
+        <!-- Q10 -->
+        <div class="question-container" id="question10">
+            <div class="question-header"><div class="question-number">Question 10</div><div class="question-text"><strong>Facteurs de qualité image</strong></div></div>
+            <div class="table-container"><table><thead><tr><th>Définition</th><th>Terme</th></tr></thead><tbody>
+                <tr><td>Intensité du voxel</td><td><input type="text" id="q10_1"></td></tr><tr class="solution-row"><td colspan="2">💡 Signal</td></tr>
+                <tr><td>Signal aléatoire du système</td><td><input type="text" id="q10_2"></td></tr><tr class="solution-row"><td colspan="2">💡 Bruit</td></tr>
+                <tr><td>Facteur conditionnant la qualité</td><td><input type="text" id="q10_3"></td></tr><tr class="solution-row"><td colspan="2">💡 Rapport S/B</td></tr>
+                <tr><td>Différenciation structures faible contraste</td><td><input type="text" id="q10_4"></td></tr><tr class="solution-row"><td colspan="2">💡 Résolution de contraste</td></tr>
+                <tr><td>Distinction petites structures fort contraste</td><td><input type="text" id="q10_5"></td></tr><tr class="solution-row"><td colspan="2">💡 Résolution spatiale</td></tr>
+                <tr><td>Capacité acquisition rapide</td><td><input type="text" id="q10_6"></td></tr><tr class="solution-row"><td colspan="2">💡 Résolution temporelle</td></tr>
+            </tbody></table></div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkTable(10)">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(10)">Accepter</button></div>
+            <div class="feedback" id="feedback10"></div>
+        </div>
+
+        <!-- Q11 - CORRIGÉ : pas de tips visibles avant vérification -->
+        <div class="question-container" id="question11">
+            <div class="question-header"><div class="question-number">Question 11</div><div class="question-text"><strong>Les artéfacts</strong><br>À partir des images, identifiez les différents types d'artéfacts</div></div>
+            <div class="schema-upload"><div class="upload-area" onclick="document.getElementById('img11').click()"><div class="upload-icon">📤</div><p>Uploader image d'artéfact</p></div><input type="file" id="img11" accept="image/*" style="display:none" onchange="loadImg(11,event)"><div id="prev11" style="display:none;margin-top:20px"><img id="imgD11" style="max-width:100%;border-radius:10px"></div></div>
+            <div style="margin-top:30px">
+                <h4 style="color:#1e3c72">Identifiez les artéfacts visibles :</h4>
+                <input type="text" id="q11_1" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:5px;margin:10px 0" placeholder="Artéfact 1...">
+                <input type="text" id="q11_2" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:5px;margin-bottom:10px" placeholder="Artéfact 2...">
+                <input type="text" id="q11_3" style="width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:5px" placeholder="Artéfact 3...">
+            </div>
+            <!-- Info-box CACHÉE par défaut, affichée seulement après vérification -->
+            <div class="info-box hidden" id="artefacts_info">
+                <h4>📚 Types d'artéfacts courants :</h4>
+                <ul style="margin-left:20px">
+                    <li><strong>Métallique</strong> : stries dues aux implants métalliques</li>
+                    <li><strong>Mouvement</strong> : flou dû au mouvement du patient</li>
+                    <li><strong>Moulin à vent</strong> : lignes étoilées sur les reconstructions</li>
+                    <li><strong>Durcissement de faisceau</strong> : bandes sombres entre structures denses</li>
+                    <li><strong>Anneau</strong> : cercles dus à un détecteur défaillant</li>
+                </ul>
+            </div>
+            <div class="button-group"><button class="btn btn-primary" onclick="checkQ11()">Vérifier</button><button class="btn btn-success" onclick="acceptAnswer(11)">Accepter</button></div>
+            <div class="feedback" id="feedback11"></div>
+        </div>
+
+        <!-- Export & Stats -->
+        <div class="question-container" id="question12">
+            <div style="padding:40px;text-align:center;background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);color:white;border-radius:15px"><h2 style="margin-bottom:20px">📥 Exporter</h2><p style="margin-bottom:30px">Générer un fichier HTML avec vos réponses</p><button class="btn" style="background:white;color:#1e3c72;font-size:1.2em;padding:15px 40px" onclick="exportHTML()">🌐 EXPORTER</button></div>
+        </div>
+
+        <div class="question-container" id="question13">
+            <div class="stats"><h2>🎉 Statistiques</h2><div class="stats-grid"><div class="stat-card"><div class="stat-value" id="correctAnswers">0</div><div class="stat-label">Correctes</div></div><div class="stat-card"><div class="stat-value" id="acceptedAnswers">0</div><div class="stat-label">Acceptées</div></div><div class="stat-card"><div class="stat-value" id="totalScore">0%</div><div class="stat-label">Score</div></div></div><button class="btn btn-primary" style="margin-top:30px" onclick="resetQuiz()">Recommencer</button></div>
+        </div>
+
+        <div class="navigation"><button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">← Précédent</button><button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Suivant →</button></div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 13;
+        let answers = { correct: 0, accepted: 0, total: 11, answered: new Set() };
+
+        function showQuestion(num) { document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active')); document.getElementById('question' + num).classList.add('active'); currentQuestion = num; updateProgress(); updateNavButtons(); }
+        function nextQuestion() { if (currentQuestion < totalQuestions) showQuestion(currentQuestion + 1); }
+        function previousQuestion() { if (currentQuestion > 1) showQuestion(currentQuestion - 1); }
+        function updateProgress() { document.getElementById('progressFill').style.width = (currentQuestion / totalQuestions) * 100 + '%'; }
+        function updateNavButtons() { document.getElementById('prevBtn').style.display = currentQuestion === 1 ? 'none' : 'block'; document.getElementById('nextBtn').style.display = currentQuestion === totalQuestions ? 'none' : 'block'; }
+        function normalizeText(t) { return t ? t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim() : ''; }
+
+        function checkAnswer(num) {
+            if (num === 1) {
+                const sols = { 1: ['acquisition','tube','détecteur','statif','générateur'], 2: ['traitement','reconstruction','filtre','matrice'], 3: ['restitution','visualisation','console','fenêtrage'], 4: ['communication','archivage','pacs','stockage'] };
+                let html = '', allCorrect = true;
+                for (let i = 1; i <= 4; i++) { const a = normalizeText(document.getElementById('answer1_' + i).value); const ok = sols[i].some(k => a.includes(normalizeText(k))); html += ok ? '<p>✅ Système '+i+' : OK</p>' : '<p>❌ Système '+i+'</p>'; if (!ok) allCorrect = false; }
+                const fb = document.getElementById('feedback1');
+                fb.innerHTML = html + '<div class="solution"><h4>💡 Solutions :</h4><p><strong>1.</strong> Acquisition : Tube, générateur, détecteurs, statif</p><p><strong>2.</strong> Traitement : Reconstruction, filtres, matrice</p><p><strong>3.</strong> Restitution : Console, fenêtrage</p><p><strong>4.</strong> Communication : PACS, archivage</p></div>';
+                fb.classList.add('show', allCorrect ? 'correct' : 'incorrect');
+                if (allCorrect && !answers.answered.has(1)) { answers.correct++; answers.answered.add(1); }
+            }
+        }
+
+        function acceptAnswer(num) { if (!answers.answered.has(num)) { answers.accepted++; answers.answered.add(num); } const fb = document.getElementById('feedback' + num); fb.innerHTML = '✅ Acceptée !'; fb.classList.add('show', 'accepted'); }
+
+        function checkTrueFalse(num, correct) {
+            let score = 0;
+            correct.forEach((c, i) => {
+                const name = 'q' + num + '_' + (i + 1), sel = document.querySelector('input[name="' + name + '"]:checked');
+                document.querySelectorAll('input[name="' + name + '"]').forEach(opt => { const p = opt.closest('.mcq-option'); p.classList.remove('correct-answer', 'wrong-answer'); if (opt.value === c) p.classList.add('correct-answer'); if (sel && opt === sel && opt.value !== c) p.classList.add('wrong-answer'); });
+                if (sel && sel.value === c) score++;
+            });
+            const fb = document.getElementById('feedback' + num);
+            fb.innerHTML = (score === correct.length ? '✅ Parfait !' : '⚠️ ' + score + '/' + correct.length) + '<div class="solution"><h4>💡 Explications :</h4><p>• Transfert électrique = <strong>bagues collectrices (slip ring)</strong></p><p>• <strong>Stator</strong> = partie FIXE</p><p>• <strong>Rotor</strong> = partie MOBILE</p><p>• Scanner "64 barrettes" = <strong>64 rangées</strong></p></div>';
+            fb.classList.add('show', score === correct.length ? 'correct' : 'incorrect');
+            if (score === correct.length && !answers.answered.has(num)) { answers.correct++; answers.answered.add(num); }
+        }
+
+        function checkQuestion3() {
+            const sols = { q3_1: '70', q3_2: '140', q3_3: '10', q3_4: '1000', q3_5: '50', q3_6: '60' };
+            let allCorrect = true;
+            Object.keys(sols).forEach(id => { const i = document.getElementById(id), s = document.getElementById('sol_' + id); if (normalizeText(i.value) === normalizeText(sols[id])) i.classList.add('correct'); else { i.classList.add('incorrect'); s.classList.add('show'); allCorrect = false; } });
+            const fb = document.getElementById('feedback3');
+            fb.innerHTML = (allCorrect ? '✅ Parfait !' : '⚠️ Corrections affichées') + '<div class="solution"><h4>💡 Tube RX :</h4><p><strong>1.</strong> Absorber contraintes thermiques (3-7 MUC)</p><p><strong>2.</strong> Dissiper la chaleur (0,1 MUC/min)</p></div>';
+            fb.classList.add('show', allCorrect ? 'correct' : 'incorrect');
+            if (allCorrect && !answers.answered.has(3)) { answers.correct++; answers.answered.add(3); }
+        }
+
+        function checkQuestion4() {
+            const sols = { q4_1: 'primaire', q4_2: 'chambre', q4_3: 'ionisation', q4_4: 'indicateurs', q4_5: 'dose', q4_6: 'secondaires', q4_7: 'barrettes', q4_8: 'après', q4_9: 'traversé', q4_10: 'transformer', q4_11: 'signal', q4_12: 'électrique' };
+            let allCorrect = true;
+            Object.keys(sols).forEach(id => { const i = document.getElementById(id), s = document.getElementById('sol_' + id), u = normalizeText(i.value), c = normalizeText(sols[id]); if (u.includes(c) || c.includes(u)) i.classList.add('correct'); else { i.classList.add('incorrect'); s.classList.add('show'); allCorrect = false; } });
+            const fb = document.getElementById('feedback4');
+            fb.innerHTML = (allCorrect ? '✅ Parfait !' : '⚠️ Corrections') + '<div class="solution"><h4>💡 3 technologies :</h4><p>1. Chambres ionisation Xénon</p><p>2. Détecteurs solides (intégratifs)</p><p>3. Détecteurs comptage photonique</p></div>';
+            fb.classList.add('show', allCorrect ? 'correct' : 'incorrect');
+            if (allCorrect && !answers.answered.has(4)) { answers.correct++; answers.answered.add(4); }
+        }
+
+        function checkTable(num) { document.querySelectorAll('#question' + num + ' .solution-row').forEach(r => r.classList.add('show')); const fb = document.getElementById('feedback' + num); fb.innerHTML = '💡 Solutions affichées'; fb.classList.add('show', 'accepted'); }
+
+        function checkQ9() { checkTable(9); document.getElementById('feedback9').innerHTML += '<div class="solution"><h4>💡 Reconstruction :</h4><p>Étape entre détection et visualisation.</p><h4>2 méthodes :</h4><p>1. Rétro projection Fourier</p><p>2. Méthode algébrique itérative</p></div>'; }
+        
+        function checkQ11() { 
+            // Afficher la box des types d'artéfacts APRÈS vérification
+            document.getElementById('artefacts_info').classList.remove('hidden');
+            const fb = document.getElementById('feedback11'); 
+            fb.innerHTML = '<div class="solution"><h4>💡 Solutions (images du TD) :</h4><p>1. Artéfact métallique</p><p>2. Artéfact de mouvement</p><p>3. Artéfact en moulin à vent</p></div>'; 
+            fb.classList.add('show', 'accepted'); 
+        }
+
+        function loadImg(num, e) { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = function(ev) { document.getElementById('prev' + num).style.display = 'block'; document.getElementById('imgD' + num).src = ev.target.result; }; r.readAsDataURL(f); }
+
+        function exportHTML() {
+            const clone = document.documentElement.cloneNode(true);
+            document.querySelectorAll('input, textarea').forEach(src => { if (!src.id) return; const t = clone.querySelector('#' + CSS.escape(src.id)); if (!t) return; if (src.tagName === 'TEXTAREA') { t.value = src.value; t.textContent = src.value; } else if (src.type === 'checkbox' || src.type === 'radio') { t.checked = src.checked; if (src.checked) t.setAttribute('checked', 'checked'); } else if (src.type !== 'file') { t.value = src.value; t.setAttribute('value', src.value); } });
+            clone.querySelectorAll('.question-container').forEach(q => { q.classList.remove('active'); q.style.display = 'block'; });
+            const nav = clone.querySelector('.navigation'); if (nav) nav.style.display = 'none';
+            const prog = clone.querySelector('.progress-bar'); if (prog) prog.style.display = 'none';
+            ['question12', 'question13'].forEach(id => { const el = clone.querySelector('#' + id); if (el) el.style.display = 'none'; });
+            const html = '<!DOCTYPE html>\n<html lang="fr">\n' + clone.innerHTML + '\n</html>';
+            const blob = new Blob([html], { type: 'text/html' });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'TD4_Scanographie_Export_' + new Date().toISOString().slice(0, 10) + '.html'; a.click();
+            alert('✅ Export réussi !');
+        }
+
+        function resetQuiz() {
+            currentQuestion = 1; answers = { correct: 0, accepted: 0, total: 11, answered: new Set() };
+            document.querySelectorAll('textarea, input[type="text"]').forEach(i => { i.value = ''; i.classList.remove('correct', 'incorrect'); });
+            document.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(i => i.checked = false);
+            document.querySelectorAll('.feedback').forEach(fb => { fb.classList.remove('show', 'correct', 'incorrect', 'accepted'); fb.innerHTML = ''; });
+            document.querySelectorAll('.mcq-option').forEach(o => o.classList.remove('correct-answer', 'wrong-answer', 'selected'));
+            document.querySelectorAll('.text-gap-solution').forEach(s => s.classList.remove('show'));
+            document.querySelectorAll('.solution-row').forEach(r => r.classList.remove('show'));
+            // Re-cacher la box des artéfacts
+            const artefactsBox = document.getElementById('artefacts_info');
+            if (artefactsBox) artefactsBox.classList.add('hidden');
+            showQuestion(1);
+        }
+
+        document.addEventListener('change', function(e) { if (e.target.type === 'radio') { const o = e.target.closest('.mcq-option'); if (o) { document.querySelectorAll('input[name="' + e.target.name + '"]').forEach(i => i.closest('.mcq-option').classList.remove('selected')); o.classList.add('selected'); } } });
+
+        updateProgress(); updateNavButtons();
+    </script>
+</body>
+</html>
