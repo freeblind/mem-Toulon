@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formation MEM - Calcul de Dose Complète S1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 8px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            opacity: 0.95;
+            font-size: 0.95em;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
+        }
+
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            min-width: 120px;
+            color: #333;
+        }
+
+        .tab:hover {
+            background: #e0e0e0;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sidebar-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 200px;
+            max-height: 350px;
+        }
+
+        .sidebar-header {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+            cursor: grab;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header:active {
+            cursor: grabbing;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .resize-handle {
+            width: 100%;
+            height: 6px;
+            background: #ddd;
+            cursor: ns-resize;
+            hover-background: #999;
+        }
+
+        .notepad textarea {
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 8px;
+            border-radius: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            resize: none;
+            background: #fffacd;
+            color: #333;
+        }
+
+        .calculator {
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .calc-display {
+            background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+            color: #00ff00;
+            text-align: right;
+            padding: 14px 12px;
+            font-family: 'Courier New', monospace;
+            flex-shrink: 0;
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 70px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .calc-display-input {
+            font-size: 13px;
+            color: #666;
+            min-height: 16px;
+            word-break: break-all;
+        }
+
+        .calc-display-result {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000;
+            min-height: 32px;
+            text-shadow: 0 0 5px rgba(0,255,0,0.2);
+            background: #eee;
+            padding: 4px 6px;
+            border-radius: 3px;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3px;
+            padding: 6px;
+            flex: 1;
+        }
+
+        .calc-btn {
+            padding: 8px 4px;
+            font-size: 10px;
+            border: 1px solid #666;
+            background: #e0e0e0;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: 600;
+            color: #000;
+        }
+
+        .calc-btn:hover {
+            background: #d0d0d0;
+        }
+
+        .calc-btn.operator {
+            background: #667eea;
+            color: white;
+        }
+
+        .calc-btn.equals {
+            background: #28a745;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .calc-btn.clear {
+            background: #dc3545;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .content-area {
+            display: none;
+        }
+
+        .content-area.active {
+            display: block;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .scenario {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            border-left: 4px solid #667eea;
+        }
+
+        .scenario h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .info-box, .warning-box, .success-box, .error-box {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+            border-left: 4px solid;
+            color: #333;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .tip-box {
+            background: #e0f7ff;
+            border: 2px solid #0288d1;
+            border-radius: 8px;
+            padding: 0;
+            margin: 12px 0;
+        }
+
+        .tip-header {
+            background: #0288d1;
+            color: white;
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .tip-header:hover {
+            background: #0277bd;
+        }
+
+        .tip-content {
+            display: none;
+            padding: 15px;
+            background: white;
+            color: #333;
+        }
+
+        .tip-content.visible {
+            display: block;
+        }
+
+        .tip-toggle {
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .tip-toggle.open {
+            transform: rotate(180deg);
+        }
+
+        .input-group {
+            margin: 12px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border 0.3s;
+            color: #333;
+            background: white;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 5px 5px 5px 0;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+        }
+
+        .formula {
+            background: #f0f0f0;
+            padding: 12px;
+            border-left: 3px solid #667eea;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .input-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .input-pair input {
+            width: 100%;
+        }
+
+        .input-pair-labels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .input-pair-labels span {
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 12px;
+        }
+
+        .ampoule {
+            padding: 10px;
+            background: #e8f4f8;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            text-align: center;
+            color: #333;
+        }
+
+        .ampoule:hover {
+            background: #c9e4f5;
+            transform: scale(1.08);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .ampoule.selected {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        /* PERFUSION ANIMATION */
+        .perfusion-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 20px 0;
+            gap: 30px;
+        }
+
+        .iv-bag {
+            width: 120px;
+            height: 180px;
+            border: 3px solid #333;
+            border-radius: 15px 15px 40px 40px;
+            position: relative;
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, #4a90e2, #87ceeb);
+            transition: height 0.5s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            padding-bottom: 8px;
+        }
+
+        .liquid.correct {
+            background: linear-gradient(to top, #28a745, #5cb85c);
+        }
+
+        .liquid.warning {
+            background: linear-gradient(to top, #ffc107, #ffb300);
+        }
+
+        .liquid.error {
+            background: linear-gradient(to top, #dc3545, #e57373);
+        }
+
+        .bag-label {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .ampoule-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+            margin: 15px 0;
+        }
+
+        .difficulty-selector {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .diff-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        .diff-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white;
+        }
+
+        .calculation-steps {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 12px 0;
+            color: #333;
+        }
+
+        .calculation-steps h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .calculation-steps ul, .calculation-steps ol {
+            margin-left: 20px;
+        }
+
+        .calculation-steps li {
+            margin: 6px 0;
+            line-height: 1.4;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: inline-block;
+            margin: 0 12px;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Formation MEM - Calcul de Dose & Électrolytes</h1>
+            <p class="subtitle">Semestre 1 | Référentiel Formation Manipulateur</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('conversions')">1️⃣ Conversions</button>
+            <button class="tab" onclick="switchTab('perfusion')">2️⃣ Perfusion</button>
+            <button class="tab" onclick="switchTab('electrolytes')">3️⃣ Électrolytes</button>
+            <button class="tab" onclick="switchTab('debit')">4️⃣ Débit</button>
+            <button class="tab" onclick="switchTab('concentration')">5️⃣ Concentration <span style="font-size: 0.8em; color: #dc3545;">*Non au partiel</span></button>
+        </div>
+
+        <div class="main-content">
+            <div class="content-wrapper">
+                <!-- ===== EX 1 : CONVERSIONS ÉQUILIBRÉES ===== -->
+                <div id="conversions" class="content-area active">
+                    <h2>Exercice 1 : Conversions & Équivalences</h2>
+                    
+                    <div class="scenario">
+                        <h3>📝 5 Questions Variées</h3>
+                        <p style="color: #666; font-size: 13px;">1 goutte • 1 mL/L • 1 temps • 1 concentration</p>
+                        <button class="btn-warning" onclick="generateConversions()">🔄 Générer Nouvelles Questions</button>
+                        
+                        <div id="conv-questions" style="margin-top: 15px;"></div>
+                        
+                        <button class="btn-success" onclick="checkAllConversions()" style="margin-top: 15px;">✓ Vérifier Toutes</button>
+                        <button class="btn-secondary" onclick="resetConversions()">↻ Réinitialiser</button>
+                    </div>
+                    
+                    <div id="conv-result"></div>
+                </div>
+
+                <!-- ===== EX 2 : PERFUSION VISUELLE AVEC ANIMATION ===== -->
+                <div id="perfusion" class="content-area">
+                    <h2>Exercice 2 : Perfusion Enrichie</h2>
+                    
+                    <div class="scenario">
+                        <h3>🏥 Cas Clinique</h3>
+                        <div class="info-box" id="perf-prescription"></div>
+
+                        <div class="perfusion-container">
+                            <div>
+                                <div class="iv-bag">
+                                    <div class="liquid" id="perf-liquid" style="height: 50%;">
+                                        <span id="perf-vol-text">500mL</span>
+                                    </div>
+                                </div>
+                                <div class="bag-label">Poche à perfuser</div>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 20px; color: #667eea;">Sélectionnez les ampoules :</h4>
+                        <div id="perf-ampoules-section"></div>
+
+                        <h4 style="margin-top: 15px; color: #667eea;">Ampoules sélectionnées :</h4>
+                        <div class="info-box" id="perf-selected-ampoules" style="min-height: 40px;">
+                            <p style="color: #999;">Aucune ampoule sélectionnée</p>
+                        </div>
+
+                        <button class="btn-success" onclick="validatePerfusion()" style="margin-top: 15px;">✓ Valider la Préparation</button>
+                        <button class="btn-secondary" onclick="resetPerfusion()">↻ Réinitialiser</button>
+                        <button class="btn-warning" onclick="generatePerfusion()">🔄 Nouvel Exercice</button>
+                    </div>
+
+                    <div id="perf-feedback"></div>
+                </div>
+
+                <!-- ===== EX 3 : ÉLECTROLYTES MULTI-NIVEAUX ===== -->
+                <div id="electrolytes" class="content-area">
+                    <h2>Exercice 3 : Électrolytes - Multi Niveaux</h2>
+                    
+                    <div class="scenario">
+                        <div class="difficulty-selector">
+                            <label><strong>🎯 Niveau de Difficulté :</strong></label>
+                            <div class="difficulty-buttons">
+                                <button class="diff-btn btn-secondary active" onclick="setDifficulty('easy')">Facile</button>
+                                <button class="diff-btn btn-secondary" onclick="setDifficulty('medium')">Moyen</button>
+                                <button class="diff-btn btn-secondary" onclick="setDifficulty('hard')">Difficile</button>
+                            </div>
+                        </div>
+
+                        <div class="info-box" id="elec-scenario"></div>
+
+                        <div id="elec-questions-container"></div>
+
+                        <button class="btn-warning" onclick="generateElectrolytes()" style="margin-top: 15px;">🔄 Nouvel Exercice</button>
+                    </div>
+
+                    <div id="elec-feedback"></div>
+                </div>
+
+                <!-- ===== EX 4 : DÉBIT ===== -->
+                <div id="debit" class="content-area">
+                    <h2>Exercice 4 : Calcul de Débit</h2>
+                    
+                    <div class="scenario">
+                        <h3>💧 Débit de Perfusion</h3>
+                        <div class="info-box">
+                            <p>Volume : <strong id="debit-vol">0</strong> mL en <strong id="debit-dur">0</strong>h</p>
+                        </div>
+
+                        <div class="tip-box">
+                            <div class="tip-header" onclick="toggleTip(this)">
+                                💡 Besoin d'aide ? Cliquez ici
+                                <span class="tip-toggle">▼</span>
+                            </div>
+                            <div class="tip-content">
+                                <div class="calculation-steps">
+                                    <h4>📚 Étapes de résolution :</h4>
+                                    <ol>
+                                        <li><strong>Volume en gouttes</strong> : Volume (mL) × 20</li>
+                                        <li><strong>Durée en minutes</strong> : Durée (h) × 60</li>
+                                        <li><strong>Débit</strong> : Gouttes ÷ Minutes</li>
+                                        <li><strong>Arrondir</strong> : &lt; 0,5 (bas), ≥ 0,5 (haut)</li>
+                                    </ol>
+                                    <p style="margin-top: 12px;"><strong>⚠️ Rappel :</strong> 1 mL = 20 gouttes</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div>
+                                <div class="input-group">
+                                    <label>Gouttes :</label>
+                                    <input type="number" id="debit-q1">
+                                    <button class="btn-success btn-small" onclick="checkDebitStep(1)">✓</button>
+                                </div>
+                            </div>
+                            <div id="debit-result1"></div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div>
+                                <div class="input-group">
+                                    <label>Minutes :</label>
+                                    <input type="number" id="debit-q2">
+                                    <button class="btn-success btn-small" onclick="checkDebitStep(2)">✓</button>
+                                </div>
+                            </div>
+                            <div id="debit-result2"></div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div>
+                                <div class="input-group">
+                                    <label>Débit (gttes/min) :</label>
+                                    <input type="number" id="debit-q3">
+                                    <button class="btn-success btn-small" onclick="checkDebitStep(3)">✓</button>
+                                </div>
+                            </div>
+                            <div id="debit-result3"></div>
+                        </div>
+
+                        <button class="btn-warning" onclick="generateDebit()" style="margin-top: 15px;">🔄 Nouvel Exercice</button>
+                    </div>
+                </div>
+
+                <!-- ===== EX 5 : CONCENTRATION & DILUTION ===== -->
+                <div id="concentration" class="content-area">
+                    <h2>Exercice 5 : Concentration & Dilution <span style="color: #dc3545; font-size: 0.8em;">⚠️ Non au partiel</span></h2>
+                    
+                    <div class="scenario">
+                        <h3>🧪 Cas Clinique</h3>
+                        <div id="conc-scenario" class="info-box"></div>
+
+                        <div class="grid-2">
+                            <div>
+                                <div class="input-group">
+                                    <label id="conc-q1-label">Question 1</label>
+                                    <input type="number" id="conc-q1" placeholder="Votre réponse" step="0.01">
+                                    <button class="btn-success btn-small" onclick="checkConcStep(1)">✓</button>
+                                </div>
+                            </div>
+                            <div id="conc-result1"></div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div>
+                                <div class="input-group">
+                                    <label id="conc-q2-label">Question 2</label>
+                                    <input type="number" id="conc-q2" placeholder="Votre réponse" step="0.01">
+                                    <button class="btn-success btn-small" onclick="checkConcStep(2)">✓</button>
+                                </div>
+                            </div>
+                            <div id="conc-result2"></div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div>
+                                <div class="input-group">
+                                    <label id="conc-q3-label">Question 3</label>
+                                    <input type="number" id="conc-q3" placeholder="Votre réponse" step="0.01">
+                                    <button class="btn-success btn-small" onclick="checkConcStep(3)">✓</button>
+                                </div>
+                            </div>
+                            <div id="conc-result3"></div>
+                        </div>
+
+                        <button class="btn-warning" onclick="generateConcentration()" style="margin-top: 15px;">🔄 Nouvel Exercice</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIDEBAR : CALCULATRICE + NOTES -->
+            <div class="sidebar">
+                <!-- CALCULATRICE -->
+                <div class="sidebar-item" id="sidebar-calc" style="min-height: 250px;">
+                    <div class="sidebar-header" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)">
+                        🧮 CALCULATRICE
+                        <span style="font-size: 12px;">⋮⋮ Drag</span>
+                    </div>
+                    <div class="sidebar-content calculator">
+                        <div class="calc-display" id="calc-display">
+                            <div class="calc-display-input" id="calc-display-input"></div>
+                            <div class="calc-display-result" id="calc-display-result">0</div>
+                        </div>
+                        <div class="calc-buttons">
+                            <button class="calc-btn" onclick="calcClick('7')">7</button>
+                            <button class="calc-btn" onclick="calcClick('8')">8</button>
+                            <button class="calc-btn" onclick="calcClick('9')">9</button>
+                            <button class="calc-btn operator" onclick="calcOp('/')">/</button>
+                            
+                            <button class="calc-btn" onclick="calcClick('4')">4</button>
+                            <button class="calc-btn" onclick="calcClick('5')">5</button>
+                            <button class="calc-btn" onclick="calcClick('6')">6</button>
+                            <button class="calc-btn operator" onclick="calcOp('*')">×</button>
+                            
+                            <button class="calc-btn" onclick="calcClick('1')">1</button>
+                            <button class="calc-btn" onclick="calcClick('2')">2</button>
+                            <button class="calc-btn" onclick="calcClick('3')">3</button>
+                            <button class="calc-btn operator" onclick="calcOp('-')">-</button>
+                            
+                            <button class="calc-btn" onclick="calcClick('0')">0</button>
+                            <button class="calc-btn" onclick="calcClick('.')">.</button>
+                            <button class="calc-btn operator" onclick="calcOp('+')">+</button>
+                            <button class="calc-btn equals" onclick="calcEquals()">=</button>
+                            
+                            <button class="calc-btn clear" onclick="calcClear()">C</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BLOC NOTES -->
+                <div class="sidebar-item" id="sidebar-notes" style="flex: 1;">
+                    <div class="sidebar-header" draggable="true" ondragstart="dragStart(event)" ondragend="dragEnd(event)">
+                        📝 BLOC NOTES
+                        <span style="font-size: 12px;">⋮⋮ Drag</span>
+                    </div>
+                    <div class="sidebar-content notepad">
+                        <textarea id="notes" placeholder="Calculs...&#10;&#10;Formules:&#10;• Produit croix: (a×b)/c&#10;• %: g pour 100mL&#10;• ‰: g pour 1000mL&#10;• Gouttes: mL×20"></textarea>
+                    </div>
+                    <div class="resize-handle" onmousedown="startResize(event)"></div>
+                    <button class="btn-secondary btn-small" onclick="clearNotes()" style="width: 100%; border-radius: 0;">Effacer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATISTIQUES -->
+        <div class="stat-box">
+            <h3>📈 VOS STATISTIQUES</h3>
+            <div class="stat-item">
+                Correctes : <span class="stat-number" id="correct-count">0</span>
+            </div>
+            <div class="stat-item">
+                Total : <span class="stat-number" id="total-count">0</span>
+            </div>
+            <div class="stat-item">
+                Taux : <span class="stat-number" id="success-rate">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== DONNÉES GLOBALES =====
+        let stats = { correct: 0, total: 0 };
+        let currentDifficulty = 'easy';
+        let calcDisplay = '0';
+        let calcValue = 0;
+        let calcOperator = null;
+        let calcNew = true;
+        let currentConvQuestions = [];
+        let draggedElement = null;
+        let resizeElement = null;
+        let startHeight = 0;
+        let startY = 0;
+
+        // ===== DRAG & DROP SIDEBAR =====
+        function dragStart(event) {
+            draggedElement = event.target.closest('.sidebar-item');
+            draggedElement.style.opacity = '0.7';
+        }
+
+        function dragEnd(event) {
+            if (!draggedElement) return;
+            draggedElement.style.opacity = '1';
+            
+            const calc = document.getElementById('sidebar-calc');
+            const notes = document.getElementById('sidebar-notes');
+            
+            if (draggedElement === calc) {
+                calc.parentNode.insertBefore(notes, calc);
+            } else {
+                notes.parentNode.insertBefore(calc, notes);
+            }
+            draggedElement = null;
+        }
+
+        // ===== REDIMENSIONNER BLOC NOTES =====
+        function startResize(event) {
+            resizeElement = document.getElementById('sidebar-notes');
+            startY = event.clientY;
+            startHeight = resizeElement.offsetHeight;
+            
+            document.addEventListener('mousemove', doResize);
+            document.addEventListener('mouseup', stopResize);
+        }
+
+        function doResize(event) {
+            if (!resizeElement) return;
+            const diff = event.clientY - startY;
+            resizeElement.style.height = (startHeight + diff) + 'px';
+        }
+
+        function stopResize() {
+            document.removeEventListener('mousemove', doResize);
+            document.removeEventListener('mouseup', stopResize);
+            resizeElement = null;
+        }
+
+        // ===== GESTION DES ONGLETS =====
+        function switchTab(tabName) {
+            document.querySelectorAll('.content-area').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // ===== CALCULATRICE =====
+        function calcClick(num) {
+            if (calcNew) {
+                calcDisplay = num;
+                calcNew = false;
+            } else {
+                calcDisplay = calcDisplay === '0' ? num : calcDisplay + num;
+            }
+            updateCalcDisplay();
+        }
+
+        function calcOp(op) {
+            calcValue = parseFloat(calcDisplay);
+            calcOperator = op;
+            calcNew = true;
+            updateCalcDisplay();
+        }
+
+        function calcEquals() {
+            if (!calcOperator) return;
+            const curr = parseFloat(calcDisplay);
+            let result = 0;
+            
+            if (calcOperator === '+') result = calcValue + curr;
+            else if (calcOperator === '-') result = calcValue - curr;
+            else if (calcOperator === '*') result = calcValue * curr;
+            else if (calcOperator === '/') result = (curr !== 0) ? calcValue / curr : 0;
+            
+            calcDisplay = result.toString();
+            calcOperator = null;
+            calcNew = true;
+            updateCalcDisplay(true);
+        }
+
+        function calcClear() {
+            calcDisplay = '0';
+            calcValue = 0;
+            calcOperator = null;
+            calcNew = true;
+            updateCalcDisplay();
+        }
+
+        function updateCalcDisplay(showResult = false) {
+            const resultEl = document.getElementById('calc-display-result');
+            const inputEl = document.getElementById('calc-display-input');
+            
+            resultEl.textContent = calcDisplay;
+            
+            if (calcOperator) {
+                inputEl.textContent = calcValue + ' ' + calcOperator;
+            } else if (showResult) {
+                inputEl.textContent = '= ' + calcDisplay;
+            } else {
+                inputEl.textContent = '';
+            }
+        }
+
+        // ===== TIPS MASQUABLES =====
+        function toggleTip(header) {
+            const content = header.nextElementSibling;
+            const toggle = header.querySelector('.tip-toggle');
+            content.classList.toggle('visible');
+            toggle.classList.toggle('open');
+        }
+
+        // ===== EX 1 : CONVERSIONS ÉQUILIBRÉES =====
+        function generateConversions() {
+            const conversions = [];
+            
+            // 1 GOUTTES
+            const goutteTypes = [
+                { q: "1 mL", a: 20, u: "gouttes" },
+                { q: "0,5 mL", a: 10, u: "gouttes" },
+                { q: "1,5 mL", a: 30, u: "gouttes" },
+                { q: "2 mL", a: 40, u: "gouttes" }
+            ];
+            conversions.push(goutteTypes[Math.floor(Math.random() * goutteTypes.length)]);
+
+            // 1 mL/L/volume
+            const volumeTypes = [
+                { q: "1 L", a: 1000, u: "mL" },
+                { q: "0,5 L", a: 500, u: "mL" },
+                { q: "2,5 L", a: 2500, u: "mL" },
+                { q: "1,5 L", a: 1500, u: "mL" },
+                { q: "500 mL", a: 0.5, u: "L" },
+                { q: "250 mL", a: 0.25, u: "L" }
+            ];
+            conversions.push(volumeTypes[Math.floor(Math.random() * volumeTypes.length)]);
+
+            // 1 TEMPS (heure en minute ET minute en heure)
+            const timeTypes = [
+                { q: "1 h", a: 60, u: "min" },
+                { q: "2 h", a: 120, u: "min" },
+                { q: "6 h", a: 360, u: "min" },
+                { q: "12 h", a: 720, u: "min" },
+                { q: "3 h 30 min", a: 210, u: "min" },
+                { q: "2 h 15 min", a: 135, u: "min" },
+                { q: "120 min", a: 2, u: "h" },
+                { q: "180 min", a: 3, u: "h" },
+                { q: "90 min", a: 1.5, u: "h" }
+            ];
+            conversions.push(timeTypes[Math.floor(Math.random() * timeTypes.length)]);
+
+            // 1 CONCENTRATION (%) - 2 cases à remplir
+            const percTypes = [
+                { q: "5%", a_g: 5, a_ml: 100, type: "%" },
+                { q: "10%", a_g: 10, a_ml: 100, type: "%" },
+                { q: "2%", a_g: 2, a_ml: 100, type: "%" },
+                { q: "7,46%", a_g: 7.46, a_ml: 100, type: "%" }
+            ];
+            conversions.push(percTypes[Math.floor(Math.random() * percTypes.length)]);
+
+            // 1 CONCENTRATION (‰) - 2 cases à remplir
+            const permTypes = [
+                { q: "0,5‰", a_g: 0.5, a_ml: 1000, type: "‰" },
+                { q: "2‰", a_g: 2, a_ml: 1000, type: "‰" },
+                { q: "1‰", a_g: 1, a_ml: 1000, type: "‰" },
+                { q: "5‰", a_g: 5, a_ml: 1000, type: "‰" }
+            ];
+            conversions.push(permTypes[Math.floor(Math.random() * permTypes.length)]);
+
+            // CC en mL (faibles volumes)
+            const ccTypes = [
+                { q: "1 CC", a: 1, u: "mL" },
+                { q: "5 CC", a: 5, u: "mL" },
+                { q: "10 CC", a: 10, u: "mL" },
+                { q: "2,5 CC", a: 2.5, u: "mL" },
+                { q: "0,5 CC", a: 0.5, u: "mL" }
+            ];
+            conversions.push(ccTypes[Math.floor(Math.random() * ccTypes.length)]);
+
+            renderConversions(conversions);
+        }
+
+        function renderConversions(conversions) {
+            let html = '';
+            conversions.forEach((q, idx) => {
+                // Si c'est une concentration
+                if (q.type && (q.type === '%' || q.type === '‰')) {
+                    html += `
+                        <div class="input-group" style="border: 1px solid #ddd; padding: 12px; border-radius: 6px; margin: 10px 0; background: white;">
+                            <label><strong>Q${idx+1} :</strong> ${q.q}</label>
+                            <div class="input-pair-labels">
+                                <span>g</span>
+                                <span>mL</span>
+                            </div>
+                            <div class="input-pair">
+                                <input type="number" id="conv-${idx}-g" placeholder="g" step="0.01">
+                                <input type="number" id="conv-${idx}-ml" placeholder="mL" step="0.01">
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Conversions simples
+                    html += `
+                        <div class="input-group" style="border: 1px solid #ddd; padding: 12px; border-radius: 6px; margin: 10px 0; background: white;">
+                            <label><strong>Q${idx+1} :</strong> ${q.q} = ?</label>
+                            <div style="display: grid; grid-template-columns: 1fr 100px; gap: 10px;">
+                                <input type="number" id="conv-${idx}" placeholder="Réponse" step="0.01">
+                                <input type="text" value="${q.u}" readonly style="background: #f0f0f0; cursor: not-allowed; color: #666;">
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            document.getElementById('conv-questions').innerHTML = html;
+            document.getElementById('conv-result').innerHTML = '';
+            window.currentConvQuestions = conversions;
+        }
+
+        function checkAllConversions() {
+            const convs = window.currentConvQuestions;
+            let correct = 0, total = convs.length;
+            let html = '<div class="calculation-steps" style="margin-top: 15px;"><h4>📊 Résultats :</h4>';
+            
+            convs.forEach((q, idx) => {
+                let isCorrect = false;
+                
+                if (q.type && (q.type === '%' || q.type === '‰')) {
+                    const ansG = parseFloat(document.getElementById(`conv-${idx}-g`).value);
+                    const ansMl = parseFloat(document.getElementById(`conv-${idx}-ml`).value);
+                    isCorrect = Math.abs(ansG - q.a_g) < 0.05 && Math.abs(ansMl - q.a_ml) < 1;
+                    if (isCorrect) {
+                        correct++;
+                        html += `<div class="success-box">✅ Q${idx+1} Correct !</div>`;
+                    } else {
+                        html += `<div class="error-box">❌ Q${idx+1} Incorrect. Réponse : <strong>${q.a_g} g / ${q.a_ml} mL</strong></div>`;
+                    }
+                } else {
+                    const answer = parseFloat(document.getElementById(`conv-${idx}`).value);
+                    isCorrect = Math.abs(answer - q.a) < 0.01;
+                    if (isCorrect) {
+                        correct++;
+                        html += `<div class="success-box">✅ Q${idx+1} Correct !</div>`;
+                    } else {
+                        html += `<div class="error-box">❌ Q${idx+1} Incorrect. Réponse : <strong>${q.a} ${q.u}</strong></div>`;
+                    }
+                }
+            });
+            
+            html += '</div>';
+            document.getElementById('conv-result').innerHTML = html;
+            updateStats(correct, total);
+        }
+
+        function resetConversions() {
+            window.currentConvQuestions?.forEach((q, idx) => {
+                if (q.type && (q.type === '%' || q.type === '‰')) {
+                    const el1 = document.getElementById(`conv-${idx}-g`);
+                    const el2 = document.getElementById(`conv-${idx}-ml`);
+                    if (el1) el1.value = '';
+                    if (el2) el2.value = '';
+                } else {
+                    const el = document.getElementById(`conv-${idx}`);
+                    if (el) el.value = '';
+                }
+            });
+            document.getElementById('conv-result').innerHTML = '';
+        }
+
+        // ===== EX 2 : CONCENTRATION & DILUTION - CLARIFIÉ =====
+        function generateConcentration() {
+            const scenarios = [
+                {
+                    title: "Prélèvement d'une solution",
+                    description: "On doit prélever une certaine quantité d'une solution pour l'ajouter à un sac.",
+                    conc: 10, vol: 20, final: 100,
+                    q1: "Combien de g contient 20mL d'une solution à 10% ?",
+                    a1: 2,
+                    q2: "Si on ajoute ces 20mL à un sac qui en contient 100mL au total, quel % de concentration on obtient ?",
+                    a2: 2,
+                    q3: "Exprimé en g/mL, ça donne ?",
+                    a3: 0.02
+                },
+                {
+                    title: "Mélange de deux solutions",
+                    description: "On doit mélanger une solution concentrée dans un volume plus important.",
+                    conc: 5, vol: 50, final: 250,
+                    q1: "Combien de g contient 50mL d'une solution à 5% ?",
+                    a1: 2.5,
+                    q2: "On mélange ces 50mL dans un flacon qui contiendra 250mL au total. Quel % obtient-on ?",
+                    a2: 1,
+                    q3: "Exprimé en g/mL, ça donne ?",
+                    a3: 0.01
+                },
+                {
+                    title: "Dilution dans du sérum",
+                    description: "On dilue un médicament concentré dans du sérum physiologique.",
+                    conc: 7.46, vol: 15, final: 100,
+                    q1: "Combien de g contient 15mL de KCl à 7,46% ?",
+                    a1: 1.119,
+                    q2: "Dilué dans 100mL de sérum, quel % obtient-on ?",
+                    a2: 1.119,
+                    q3: "Exprimé en g/mL, ça donne ?",
+                    a3: 0.01119
+                }
+            ];
+
+            window.concData = scenarios[Math.floor(Math.random() * scenarios.length)];
+            document.getElementById('conc-scenario').innerHTML = `
+                <p><strong>Situation :</strong> ${window.concData.title}</p>
+                <p><em>${window.concData.description}</em></p>
+            `;
+            document.getElementById('conc-q1-label').textContent = window.concData.q1;
+            document.getElementById('conc-q2-label').textContent = window.concData.q2;
+            document.getElementById('conc-q3-label').textContent = window.concData.q3;
+            ['1', '2', '3'].forEach(n => {
+                document.getElementById(`conc-q${n}`).value = '';
+                document.getElementById(`conc-result${n}`).innerHTML = '';
+            });
+        }
+
+        function checkConcStep(step) {
+            const answers = { 1: window.concData['a1'], 2: window.concData['a2'], 3: window.concData['a3'] };
+            const answer = parseFloat(document.getElementById(`conc-q${step}`).value);
+            const isCorrect = Math.abs(answer - answers[step]) < 0.05;
+            const html = isCorrect ?
+                `<div class="success-box">✅ Correct ! <div class="formula">${answers[step].toFixed(4)}</div></div>` :
+                `<div class="error-box">❌ Incorrect. <div class="formula">${answers[step].toFixed(4)}</div></div>`;
+            document.getElementById(`conc-result${step}`).innerHTML = html;
+            updateStats(isCorrect ? 1 : 0, 1);
+        }
+
+        // ===== EX 3 : PERFUSION AVEC ANIMATION =====
+        let perfData = { baseVol: 1000, targets: {}, selected: {}, selectedList: [], totalVol: 1000 };
+
+        function generatePerfusion() {
+            // Ampoules réalistes avec g/ampoule
+            const ampouleDatabase = {
+                'NaCl': [
+                    { c: '10%', v: 10, g: 1 },
+                    { c: '20%', v: 10, g: 2 }
+                ],
+                'KCL': [
+                    { c: '10%', v: 10, g: 1 },
+                    { c: '20%', v: 10, g: 2 }
+                ],
+                'CaCl': [
+                    { c: '10%', v: 10, g: 1 }
+                ],
+                'Glucose': [
+                    { c: '5%', v: 20, g: 1 },
+                    { c: '10%', v: 20, g: 2 },
+                    { c: '30%', v: 20, g: 6 }
+                ],
+                'MgSO4': [
+                    { c: '10%', v: 10, g: 1 }
+                ]
+            };
+
+            perfData = { baseVol: [500, 1000][Math.floor(Math.random() * 2)], targets: {}, selected: {}, selectedList: [], totalVol: 0 };
+            perfData.totalVol = perfData.baseVol;
+
+            // Choisir 2-3 électrolytes aléatoires
+            const availableElecs = Object.keys(ampouleDatabase);
+            const numElec = Math.random() > 0.5 ? 2 : 3;
+            const selectedElecs = [...availableElecs].sort(() => Math.random() - 0.5).slice(0, numElec);
+
+            // Pour chaque électrolyte, générer un dosage qui peut être obtenu avec les ampoules
+            let html = `<p><strong>Base :</strong> ${perfData.baseVol}mL</p><p><strong>À ajouter :</strong></p><ul>`;
+            
+            selectedElecs.forEach(elec => {
+                const ampoules = ampouleDatabase[elec];
+                
+                // Choisir aléatoirement une ampoule et un nombre (1-3 ampoules)
+                const selectedAmpoule = ampoules[Math.floor(Math.random() * ampoules.length)];
+                const numAmpoules = Math.floor(Math.random() * 3) + 1; // 1, 2 ou 3
+                const targetGrams = selectedAmpoule.g * numAmpoules;
+                
+                perfData.targets[elec] = targetGrams;
+                perfData.selected[elec] = 0;
+                perfData[elec + '_ampoule'] = selectedAmpoule; // Garder l'ampoule pour la correction
+                
+                html += `<li>${elec} : ${targetGrams}g</li>`;
+            });
+            
+            html += '</ul>';
+            document.getElementById('perf-prescription').innerHTML = html;
+
+            // Afficher les ampoules disponibles
+            let ampoulesHtml = '';
+            selectedElecs.forEach(elec => {
+                ampoulesHtml += `<h4 style="color: #667eea; margin-top: 15px;">${elec}</h4><div class="ampoule-grid">`;
+                const ampoules = ampouleDatabase[elec];
+                
+                // Afficher chaque type d'ampoule 2-3 fois
+                ampoules.forEach(opt => {
+                    for (let i = 0; i < 2; i++) {
+                        ampoulesHtml += `<div class="ampoule" onclick="selectPerfAmpoule('${elec}', ${opt.g}, ${opt.v}, '${opt.c}')"><strong>${opt.c}</strong><br>${opt.v}mL</div>`;
+                    }
+                });
+                ampoulesHtml += '</div>';
+            });
+            
+            document.getElementById('perf-ampoules-section').innerHTML = ampoulesHtml;
+            updatePerfusionDisplay();
+        }
+
+        function selectPerfAmpoule(type, grams, volume, conc) {
+            perfData.selected[type] += grams;
+            perfData.totalVol += volume;
+            perfData.selectedList.push({ type, grams, volume, conc });
+            updatePerfusionDisplay();
+            renderSelectedAmpoules();
+        }
+
+        function renderSelectedAmpoules() {
+            if (perfData.selectedList.length === 0) {
+                document.getElementById('perf-selected-ampoules').innerHTML = '<p style="color: #999;">Aucune ampoule sélectionnée</p>';
+                return;
+            }
+            let html = '<ul style="margin-left: 20px;">';
+            perfData.selectedList.forEach(a => {
+                html += `<li>${a.type} ${a.conc} : ${a.volume}mL</li>`;
+            });
+            html += '</ul>';
+            document.getElementById('perf-selected-ampoules').innerHTML = html;
+        }
+
+        function updatePerfusionDisplay() {
+            const fillPercent = Math.min(100, (perfData.totalVol / 2000) * 100);
+            const liquid = document.getElementById('perf-liquid');
+            liquid.style.height = fillPercent + '%';
+            document.getElementById('perf-vol-text').textContent = perfData.totalVol + 'mL';
+
+            let hasError = false;
+            Object.keys(perfData.targets).forEach(type => {
+                const diff = Math.abs((perfData.selected[type] || 0) - perfData.targets[type]);
+                if (diff > 0.1) hasError = true;
+            });
+
+            liquid.classList.remove('correct', 'warning', 'error');
+            if (perfData.totalVol === perfData.baseVol) {
+                liquid.classList.add('warning');
+            } else if (hasError) {
+                liquid.classList.add('error');
+            } else {
+                liquid.classList.add('correct');
+            }
+        }
+
+        function validatePerfusion() {
+            let isCorrect = true;
+            let detailedFeedback = '<div style="margin-top: 15px;">';
+            
+            // Vérifier les dosages de chaque substance
+            detailedFeedback += '<h4 style="color: #667eea; margin-bottom: 12px;">📊 Détails de la Préparation :</h4>';
+            detailedFeedback += '<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 12px;">';
+            
+            Object.keys(perfData.targets).forEach(type => {
+                const target = perfData.targets[type];
+                const selected = perfData.selected[type] || 0;
+                const diff = Math.abs(selected - target);
+                const isSubCorrect = diff <= 0.01;
+                
+                if (!isSubCorrect) isCorrect = false;
+                
+                const status = isSubCorrect ? '✅' : '❌';
+                const ampoule = perfData[type + '_ampoule'];
+                const nbAmpoules = target / ampoule.g;
+                
+                detailedFeedback += `<div style="margin: 12px 0; padding: 12px; background: ${isSubCorrect ? '#d4edda' : '#f8d7da'}; border-radius: 6px; border-left: 4px solid ${isSubCorrect ? '#28a745' : '#dc3545'};">
+                    <strong>${status} ${type}</strong><br>
+                    Cible : <strong>${target}g</strong><br>
+                    Sélectionné : <strong>${selected.toFixed(2)}g</strong><br>
+                    <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; border-left: 3px solid #28a745;">
+                        <strong style="color: #28a745;">✓ Solution attendue :</strong><br>
+                        <strong>${nbAmpoules} × ampoule ${type} ${ampoule.c} (${ampoule.v}mL)</strong><br>
+                        Dosage : ${nbAmpoules} × ${ampoule.g}g = <strong>${(nbAmpoules * ampoule.g).toFixed(2)}g</strong>
+                    </div>
+                </div>`;
+            });
+            
+            detailedFeedback += '</div>';
+            
+            // Vérifier le volume total
+            const volDiff = Math.abs(perfData.totalVol - perfData.baseVol);
+            const volCorrect = volDiff <= 10;
+            
+            detailedFeedback += '<h4 style="color: #667eea; margin: 12px 0 12px 0;">💧 Volume :</h4>';
+            detailedFeedback += `<div style="background: ${volCorrect ? '#d4edda' : '#f8d7da'}; padding: 12px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid ${volCorrect ? '#28a745' : '#ffc107'};">
+                ${volCorrect ? '✅' : '⚠️'} <strong>Volume total : ${perfData.totalVol}mL</strong> (attendu : ${perfData.baseVol}mL)
+            </div>`;
+            
+            if (!volCorrect) isCorrect = false;
+            
+            // Afficher le résultat final
+            if (isCorrect) {
+                detailedFeedback += '<div class="success-box" style="margin-top: 15px;"><h4>✅ Préparation Correcte !</h4><p>Tous les dosages et le volume sont conformes.</p></div>';
+            } else {
+                detailedFeedback += '<div class="error-box" style="margin-top: 15px;"><h4>❌ Erreur de Dosage</h4><p>Vérifiez les dosages ou le volume total et réessayez.</p></div>';
+            }
+            
+            detailedFeedback += '</div>';
+            
+            document.getElementById('perf-feedback').innerHTML = detailedFeedback;
+            updateStats(isCorrect ? 1 : 0, 1);
+        }
+
+        function resetPerfusion() {
+            Object.keys(perfData.targets).forEach(type => perfData.selected[type] = 0);
+            perfData.selectedList = [];
+            perfData.totalVol = perfData.baseVol;
+            updatePerfusionDisplay();
+            renderSelectedAmpoules();
+            document.getElementById('perf-feedback').innerHTML = '';
+        }
+
+        // ===== EX 4 : ÉLECTROLYTES MULTI-NIVEAUX =====
+        function setDifficulty(level) {
+            currentDifficulty = level;
+            document.querySelectorAll('.diff-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            generateElectrolytes();
+        }
+
+        function generateElectrolytes() {
+            const all = [
+                { name: 'NaCl', c: 10, v: 10, d: 5, g: 1 },
+                { name: 'KCL', c: 7.46, v: 10, d: 2, g: 0.746 },
+                { name: 'CaCl', c: 10, v: 10, d: 2, g: 1 },
+                { name: 'Glucose', c: 30, v: 20, d: 30, g: 6 },
+                { name: 'MgSO4', c: 10, v: 10, d: 2, g: 1 }
+            ];
+
+            const numElec = { easy: 2, medium: 3, hard: 4 }[currentDifficulty];
+            window.elecList = [...all].sort(() => Math.random() - 0.5).slice(0, numElec);
+
+            let scenarioHTML = '<p><strong>Prescription :</strong></p><ul>';
+            window.elecList.forEach(e => scenarioHTML += `<li>${e.name} ${e.c}% : ${e.d}g</li>`);
+            scenarioHTML += '</ul>';
+            document.getElementById('elec-scenario').innerHTML = scenarioHTML;
+
+            let questionsHTML = '';
+            window.elecList.forEach((e, idx) => {
+                questionsHTML += `
+                    <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 12px 0;">
+                        <h4 style="color: #667eea;">${e.name} ${e.c}%</h4>
+                        <div class="input-group">
+                            <label>Q1 : g dans ${e.v}mL ?</label>
+                            <input type="number" id="elec-${idx}-1" step="0.01">
+                            <button class="btn-success btn-small" onclick="checkElecQ(${idx},1)">✓</button>
+                        </div>
+                        <div id="elec-${idx}-r1"></div>
+                        <div class="input-group">
+                            <label>Q2 : mL pour ${e.d}g ?</label>
+                            <input type="number" id="elec-${idx}-2" step="0.01">
+                            <button class="btn-success btn-small" onclick="checkElecQ(${idx},2)">✓</button>
+                        </div>
+                        <div id="elec-${idx}-r2"></div>
+                        <div class="input-group">
+                            <label>Q3 : Ampoules ?</label>
+                            <input type="number" id="elec-${idx}-3" step="0.1">
+                            <button class="btn-success btn-small" onclick="checkElecQ(${idx},3)">✓</button>
+                        </div>
+                        <div id="elec-${idx}-r3"></div>
+                    </div>
+                `;
+            });
+            document.getElementById('elec-questions-container').innerHTML = questionsHTML;
+        }
+
+        function checkElecQ(idx, q) {
+            const e = window.elecList[idx];
+            const ans = parseFloat(document.getElementById(`elec-${idx}-${q}`).value);
+            let correct = false, val = 0;
+
+            if (q === 1) { val = (e.c * e.v) / 100; correct = Math.abs(ans - val) < 0.05; }
+            else if (q === 2) { val = (e.d * 100) / e.c; correct = Math.abs(ans - val) < 0.5; }
+            else { val = Math.ceil(((e.d * 100) / e.c) / e.v); correct = Math.abs(ans - val) < 0.1; }
+
+            const html = correct ?
+                `<div class="success-box">✅ Correct !</div>` :
+                `<div class="error-box">❌ Incorrect. Attendu : ${val.toFixed(2)}</div>`;
+            document.getElementById(`elec-${idx}-r${q}`).innerHTML = html;
+            updateStats(correct ? 1 : 0, 1);
+        }
+
+        // ===== EX 5 : DÉBIT =====
+        function generateDebit() {
+            window.debitData = {
+                volume: [500, 750, 1000, 1500, 2000][Math.floor(Math.random() * 5)],
+                duration: [6, 8, 12, 24][Math.floor(Math.random() * 4)]
+            };
+            window.debitData.gouttes = window.debitData.volume * 20;
+            window.debitData.minutes = window.debitData.duration * 60;
+            window.debitData.debit = Math.round(window.debitData.gouttes / window.debitData.minutes);
+
+            document.getElementById('debit-vol').textContent = window.debitData.volume;
+            document.getElementById('debit-dur').textContent = window.debitData.duration;
+            ['1', '2', '3'].forEach(n => {
+                document.getElementById(`debit-q${n}`).value = '';
+                document.getElementById(`debit-result${n}`).innerHTML = '';
+            });
+        }
+
+        function checkDebitStep(step) {
+            const ans = parseInt(document.getElementById(`debit-q${step}`).value);
+            let correct = false, val = 0, formula = '';
+
+            if (step === 1) {
+                val = window.debitData.gouttes;
+                correct = ans === val;
+                formula = `${window.debitData.volume} × 20 = ${val}`;
+            } else if (step === 2) {
+                val = window.debitData.minutes;
+                correct = ans === val;
+                formula = `${window.debitData.duration} × 60 = ${val}`;
+            } else {
+                val = window.debitData.debit;
+                correct = ans === val;
+                formula = `${window.debitData.gouttes} ÷ ${window.debitData.minutes} ≈ ${val}`;
+            }
+
+            const html = correct ?
+                `<div class="success-box">✅ Correct !<div class="formula">${formula}</div></div>` :
+                `<div class="error-box">❌ Incorrect. Attendu : ${val}<div class="formula">${formula}</div></div>`;
+            document.getElementById(`debit-result${step}`).innerHTML = html;
+            updateStats(correct ? 1 : 0, 1);
+        }
+
+        // ===== UTILITAIRES =====
+        function updateStats(correct, total) {
+            stats.correct += correct;
+            stats.total += total;
+            const rate = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+            document.getElementById('correct-count').textContent = stats.correct;
+            document.getElementById('total-count').textContent = stats.total;
+            document.getElementById('success-rate').textContent = rate + '%';
+        }
+
+        function clearNotes() {
+            if (confirm('Effacer le bloc-notes ?')) document.getElementById('notes').value = '';
+        }
+
+        // ===== INITIALISATION =====
+        window.addEventListener('load', () => {
+            generateConversions();
+            generateConcentration();
+            generatePerfusion();
+            generateElectrolytes();
+            generateDebit();
+        });
+    </script>
+</body>
+</html>
