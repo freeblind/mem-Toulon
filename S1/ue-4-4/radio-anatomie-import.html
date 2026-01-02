@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomie Interactive - Apprentissage et Évaluation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .import-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .import-section h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .import-btn {
+            padding: 12px 24px;
+            background: #ffc107;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .import-btn:hover {
+            background: #e0a800;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .content {
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .schema-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .schema-item {
+            padding: 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .schema-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .schema-item.active {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .schema-item-name {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .schema-item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .schema-item-btn {
+            padding: 4px 8px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .schema-item-btn:hover {
+            background: #ee5a6f;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .new-schema-btn {
+            width: 100%;
+            padding: 10px;
+            background: #26de81;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .new-schema-btn:hover {
+            background: #20bf6b;
+        }
+
+        .exam-schema-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .exam-schema-option {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .exam-schema-option:hover {
+            border-color: #667eea;
+        }
+
+        .exam-schema-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        .image-upload-zone {
+            border: 3px dashed #ddd;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload-zone:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .image-upload-zone.has-image {
+            border-style: solid;
+            border-color: #26de81;
+            padding: 0;
+            position: relative;
+        }
+
+        .schema-image {
+            width: 100%;
+            max-width: 100%;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .marker-container {
+            position: relative;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: move;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .marker.selected {
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.8), 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .arrow-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .marker-controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .marker-controls h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .control-group input[type="text"],
+        .control-group input[type="color"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ee5a6f;
+        }
+
+        .btn-success {
+            background: #26de81;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #20bf6b;
+        }
+
+        .markers-list {
+            max-height: 300px;
+            overflow-y: auto;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .marker-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .marker-item:hover {
+            border-color: #667eea;
+        }
+
+        .marker-item.selected {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .exam-container {
+            position: relative;
+        }
+
+        .exam-marker {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .exam-marker:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .exam-marker.correct {
+            background: #26de81;
+            animation: pulse 0.5s;
+        }
+
+        .exam-marker.incorrect {
+            background: #ff4757;
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+            25% { transform: translate(-50%, -50%) translateX(-10px); }
+            75% { transform: translate(-50%, -50%) translateX(10px); }
+        }
+
+        .answer-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .answer-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .exam-score {
+            background: #26de81;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .exam-prompt {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Anatomie Interactive - Formation MEM</h1>
+            <p>Apprentissage et évaluation des schémas anatomiques</p>
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="switchMode('create')">✏️ Création</button>
+                <button class="mode-btn" onclick="switchMode('exam-fill')">📝 Test - Compléter</button>
+                <button class="mode-btn" onclick="switchMode('exam-click')">👆 Test - Cliquer</button>
+            </div>
+        </div>
+
+        <!-- Section d'import JSON -->
+        <div class="import-section" id="importSection">
+            <h3>📥 Importer vos schémas depuis le fichier JSON</h3>
+            <p style="margin-bottom: 15px;">Cliquez sur le bouton ci-dessous pour charger votre fichier de sauvegarde</p>
+            <input type="file" id="jsonFileInput" accept=".json" style="display: none;">
+            <button class="import-btn" onclick="document.getElementById('jsonFileInput').click()">
+                📂 Choisir le fichier JSON
+            </button>
+            <div id="importStatus" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="content">
+            <div class="sidebar">
+                <button class="new-schema-btn" onclick="createNewSchema()">➕ Nouveau schéma</button>
+                <h3>Mes schémas</h3>
+                <div class="schema-list" id="schemaList"></div>
+            </div>
+
+            <div class="main-content">
+                <!-- Mode Création -->
+                <div id="createMode" class="mode-content active">
+                    <div class="image-upload-zone" id="uploadZone" onclick="document.getElementById('imageInput').click()">
+                        <p>📁 Cliquez pour charger une image</p>
+                        <small>Formats acceptés : JPG, PNG, WebP</small>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+
+                    <div id="editorContainer" style="display: none;">
+                        <div class="marker-container" id="markerContainer">
+                            <img class="schema-image" id="schemaImage" alt="Schéma anatomique">
+                            <svg class="arrow-svg" id="arrowSvg"></svg>
+                        </div>
+
+                        <div class="marker-controls">
+                            <h3>Marqueurs</h3>
+                            <div class="markers-list" id="markersList"></div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn btn-success" onclick="addMarker()">➕ Ajouter un marqueur</button>
+                                <button class="btn btn-primary" onclick="saveCurrentSchema()">💾 Enregistrer</button>
+                            </div>
+
+                            <div id="markerEditor" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 2px solid #ddd;">
+                                <h3>Éditer le marqueur</h3>
+                                <div class="control-group">
+                                    <label>Numéro</label>
+                                    <input type="text" id="markerNumber" readonly>
+                                </div>
+                                <div class="control-group">
+                                    <label>Label</label>
+                                    <input type="text" id="markerLabel" onchange="updateLabel()">
+                                </div>
+                                <div class="control-group">
+                                    <label>Couleur</label>
+                                    <input type="color" id="markerColor" onchange="updateColor()">
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="btn btn-primary" onclick="addArrow()">➕ Ajouter une flèche</button>
+                                    <button class="btn btn-danger" onclick="removeMarker()">🗑️ Supprimer</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mode Test - Compléter -->
+                <div id="examFillMode" class="mode-content">
+                    <div class="exam-schema-selector" id="examSchemaSelector"></div>
+                    <div id="scoreFill" class="exam-score" style="display: none;"></div>
+                    <div id="examContainerFill"></div>
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="startExamFill()">🎯 Démarrer le test</button>
+                        <button class="btn btn-primary" onclick="checkAnswersFill()">✅ Vérifier</button>
+                        <button class="btn btn-danger" onclick="resetExamFill()">🔄 Recommencer</button>
+                    </div>
+                </div>
+
+                <!-- Mode Test - Cliquer -->
+                <div id="examClickMode" class="mode-content">
+                    <div class="exam-schema-selector" id="examClickSchemaSelector"></div>
+                    <div id="currentTermPrompt" class="exam-prompt" style="display: none;"></div>
+                    <div id="scoreClick" class="exam-score" style="display: none;"></div>
+                    <div id="examContainerClick"></div>
+                    <div class="action-buttons">
+                        <button class="btn btn-success" onclick="startExamClick()">🎯 Démarrer le test</button>
+                        <button class="btn btn-danger" onclick="resetExamClick()">🔄 Recommencer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration du stockage
+        const STORAGE_KEY = 'anatomie_schemas';
+        let schemas = [];
+        let currentSchemaId = null;
+        let selectedMarkerId = null;
+        let currentMode = 'create';
+        let selectedExamSchemas = [];
+        let examState = {
+            fill: { answers: {}, score: 0, total: 0 },
+            click: { currentIndex: 0, score: 0, total: 0, shuffledMarkers: [] }
+        };
+
+        // IMPORT JSON
+        document.getElementById('jsonFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedSchemas = JSON.parse(event.target.result);
+                    
+                    if (!Array.isArray(importedSchemas)) {
+                        throw new Error('Format invalide');
+                    }
+
+                    schemas = importedSchemas;
+                    saveData();
+                    renderSchemaList();
+                    
+                    document.getElementById('importStatus').innerHTML = 
+                        `<p style="color: #28a745; font-weight: bold;">✅ ${schemas.length} schéma(s) importé(s) avec succès !</p>`;
+                    
+                    // Masquer la section d'import après succès
+                    setTimeout(() => {
+                        document.getElementById('importSection').style.display = 'none';
+                    }, 3000);
+                    
+                } catch (error) {
+                    document.getElementById('importStatus').innerHTML = 
+                        `<p style="color: #dc3545; font-weight: bold;">❌ Erreur : ${error.message}</p>`;
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Fonction de stockage robuste
+        function saveData() {
+            try {
+                const data = JSON.stringify(schemas);
+                localStorage.setItem(STORAGE_KEY, data);
+                return true;
+            } catch (e) {
+                console.error('Erreur de sauvegarde:', e);
+                alert('Erreur lors de la sauvegarde. Veuillez vérifier l\'espace disponible.');
+                return false;
+            }
+        }
+
+        function loadData() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                if (data) {
+                    schemas = JSON.parse(data);
+                } else {
+                    schemas = [];
+                }
+            } catch (e) {
+                console.error('Erreur de chargement:', e);
+                schemas = [];
+            }
+        }
+
+        // Gestion des modes
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            
+            if (mode === 'create') {
+                document.getElementById('createMode').classList.add('active');
+            } else if (mode === 'exam-fill') {
+                document.getElementById('examFillMode').classList.add('active');
+                renderExamSchemaSelector('examSchemaSelector');
+            } else if (mode === 'exam-click') {
+                document.getElementById('examClickMode').classList.add('active');
+                renderExamSchemaSelector('examClickSchemaSelector');
+            }
+        }
+
+        // Gestion des schémas
+        function createNewSchema() {
+            const name = prompt('Nom du nouveau schéma:', 'Schéma ' + (schemas.length + 1));
+            if (!name) return;
+
+            const schema = {
+                id: Date.now(),
+                name: name,
+                image: null,
+                markers: []
+            };
+            
+            schemas.push(schema);
+            saveData();
+            renderSchemaList();
+            loadSchema(schema.id);
+        }
+
+        function loadSchema(schemaId) {
+            currentSchemaId = schemaId;
+            const schema = schemas.find(s => s.id === schemaId);
+            if (!schema) return;
+
+            document.querySelectorAll('.schema-item').forEach(item => {
+                item.classList.toggle('active', parseInt(item.dataset.id) === schemaId);
+            });
+
+            if (schema.image) {
+                const uploadZone = document.getElementById('uploadZone');
+                uploadZone.classList.add('has-image');
+                uploadZone.innerHTML = '';
+                
+                const img = document.getElementById('schemaImage');
+                img.src = schema.image;
+                
+                document.getElementById('editorContainer').style.display = 'block';
+                renderMarkers();
+            } else {
+                document.getElementById('editorContainer').style.display = 'none';
+            }
+        }
+
+        function saveCurrentSchema() {
+            if (!currentSchemaId) return;
+            
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            if (saveData()) {
+                alert('✅ Schéma enregistré avec succès !');
+            }
+        }
+
+        function deleteSchema(schemaId) {
+            if (!confirm('Supprimer ce schéma ?')) return;
+            
+            schemas = schemas.filter(s => s.id !== schemaId);
+            saveData();
+            
+            if (currentSchemaId === schemaId) {
+                currentSchemaId = null;
+                document.getElementById('editorContainer').style.display = 'none';
+            }
+            
+            renderSchemaList();
+        }
+
+        function renameSchema(schemaId) {
+            const schema = schemas.find(s => s.id === schemaId);
+            if (!schema) return;
+            
+            const newName = prompt('Nouveau nom:', schema.name);
+            if (newName && newName !== schema.name) {
+                schema.name = newName;
+                saveData();
+                renderSchemaList();
+            }
+        }
+
+        function renderSchemaList() {
+            const list = document.getElementById('schemaList');
+            list.innerHTML = '';
+            
+            schemas.forEach(schema => {
+                const item = document.createElement('div');
+                item.className = 'schema-item';
+                item.dataset.id = schema.id;
+                
+                item.innerHTML = `
+                    <span class="schema-item-name">${schema.name}</span>
+                    <div class="schema-item-actions">
+                        <button class="schema-item-btn" onclick="event.stopPropagation(); renameSchema(${schema.id})" title="Renommer">✏️</button>
+                        <button class="schema-item-btn" onclick="event.stopPropagation(); deleteSchema(${schema.id})" title="Supprimer">🗑️</button>
+                    </div>
+                `;
+                
+                item.onclick = () => loadSchema(schema.id);
+                list.appendChild(item);
+            });
+        }
+
+        // Gestion de l'image
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const schema = schemas.find(s => s.id === currentSchemaId);
+                if (schema) {
+                    schema.image = event.target.result;
+                    saveData();
+                    loadSchema(currentSchemaId);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Gestion des marqueurs
+        function addMarker() {
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            const marker = {
+                id: Date.now(),
+                number: schema.markers.length + 1,
+                x: 50,
+                y: 50,
+                label: 'Structure ' + (schema.markers.length + 1),
+                color: '#667eea',
+                arrows: []
+            };
+
+            schema.markers.push(marker);
+            saveData();
+            renderMarkers();
+        }
+
+        function removeMarker() {
+            if (!selectedMarkerId) return;
+            
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            schema.markers = schema.markers.filter(m => m.id !== selectedMarkerId);
+            schema.markers.forEach((m, i) => m.number = i + 1);
+            
+            selectedMarkerId = null;
+            document.getElementById('markerEditor').style.display = 'none';
+            saveData();
+            renderMarkers();
+        }
+
+        function updateLabel() {
+            if (!selectedMarkerId) return;
+            
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            const marker = schema.markers.find(m => m.id === selectedMarkerId);
+            if (marker) {
+                marker.label = document.getElementById('markerLabel').value;
+                renderMarkers();
+            }
+        }
+
+        function updateColor() {
+            if (!selectedMarkerId) return;
+            
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            const marker = schema.markers.find(m => m.id === selectedMarkerId);
+            if (marker) {
+                marker.color = document.getElementById('markerColor').value;
+                renderMarkers();
+            }
+        }
+
+        function addArrow() {
+            if (!selectedMarkerId) return;
+            
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            const marker = schema.markers.find(m => m.id === selectedMarkerId);
+            if (!marker) return;
+
+            const arrow = {
+                id: Date.now(),
+                targetX: marker.x + 10,
+                targetY: marker.y + 10
+            };
+
+            marker.arrows.push(arrow);
+            saveData();
+            renderMarkers();
+        }
+
+        function removeArrow(markerId, arrowId) {
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            const marker = schema.markers.find(m => m.id === markerId);
+            if (!marker) return;
+
+            marker.arrows = marker.arrows.filter(a => a.id !== arrowId);
+            saveData();
+            renderMarkers();
+        }
+
+        function renderMarkers() {
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            const container = document.getElementById('markerContainer');
+            const svg = document.getElementById('arrowSvg');
+            const list = document.getElementById('markersList');
+            
+            container.querySelectorAll('.marker').forEach(m => m.remove());
+            svg.innerHTML = '';
+            list.innerHTML = '';
+
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            schema.markers.forEach(marker => {
+                marker.arrows.forEach((arrow, idx) => {
+                    const markerDef = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                    markerDef.setAttribute('id', `arrowhead-${marker.id}-${idx}`);
+                    markerDef.setAttribute('markerWidth', '10');
+                    markerDef.setAttribute('markerHeight', '10');
+                    markerDef.setAttribute('refX', '9');
+                    markerDef.setAttribute('refY', '3');
+                    markerDef.setAttribute('orient', 'auto');
+                    
+                    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    polygon.setAttribute('points', '0 0, 10 3, 0 6');
+                    polygon.setAttribute('fill', marker.color);
+                    
+                    markerDef.appendChild(polygon);
+                    defs.appendChild(markerDef);
+                });
+            });
+            svg.appendChild(defs);
+
+            schema.markers.forEach(marker => {
+                marker.arrows.forEach((arrow, idx) => {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', marker.x + '%');
+                    line.setAttribute('y1', marker.y + '%');
+                    line.setAttribute('x2', arrow.targetX + '%');
+                    line.setAttribute('y2', arrow.targetY + '%');
+                    line.setAttribute('stroke', marker.color);
+                    line.setAttribute('stroke-width', '3');
+                    line.setAttribute('marker-end', `url(#arrowhead-${marker.id}-${idx})`);
+                    svg.appendChild(line);
+                });
+            });
+
+            schema.markers.forEach(marker => {
+                const markerEl = document.createElement('div');
+                markerEl.className = 'marker' + (selectedMarkerId === marker.id ? ' selected' : '');
+                markerEl.textContent = marker.number;
+                markerEl.style.left = marker.x + '%';
+                markerEl.style.top = marker.y + '%';
+                markerEl.style.background = marker.color;
+                markerEl.dataset.id = marker.id;
+                
+                markerEl.onclick = () => selectMarker(marker.id);
+                
+                let isDragging = false;
+                markerEl.onmousedown = (e) => {
+                    isDragging = true;
+                    e.preventDefault();
+                };
+                
+                document.onmousemove = (e) => {
+                    if (!isDragging) return;
+                    
+                    const rect = container.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    
+                    marker.x = Math.max(0, Math.min(100, x));
+                    marker.y = Math.max(0, Math.min(100, y));
+                    
+                    renderMarkers();
+                };
+                
+                document.onmouseup = () => {
+                    if (isDragging) {
+                        isDragging = false;
+                        saveData();
+                    }
+                };
+                
+                container.appendChild(markerEl);
+
+                const listItem = document.createElement('div');
+                listItem.className = 'marker-item' + (selectedMarkerId === marker.id ? ' selected' : '');
+                listItem.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: ${marker.color}; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${marker.number}</div>
+                        <span>${marker.label}</span>
+                    </div>
+                `;
+                listItem.onclick = () => selectMarker(marker.id);
+                list.appendChild(listItem);
+            });
+        }
+
+        function selectMarker(markerId) {
+            selectedMarkerId = markerId;
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (!schema) return;
+
+            const marker = schema.markers.find(m => m.id === markerId);
+            if (!marker) return;
+
+            document.getElementById('markerNumber').value = marker.number;
+            document.getElementById('markerLabel').value = marker.label;
+            document.getElementById('markerColor').value = marker.color;
+            document.getElementById('markerEditor').style.display = 'block';
+            
+            renderMarkers();
+        }
+
+        // Tests
+        function renderExamSchemaSelector(containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '<div style="width: 100%; font-weight: 600; margin-bottom: 10px;">Sélectionner les schémas à tester:</div>';
+            
+            schemas.forEach(schema => {
+                if (!schema.image || schema.markers.length === 0) return;
+                
+                const option = document.createElement('div');
+                option.className = 'exam-schema-option';
+                option.textContent = schema.name;
+                option.onclick = () => toggleExamSchema(schema.id, containerId);
+                option.dataset.id = schema.id;
+                container.appendChild(option);
+            });
+        }
+
+        function toggleExamSchema(schemaId, containerId) {
+            const idx = selectedExamSchemas.indexOf(schemaId);
+            if (idx > -1) {
+                selectedExamSchemas.splice(idx, 1);
+            } else {
+                selectedExamSchemas.push(schemaId);
+            }
+            
+            document.querySelectorAll(`#${containerId} .exam-schema-option`).forEach(opt => {
+                opt.classList.toggle('selected', selectedExamSchemas.includes(parseInt(opt.dataset.id)));
+            });
+        }
+
+        function startExamFill() {
+            if (selectedExamSchemas.length === 0) {
+                alert('Veuillez sélectionner au moins un schéma');
+                return;
+            }
+
+            const container = document.getElementById('examContainerFill');
+            container.innerHTML = '';
+            examState.fill.answers = {};
+            examState.fill.total = 0;
+            document.getElementById('scoreFill').style.display = 'none';
+
+            selectedExamSchemas.forEach(schemaId => {
+                const schema = schemas.find(s => s.id === schemaId);
+                if (!schema) return;
+
+                const schemaDiv = document.createElement('div');
+                schemaDiv.style.marginBottom = '30px';
+                schemaDiv.innerHTML = `<h3>${schema.name}</h3>`;
+
+                const markerContainer = document.createElement('div');
+                markerContainer.className = 'marker-container';
+                markerContainer.style.marginBottom = '20px';
+
+                const img = document.createElement('img');
+                img.src = schema.image;
+                img.className = 'schema-image';
+                markerContainer.appendChild(img);
+
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'arrow-svg');
+
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                schema.markers.forEach(marker => {
+                    marker.arrows.forEach((arrow, idx) => {
+                        const markerDef = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                        markerDef.setAttribute('id', `exam-arrow-${marker.id}-${idx}`);
+                        markerDef.setAttribute('markerWidth', '10');
+                        markerDef.setAttribute('markerHeight', '10');
+                        markerDef.setAttribute('refX', '9');
+                        markerDef.setAttribute('refY', '3');
+                        markerDef.setAttribute('orient', 'auto');
+                        
+                        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        polygon.setAttribute('points', '0 0, 10 3, 0 6');
+                        polygon.setAttribute('fill', marker.color);
+                        
+                        markerDef.appendChild(polygon);
+                        defs.appendChild(markerDef);
+                    });
+                });
+                svg.appendChild(defs);
+
+                schema.markers.forEach(marker => {
+                    marker.arrows.forEach((arrow, idx) => {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', marker.x + '%');
+                        line.setAttribute('y1', marker.y + '%');
+                        line.setAttribute('x2', arrow.targetX + '%');
+                        line.setAttribute('y2', arrow.targetY + '%');
+                        line.setAttribute('stroke', marker.color);
+                        line.setAttribute('stroke-width', '3');
+                        line.setAttribute('marker-end', `url(#exam-arrow-${marker.id}-${idx})`);
+                        svg.appendChild(line);
+                    });
+
+                    const markerEl = document.createElement('div');
+                    markerEl.className = 'exam-marker';
+                    markerEl.textContent = marker.number;
+                    markerEl.style.left = marker.x + '%';
+                    markerEl.style.top = marker.y + '%';
+                    markerEl.style.background = marker.color;
+                    markerEl.style.cursor = 'default';
+                    markerContainer.appendChild(markerEl);
+                });
+
+                markerContainer.appendChild(svg);
+                schemaDiv.appendChild(markerContainer);
+
+                const answersDiv = document.createElement('div');
+                schema.markers.forEach(marker => {
+                    examState.fill.total++;
+                    const answerDiv = document.createElement('div');
+                    answerDiv.className = 'answer-input';
+                    answerDiv.innerHTML = `
+                        <strong style="min-width: 30px;">${marker.number}.</strong>
+                        <input type="text" data-marker="${marker.id}" data-schema="${schemaId}" placeholder="Entrez le nom de la structure">
+                    `;
+                    answersDiv.appendChild(answerDiv);
+                });
+
+                schemaDiv.appendChild(answersDiv);
+                container.appendChild(schemaDiv);
+            });
+        }
+
+        function checkAnswersFill() {
+            examState.fill.score = 0;
+            
+            document.querySelectorAll('#examContainerFill input[type="text"]').forEach(input => {
+                const markerId = parseInt(input.dataset.marker);
+                const schemaId = parseInt(input.dataset.schema);
+                const schema = schemas.find(s => s.id === schemaId);
+                if (!schema) return;
+
+                const marker = schema.markers.find(m => m.id === markerId);
+                if (!marker) return;
+
+                const userAnswer = input.value.trim().toLowerCase();
+                const correctAnswer = marker.label.toLowerCase();
+
+                if (userAnswer === correctAnswer) {
+                    examState.fill.score++;
+                    input.style.borderColor = '#26de81';
+                    input.style.background = '#e8f5e9';
+                } else {
+                    input.style.borderColor = '#ff4757';
+                    input.style.background = '#ffebee';
+                    input.value = `${input.value} ➜ ${marker.label}`;
+                }
+            });
+
+            const percentage = ((examState.fill.score / examState.fill.total) * 100).toFixed(0);
+            document.getElementById('scoreFill').innerHTML = `Score: ${examState.fill.score} / ${examState.fill.total} (${percentage}%)`;
+            document.getElementById('scoreFill').style.display = 'block';
+        }
+
+        function resetExamFill() {
+            startExamFill();
+        }
+
+        function startExamClick() {
+            if (selectedExamSchemas.length === 0) {
+                alert('Veuillez sélectionner au moins un schéma');
+                return;
+            }
+
+            examState.click.currentIndex = 0;
+            examState.click.score = 0;
+            examState.click.shuffledMarkers = [];
+
+            selectedExamSchemas.forEach(schemaId => {
+                const schema = schemas.find(s => s.id === schemaId);
+                if (!schema) return;
+
+                schema.markers.forEach(marker => {
+                    examState.click.shuffledMarkers.push({
+                        ...marker,
+                        schemaId: schemaId,
+                        schemaName: schema.name,
+                        schemaImage: schema.image,
+                        displayNumber: examState.click.shuffledMarkers.length + 1
+                    });
+                });
+            });
+
+            examState.click.shuffledMarkers.sort(() => Math.random() - 0.5);
+            examState.click.total = examState.click.shuffledMarkers.length;
+
+            document.getElementById('scoreClick').style.display = 'none';
+            loadExamClick();
+        }
+
+        function loadExamClick() {
+            const container = document.getElementById('examContainerClick');
+            const currentMarker = examState.click.shuffledMarkers[examState.click.currentIndex];
+            
+            if (!currentMarker) {
+                finishExamClick();
+                return;
+            }
+
+            const schema = schemas.find(s => s.id === currentMarker.schemaId);
+            if (!schema) return;
+
+            document.getElementById('currentTermPrompt').innerHTML = `
+                Question ${examState.click.currentIndex + 1} / ${examState.click.total}<br>
+                <strong>Cliquez sur : ${currentMarker.label}</strong>
+            `;
+            document.getElementById('currentTermPrompt').style.display = 'block';
+
+            container.innerHTML = `<h3>${currentMarker.schemaName}</h3>`;
+
+            const markerContainer = document.createElement('div');
+            markerContainer.className = 'marker-container';
+            markerContainer.id = 'examMarkersClick';
+
+            const img = document.createElement('img');
+            img.src = currentMarker.schemaImage;
+            img.className = 'schema-image';
+            markerContainer.appendChild(img);
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'arrow-svg');
+
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            schema.markers.forEach(marker => {
+                marker.arrows.forEach((arrow, idx) => {
+                    const markerDef = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                    markerDef.setAttribute('id', `click-arrow-${marker.id}-${idx}`);
+                    markerDef.setAttribute('markerWidth', '10');
+                    markerDef.setAttribute('markerHeight', '10');
+                    markerDef.setAttribute('refX', '9');
+                    markerDef.setAttribute('refY', '3');
+                    markerDef.setAttribute('orient', 'auto');
+                    
+                    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                    polygon.setAttribute('points', '0 0, 10 3, 0 6');
+                    polygon.setAttribute('fill', marker.color);
+                    
+                    markerDef.appendChild(polygon);
+                    defs.appendChild(markerDef);
+                });
+            });
+            svg.appendChild(defs);
+
+            schema.markers.forEach(marker => {
+                const matchedMarker = examState.click.shuffledMarkers.find(m => m.id === marker.id && m.schemaId === currentMarker.schemaId);
+                
+                marker.arrows.forEach((arrow, idx) => {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', marker.x + '%');
+                    line.setAttribute('y1', marker.y + '%');
+                    line.setAttribute('x2', arrow.targetX + '%');
+                    line.setAttribute('y2', arrow.targetY + '%');
+                    line.setAttribute('stroke', marker.color);
+                    line.setAttribute('stroke-width', '3');
+                    line.setAttribute('marker-end', `url(#click-arrow-${marker.id}-${idx})`);
+                    svg.appendChild(line);
+                });
+
+                const markerEl = document.createElement('div');
+                markerEl.className = 'exam-marker';
+                markerEl.textContent = matchedMarker ? matchedMarker.displayNumber : marker.number;
+                markerEl.style.left = marker.x + '%';
+                markerEl.style.top = marker.y + '%';
+                markerEl.style.background = marker.color;
+                markerEl.dataset.id = marker.id;
+                markerEl.onclick = () => checkClickAnswer(marker.id);
+                markerContainer.appendChild(markerEl);
+            });
+
+            markerContainer.appendChild(svg);
+            container.appendChild(markerContainer);
+        }
+
+        function checkClickAnswer(clickedMarkerId) {
+            const currentMarker = examState.click.shuffledMarkers[examState.click.currentIndex];
+            
+            if (clickedMarkerId === currentMarker.id) {
+                examState.click.score++;
+                
+                const markerEls = document.querySelectorAll('#examMarkersClick .exam-marker');
+                markerEls.forEach(el => {
+                    if (parseInt(el.dataset.id) === clickedMarkerId) {
+                        el.classList.add('correct');
+                        setTimeout(() => {
+                            el.classList.remove('correct');
+                            examState.click.currentIndex++;
+                            loadExamClick();
+                        }, 500);
+                    }
+                });
+            } else {
+                const markerEls = document.querySelectorAll('#examMarkersClick .exam-marker');
+                markerEls.forEach(el => {
+                    const elId = parseInt(el.dataset.id);
+                    if (elId === clickedMarkerId) {
+                        el.classList.add('incorrect');
+                        setTimeout(() => el.classList.remove('incorrect'), 800);
+                    }
+                    if (elId === currentMarker.id) {
+                        setTimeout(() => {
+                            el.classList.add('correct');
+                            setTimeout(() => {
+                                el.classList.remove('correct');
+                                examState.click.currentIndex++;
+                                loadExamClick();
+                            }, 800);
+                        }, 300);
+                    }
+                });
+            }
+        }
+
+        function finishExamClick() {
+            document.getElementById('currentTermPrompt').style.display = 'none';
+            const percentage = ((examState.click.score / examState.click.total) * 100).toFixed(0);
+            document.getElementById('scoreClick').innerHTML = `Test terminé ! Score : ${examState.click.score} / ${examState.click.total} (${percentage}%)`;
+            document.getElementById('scoreClick').style.display = 'block';
+            document.getElementById('examContainerClick').innerHTML = '';
+        }
+
+        function resetExamClick() {
+            startExamClick();
+        }
+
+        // Initialisation
+        window.onload = function() {
+            loadData();
+            renderSchemaList();
+            
+            // Masquer la section d'import si des schémas existent déjà
+            if (schemas.length > 0) {
+                document.getElementById('importSection').style.display = 'none';
+            }
+        };
+    </script>
+</body>
+</html>

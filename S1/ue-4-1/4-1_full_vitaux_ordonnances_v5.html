@@ -1,0 +1,3428 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>UE 4.1 S1 — Quiz complet (Partiel + QCM + V/F)</title>
+  <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root{
+            --primary: #667eea;
+            --primary2:#764ba2;
+            --bg: #f1f3f6;
+            --card: #f8f9fa;
+            --white: #ffffff;
+            --text: #2c3e50;
+            --muted: #6c757d;
+            --border: #e9ecef;
+            --ok: #28a745;
+            --bad: #dc3545;
+            --warn:#ffc107;
+            --shadow: 0 20px 60px rgba(0,0,0,0.30);
+            --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        body{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container{
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        /* Header */
+        header.header{
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        header.header h1{
+            font-size: clamp(22px, 2.2vw, 34px);
+            margin-bottom: 10px;
+        }
+        header.header .sub{
+            font-size: 1.05em;
+            opacity: 0.92;
+            margin: 0 auto;
+            max-width: 80ch;
+            line-height: 1.5;
+        }
+        .row{
+            display:flex;
+            gap:12px;
+            flex-wrap:wrap;
+            margin-top: 18px;
+            justify-content:center;
+        }
+        .pill{
+            display:inline-flex;
+            gap:8px;
+            align-items:center;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.28);
+            background: rgba(255,255,255,0.18);
+            font-size: 0.95em;
+            color: rgba(255,255,255,0.92);
+        }
+        .pill b{ color: white; }
+
+        /* Mode selector (tabs) */
+        .mode-selector{
+            display:flex;
+            background: var(--card);
+            border-bottom: 3px solid var(--border);
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            }
+        .mode-btn, .tab{
+            flex: 0 0 auto;
+            min-width: 220px;
+            padding: 18px 16px;
+            border: none;
+            border-right: 1px solid var(--border);
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 650;
+            color: var(--muted);
+            position: relative;
+            transition: all 0.2s ease;
+            text-align:center;
+        }
+        .mode-btn:hover, .tab:hover{
+            background: rgba(0,0,0,0.06);
+            color: var(--text);
+            transform: translateY(-1px);
+        }
+        
+        .mode-btn:focus-visible, .tab:focus-visible{
+            outline: 3px solid rgba(0,0,0,0.15);
+            outline-offset: -3px;
+        }
+.mode-btn.active, .tab.active{
+            color: var(--primary);
+            background: var(--white);
+            box-shadow: inset 0 -4px 0 var(--primary);
+        }
+        .mode-btn.active::after, .tab.active::after{
+            content:'';
+            position:absolute;
+            left:0; right:0; bottom:0;
+            height: 3px;
+            background: var(--primary);
+        }
+
+        /* Content wrapper */
+        .content{
+            padding: 26px;
+            background: var(--white);
+        }
+
+        /* Controls bar */
+        .controls-bar{
+            display:flex;
+            gap:12px;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: var(--white);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            position: sticky;
+            top: 14px;
+            z-index: 10;
+        }
+        .toggle{
+            display:flex;
+            gap: 14px;
+            align-items:center;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 0.95em;
+        }
+        .toggle input{
+            width: 16px;
+            height: 16px;
+            transform: translateY(1px);
+            cursor: pointer;
+        }
+        .actions{
+            display:flex;
+            gap: 10px;
+            align-items:center;
+            flex-wrap: wrap;
+        }
+
+        button, .btn{
+            cursor:pointer;
+            border: 2px solid var(--border);
+            background: var(--white);
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-weight: 650;
+            transition: all 0.2s ease;
+        }
+        button:hover, .btn:hover{
+            border-color: var(--primary);
+            background: rgba(102,126,234,0.06);
+        }
+        button:active{ transform: translateY(1px); }
+
+        /* Primary/secondary buttons */
+        #checkAll{
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        #checkAll:hover{ filter: brightness(0.98); }
+        #resetTab{
+            background: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        #resetTab:hover{ filter: brightness(0.98); }
+
+        /* KPI */
+        .kpi{
+            display:flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+        .kpi .box{
+            flex: 1 1 200px;
+            min-width: 200px;
+            background: var(--card);
+            border-radius: 15px;
+            padding: 14px 16px;
+            border-left: 5px solid var(--primary);
+        }
+        .kpi .big{ font-size: 1.25em; font-weight: 800; color: var(--text); }
+        .kpi .small{ color: var(--muted); font-size: 0.92em; }
+
+        /* Question cards */
+        .grid{
+            display:grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+            margin-top: 18px;
+        }
+        .card{
+            background: var(--card);
+            border-radius: 15px;
+            padding: 22px;
+            border-left: 5px solid var(--primary);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        .card h2{
+            font-size: 1.08em;
+            margin-bottom: 8px;
+            display:flex;
+            gap:10px;
+            align-items: baseline;
+            flex-wrap: wrap;
+            color: var(--text);
+        }
+        .meta{
+            color: var(--muted);
+            font-size: 0.9em;
+            display:flex;
+            gap:10px;
+            flex-wrap: wrap;
+            align-items:center;
+        }
+        .qtext{
+            margin: 14px 0 16px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .badge{
+            display:inline-flex;
+            align-items:center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 0.82em;
+            border: 2px solid var(--border);
+            background: var(--white);
+            color: var(--muted);
+        }
+        .badge.ok{ border-color: rgba(40,167,69,0.35); color: var(--ok); background: rgba(40,167,69,0.10); }
+        .badge.bad{ border-color: rgba(220,53,69,0.35); color: var(--bad); background: rgba(220,53,69,0.10); }
+        .badge.warn{ border-color: rgba(255,193,7,0.45); color: #856404; background: rgba(255,193,7,0.18); }
+
+        .mono{ font-family: var(--mono); }
+
+        textarea, input[type="text"], input[type="number"]{
+            width: 100%;
+            border: 2px solid var(--border);
+            background: var(--white);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 12px 12px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        textarea{ min-height: 110px; resize: vertical; }
+        input[type="number"]{ max-width: 260px; }
+        textarea:focus, input[type="text"]:focus, input[type="number"]:focus, select:focus{
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.15);
+        }
+
+        .choices{ display:flex; flex-direction:column; gap:10px; }
+        label.choice{
+            background: var(--white);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            cursor:pointer;
+            display:flex;
+            gap:10px;
+            align-items:flex-start;
+            transition: all 0.2s ease;
+        }
+        label.choice:hover{
+            border-color: var(--primary);
+            background: rgba(102,126,234,0.06);
+            transform: translateX(4px);
+        }
+        label.choice input{ margin-top: 3px; }
+
+        .twoCol{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (min-width: 900px){
+            .twoCol{ grid-template-columns: 1fr 1fr; }
+        }
+
+        .inline{ display:flex; gap:10px; flex-wrap: wrap; align-items: center; }
+        .hr{ height: 1px; background: var(--border); margin: 14px 0; }
+
+        .help{
+            color: var(--muted);
+            font-size: 0.92em;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .feedback{
+            margin-top: 14px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: var(--white);
+            padding: 14px;
+        }
+        .feedback.ok{ border-color: rgba(40,167,69,0.35); background: rgba(40,167,69,0.10); }
+        .feedback.bad{ border-color: rgba(220,53,69,0.35); background: rgba(220,53,69,0.10); }
+        .feedback.warn{ border-color: rgba(255,193,7,0.45); background: rgba(255,193,7,0.18); }
+        .feedback .title{ font-weight: 800; margin-bottom: 6px; }
+        .feedback ul{ margin: 8px 0 0 18px; }
+
+        .select{
+            width: 100%;
+            border: 2px solid var(--border);
+            background: var(--white);
+            color: var(--text);
+            border-radius: 12px;
+            padding: 10px 12px;
+            outline:none;
+        }
+        select option{
+            background: var(--white);
+            color: var(--text);
+        }
+
+        .tableLike{
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--white);
+        }
+        .trow{
+            display:grid;
+            grid-template-columns: 1fr 200px;
+            gap: 0;
+            border-top: 1px solid var(--border);
+            align-items:center;
+        }
+        .trow:first-child{ border-top: 0; }
+        .tcell{ padding: 12px; }
+        .tcell.right{
+            border-left: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        .footerNote{
+            margin-top: 18px;
+            color: var(--muted);
+            font-size: 0.9em;
+            text-align: center;
+        }
+    
+/* ===== Ordonnance (visuel) ===== */
+.ordo-paper{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.10);
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.10);
+  padding: 18px 18px 14px;
+  margin: 12px 0 6px;
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.45;
+  color: #1f2d3a;
+  position: relative;
+  overflow: hidden;
+}
+.ordo-paper:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.00),
+    rgba(0,0,0,0.00) 22px,
+    rgba(102,126,234,0.06) 23px
+  );
+  pointer-events:none;
+}
+.ordo-paper > *{ position: relative; }
+
+.ordo-head{
+  display:flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items:flex-start;
+}
+.ordo-head .left{
+  font-weight: 700;
+  font-size: 1.02em;
+}
+.ordo-head .left .sub{
+  font-weight: 600;
+  font-size: 0.95em;
+  opacity: 0.85;
+}
+.ordo-head .right{
+  text-align:right;
+  font-size: 0.95em;
+  font-weight: 650;
+  opacity: 0.85;
+  white-space: nowrap;
+}
+.ordo-rule{
+  height:1px;
+  background: rgba(0,0,0,0.10);
+  margin: 10px 0 12px;
+}
+.ordo-section{
+  margin-top: 10px;
+}
+.ordo-title{
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78em;
+  font-weight: 800;
+  color: rgba(0,0,0,0.55);
+  margin-bottom: 6px;
+}
+.ordo-lines > div{
+  margin: 2px 0;
+}
+.ordo-lines .mut{
+  opacity: 0.82;
+}
+.ordo-footer{
+  display:flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  align-items:flex-end;
+}
+.ordo-footer .doc{
+  font-weight: 650;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text);
+}
+.ordo-sig{
+  width: 220px;
+  height: 74px;
+  border-top: 1px solid rgba(0,0,0,0.14);
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-end;
+  padding-top: 6px;
+}
+.ordo-sig svg{
+  width: 210px;
+  height: 64px;
+}
+.doc-sig{
+  margin-top: 4px;
+  width: 210px;
+  height: 54px;
+}
+.doc-sig svg{
+  width: 210px;
+  height: 54px;
+  opacity: 0.9;
+}
+.ordo-progress{
+  display:flex;
+  gap: 10px;
+  align-items:center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>UE 4.1 S1 — Quiz complet (Partiel + QCM + Vrai/Faux)</h1>
+      <div class="sub">
+        Vérification <b>laxiste</b> sur les réponses rédigées : accents, apostrophes, tirets, singulier/pluriel, ordre, listes en vrac… tout est toléré.
+        Pour les calculs : tolérances numériques.
+      </div>
+      <div class="row">
+        <div class="pill">📌 <b>Objectif</b> : entraînement “partiel” + variantes plus dures</div>
+        <div class="pill">🧠 <b>Astuce</b> : réponds en listes (1 idée par ligne)</div>
+        <div class="pill">⚖️ <b>Score</b> : points partiels + feedback</div>
+      </div>
+    </header>
+
+    <div class="mode-selector">
+      <button class="mode-btn tab active" data-tab="partiel">Partiel (rédaction + tableaux + calcul)</button>
+      <button class="mode-btn tab" data-tab="qcm">QCM</button>
+      <button class="mode-btn tab" data-tab="vf">Vrai/Faux</button>
+      <button class="mode-btn tab" data-tab="mix">Mix (mode examen)</button>
+      <button class="mode-btn tab" data-tab="cas_vitaux">Cas cliniques — constantes</button>
+      <button class="mode-btn tab" data-tab="cas_pm">Conformité des prescriptions</button>
+    </div>
+
+    <div class="content">
+      <div class="controls-bar">
+        <div class="toggle">
+          <label><input id="shuffle" type="checkbox" /> Mélanger</label>
+          <label><input id="hideHelp" type="checkbox" /> Masquer indices</label>
+        </div>
+        <div class="actions">
+          <button id="checkAll">Corriger l’onglet</button>
+          <button id="resetTab">Réessayer l’onglet</button>
+        </div>
+      </div>
+
+      <div id="kpis" class="kpi"></div>
+      <div id="content" class="grid"></div>
+
+      <div class="footerNote">
+        Fonctionne 100% hors-ligne. Rien n’est envoyé.
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =========================
+   Utils — normalisation “laxiste”
+========================= */
+function norm(s){
+  if(s == null) return "";
+  s = String(s).toLowerCase().trim();
+  s = s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  s = s.replace(/['’`´\-_/]+/g," ");
+  s = s.replace(/[^\p{L}\p{N}]+/gu," ");
+  s = s.replace(/\s+/g," ").trim();
+  return s;
+}
+function stemish(w){
+  w = norm(w);
+  w = w.replace(/\b(\p{L}{3,})(s|x)\b/gu, "$1");
+  return w;
+}
+function unique(arr){ return [...new Set(arr)]; }
+function splitLinesOrCommas(s){
+  if(!s) return [];
+  return s
+    .split(/\n|;|,|\u2022|•/g)
+    .map(x=>x.trim())
+    .filter(x=>x.length>0);
+}
+function escapeRegExp(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function containsAnyKeyword(answerNorm, kwList){
+  const a = stemish(answerNorm);
+  for(const kw of kwList){
+    const k = stemish(kw);
+    if(!k) continue;
+    const re = new RegExp("(^|\\s)" + escapeRegExp(k) + "(\\s|$)");
+    if(re.test(a)) return true;
+    if(k.length >= 8 && a.includes(k)) return true;
+  }
+  return false;
+}
+function scoreSetAnswer(userText, items, minNeeded){
+  const all = stemish(userText);
+  const found = new Set();
+  for(const it of items){
+    if(containsAnyKeyword(all, it.keywords)) found.add(it.id);
+  }
+  const got = found.size;
+  const ok = got >= minNeeded;
+  return { ok, got, need:minNeeded, foundIds:[...found] };
+}
+function inRangeLoose(text, min, max){
+  const t = norm(text);
+  const nums = (t.match(/(\d+([.,]\d+)?)/g) || []).map(x=>Number(x.replace(",","."))).filter(x=>Number.isFinite(x));
+  if(nums.length === 0) return {ok:false, parsed:[]};
+  if(nums.length === 1){
+    const v = nums[0];
+    return {ok:(v>=min && v<=max), parsed:[v]};
+  }
+  const lo = Math.min(...nums);
+  const hi = Math.max(...nums);
+  const ok = (lo <= max) && (hi >= min);
+  return {ok, parsed:[lo,hi]};
+}
+function approxEqual(a, b, tol){
+  if(!Number.isFinite(a) || !Number.isFinite(b)) return false;
+  return Math.abs(a - b) <= tol;
+}
+function roundNice(x){
+  if(!Number.isFinite(x)) return x;
+  const a = Math.abs(x);
+  if(a >= 100) return Math.round(x);
+  if(a >= 10) return Math.round(x*10)/10;
+  return Math.round(x*100)/100;
+}
+
+/* =========================
+   Question bank
+========================= */
+
+// ÉCONOMIE = incluse comme critère (comme ton cours)
+const CRITERES_QUALITE = [
+  {id:"securite", label:"Sécurité", keywords:["securite","asepsie","identite patient","allergie","contre indication","risque","prevention risque"]},
+  {id:"efficacite", label:"Efficacité", keywords:["efficacite","objectif atteint","resultat","amelioration","diminution douleur"]},
+  {id:"pertinence", label:"Pertinence / adaptation", keywords:["pertinence","adaptation","adapte","individualise","etat du patient","besoin du patient","priorite"]},
+  {id:"confort", label:"Confort / respect", keywords:["confort","pudeur","intimite","respect","dignite","douleur","installation antalgique"]},
+  {id:"continuite", label:"Continuité / traçabilité", keywords:["continuite","tracabilite","tracer","transmission","dossier","note","coordination"]},
+  {id:"economie", label:"Économie", keywords:["economie","economique","cout","optimiser","efficience","rationnel"]},
+  // bonus (acceptés)
+  {id:"hygiene", label:"Hygiène", keywords:["hygiene","sha","lavage des mains","gants","propre","sale","desinfection","aseptique"]},
+  {id:"organisation", label:"Organisation", keywords:["organisation","preparation","materiel","planification","orr"]},
+  {id:"ergonomie", label:"Ergonomie", keywords:["ergonomie","posture","position","triangle","accessibilite"]},
+];
+
+const DIGNITE_ACTIONS = [
+  {id:"presentation", label:"Se présenter / langage respectueux", keywords:["se presenter","bonjour","respect","vouvoi","pas infantiliser","politesse"]},
+  {id:"info_consent", label:"Informer + consentement", keywords:["expliquer","informer","consentement","accord","refus"]},
+  {id:"pudeur", label:"Préserver la pudeur", keywords:["pudeur","couvrir","drap","ne pas exposer","zone concernee"]},
+  {id:"confidentialite", label:"Confidentialité / secret", keywords:["confidentialite","secret","discretion","informations"]},
+  {id:"valeurs", label:"Respect valeurs/croyances", keywords:["valeurs","croyances","religion","habitudes","culture"]},
+  {id:"autonomie", label:"Favoriser autonomie", keywords:["autonomie","participation","solliciter","choix","independance"]},
+];
+
+const INTIMITE_ACTIONS = [
+  {id:"porte_rideau", label:"Fermer porte / rideau / paravent", keywords:["fermer la porte","rideau","paravent","intimite","presence"]},
+  {id:"visiteurs", label:"Faire sortir visiteurs si besoin", keywords:["visiteur","faire sortir","tiers","chambre"]},
+  {id:"zone", label:"N’exposer que la zone", keywords:["n exposer que","zone","drap","couvrir"]},
+];
+
+const ORDO_PATIENT_INFO = [
+  {id:"nom", label:"Nom", keywords:["nom"]},
+  {id:"prenom", label:"Prénom", keywords:["prenom"]},
+  {id:"ddn", label:"Date de naissance / âge", keywords:["date de naissance","ddn","age"]},
+  {id:"sexe", label:"Sexe", keywords:["sexe"]},
+  {id:"ipp", label:"Identifiant (IPP/NIP)", keywords:["ipp","nip","identifiant"]},
+  {id:"adresse", label:"Adresse", keywords:["adresse"]},
+  {id:"taille_poids", label:"Taille/Poids si nécessaire", keywords:["taille","poids","kg","cm"]},
+];
+
+const ORDO_MED_INFO = [
+  {id:"nom", label:"Nom (DCI/spécialité)", keywords:["dci","denomination commune","nom du medicament","specialite"]},
+  {id:"dosage", label:"Dosage/concentration", keywords:["dosage","concentration","mg","g","ui","mg ml"]},
+  {id:"forme", label:"Forme galénique", keywords:["forme","galenique","comprime","gelule","sirop","injectable","solution"]},
+  {id:"voie", label:"Voie d’administration", keywords:["voie","per os","po","iv","im","sc","id","sublinguale","rectale","cutanee","transdermique"]},
+  {id:"posologie", label:"Posologie (dose + fréquence)", keywords:["posologie","fois","par jour","x","frequence","toutes les","prise","matin","soir"]},
+  {id:"duree", label:"Durée/quantité totale", keywords:["duree","jours","semaines","nombre","boite","quantite totale","unites"]},
+  {id:"mode", label:"Mode d’emploi (dilution/vitesse/heure)", keywords:["dilution","vitesse","debit","heure","moment","mode d emploi"]},
+];
+
+const TRACABILITE_OBJECTIFS = [
+  {id:"continuite", label:"Continuité/coordination", keywords:["continuite","coordination","transmission","equipe"]},
+  {id:"securite", label:"Sécurité (erreurs, oublis)", keywords:["securite","erreur","oubli","doublon","iatrogenie"]},
+  {id:"medicolegal", label:"Preuve médico-légale", keywords:["preuve","medico legal","tribunal","responsabilite","litige"]},
+  {id:"qualite", label:"Qualité/évaluation/audit", keywords:["qualite","evaluation","audit","amelioration","indicateur"]},
+  {id:"identif", label:"Identification patient/professionnels", keywords:["identification","patient","professionnel","qui a fait quoi"]},
+  {id:"vigilances", label:"Vigilances (pharmaco/matério…)", keywords:["vigilance","pharmacovigilance","materiovigilance","biovigilance","hemovigilance"]},
+];
+
+const CI_PRELEVEMENT_BRAS = [
+  {id:"fistule", label:"Fistule artério-veineuse", keywords:["fistule","arterio veineuse","dialyse"]},
+  {id:"curage", label:"Mastectomie/curage axillaire", keywords:["mastectomie","curage","axillaire","sein"]},
+  {id:"perf", label:"Perfusion/cathéter sur le membre", keywords:["perfusion","catheter","kt","voie veineuse","vvp"]},
+  {id:"lymph", label:"Lymphœdème / œdème important", keywords:["lymphoedeme","oedeme","gonfle"]},
+  {id:"lesion", label:"Plaie/brûlure/infection/inflammation", keywords:["plaie","brulure","infection","inflammation","rougeur","cellulite"]},
+  {id:"hematome", label:"Hématome / traumatisme / immobilisation", keywords:["hematome","trauma","platre","immobilisation","attelle"]},
+  {id:"hemi", label:"Hémiplégie (selon consignes de service)", keywords:["hemiplegie","paralysie"]},
+];
+
+const POULS_ARTERES = [
+  {id:"radiale", label:"Radiale", keywords:["radiale"]},
+  {id:"carotide", label:"Carotide", keywords:["carotide"]},
+  {id:"femorale", label:"Fémorale", keywords:["femorale"]},
+  {id:"humerale", label:"Humérale/brachiale", keywords:["humerale","brachiale"]},
+  {id:"pedieuse", label:"Pédieuse", keywords:["pedieuse","dorsale du pied"]},
+  {id:"poplitee", label:"Poplitée", keywords:["poplitee"]},
+  {id:"tibial", label:"Tibiale postérieure", keywords:["tibial","tibiale"]},
+  {id:"cubital", label:"Cubital/ulnaire", keywords:["cubital","ulnaire"]},
+];
+
+const POUlS_MODALITES = [
+  {id:"repos", label:"Patient au repos / position confortable", keywords:["repos","10 min","position","confort"]},
+  {id:"doigts", label:"Index + majeur (pas le pouce)", keywords:["index","majeur","pas le pouce","pulpe"]},
+  {id:"temps", label:"30 s×2 si régulier, 1 min si irrégulier", keywords:["30","seconde","x2","1 min","irregulier","une minute"]},
+  {id:"qualite", label:"Noter rythme/amplitude + tracer/transmettre", keywords:["rythme","amplitude","volume","tracer","transmettre","dossier"]},
+  {id:"pression", label:"Pression douce sur plan osseux", keywords:["pression","douce","comprimer","plan osseux"]},
+];
+
+const AVANT_PENDANT_APRES_ITEMS = [
+  {id:"verif_pm", text:"Vérifier la prescription médicale + transmissions patient", stage:"avant"},
+  {id:"rassembler", text:"Rassembler/vérifier matériel et produits nécessaires", stage:"avant"},
+  {id:"preparer", text:"Préparer le matériel", stage:"avant"},
+  {id:"prevenir", text:"Prévenir le patient", stage:"avant"},
+  {id:"informer_consent", text:"Informer + recueillir consentement", stage:"avant"},
+  {id:"participation", text:"Solliciter la participation si possible", stage:"avant"},
+  {id:"visiteurs", text:"Faire sortir les visiteurs si besoin", stage:"avant"},
+  {id:"presence_on", text:"Mettre la présence / signaler soin en cours", stage:"avant"},
+  {id:"intimite", text:"Respecter intimité + confort pendant le soin", stage:"pendant"},
+  {id:"reexpliquer", text:"Réexpliquer si nécessaire", stage:"pendant"},
+  {id:"tenir_compte", text:"Réaliser le soin en tenant compte des réactions", stage:"pendant"},
+  {id:"reinstaller_patient", text:"Réinstaller le patient (besoins/habitudes)", stage:"apres"},
+  {id:"reinstaller_env", text:"Réinstaller l’environnement", stage:"apres"},
+  {id:"nettoyer", text:"Nettoyer/décontaminer/ranger le matériel", stage:"apres"},
+  {id:"poubelles", text:"Fermer puis jeter les poubelles", stage:"apres"},
+  {id:"informer_equipe", text:"Informer l’équipe soignante / transmissions", stage:"apres"},
+  {id:"presence_off", text:"Éteindre présence", stage:"apres"},
+];
+
+function makePartielQuestions(){
+  return [
+    {
+      id:"P1",
+      type:"open_set",
+      points:4,
+      title:"Question 1 (4 pts) — Critères de qualité d’un soin",
+      prompt:"Citez 5 critères de qualité que doit respecter un soin et donnez un exemple concret pour chacun. (Tu peux répondre en 5 lignes : critère — exemple)",
+      minNeeded:5,
+      items: CRITERES_QUALITE,
+      extraExplain:"On corrige en repérant au moins 5 critères distincts (ordre libre). Les exemples ne sont pas notés finement ici, mais tu dois en écrire pour t’entraîner.",
+      placeholder:"Ex:\nSécurité — vérification identité + asepsie\nEfficacité — douleur diminue après antalgique…\nÉconomie — ne pas gaspiller le matériel…\n…",
+      check:(ans, q)=>{
+        const setScore = scoreSetAnswer(ans, q.items, q.minNeeded);
+        const lines = splitLinesOrCommas(ans);
+        const hasExamples = lines.some(l => /—| - |:/.test(l));
+        const ok = setScore.ok;
+        let level = ok ? "ok" : (setScore.got >= Math.max(2, q.minNeeded-2) ? "warn" : "bad");
+        let msg = [];
+        msg.push(`Critères trouvés : ${setScore.got}/${q.minNeeded}.`);
+        if(!hasExamples) msg.push("Ajoute des exemples concrets (critère — exemple) pour chaque critère.");
+        return { ok, level, score: Math.min(setScore.got, q.minNeeded)/q.minNeeded * q.points, details: msg, expectedHint: q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P2",
+      type:"open_set",
+      points:2,
+      title:"Question 2 (2 pts) — Dignité",
+      prompt:"Citez 4 actions pour favoriser le respect de la dignité chez un patient.",
+      minNeeded:4,
+      items: DIGNITE_ACTIONS,
+      placeholder:"Ex:\n• Se présenter…\n• Expliquer le soin…\n• Préserver la pudeur…\n• Confidentialité…",
+      check:(ans,q)=>{
+        const s = scoreSetAnswer(ans, q.items, q.minNeeded);
+        const ok = s.ok;
+        const level = ok ? "ok" : (s.got>=2 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Actions repérées : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P3",
+      type:"open_set",
+      points:0.5,
+      title:"Question 3 (0,5 pt) — Intimité",
+      prompt:"Citez 2 actions pour favoriser le respect de l’intimité chez un patient.",
+      minNeeded:2,
+      items: INTIMITE_ACTIONS,
+      placeholder:"Ex:\n• Fermer la porte / tirer le rideau\n• Faire sortir les visiteurs…",
+      check:(ans,q)=>{
+        const s = scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok = s.ok;
+        const level = ok ? "ok" : (s.got>=1 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Actions repérées : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P4",
+      type:"open_set",
+      points:1,
+      title:"Question 4 (1 pt) — Ordonnance : infos patient",
+      prompt:"Citez 4 informations indispensables sur une prescription, en lien avec le patient (identification).",
+      minNeeded:4,
+      items: ORDO_PATIENT_INFO,
+      placeholder:"Ex: Nom, prénom, date de naissance/âge, sexe, IPP…",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=2 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Éléments repérés : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P5",
+      type:"open_set",
+      points:3,
+      title:"Question 5 (3 pts) — Ordonnance : infos médicament",
+      prompt:"Citez 6 informations indispensables sur une prescription médicamenteuse, en lien avec le médicament.",
+      minNeeded:6,
+      items: ORDO_MED_INFO,
+      placeholder:"Ex: DCI/nom, dosage, forme galénique, voie, posologie, durée, mode d’emploi…",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=4 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Éléments repérés : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P6",
+      type:"open_multi",
+      points:2,
+      title:"Question 6 (2 pts) — Définitions : dosage / dose / posologie / forme galénique",
+      prompt:"Définis chaque terme. (Mots-clés attendus, formulation libre.)",
+      fields:[
+        {key:"dosage", label:"Dosage", placeholder:"Ex: quantité de principe actif par unité (mg/comprimé, mg/mL…)"},
+        {key:"dose", label:"Dose", placeholder:"Ex: quantité réellement administrée au patient"},
+        {key:"posologie", label:"Posologie", placeholder:"Ex: modalités d’administration (dose + fréquence + durée)"},
+        {key:"forme", label:"Forme galénique", placeholder:"Ex: présentation (comprimé, sirop, injectable…)"},
+      ],
+      check:(vals,q)=>{
+        const rules = {
+          dosage:[["principe actif","pa"],["par unite","mg","ml","concentration","dosage"]],
+          dose:[["administre","donne","effectivement"],["quantite","mg","ml","prise"]],
+          posologie:[["frequence","fois","rythme","toutes les"],["dose","prise"],["duree","jours","semaines","24h"]],
+          forme:[["forme","presentation","pharmaceutique","galenique"],["comprime","gelule","sirop","injectable","solution","suppositoire","patch","creme"]],
+        };
+        let okCount=0;
+        let details=[];
+        for(const f of q.fields){
+          const a = vals[f.key] || "";
+          const aN = stemish(a);
+          const bundles = rules[f.key];
+          let hit=0;
+          for(const b of bundles){
+            if(b.some(k=>aN.includes(stemish(k)))) hit++;
+          }
+          const ok = hit >= Math.min(2, bundles.length);
+          if(ok) okCount++;
+          details.push(`${f.label} : ${ok ? "OK" : "À compléter (mets l’idée clé)"}.`);
+        }
+        const score = (okCount/q.fields.length)*q.points;
+        const okAll = okCount===q.fields.length;
+        const level = okAll ? "ok" : (okCount>=2 ? "warn":"bad");
+        return { ok: okAll, level, score, details, expectedHint:[
+          "Dosage = quantité de PA par unité/volume",
+          "Dose = quantité administrée",
+          "Posologie = dose + fréquence + durée",
+          "Forme galénique = présentation (comprimé/sirop/injectable…)"
+        ]};
+      }
+    },
+    {
+      id:"P7",
+      type:"open",
+      points:1,
+      title:"Question 7 (1 pt) — Définition : médicament",
+      prompt:"Définis le terme « médicament » (définition type Code de la Santé Publique, en substance).",
+      placeholder:"Ex: substance/composition présentée comme curative/préventive, ou pour diagnostiquer, ou restaurer/corriger/modifier une fonction…",
+      check:(ans,q)=>{
+        const a=stemish(ans);
+        const axes = [
+          ["substance","composition","produit"],
+          ["curative","preventive","soigner","prevenir"],
+          ["diagnostic","diagnostiquer"],
+          ["restaurer","corriger","modifier","fonction"],
+        ];
+        let hit=0;
+        for(const b of axes){
+          if(b.some(k=>a.includes(stemish(k)))) hit++;
+        }
+        const ok = hit>=3;
+        const level = ok ? "ok" : (hit>=2 ? "warn":"bad");
+        const score = (hit/4)*q.points;
+        return { ok, level, score, details:[`Éléments clés repérés : ${hit}/4.`], expectedHint:[
+          "Substance/composition",
+          "Curatif/préventif",
+          "Diagnostic",
+          "Restaurer/corriger/modifier fonctions"
+        ]};
+      }
+    },
+    {
+      id:"P8",
+      type:"open_set_plus_def",
+      points:2,
+      title:"Question 8 (2 pts) — Traçabilité : définition + objectifs",
+      prompt:"Définis la « traçabilité dans les soins » puis cite 4 objectifs.",
+      minNeeded:4,
+      items: TRACABILITE_OBJECTIFS,
+      placeholder:"Définition + objectifs (au moins 4).\nEx: inscription datée/horodatée/signée dans dossier patient…\nObjectifs: continuité, sécurité, preuve, qualité…",
+      check:(ans,q)=>{
+        const a=stemish(ans);
+        const defKeys = ["tracer","trace","inscription","ecrit","dossier","date","horodat","signature","transmission"];
+        const defHit = defKeys.some(k=>a.includes(stemish(k)));
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok = defHit && s.ok;
+        const level = ok ? "ok" : ((defHit && s.got>=2) || (!defHit && s.got>=4) ? "warn":"bad");
+        let score = (Math.min(s.got,q.minNeeded)/q.minNeeded)*q.points;
+        if(defHit) score += 0.2;
+        score = Math.min(q.points, score);
+        const details = [];
+        details.push(defHit ? "Définition : OK (trace écrite/datée… repérée)." : "Définition : ajoute l’idée de trace écrite/datée/signée dans le dossier.");
+        details.push(`Objectifs repérés : ${s.got}/${q.minNeeded}.`);
+        return { ok, level, score, details, expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P9",
+      type:"open_set",
+      points:1.5,
+      title:"Question 9 (1,5 pt) — Contre-indications sur un bras (prélèvement veineux)",
+      prompt:"Cite 6 contre-indications visibles/connues sur un bras qui te font passer sur l’autre bras.",
+      minNeeded:6,
+      items: CI_PRELEVEMENT_BRAS,
+      placeholder:"Ex: fistule AV, curage axillaire/mastectomie, perfusion/KT, lymphœdème, plaie/infection, hématome/plâtre…",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=4 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Contre-indications repérées : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P10",
+      type:"open_two",
+      points:1,
+      title:"Question 10 (1 pt) — Pouls : artères + norme FC adulte",
+      prompt:"Cite 4 artères fréquentes pour mesurer le pouls, et donne la norme de la fréquence cardiaque (adulte sain au repos).",
+      fields:[
+        {key:"arteres", label:"Artères (4)", placeholder:"Ex: radiale, carotide, fémorale, humérale…"},
+        {key:"norme", label:"Norme FC (bpm)", placeholder:"Ex: 60–80 bpm"},
+      ],
+      check:(vals,q)=>{
+        const art = vals.arteres || "";
+        const set = scoreSetAnswer(art, POULS_ARTERES, 4);
+        const r = inRangeLoose(vals.norme || "", 60, 80);
+        const ok = set.ok && r.ok;
+        const level = ok ? "ok" : ((set.got>=3 && r.ok) || (set.ok && !r.ok) ? "warn":"bad");
+        let details = [];
+        details.push(`Artères repérées : ${set.got}/4.`);
+        details.push(r.ok ? "Norme FC : OK (intervalle cohérent)." : "Norme FC : donne un intervalle type 60–80 bpm (au repos).");
+        const score = (Math.min(set.got,4)/4)*0.6*q.points + (r.ok?0.4*q.points:0);
+        return { ok, level, score, details, expectedHint:[
+          "Radiale, carotide, fémorale, humérale/brachiale (ou autres artères palpables)",
+          "FC adulte au repos : ~60–80 bpm (selon cours)"
+        ]};
+      }
+    },
+    {
+      id:"P11",
+      type:"open_set",
+      points:1,
+      title:"Question 11 (1 pt) — Prise du pouls : modalités fiables",
+      prompt:"Cite 4 modalités optimales de la prise du pouls pour un résultat fiable.",
+      minNeeded:4,
+      items: POUlS_MODALITES,
+      placeholder:"Ex: patient au repos, index+majeur, 30s×2 si régulier, 1min si irrégulier, noter rythme/amplitude + tracer…",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=3 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Modalités repérées : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P12",
+      type:"open",
+      points:1,
+      title:"Question 12 (1 pt) — Définition : saturométrie/oxymétrie",
+      prompt:"Donne la définition de la saturométrie (oxymétrie).",
+      placeholder:"Ex: mesure non invasive de la saturation pulsée en O₂ (SpO₂) via oxymètre…",
+      check:(ans,q)=>{
+        const a=stemish(ans);
+        const keys = [
+          ["mesure","mesurer"],
+          ["saturation","spo2","hemoglobine"],
+          ["oxygene","o2"],
+          ["non invasive","capteur","oxymetre","saturometre"],
+        ];
+        let hit=0;
+        for(const b of keys){
+          if(b.some(k=>a.includes(stemish(k)))) hit++;
+        }
+        const ok = hit>=3;
+        const level = ok ? "ok" : (hit>=2 ? "warn":"bad");
+        const score = (hit/4)*q.points;
+        return { ok, level, score, details:[`Éléments clés repérés : ${hit}/4.`], expectedHint:["Mesure non invasive", "Saturation pulsée (SpO₂)", "Oxygène / hémoglobine", "Oxymètre/saturomètre"]};
+      }
+    },
+    {
+      id:"P13",
+      type:"tf_block",
+      points:1.5,
+      title:"Question 13 (1,5 pt) — Vrai/Faux",
+      prompt:"Pour chaque proposition, coche Vrai ou Faux.",
+      statements:[
+        {id:"s1", text:"Le pouls fémoral est le pouls de référence en urgence vitale.", answer:false},
+        {id:"s2", text:"On parle d’HTA si TA ≥ 15/9 cmHg.", answer:false},
+        {id:"s3", text:"La SpO₂ est normale si > 93%.", answer:false},
+        {id:"s4", text:"Une fréquence cardiaque “saine” au repos est 60–80 bpm.", answer:true},
+        {id:"s5", text:"Une fréquence respiratoire saine chez l’adulte est > 20/min.", answer:false},
+        {id:"s6", text:"On parle de bradycardie si FC < 70 bpm.", answer:false},
+      ],
+      check:(vals,q)=>{
+        let good=0;
+        for(const st of q.statements){
+          const v = vals[st.id];
+          if(v === undefined) continue;
+          if((v==="true") === st.answer) good++;
+        }
+        const total = q.statements.length;
+        const ok = good===total;
+        const level = ok ? "ok" : (good>=4 ? "warn":"bad");
+        const score = (good/total)*q.points;
+        return { ok, level, score, details:[`Bonnes réponses : ${good}/${total}.`], expectedHint:[
+          "Références usuelles : FC 60–80 (cours), FR adulte 12–20, HTA souvent ≥ 14/9 ou selon cours, SpO₂ normale plutôt ≥95% (93–94 limite selon contexte)."
+        ]};
+      }
+    },
+    {
+      id:"P14",
+      type:"stage_sort",
+      points:6,
+      title:"Question 14 (6 pts) — Avant / Pendant / Après le soin",
+      prompt:"Pour chaque élément, choisis : AVANT / PENDANT / APRÈS.",
+      items: AVANT_PENDANT_APRES_ITEMS,
+      check:(vals,q)=>{
+        let good=0;
+        for(const it of q.items){
+          if(vals[it.id] && vals[it.id]===it.stage) good++;
+        }
+        const total = q.items.length;
+        const ok = good===total;
+        const level = ok ? "ok" : (good>=Math.ceil(total*0.7) ? "warn":"bad");
+        const score = (good/total)*q.points;
+        return { ok, level, score, details:[`Bon placement : ${good}/${total}.`], expectedHint:[
+          "Avant : vérifs + préparation + info/consentement + intimité/visiteurs + présence",
+          "Pendant : intimité/confort + réaliser en tenant compte des réactions",
+          "Après : réinstaller + nettoyer + poubelles + transmissions + présence off"
+        ]};
+      }
+    },
+    {
+      id:"P15",
+      type:"open_set",
+      points:1,
+      title:"Question 15 (1 pt) — Règle des 5B",
+      prompt:"Cite les 5 éléments à vérifier avant l’administration d’un médicament (règle des 5B).",
+      minNeeded:5,
+      items: [
+        {id:"patient", label:"Bon patient", keywords:["bon patient","identite"]},
+        {id:"med", label:"Bon médicament", keywords:["bon medicament","bon traitement","bon produit"]},
+        {id:"dose", label:"Bonne dose", keywords:["bonne dose","dose"]},
+        {id:"voie", label:"Bonne voie", keywords:["bonne voie","voie"]},
+        {id:"moment", label:"Bon moment", keywords:["bon moment","bonne heure","horaire"]},
+      ],
+      placeholder:"Ex: bon patient, bon médicament, bonne dose, bonne voie, bon moment.",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=4 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`B repérés : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P16",
+      type:"calc",
+      points:1.5,
+      title:"Question 16 (1,5 pt) — Calcul perfusion",
+      prompt:"Prescription : 1 L de G5% + 3 g NaCl + 2 g KCl sur 24 h. Ampoules : NaCl 10 mL à 10% ; KCl 10 mL à 20%.",
+      fields:[
+        {key:"nacl_amp", label:"NaCl : nombre d’ampoules", kind:"number"},
+        {key:"nacl_ml", label:"NaCl : volume total (mL)", kind:"number"},
+        {key:"kcl_amp", label:"KCl : nombre d’ampoules", kind:"number"},
+        {key:"kcl_ml", label:"KCl : volume total (mL)", kind:"number"},
+        {key:"vol_total", label:"Volume total perfusion (mL)", kind:"number"},
+        {key:"ml_h", label:"Débit (mL/h)", kind:"number"},
+        {key:"gtt_min", label:"Débit (gouttes/min) si 20 gtt/mL", kind:"number"},
+      ],
+      check:(vals,q)=>{
+        const v = (k)=> Number(vals[k]);
+        const exp = {
+          nacl_amp:3,
+          nacl_ml:30,
+          kcl_amp:1,
+          kcl_ml:10,
+          vol_total:1040,
+          ml_h:1040/24,
+          gtt_min:(1040*20)/1440,
+        };
+        const tol = {
+          nacl_amp:0, nacl_ml:1,
+          kcl_amp:0,  kcl_ml:1,
+          vol_total:2,
+          ml_h:0.8,
+          gtt_min:1.2
+        };
+        let good=0, total=0;
+        let details=[];
+        for(const f of q.fields){
+          total++;
+          const got = v(f.key);
+          const target = exp[f.key];
+          const ok = Number.isFinite(got) && approxEqual(got, target, tol[f.key]);
+          if(ok) good++;
+          details.push(`${f.label} : ${ok ? "OK" : `attendu ≈ ${roundNice(target)} (tolérance)`}`);
+        }
+        const okAll = good===total;
+        const level = okAll ? "ok" : (good>=5 ? "warn":"bad");
+        const score = (good/total)*q.points;
+        return { ok: okAll, level, score, details, expectedHint:[
+          "NaCl 10% : 1 g / ampoule (10 mL) → 3 g = 3 ampoules = 30 mL",
+          "KCl 20% : 2 g / ampoule (10 mL) → 2 g = 1 ampoule = 10 mL",
+          "Volume total = 1040 mL ; mL/h ≈ 43,3 ; gtt/min (20 gtt/mL) ≈ 14–15"
+        ]};
+      }
+    },
+    {
+      id:"P17",
+      type:"open_multi",
+      points:2,
+      title:"Question 17 (2 pts) — Tension artérielle : normes et variations",
+      prompt:"Complète : (1) valeurs « normales » chez l’adulte (systolique + diastolique) ; (2) seuils d’HTA ; (3) seuils d’hypotension.",
+      fields:[
+        {key:"norme", label:"TA normale adulte (mmHg)", placeholder:"Ex: 100–145 / 50–85 mmHg"},
+        {key:"hta", label:"HTA (mmHg)", placeholder:"Ex: ≥150 / ≥90 mmHg (ou 15/9 cmHg)"},
+        {key:"hypo", label:"Hypotension (mmHg)", placeholder:"Ex: <90 / <50 mmHg (ou 9/5 cmHg)"},
+      ],
+      check:(vals,q)=>{
+        function nums(s){
+          const t = norm(s);
+          return (t.match(/(\d+([.,]\d+)?)/g) || []).map(x=>Number(x.replace(",","."))).filter(x=>Number.isFinite(x));
+        }
+        function anyBetween(arr, lo, hi){
+          return arr.some(v=>v>=lo && v<=hi);
+        }
+        function anyApprox(arr, target, tol){
+          return arr.some(v=>approxEqual(v, target, tol));
+        }
+        // Norme : on veut retrouver l’idée "100–145 / 50–85"
+        const nN = nums(vals.norme||"");
+        const sysOk = anyBetween(nN, 100, 145);
+        const diaOk = anyBetween(nN, 50, 85);
+        const normeOk = sysOk && diaOk;
+
+        // HTA : ≥150 et/ou ≥90 (ou 15/9 en cmHg)
+        const hN = nums(vals.hta||"");
+        const htaOk = (anyBetween(hN,150,170) && anyBetween(hN,90,105)) || (anyBetween(hN,15,17) && anyBetween(hN,9,11));
+
+        // Hypotension : <90 et/ou <50 (ou 9/5 en cmHg)
+        const pN = nums(vals.hypo||"");
+        const hypoOk = (anyBetween(pN,80,90) && anyBetween(pN,45,50)) || (anyBetween(pN,8,9) && anyBetween(pN,4.5,5.5));
+
+        const okAll = normeOk && htaOk && hypoOk;
+        const good = [normeOk, htaOk, hypoOk].filter(Boolean).length;
+        const level = okAll ? "ok" : (good>=2 ? "warn":"bad");
+        const score = (good/3)*q.points;
+
+        const details = [
+          normeOk ? "Normes : OK (systolique + diastolique repérées)." : "Normes : vise ~100–145 / 50–85 mmHg.",
+          htaOk ? "HTA : OK (≥150 / ≥90 repéré)." : "HTA : vise ≥150 / ≥90 mmHg (ou 15/9 cmHg).",
+          hypoOk ? "Hypotension : OK (<90 / <50 repéré)." : "Hypotension : vise <90 / <50 mmHg (ou 9/5 cmHg).",
+        ];
+        return { ok: okAll, level, score, details, expectedHint:[
+          "Normotension adulte (cours) : systolique ~100–145 mmHg ; diastolique ~50–85 mmHg",
+          "HTA : systolique ≥150 mmHg et diastolique ≥90 mmHg",
+          "Hypotension : systolique <90 mmHg et diastolique <50 mmHg"
+        ]};
+      }
+    },
+    {
+      id:"P18",
+      type:"open_set",
+      points:1,
+      title:"Question 18 (1 pt) — Brassard TA : contre-indications",
+      prompt:"Cite 3 contre-indications à la pose d’un brassard de tension sur un bras.",
+      minNeeded:3,
+      items:[
+        {id:"curage", label:"Curage ganglionnaire (risque de lymphœdème)", keywords:["curage","ganglionnaire","axillaire","mastectomie","sein","lymphoedeme"]},
+        {id:"fistule", label:"Fistule artério-veineuse (dialyse)", keywords:["fistule","arterio veineuse","dialyse"]},
+        {id:"plaie", label:"État cutané altéré (plaie…)", keywords:["plaie","etat cutane","lesion","brulure","infection","dermatose"]},
+      ],
+      placeholder:"Ex: curage ganglionnaire, fistule AV, plaie/état cutané altéré…",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=2 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Éléments repérés : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P19",
+      type:"open_set",
+      points:2,
+      title:"Question 19 (2 pts) — Prise de TA : technique (points clés)",
+      prompt:"Cite 6 points clés pour une prise de tension artérielle fiable (installation + brassard + méthode + lecture).",
+      minNeeded:6,
+      items:[
+        {id:"repos10", label:"Patient informé + repos ≥ 10 min", keywords:["informe","averti","repos","10 min","dix minutes"]},
+        {id:"brascoeur", label:"Bras au niveau du cœur, soutenu", keywords:["niveau du coeur","hauteur du coeur","bras repose","soutenu","plan"]},
+        {id:"pascomp", label:"Pas de compression en amont (vêtement…)", keywords:["compression","vetement","manche","pas de compression"]},
+        {id:"brassardpos", label:"Brassard adapté + poche sur artère humérale, bord à 2 travers de doigt du pli", keywords:["brassard","taille","adapte","poche gonflable","artere humerale","2 travers","deux travers","pli du coude"]},
+        {id:"gonfler", label:"Gonfler jusqu’à disparition du pouls radial", keywords:["gonfler","disparition","pouls radial","silence"]},
+        {id:"degonfler", label:"Dégonfler lentement et régulièrement", keywords:["degonfler","progressivement","lentement","regulier"]},
+        {id:"lecture", label:"1er bruit = systolique ; dernier bruit = diastolique", keywords:["premier bruit","1er bruit","systolique","maxima","dernier bruit","diastolique","minima"]},
+        {id:"environnement", label:"Environnement calme + matériel OK", keywords:["bruyant","calme","materiel","defectueux","fuite","manometre"]},
+      ],
+      placeholder:"Ex: repos 10 min, bras au niveau du cœur, brassard adapté et bien placé, gonfler jusqu’à disparition pouls radial, dégonfler lentement, 1er bruit=systolique, dernier=diastolique…",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=4 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Points clés repérés : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+    {
+      id:"P20",
+      type:"open_set",
+      points:1.5,
+      title:"Question 20 (1,5 pt) — Respiration : norme et méthode",
+      prompt:"Cite 5 éléments à connaître pour mesurer la respiration (norme adulte + méthode d’observation).",
+      minNeeded:5,
+      items:[
+        {id:"cycle", label:"1 cycle = 1 inspiration + 1 expiration", keywords:["inspiration","expiration","cycle","mouvement"]},
+        {id:"norme", label:"Norme adulte : 12–20/min", keywords:["12","20","par minute","mvt","mvts","mouvements"]},
+        {id:"insu", label:"Mesure de préférence à l’insu du patient", keywords:["a l insu","insu","sans le dire","discret"]},
+        {id:"repos", label:"Patient au repos ≥ 10 min", keywords:["repos","10 min","dix minutes"]},
+        {id:"obs", label:"Observer le thorax (ou main sur thorax) + compter", keywords:["observer","thorax","se soulever","compter","main sur le thorax","paume"]},
+        {id:"sym", label:"Vérifier symétrie des hémithorax", keywords:["symetrique","hemithorax","mobilite"]},
+        {id:"cyanose", label:"Surveiller coloration extrémités (cyanose)", keywords:["bleu","violet","cyanose","extremites","manque d o2"]},
+      ],
+      placeholder:"Ex: 12–20/min adulte, 1 cycle = insp+exp, au repos 10 min, à l’insu, observer le thorax et compter, vérifier symétrie, repérer cyanose…",
+      check:(ans,q)=>{
+        const s=scoreSetAnswer(ans,q.items,q.minNeeded);
+        const ok=s.ok;
+        const level = ok ? "ok" : (s.got>=3 ? "warn":"bad");
+        return { ok, level, score: Math.min(s.got,q.minNeeded)/q.minNeeded*q.points, details:[`Éléments repérés : ${s.got}/${q.minNeeded}.`], expectedHint:q.items.map(x=>x.label) };
+      }
+    },
+
+  ];
+}
+
+// QCM + VF question builders
+function makeQcmQuestions(){
+  return [
+    {
+      id:"QCM1",
+      type:"mcq",
+      points:1,
+      title:"QCM — Qualité du soin",
+      prompt:"Quels éléments font partie des critères de qualité d’un soin ? (plusieurs réponses possibles)",
+      multi:true,
+      options:[
+        {id:"a", text:"Sécurité", correct:true},
+        {id:"b", text:"Efficacité", correct:true},
+        {id:"c", text:"Pertinence / adaptation", correct:true},
+        {id:"d", text:"Confort / respect de la personne", correct:true},
+        {id:"e", text:"Continuité / traçabilité", correct:true},
+        {id:"g", text:"Économie", correct:true},
+        {id:"f", text:"Hasard / improvisation", correct:false},
+      ],
+      explain:"Critères classiques : sécurité, efficacité, pertinence, confort/respect, continuité/traçabilité, économie."
+    },
+    {
+      id:"QCM2",
+      type:"mcq",
+      points:1,
+      title:"QCM — Conformité d’une prescription (5 domaines)",
+      prompt:"Dans la vérification de conformité d’une prescription, quels domaines sont classiquement retenus ? (plusieurs réponses possibles)",
+      multi:true,
+      options:[
+        {id:"a", text:"Patient", correct:true},
+        {id:"b", text:"Prescripteur", correct:true},
+        {id:"c", text:"Support (papier/informatisé)", correct:true},
+        {id:"d", text:"Réglementation/législation", correct:true},
+        {id:"e", text:"Objet de la prescription (médicament / examen / soin)", correct:true},
+        {id:"f", text:"Couleur du stylo", correct:false},
+      ],
+      explain:"Synthèse fréquente : patient / prescripteur / support / réglementation / objet."
+    },
+    {
+      id:"QCM3",
+      type:"mcq",
+      points:1,
+      title:"QCM — Règle des 5B",
+      prompt:"La règle des 5B comprend :",
+      multi:false,
+      options:[
+        {id:"a", text:"Bon patient, bon médicament, bonne dose, bonne voie, bon moment", correct:true},
+        {id:"b", text:"Bonne humeur, bonne hygiène, bon repas, bonne sieste, bon café", correct:false},
+        {id:"c", text:"Bon prescripteur, bon logiciel, bon code-barres, bon chariot, bon pansement", correct:false},
+      ],
+      explain:"Les 5B = patient / médicament / dose / voie / moment."
+    },
+    {
+      id:"QCM4",
+      type:"mcq",
+      points:1,
+      title:"QCM — Posologie vs dosage (piège)",
+      prompt:"Quelle proposition est correcte ?",
+      multi:false,
+      options:[
+        {id:"a", text:"Le dosage = modalités d’administration (dose + fréquence + durée).", correct:false},
+        {id:"b", text:"La posologie = quantité de principe actif par comprimé.", correct:false},
+        {id:"c", text:"Le dosage = quantité de principe actif par unité (ex: 500 mg/comprimé).", correct:true},
+        {id:"d", text:"La dose = ce qui est écrit sur la boîte, jamais ce qui est administré.", correct:false},
+      ],
+      explain:"Dosage = PA par unité/volume ; dose = quantité administrée ; posologie = dose + fréquence + durée."
+    },
+    {
+      id:"QCM5",
+      type:"mcq",
+      points:1,
+      title:"QCM — Saturométrie (pratique)",
+      prompt:"Qu’est-ce qui peut fausser une mesure de SpO₂ ? (plusieurs réponses possibles)",
+      multi:true,
+      options:[
+        {id:"a", text:"Vernis à ongles", correct:true},
+        {id:"b", text:"Mouvements du patient", correct:true},
+        {id:"c", text:"Main froide / mauvaise circulation périphérique", correct:true},
+        {id:"d", text:"Compression en amont (ex: brassard TA du même côté)", correct:true},
+        {id:"e", text:"Un capteur bien placé, patient immobile", correct:false},
+      ],
+      explain:"Tout ce qui perturbe le signal pulsatile ou la transmission (mouvements, froid, compression, vernis…)."
+    },
+    {
+      id:"QCM6",
+      type:"mcq",
+      points:1,
+      title:"QCM — Prélèvement veineux : bras à éviter",
+      prompt:"Sur quel(s) membre(s) faut-il éviter de prélever en priorité ? (plusieurs réponses possibles)",
+      multi:true,
+      options:[
+        {id:"a", text:"Bras avec fistule artério-veineuse (dialyse)", correct:true},
+        {id:"b", text:"Bras du côté d’un curage ganglionnaire/mastectomie", correct:true},
+        {id:"c", text:"Bras avec perfusion/KT en place", correct:true},
+        {id:"d", text:"Bras avec hématome important / plâtre", correct:true},
+        {id:"e", text:"Bras non-dominant (toujours interdit)", correct:false},
+      ],
+      explain:"On protège le capital veineux et on évite les situations à risque (fistule, curage, perf/KT, lésions…)."
+    },
+    {
+      id:"QCM7",
+      type:"mcq",
+      points:1,
+      title:"QCM — Traçabilité (objectifs)",
+      prompt:"La traçabilité sert notamment à : (plusieurs réponses possibles)",
+      multi:true,
+      options:[
+        {id:"a", text:"Assurer continuité et coordination", correct:true},
+        {id:"b", text:"Réduire erreurs/oubli/doublons", correct:true},
+        {id:"c", text:"Fournir une preuve médico-légale", correct:true},
+        {id:"d", text:"Améliorer qualité (audit/indicateurs)", correct:true},
+        {id:"e", text:"Remplacer le consentement du patient", correct:false},
+      ],
+      explain:"Traçabilité = continuité + sécurité + preuve + qualité (entre autres)."
+    },
+    {
+      id:"QCM8",
+      type:"mcq",
+      points:1,
+      title:"QCM — Ordonnance : infos prescripteur (dur)",
+      prompt:"Quels éléments sont des informations obligatoires liées au prescripteur (en général) ? (plusieurs réponses possibles)",
+      multi:true,
+      options:[
+        {id:"a", text:"Nom + prénom", correct:true},
+        {id:"b", text:"Qualité (médecin, sage-femme…)", correct:true},
+        {id:"c", text:"Signature", correct:true},
+        {id:"d", text:"Date", correct:true},
+        {id:"e", text:"Numéro d’identification", correct:true},
+        {id:"f", text:"Groupe sanguin du patient", correct:false},
+      ],
+      explain:"Selon supports : identité/qualité/numéro + signature + date (+ service/unité à l’hôpital)."
+    },
+    {
+      id:"QCM9",
+      type:"mcq",
+      points:1,
+      title:"QCM — Tension artérielle : normes et seuils",
+      prompt:"Coche les propositions justes (plusieurs réponses possibles).",
+      multi:true,
+      options:[
+        {id:"a", text:"Chez l’adulte, une TA systolique « normale » est environ entre 100 et 145 mmHg.", correct:true},
+        {id:"b", text:"Chez l’adulte, une TA diastolique « normale » est environ entre 50 et 85 mmHg.", correct:true},
+        {id:"c", text:"On parle d’HTA quand la systolique est ≥150 mmHg ET la diastolique ≥90 mmHg.", correct:true},
+        {id:"d", text:"Hypotension : systolique <90 mmHg et/ou diastolique <50 mmHg.", correct:true},
+        {id:"e", text:"La TA se note classiquement sous la forme : diastolique / systolique.", correct:false},
+      ],
+      explain:"Cours : normotension ≈ 100–145 / 50–85 mmHg ; HTA si ≥150/90 ; hypotension si <90/<50."
+    },
+    {
+      id:"QCM10",
+      type:"mcq",
+      points:1,
+      title:"QCM — Brassard TA : contre-indications",
+      prompt:"Quelles situations contre-indiquent la pose d’un brassard sur ce bras ?",
+      multi:true,
+      options:[
+        {id:"a", text:"Curage ganglionnaire", correct:true},
+        {id:"b", text:"Fistule artério-veineuse (dialyse)", correct:true},
+        {id:"c", text:"Plaie / état cutané altéré", correct:true},
+        {id:"d", text:"Bras au repos depuis 10 min", correct:false},
+      ],
+      explain:"Dans le cours : curage ganglionnaire, fistule AV, état cutané altéré (plaie…)."
+    },
+    {
+      id:"QCM11",
+      type:"mcq",
+      points:1,
+      title:"QCM — Prise de TA : causes d’erreur fréquentes",
+      prompt:"Quelles causes peuvent fausser la mesure ? (plusieurs réponses possibles)",
+      multi:true,
+      options:[
+        {id:"a", text:"Matériel défectueux (fuite…), taille de brassard inadaptée", correct:true},
+        {id:"b", text:"Dégonflage trop rapide ou saccadé", correct:true},
+        {id:"c", text:"Environnement bruyant", correct:true},
+        {id:"d", text:"Artère humérale calcifiée (mesure difficile/impossible)", correct:true},
+        {id:"e", text:"Mettre le bras au niveau du cœur", correct:false},
+      ],
+      explain:"Cours : matériel/brassard, dégonflage, bruit, artère calcifiée, etc."
+    },
+    {
+      id:"QCM12",
+      type:"mcq",
+      points:1,
+      title:"QCM — Pouls : artères et urgence",
+      prompt:"À propos de la palpation du pouls, coche le vrai.",
+      multi:false,
+      options:[
+        {id:"a", text:"Le pouls radial est un pouls central.", correct:false},
+        {id:"b", text:"Le pouls carotidien et le pouls fémoral sont des pouls centraux utiles en urgence vitale.", correct:true},
+        {id:"c", text:"La bradycardie correspond à une FC > 100/min chez l’adulte.", correct:false},
+        {id:"d", text:"La tachycardie correspond à une FC < 60/min chez l’adulte.", correct:false},
+      ],
+      explain:"Cours : bradycardie <60/min ; tachycardie >100/min. En urgence, pouls centraux : carotidien (et fémoral)."
+    },
+    {
+      id:"QCM13",
+      type:"mcq",
+      points:1,
+      title:"QCM — Respiration : norme adulte",
+      prompt:"Quelle est la norme de fréquence respiratoire chez l’adulte au repos ?",
+      multi:false,
+      options:[
+        {id:"a", text:"5–10 mouvements/min", correct:false},
+        {id:"b", text:"12–20 mouvements/min", correct:true},
+        {id:"c", text:"25–35 mouvements/min", correct:false},
+        {id:"d", text:"40–60 mouvements/min", correct:false},
+      ],
+      explain:"Cours : fréquence respiratoire normale adulte ≈ 12–20/min."
+    },
+    {
+      id:"QCM14",
+      type:"mcq",
+      points:1,
+      title:"QCM — Oxymétrie : SpO₂ vs SaO₂",
+      prompt:"Quelle proposition décrit correctement SpO₂ et SaO₂ ?",
+      multi:false,
+      options:[
+        {id:"a", text:"SpO₂ est mesurée par gaz du sang artériel ; SaO₂ par oxymètre de pouls.", correct:false},
+        {id:"b", text:"SpO₂ est une estimation non invasive par oxymètre ; SaO₂ est mesurée de façon fiable par gaz du sang.", correct:true},
+        {id:"c", text:"SpO₂ correspond à la température corporelle.", correct:false},
+        {id:"d", text:"SaO₂ se mesure au niveau d’une veine périphérique.", correct:false},
+      ],
+      explain:"Cours : SpO₂ = saturation pulsée estimée par oxymètre ; SaO₂ = mesure fiable par gaz du sang (prélèvement artériel)."
+    },
+    {
+      id:"QCM15",
+      type:"mcq",
+      points:1,
+      title:"QCM — Température : normal et fièvre",
+      prompt:"Coche les propositions justes (plusieurs réponses possibles).",
+      multi:true,
+      options:[
+        {id:"a", text:"Température physiologique matin : ~36,5 à 37°C ; soir : ~37 à 37,5°C.", correct:true},
+        {id:"b", text:"Hyperthermie/fièvre : température > 38°C.", correct:true},
+        {id:"c", text:"Hypothermie : température toujours > 38°C.", correct:false},
+        {id:"d", text:"La mesure tympanique est rapide et reflète assez bien la température centrale si bien réalisée.", correct:true},
+      ],
+      explain:"Cours : valeurs physiologiques matin/soir ; fièvre >38°C ; tympanique rapide et plutôt fiable si correctement placée."
+    },
+
+  ];
+}
+
+function makeVfQuestions(){
+  return [
+    {
+      id:"VF1",
+      type:"tf_block",
+      points:1,
+      title:"Vrai/Faux — Hygiène/soins de confort",
+      prompt:"Coche Vrai ou Faux.",
+      statements:[
+        {id:"a", text:"En toilette, on va toujours du plus propre vers le plus sale.", answer:true},
+        {id:"b", text:"ORR signifie Organisation – Réalisation – Relation.", answer:true},
+        {id:"c", text:"Prévenir l’escarre = uniquement mettre un pansement.", answer:false},
+        {id:"d", text:"Le changement de position aide à prévenir les escarres.", answer:true},
+        {id:"e", text:"La confidentialité fait partie du respect de la dignité.", answer:true},
+      ]
+    },
+    {
+      id:"VF2",
+      type:"tf_block",
+      points:1,
+      title:"Vrai/Faux — Constantes vitales (pièges)",
+      prompt:"Coche Vrai ou Faux.",
+      statements:[
+        {id:"a", text:"FR adulte normale ≈ 12–20/min.", answer:true},
+        {id:"b", text:"Bradycardie adulte = FC < 60/min.", answer:true},
+        {id:"c", text:"SpO₂ normale est généralement entre 95 et 99%.", answer:true},
+        {id:"d", text:"Un pouls inexistant peut évoquer un arrêt cardiaque.", answer:true},
+        {id:"e", text:"On mesure la respiration de préférence à l’insu du patient.", answer:true},
+      ]
+    },
+    {
+      id:"VF3",
+      type:"tf_block",
+      points:1,
+      title:"Vrai/Faux — Administration médicamenteuse",
+      prompt:"Coche Vrai ou Faux.",
+      statements:[
+        {id:"a", text:"En cas de doute sur une prescription, on administre quand même pour ne pas retarder le soin.", answer:false},
+        {id:"b", text:"« Celui qui prépare administre » (principe de sécurisation).", answer:true},
+        {id:"c", text:"La traçabilité après administration fait partie de la sécurité des soins.", answer:true},
+        {id:"d", text:"Une interaction médicamenteuse est toujours bénéfique.", answer:false},
+      ]
+    },
+    {
+      id:"VF4",
+      type:"tf_block",
+      points:1,
+      title:"Vrai/Faux — KT/perfusion (service)",
+      prompt:"Coche Vrai ou Faux.",
+      statements:[
+        {id:"a", text:"On attend le séchage complet de l’antiseptique avant ponction.", answer:true},
+        {id:"b", text:"Le mandrin peut être reposé sur le chariot si on le recapuchonne.", answer:false},
+        {id:"c", text:"Le pansement doit rester propre/occlusif/étanche et daté.", answer:true},
+        {id:"d", text:"Une extravasation fait partie des risques à surveiller.", answer:true},
+      ]
+    },
+    {
+      id:"VF5",
+      type:"tf_block",
+      points:1,
+      title:"Vrai/Faux — Signes vitaux (pouls / TA)",
+      prompt:"Coche Vrai ou Faux.",
+      statements:[
+        {id:"a", text:"Bradycardie chez l’adulte : fréquence cardiaque < 60/min.", answer:true},
+        {id:"b", text:"Tachycardie chez l’adulte : fréquence cardiaque > 100/min.", answer:true},
+        {id:"c", text:"Le pouls augmente en moyenne de 15 à 20 pulsations par degré Celsius lors d’une fièvre.", answer:true},
+        {id:"d", text:"Pouls radial palpable ⇒ tension systolique > 8 (en cmHg, selon le cours).", answer:true},
+        {id:"e", text:"Pour prendre un pouls, on utilise de préférence le pouce.", answer:false},
+      ]
+    },
+    {
+      id:"VF6",
+      type:"tf_block",
+      points:1,
+      title:"Vrai/Faux — Température",
+      prompt:"Coche Vrai ou Faux.",
+      statements:[
+        {id:"a", text:"En général, la température est plus élevée le soir que le matin.", answer:true},
+        {id:"b", text:"La mesure tympanique est rapide (≈ 2 secondes) et plutôt fiable si l’embout est bien orienté dans le CAE.", answer:true},
+        {id:"c", text:"La mesure cutanée frontale est totalement adaptée en milieu hospitalier.", answer:false},
+        {id:"d", text:"L’hyperthermie correspond à une température > 38°C.", answer:true},
+        {id:"e", text:"L’hypothermie peut se situer entre ~32°C et 36°C.", answer:true},
+      ]
+    },
+    {
+      id:"VF7",
+      type:"tf_block",
+      points:1,
+      title:"Vrai/Faux — Respiration / oxymétrie",
+      prompt:"Coche Vrai ou Faux.",
+      statements:[
+        {id:"a", text:"1 cycle respiratoire = 1 inspiration + 1 expiration.", answer:true},
+        {id:"b", text:"La fréquence respiratoire normale chez l’adulte est d’environ 12 à 20 mouvements/min.", answer:true},
+        {id:"c", text:"La respiration se mesure de préférence à l’insu de la personne soignée.", answer:true},
+        {id:"d", text:"SpO₂ est la saturation pulsée estimée par oxymètre ; SaO₂ est mesurée de façon fiable par gaz du sang.", answer:true},
+        {id:"e", text:"Une coloration bleue/violette des extrémités peut évoquer un manque d’oxygène.", answer:true},
+      ]
+    },
+
+  ];
+}
+
+function makeMixQuestions(){
+  const partiel = makePartielQuestions();
+  const qcm = makeQcmQuestions();
+  const vf = makeVfQuestions();
+  return [
+    partiel.find(x=>x.id==="P5"),
+    partiel.find(x=>x.id==="P8"),
+    partiel.find(x=>x.id==="P9"),
+    partiel.find(x=>x.id==="P14"),
+    qcm.find(x=>x.id==="QCM2"),
+    qcm.find(x=>x.id==="QCM5"),
+    qcm.find(x=>x.id==="QCM8"),
+    vf.find(x=>x.id==="VF2"),
+    vf.find(x=>x.id==="VF3"),
+  ].filter(Boolean);
+}
+
+
+function makeCasVitauxQuestions(){
+  // Objectif : repérer les constantes "pas bonnes" (hors normes / préoccupantes) dans un contexte donné.
+  // Rappel cours : en cas de fièvre, la FC augmente d’environ +15 à +20 bpm par °C.
+  const baseOptions = (vals)=>[
+    {id:"temp", text:`Température : ${vals.t} °C`, correct: vals.bad.includes("temp")},
+    {id:"fc",   text:`FC : ${vals.fc} bpm`, correct: vals.bad.includes("fc")},
+    {id:"fr",   text:`FR : ${vals.fr} /min`, correct: vals.bad.includes("fr")},
+    {id:"ta",   text:`TA : ${vals.ta}`, correct: vals.bad.includes("ta")},
+    {id:"spo2", text:`SpO₂ : ${vals.spo2}%`, correct: vals.bad.includes("spo2")},
+  ];
+
+  return [
+    {
+      id:"VIT1",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 1",
+      prompt:"Patiente 34 ans, frissons, T° 39,0°C. Repère les constantes préoccupantes.",
+      multi:true,
+      options: baseOptions({t:"39,0", fc:108, fr:18, ta:"120/75", spo2:97, bad:["temp","fc"]}),
+      explain:"Fièvre (>38°C). FC élevée : la fièvre augmente la FC d’environ +15 à +20 bpm par °C ; à 39°C, une FC ~100–110 peut s’observer, mais reste à surveiller."
+    },
+    {
+      id:"VIT2",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 2",
+      prompt:"Homme 72 ans au repos, pas de douleur. Repère les constantes anormales.",
+      multi:true,
+      options: baseOptions({t:"36,7", fc:52, fr:16, ta:"132/78", spo2:97, bad:["fc"]}),
+      explain:"Bradycardie : FC <60 bpm chez l’adulte. À mettre en lien avec le contexte (sportif, bêtabloquants, malaise…)."
+    },
+    {
+      id:"VIT3",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 3",
+      prompt:"Femme 26 ans, anxieuse, respiration rapide. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"37,0", fc:96, fr:26, ta:"118/70", spo2:95, bad:["fr","fc"]}),
+      explain:"Tachypnée : FR >20/min chez l'adulte (élément clé ici). FC à 96 bpm : pas de tachycardie (<100), mais valeur au-dessus de la normale (60-80) donc à surveiller dans le contexte d'anxiété."
+    },
+    {
+      id:"VIT4",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 4",
+      prompt:"Homme 58 ans, dyspnée. Repère les constantes préoccupantes.",
+      multi:true,
+      options: baseOptions({t:"37,4", fc:102, fr:24, ta:"145/85", spo2:91, bad:["fc","fr","spo2"]}),
+      explain:"SpO₂ basse (hypoxémie). FR élevée (tachypnée). FC >100 = tachycardie. Priorité : alerter/transmettre + conduite selon protocole/service."
+    },
+    {
+      id:"VIT5",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 5",
+      prompt:"Homme 45 ans, sensation de malaise. Repère les constantes anormales.",
+      multi:true,
+      options: baseOptions({t:"36,6", fc:118, fr:22, ta:"88/48", spo2:97, bad:["fc","fr","ta"]}),
+      explain:"Hypotension (<90/<50 mmHg) + tachycardie + FR augmentée : tableau potentiellement grave (déshydratation, hémorragie, choc…)."
+    },
+    {
+      id:"VIT6",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 6",
+      prompt:"Patiente 80 ans, somnolente, peau froide. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"35,2", fc:58, fr:10, ta:"100/60", spo2:94, bad:["temp","fc","fr","spo2"]}),
+      explain:"Hypothermie (<36°C). Bradycardie possible (FC <60). Bradypnée (FR <12). SpO₂ limite (93–94% = à surveiller selon contexte)."
+    },
+    {
+      id:"VIT7",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 7",
+      prompt:"Homme 63 ans, céphalées, visage rouge. Repère les constantes anormales.",
+      multi:true,
+      options: baseOptions({t:"36,9", fc:84, fr:18, ta:"172/98", spo2:96, bad:["ta"]}),
+      explain:"HTA : TA ≥150/90 mmHg (selon cours). À transmettre, surveiller, rechercher signes associés."
+    },
+    {
+      id:"VIT8",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 8",
+      prompt:"Patiente 29 ans post-op, douleur 7/10. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"37,6", fc:112, fr:20, ta:"138/82", spo2:96, bad:["fc"]}),
+      explain:"Tachycardie (FC >100). Douleur, anxiété, fièvre, hypovolémie sont des causes possibles : corréler aux signes cliniques."
+    },
+    {
+      id:"VIT9",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 9",
+      prompt:"Homme 40 ans, fièvre modérée T° 38,5°C. Repère ce qui est préoccupant.",
+      multi:true,
+      options: baseOptions({t:"38,5", fc:110, fr:19, ta:"125/78", spo2:98, bad:["temp","fc"]}),
+      explain:"Fièvre (>38°C). Tachycardie : la fièvre augmente la FC d’environ +15 à +20 bpm/°C ; à 38,5°C, FC élevée attendue mais à surveiller (hydratation, douleur, sepsis…)."
+    },
+    {
+      id:"VIT10",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 10",
+      prompt:"Patiente 67 ans, BPCO connue, au repos. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"37,1", fc:92, fr:22, ta:"130/75", spo2:90, bad:["fr","spo2"]}),
+      explain:"SpO₂ basse. FR élevée. Chez certains patients BPCO, une SpO₂ cible peut être différente, mais 90% doit alerter et se discuter selon protocole."
+    },
+    {
+      id:"VIT11",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 11",
+      prompt:"Homme 52 ans, vertiges au lever. Repère les constantes anormales.",
+      multi:true,
+      options: baseOptions({t:"36,8", fc:64, fr:16, ta:"92/54", spo2:97, bad:["ta"]}),
+      explain:"TA basse (proche hypotension). Contexte de vertiges : vérifier position, hydratation, orthostatisme, transmettre."
+    },
+    {
+      id:"VIT12",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 12",
+      prompt:"Patiente 21 ans, crise d’angoisse. Repère les constantes préoccupantes.",
+      multi:true,
+      options: baseOptions({t:"36,9", fc:104, fr:30, ta:"128/76", spo2:99, bad:["fc","fr"]}),
+      explain:"Tachycardie et tachypnée possibles en anxiété. Toujours éliminer une cause organique si doute."
+    },
+    {
+      id:"VIT13",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 13",
+      prompt:"Homme 75 ans, fièvre, confusion. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"40,0", fc:124, fr:28, ta:"96/58", spo2:93, bad:["temp","fc","fr","ta","spo2"]}),
+      explain:"Hyperthermie majeure + tachycardie + tachypnée + TA basse + SpO₂ limite : suspicion d’infection grave/sepsis → alerte."
+    },
+    {
+      id:"VIT14",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 14",
+      prompt:"Femme 48 ans, douleur thoracique. Repère les constantes préoccupantes.",
+      multi:true,
+      options: baseOptions({t:"36,6", fc:110, fr:24, ta:"158/92", spo2:92, bad:["fc","fr","ta","spo2"]}),
+      explain:"Tachycardie + tachypnée + HTA + SpO₂ basse : situation à risque, transmettre/alerter immédiatement."
+    },
+    {
+      id:"VIT15",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 15",
+      prompt:"Homme 33 ans, sportif, au repos. Repère les constantes anormales.",
+      multi:true,
+      options: baseOptions({t:"36,5", fc:48, fr:12, ta:"118/68", spo2:98, bad:["fc"]}),
+      explain:"Bradycardie <60. Chez un sportif, cela peut être physiologique : à corréler à l’état clinique."
+    },
+    {
+      id:"VIT16",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 16",
+      prompt:"Femme 60 ans, nausées, sueurs. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"36,4", fc:58, fr:22, ta:"84/46", spo2:96, bad:["fc","fr","ta"]}),
+      explain:"Hypotension marquée + FR élevée + brady relative : possible malaise vagal, choc… surveillance + alerte selon état."
+    },
+    {
+      id:"VIT17",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 17",
+      prompt:"Homme 50 ans, douleur, agitation. Repère les constantes préoccupantes.",
+      multi:true,
+      options: baseOptions({t:"37,8", fc:128, fr:26, ta:"146/88", spo2:95, bad:["fc","fr"]}),
+      explain:"FC très élevée + FR élevée : peut être lié à douleur/anxiété, mais à surveiller et à transmettre."
+    },
+    {
+      id:"VIT18",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 18",
+      prompt:"Patiente 70 ans, somnolence après sédation. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"36,7", fc:72, fr:8, ta:"112/70", spo2:89, bad:["fr","spo2"]}),
+      explain:"Bradypnée + SpO₂ basse : risque de dépression respiratoire (médicamenteuse) → alerte."
+    },
+    {
+      id:"VIT19",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 19",
+      prompt:"Homme 64 ans, sans plainte, mais constantes au scope. Repère l’anomalie.",
+      multi:true,
+      options: baseOptions({t:"36,9", fc:102, fr:14, ta:"110/60", spo2:97, bad:["fc"]}),
+      explain:"Tachycardie (FC >100). Rechercher cause : fièvre, douleur, déshydratation, anxiété, arythmie, etc."
+    },
+    {
+      id:"VIT20",
+      type:"mcq",
+      points:1,
+      title:"Cas vitaux 20",
+      prompt:"Femme 55 ans, fièvre 38,9°C, frissons. Repère les constantes pas bonnes.",
+      multi:true,
+      options: baseOptions({t:"38,9", fc:105, fr:21, ta:"102/64", spo2:94, bad:["temp","fc","fr","spo2"]}),
+      explain:"Fièvre + FC élevée (≈ +15–20 bpm/°C) + FR >20 + SpO₂ limite : tableau à surveiller de près et à transmettre."
+    },
+  ];
+}
+
+function makeCasPMQuestions(){
+  // Objectif : valider la conformité d'une prescription selon 5 domaines :
+  // patient / prescripteur / support / réglementation / médicament (ou autre examen).
+  const yn = (ok)=>[
+    {id:"ok", text:"✅ Conforme", correct: ok===true},
+    {id:"no", text:"❌ Non conforme", correct: ok===false},
+  ];
+
+  const conduireSiDoute = "Si doute/incompréhension : ne pas administrer et faire clarifier la prescription avant d’exécuter (règle des 5B).";
+
+  return [
+    {
+      id:"PM1",
+      type:"mcq",
+      points:1,
+      title:"Prescription 1",
+      prompt:`═══════════════════════════════
+ORDONNANCE HOSPITALIÈRE
+CHU Saint-Antoine — Médecine Interne
+═══════════════════════════════
+
+Patient : DUPONT Léa
+Date de naissance : 05/03/1985
+
+Paris, le 15/01/2026
+
+Prescription :
+Paracétamol 1 g (comprimé)
+1 comprimé si douleur (max 3 g/24h)
+Voie orale
+Durée : 3 jours
+
+Dr MARTIN Sophie — Médecine Interne
+15/01/2026 [signature + tampon]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme : prescription exploitable.",
+        "Support identifiable (établissement + service).",
+        "Patient identifié (nom + date de naissance/âge).",
+        "Médicament complet : nom, dosage, forme, posologie, voie, durée.",
+        "Prescripteur + date + signature présents."
+      ]
+    },
+    {
+      id:"PM2",
+      type:"mcq",
+      points:1,
+      title:"Prescription 2",
+      prompt:`Dr LEFEBVRE Thomas — Médecine générale
+18 avenue Victor Hugo — 69003 Lyon
+
+Patient : ROUSSEAU Marc
+Né le : 18/11/1972
+
+Lyon, le 20/01/2026
+
+Ordonnance :
+Doliprane (Paracétamol) 1 g — comprimé
+1 comprimé matin et soir
+Voie orale
+
+Dr LEFEBVRE Thomas
+20/01/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine médicament : durée de traitement absente (information obligatoire).",
+        "Conséquence : impossible de savoir quand arrêter / quantité totale → risque d’erreur d’administration.",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM3",
+      type:"mcq",
+      points:1,
+      title:"Prescription 3",
+      prompt:`CHU de Lyon — Urgences
+
+Patient : BERNARD Sophie
+Née le : 22/07/1990
+N° dossier : 45782
+
+Lyon, le 12/01/2026
+
+Prescription :
+Amoxicilline 1 g (comprimé)
+1 comprimé x3/jour
+Durée : 7 jours
+
+Dr LEFEBVRE Thomas — Urgentiste
+12/01/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine médicament : voie d’administration absente.",
+        "Conséquence : la règle des 5B ne peut pas être validée (bonne voie / bon moment).",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM4",
+      type:"mcq",
+      points:1,
+      title:"Prescription 4",
+      prompt:`Hôpital Bichat — Réanimation
+
+Patient : MOREAU Thomas
+Date de naissance :
+
+Paris, le 15/01/2026
+
+Prescription :
+Sérum physiologique NaCl 0,9%
+500 mL en perfusion IV
+Sur 6 heures
+
+Dr DUPUIS Claire — Réanimation
+15/01/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine patient : identité incomplète (âge/date de naissance obligatoire).",
+        "Conséquence : risque d’erreur de patient → “bon patient” (5B) non sécurisé.",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM5",
+      type:"mcq",
+      points:1,
+      title:"Prescription 5",
+      prompt:`═══════════════════════════════
+PRESCRIPTION INFORMATISÉE
+Hôpital Européen Georges-Pompidou
+Cardiologie — Unité 2A
+═══════════════════════════════
+
+Patient : LAMBERT Claire
+Née le : 30/09/1965
+IPP : 7845123
+
+Date : 18/01/2026
+Prescripteur : Dr SIMON Marc — Cardiologie
+
+Prescription :
+Furosémide 20 mg (comprimé)
+1 comprimé le matin
+Voie orale
+Durée : 5 jours
+
+18/01/2026 — Validation électronique`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme : prescription informatisée complète.",
+        "Support identifiable + traçabilité (IPP, date, validation).",
+        "Médicament complet : nom, dosage, forme, posologie, voie, durée.",
+        "Prescripteur identifié + date/validation."
+      ]
+    },
+    {
+      id:"PM6",
+      type:"mcq",
+      points:1,
+      title:"Prescription 6",
+      prompt:`Cabinet Médical Dr GARNIER
+12 rue de la Santé — 75014 Paris
+Tél : 01 45 67 89 10
+
+Patient : PETIT Marie
+Née le : 14/02/1988
+
+Paris, le 20/01/2026
+
+Ordonnance :
+Ibuprofène 400 mg (comprimé)
+1 comprimé 3 fois par jour
+Voie orale
+Durée : 5 jours
+
+Dr GARNIER Paul — Médecin généraliste
+20/01/2026 [signature + tampon]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme.",
+        "Prescripteur : identité + date + signature.",
+        "Patient identifié.",
+        "Médicament complet (nom, dosage, forme, posologie, voie, durée)."
+      ]
+    },
+    {
+      id:"PM7",
+      type:"mcq",
+      points:1,
+      title:"Prescription 7",
+      prompt:`═══════════════════════════════
+ORDONNANCE SÉCURISÉE
+═══════════════════════════════
+Dr OLIVIER Alice — Anesthésie
+Hôpital Saint-Louis — Paris
+
+Patient : MARTIN Paul
+Né le : 12/03/1958
+
+Paris, le 02/02/2026
+
+Prescription :
+Morphine (sulfate) 10 mg — gélule
+1 gélule toutes les 4 heures si douleur
+Voie orale
+Durée : 7 jours
+
+Dr OLIVIER Alice
+02/02/2026 [signature]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme.",
+        "Médicament complet + voie + durée + conditions d’administration.",
+        "Support adapté pour un stupéfiant (ordonnance sécurisée).",
+        "Patient + prescripteur + date + signature présents."
+      ]
+    },
+    {
+      id:"PM8",
+      type:"mcq",
+      points:1,
+      title:"Prescription 8",
+      prompt:`Clinique du Parc — Endocrinologie
+
+Patient : GIRARD Isabelle
+Née le : 25/06/1975
+
+Toulouse, le 22/01/2026
+
+Prescription :
+Metformine 850 mg (comprimé)
+1 comprimé matin et soir
+Voie orale
+Durée : 1 mois
+
+Dr VINCENT Alexandre — Endocrinologue`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine prescripteur : absence de signature.",
+        "Conséquence : prescription non validée juridiquement / traçabilité insuffisante.",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM9",
+      type:"mcq",
+      points:1,
+      title:"Prescription 9",
+      prompt:`═══════════════════════════════
+CHU de Bordeaux — Pneumologie
+Service Pr. MERCIER — Bâtiment B2
+═══════════════════════════════
+
+Patient : ROUX Jean
+Né le : 08/04/1942
+
+Bordeaux, le 22/01/2026
+
+Prescription :
+Oxygénothérapie
+2 L/min par lunettes nasales
+Si SpO₂ < 92%
+À réévaluer quotidiennement
+
+Dr MERCIER Henri — Pneumologue
+22/01/2026 [signature + tampon]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme : prescription non médicamenteuse exploitable.",
+        "Support/service identifié + prescripteur daté et signé.",
+        "Objet de prescription précis : débit, dispositif, condition d’utilisation, réévaluation."
+      ]
+    },
+    {
+      id:"PM10",
+      type:"mcq",
+      points:1,
+      title:"Prescription 10",
+      prompt:`Dr BLANC Nicolas — Médecine générale
+18 avenue Victor Hugo — 69003 Lyon
+
+Patient : FAURE Anne
+Née le : 17/09/1981
+
+Lyon, le 24/01/2026
+
+Ordonnance :
+Augmentin 1 g (comprimé)
+1 comprimé
+Voie orale
+Durée : 7 jours
+
+Dr BLANC Nicolas
+24/01/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine médicament : posologie incomplète (fréquence/horaire manquant).",
+        "Conséquence : “bonne dose” et “bon moment” (5B) non sécurisables.",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM11",
+      type:"mcq",
+      points:1,
+      title:"Prescription 11",
+      prompt:`Hôpital Tenon — ORL
+
+Patient : CHEVALIER Luc
+Né le : 03/12/1968
+
+Paris, le 25/01/2026
+
+Prescription :
+Amoxicilline 500 mg — gélule
+1 gélule 3 fois par jour
+Voie orale
+Durée : 7 jours
+
+Dr MOREAU — ORL
+25/01/2026`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine prescripteur : signature absente.",
+        "Conséquence : prescription non validée / traçabilité insuffisante.",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM12",
+      type:"mcq",
+      points:1,
+      title:"Prescription 12",
+      prompt:`═══════════════════════════════
+PRESCRIPTION PERMANENTE
+Hôpital Pitié-Salpêtrière
+Diabétologie — Unité 3B
+═══════════════════════════════
+
+Patient : ANDRE Monique
+Née le : 11/05/1955
+Dossier : 88452
+
+Paris, le 26/01/2026
+
+Traitement chronique :
+Insuline rapide (Novorapid) — stylo
+6 unités en sous-cutané avant chaque repas
+Selon protocole diabète établi
+Durée : renouvelable
+
+Dr LEROY Camille — Diabétologie
+26/01/2026 [signature + validation]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme (prescription permanente).",
+        "Patient + support/service identifiés.",
+        "Médicament/protocole : produit, dose, voie, moment (avant repas) + cadre protocolaire.",
+        "Date + signature/validation présentes."
+      ]
+    },
+    {
+      id:"PM13",
+      type:"mcq",
+      points:1,
+      title:"Prescription 13",
+      prompt:`CHU de Nantes — Chirurgie digestive
+
+Patient : BAILLY Karim
+Né le : 19/10/1979
+
+Nantes, le 28/01/2026
+
+Prescription :
+KCl 10% 20 mL (ampoule)
+À diluer dans 500 mL NaCl 0,9%
+Voie IV
+
+Dr PICARD Julie — Chirurgie
+28/01/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine médicament : modalités d’administration incomplètes (durée/vitesse de perfusion manquante).",
+        "Conséquence : risque iatrogène (débit inadapté).",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM14",
+      type:"mcq",
+      points:1,
+      title:"Prescription 14",
+      prompt:`Maison de santé — Dr BENALI Sarah
+4 place du Marché — 13006 Marseille
+
+Patient : LOPEZ Diego
+Né le : 07/01/1999
+
+Marseille, le 30/01/2026
+
+Ordonnance :
+Crème hydrocortisone 1% (tube)
+Appliquer une fine couche matin et soir
+Voie cutanée
+Durée : 5 jours
+
+Dr BENALI Sarah
+30/01/2026 [signature + tampon]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme.",
+        "Médicament : produit + concentration, posologie, voie, durée.",
+        "Patient + prescripteur + date + signature présents."
+      ]
+    },
+    {
+      id:"PM15",
+      type:"mcq",
+      points:1,
+      title:"Prescription 15",
+      prompt:`Hôpital Saint-Louis — Rhumatologie
+
+Patient : DENIS Christophe
+Né le : 10/07/1983
+
+Paris, le 06/02/2026
+
+Traitement corticoïde :
+Prednisone 20 mg (comprimé)
+2 comprimés le matin à 8h
+Durée : 5 jours
+
+Dr LAMBERT Isabelle — Rhumatologie
+06/02/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine médicament : voie d’administration absente (même si “souvent” orale, elle doit être écrite).",
+        "Conséquence : règle des 5B non validable.",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM16",
+      type:"mcq",
+      points:1,
+      title:"Prescription 16",
+      prompt:`═══════════════════════════════
+Hôpital Nord — Médecine
+═══════════════════════════════
+
+Patient : DURAND Émilie
+Née le : 14/04/1962
+IPP : 5521901
+
+Lille, le 01/02/2026
+
+Prescription :
+Enoxaparine 4000 UI (seringue)
+1 injection en sous-cutané à 20h
+Durée : 10 jours
+
+Dr ROLLAND Nicolas — Médecine
+01/02/2026 [signature + tampon]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme.",
+        "Patient identifié (nom + date de naissance + IPP).",
+        "Médicament complet (dose, voie SC, moment, durée).",
+        "Support/service + prescripteur + date + signature."
+      ]
+    },
+    {
+      id:"PM17",
+      type:"mcq",
+      points:1,
+      title:"Prescription 17",
+      prompt:`CHU de Rennes — Infectiologie
+
+Patient :  LEMAIRE
+Né le : 09/09/1988
+
+Rennes, le 03/02/2026
+
+Prescription :
+Ceftriaxone 1 g (poudre)
+1 injection par jour
+Voie IV
+Durée : 3 jours
+
+Dr HENAULT Marc — Infectiologie
+03/02/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine patient : identité incomplète (prénom absent).",
+        "Conséquence : risque d’erreur de patient / traçabilité insuffisante.",
+        conduireSiDoute
+      ]
+    },
+    {
+      id:"PM18",
+      type:"mcq",
+      points:1,
+      title:"Prescription 18",
+      prompt:`Hôpital Cochin — Oncologie
+
+Patient : BOUVIER Claire
+Née le : 02/12/1970
+
+Paris, le 04/02/2026
+
+Prescription :
+Paracétamol 1 g IV
+À diluer dans 100 mL NaCl 0,9%
+Perfusion sur 15 minutes
+À renouveler si besoin (max 3 g/24h)
+
+Dr DUBOIS Alain — Oncologie
+04/02/2026 [signature + tampon]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme.",
+        "Médicament + voie + dilution + durée/vitesse : administration sécurisée.",
+        "Patient + prescripteur + date + signature présents."
+      ]
+    },
+    {
+      id:"PM19",
+      type:"mcq",
+      points:1,
+      title:"Prescription 19",
+      prompt:`═══════════════════════════════
+Cabinet Médical Dr MULLER — Cardiologie
+8 rue des Lilas — 67000 Strasbourg
+═══════════════════════════════
+
+Patiente : BERTRAND Nathalie
+Née le : 26/02/1969
+
+Strasbourg, le 05/02/2026
+
+Ordonnance :
+Metoprolol 25 mg (comprimé)
+1 comprimé le matin
+Voie orale
+Durée : 1 mois
+
+Dr MULLER Andreas — Cardiologue
+05/02/2026 [signature + tampon]`,
+      options: yn(true),
+      explain:[
+        "✅ Conforme.",
+        "Prescripteur identifié (qualité) + date + signature.",
+        "Patient identifié.",
+        "Médicament complet (nom, dosage, forme, posologie, voie, durée)."
+      ]
+    },
+    {
+      id:"PM20",
+      type:"mcq",
+      points:1,
+      title:"Prescription 20",
+      prompt:`CHU de Lille — Neurologie
+
+Patient : PERRIN Lucas
+Né le : 05/08/1995
+
+Lille, le 05/02/2026
+
+Prescription :
+Diazépam 10 mg (ampoule)
+1 ampoule IV lente
+Durée : 1 dose
+
+Dr HUGO Claire — Neurologie
+05/02/2026 [signature + tampon]`,
+      options: yn(false),
+      explain:[
+        "❌ Non conforme.",
+        "Domaine médicament : modalités d’administration incomplètes (débit/vitesse de l’IV lente non précisés).",
+        "Conséquence : risque d’effets indésirables par administration trop rapide.",
+        conduireSiDoute
+      ]
+    },
+  ];
+}
+
+
+
+const BANK = {
+  partiel: makePartielQuestions(),
+  qcm: makeQcmQuestions(),
+  vf: makeVfQuestions(),
+  mix: makeMixQuestions(),
+  cas_vitaux: makeCasVitauxQuestions(),
+  cas_pm: makeCasPMQuestions()
+};
+
+let currentTab = "partiel";
+let state = {
+  pmIndex: 0,
+  answers: {},
+  feedback: {},
+  shuffled: { partiel:false, qcm:false, vf:false, mix:false, cas_vitaux:false, cas_pm:false },
+  order: { partiel:[], qcm:[], vf:[], mix:[], cas_vitaux:[], cas_pm:[] }
+};
+
+function getQuestions(tab){
+  const base = BANK[tab].slice();
+  let doShuffle = document.getElementById("shuffle").checked;
+  if(tab === "cas_pm") doShuffle = true; // ordonnances : une par une, ordre aléatoire
+  if(!state.order[tab].length || state.shuffled[tab] !== doShuffle){
+    const ids = base.map(q=>q.id);
+    let order = ids.slice();
+    if(doShuffle) order.sort(()=>Math.random()-0.5);
+    state.order[tab] = order;
+    state.shuffled[tab] = doShuffle;
+  }
+  const map = new Map(base.map(q=>[q.id,q]));
+  return state.order[tab].map(id=>map.get(id)).filter(Boolean);
+}
+
+function labelType(t){
+  const map = {
+    open:"Réponse rédigée",
+    open_set:"Liste (ordre libre)",
+    open_set_plus_def:"Définition + liste",
+    open_two:"2 champs",
+    open_multi:"Définitions (multi)",
+    mcq:"QCM",
+    tf_block:"Vrai/Faux",
+    stage_sort:"Classement AVANT/PENDANT/APRÈS",
+    calc:"Calculs"
+  };
+  return map[t] || t;
+}
+
+function safePlaceholder(ph, kind){
+  if(!ph) return "";
+  const s = String(ph).trim();
+  // Retire les exemples ("Ex:") qui donnent souvent la réponse
+  if(/\bex\s*[:\n]/i.test(s) || /\bexemple\b/i.test(s) || s.toLowerCase().includes("ex:") || s.toLowerCase().startsWith("ex")){
+    return (kind==="textarea") ? "Écris ta réponse ici…" : "Réponse…";
+  }
+  return ph;
+}
+
+
+/* =========================
+   Ordonnances — rendu “papier” + navigation (cas_pm)
+========================= */
+function hash32(str){
+  // FNV-1a 32-bit
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function mulberry32(seed){
+  return function(){
+    let t = (seed += 0x6D2B79F5) >>> 0;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function isBorderLine(l){
+  const s = String(l||"").trim();
+  if(!s) return true;
+  if(/^[\u2550\u2500\u2501\u2502\u2551\u2014\u2013\-_=]{10,}$/.test(s)) return true;
+  if(/^═{3,}$/.test(s) || /^—{3,}$/.test(s)) return true;
+  return false;
+}
+function parseOrdonnanceText(txt){
+  let s = String(txt||"").replace(/\r/g,"");
+  let lines = s.split("\n").map(x=>x.replace(/\s+$/,"")).filter(x=>x.trim().length>0);
+  lines = lines.filter(l=>!isBorderLine(l));
+  const idxPatient = lines.findIndex(l=>/^patient\s*:/i.test(l.trim()));
+  const idxPresc = lines.findIndex(l=>/^(prescription|ordonnance)\s*:/i.test(l.trim()));
+  const idxDate = lines.findIndex(l=>/\ble\s*\d{2}\/\d{2}\/\d{4}\b/i.test(l));
+  let idxDoc = -1;
+  if(idxPresc >= 0){
+    idxDoc = lines.findIndex((l,i)=> i>idxPresc && /^\s*(dr|docteur|pr)\b/i.test(l.trim()));
+  }
+  if(idxDoc < 0){
+    idxDoc = lines.findIndex((l)=> /^\s*(dr|docteur|pr)\b/i.test(l.trim()));
+  }
+
+  const headerLines = (idxPatient>0 ? lines.slice(0, idxPatient) : lines.slice(0, 4)).slice(0, 5);
+
+  const patientEnd = (idxDate>=0 ? idxDate : (idxPresc>=0 ? idxPresc : (idxPatient>=0 ? idxPatient+2 : 0)));
+  const patientLines = (idxPatient>=0 ? lines.slice(idxPatient, patientEnd) : []);
+
+  const locDate = (idxDate>=0 ? lines[idxDate] : "");
+
+  const bodyStart = (idxPresc>=0 ? idxPresc+1 : (idxDate>=0 ? idxDate+1 : 0));
+  const bodyEnd = (idxDoc>=0 ? idxDoc : lines.length);
+  const bodyLines = lines.slice(bodyStart, bodyEnd);
+
+  const footerLinesRaw = (idxDoc>=0 ? lines.slice(idxDoc) : []);
+  const signature = /\bsignature\b/i.test(s);
+
+  // Nettoyage du footer : retire les marqueurs [signature ...]
+  const footerLines = footerLinesRaw
+    .map(l => l.replace(/\[[^\]]*signature[^\]]*\]/ig, "").trim())
+    .filter(Boolean);
+
+  return { headerLines, patientLines, locDate, bodyLines, footerLines, signature };
+}
+function makeSignatureSvg(seedKey){
+  const seed = hash32(String(seedKey||"sig"));
+  const rnd = mulberry32(seed);
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", "0 0 210 64");
+
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "rgba(0,0,0,0.78)");
+  path.setAttribute("stroke-width", "2.3");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+
+  // Génère une “signature” en 2–3 traits
+  const strokes = 2 + Math.floor(rnd()*2);
+  let d = "";
+  for(let s=0;s<strokes;s++){
+    const x0 = 14 + rnd()*30;
+    const y0 = 18 + rnd()*20;
+    d += `M ${x0.toFixed(1)} ${y0.toFixed(1)} `;
+    const segs = 10 + Math.floor(rnd()*10);
+    let x = x0, y = y0;
+    for(let i=0;i<segs;i++){
+      x += 10 + rnd()*14;
+      y += (rnd()-0.5)*14;
+      x = Math.min(200, Math.max(8, x));
+      y = Math.min(56, Math.max(8, y));
+      const cx = x - (6 + rnd()*10);
+      const cy = y + (rnd()-0.5)*10;
+      d += `Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)} `;
+    }
+  }
+  path.setAttribute("d", d.trim());
+  svg.appendChild(path);
+  return svg;
+}
+function renderOrdonnanceElement(txt, seedKey){
+  const data = parseOrdonnanceText(txt);
+
+  const paper = document.createElement("div");
+  paper.className = "ordo-paper";
+
+  const head = document.createElement("div");
+  head.className = "ordo-head";
+
+  const left = document.createElement("div");
+  left.className = "left";
+
+  // Première ligne très visible, le reste en “sous-titre”
+  if(data.headerLines.length){
+    const first = document.createElement("div");
+    first.textContent = data.headerLines[0];
+    left.appendChild(first);
+    for(let i=1;i<data.headerLines.length;i++){
+      const sub = document.createElement("div");
+      sub.className = "sub";
+      sub.textContent = data.headerLines[i];
+      left.appendChild(sub);
+    }
+  }
+
+  const right = document.createElement("div");
+  right.className = "right";
+  right.textContent = data.locDate || "";
+
+  head.appendChild(left);
+  head.appendChild(right);
+  paper.appendChild(head);
+
+  const rule = document.createElement("div");
+  rule.className = "ordo-rule";
+  paper.appendChild(rule);
+
+  // Patient
+  if(data.patientLines && data.patientLines.length){
+    const sec = document.createElement("div");
+    sec.className = "ordo-section";
+    const t = document.createElement("div");
+    t.className = "ordo-title";
+    t.textContent = "Patient";
+    sec.appendChild(t);
+
+    const lines = document.createElement("div");
+    lines.className = "ordo-lines";
+    for(const l of data.patientLines){
+      const d = document.createElement("div");
+      d.textContent = l;
+      lines.appendChild(d);
+    }
+    sec.appendChild(lines);
+    paper.appendChild(sec);
+  }
+
+  // Prescription
+  const sec2 = document.createElement("div");
+  sec2.className = "ordo-section";
+  const t2 = document.createElement("div");
+  t2.className = "ordo-title";
+  t2.textContent = "Prescription";
+  sec2.appendChild(t2);
+
+  const lines2 = document.createElement("div");
+  lines2.className = "ordo-lines";
+  for(const l of (data.bodyLines||[])){
+    const d = document.createElement("div");
+    d.textContent = l;
+    lines2.appendChild(d);
+  }
+  sec2.appendChild(lines2);
+  paper.appendChild(sec2);
+
+  // Footer (prescripteur + signature)
+  if((data.footerLines && data.footerLines.length) || data.signature){
+    const foot = document.createElement("div");
+    foot.className = "ordo-footer";
+
+    const doc = document.createElement("div");
+    doc.className = "doc";
+
+    let placedUnderName = false;
+    const fl = (data.footerLines||[]);
+    for(let i=0;i<fl.length;i++){
+      const l = fl[i];
+      const d = document.createElement("div");
+      d.textContent = l;
+      doc.appendChild(d);
+
+      // Si signature : gribouillis sous le nom du praticien (1ère ligne du footer)
+      if(i===0 && data.signature){
+        const ds = document.createElement("div");
+        ds.className = "doc-sig";
+        ds.appendChild(makeSignatureSvg((seedKey || "sig") + "_under"));
+        doc.appendChild(ds);
+        placedUnderName = true;
+      }
+    }
+
+    // Si on a une signature mais pas de ligne prescripteur, on la laisse dans le bloc de droite
+    foot.appendChild(doc);
+
+    const sig = document.createElement("div");
+    sig.className = "ordo-sig";
+    if(data.signature && !placedUnderName){
+      sig.appendChild(makeSignatureSvg(seedKey || "sig"));
+      foot.appendChild(sig);
+    }else if(!data.signature){
+      // laisse un espace “vide” sans écrire "signature"
+      const spacer = document.createElement("div");
+      spacer.style.width = "210px";
+      spacer.style.height = "64px";
+      sig.appendChild(spacer);
+      foot.appendChild(sig);
+    }
+
+    paper.appendChild(foot);
+  }
+
+  return paper;
+}
+function renderPromptElement(q){
+  if(currentTab === "cas_pm"){
+    return renderOrdonnanceElement(q.prompt, q.id);
+  }
+  const div = document.createElement("div");
+  div.textContent = q.prompt;
+  return div;
+}
+function casPmTotal(){
+  return getQuestions("cas_pm").length;
+}
+function casPmCurrent(){
+  const qs = getQuestions("cas_pm");
+  if(!qs.length) return null;
+  if(state.pmIndex < 0) state.pmIndex = 0;
+  if(state.pmIndex >= qs.length) return null;
+  return qs[state.pmIndex];
+}
+function goNextOrdonnance(){
+  const total = casPmTotal();
+  if(!total) return;
+  state.pmIndex = Math.min(state.pmIndex + 1, total);
+  window.scrollTo({top: 0, behavior: "smooth"});
+  render();
+}
+function restartOrdonnances(){
+  // reset deck + re-mélange
+  state.order["cas_pm"] = [];
+  state.pmIndex = 0;
+  const qs = BANK["cas_pm"] || [];
+  for(const q of qs){
+    delete state.answers[q.id];
+    delete state.feedback[q.id];
+  }
+  render();
+}
+
+function deriveMissingChecklist(q){
+  // Déduit une “checklist” de ce qui manque, à partir des explications (cas non conformes)
+  const exp = q.explain;
+  const txt = Array.isArray(exp) ? exp.join(" ") : (exp || "");
+  const t = stemish(txt);
+
+  const items = [];
+  const add = (id, label, keywords)=>{
+    if(items.some(x=>x.id===id)) return;
+    items.push({id, label, keywords});
+  };
+
+  // Patient / identité
+  if(/prenom\s*(manqu|absent)|absence\s*de\s*prenom/.test(t)) add("prenom","Prénom",["prenom","prénom"]);
+  if(/nom\s*(manqu|absent)|absence\s*de\s*nom/.test(t)) add("nom","Nom",["nom"]);
+  if(/date\s*de\s*naissance|ddn|age\s*(manqu|absent)|absence\s*de\s*(ddn|date\s*de\s*naissance)|absence\s*d\s*age/.test(t)) add("ddn","Âge / date de naissance",["age","âge","date de naissance","ddn","naissance"]);
+  if(/identif|ipp|nip/.test(t) && /manqu|absent/.test(t)) add("ipp","Identifiant (IPP/NIP)",["ipp","nip","identifiant"]);
+
+  // Prescripteur
+  if(/signature\s*(manqu|absent)|absence\s*de\s*signature/.test(t)) add("signature","Signature",["signature","signe","signer"]);
+  if(/absence\s*de\s*date|date\s*(manqu|absent)/.test(t)) add("date","Date",["date"]);
+
+  // Médicament / modalités
+  if(/voie\s*(manqu|absent)|absence\s*de\s*voie|voie\s*d\s*administration/.test(t)) add("voie","Voie d’administration",["voie","administration"]);
+  if(/posologie\s*(incomplet|manqu|absent)|frequence\s*(manqu|absent)|horaire\s*(manqu|absent)|moment\s*(manqu|absent)/.test(t)) add("posologie","Posologie / fréquence / horaire",["posologie","frequence","fréquence","horaire","fois","moment","matin","soir"]);
+  if(/duree\s*(manqu|absent)|absence\s*de\s*duree|quantite\s*totale/.test(t)) add("duree","Durée / quantité totale",["duree","durée","jours","semaines","mois","quantite","quantité","boite","boîte"]);
+  if(/dosage\s*(manqu|absent)|dose\s*(manqu|absent)|concentration\s*(manqu|absent)/.test(t)) add("dosage","Dosage / dose / quantité",["dosage","dose","quantite","quantité","mg","g","ml","ui","%","concentration"]);
+  if(/debit|vitesse|iv\s*lente|administration\s*incomplet/.test(t)) add("debit","Débit / vitesse",["debit","débit","vitesse","ml/h","goutte","gtt","iv","lente"]);
+
+  // Support / réglementation (large)
+  if(/support\s*(non\s*identif|absent)|ordonnance\s*securisee|stup/.test(t)) add("support","Support / réglementation",["support","securisee","sécurisée","ordonnance","stup","stupéfiant"]);
+
+  if(!items.length){
+    add("manquant","Éléments manquants",["manque","manquant","absent","incomplet"]);
+  }
+  return items;
+}
+
+
+function renderQuestionUI(q){
+  const wrap = document.createElement("div");
+  if(q.type === "open" || q.type === "open_set" || q.type === "open_set_plus_def"){
+    const ta = document.createElement("textarea");
+    ta.placeholder = safePlaceholder(q.placeholder, "textarea");
+    ta.value = state.answers[q.id] || "";
+    ta.oninput = ()=> { state.answers[q.id] = ta.value; };
+    wrap.appendChild(ta);
+  }
+  else if(q.type === "open_two"){
+    const box = document.createElement("div");
+    box.className = "twoCol";
+    const saved = state.answers[q.id] || {};
+    for(const f of q.fields){
+      const d = document.createElement("div");
+      const lab = document.createElement("div");
+      lab.className = "muted";
+      lab.style.marginBottom = "6px";
+      lab.textContent = f.label;
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = safePlaceholder(f.placeholder, "input");
+      inp.value = saved[f.key] || "";
+      inp.oninput = ()=>{
+        const cur = state.answers[q.id] || {};
+        cur[f.key] = inp.value;
+        state.answers[q.id] = cur;
+      };
+      d.appendChild(lab);
+      d.appendChild(inp);
+      box.appendChild(d);
+    }
+    wrap.appendChild(box);
+  }
+  else if(q.type === "open_multi"){
+    const box = document.createElement("div");
+    box.className = "twoCol";
+    const saved = state.answers[q.id] || {};
+    for(const f of q.fields){
+      const d = document.createElement("div");
+      const lab = document.createElement("div");
+      lab.className = "muted";
+      lab.style.marginBottom = "6px";
+      lab.textContent = f.label;
+      const ta = document.createElement("textarea");
+      ta.style.minHeight = "84px";
+      ta.placeholder = safePlaceholder(f.placeholder, "textarea");
+      ta.value = saved[f.key] || "";
+      ta.oninput = ()=>{
+        const cur = state.answers[q.id] || {};
+        cur[f.key] = ta.value;
+        state.answers[q.id] = cur;
+      };
+      d.appendChild(lab);
+      d.appendChild(ta);
+      box.appendChild(d);
+    }
+    wrap.appendChild(box);
+  }
+  else if(q.type === "mcq"){
+    const savedRaw = state.answers[q.id] || (q.multi ? [] : "");
+    let saved = savedRaw;
+    let missingText = "";
+
+    // Ordonnances (cas_pm) : sauvegarde enrichie {choice, missingText}
+    if(currentTab === "cas_pm" && !q.multi){
+      if(savedRaw && typeof savedRaw === "object"){
+        saved = savedRaw.choice || "";
+        missingText = savedRaw.missingText || "";
+      }else{
+        saved = savedRaw || "";
+      }
+    }
+
+    const choices = document.createElement("div");
+    choices.className = "choices";
+
+    for(const opt of q.options){
+      const lab = document.createElement("label");
+      lab.className = "choice";
+      const input = document.createElement("input");
+      input.type = q.multi ? "checkbox" : "radio";
+      input.name = q.id;
+
+      if(q.multi){
+        input.checked = saved.includes(opt.id);
+        input.onchange = ()=>{
+          let cur = state.answers[q.id] || [];
+          if(input.checked) cur = unique(cur.concat([opt.id]));
+          else cur = cur.filter(x=>x!==opt.id);
+          state.answers[q.id] = cur;
+        };
+      }else{
+        input.checked = (saved === opt.id);
+        input.onchange = ()=>{
+          if(currentTab === "cas_pm"){
+            const cur = state.answers[q.id];
+            const keep = (cur && typeof cur === "object") ? (cur.missingText || "") : "";
+            state.answers[q.id] = {choice: opt.id, missingText: keep};
+          }else{
+            state.answers[q.id] = opt.id;
+          }
+          render(); // pour afficher/masquer l'encart dynamiquement
+        };
+      }
+
+      const span = document.createElement("div");
+      span.innerHTML = `<div>${opt.text}</div>`;
+      lab.appendChild(input);
+      lab.appendChild(span);
+      choices.appendChild(lab);
+    }
+
+    wrap.appendChild(choices);
+
+    // Encart "ce qu'il manque" (uniquement ordonnances + si Non conforme choisi)
+    if(currentTab === "cas_pm" && !q.multi){
+      const choice = (savedRaw && typeof savedRaw === "object") ? (savedRaw.choice || "") : (saved || "");
+      const mt = (savedRaw && typeof savedRaw === "object") ? (savedRaw.missingText || "") : "";
+
+      if(choice === "no"){
+        const box = document.createElement("div");
+        box.className = "feedback warn";
+        box.style.marginTop = "12px";
+        box.innerHTML = `<div class="title">Ce qu'il manque (mots-clés suffisants)</div>
+          <div class="help" style="margin:6px 0 10px 0; font-style: normal;">
+            Tu peux tout écrire à la suite (ex : nom, etc.). Accents/ponctuation/ordre : on s'en fiche.
+          </div>`;
+        const ta = document.createElement("textarea");
+        ta.placeholder = "Ex : nom, etc.";
+        ta.value = mt;
+        ta.oninput = ()=>{
+          const cur = state.answers[q.id];
+          const base = (cur && typeof cur === "object") ? cur : {choice:"no", missingText:""};
+          base.missingText = ta.value;
+          state.answers[q.id] = base;
+        };
+        box.appendChild(ta);
+        wrap.appendChild(box);
+      }
+    }
+  }
+  else if(q.type === "tf_block"){
+    const saved = state.answers[q.id] || {};
+    const tbl = document.createElement("div");
+    tbl.className = "tableLike";
+    for(const st of q.statements){
+      const row = document.createElement("div");
+      row.className = "trow";
+      const left = document.createElement("div");
+      left.className = "tcell";
+      left.textContent = st.text;
+      const right = document.createElement("div");
+      right.className = "tcell right";
+      const sel = document.createElement("select");
+      sel.className = "select";
+      sel.innerHTML = `
+        <option value="">—</option>
+        <option value="true">Vrai</option>
+        <option value="false">Faux</option>
+      `;
+      sel.value = saved[st.id] ?? "";
+      sel.onchange = ()=>{
+        const cur = state.answers[q.id] || {};
+        cur[st.id] = sel.value;
+        state.answers[q.id] = cur;
+      };
+      right.appendChild(sel);
+      row.appendChild(left);
+      row.appendChild(right);
+      tbl.appendChild(row);
+    }
+    wrap.appendChild(tbl);
+  }
+  else if(q.type === "stage_sort"){
+    const saved = state.answers[q.id] || {};
+    const tbl = document.createElement("div");
+    tbl.className = "tableLike";
+    for(const it of q.items){
+      const row = document.createElement("div");
+      row.className = "trow";
+      const left = document.createElement("div");
+      left.className = "tcell";
+      left.textContent = it.text;
+      const right = document.createElement("div");
+      right.className = "tcell right";
+      const sel = document.createElement("select");
+      sel.className = "select";
+      sel.innerHTML = `
+        <option value="">—</option>
+        <option value="avant">AVANT</option>
+        <option value="pendant">PENDANT</option>
+        <option value="apres">APRÈS</option>
+      `;
+      sel.value = saved[it.id] ?? "";
+      sel.onchange = ()=>{
+        const cur = state.answers[q.id] || {};
+        cur[it.id] = sel.value;
+        state.answers[q.id] = cur;
+      };
+      right.appendChild(sel);
+      row.appendChild(left);
+      row.appendChild(right);
+      tbl.appendChild(row);
+    }
+    wrap.appendChild(tbl);
+  }
+  else if(q.type === "calc"){
+    const saved = state.answers[q.id] || {};
+    const box = document.createElement("div");
+    box.className = "twoCol";
+    for(const f of q.fields){
+      const d = document.createElement("div");
+      const lab = document.createElement("div");
+      lab.className = "muted";
+      lab.style.marginBottom = "6px";
+      lab.textContent = f.label;
+      const inp = document.createElement("input");
+      inp.type = "number";
+      inp.step = "any";
+      inp.value = (saved[f.key] ?? "");
+      inp.oninput = ()=>{
+        const cur = state.answers[q.id] || {};
+        cur[f.key] = inp.value;
+        state.answers[q.id] = cur;
+      };
+      d.appendChild(lab);
+      d.appendChild(inp);
+      box.appendChild(d);
+    }
+    wrap.appendChild(box);
+    const note = document.createElement("div");
+    note.className = "help";
+    note.textContent = "Tolérances actives (arrondis acceptés).";
+    wrap.appendChild(note);
+  }
+  return wrap;
+}
+
+function renderFeedbackBlock(res, q, hideHelp){
+  const box = document.createElement("div");
+  box.className = "feedback " + (res.level==="ok"?"ok":(res.level==="warn"?"warn":"bad"));
+  const title = document.createElement("div");
+  title.className = "title";
+  const s = Math.round(res.score*100)/100;
+  title.textContent = `${res.level==="ok"?"✅ OK":(res.level==="warn"?"⚠️ Partiel":"❌ À revoir")} — Score: ${s}/${q.points}`;
+  box.appendChild(title);
+
+  const ul = document.createElement("ul");
+  for(const d of (res.details || [])){
+    const li = document.createElement("li");
+    li.textContent = d;
+    ul.appendChild(li);
+  }
+  box.appendChild(ul);
+
+  if(!hideHelp && res.expectedHint && res.expectedHint.length){
+    const hr = document.createElement("div");
+    hr.className = "hr";
+    box.appendChild(hr);
+    const hint = document.createElement("div");
+    hint.className = "muted";
+    hint.innerHTML = `<b>Rappels attendus (indicatifs)</b>`;
+    box.appendChild(hint);
+
+    const ul2 = document.createElement("ul");
+    for(const h of res.expectedHint){
+      if(!h) continue;
+      const li = document.createElement("li");
+      li.textContent = h;
+      ul2.appendChild(li);
+    }
+    box.appendChild(ul2);
+  }
+  return box;
+}
+
+function updateBadge(qid, res){
+  const b = document.getElementById(`badge_${qid}`);
+  if(!b) return;
+  b.className = "badge " + (res.level==="ok"?"ok":(res.level==="warn"?"warn":"bad"));
+  b.textContent = res.level==="ok" ? "✅ OK" : (res.level==="warn" ? "⚠️ Partiel" : "❌ À revoir");
+}
+
+function grade(q, ans){
+  if(q.type === "open" || q.type === "open_set" || q.type === "open_set_plus_def"){
+    return q.check(ans || "", q);
+  }
+  if(q.type === "open_two" || q.type === "open_multi" || q.type === "tf_block" || q.type==="stage_sort" || q.type==="calc"){
+    return q.check(ans || {}, q);
+  }
+  if(q.type === "mcq"){
+    // Ordonnances (cas_pm) : ans peut être {choice, missingText}
+    let selected = ans || (q.multi ? [] : "");
+    let missingText = "";
+    if(currentTab === "cas_pm" && !q.multi){
+      if(ans && typeof ans === "object"){
+        selected = ans.choice || "";
+        missingText = ans.missingText || "";
+      }else{
+        selected = ans || "";
+      }
+    }
+
+    const correctIds = q.options.filter(o=>o.correct).map(o=>o.id);
+    let ok=false, level="bad", score=0, details=[];
+
+    if(q.multi){
+      const selSet = new Set(selected);
+      const pickedCorrect = correctIds.filter(id=>selSet.has(id)).length;
+      const pickedIncorrect = q.options.filter(o=>!o.correct && selSet.has(o.id)).length;
+      const missed = correctIds.filter(id=>!selSet.has(id)).length;
+      ok = (pickedCorrect===correctIds.length && pickedIncorrect===0 && missed===0);
+      let raw = pickedCorrect - pickedIncorrect;
+      raw = Math.max(0, raw);
+      score = (raw / correctIds.length) * q.points;
+      level = ok ? "ok" : (score >= q.points*0.7 ? "warn" : "bad");
+      details.push(`Corrects sélectionnés : ${pickedCorrect}/${correctIds.length}.`);
+      if(pickedIncorrect>0) details.push(`Choix incorrects : ${pickedIncorrect} (retire-les).`);
+      if(missed>0) details.push(`Manquants : ${missed} (ajoute-les).`);
+    }else{
+      const sel = selected;
+      const choiceOk = correctIds.includes(sel);
+
+      // Bonus "ce qu'il manque" uniquement si la bonne réponse est Non conforme (cas_pm)
+      const expectedNonConforme = (correctIds.length===1 && correctIds[0]==="no");
+      if(currentTab === "cas_pm" && expectedNonConforme){
+        const items = deriveMissingChecklist(q);
+        const s = scoreSetAnswer(missingText || "", items, items.length);
+        const missingOk = s.ok;
+
+        const half = q.points/2;
+        score = (choiceOk ? half : 0) + (missingOk ? half : 0);
+        ok = choiceOk && missingOk;
+        level = ok ? "ok" : (score>0 ? "warn" : "bad");
+
+        if(!sel){
+          details.push("Choisis d’abord Conforme ou Non conforme.");
+        }else{
+          details.push(choiceOk ? "Bonne réponse (non conforme)." : "Mauvaise réponse.");
+        }
+
+        if(!missingText || !missingText.trim()){
+          details.push("Ajoute ce qu’il manque (mots-clés).");
+        }else if(missingOk){
+          details.push("Éléments manquants : OK.");
+        }else{
+          const missing = items.filter(it => !s.foundIds.includes(it.id)).map(it=>it.label);
+          details.push("Il manque encore : " + (missing.length ? missing.join(", ") : "des mots-clés attendus") + ".");
+        }
+      }else{
+        ok = choiceOk;
+        score = ok ? q.points : 0;
+        level = ok ? "ok" : "bad";
+        details.push(ok ? "Bonne réponse." : "Mauvaise réponse.");
+      }
+    }
+
+    const exp = q.explain;
+    const expectedHint = Array.isArray(exp) ? exp : (exp ? [exp] : []);
+    return { ok, level, score, details, expectedHint };
+  }
+  return { ok:false, level:"bad", score:0, details:["Type inconnu."], expectedHint:[] };
+}
+
+function renderKpis(){
+  const host = document.getElementById("kpis");
+  const qs = getQuestions(currentTab);
+  let totalPts = 0;
+  let gotPts = 0;
+  let done = 0;
+  let ok = 0;
+  for(const q of qs){
+    totalPts += q.points;
+    const fb = state.feedback[q.id];
+    if(fb){
+      done++;
+      gotPts += fb.score || 0;
+      if(fb.level==="ok") ok++;
+    }
+  }
+  const pct = totalPts ? Math.round((gotPts/totalPts)*100) : 0;
+  host.innerHTML = "";
+  host.appendChild(kpiBox("Questions corrigées", `${done}/${qs.length}`, "Corrige pour voir le score."));
+  host.appendChild(kpiBox("Points", `${roundNice(gotPts)}/${roundNice(totalPts)}`, `≈ ${pct}%`));
+  host.appendChild(kpiBox("OK", `${ok}/${qs.length}`, "Le “partiel” vise 100% OK."));
+}
+function kpiBox(label, big, small){
+  const d = document.createElement("div");
+  d.className = "box";
+  d.innerHTML = `<div class="small">${label}</div><div class="big">${big}</div><div class="small">${small}</div>`;
+  return d;
+}
+
+function render(){
+  // Ajuste la barre d’actions selon l’onglet
+  const btnAll = document.getElementById("checkAll");
+  const btnReset = document.getElementById("resetTab");
+  if(currentTab === "cas_pm"){
+    btnAll.textContent = "Corriger l’ordonnance";
+    btnReset.textContent = "Recommencer les ordonnances";
+  }else{
+    btnAll.textContent = "Corriger l’onglet";
+    btnReset.textContent = "Réessayer l’onglet";
+  }
+
+  renderKpis();
+  const hideHelp = document.getElementById("hideHelp").checked;
+  const content = document.getElementById("content");
+  content.innerHTML = "";
+
+  const qs = getQuestions(currentTab);
+
+  // Cas particulier : ordonnances une par une
+  if(currentTab === "cas_pm"){
+    const total = qs.length;
+
+    // Fin du paquet
+    if(state.pmIndex >= total){
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const head = document.createElement("h2");
+      head.innerHTML = `Ordonnances — terminé <span class="badge">${total} / ${total}</span>`;
+      card.appendChild(head);
+
+      const qtext = document.createElement("div");
+      qtext.className = "qtext";
+      qtext.innerHTML = "";
+      const p = document.createElement("div");
+      p.className = "help";
+      p.style.marginTop = "6px";
+      p.textContent = "Tu as vu toutes les ordonnances de cette série.";
+      qtext.appendChild(p);
+      card.appendChild(qtext);
+
+      const actions = document.createElement("div");
+      actions.className = "inline";
+      actions.style.marginTop = "10px";
+
+      const btnRestart = document.createElement("button");
+      btnRestart.textContent = "Recommencer (ordre aléatoire)";
+      btnRestart.onclick = restartOrdonnances;
+
+      actions.appendChild(btnRestart);
+      card.appendChild(actions);
+
+      content.appendChild(card);
+      return;
+    }
+
+    const q = qs[state.pmIndex];
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.qid = q.id;
+
+    const head = document.createElement("h2");
+    const progress = `${state.pmIndex+1}/${total}`;
+    head.innerHTML = `${q.title} <span class="badge">${q.points} pt${q.points>1?"s":""}</span> <span class="badge mono">${progress}</span> <span id="badge_${q.id}" class="badge muted">Non corrigé</span>`;
+    card.appendChild(head);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.innerHTML = `<span class="badge">${labelType(q.type)}</span><span class="badge mono">${q.id}</span>`;
+    card.appendChild(meta);
+
+    const qtext = document.createElement("div");
+    qtext.className = "qtext";
+    qtext.innerHTML = "";
+    qtext.appendChild(renderPromptElement(q));
+    card.appendChild(qtext);
+
+    card.appendChild(renderQuestionUI(q));
+
+    const actions = document.createElement("div");
+    actions.className = "inline";
+    actions.style.marginTop = "10px";
+
+    const btnCheck = document.createElement("button");
+    btnCheck.textContent = "Corriger";
+    btnCheck.onclick = ()=> checkOne(q.id);
+
+    const btnResetOne = document.createElement("button");
+    btnResetOne.textContent = "Réessayer";
+    btnResetOne.onclick = ()=> resetOne(q.id);
+
+    actions.appendChild(btnCheck);
+    actions.appendChild(btnResetOne);
+
+    // Bouton “Ordonnance suivante” seulement après correction
+    if(state.feedback[q.id]){
+      const btnNext = document.createElement("button");
+      btnNext.textContent = (state.pmIndex+1>=total) ? "Terminer la série" : "Ordonnance suivante";
+      btnNext.onclick = goNextOrdonnance;
+      actions.appendChild(btnNext);
+    }
+
+    const hint = document.createElement("div");
+    hint.className = "help";
+    hint.id = `help_${q.id}`;
+    hint.textContent = hideHelp ? "" : (q.extraExplain || "");
+    actions.appendChild(hint);
+
+    card.appendChild(actions);
+
+    const fb = document.createElement("div");
+    fb.id = `fb_${q.id}`;
+    const savedFb = state.feedback[q.id];
+    if(savedFb){
+      fb.appendChild(renderFeedbackBlock(savedFb, q, hideHelp));
+      updateBadge(q.id, savedFb);
+    }
+    card.appendChild(fb);
+
+    content.appendChild(card);
+    return;
+  }
+
+  // Rendu normal : toutes les questions
+  for(const q of qs){
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.qid = q.id;
+
+    const head = document.createElement("h2");
+    head.innerHTML = `${q.title} <span class="badge">${q.points} pt${q.points>1?"s":""}</span> <span id="badge_${q.id}" class="badge muted">Non corrigé</span>`;
+    card.appendChild(head);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.innerHTML = `<span class="badge">${labelType(q.type)}</span><span class="badge mono">${q.id}</span>`;
+    card.appendChild(meta);
+
+    const qtext = document.createElement("div");
+    qtext.className = "qtext";
+    qtext.innerHTML = "";
+    qtext.appendChild(renderPromptElement(q));
+    card.appendChild(qtext);
+
+    card.appendChild(renderQuestionUI(q));
+
+    const actions = document.createElement("div");
+    actions.className = "inline";
+    actions.style.marginTop = "10px";
+    const btnCheck = document.createElement("button");
+    btnCheck.textContent = "Corriger";
+    btnCheck.onclick = ()=> checkOne(q.id);
+    const btnReset = document.createElement("button");
+    btnReset.textContent = "Réessayer";
+    btnReset.onclick = ()=> resetOne(q.id);
+    actions.appendChild(btnCheck);
+    actions.appendChild(btnReset);
+
+    const hint = document.createElement("div");
+    hint.className = "help";
+    hint.id = `help_${q.id}`;
+    hint.textContent = hideHelp ? "" : (q.extraExplain || "");
+    actions.appendChild(hint);
+
+    card.appendChild(actions);
+
+    const fb = document.createElement("div");
+    fb.id = `fb_${q.id}`;
+    const savedFb = state.feedback[q.id];
+    if(savedFb){
+      fb.appendChild(renderFeedbackBlock(savedFb, q, hideHelp));
+      updateBadge(q.id, savedFb);
+    }
+    card.appendChild(fb);
+
+    content.appendChild(card);
+  }
+}
+
+function checkOne(qid){
+  const q = BANK[currentTab].find(x=>x.id===qid);
+  if(!q) return;
+  const ans = state.answers[qid];
+  const res = grade(q, ans);
+  state.feedback[qid] = res;
+
+  // Sur l’onglet ordonnances, on rerend tout pour afficher le bouton “Ordonnance suivante”
+  if(currentTab === "cas_pm"){
+    render();
+    return;
+  }
+
+  updateBadge(qid, res);
+  const fbHost = document.getElementById(`fb_${qid}`);
+  fbHost.innerHTML = "";
+  fbHost.appendChild(renderFeedbackBlock(res, q, document.getElementById("hideHelp").checked));
+  renderKpis();
+}
+function checkAll(){
+  const qs = getQuestions(currentTab);
+  if(currentTab === "cas_pm"){
+    const cur = casPmCurrent();
+    if(cur) checkOne(cur.id);
+    return;
+  }
+  for(const q of qs) checkOne(q.id);
+}
+function resetOne(qid){
+  delete state.answers[qid];
+  delete state.feedback[qid];
+  render();
+}
+function resetTab(){
+  if(currentTab === "cas_pm"){
+    restartOrdonnances();
+    return;
+  }
+  const qs = getQuestions(currentTab);
+  for(const q of qs){
+    delete state.answers[q.id];
+    delete state.feedback[q.id];
+  }
+  render();
+}
+
+/* Tabs & events */
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentTab = btn.dataset.tab;
+    if(currentTab === "cas_pm" && !state.order["cas_pm"].length){
+      state.pmIndex = 0;
+    }
+    render();
+  });
+});
+document.getElementById("checkAll").addEventListener("click", checkAll);
+document.getElementById("resetTab").addEventListener("click", resetTab);
+document.getElementById("shuffle").addEventListener("change", ()=> render());
+document.getElementById("hideHelp").addEventListener("change", ()=> render());
+
+render();
+</script>
+</body>
+</html>

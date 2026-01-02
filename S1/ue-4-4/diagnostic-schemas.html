@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Récupération des schémas - Diagnostic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info {
+            color: #17a2b8;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        .download-link {
+            display: inline-block;
+            margin: 10px 0;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic et Récupération des Schémas</h1>
+        
+        <div class="section">
+            <h3>Étape 1 : Diagnostic</h3>
+            <button onclick="checkAllStorage()">🔎 Analyser le stockage</button>
+            <div id="diagnosticResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>Étape 2 : Extraction</h3>
+            <button onclick="extractFromIndexedDB()">📦 Extraire depuis IndexedDB</button>
+            <button onclick="extractFromLocalStorage()">💾 Extraire depuis localStorage</button>
+            <div id="extractionResult"></div>
+        </div>
+
+        <div class="section">
+            <h3>Étape 3 : Données récupérées</h3>
+            <div id="dataDisplay"></div>
+        </div>
+
+        <div class="section">
+            <h3>Étape 4 : Export</h3>
+            <button onclick="downloadAsJSON()">⬇️ Télécharger les données JSON</button>
+            <div id="exportResult"></div>
+        </div>
+    </div>
+
+    <script>
+        let recoveredData = null;
+
+        async function checkAllStorage() {
+            const result = document.getElementById('diagnosticResult');
+            result.innerHTML = '<p class="info">Analyse en cours...</p>';
+            
+            let report = '<h4>Rapport de diagnostic :</h4>';
+            
+            // Vérifier localStorage
+            try {
+                const lsKeys = Object.keys(localStorage);
+                report += `<p>✅ localStorage accessible - ${lsKeys.length} clés trouvées</p>`;
+                
+                if (lsKeys.length > 0) {
+                    report += '<p>Clés présentes :</p><ul>';
+                    lsKeys.forEach(key => {
+                        const size = localStorage.getItem(key)?.length || 0;
+                        report += `<li><strong>${key}</strong> (${size} caractères)</li>`;
+                    });
+                    report += '</ul>';
+                }
+            } catch (e) {
+                report += `<p class="error">❌ Erreur localStorage : ${e.message}</p>`;
+            }
+
+            // Vérifier IndexedDB
+            try {
+                const databases = await indexedDB.databases();
+                report += `<p>✅ IndexedDB accessible - ${databases.length} base(s) trouvée(s)</p>`;
+                
+                if (databases.length > 0) {
+                    report += '<p>Bases de données :</p><ul>';
+                    databases.forEach(db => {
+                        report += `<li><strong>${db.name}</strong> (version ${db.version})</li>`;
+                    });
+                    report += '</ul>';
+                }
+
+                // Essayer d'ouvrir AnatomieDB
+                await checkAnatomieDB(report);
+                
+            } catch (e) {
+                report += `<p class="error">❌ Erreur IndexedDB : ${e.message}</p>`;
+            }
+
+            result.innerHTML = report;
+        }
+
+        async function checkAnatomieDB(report) {
+            return new Promise((resolve) => {
+                const request = indexedDB.open('AnatomieDB', 1);
+                
+                request.onsuccess = (event) => {
+                    const db = event.target.result;
+                    const stores = Array.from(db.objectStoreNames);
+                    
+                    document.getElementById('diagnosticResult').innerHTML += 
+                        `<p class="success">✅ Base AnatomieDB trouvée avec ${stores.length} store(s) : ${stores.join(', ')}</p>`;
+                    
+                    if (stores.includes('schemas')) {
+                        const transaction = db.transaction(['schemas'], 'readonly');
+                        const store = transaction.objectStore('schemas');
+                        const countRequest = store.count();
+                        
+                        countRequest.onsuccess = () => {
+                            document.getElementById('diagnosticResult').innerHTML += 
+                                `<p class="success">🎯 ${countRequest.result} schéma(s) trouvé(s) dans IndexedDB !</p>`;
+                        };
+                    }
+                    
+                    db.close();
+                    resolve();
+                };
+                
+                request.onerror = () => {
+                    document.getElementById('diagnosticResult').innerHTML += 
+                        `<p class="error">❌ Impossible d'ouvrir AnatomieDB</p>`;
+                    resolve();
+                };
+            });
+        }
+
+        async function extractFromIndexedDB() {
+            const result = document.getElementById('extractionResult');
+            result.innerHTML = '<p class="info">Extraction en cours...</p>';
+
+            try {
+                const request = indexedDB.open('AnatomieDB', 1);
+                
+                request.onsuccess = (event) => {
+                    const db = event.target.result;
+                    
+                    if (!db.objectStoreNames.contains('schemas')) {
+                        result.innerHTML = '<p class="error">❌ Aucun store "schemas" trouvé</p>';
+                        db.close();
+                        return;
+                    }
+
+                    const transaction = db.transaction(['schemas'], 'readonly');
+                    const store = transaction.objectStore('schemas');
+                    const getAllRequest = store.getAll();
+                    
+                    getAllRequest.onsuccess = () => {
+                        const schemas = getAllRequest.result;
+                        
+                        if (schemas && schemas.length > 0) {
+                            recoveredData = schemas;
+                            result.innerHTML = `<p class="success">✅ ${schemas.length} schéma(s) extrait(s) avec succès !</p>`;
+                            displayData(schemas);
+                            
+                            // Sauvegarder automatiquement dans localStorage
+                            localStorage.setItem('anatomie_schemas', JSON.stringify(schemas));
+                            result.innerHTML += '<p class="success">✅ Données sauvegardées dans localStorage</p>';
+                        } else {
+                            result.innerHTML = '<p class="error">❌ Aucun schéma trouvé dans IndexedDB</p>';
+                        }
+                        
+                        db.close();
+                    };
+                    
+                    getAllRequest.onerror = () => {
+                        result.innerHTML = '<p class="error">❌ Erreur lors de la lecture des données</p>';
+                        db.close();
+                    };
+                };
+                
+                request.onerror = () => {
+                    result.innerHTML = '<p class="error">❌ Impossible d\'ouvrir la base de données</p>';
+                };
+                
+            } catch (e) {
+                result.innerHTML = `<p class="error">❌ Erreur : ${e.message}</p>`;
+            }
+        }
+
+        function extractFromLocalStorage() {
+            const result = document.getElementById('extractionResult');
+            
+            try {
+                const keys = ['anatomie_schemas', 'schemas', 'anatomieSchemas'];
+                let found = false;
+                
+                for (const key of keys) {
+                    const data = localStorage.getItem(key);
+                    if (data) {
+                        const schemas = JSON.parse(data);
+                        if (Array.isArray(schemas) && schemas.length > 0) {
+                            recoveredData = schemas;
+                            result.innerHTML = `<p class="success">✅ ${schemas.length} schéma(s) trouvé(s) dans localStorage (clé: ${key})</p>`;
+                            displayData(schemas);
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (!found) {
+                    result.innerHTML = '<p class="error">❌ Aucune donnée trouvée dans localStorage</p>';
+                }
+                
+            } catch (e) {
+                result.innerHTML = `<p class="error">❌ Erreur : ${e.message}</p>`;
+            }
+        }
+
+        function displayData(schemas) {
+            const display = document.getElementById('dataDisplay');
+            
+            let html = `<h4>📊 ${schemas.length} schéma(s) récupéré(s) :</h4><ul>`;
+            
+            schemas.forEach((schema, index) => {
+                const markerCount = schema.markers ? schema.markers.length : 0;
+                const hasImage = schema.image ? '✅' : '❌';
+                html += `<li>
+                    <strong>${schema.name || 'Schéma ' + (index + 1)}</strong><br>
+                    ${markerCount} marqueur(s) | Image: ${hasImage}
+                </li>`;
+            });
+            
+            html += '</ul>';
+            
+            html += '<h4>Aperçu JSON :</h4>';
+            html += `<pre>${JSON.stringify(schemas, null, 2).substring(0, 2000)}${schemas.length > 100 ? '...' : ''}</pre>`;
+            
+            display.innerHTML = html;
+        }
+
+        function downloadAsJSON() {
+            if (!recoveredData) {
+                document.getElementById('exportResult').innerHTML = 
+                    '<p class="error">❌ Aucune donnée à exporter. Lancez d\'abord l\'extraction.</p>';
+                return;
+            }
+
+            const dataStr = JSON.stringify(recoveredData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `schemas-anatomie-backup-${Date.now()}.json`;
+            a.click();
+            
+            document.getElementById('exportResult').innerHTML = 
+                '<p class="success">✅ Fichier JSON téléchargé !</p>';
+        }
+
+        // Auto-diagnostic au chargement
+        window.onload = () => {
+            checkAllStorage();
+        };
+    </script>
+</body>
+</html>
