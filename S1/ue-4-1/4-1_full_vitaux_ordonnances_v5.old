@@ -83,13 +83,15 @@
             display:flex;
             background: var(--card);
             border-bottom: 3px solid var(--border);
-            flex-wrap: wrap;
-            overflow-x: visible;
-            overflow-y: visible;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
             }
         .mode-btn, .tab{
-            flex: 1 1 220px;
-            min-width: 200px;
+            flex: 0 0 auto;
+            min-width: 220px;
             padding: 18px 16px;
             border: none;
             border-right: 1px solid var(--border);
@@ -102,8 +104,6 @@
             transition: all 0.2s ease;
             text-align:center;
         }
-        .tab-break{ flex-basis: 100%; height: 0; }
-
         .mode-btn:hover, .tab:hover{
             background: rgba(0,0,0,0.06);
             color: var(--text);
@@ -517,7 +517,6 @@
       <button class="mode-btn tab" data-tab="qcm">QCM</button>
       <button class="mode-btn tab" data-tab="vf">Vrai/Faux</button>
       <button class="mode-btn tab" data-tab="mix">Mix (mode examen)</button>
-      <span class="tab-break"></span>
       <button class="mode-btn tab" data-tab="cas_vitaux">Cas cliniques — constantes</button>
       <button class="mode-btn tab" data-tab="cas_pm">Conformité des prescriptions</button>
     </div>
@@ -2445,15 +2444,6 @@ let state = {
   order: { partiel:[], qcm:[], vf:[], mix:[], cas_vitaux:[], cas_pm:[] }
 };
 
-function keyForId(qid, tab){
-  const t = tab || currentTab;
-  return (t === "mix") ? ("mix::" + qid) : qid;
-}
-function keyFor(q, tab){
-  return keyForId(q.id, tab);
-}
-
-
 function getQuestions(tab){
   const base = BANK[tab].slice();
   let doShuffle = document.getElementById("shuffle").checked;
@@ -2749,8 +2739,8 @@ function restartOrdonnances(){
   state.pmIndex = 0;
   const qs = BANK["cas_pm"] || [];
   for(const q of qs){
-    delete state.answers[keyFor(q)];
-    delete state.feedback[keyFor(q)];
+    delete state.answers[q.id];
+    delete state.feedback[q.id];
   }
   render();
 }
@@ -2799,14 +2789,14 @@ function renderQuestionUI(q){
   if(q.type === "open" || q.type === "open_set" || q.type === "open_set_plus_def"){
     const ta = document.createElement("textarea");
     ta.placeholder = safePlaceholder(q.placeholder, "textarea");
-    ta.value = state.answers[keyFor(q)] || "";
-    ta.oninput = ()=> { state.answers[keyFor(q)] = ta.value; };
+    ta.value = state.answers[q.id] || "";
+    ta.oninput = ()=> { state.answers[q.id] = ta.value; };
     wrap.appendChild(ta);
   }
   else if(q.type === "open_two"){
     const box = document.createElement("div");
     box.className = "twoCol";
-    const saved = state.answers[keyFor(q)] || {};
+    const saved = state.answers[q.id] || {};
     for(const f of q.fields){
       const d = document.createElement("div");
       const lab = document.createElement("div");
@@ -2818,9 +2808,9 @@ function renderQuestionUI(q){
       inp.placeholder = safePlaceholder(f.placeholder, "input");
       inp.value = saved[f.key] || "";
       inp.oninput = ()=>{
-        const cur = state.answers[keyFor(q)] || {};
+        const cur = state.answers[q.id] || {};
         cur[f.key] = inp.value;
-        state.answers[keyFor(q)] = cur;
+        state.answers[q.id] = cur;
       };
       d.appendChild(lab);
       d.appendChild(inp);
@@ -2831,7 +2821,7 @@ function renderQuestionUI(q){
   else if(q.type === "open_multi"){
     const box = document.createElement("div");
     box.className = "twoCol";
-    const saved = state.answers[keyFor(q)] || {};
+    const saved = state.answers[q.id] || {};
     for(const f of q.fields){
       const d = document.createElement("div");
       const lab = document.createElement("div");
@@ -2843,9 +2833,9 @@ function renderQuestionUI(q){
       ta.placeholder = safePlaceholder(f.placeholder, "textarea");
       ta.value = saved[f.key] || "";
       ta.oninput = ()=>{
-        const cur = state.answers[keyFor(q)] || {};
+        const cur = state.answers[q.id] || {};
         cur[f.key] = ta.value;
-        state.answers[keyFor(q)] = cur;
+        state.answers[q.id] = cur;
       };
       d.appendChild(lab);
       d.appendChild(ta);
@@ -2854,7 +2844,7 @@ function renderQuestionUI(q){
     wrap.appendChild(box);
   }
   else if(q.type === "mcq"){
-    const savedRaw = state.answers[keyFor(q)] || (q.multi ? [] : "");
+    const savedRaw = state.answers[q.id] || (q.multi ? [] : "");
     let saved = savedRaw;
     let missingText = "";
 
@@ -2881,20 +2871,20 @@ function renderQuestionUI(q){
       if(q.multi){
         input.checked = saved.includes(opt.id);
         input.onchange = ()=>{
-          let cur = state.answers[keyFor(q)] || [];
+          let cur = state.answers[q.id] || [];
           if(input.checked) cur = unique(cur.concat([opt.id]));
           else cur = cur.filter(x=>x!==opt.id);
-          state.answers[keyFor(q)] = cur;
+          state.answers[q.id] = cur;
         };
       }else{
         input.checked = (saved === opt.id);
         input.onchange = ()=>{
           if(currentTab === "cas_pm"){
-            const cur = state.answers[keyFor(q)];
+            const cur = state.answers[q.id];
             const keep = (cur && typeof cur === "object") ? (cur.missingText || "") : "";
-            state.answers[keyFor(q)] = {choice: opt.id, missingText: keep};
+            state.answers[q.id] = {choice: opt.id, missingText: keep};
           }else{
-            state.answers[keyFor(q)] = opt.id;
+            state.answers[q.id] = opt.id;
           }
           render(); // pour afficher/masquer l'encart dynamiquement
         };
@@ -2926,10 +2916,10 @@ function renderQuestionUI(q){
         ta.placeholder = "Ex : nom, etc.";
         ta.value = mt;
         ta.oninput = ()=>{
-          const cur = state.answers[keyFor(q)];
+          const cur = state.answers[q.id];
           const base = (cur && typeof cur === "object") ? cur : {choice:"no", missingText:""};
           base.missingText = ta.value;
-          state.answers[keyFor(q)] = base;
+          state.answers[q.id] = base;
         };
         box.appendChild(ta);
         wrap.appendChild(box);
@@ -2937,7 +2927,7 @@ function renderQuestionUI(q){
     }
   }
   else if(q.type === "tf_block"){
-    const saved = state.answers[keyFor(q)] || {};
+    const saved = state.answers[q.id] || {};
     const tbl = document.createElement("div");
     tbl.className = "tableLike";
     for(const st of q.statements){
@@ -2957,9 +2947,9 @@ function renderQuestionUI(q){
       `;
       sel.value = saved[st.id] ?? "";
       sel.onchange = ()=>{
-        const cur = state.answers[keyFor(q)] || {};
+        const cur = state.answers[q.id] || {};
         cur[st.id] = sel.value;
-        state.answers[keyFor(q)] = cur;
+        state.answers[q.id] = cur;
       };
       right.appendChild(sel);
       row.appendChild(left);
@@ -2969,7 +2959,7 @@ function renderQuestionUI(q){
     wrap.appendChild(tbl);
   }
   else if(q.type === "stage_sort"){
-    const saved = state.answers[keyFor(q)] || {};
+    const saved = state.answers[q.id] || {};
     const tbl = document.createElement("div");
     tbl.className = "tableLike";
     for(const it of q.items){
@@ -2990,9 +2980,9 @@ function renderQuestionUI(q){
       `;
       sel.value = saved[it.id] ?? "";
       sel.onchange = ()=>{
-        const cur = state.answers[keyFor(q)] || {};
+        const cur = state.answers[q.id] || {};
         cur[it.id] = sel.value;
-        state.answers[keyFor(q)] = cur;
+        state.answers[q.id] = cur;
       };
       right.appendChild(sel);
       row.appendChild(left);
@@ -3002,7 +2992,7 @@ function renderQuestionUI(q){
     wrap.appendChild(tbl);
   }
   else if(q.type === "calc"){
-    const saved = state.answers[keyFor(q)] || {};
+    const saved = state.answers[q.id] || {};
     const box = document.createElement("div");
     box.className = "twoCol";
     for(const f of q.fields){
@@ -3016,9 +3006,9 @@ function renderQuestionUI(q){
       inp.step = "any";
       inp.value = (saved[f.key] ?? "");
       inp.oninput = ()=>{
-        const cur = state.answers[keyFor(q)] || {};
+        const cur = state.answers[q.id] || {};
         cur[f.key] = inp.value;
-        state.answers[keyFor(q)] = cur;
+        state.answers[q.id] = cur;
       };
       d.appendChild(lab);
       d.appendChild(inp);
@@ -3078,50 +3068,12 @@ function updateBadge(qid, res){
   b.textContent = res.level==="ok" ? "✅ OK" : (res.level==="warn" ? "⚠️ Partiel" : "❌ À revoir");
 }
 
-
-function defaultTfBlockCheck(vals, q){
-  const wrong = [];
-  const missing = [];
-  let good = 0;
-
-  for(const st of (q.statements || [])){
-    const v = vals ? vals[st.id] : undefined; // "true"/"false"
-    if(v === undefined || v === ""){
-      missing.push(st);
-      continue;
-    }
-    const isTrue = (v === "true");
-    const okOne = (isTrue === !!st.answer);
-    if(okOne) good++;
-    else wrong.push({st, expected: st.answer ? "Vrai" : "Faux"});
-  }
-
-  const total = (q.statements || []).length;
-  const ok = (good === total) && (missing.length === 0);
-  const level = ok ? "ok" : (good >= Math.ceil(total*0.7) ? "warn" : "bad");
-  const score = total ? (good/total) * (q.points || 0) : 0;
-
-  const details = [`Bonnes réponses : ${good}/${total}.`];
-  if(missing.length) details.push(`À répondre : ${missing.length}.`);
-  if(wrong.length){
-    const list = wrong.slice(0, 6).map(x=>`• ${x.st.text} → ${x.expected}`);
-    details.push("Corrections :");
-    details.push(...list);
-    if(wrong.length > 6) details.push(`(+${wrong.length-6} autres)`);
-  }
-  return { ok, level, score, details, expectedHint: [] };
-}
-
 function grade(q, ans){
   if(q.type === "open" || q.type === "open_set" || q.type === "open_set_plus_def"){
     return q.check(ans || "", q);
   }
-  if(q.type === "open_two" || q.type === "open_multi" || q.type==="stage_sort" || q.type==="calc"){
+  if(q.type === "open_two" || q.type === "open_multi" || q.type === "tf_block" || q.type==="stage_sort" || q.type==="calc"){
     return q.check(ans || {}, q);
-  }
-  if(q.type === "tf_block"){
-    if(typeof q.check === "function") return q.check(ans || {}, q);
-    return defaultTfBlockCheck(ans || {}, q);
   }
   if(q.type === "mcq"){
     // Ordonnances (cas_pm) : ans peut être {choice, missingText}
@@ -3206,7 +3158,7 @@ function renderKpis(){
   let ok = 0;
   for(const q of qs){
     totalPts += q.points;
-    const fb = state.feedback[keyFor(q)];
+    const fb = state.feedback[q.id];
     if(fb){
       done++;
       gotPts += fb.score || 0;
@@ -3323,7 +3275,7 @@ function render(){
     actions.appendChild(btnResetOne);
 
     // Bouton “Ordonnance suivante” seulement après correction
-    if(state.feedback[keyFor(q)]){
+    if(state.feedback[q.id]){
       const btnNext = document.createElement("button");
       btnNext.textContent = (state.pmIndex+1>=total) ? "Terminer la série" : "Ordonnance suivante";
       btnNext.onclick = goNextOrdonnance;
@@ -3340,7 +3292,7 @@ function render(){
 
     const fb = document.createElement("div");
     fb.id = `fb_${q.id}`;
-    const savedFb = state.feedback[keyFor(q)];
+    const savedFb = state.feedback[q.id];
     if(savedFb){
       fb.appendChild(renderFeedbackBlock(savedFb, q, hideHelp));
       updateBadge(q.id, savedFb);
@@ -3396,7 +3348,7 @@ function render(){
 
     const fb = document.createElement("div");
     fb.id = `fb_${q.id}`;
-    const savedFb = state.feedback[keyFor(q)];
+    const savedFb = state.feedback[q.id];
     if(savedFb){
       fb.appendChild(renderFeedbackBlock(savedFb, q, hideHelp));
       updateBadge(q.id, savedFb);
@@ -3410,10 +3362,9 @@ function render(){
 function checkOne(qid){
   const q = BANK[currentTab].find(x=>x.id===qid);
   if(!q) return;
-  const key = keyFor(q);
-  const ans = state.answers[key];
+  const ans = state.answers[qid];
   const res = grade(q, ans);
-  state.feedback[key] = res;
+  state.feedback[qid] = res;
 
   // Sur l’onglet ordonnances, on rerend tout pour afficher le bouton “Ordonnance suivante”
   if(currentTab === "cas_pm"){
@@ -3437,9 +3388,8 @@ function checkAll(){
   for(const q of qs) checkOne(q.id);
 }
 function resetOne(qid){
-  const key = keyForId(qid);
-  delete state.answers[key];
-  delete state.feedback[key];
+  delete state.answers[qid];
+  delete state.feedback[qid];
   render();
 }
 function resetTab(){
@@ -3449,20 +3399,10 @@ function resetTab(){
   }
   const qs = getQuestions(currentTab);
   for(const q of qs){
-    delete state.answers[keyFor(q)];
-    delete state.feedback[keyFor(q)];
+    delete state.answers[q.id];
+    delete state.feedback[q.id];
   }
   render();
-}
-
-
-function clearMixSession(){
-  const qs = BANK["mix"] || [];
-  for(const q of qs){
-    const key = keyForId(q.id, "mix");
-    delete state.answers[key];
-    delete state.feedback[key];
-  }
 }
 
 /* Tabs & events */
@@ -3471,9 +3411,6 @@ document.querySelectorAll(".tab").forEach(btn=>{
     document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     currentTab = btn.dataset.tab;
-    if(currentTab === "mix"){
-      clearMixSession();
-    }
     if(currentTab === "cas_pm" && !state.order["cas_pm"].length){
       state.pmIndex = 0;
     }
