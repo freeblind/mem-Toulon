@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mécanique des Fluides en Hydrothérapie</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .level-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+
+        .level-btn {
+            padding: 10px 20px;
+            background: #f0f0f0;
+            border: 2px solid #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .level-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .canvas-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #2196F3;
+        }
+
+        .formula {
+            font-size: 1.3em;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 600;
+            color: #1565C0;
+        }
+
+        .example-box {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #FF9800;
+        }
+
+        .exercise-box {
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #9C27B0;
+        }
+
+        .question {
+            font-weight: 600;
+            margin: 15px 0 10px 0;
+            color: #6A1B9A;
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            border: 2px solid #9C27B0;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 150px;
+            margin: 0 10px;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .result.correct {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .result.incorrect {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .info-box {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #4CAF50;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 5px solid #FFC107;
+        }
+
+        h2 {
+            color: #667eea;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin: 20px 0 10px 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        input[type="range"] {
+            width: 200px;
+        }
+
+        .value-display {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 80px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .keyboard-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #667eea;
+        }
+
+        .keyboard-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .symbol-btn {
+            padding: 10px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .symbol-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .symbol-btn:active {
+            transform: scale(0.95);
+        }
+
+        .formula-input-area {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 3px solid #667eea;
+        }
+
+        .formula-display {
+            font-size: 1.8em;
+            min-height: 60px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 2px dashed #999;
+            font-family: 'Courier New', monospace;
+            word-wrap: break-word;
+        }
+
+        .formula-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .formula-quiz-box {
+            background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #3f51b5;
+        }
+
+        .formula-target {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #3f51b5;
+            margin: 15px 0;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .validation-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1em;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .formula-hint {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+            font-size: 0.95em;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+
+        .subscript-mode, .superscript-mode {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .mode-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+    
+        /* --- Améliorations responsive & tactile (sans changer le design) --- */
+        html { -webkit-text-size-adjust: 100%; }
+        body { padding-bottom: env(safe-area-inset-bottom); }
+
+        /* Confort tactile : évite les zooms intempestifs au double-tap */
+        .tab-btn, .level-btn, .btn, .symbol-btn { touch-action: manipulation; }
+
+        /* Canvas responsive (garde les proportions) */
+        canvas { max-width: 100%; width: 100%; height: auto; }
+
+        /* Champs et boutons plus souples sur mobile */
+        input[type="number"] { max-width: 100%; }
+
+        /* Pédagogie : détails dépliables au look cohérent */
+        details.pedago {
+            margin-top: 12px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 8px;
+            padding: 10px 12px;
+            border: 1px dashed rgba(21,101,192,0.35);
+        }
+        details.pedago > summary {
+            cursor: pointer;
+            font-weight: 700;
+            color: #1565C0;
+            list-style: none;
+            outline: none;
+        }
+        details.pedago > summary::-webkit-details-marker { display: none; }
+        .unit-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.98em;
+        }
+        .unit-table th, .unit-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        .unit-table th { background: #667eea; color: white; }
+        .unit-note { margin-top: 10px; font-size: 0.95em; color: #333; }
+        .chip {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(102,126,234,0.12);
+            color: #333;
+            font-weight: 600;
+            margin: 2px 4px 0 0;
+            white-space: nowrap;
+        }
+
+        /* Responsive layout : conserve l'esthétique mais évite le débordement */
+        @media (max-width: 900px) {
+            .container { padding: 14px; }
+            header { padding: 22px; }
+        }
+        @media (max-width: 700px) {
+            h1 { font-size: 2.0em; }
+            .subtitle { font-size: 1.05em; }
+            .content-section { padding: 18px; }
+            .canvas-container { padding: 14px; }
+            .controls { gap: 8px; }
+            input[type="range"] { width: min(260px, 75vw); }
+            .formula-display { font-size: 1.4em; }
+            .tab-btn { padding: 11px 16px; }
+        }
+        @media (max-width: 450px) {
+            h1 { font-size: 1.75em; }
+            .level-selector { flex-wrap: wrap; }
+            .level-btn { width: 100%; text-align: center; }
+            .formula-controls .btn { width: 100%; }
+            .btn { width: 100%; }
+            .symbol-grid { grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); }
+        }
+
+        /* Accessibilité : focus visible */
+        .tab-btn:focus-visible, .level-btn:focus-visible, .btn:focus-visible, .symbol-btn:focus-visible, summary:focus-visible {
+            outline: 3px solid rgba(102,126,234,0.55);
+            outline-offset: 2px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌊 Mécanique des Fluides en Hydrothérapie</h1>
+            <p class="subtitle">Applications cliniques en physiothérapie et rééducation</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('pression', this)">Pression & Archimède</button>
+            <button class="tab-btn" onclick="showTab('ecoulement', this)">Écoulement & Débit</button>
+            <button class="tab-btn" onclick="showTab('formules', this)">Maîtriser les Formules</button>
+            <button class="tab-btn" onclick="showTab('exemples', this)">Exemples Calculés</button>
+            <button class="tab-btn" onclick="showTab('exercices', this)">Exercices Pratiques</button>
+        </div>
+
+        <!-- Section Pression & Archimède -->
+        <div id="pression" class="content-section active">
+            <div class="level-selector">
+                <button class="level-btn active" onclick="showLevel(\'pression\', \'base\', this)">Niveau Base</button>
+                <button class="level-btn" onclick="showLevel(\'pression\', \'avance\', this)">Niveau Avancé</button>
+            </div>
+
+            <div id="pression-base" class="level-content">
+                <h2>1. Pression Hydrostatique</h2>
+                
+                <div class="info-box">
+                    <strong>💡 Concept clé :</strong> La pression dans un fluide augmente avec la profondeur. C'est pourquoi on ressent plus de pression sur les jambes en position debout dans l'eau.
+                </div>
+
+                <div class="canvas-container">
+                    <h3 style="text-align: center;">Animation : Pression selon la profondeur</h3>
+                    <canvas id="pressionCanvas" width="700" height="400"></canvas>
+                    <div class="controls">
+                        <div class="slider-container">
+                            <label>Profondeur (m) :</label>
+                            <input type="range" id="profondeurSlider" min="0" max="2" step="0.1" value="1">
+                            <span class="value-display" id="profondeurValue">1.0 m</span>
+                        </div>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2196F3;"></div>
+                            <span>Eau (densité 1000 kg/m³)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #FF5722;"></div>
+                            <span>Zone de pression maximale</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-box">
+                    <h3>Formule de base</h3>
+                    <div class="formula">P = P₀ + ρgh</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        <strong>P</strong> = Pression totale (Pa)<br>
+                        <strong>P₀</strong> = Pression atmosphérique (101 325 Pa)<br>
+                        <strong>ρ</strong> = Masse volumique du fluide (1000 kg/m³ pour l'eau)<br>
+                        <strong>g</strong> = Accélération de la pesanteur (9.81 m/s²)<br>
+                        <strong>h</strong> = Profondeur (m)
+                    </p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🏥 Application clinique :</strong> En hydrothérapie, la pression exercée sur les membres inférieurs favorise le retour veineux. Une immersion jusqu'au cou génère une pression d'environ 15 000 Pa sur les pieds (équivalent à un bandage de compression).
+                </div>
+
+                <h2>2. Poussée d'Archimède et Flottabilité</h2>
+
+                <div class="info-box">
+                    <strong>💡 Principe :</strong> Tout corps plongé dans un fluide subit une force verticale dirigée vers le haut égale au poids du fluide déplacé.
+                </div>
+
+                <div class="canvas-container">
+                    <h3 style="text-align: center;">Animation : Poussée d'Archimède</h3>
+                    <canvas id="archimedeCanvas" width="700" height="450"></canvas>
+                    <div class="controls">
+                        <div class="slider-container">
+                            <label>Densité du corps :</label>
+                            <input type="range" id="densiteSlider" min="500" max="1500" step="50" value="950">
+                            <span class="value-display" id="densiteValue">950 kg/m³</span>
+                        </div>
+                        <div class="slider-container">
+                            <label>Volume (L) :</label>
+                            <input type="range" id="volumeSlider" min="10" max="100" step="5" value="70">
+                            <span class="value-display" id="volumeValue">70 L</span>
+                        </div>
+                    </div>
+                    <div id="archimedeInfo" style="text-align: center; margin-top: 15px; font-weight: 600;"></div>
+                </div>
+
+                <div class="formula-box">
+                    <h3>Formules</h3>
+                    <div class="formula">F<sub>A</sub> = ρ<sub>fluide</sub> × V<sub>immergé</sub> × g</div>
+                    <p style="text-align: center; margin: 15px 0;">
+                        <strong>F<sub>A</sub></strong> = Poussée d'Archimède (N)<br>
+                        <strong>V<sub>immergé</sub></strong> = Volume immergé (m³)
+                    </p>
+                    <div class="formula">Poids apparent = Poids réel - Poussée d'Archimède</div>
+                </div>
+
+                <div class="info-box">
+                    <strong>🏥 Application clinique :</strong> 
+                    <ul style="margin-top: 10px;">
+                        <li>Un patient de 70 kg pèse environ 7 kg dans l'eau (réduction de 90%)</li>
+                        <li>Permet la rééducation précoce après chirurgie orthopédique</li>
+                        <li>Facilite les mouvements chez les patients avec limitations articulaires</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="pression-avance" class="level-content" style="display: none;">
+                <h2>Niveau Avancé : Pression et Archimède</h2>
+
+                <div class="formula-box">
+                    <h3>Équation complète de la pression</h3>
+                    <div class="formula">P(z) = P₀ + ρ<sub>fluide</sub>g(z₀ - z)</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        Avec z l'axe vertical orienté vers le haut
+                    </p>
+                </div>
+
+                <h3>Gradient de pression</h3>
+                <div class="formula-box">
+                    <div class="formula">∇P = -ρg<strong>k̂</strong></div>
+                    <p style="text-align: center;">Le gradient est vertical et dirigé vers le bas</p>
+                </div>
+
+                <h3>Conditions d'équilibre</h3>
+                <div class="example-box">
+                    <p><strong>Corps en flottaison neutre :</strong></p>
+                    <div class="formula">ρ<sub>corps</sub> = ρ<sub>fluide</sub> × (V<sub>immergé</sub> / V<sub>total</sub>)</div>
+                    
+                    <p style="margin-top: 20px;"><strong>Stabilité de la flottaison :</strong></p>
+                    <p>La stabilité dépend de la position relative entre :</p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Centre de gravité (G)</strong> : point d'application du poids</li>
+                        <li><strong>Centre de carène (C)</strong> : centre de la poussée d'Archimède</li>
+                    </ul>
+                    <p style="margin-top: 10px;">Si G est au-dessus de C : équilibre instable (tendance au retournement)</p>
+                </div>
+
+                <h3>Pression différentielle en hydrothérapie</h3>
+                <div class="info-box">
+                    <strong>Compression veineuse progressive :</strong>
+                    <table>
+                        <tr>
+                            <th>Profondeur</th>
+                            <th>Pression relative</th>
+                            <th>Équivalent compression</th>
+                        </tr>
+                        <tr>
+                            <td>Chevilles (1.5 m)</td>
+                            <td>14.7 kPa</td>
+                            <td>110 mmHg</td>
+                        </tr>
+                        <tr>
+                            <td>Genoux (1.0 m)</td>
+                            <td>9.8 kPa</td>
+                            <td>74 mmHg</td>
+                        </tr>
+                        <tr>
+                            <td>Hanches (0.5 m)</td>
+                            <td>4.9 kPa</td>
+                            <td>37 mmHg</td>
+                        </tr>
+                        <tr>
+                            <td>Thorax (0.2 m)</td>
+                            <td>2.0 kPa</td>
+                            <td>15 mmHg</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Précautions cliniques :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>Insuffisance cardiaque : la pression thoracique augmente le retour veineux (précharge)</li>
+                        <li>Hypertension artérielle : surveillance nécessaire</li>
+                        <li>Œdèmes : la compression hydrostatique favorise la résorption mais peut être inconfortable</li>
+                    </ul>
+                </div>
+
+                <h3>Travail mécanique en immersion</h3>
+                <div class="formula-box">
+                    <p><strong>Travail contre la poussée d'Archimède :</strong></p>
+                    <div class="formula">W = F<sub>A</sub> × Δh = ρ<sub>eau</sub>gV × Δh</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        Pour immerger complètement un membre de 5 L sur 0.5 m :<br>
+                        W = 1000 × 9.81 × 0.005 × 0.5 = <strong>24.5 J</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Écoulement & Débit -->
+        <div id="ecoulement" class="content-section">
+            <div class="level-selector">
+                <button class="level-btn active" onclick="showLevel(\'ecoulement\', \'base\', this)">Niveau Base</button>
+                <button class="level-btn" onclick="showLevel(\'ecoulement\', \'avance\', this)">Niveau Avancé</button>
+            </div>
+
+            <div id="ecoulement-base" class="level-content">
+                <h2>1. Écoulement et Débit</h2>
+
+                <div class="info-box">
+                    <strong>💡 Concept :</strong> Le débit mesure la quantité de fluide qui traverse une section par unité de temps.
+                </div>
+
+                <div class="canvas-container">
+                    <h3 style="text-align: center;">Animation : Écoulement dans une conduite</h3>
+                    <canvas id="ecoulementCanvas" width="700" height="350"></canvas>
+                    <div class="controls">
+                        <div class="slider-container">
+                            <label>Débit (L/min) :</label>
+                            <input type="range" id="debitSlider" min="1" max="20" step="1" value="10">
+                            <span class="value-display" id="debitValue">10 L/min</span>
+                        </div>
+                        <div class="slider-container">
+                            <label>Diamètre (cm) :</label>
+                            <input type="range" id="diametreSlider" min="1" max="5" step="0.5" value="2">
+                            <span class="value-display" id="diametreValue">2 cm</span>
+                        </div>
+                    </div>
+                    <div id="ecoulementInfo" style="text-align: center; margin-top: 15px; font-weight: 600;"></div>
+                </div>
+
+                <div class="formula-box">
+                    <h3>Formules de débit</h3>
+                    <div class="formula">Q = V × S = v × π × r²</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        <strong>Q</strong> = Débit volumique (m³/s ou L/min)<br>
+                        <strong>V</strong> = Volume (m³ ou L)<br>
+                        <strong>S</strong> = Section (m²)<br>
+                        <strong>v</strong> = Vitesse d'écoulement (m/s)<br>
+                        <strong>r</strong> = Rayon (m)
+                    </p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🏥 Application : Jets hydromassants</strong><br>
+                    Un jet de massage en piscine avec un débit de 15 L/min et un diamètre de 2 cm crée une vitesse d'écoulement de 1.3 m/s, générant un effet de massage localisé.
+                </div>
+
+                <h2>2. Viscosité</h2>
+
+                <div class="info-box">
+                    <strong>💡 Définition :</strong> La viscosité mesure la résistance d'un fluide à l'écoulement. Plus un fluide est visqueux, plus il résiste au mouvement.
+                </div>
+
+                <div class="canvas-container">
+                    <h3 style="text-align: center;">Animation : Effet de la viscosité</h3>
+                    <canvas id="viscositeCanvas" width="700" height="350"></canvas>
+                    <div class="controls">
+                        <button class="btn" onclick="startViscositeAnimation()">Lancer l'animation</button>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #2196F3;"></div>
+                            <span>Eau (η = 1 mPa·s)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #4CAF50;"></div>
+                            <span>Huile légère (η = 50 mPa·s)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #FF9800;"></div>
+                            <span>Miel (η = 10 000 mPa·s)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formula-box">
+                    <h3>Viscosité dynamique</h3>
+                    <div class="formula">τ = η × (dv/dy)</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        <strong>τ</strong> = Contrainte de cisaillement (Pa)<br>
+                        <strong>η</strong> = Viscosité dynamique (Pa·s)<br>
+                        <strong>dv/dy</strong> = Gradient de vitesse (s⁻¹)
+                    </p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🏥 Applications cliniques :</strong>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Eau thermale :</strong> η ≈ 0.7 mPa·s à 35°C (moins visqueuse, facilite les mouvements)</li>
+                        <li><strong>Bains de boue :</strong> η > 100 mPa·s (résistance accrue, renforcement musculaire)</li>
+                        <li><strong>Piscine avec algues :</strong> Augmentation de viscosité pour exercices de résistance</li>
+                    </ul>
+                </div>
+
+                <h2>3. Pertes de charge</h2>
+
+                <div class="info-box">
+                    <strong>💡 Concept :</strong> Les pertes de charge représentent la diminution de pression due aux frottements dans une canalisation.
+                </div>
+
+                <div class="formula-box">
+                    <h3>Formule simplifiée</h3>
+                    <div class="formula">ΔP = λ × (L/D) × (ρv²/2)</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        <strong>ΔP</strong> = Perte de charge (Pa)<br>
+                        <strong>λ</strong> = Coefficient de perte de charge<br>
+                        <strong>L</strong> = Longueur de la conduite (m)<br>
+                        <strong>D</strong> = Diamètre (m)<br>
+                        <strong>ρ</strong> = Masse volumique (kg/m³)<br>
+                        <strong>v</strong> = Vitesse (m/s)
+                    </p>
+                </div>
+            </div>
+
+            <div id="ecoulement-avance" class="level-content" style="display: none;">
+                <h2>Niveau Avancé : Écoulement</h2>
+
+                <h3>Équation de continuité</h3>
+                <div class="formula-box">
+                    <div class="formula">ρ₁v₁S₁ = ρ₂v₂S₂</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        Pour un fluide incompressible (ρ constant) :<br>
+                        <strong>v₁S₁ = v₂S₂</strong>
+                    </p>
+                </div>
+
+                <h3>Équation de Bernoulli</h3>
+                <div class="formula-box">
+                    <div class="formula">P + ½ρv² + ρgh = constante</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        <strong>P</strong> = Énergie de pression<br>
+                        <strong>½ρv²</strong> = Énergie cinétique<br>
+                        <strong>ρgh</strong> = Énergie potentielle
+                    </p>
+                </div>
+
+                <div class="example-box">
+                    <h3>Application : Jet thérapeutique</h3>
+                    <p>Un jet sort d'une buse de diamètre 2 cm avec un débit de 20 L/min :</p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li><strong>Vitesse de sortie :</strong><br>
+                        Q = 20 L/min = 3.33×10⁻⁴ m³/s<br>
+                        S = π × (0.01)² = 3.14×10⁻⁴ m²<br>
+                        v = Q/S = 1.06 m/s</li>
+                        
+                        <li style="margin-top: 15px;"><strong>Pression dynamique :</strong><br>
+                        P<sub>dyn</sub> = ½ρv² = ½ × 1000 × (1.06)² = <strong>562 Pa</strong></li>
+                        
+                        <li style="margin-top: 15px;"><strong>Force sur la peau (surface 10 cm²) :</strong><br>
+                        F = P × S = 562 × 0.001 = <strong>0.56 N</strong></li>
+                    </ol>
+                </div>
+
+                <h3>Nombre de Reynolds</h3>
+                <div class="formula-box">
+                    <div class="formula">Re = (ρvD)/η = (vD)/ν</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        <strong>ν</strong> = η/ρ = Viscosité cinématique (m²/s)
+                    </p>
+                    <ul style="margin-top: 15px; text-align: left;">
+                        <li>Re < 2000 : Écoulement laminaire (régulier, prévisible)</li>
+                        <li>2000 < Re < 4000 : Transition</li>
+                        <li>Re > 4000 : Écoulement turbulent (chaotique, mélange efficace)</li>
+                    </ul>
+                </div>
+
+                <h3>Loi de Poiseuille (écoulement laminaire)</h3>
+                <div class="formula-box">
+                    <div class="formula">Q = (πΔPr⁴)/(8ηL)</div>
+                    <p style="text-align: center; margin-top: 10px;">
+                        Le débit est proportionnel à la puissance 4 du rayon !<br>
+                        Doubler le diamètre multiplie le débit par 16.
+                    </p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Conséquence clinique :</strong> Dans les jets hydromassants, une petite modification du diamètre de la buse a un effet considérable sur la puissance du jet.
+                </div>
+
+                <h3>Pertes de charge détaillées</h3>
+                <div class="formula-box">
+                    <h4>Pertes régulières (linéaires)</h4>
+                    <div class="formula">ΔP<sub>régulières</sub> = λ × (L/D) × (ρv²/2)</div>
+                    
+                    <h4 style="margin-top: 20px;">Pertes singulières (coudes, vannes...)</h4>
+                    <div class="formula">ΔP<sub>singulières</sub> = Σ K<sub>i</sub> × (ρv²/2)</div>
+                    
+                    <p style="text-align: center; margin-top: 15px;">
+                        <strong>Coefficients K typiques :</strong><br>
+                        Coude 90° : K ≈ 0.9<br>
+                        Té : K ≈ 1.8<br>
+                        Vanne ouverte : K ≈ 0.2
+                    </p>
+                </div>
+
+                <div class="info-box">
+                    <strong>🏥 Dimensionnement de circuits hydrothérapeutiques :</strong>
+                    <p>Pour un circuit de 50 m avec 10 coudes et une vitesse de 2 m/s (D=5cm, λ=0.02) :</p>
+                    <ul style="margin-top: 10px;">
+                        <li>Pertes régulières : ΔP<sub>rég</sub> = 0.02 × (50/0.05) × (1000×4/2) = 40 kPa</li>
+                        <li>Pertes singulières : ΔP<sub>sing</sub> = 10 × 0.9 × (1000×4/2) = 18 kPa</li>
+                        <li><strong>Total : 58 kPa</strong> → Nécessite une pompe adaptée</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Maîtriser les Formules -->
+        <div id="formules" class="content-section">
+            <h2>✍️ Maîtriser les Formules</h2>
+            
+            <div class="info-box">
+                <strong>📝 Objectif :</strong> Apprendre à écrire correctement les formules de physique en utilisant le clavier de symboles ci-dessous. La correction est intelligente et accepte différentes façons d'écrire (cT, c*T, T*c, Tc, etc.).
+            </div>
+
+            <!-- Clavier de symboles -->
+            <div class="keyboard-section">
+                <div class="keyboard-title">🔤 Alphabet grec et symboles mathématiques</div>
+                <div class="symbol-grid" id="greekSymbols"></div>
+            </div>
+
+            <div class="keyboard-section">
+                <div class="keyboard-title">⚡ Variables physiques courantes</div>
+                <div class="symbol-grid" id="physicsSymbols"></div>
+            </div>
+
+            <div class="keyboard-section">
+                <div class="keyboard-title">🔢 Opérateurs et indices</div>
+                <div class="symbol-grid" id="operators"></div>
+            </div>
+
+            <!-- Zone de saisie -->
+            <div class="formula-input-area">
+                <h3>Zone de saisie <span class="mode-indicator" id="modeIndicator">Mode normal</span></h3>
+                <div class="formula-display" id="formulaDisplay" contenteditable="false">Cliquez sur les symboles ci-dessus...</div>
+                <div class="formula-controls">
+                    <button class="btn" onclick="clearFormula()">🗑️ Effacer</button>
+                    <button class="btn" onclick="deleteLastChar()">⌫ Supprimer dernier</button>
+                    <button class="btn" onclick="toggleSubscript()">₁ Indice</button>
+                    <button class="btn" onclick="toggleSuperscript()">¹ Exposant</button>
+                    <button class="btn" onclick="addSpace()">␣ Espace</button>
+                </div>
+            </div>
+
+            <!-- Quiz progressif -->
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%">0/10</div>
+            </div>
+
+            <div class="formula-quiz-box">
+                <h3>🎯 Quiz : Écris la formule demandée</h3>
+                <div class="formula-target" id="formulaTarget">Chargement...</div>
+                <div class="formula-hint" id="formulaHint"></div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="btn" onclick="validateFormula()" style="font-size: 1.2em; padding: 15px 40px;">
+                        ✓ Valider ma formule
+                    </button>
+                    <button class="btn" onclick="skipFormula()">⏭️ Passer</button>
+                    <button class="btn" onclick="showFormulaHelp()">💡 Aide</button>
+                </div>
+                
+                <div id="validationResult"></div>
+            </div>
+
+            <!-- Récapitulatif des formules -->
+            <h2>📚 Récapitulatif des Formules</h2>
+
+            <div class="formula-box">
+                <h3>Pression hydrostatique</h3>
+                <div class="formula">P = P₀ + ρgh
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>P</strong></td><td>Pression totale au point considéré</td><td>Pa (pascal) = N/m²</td><td>kPa, bar, mmHg</td><td>Toujours une pression (force / surface).</td></tr>
+<tr><td><strong>P₀</strong></td><td>Pression à la surface (souvent atmosphérique)</td><td>Pa</td><td>≈ 101 325 Pa (au niveau de la mer)</td><td>Si tu veux seulement la pression due à l’eau : calcule ρgh (pression « relative »).</td></tr>
+<tr><td><strong>ρ</strong></td><td>Masse volumique du fluide</td><td>kg/m³</td><td>Eau douce ≈ 1000 kg/m³</td><td>Plus ρ est grande, plus la pression augmente vite avec la profondeur.</td></tr>
+<tr><td><strong>g</strong></td><td>Accélération de la pesanteur</td><td>m/s²</td><td>≈ 9,81 m/s²</td><td>Dans les exercices on prend souvent 9,81.</td></tr>
+<tr><td><strong>h</strong></td><td>Profondeur sous la surface</td><td>m</td><td>cm → m : diviser par 100</td><td>h = 0 à la surface, augmente en descendant.</td></tr>
+</table><div class="unit-note">Repères rapides : 1 kPa = 1000 Pa ; 1 bar = 100 kPa ; 1 mmHg ≈ 133,322 Pa.</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    P = Pression totale (Pa)<br>
+                    P₀ = Pression atmosphérique (101 325 Pa)<br>
+                    ρ = Masse volumique (kg/m³)<br>
+                    g = 9.81 m/s²<br>
+                    h = Profondeur (m)
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Poussée d'Archimède</h3>
+                <div class="formula">F_A = ρ_fluide × V_immergé × g
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>F_A</strong></td><td>Force de flottabilité (vers le haut)</td><td>N (newton)</td><td>N (pas d’unité « clinique » standard)</td><td>C’est une force : elle s’oppose au poids.</td></tr>
+<tr><td><strong>ρ_fluide</strong></td><td>Masse volumique du fluide</td><td>kg/m³</td><td>Eau ≈ 1000 kg/m³</td><td>Si l’eau est salée → ρ un peu plus grand → poussée un peu plus grande.</td></tr>
+<tr><td><strong>V_immergé</strong></td><td>Volume de la partie immergée</td><td>m³</td><td>L → m³ : diviser par 1000</td><td>Attention : c’est le volume immergé, pas forcément le volume total du corps.</td></tr>
+<tr><td><strong>g</strong></td><td>Accélération de la pesanteur</td><td>m/s²</td><td>≈ 9,81 m/s²</td><td>Même g que pour le poids.</td></tr>
+</table><div class="unit-note">Astuce : si tu connais le volume en litres, convertis : 50 L = 0,050 m³.</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    F_A = Poussée d'Archimède (N)<br>
+                    V = Volume immergé (m³)
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Poids apparent</h3>
+                <div class="formula">P_apparent = P_réel - F_A
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>P_apparent</strong></td><td>« Poids ressenti » en immersion (force exercée sur les appuis)</td><td>N</td><td>On peut aussi l’exprimer en « kg équivalent » : P_apparent / g</td><td>Plus F_A est grande, plus le poids apparent diminue.</td></tr>
+<tr><td><strong>P_réel</strong></td><td>Poids dans l’air (force)</td><td>N</td><td>P_réel = m·g</td><td>Ne pas confondre masse m (kg) et poids P (N).</td></tr>
+<tr><td><strong>F_A</strong></td><td>Poussée d’Archimède (force vers le haut)</td><td>N</td><td>Voir formule ci-dessus</td><td>Quand F_A ≈ P_réel → flottaison neutre.</td></tr>
+</table><div class="unit-note">Conversion : masse équivalente (kg) = force (N) / 9,81.</div></details>
+</div>
+            </div>
+
+            <div class="formula-box">
+                <h3>Débit volumique</h3>
+                <div class="formula">Q = v × S = v × π × r²
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>Q</strong></td><td>Débit volumique (volume qui passe par seconde)</td><td>m³/s</td><td>L/min, L/s</td><td>Toujours : Q = v·S.</td></tr>
+<tr><td><strong>v</strong></td><td>Vitesse moyenne du fluide</td><td>m/s</td><td>—</td><td>Si tu doubles Q à section constante, v double.</td></tr>
+<tr><td><strong>S</strong></td><td>Section de passage</td><td>m²</td><td>cm² → m² : diviser par 10 000</td><td>Pour un tube circulaire : S = π·r².</td></tr>
+<tr><td><strong>r</strong></td><td>Rayon (moitié du diamètre)</td><td>m</td><td>cm → m : /100</td><td>Diamètre D = 2r.</td></tr>
+</table><div class="unit-note">Conversions utiles : 1 L = 10⁻³ m³ ; 1 min = 60 s.</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    Q = Débit (m³/s)<br>
+                    v = Vitesse (m/s)<br>
+                    S = Section (m²)<br>
+                    r = Rayon (m)
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Nombre de Reynolds</h3>
+                <div class="formula">Re = (ρvD)/η = (vD)/ν
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>Re</strong></td><td>Indicateur du type d’écoulement</td><td>Sans unité</td><td>—</td><td>Petit → laminaire ; grand → turbulent.</td></tr>
+<tr><td><strong>ρ</strong></td><td>Masse volumique</td><td>kg/m³</td><td>—</td><td>Dans l’eau, ρ varie peu → l’effet vient surtout de v, D et η/ν.</td></tr>
+<tr><td><strong>v</strong></td><td>Vitesse</td><td>m/s</td><td>—</td><td>Plus v augmente, plus Re augmente.</td></tr>
+<tr><td><strong>D</strong></td><td>Diamètre hydraulique (tube circulaire : diamètre)</td><td>m</td><td>cm → m : /100</td><td>Augmenter D augmente Re.</td></tr>
+<tr><td><strong>η</strong></td><td>Viscosité dynamique</td><td>Pa·s</td><td>mPa·s (eau ≈ 1 mPa·s à ~20°C)</td><td>Plus η est grande, plus Re diminue.</td></tr>
+<tr><td><strong>ν</strong></td><td>Viscosité cinématique (ν = η/ρ)</td><td>m²/s</td><td>eau ~ 1×10⁻⁶ m²/s (ordre de grandeur)</td><td>Forme pratique : Re = v·D/ν.</td></tr>
+</table><div class="unit-note">Seuils (approx.) : Re < 2000 laminaire ; 2000–4000 transition ; > 4000 turbulent.</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    Re = Nombre de Reynolds (sans unité)<br>
+                    D = Diamètre (m)<br>
+                    η = Viscosité dynamique (Pa·s)<br>
+                    ν = Viscosité cinématique (m²/s)
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Équation de Bernoulli</h3>
+                <div class="formula">P + ½ρv² + ρgh = constante
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary><div style="margin-top:8px;"><span class="chip">Idéal (sans pertes)</span><span class="chip">Incompressible</span><span class="chip">Stationnaire</span></div>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>P</strong></td><td>Pression statique</td><td>Pa</td><td>kPa, bar</td><td>C’est l’énergie par unité de volume liée à la pression.</td></tr>
+<tr><td><strong>½ρv²</strong></td><td>Pression/énergie dynamique (liée à la vitesse)</td><td>Pa</td><td>—</td><td>Si v augmente, ce terme augmente comme v².</td></tr>
+<tr><td><strong>ρgh</strong></td><td>Terme hydrostatique (lié à la hauteur)</td><td>Pa</td><td>—</td><td>h est une altitude (pas une profondeur) dans cette écriture.</td></tr>
+<tr><td><strong>constante</strong></td><td>Même valeur le long d’une ligne de courant (cas idéal)</td><td>—</td><td>—</td><td>Hypothèses : écoulement stationnaire, fluide incompressible, pertes négligées.</td></tr>
+</table><div class="unit-note">Lecture simple : si l’énergie totale se conserve, gagner en vitesse peut se faire au détriment de la pression (et inversement).</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    Principe de conservation de l'énergie dans un fluide
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Loi de Poiseuille</h3>
+                <div class="formula">Q = (πΔPr⁴)/(8ηL)
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary><div style="margin-top:8px;"><span class="chip">Laminaire</span><span class="chip">Tube cylindrique</span><span class="chip">Fluide newtonien</span></div>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>Q</strong></td><td>Débit volumique</td><td>m³/s</td><td>L/min</td><td>Très sensible au rayon : r⁴ !</td></tr>
+<tr><td><strong>ΔP</strong></td><td>Différence de pression entre l’entrée et la sortie</td><td>Pa</td><td>kPa</td><td>Plus ΔP augmente, plus Q augmente.</td></tr>
+<tr><td><strong>r</strong></td><td>Rayon du tube</td><td>m</td><td>mm, cm</td><td>Doubler r → Q × 16 (si tout le reste reste pareil).</td></tr>
+<tr><td><strong>η</strong></td><td>Viscosité dynamique</td><td>Pa·s</td><td>mPa·s</td><td>Plus le fluide est visqueux, plus le débit diminue.</td></tr>
+<tr><td><strong>L</strong></td><td>Longueur du tube</td><td>m</td><td>—</td><td>Plus le tube est long, plus le débit diminue.</td></tr>
+<tr><td><strong>π et 8</strong></td><td>Constantes mathématiques</td><td>—</td><td>—</td><td>Elles viennent de l’intégration du profil de vitesse laminaire.</td></tr>
+</table><div class="unit-note">Valable en régime laminaire dans un tube cylindrique, fluide newtonien, écoulement établi.</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    ΔP = Différence de pression (Pa)<br>
+                    L = Longueur de la conduite (m)
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Pertes de charge</h3>
+                <div class="formula">ΔP = λ × (L/D) × (ρv²/2)
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>ΔP</strong></td><td>Perte de pression due aux frottements</td><td>Pa</td><td>kPa</td><td>C’est une « pression perdue » à compenser par la pompe.</td></tr>
+<tr><td><strong>λ</strong></td><td>Facteur de frottement (dépend de Re et de la rugosité)</td><td>Sans unité</td><td>—</td><td>En pratique, on le lit sur des abaques (Moody) ou via des formules.</td></tr>
+<tr><td><strong>L</strong></td><td>Longueur de la conduite</td><td>m</td><td>—</td><td>Plus c’est long → plus ça perd.</td></tr>
+<tr><td><strong>D</strong></td><td>Diamètre</td><td>m</td><td>cm</td><td>Plus D est grand → moins il y a de pertes (à débit comparable).</td></tr>
+<tr><td><strong>ρ</strong></td><td>Masse volumique</td><td>kg/m³</td><td>—</td><td>Dans l’eau, ρ ≈ 1000 kg/m³.</td></tr>
+<tr><td><strong>v</strong></td><td>Vitesse moyenne</td><td>m/s</td><td>—</td><td>Le terme v²/2 : la vitesse pèse très fort sur les pertes.</td></tr>
+</table><div class="unit-note">Si tu connais Q et D : v = Q/S puis tu peux estimer ΔP.</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    λ = Coefficient de perte de charge<br>
+                    L = Longueur (m)<br>
+                    D = Diamètre (m)
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Viscosité - Loi de Newton</h3>
+                <div class="formula">τ = η × (dv/dy)
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary><div style="margin-top:8px;"><span class="chip">Cisaillement</span><span class="chip">Fluide newtonien</span></div>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>τ</strong></td><td>Contrainte de cisaillement (force tangentielle / surface)</td><td>Pa</td><td>—</td><td>C’est « ce qui tire » les couches de fluide entre elles.</td></tr>
+<tr><td><strong>η</strong></td><td>Viscosité dynamique</td><td>Pa·s</td><td>mPa·s</td><td>Plus η est grande, plus il faut « forcer » pour créer le même cisaillement.</td></tr>
+<tr><td><strong>dv/dy</strong></td><td>Gradient de vitesse (variation de v selon y)</td><td>s⁻¹</td><td>—</td><td>Si la vitesse change vite entre deux couches → cisaillement élevé.</td></tr>
+</table><div class="unit-note">Fluide newtonien : relation linéaire entre τ et dv/dy (ex : eau).</div></details>
+</div>
+                <p style="text-align: center; margin-top: 10px;">
+                    τ = Contrainte de cisaillement (Pa)<br>
+                    dv/dy = Gradient de vitesse (s⁻¹)
+                </p>
+            </div>
+
+            <div class="formula-box">
+                <h3>Énergie cinétique du fluide</h3>
+                <div class="formula">E_c = ½mv² = ½ρVv²
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>E_c</strong></td><td>Énergie cinétique</td><td>J (joule)</td><td>—</td><td>Énergie = capacité à produire un travail.</td></tr>
+<tr><td><strong>m</strong></td><td>Masse de fluide en mouvement</td><td>kg</td><td>—</td><td>m = ρ·V.</td></tr>
+<tr><td><strong>v</strong></td><td>Vitesse</td><td>m/s</td><td>—</td><td>Dépend comme v² : si v double, E_c est multipliée par 4.</td></tr>
+<tr><td><strong>ρ</strong></td><td>Masse volumique</td><td>kg/m³</td><td>—</td><td>Permet de passer de volume à masse.</td></tr>
+<tr><td><strong>V</strong></td><td>Volume de fluide</td><td>m³</td><td>L → m³ : /1000</td><td>Attention au V (volume) et v (vitesse) : majuscule/minuscule !</td></tr>
+</table><div class="unit-note">Dans un jet, c’est cette énergie (liée à la vitesse) qui contribue à l’effet « massant ».</div></details>
+</div>
+            </div>
+
+            <div class="formula-box">
+                <h3>Pression dynamique</h3>
+                <div class="formula">P_dyn = ½ρv²
+<details class="pedago"><summary>Que représente chaque terme ? (unités)</summary>
+<table class="unit-table"><tr><th>Symbole</th><th>Signification</th><th>Unité (SI)</th><th>Unités utiles</th><th>À retenir</th></tr>
+<tr><td><strong>P_dyn</strong></td><td>Pression dynamique (liée au mouvement)</td><td>Pa</td><td>—</td><td>Même unité qu’une pression car c’est une énergie par unité de volume.</td></tr>
+<tr><td><strong>ρ</strong></td><td>Masse volumique</td><td>kg/m³</td><td>—</td><td>Dans l’eau : ≈ 1000 kg/m³.</td></tr>
+<tr><td><strong>v</strong></td><td>Vitesse</td><td>m/s</td><td>—</td><td>Si v double → P_dyn × 4.</td></tr>
+</table><div class="unit-note">À ne pas confondre avec la pression statique P. P_dyn vient du terme ½ρv².</div></details>
+</div>
+            </div>
+        </div>
+
+        <!-- Section Exemples -->
+        <div id="exemples" class="content-section">
+            <h2>📊 Exemples de Calculs Détaillés</h2>
+
+            <div class="example-box">
+                <h3>Exemple 1 : Pression sur un patient immergé</h3>
+                <p><strong>Situation :</strong> Un patient de 75 kg, taille 1.75 m, est immergé dans une piscine thérapeutique jusqu'au cou (profondeur 1.5 m).</p>
+                
+                <p style="margin-top: 15px;"><strong>Calculs :</strong></p>
+                
+                <p><strong>a) Pression au niveau des pieds :</strong></p>
+                <div class="formula">P = P₀ + ρgh = 101 325 + 1000 × 9.81 × 1.5</div>
+                <div class="formula">P = 101 325 + 14 715 = 116 040 Pa</div>
+                <p>Soit une pression relative de <strong>14.7 kPa = 110 mmHg</strong></p>
+                
+                <p style="margin-top: 15px;"><strong>b) Poussée d'Archimède :</strong></p>
+                <p>Volume approximatif du corps : V ≈ 75 L = 0.075 m³</p>
+                <div class="formula">F<sub>A</sub> = ρ<sub>eau</sub> × V × g = 1000 × 0.075 × 9.81 = 736 N</div>
+                
+                <p style="margin-top: 15px;"><strong>c) Poids apparent :</strong></p>
+                <p>Poids réel : P<sub>réel</sub> = 75 × 9.81 = 736 N</p>
+                <div class="formula">P<sub>apparent</sub> = 736 - 736 = 0 N</div>
+                <p>Le patient est en <strong>flottaison neutre</strong> !</p>
+                
+                <div class="info-box" style="margin-top: 15px;">
+                    <strong>Interprétation clinique :</strong> La réduction drastique du poids permet une mobilisation précoce sans contrainte articulaire, idéale pour la rééducation post-opératoire.
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h3>Exemple 2 : Jet hydromassant</h3>
+                <p><strong>Situation :</strong> Installation d'un jet thérapeutique avec les caractéristiques suivantes :</p>
+                <ul>
+                    <li>Débit : Q = 30 L/min</li>
+                    <li>Diamètre de la buse : D = 3 cm</li>
+                    <li>Distance peau-buse : 20 cm</li>
+                </ul>
+                
+                <p style="margin-top: 15px;"><strong>Calculs :</strong></p>
+                
+                <p><strong>a) Vitesse de sortie :</strong></p>
+                <p>Q = 30 L/min = 5×10⁻⁴ m³/s</p>
+                <p>Section : S = π × (0.015)² = 7.07×10⁻⁴ m²</p>
+                <div class="formula">v = Q/S = 5×10⁻⁴ / 7.07×10⁻⁴ = 0.71 m/s</div>
+                
+                <p style="margin-top: 15px;"><strong>b) Nombre de Reynolds :</strong></p>
+                <p>Viscosité cinématique de l'eau à 35°C : ν ≈ 7×10⁻⁷ m²/s</p>
+                <div class="formula">Re = (v × D) / ν = (0.71 × 0.03) / 7×10⁻⁷ = 30 400</div>
+                <p>Re > 4000 → <strong>Écoulement turbulent</strong> (effet massant efficace)</p>
+                
+                <p style="margin-top: 15px;"><strong>c) Pression dynamique :</strong></p>
+                <div class="formula">P<sub>dyn</sub> = ½ρv² = ½ × 1000 × (0.71)² = 252 Pa</div>
+                
+                <p style="margin-top: 15px;"><strong>d) Force sur la peau (surface 15 cm²) :</strong></p>
+                <div class="formula">F = P × S = 252 × 0.0015 = 0.38 N</div>
+                
+                <div class="info-box" style="margin-top: 15px;">
+                    <strong>Interprétation :</strong> Force modérée, idéale pour massage relaxant. Pour un effet plus tonique, augmenter le débit ou réduire le diamètre.
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h3>Exemple 3 : Marche en piscine thérapeutique</h3>
+                <p><strong>Situation :</strong> Un patient marche dans une piscine avec différents niveaux d'immersion.</p>
+                
+                <table style="margin-top: 15px;">
+                    <tr>
+                        <th>Niveau d'eau</th>
+                        <th>% poids supporté</th>
+                        <th>Poids apparent (70 kg)</th>
+                        <th>Application</th>
+                    </tr>
+                    <tr>
+                        <td>Chevilles</td>
+                        <td>90%</td>
+                        <td>63 kg</td>
+                        <td>Marche légère</td>
+                    </tr>
+                    <tr>
+                        <td>Genoux</td>
+                        <td>75%</td>
+                        <td>52.5 kg</td>
+                        <td>Rééducation post-entorse</td>
+                    </tr>
+                    <tr>
+                        <td>Hanches</td>
+                        <td>50%</td>
+                        <td>35 kg</td>
+                        <td>Rééducation post-PTH</td>
+                    </tr>
+                    <tr>
+                        <td>Taille</td>
+                        <td>25%</td>
+                        <td>17.5 kg</td>
+                        <td>Rééducation précoce</td>
+                    </tr>
+                    <tr>
+                        <td>Épaules</td>
+                        <td>10%</td>
+                        <td>7 kg</td>
+                        <td>Paralysie partielle</td>
+                    </tr>
+                </table>
+                
+                <div class="info-box" style="margin-top: 15px;">
+                    <strong>Principe de progression :</strong> Commencer avec une immersion importante (épaules) puis réduire progressivement le niveau d'eau pour augmenter la charge.
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h3>Exemple 4 : Dimensionnement d'un circuit de jets</h3>
+                <p><strong>Situation :</strong> Conception d'un circuit alimentant 4 jets thérapeutiques.</p>
+                <p><strong>Données :</strong></p>
+                <ul>
+                    <li>Débit par jet : 25 L/min</li>
+                    <li>Longueur totale : 40 m</li>
+                    <li>Diamètre conduite : 5 cm</li>
+                    <li>8 coudes à 90°</li>
+                    <li>2 vannes</li>
+                </ul>
+                
+                <p style="margin-top: 15px;"><strong>Calculs :</strong></p>
+                
+                <p><strong>a) Débit total :</strong></p>
+                <div class="formula">Q<sub>total</sub> = 4 × 25 = 100 L/min = 1.67×10⁻³ m³/s</div>
+                
+                <p style="margin-top: 15px;"><strong>b) Vitesse moyenne :</strong></p>
+                <p>S = π × (0.025)² = 1.96×10⁻³ m²</p>
+                <div class="formula">v = Q/S = 1.67×10⁻³ / 1.96×10⁻³ = 0.85 m/s</div>
+                
+                <p style="margin-top: 15px;"><strong>c) Pertes de charge régulières (λ = 0.02) :</strong></p>
+                <div class="formula">ΔP<sub>rég</sub> = 0.02 × (40/0.05) × (1000 × 0.85²/2) = 5780 Pa</div>
+                
+                <p style="margin-top: 15px;"><strong>d) Pertes singulières :</strong></p>
+                <p>Coudes : K<sub>coude</sub> = 0.9, Vannes : K<sub>vanne</sub> = 0.2</p>
+                <div class="formula">ΔP<sub>sing</sub> = (8×0.9 + 2×0.2) × (1000 × 0.85²/2) = 2770 Pa</div>
+                
+                <p style="margin-top: 15px;"><strong>e) Pertes totales :</strong></p>
+                <div class="formula">ΔP<sub>total</sub> = 5780 + 2770 = 8550 Pa ≈ 8.6 kPa</div>
+                
+                <div class="info-box" style="margin-top: 15px;">
+                    <strong>Spécification pompe :</strong> Prévoir une pompe de 100 L/min avec une hauteur manométrique d'au moins 10 mCE (mètres de colonne d'eau) pour compenser les pertes et maintenir la pression de sortie.
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Exercices -->
+        <div id="exercices" class="content-section">
+            <h2>🎯 Exercices Pratiques</h2>
+
+            <div class="exercise-box">
+                <h3>Exercice 1 : Pression hydrostatique</h3>
+                <p class="question">Un patient est allongé au fond d'une piscine à 2 m de profondeur. Quelle est la pression totale qu'il subit ?</p>
+                <p><strong>Données :</strong> P₀ = 101 325 Pa, ρ = 1000 kg/m³, g = 9.81 m/s²</p>
+                
+                <div style="margin-top: 15px;">
+                    <label>Votre réponse (Pa) :</label>
+                    <input type="number" id="ex1Input" step="1">
+                    <button class="btn" onclick="verifierEx1()">Vérifier</button>
+                </div>
+                <div id="ex1Result"></div>
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: 600;">Solution détaillée</summary>
+                    <div style="margin-top: 10px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                        <p><strong>Formule :</strong> P = P₀ + ρgh</p>
+                        <p><strong>Calcul :</strong></p>
+                        <p>P = 101 325 + (1000 × 9.81 × 2)</p>
+                        <p>P = 101 325 + 19 620</p>
+                        <p><strong>P = 120 945 Pa</strong></p>
+                        <p style="margin-top: 10px;"><em>La pression relative (due à l'eau) est de 19.62 kPa, soit environ 147 mmHg.</em></p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="exercise-box">
+                <h3>Exercice 2 : Poussée d'Archimède</h3>
+                <p class="question">Un ballon de rééducation de 60 cm de diamètre est immergé complètement dans l'eau. Quelle est la poussée d'Archimède qu'il subit ?</p>
+                <p><strong>Données :</strong> Volume sphère = (4/3)πr³, ρ<sub>eau</sub> = 1000 kg/m³</p>
+                
+                <div style="margin-top: 15px;">
+                    <label>Votre réponse (N) :</label>
+                    <input type="number" id="ex2Input" step="0.1">
+                    <button class="btn" onclick="verifierEx2()">Vérifier</button>
+                </div>
+                <div id="ex2Result"></div>
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: 600;">Solution détaillée</summary>
+                    <div style="margin-top: 10px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                        <p><strong>Étape 1 :</strong> Calculer le volume du ballon</p>
+                        <p>r = 0.30 m</p>
+                        <p>V = (4/3) × π × (0.30)³ = 0.1131 m³</p>
+                        <p><strong>Étape 2 :</strong> Calculer la poussée</p>
+                        <p>F<sub>A</sub> = ρ<sub>eau</sub> × V × g</p>
+                        <p>F<sub>A</sub> = 1000 × 0.1131 × 9.81</p>
+                        <p><strong>F<sub>A</sub> = 1109.5 N ≈ 1110 N</strong></p>
+                        <p style="margin-top: 10px;"><em>Cette force équivaut au poids d'une masse de 113 kg !</em></p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="exercise-box">
+                <h3>Exercice 3 : Vitesse d'écoulement</h3>
+                <p class="question">Un jet hydromassant a un débit de 40 L/min et une buse de 2.5 cm de diamètre. Quelle est la vitesse de sortie de l'eau ?</p>
+                
+                <div style="margin-top: 15px;">
+                    <label>Votre réponse (m/s) :</label>
+                    <input type="number" id="ex3Input" step="0.01">
+                    <button class="btn" onclick="verifierEx3()">Vérifier</button>
+                </div>
+                <div id="ex3Result"></div>
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: 600;">Solution détaillée</summary>
+                    <div style="margin-top: 10px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                        <p><strong>Étape 1 :</strong> Convertir le débit</p>
+                        <p>Q = 40 L/min = 40/60 000 m³/s = 6.67×10⁻⁴ m³/s</p>
+                        <p><strong>Étape 2 :</strong> Calculer la section</p>
+                        <p>r = 0.0125 m</p>
+                        <p>S = π × r² = π × (0.0125)² = 4.91×10⁻⁴ m²</p>
+                        <p><strong>Étape 3 :</strong> Calculer la vitesse</p>
+                        <p>v = Q/S = 6.67×10⁻⁴ / 4.91×10⁻⁴</p>
+                        <p><strong>v = 1.36 m/s</strong></p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="exercise-box">
+                <h3>Exercice 4 : Poids apparent</h3>
+                <p class="question">Un patient de 80 kg avec un volume corporel de 78 L est immergé jusqu'à la taille (50% du volume immergé). Quel est son poids apparent ?</p>
+                
+                <div style="margin-top: 15px;">
+                    <label>Votre réponse (N) :</label>
+                    <input type="number" id="ex4Input" step="0.1">
+                    <button class="btn" onclick="verifierEx4()">Vérifier</button>
+                </div>
+                <div id="ex4Result"></div>
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: 600;">Solution détaillée</summary>
+                    <div style="margin-top: 10px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                        <p><strong>Étape 1 :</strong> Poids réel</p>
+                        <p>P<sub>réel</sub> = m × g = 80 × 9.81 = 784.8 N</p>
+                        <p><strong>Étape 2 :</strong> Volume immergé</p>
+                        <p>V<sub>immergé</sub> = 0.50 × 78 = 39 L = 0.039 m³</p>
+                        <p><strong>Étape 3 :</strong> Poussée d'Archimède</p>
+                        <p>F<sub>A</sub> = ρ × V × g = 1000 × 0.039 × 9.81 = 382.6 N</p>
+                        <p><strong>Étape 4 :</strong> Poids apparent</p>
+                        <p>P<sub>apparent</sub> = P<sub>réel</sub> - F<sub>A</sub></p>
+                        <p>P<sub>apparent</sub> = 784.8 - 382.6</p>
+                        <p><strong>P<sub>apparent</sub> = 402.2 N</strong></p>
+                        <p style="margin-top: 10px;"><em>Le patient ne porte plus que 51% de son poids (41 kg équivalent).</em></p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="exercise-box">
+                <h3>Exercice 5 : Nombre de Reynolds</h3>
+                <p class="question">Dans un tuyau de 4 cm de diamètre, l'eau s'écoule à 0.5 m/s. Déterminez le type d'écoulement.</p>
+                <p><strong>Données :</strong> Viscosité cinématique ν = 1×10⁻⁶ m²/s</p>
+                
+                <div style="margin-top: 15px;">
+                    <label>Votre réponse (Re) :</label>
+                    <input type="number" id="ex5Input" step="1">
+                    <button class="btn" onclick="verifierEx5()">Vérifier</button>
+                </div>
+                <div id="ex5Result"></div>
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: 600;">Solution détaillée</summary>
+                    <div style="margin-top: 10px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                        <p><strong>Formule :</strong> Re = (v × D) / ν</p>
+                        <p><strong>Calcul :</strong></p>
+                        <p>Re = (0.5 × 0.04) / (1×10⁻⁶)</p>
+                        <p>Re = 0.02 / (1×10⁻⁶)</p>
+                        <p><strong>Re = 20 000</strong></p>
+                        <p style="margin-top: 10px;"><em><strong>Interprétation :</strong> Re > 4000 → Écoulement turbulent. Les filets d'eau sont chaotiques, le mélange est efficace.</em></p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="exercise-box">
+                <h3>Exercice 6 : Cas clinique complet</h3>
+                <p><strong>Situation :</strong> Vous devez concevoir un protocole de rééducation pour une patiente de 65 kg ayant subi une prothèse totale de hanche.</p>
+                
+                <p class="question">Phase 1 (J+7) : Immersion jusqu'aux épaules. Quel sera son poids apparent ?</p>
+                <p><em>Considérer 90% du volume corporel immergé, volume total 63 L</em></p>
+                
+                <div style="margin-top: 15px;">
+                    <label>Votre réponse (kg) :</label>
+                    <input type="number" id="ex6Input" step="0.1">
+                    <button class="btn" onclick="verifierEx6()">Vérifier</button>
+                </div>
+                <div id="ex6Result"></div>
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: 600;">Solution détaillée</summary>
+                    <div style="margin-top: 10px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                        <p><strong>Étape 1 :</strong> Volume immergé</p>
+                        <p>V<sub>immergé</sub> = 0.90 × 63 = 56.7 L = 0.0567 m³</p>
+                        <p><strong>Étape 2 :</strong> Poussée d'Archimède</p>
+                        <p>F<sub>A</sub> = 1000 × 0.0567 × 9.81 = 556.2 N</p>
+                        <p><strong>Étape 3 :</strong> Poids réel</p>
+                        <p>P<sub>réel</sub> = 65 × 9.81 = 637.7 N</p>
+                        <p><strong>Étape 4 :</strong> Poids apparent</p>
+                        <p>P<sub>apparent</sub> = 637.7 - 556.2 = 81.5 N</p>
+                        <p><strong>Masse apparente = 81.5 / 9.81 = 8.3 kg</strong></p>
+                        <p style="margin-top: 10px;"><em><strong>Interprétation clinique :</strong> La patiente ne supporte que 13% de son poids, permettant une mobilisation précoce sans contrainte sur la prothèse.</em></p>
+                    </div>
+                </details>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" onclick="resetExercices()">Réinitialiser tous les exercices</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation entre onglets
+        function showTab(tabName, btnEl) {
+            const sections = document.querySelectorAll('.content-section');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            sections.forEach(section => section.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            const targetBtn = btnEl || (typeof event !== 'undefined' ? event.target : null);
+            if (targetBtn) targetBtn.classList.add('active');
+        }
+
+        // Navigation entre niveaux
+        function showLevel(section, level, btnEl) {
+            const levelContents = document.querySelectorAll(`#${section} .level-content`);
+            const levelButtons = document.querySelectorAll(`#${section} .level-btn`);
+            
+            levelContents.forEach(content => content.style.display = 'none');
+            levelButtons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(`${section}-${level}`).style.display = 'block';
+            const targetBtn = btnEl || (typeof event !== 'undefined' ? event.target : null);
+            if (targetBtn) targetBtn.classList.add('active');
+        }
+
+        // Animation Pression
+        const pressionCanvas = document.getElementById('pressionCanvas');
+        const pressionCtx = pressionCanvas.getContext('2d');
+        const profondeurSlider = document.getElementById('profondeurSlider');
+        const profondeurValue = document.getElementById('profondeurValue');
+
+        function drawPression() {
+            const h = parseFloat(profondeurSlider.value);
+            profondeurValue.textContent = h.toFixed(1) + ' m';
+            
+            pressionCtx.clearRect(0, 0, pressionCanvas.width, pressionCanvas.height);
+            
+            // Fond ciel
+            const skyGradient = pressionCtx.createLinearGradient(0, 0, 0, pressionCanvas.height - 300);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(1, '#E0F6FF');
+            pressionCtx.fillStyle = skyGradient;
+            pressionCtx.fillRect(0, 0, pressionCanvas.width, pressionCanvas.height - 300);
+            
+            // Eau avec gradient progressif
+            const waterHeight = 300;
+            const gradient = pressionCtx.createLinearGradient(0, pressionCanvas.height - waterHeight, 0, pressionCanvas.height);
+            gradient.addColorStop(0, '#81D4FA');
+            gradient.addColorStop(0.3, '#29B6F6');
+            gradient.addColorStop(0.7, '#039BE5');
+            gradient.addColorStop(1, '#01579B');
+            pressionCtx.fillStyle = gradient;
+            pressionCtx.fillRect(50, pressionCanvas.height - waterHeight, 600, waterHeight);
+            
+            // Ondulations surface
+            pressionCtx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            pressionCtx.lineWidth = 2;
+            for (let i = 0; i < 3; i++) {
+                pressionCtx.beginPath();
+                for (let x = 50; x < 650; x += 5) {
+                    const y = pressionCanvas.height - waterHeight + Math.sin((x + i * 20) / 20) * 3;
+                    if (x === 50) pressionCtx.moveTo(x, y);
+                    else pressionCtx.lineTo(x, y);
+                }
+                pressionCtx.stroke();
+            }
+            
+            // Niveau d'eau
+            pressionCtx.strokeStyle = '#01579B';
+            pressionCtx.lineWidth = 2;
+            pressionCtx.setLineDash([5, 5]);
+            pressionCtx.beginPath();
+            pressionCtx.moveTo(50, pressionCanvas.height - waterHeight);
+            pressionCtx.lineTo(650, pressionCanvas.height - waterHeight);
+            pressionCtx.stroke();
+            pressionCtx.setLineDash([]);
+            
+            // Point de mesure
+            const yPos = pressionCanvas.height - waterHeight + (h / 2) * waterHeight;
+            
+            // Flèches de pression avec intensité variable
+            const numArrows = Math.floor(h * 3) + 3;
+            pressionCtx.lineWidth = 3;
+            
+            for (let i = 0; i < numArrows; i++) {
+                const x = 350;
+                const y = yPos + (i - numArrows/2) * 20;
+                const length = 30 + (h * 10);
+                
+                // Gradient de couleur selon intensité
+                const intensity = Math.min(255, 100 + h * 50);
+                pressionCtx.strokeStyle = `rgb(${intensity}, ${255-intensity}, 34)`;
+                pressionCtx.fillStyle = `rgb(${intensity}, ${255-intensity}, 34)`;
+                
+                // Flèche gauche
+                pressionCtx.beginPath();
+                pressionCtx.moveTo(x - length, y);
+                pressionCtx.lineTo(x - 10, y);
+                pressionCtx.stroke();
+                pressionCtx.beginPath();
+                pressionCtx.moveTo(x - 10, y);
+                pressionCtx.lineTo(x - 20, y - 5);
+                pressionCtx.lineTo(x - 20, y + 5);
+                pressionCtx.closePath();
+                pressionCtx.fill();
+                
+                // Flèche droite
+                pressionCtx.beginPath();
+                pressionCtx.moveTo(x + length, y);
+                pressionCtx.lineTo(x + 10, y);
+                pressionCtx.stroke();
+                pressionCtx.beginPath();
+                pressionCtx.moveTo(x + 10, y);
+                pressionCtx.lineTo(x + 20, y - 5);
+                pressionCtx.lineTo(x + 20, y + 5);
+                pressionCtx.closePath();
+                pressionCtx.fill();
+            }
+            
+            // Point de mesure avec animation
+            pressionCtx.shadowBlur = 10;
+            pressionCtx.shadowColor = '#FF5722';
+            pressionCtx.fillStyle = '#FF5722';
+            pressionCtx.beginPath();
+            pressionCtx.arc(350, yPos, 8, 0, Math.PI * 2);
+            pressionCtx.fill();
+            pressionCtx.shadowBlur = 0;
+            
+            // Calculs
+            const P0 = 101325;
+            const rho = 1000;
+            const g = 9.81;
+            const P = P0 + rho * g * h;
+            const P_rel = rho * g * h;
+            const P_mmHg = (P_rel / 133.322).toFixed(0);
+            
+            // Boîte d'affichage des valeurs
+            pressionCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            pressionCtx.fillRect(10, 10, 300, 100);
+            pressionCtx.strokeStyle = '#667eea';
+            pressionCtx.lineWidth = 3;
+            pressionCtx.strokeRect(10, 10, 300, 100);
+            
+            pressionCtx.fillStyle = '#000';
+            pressionCtx.font = 'bold 15px Arial';
+            pressionCtx.fillText(`📏 Profondeur: ${h.toFixed(1)} m`, 20, 35);
+            pressionCtx.fillText(`📊 Pression totale: ${P.toFixed(0)} Pa`, 20, 60);
+            pressionCtx.fillStyle = '#FF5722';
+            pressionCtx.fillText(`💪 Pression relative: ${P_rel.toFixed(0)} Pa`, 20, 85);
+            pressionCtx.fillStyle = '#1976D2';
+            pressionCtx.font = 'bold 14px Arial';
+            pressionCtx.fillText(`= ${P_mmHg} mmHg`, 200, 100);
+            
+            // Échelle de profondeur améliorée
+            pressionCtx.strokeStyle = '#333';
+            pressionCtx.lineWidth = 3;
+            pressionCtx.beginPath();
+            pressionCtx.moveTo(30, pressionCanvas.height - waterHeight);
+            pressionCtx.lineTo(30, pressionCanvas.height);
+            pressionCtx.stroke();
+            
+            for (let i = 0; i <= 2; i += 0.5) {
+                const y = pressionCanvas.height - waterHeight + (i / 2) * waterHeight;
+                pressionCtx.beginPath();
+                pressionCtx.moveTo(25, y);
+                pressionCtx.lineTo(35, y);
+                pressionCtx.stroke();
+                pressionCtx.fillStyle = '#000';
+                pressionCtx.font = 'bold 13px Arial';
+                pressionCtx.fillText(`${i.toFixed(1)}m`, 5, y + 5);
+            }
+        }
+
+        profondeurSlider.addEventListener('input', drawPression);
+        drawPression();
+
+        // Animation Archimède
+        const archimedeCanvas = document.getElementById('archimedeCanvas');
+        const archimedeCtx = archimedeCanvas.getContext('2d');
+        const densiteSlider = document.getElementById('densiteSlider');
+        const densiteValue = document.getElementById('densiteValue');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+
+        function drawArchimede() {
+            const densite = parseFloat(densiteSlider.value);
+            const volume = parseFloat(volumeSlider.value);
+            
+            densiteValue.textContent = densite + ' kg/m³';
+            volumeValue.textContent = volume + ' L';
+            
+            archimedeCtx.clearRect(0, 0, archimedeCanvas.width, archimedeCanvas.height);
+            
+            // Fond ciel
+            const skyGradient = archimedeCtx.createLinearGradient(0, 0, 0, 300);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(1, '#E0F6FF');
+            archimedeCtx.fillStyle = skyGradient;
+            archimedeCtx.fillRect(0, 0, archimedeCanvas.width, 300);
+            
+            // Eau
+            const waterLevel = 300;
+            const gradient = archimedeCtx.createLinearGradient(0, waterLevel, 0, archimedeCanvas.height);
+            gradient.addColorStop(0, '#81D4FA');
+            gradient.addColorStop(0.5, '#29B6F6');
+            gradient.addColorStop(1, '#0277BD');
+            archimedeCtx.fillStyle = gradient;
+            archimedeCtx.fillRect(0, waterLevel, archimedeCanvas.width, archimedeCanvas.height - waterLevel);
+            
+            // Bulles d'air
+            archimedeCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            for (let i = 0; i < 8; i++) {
+                const x = 50 + Math.random() * (archimedeCanvas.width - 100);
+                const y = waterLevel + 50 + Math.random() * 80;
+                const r = 3 + Math.random() * 4;
+                archimedeCtx.beginPath();
+                archimedeCtx.arc(x, y, r, 0, Math.PI * 2);
+                archimedeCtx.fill();
+            }
+            
+            // Surface de l'eau avec ondulations
+            archimedeCtx.strokeStyle = '#01579B';
+            archimedeCtx.lineWidth = 3;
+            archimedeCtx.beginPath();
+            for (let x = 0; x < archimedeCanvas.width; x += 10) {
+                const y = waterLevel + Math.sin(x / 30) * 2;
+                if (x === 0) archimedeCtx.moveTo(x, y);
+                else archimedeCtx.lineTo(x, y);
+            }
+            archimedeCtx.stroke();
+            
+            // Calculs
+            const volumeM3 = volume / 1000;
+            const masse = densite * volumeM3;
+            const poids = masse * 9.81;
+            const poussee = 1000 * volumeM3 * 9.81;
+            const poidsApparent = poids - poussee;
+            
+            // Position du corps
+            let bodyY;
+            let bodySize = Math.min(80, 40 + volume * 0.5);
+            let bodyColor, etat, emoji;
+            
+            if (Math.abs(poidsApparent) < 1) {
+                // Flottaison neutre
+                bodyY = waterLevel + 20;
+                bodyColor = '#FFC107';
+                etat = "⚖️ Flottaison neutre";
+                emoji = "⚖️";
+            } else if (poidsApparent > 0) {
+                // Coule
+                bodyY = archimedeCanvas.height - 80;
+                bodyColor = '#FF5722';
+                etat = "⬇️ Le corps coule";
+                emoji = "⬇️";
+            } else {
+                // Flotte
+                bodyY = waterLevel - bodySize/2;
+                bodyColor = '#4CAF50';
+                etat = "⬆️ Le corps flotte";
+                emoji = "⬆️";
+            }
+            
+            // Ombre du corps
+            archimedeCtx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            archimedeCtx.fillRect(archimedeCanvas.width/2 - bodySize/2 + 5, bodyY - bodySize/2 + 5, bodySize, bodySize);
+            
+            // Corps avec gradient
+            const bodyGradient = archimedeCtx.createLinearGradient(
+                archimedeCanvas.width/2 - bodySize/2, bodyY - bodySize/2,
+                archimedeCanvas.width/2 + bodySize/2, bodyY + bodySize/2
+            );
+            bodyGradient.addColorStop(0, bodyColor);
+            bodyGradient.addColorStop(1, adjustColor(bodyColor, -30));
+            archimedeCtx.fillStyle = bodyGradient;
+            archimedeCtx.fillRect(archimedeCanvas.width/2 - bodySize/2, bodyY - bodySize/2, bodySize, bodySize);
+            
+            // Contour du corps
+            archimedeCtx.strokeStyle = '#333';
+            archimedeCtx.lineWidth = 3;
+            archimedeCtx.strokeRect(archimedeCanvas.width/2 - bodySize/2, bodyY - bodySize/2, bodySize, bodySize);
+            
+            // Emoji sur le corps
+            archimedeCtx.font = 'bold 30px Arial';
+            archimedeCtx.textAlign = 'center';
+            archimedeCtx.fillText(emoji, archimedeCanvas.width/2, bodyY + 10);
+            
+            // Flèche poids (rouge, vers le bas)
+            const arrowLength = Math.min(100, 30 + Math.abs(poids) * 0.05);
+            
+            // Ombre flèche
+            archimedeCtx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            archimedeCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            archimedeCtx.lineWidth = 4;
+            archimedeCtx.beginPath();
+            archimedeCtx.moveTo(archimedeCanvas.width/2 - 38, bodyY + 2);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 - 38, bodyY + arrowLength + 2);
+            archimedeCtx.stroke();
+            
+            // Flèche poids réelle
+            archimedeCtx.strokeStyle = '#D32F2F';
+            archimedeCtx.fillStyle = '#D32F2F';
+            archimedeCtx.lineWidth = 4;
+            
+            archimedeCtx.beginPath();
+            archimedeCtx.moveTo(archimedeCanvas.width/2 - 40, bodyY);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 - 40, bodyY + arrowLength);
+            archimedeCtx.stroke();
+            
+            archimedeCtx.beginPath();
+            archimedeCtx.moveTo(archimedeCanvas.width/2 - 40, bodyY + arrowLength);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 - 50, bodyY + arrowLength - 12);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 - 30, bodyY + arrowLength - 12);
+            archimedeCtx.closePath();
+            archimedeCtx.fill();
+            
+            // Label poids
+            archimedeCtx.fillStyle = '#D32F2F';
+            archimedeCtx.font = 'bold 16px Arial';
+            archimedeCtx.fillText('P', archimedeCanvas.width/2 - 40, bodyY + arrowLength + 25);
+            archimedeCtx.font = '12px Arial';
+            archimedeCtx.fillText(`${poids.toFixed(1)} N`, archimedeCanvas.width/2 - 40, bodyY + arrowLength + 40);
+            
+            // Flèche poussée (bleue, vers le haut)
+            const arrowLength2 = Math.min(100, 30 + Math.abs(poussee) * 0.05);
+            
+            // Ombre flèche
+            archimedeCtx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+            archimedeCtx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            archimedeCtx.lineWidth = 4;
+            archimedeCtx.beginPath();
+            archimedeCtx.moveTo(archimedeCanvas.width/2 + 42, bodyY + 2);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 + 42, bodyY - arrowLength2 + 2);
+            archimedeCtx.stroke();
+            
+            // Flèche poussée réelle
+            archimedeCtx.strokeStyle = '#1976D2';
+            archimedeCtx.fillStyle = '#1976D2';
+            archimedeCtx.lineWidth = 4;
+            
+            archimedeCtx.beginPath();
+            archimedeCtx.moveTo(archimedeCanvas.width/2 + 40, bodyY);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 + 40, bodyY - arrowLength2);
+            archimedeCtx.stroke();
+            
+            archimedeCtx.beginPath();
+            archimedeCtx.moveTo(archimedeCanvas.width/2 + 40, bodyY - arrowLength2);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 + 30, bodyY - arrowLength2 + 12);
+            archimedeCtx.lineTo(archimedeCanvas.width/2 + 50, bodyY - arrowLength2 + 12);
+            archimedeCtx.closePath();
+            archimedeCtx.fill();
+            
+            // Label poussée
+            archimedeCtx.fillStyle = '#1976D2';
+            archimedeCtx.font = 'bold 16px Arial';
+            archimedeCtx.fillText('F_A', archimedeCanvas.width/2 + 40, bodyY - arrowLength2 - 15);
+            archimedeCtx.font = '12px Arial';
+            archimedeCtx.fillText(`${poussee.toFixed(1)} N`, archimedeCanvas.width/2 + 40, bodyY - arrowLength2 - 30);
+            
+            // Boîte d'informations
+            const infoDiv = document.getElementById('archimedeInfo');
+            const percentPoids = ((poids - Math.abs(poidsApparent)) / poids * 100).toFixed(0);
+            infoDiv.innerHTML = `
+                <strong>Masse:</strong> ${masse.toFixed(1)} kg | 
+                <strong>Poids:</strong> ${poids.toFixed(1)} N | 
+                <strong>Poussée:</strong> ${poussee.toFixed(1)} N<br>
+                <strong>Poids apparent:</strong> ${Math.abs(poidsApparent).toFixed(1)} N 
+                (${poidsApparent >= 0 ? percentPoids : '0'}% du poids supporté)<br>
+                <strong style="color: ${bodyColor}; font-size: 1.2em;">${etat}</strong>
+            `;
+        }
+        
+        // Fonction helper pour ajuster la couleur
+        function adjustColor(color, amount) {
+            const num = parseInt(color.replace("#",""), 16);
+            const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+            const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+            const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+            return "#" + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+        }
+
+        densiteSlider.addEventListener('input', drawArchimede);
+        volumeSlider.addEventListener('input', drawArchimede);
+        drawArchimede();
+
+        // Animation Écoulement
+        const ecoulementCanvas = document.getElementById('ecoulementCanvas');
+        const ecoulementCtx = ecoulementCanvas.getContext('2d');
+        const debitSlider = document.getElementById('debitSlider');
+        const debitValue = document.getElementById('debitValue');
+        const diametreSlider = document.getElementById('diametreSlider');
+        const diametreValue = document.getElementById('diametreValue');
+
+        let particles = [];
+        let animationFrameEcoulement;
+
+        class Particle {
+            constructor(x, y, speed) {
+                this.x = x;
+                this.y = y;
+                this.speed = speed;
+                this.size = 3;
+            }
+
+            update() {
+                this.x += this.speed;
+                if (this.x > ecoulementCanvas.width) {
+                    this.x = 50;
+                }
+            }
+
+            draw() {
+                ecoulementCtx.fillStyle = '#2196F3';
+                ecoulementCtx.beginPath();
+                ecoulementCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ecoulementCtx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            const debit = parseFloat(debitSlider.value);
+            const diametre = parseFloat(diametreSlider.value);
+            const numParticles = Math.floor(debit);
+            const speed = debit * 0.3;
+            
+            const pipeY = ecoulementCanvas.height / 2;
+            const pipeHeight = diametre * 15;
+            
+            for (let i = 0; i < numParticles; i++) {
+                const x = Math.random() * ecoulementCanvas.width;
+                const y = pipeY + (Math.random() - 0.5) * pipeHeight;
+                particles.push(new Particle(x, y, speed));
+            }
+        }
+
+        function animateEcoulement() {
+            const debit = parseFloat(debitSlider.value);
+            const diametre = parseFloat(diametreSlider.value);
+            
+            debitValue.textContent = debit + ' L/min';
+            diametreValue.textContent = diametre + ' cm';
+            
+            ecoulementCtx.clearRect(0, 0, ecoulementCanvas.width, ecoulementCanvas.height);
+            
+            // Conduite
+            const pipeY = ecoulementCanvas.height / 2;
+            const pipeHeight = diametre * 15;
+            
+            ecoulementCtx.fillStyle = '#E0E0E0';
+            ecoulementCtx.fillRect(0, pipeY - pipeHeight/2, ecoulementCanvas.width, pipeHeight);
+            
+            ecoulementCtx.strokeStyle = '#666';
+            ecoulementCtx.lineWidth = 3;
+            ecoulementCtx.beginPath();
+            ecoulementCtx.moveTo(0, pipeY - pipeHeight/2);
+            ecoulementCtx.lineTo(ecoulementCanvas.width, pipeY - pipeHeight/2);
+            ecoulementCtx.stroke();
+            ecoulementCtx.beginPath();
+            ecoulementCtx.moveTo(0, pipeY + pipeHeight/2);
+            ecoulementCtx.lineTo(ecoulementCanvas.width, pipeY + pipeHeight/2);
+            ecoulementCtx.stroke();
+            
+            // Particules
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            
+            // Calculs
+            const Q = debit / 60000; // m³/s
+            const r = (diametre / 100) / 2; // m
+            const S = Math.PI * r * r;
+            const v = Q / S;
+            
+            // Affichage
+            const infoDiv = document.getElementById('ecoulementInfo');
+            infoDiv.innerHTML = `
+                <strong>Section:</strong> ${(S * 10000).toFixed(2)} cm² | 
+                <strong>Vitesse:</strong> ${v.toFixed(2)} m/s | 
+                <strong>Débit volumique:</strong> ${Q.toFixed(6)} m³/s
+            `;
+            
+            animationFrameEcoulement = requestAnimationFrame(animateEcoulement);
+        }
+
+        debitSlider.addEventListener('input', () => {
+            initParticles();
+        });
+        diametreSlider.addEventListener('input', () => {
+            initParticles();
+        });
+
+        initParticles();
+        animateEcoulement();
+
+        // ========================================
+        // SYSTÈME DE FORMULES INTELLIGENT
+        // ========================================
+
+        // Définition des symboles
+        const greekSymbols = [
+            'α', 'β', 'γ', 'δ', 'ε', 'ζ', 'η', 'θ', 'ι', 'κ', 'λ', 'μ', 'ν', 'ξ', 'ο', 'π', 'ρ', 'σ', 'τ', 'υ', 'φ', 'χ', 'ψ', 'ω',
+            'Γ', 'Δ', 'Θ', 'Λ', 'Ξ', 'Π', 'Σ', 'Φ', 'Ψ', 'Ω'
+        ];
+
+        const physicsSymbols = [
+            'P', 'F', 'Q', 'V', 'v', 'm', 'T', 't', 'E', 'W', 'R', 'r', 'D', 'd', 'L', 'S', 'A', 'h', 'g', 'c', 'n', 'N'
+        ];
+
+        const operators = [
+            '+', '-', '×', '·', '*', '/', '=', '(', ')', '[', ']', 
+            '²', '³', '⁴', '½', '¼', '¾',
+            '₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉',
+            '⁰', '¹', '²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹',
+            '∞', '∂', '∇', '∫', '∑', '√', '±', '≈', '≠', '≤', '≥', '→', '°', 'Δ'
+        ];
+
+        // Générer les claviers
+        function generateKeyboard(containerId, symbols) {
+            const container = document.getElementById(containerId);
+            symbols.forEach(symbol => {
+                const btn = document.createElement('button');
+                btn.className = 'symbol-btn';
+                btn.textContent = symbol;
+                btn.onclick = () => addSymbol(symbol);
+                container.appendChild(btn);
+            });
+        }
+
+        generateKeyboard('greekSymbols', greekSymbols);
+        generateKeyboard('physicsSymbols', physicsSymbols);
+        generateKeyboard('operators', operators);
+
+        // Variables globales pour le mode de saisie
+        let currentMode = 'normal'; // normal, subscript, superscript
+        let formulaText = '';
+
+        function addSymbol(symbol) {
+            const display = document.getElementById('formulaDisplay');
+            
+            if (currentMode === 'subscript') {
+                // Convertir en indice
+                const subscripts = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉'};
+                const subscriptLetters = {
+                    'a':'ₐ','e':'ₑ','o':'ₒ','x':'ₓ','h':'ₕ','k':'ₖ','l':'ₗ','m':'ₘ','n':'ₙ','p':'ₚ','s':'ₛ','t':'ₜ'
+                };
+                const converted = subscripts[symbol] || subscriptLetters[symbol] || '₍' + symbol + '₎';
+                formulaText += converted;
+                currentMode = 'normal';
+                document.getElementById('modeIndicator').textContent = 'Mode normal';
+                document.getElementById('modeIndicator').className = 'mode-indicator';
+            } else if (currentMode === 'superscript') {
+                // Convertir en exposant
+                const superscripts = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+                const superscriptLetters = {'n':'ⁿ'};
+                const converted = superscripts[symbol] || superscriptLetters[symbol] || '⁽' + symbol + '⁾';
+                formulaText += converted;
+                currentMode = 'normal';
+                document.getElementById('modeIndicator').textContent = 'Mode normal';
+                document.getElementById('modeIndicator').className = 'mode-indicator';
+            } else {
+                formulaText += symbol;
+            }
+            
+            display.textContent = formulaText || 'Cliquez sur les symboles ci-dessus...';
+        }
+
+        function clearFormula() {
+            formulaText = '';
+            document.getElementById('formulaDisplay').textContent = 'Cliquez sur les symboles ci-dessus...';
+        }
+
+        function deleteLastChar() {
+            formulaText = formulaText.slice(0, -1);
+            document.getElementById('formulaDisplay').textContent = formulaText || 'Cliquez sur les symboles ci-dessus...';
+        }
+
+        function toggleSubscript() {
+            currentMode = currentMode === 'subscript' ? 'normal' : 'subscript';
+            const indicator = document.getElementById('modeIndicator');
+            if (currentMode === 'subscript') {
+                indicator.textContent = 'Mode INDICE actif';
+                indicator.className = 'mode-indicator subscript-mode';
+            } else {
+                indicator.textContent = 'Mode normal';
+                indicator.className = 'mode-indicator';
+            }
+        }
+
+        function toggleSuperscript() {
+            currentMode = currentMode === 'superscript' ? 'normal' : 'superscript';
+            const indicator = document.getElementById('modeIndicator');
+            if (currentMode === 'superscript') {
+                indicator.textContent = 'Mode EXPOSANT actif';
+                indicator.className = 'mode-indicator superscript-mode';
+            } else {
+                indicator.textContent = 'Mode normal';
+                indicator.className = 'mode-indicator';
+            }
+        }
+
+        function addSpace() {
+            formulaText += ' ';
+            document.getElementById('formulaDisplay').textContent = formulaText;
+        }
+
+        // QUIZ DE FORMULES
+        const formulaQuizzes = [
+            {
+                description: "Pression hydrostatique",
+                target: "P = P₀ + ρgh",
+                alternatives: ["P=P0+ρgh", "P=P₀+ρ×g×h", "P=P0+rho×g×h"],
+                hint: "P égale P indice 0 plus rho fois g fois h",
+                context: "P (Pa) = pression totale. P₀ (Pa) = pression à la surface (souvent atmosphérique). ρ (kg/m³) = masse volumique (eau ≈ 1000). g (m/s²) ≈ 9,81. h (m) = profondeur. Astuce : la pression due à l’eau seule vaut ρgh."
+            },
+            {
+                description: "Poussée d'Archimède",
+                target: "F_A = ρVg",
+                alternatives: ["FA=ρVg", "F_A=ρ×V×g", "FA=rho×V×g", "Fa=ρVg"],
+                hint: "F indice A égale rho fois V fois g",
+                context: "F_A (N) = force de flottabilité vers le haut. ρ (kg/m³) = masse volumique du fluide. V (m³) = volume immergé (1 L = 0,001 m³). g (m/s²) ≈ 9,81. Interprétation : F_A = poids du fluide déplacé."
+            },
+            {
+                description: "Débit volumique",
+                target: "Q = vS",
+                alternatives: ["Q=v×S", "Q=v·S", "Q=S×v", "Q=Sv"],
+                hint: "Q égale v fois S (vitesse fois section)",
+                context: "Q (m³/s) = débit. v (m/s) = vitesse moyenne. S (m²) = section. Conversions : 1 L/min = 1/60 000 m³/s. Si le tube est circulaire : S = πr²."
+            },
+            {
+                description: "Nombre de Reynolds",
+                target: "Re = ρvD/η",
+                alternatives: ["Re=(ρvD)/η", "Re=ρ×v×D/η", "Re=(rho×v×D)/eta"],
+                hint: "Re égale rho fois v fois D divisé par eta",
+                context: "Re (sans unité) compare forces d’inertie et forces visqueuses. ρ (kg/m³), v (m/s), D (m), η (Pa·s). Repères : Re < 2000 laminaire ; > 4000 turbulent (ordre de grandeur)."
+            },
+            {
+                description: "Équation de Bernoulli",
+                target: "P + ½ρv² + ρgh = cte",
+                alternatives: ["P+½ρv²+ρgh=cte", "P+(1/2)ρv²+ρgh=constante"],
+                hint: "P plus un demi rho v carré plus rho g h égale constante",
+                context: "Chaque terme s’exprime en Pa (énergie par volume) : P (pression), ½ρv² (dynamique), ρgh (hydrostatique). Valable si écoulement stationnaire, incompressible, et pertes négligeables."
+            },
+            {
+                description: "Loi de Poiseuille",
+                target: "Q = πΔPr⁴/(8ηL)",
+                alternatives: ["Q=(π×ΔP×r⁴)/(8×η×L)", "Q=π*ΔP*r⁴/(8*η*L)"],
+                hint: "Q égale pi fois delta P fois r puissance 4 divisé par 8 eta L",
+                context: "Q (m³/s) = (πΔP r⁴)/(8ηL). ΔP (Pa), r (m), η (Pa·s), L (m). Très important : r⁴ → un petit changement de rayon change énormément le débit (r×2 → Q×16). Régime laminaire requis."
+            },
+            {
+                description: "Pertes de charge",
+                target: "ΔP = λ(L/D)(ρv²/2)",
+                alternatives: ["ΔP=λ×(L/D)×(ρv²/2)", "ΔP=λ*(L/D)*(ρ×v²/2)"],
+                hint: "Delta P égale lambda fois L sur D fois rho v carré sur 2",
+                context: "ΔP (Pa) = perte de pression par frottements. λ (sans unité) dépend de Re et de la rugosité. L (m) longueur, D (m) diamètre, ρ (kg/m³), v (m/s). Le terme v² montre que la vitesse a un fort impact."
+            },
+            {
+                description: "Contrainte de cisaillement",
+                target: "τ = η(dv/dy)",
+                alternatives: ["τ=η×(dv/dy)", "tau=eta×(dv/dy)", "τ=η*dv/dy"],
+                hint: "Tau égale eta fois dv sur dy",
+                context: "τ (Pa) = contrainte de cisaillement. η (Pa·s) = viscosité dynamique. dv/dy (s⁻¹) = gradient de vitesse entre couches. Fluide newtonien : τ est proportionnelle à dv/dy."
+            },
+            {
+                description: "Pression dynamique",
+                target: "P_dyn = ½ρv²",
+                alternatives: ["Pdyn=½ρv²", "P_dyn=(1/2)ρv²", "Pdyn=0.5*ρ*v²"],
+                hint: "P dynamique égale un demi rho v carré",
+                context: "P_dyn (Pa) = ½ρv². ρ (kg/m³), v (m/s). Interprétation : pression associée au mouvement (augmente comme v²)."
+            },
+            {
+                description: "Force sur une surface",
+                target: "F = PS",
+                alternatives: ["F=P×S", "F=P·S", "F=S×P", "F=SP"],
+                hint: "F égale P fois S (pression fois surface)",
+                context: "F (N) = P × S. P (Pa) = N/m², S (m²). Donc F = (N/m²)×m² → N. Très utile pour estimer l’effort d’un jet sur la peau."
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let correctAnswers = 0;
+
+        function normalizeFormula(formula) {
+            return formula
+                .replace(/\s+/g, '')  // Supprimer espaces
+                .replace(/[×·]/g, '*')  // Normaliser multiplications
+                .replace(/[₀⁰]/g, '0').replace(/[₁¹]/g, '1').replace(/[₂²]/g, '2')
+                .replace(/[₃³]/g, '3').replace(/[₄⁴]/g, '4').replace(/[₅⁵]/g, '5')
+                .replace(/[₆⁶]/g, '6').replace(/[₇⁷]/g, '7').replace(/[₈⁸]/g, '8')
+                .replace(/[₉⁹]/g, '9')
+                .replace(/_/g, '')  // Enlever underscores
+                .replace(/rho/gi, 'ρ')
+                .replace(/eta/gi, 'η')
+                .replace(/lambda/gi, 'λ')
+                .replace(/tau/gi, 'τ')
+                .replace(/delta/gi, 'Δ')
+                .replace(/cte|constante/gi, 'cte')
+                .toLowerCase();
+        }
+
+        function compareFormulas(userFormula, targetFormula, alternatives) {
+            const normalized = normalizeFormula(userFormula);
+            const normalizedTarget = normalizeFormula(targetFormula);
+            
+            // Vérifier correspondance exacte
+            if (normalized === normalizedTarget) return true;
+            
+            // Vérifier alternatives
+            for (let alt of alternatives) {
+                if (normalized === normalizeFormula(alt)) return true;
+            }
+            
+            // Vérifier avec variations de multiplication
+            const variations = [
+                normalized.replace(/\*/g, ''),  // Sans *
+                normalized.replace(/\*/g, '×'),  // Avec ×
+                normalized.replace(/\*/g, '·'),  // Avec ·
+            ];
+            
+            for (let variation of variations) {
+                if (variation === normalizedTarget) return true;
+                for (let alt of alternatives) {
+                    if (variation === normalizeFormula(alt)) return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function loadQuiz() {
+            if (currentQuizIndex >= formulaQuizzes.length) {
+                // Quiz terminé
+                document.getElementById('formulaTarget').innerHTML = `
+                    <div style="color: #4CAF50;">
+                        🎉 Quiz terminé ! Score: ${correctAnswers}/${formulaQuizzes.length}
+                    </div>
+                `;
+                document.getElementById('formulaHint').textContent = "Excellent travail ! Tu maîtrises les formules.";
+                document.getElementById('validationResult').innerHTML = `
+                    <div class="result correct" style="text-align: center;">
+                        <h3>Félicitations ! 🏆</h3>
+                        <p>Tu as correctement écrit ${correctAnswers} formules sur ${formulaQuizzes.length}.</p>
+                        <button class="btn" onclick="restartQuiz()" style="margin-top: 15px;">🔄 Recommencer</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const quiz = formulaQuizzes[currentQuizIndex];
+            document.getElementById('formulaTarget').textContent = quiz.description;
+            document.getElementById('formulaHint').innerHTML = `
+                <strong>💡 Indice :</strong> ${quiz.hint}<br>
+                <strong>📖 Contexte :</strong> ${quiz.context}
+            `;
+            clearFormula();
+            document.getElementById('validationResult').innerHTML = '';
+            
+            // Mise à jour barre de progression
+            const progress = Math.round((currentQuizIndex / formulaQuizzes.length) * 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressBar').textContent = `${currentQuizIndex}/${formulaQuizzes.length}`;
+        }
+
+        function validateFormula() {
+            if (currentQuizIndex >= formulaQuizzes.length) return;
+            
+            const quiz = formulaQuizzes[currentQuizIndex];
+            const userFormula = formulaText;
+            
+            if (!userFormula || userFormula === 'Cliquez sur les symboles ci-dessus...') {
+                document.getElementById('validationResult').innerHTML = `
+                    <div class="result incorrect">
+                        ⚠️ Écris d'abord une formule !
+                    </div>
+                `;
+                return;
+            }
+            
+            const isCorrect = compareFormulas(userFormula, quiz.target, quiz.alternatives);
+            
+            if (isCorrect) {
+                correctAnswers++;
+                document.getElementById('validationResult').innerHTML = `
+                    <div class="result correct">
+                        ✓ Excellent ! Ta formule est correcte !<br>
+                        <strong>Formule attendue :</strong> ${quiz.target}<br>
+                        <strong>Ta formule :</strong> ${userFormula}
+                    </div>
+                `;
+                setTimeout(() => {
+                    currentQuizIndex++;
+                    loadQuiz();
+                }, 2000);
+            } else {
+                document.getElementById('validationResult').innerHTML = `
+                    <div class="result incorrect">
+                        ✗ Pas tout à fait... Réessaie !<br>
+                        <strong>Ta formule :</strong> ${userFormula}<br>
+                        <strong>Formule attendue :</strong> ${quiz.target}
+                    </div>
+                `;
+            }
+        }
+
+        function skipFormula() {
+            currentQuizIndex++;
+            loadQuiz();
+        }
+
+        function showFormulaHelp() {
+            const quiz = formulaQuizzes[currentQuizIndex];
+            document.getElementById('validationResult').innerHTML = `
+                <div class="result" style="background: #fff3cd; color: #856404;">
+                    <strong>📝 Formule correcte :</strong><br>
+                    <div style="font-size: 1.5em; margin: 15px 0;">${quiz.target}</div>
+                    <strong>Explications :</strong> ${quiz.context}
+                </div>
+            `;
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            correctAnswers = 0;
+            loadQuiz();
+        }
+
+        // Charger le premier quiz
+        loadQuiz();
+
+        // Animation Viscosité
+        const viscositeCanvas = document.getElementById('viscositeCanvas');
+        const viscositeCtx = viscositeCanvas.getContext('2d');
+
+        let ballsViscosity = [];
+        let animatingViscosity = false;
+
+        class Ball {
+            constructor(x, viscosity, color, name) {
+                this.x = x;
+                this.y = 50;
+                this.viscosity = viscosity;
+                this.velocity = 0;
+                this.color = color;
+                this.name = name;
+                this.radius = 15;
+            }
+
+            update() {
+                const gravity = 0.5;
+                const drag = this.viscosity * 0.0001;
+                
+                this.velocity += gravity - (this.velocity * drag);
+                this.y += this.velocity;
+                
+                if (this.y > viscositeCanvas.height - this.radius - 30) {
+                    this.y = viscositeCanvas.height - this.radius - 30;
+                    this.velocity = 0;
+                }
+            }
+
+            draw() {
+                viscositeCtx.fillStyle = this.color;
+                viscositeCtx.beginPath();
+                viscositeCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                viscositeCtx.fill();
+                viscositeCtx.strokeStyle = '#333';
+                viscositeCtx.lineWidth = 2;
+                viscositeCtx.stroke();
+                
+                viscositeCtx.fillStyle = '#000';
+                viscositeCtx.font = 'bold 12px Arial';
+                viscositeCtx.textAlign = 'center';
+                viscositeCtx.fillText(this.name, this.x, viscositeCanvas.height - 10);
+            }
+        }
+
+        function startViscositeAnimation() {
+            ballsViscosity = [
+                new Ball(150, 1, '#2196F3', 'Eau'),
+                new Ball(350, 50, '#4CAF50', 'Huile'),
+                new Ball(550, 10000, '#FF9800', 'Miel')
+            ];
+            animatingViscosity = true;
+            animateViscosity();
+        }
+
+        function animateViscosity() {
+            if (!animatingViscosity) return;
+            
+            viscositeCtx.clearRect(0, 0, viscositeCanvas.width, viscositeCanvas.height);
+            
+            // Colonnes
+            viscositeCtx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+            viscositeCtx.fillRect(50, 30, 200, viscositeCanvas.height - 60);
+            viscositeCtx.fillRect(250, 30, 200, viscositeCanvas.height - 60);
+            viscositeCtx.fillRect(450, 30, 200, viscositeCanvas.height - 60);
+            
+            let allStopped = true;
+            ballsViscosity.forEach(ball => {
+                ball.update();
+                ball.draw();
+                if (ball.y < viscositeCanvas.height - ball.radius - 30) {
+                    allStopped = false;
+                }
+            });
+            
+            if (!allStopped) {
+                requestAnimationFrame(animateViscosity);
+            } else {
+                animatingViscosity = false;
+            }
+        }
+
+        // Exercices
+        function verifierEx1() {
+            const reponse = parseFloat(document.getElementById('ex1Input').value);
+            const correct = 120945;
+            const resultDiv = document.getElementById('ex1Result');
+            
+            if (Math.abs(reponse - correct) < 100) {
+                resultDiv.className = 'result correct';
+                resultDiv.textContent = '✓ Correct ! La pression totale est bien de 120 945 Pa.';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.textContent = `✗ Incorrect. La bonne réponse est ${correct} Pa. Utilisez P = P₀ + ρgh.`;
+            }
+        }
+
+        function verifierEx2() {
+            const reponse = parseFloat(document.getElementById('ex2Input').value);
+            const correct = 1109.5;
+            const resultDiv = document.getElementById('ex2Result');
+            
+            if (Math.abs(reponse - correct) < 10) {
+                resultDiv.className = 'result correct';
+                resultDiv.textContent = '✓ Correct ! La poussée d\'Archimède est d\'environ 1110 N.';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.textContent = `✗ Incorrect. La bonne réponse est ${correct.toFixed(1)} N. N'oubliez pas de calculer le volume de la sphère.`;
+            }
+        }
+
+        function verifierEx3() {
+            const reponse = parseFloat(document.getElementById('ex3Input').value);
+            const correct = 1.36;
+            const resultDiv = document.getElementById('ex3Result');
+            
+            if (Math.abs(reponse - correct) < 0.05) {
+                resultDiv.className = 'result correct';
+                resultDiv.textContent = '✓ Correct ! La vitesse de sortie est d\'environ 1.36 m/s.';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.textContent = `✗ Incorrect. La bonne réponse est ${correct} m/s. Pensez à convertir le débit et calculer la section.`;
+            }
+        }
+
+        function verifierEx4() {
+            const reponse = parseFloat(document.getElementById('ex4Input').value);
+            const correct = 402.2;
+            const resultDiv = document.getElementById('ex4Result');
+            
+            if (Math.abs(reponse - correct) < 5) {
+                resultDiv.className = 'result correct';
+                resultDiv.textContent = '✓ Correct ! Le poids apparent est d\'environ 402 N.';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.textContent = `✗ Incorrect. La bonne réponse est ${correct.toFixed(1)} N. Soustrayez la poussée d'Archimède du poids réel.`;
+            }
+        }
+
+        function verifierEx5() {
+            const reponse = parseFloat(document.getElementById('ex5Input').value);
+            const correct = 20000;
+            const resultDiv = document.getElementById('ex5Result');
+            
+            if (Math.abs(reponse - correct) < 100) {
+                resultDiv.className = 'result correct';
+                resultDiv.textContent = '✓ Correct ! Re = 20 000, donc écoulement turbulent.';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.textContent = `✗ Incorrect. La bonne réponse est ${correct}. Utilisez Re = (v × D) / ν.`;
+            }
+        }
+
+        function verifierEx6() {
+            const reponse = parseFloat(document.getElementById('ex6Input').value);
+            const correct = 8.3;
+            const resultDiv = document.getElementById('ex6Result');
+            
+            if (Math.abs(reponse - correct) < 0.5) {
+                resultDiv.className = 'result correct';
+                resultDiv.textContent = '✓ Excellent ! Le poids apparent est d\'environ 8.3 kg, soit 13% du poids initial.';
+            } else {
+                resultDiv.className = 'result incorrect';
+                resultDiv.textContent = `✗ Incorrect. La bonne réponse est ${correct.toFixed(1)} kg. Calculez la poussée pour 90% du volume immergé.`;
+            }
+        }
+
+        function resetExercices() {
+            document.getElementById('ex1Input').value = '';
+            document.getElementById('ex2Input').value = '';
+            document.getElementById('ex3Input').value = '';
+            document.getElementById('ex4Input').value = '';
+            document.getElementById('ex5Input').value = '';
+            document.getElementById('ex6Input').value = '';
+            
+            document.getElementById('ex1Result').textContent = '';
+            document.getElementById('ex2Result').textContent = '';
+            document.getElementById('ex3Result').textContent = '';
+            document.getElementById('ex4Result').textContent = '';
+            document.getElementById('ex5Result').textContent = '';
+            document.getElementById('ex6Result').textContent = '';
+        }
+    
+        // --- Améliorations mobile/tactile : événements pointer + anti sélection ---
+        (function enablePointerInteractions() {
+            // Évite la sélection de texte accidentelle sur mobile quand on tape sur des boutons
+            const noSelect = (el) => {
+                el.style.webkitUserSelect = 'none';
+                el.style.userSelect = 'none';
+                el.style.webkitTapHighlightColor = 'transparent';
+            };
+
+            // Sur certains mobiles, pointerdown rend l'UI plus réactive que click
+            const fastActivate = (el) => {
+                if (!el) return;
+                noSelect(el);
+                el.addEventListener('pointerdown', (e) => {
+                    // Laisse les sliders et inputs fonctionner normalement
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') return;
+                    e.preventDefault();
+                    el.click();
+                }, { passive: false });
+            };
+
+            // Boutons principaux
+            document.querySelectorAll('.tab-btn, .level-btn, .btn, .symbol-btn').forEach(fastActivate);
+
+            // Quand les symboles sont générés dynamiquement, on retente après un court délai
+            setTimeout(() => {
+                document.querySelectorAll('.symbol-btn').forEach(fastActivate);
+            }, 0);
+        })();
+
+</script>
+</body>
+</html>

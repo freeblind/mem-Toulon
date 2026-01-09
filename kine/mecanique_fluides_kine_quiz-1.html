@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mécanique des Fluides - Kinésithérapie</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #333; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-align: center; }
+        h1 { color: #667eea; font-size: 2.5em; margin-bottom: 10px; }
+        .subtitle { color: #666; font-size: 1.2em; }
+        .quiz-container { background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%); padding: 25px; border-radius: 15px; margin: 20px 0; border: 3px solid #5c6bc0; }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #5c6bc0; flex-wrap: wrap; }
+        .quiz-progress { font-size: 1.1em; font-weight: 600; color: #3f51b5; }
+        .quiz-score { background: white; padding: 8px 15px; border-radius: 20px; font-weight: 600; color: #3f51b5; }
+        .quiz-question { font-size: 1.3em; font-weight: 600; margin: 20px 0; color: #1a237e; line-height: 1.5; }
+        .quiz-options { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+        .quiz-option { background: white; padding: 15px 20px; border-radius: 10px; border: 3px solid #9fa8da; cursor: pointer; transition: all 0.3s; font-size: 1.05em; }
+        .quiz-option:hover { transform: translateX(5px); border-color: #5c6bc0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .quiz-option.selected { background: #c5cae9; border-color: #3f51b5; font-weight: 600; }
+        .quiz-option.correct { background: #c8e6c9; border-color: #4caf50; }
+        .quiz-option.incorrect { background: #ffcdd2; border-color: #f44336; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+        .quiz-input { width: 100%; padding: 15px; font-size: 1.1em; border: 3px solid #9fa8da; border-radius: 10px; margin: 10px 0; }
+        .hint-box { background: #fff9c4; padding: 15px 20px; border-radius: 10px; margin: 15px 0; border-left: 5px solid #fbc02d; display: none; }
+        .hint-box.visible { display: block; animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .hint-level { font-weight: 600; color: #f57f17; margin-bottom: 8px; }
+        .quiz-navigation { display: flex; justify-content: space-between; margin-top: 25px; flex-wrap: wrap; gap: 10px; }
+        .quiz-btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .quiz-explanation { background: #e1f5fe; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid #0277bd; display: none; }
+        .quiz-explanation.visible { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .quiz-explanation h4 { color: #01579b; margin-bottom: 10px; }
+        .quiz-final-score { text-align: center; padding: 30px; background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%); border-radius: 15px; margin: 20px 0; }
+        .quiz-final-score h3 { font-size: 2em; color: #f57f17; margin-bottom: 15px; }
+        .quiz-final-score .score-display { font-size: 3em; font-weight: bold; color: #e65100; margin: 20px 0; }
+        .quiz-category-selector { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .category-btn { padding: 10px 20px; background: white; border: 2px solid #5c6bc0; border-radius: 20px; cursor: pointer; transition: all 0.3s; font-weight: 600; }
+        .category-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .category-btn.active { background: #5c6bc0; color: white; }
+        .btn { padding: 10px 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: 600; transition: all 0.3s; margin: 5px; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+        .info-box { background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 5px solid #4CAF50; }
+        h2 { color: #667eea; margin: 25px 0 15px 0; padding-bottom: 10px; border-bottom: 3px solid #667eea; }
+        @media (max-width: 768px) { h1 { font-size: 1.8em; } .quiz-question { font-size: 1.1em; } .quiz-header { flex-direction: column; gap: 10px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌊 Mécanique des Fluides</h1>
+            <p class="subtitle">Hydrothérapie & Kinésithérapie - 1ère année Belgique</p>
+        </header>
+
+        <h2>🎯 Mode Quiz Complet</h2>
+        
+        <div class="info-box">
+            <strong>🎓 Instructions :</strong> Testez vos connaissances avec 30 questions (QCM et calculs). Chaque question a 3 indices progressifs qui vous aident <strong>sans donner la réponse directe</strong>.
+        </div>
+
+        <div class="quiz-category-selector">
+            <button class="category-btn active" onclick="selectQuizCategory('all')">📋 Toutes (30)</button>
+            <button class="category-btn" onclick="selectQuizCategory('pression')">💧 Pression (5)</button>
+            <button class="category-btn" onclick="selectQuizCategory('archimede')">⬆️ Archimède (5)</button>
+            <button class="category-btn" onclick="selectQuizCategory('bernoulli')">🌀 Bernoulli (5)</button>
+            <button class="category-btn" onclick="selectQuizCategory('viscosite')">🍯 Viscosité (4)</button>
+            <button class="category-btn" onclick="selectQuizCategory('reynolds')">🔄 Reynolds (5)</button>
+            <button class="category-btn" onclick="selectQuizCategory('clinique')">🏥 Clinique (6)</button>
+        </div>
+
+        <div id="quizMainContainer"></div>
+    </div>
+
+    <script>
+        let quizQuestions = [], currentQuizIndex = 0, quizScore = 0, currentQuizCategory = 'all', quizAnswered = false, quizHintLevel = 0;
+
+        const allQuizQuestions = [
+            // PRESSION (5 questions)
+            { id: 1, category: 'pression', type: 'qcm', question: "Quelle est l'unité SI de la pression ?", options: ["Newton (N)", "Pascal (Pa)", "Joule (J)", "Watt (W)"], correctIndex: 1, explanation: "Le Pascal (Pa) est l'unité SI de pression. 1 Pa = 1 N/m². La pression atmosphérique standard est d'environ 101 325 Pa.", hints: ["Cette unité porte le nom d'un mathématicien français du XVIIe siècle", "C'est une force par unité de surface", "1 de cette unité = 1 N/m²"] },
+            { id: 2, category: 'pression', type: 'qcm', question: "À quelle profondeur dans l'eau la pression double-t-elle par rapport à la surface ?", options: ["5 mètres", "10 mètres", "15 mètres", "20 mètres"], correctIndex: 1, explanation: "À 10 mètres de profondeur, la pression hydrostatique ajoutée (ρgh ≈ 98 100 Pa) est environ égale à la pression atmosphérique (101 325 Pa), donc la pression totale double.", hints: ["La pression augmente d'environ 1 atmosphère tous les 10 mètres", "Calculez la profondeur pour laquelle ρgh ≈ P₀", "C'est une profondeur courante dans les piscines de plongée"] },
+            { id: 3, category: 'pression', type: 'calcul', question: "Calculez la pression totale à 3 mètres de profondeur dans une piscine (ρ = 1000 kg/m³, g = 9,81 m/s², P₀ = 101 325 Pa). Réponse en Pa.", correctAnswer: 130755, tolerance: 100, unit: "Pa", explanation: "P = P₀ + ρgh = 101 325 + (1000 × 9,81 × 3) = 101 325 + 29 430 = 130 755 Pa", hints: ["Utilisez la formule P = P₀ + ρgh", "Calculez d'abord ρgh = 1000 × 9,81 × 3", "N'oubliez pas d'ajouter P₀"] },
+            { id: 4, category: 'pression', type: 'qcm', question: "Que se passe-t-il avec la pression hydrostatique quand on descend dans l'eau ?", options: ["Elle diminue linéairement", "Elle augmente linéairement", "Elle augmente exponentiellement", "Elle reste constante"], correctIndex: 1, explanation: "La pression hydrostatique augmente linéairement avec la profondeur selon P = P₀ + ρgh. Le terme ρgh est proportionnel à h.", hints: ["Regardez la relation entre P et h dans la formule", "Plus on descend profond, plus la colonne d'eau au-dessus est lourde", "La relation est directement proportionnelle"] },
+            { id: 25, category: 'pression', type: 'qcm', question: "Dans la formule P = P₀ + ρgh, que représente le terme ρgh ?", options: ["La pression atmosphérique", "La pression hydrostatique", "La pression totale", "La pression dynamique"], correctIndex: 1, explanation: "Le terme ρgh représente la pression hydrostatique due au poids de la colonne de fluide au-dessus du point considéré.", hints: ["C'est la pression ajoutée par le fluide", "Elle dépend de la profondeur h", "C'est le deuxième terme de l'addition"] },
+
+            // ARCHIMÈDE (5 questions)
+            { id: 5, category: 'archimede', type: 'qcm', question: "La poussée d'Archimède dépend de :", options: ["La masse de l'objet immergé", "La masse volumique de l'objet", "Le volume de fluide déplacé", "La forme de l'objet"], correctIndex: 2, explanation: "La poussée d'Archimède ne dépend que du volume de fluide déplacé (volume immergé) et de la masse volumique du fluide : FA = ρfluide × Vimmergé × g", hints: ["La formule est FA = ρfluide × Vimmergé × g", "Cela ne dépend pas des propriétés de l'objet, mais de ce qu'il déplace", "Pensez au volume de liquide que l'objet 'pousse'"] },
+            { id: 6, category: 'archimede', type: 'qcm', question: "Un patient de 80 kg immergé jusqu'aux épaules (90%) ressent un poids apparent d'environ :", options: ["72 kg", "40 kg", "8 kg", "0 kg"], correctIndex: 2, explanation: "À 90% d'immersion, la poussée d'Archimède compense environ 90% du poids, ne laissant que 10% du poids apparent, soit environ 8 kg.", hints: ["L'immersion à 90% signifie que 90% du poids est compensé", "Il reste donc 10% du poids initial", "10% de 80 kg = ?"] },
+            { id: 7, category: 'archimede', type: 'calcul', question: "Calculez la poussée d'Archimède sur un cube de 20 cm de côté totalement immergé dans l'eau (ρ = 1000 kg/m³, g = 9,81 m/s²). Réponse en N.", correctAnswer: 78.48, tolerance: 1, unit: "N", explanation: "Volume = (0,2)³ = 0,008 m³. FA = 1000 × 0,008 × 9,81 = 78,48 N", hints: ["Calculez d'abord le volume du cube en m³ : V = côté³", "20 cm = 0,2 m, donc V = (0,2)³", "Ensuite utilisez FA = ρ × V × g"] },
+            { id: 8, category: 'archimede', type: 'qcm', question: "Pourquoi la rééducation en piscine est efficace en post-opératoire ?", options: ["L'eau est chaude et relaxante", "La poussée d'Archimède réduit les contraintes articulaires", "L'eau empêche les infections", "La pression hydrostatique renforce les muscles"], correctIndex: 1, explanation: "La poussée d'Archimède réduit considérablement le poids apparent, permettant une reprise précoce de la mobilisation sans surcharge des articulations opérées.", hints: ["Pensez à l'effet principal de l'immersion sur le poids ressenti", "Cet effet permet de bouger avec moins de charge sur les articulations", "C'est lié à une force dirigée vers le haut"] },
+            { id: 26, category: 'archimede', type: 'qcm', question: "Si on double le volume immergé d'un objet, la poussée d'Archimède :", options: ["Reste identique", "Double", "Quadruple", "Est divisée par 2"], correctIndex: 1, explanation: "La poussée d'Archimède est proportionnelle au volume immergé (FA = ρfluide × V × g). Si V double, FA double aussi.", hints: ["Regardez la relation entre FA et V dans la formule", "C'est une relation de proportionnalité directe", "Si V × 2, alors FA × ?"] },
+
+            // BERNOULLI (5 questions)
+            { id: 9, category: 'bernoulli', type: 'qcm', question: "Selon le théorème de Bernoulli, lorsque la vitesse d'un fluide augmente :", options: ["La pression augmente", "La pression diminue", "La pression reste constante", "La température augmente"], correctIndex: 1, explanation: "D'après Bernoulli : P + ½ρv² + ρgh = constante. Si v augmente, ½ρv² augmente, donc P doit diminuer pour que la somme reste constante (à hauteur égale).", hints: ["L'équation de Bernoulli exprime une conservation", "Si un terme augmente, un autre doit diminuer", "La pression dynamique (½ρv²) et la pression statique (P) varient en sens inverse"] },
+            { id: 10, category: 'bernoulli', type: 'qcm', question: "L'équation de continuité stipule que :", options: ["La vitesse est constante", "La pression est constante", "Le débit volumique est constant", "La viscosité est constante"], correctIndex: 2, explanation: "L'équation de continuité (Q = A₁v₁ = A₂v₂) exprime la conservation du débit : le volume qui entre par seconde égale le volume qui sort.", hints: ["C'est un principe de conservation", "Ce qui entre doit sortir (fluide incompressible)", "Q = A × v reste constant"] },
+            { id: 11, category: 'bernoulli', type: 'calcul', question: "Un jet thérapeutique a un débit de 12 L/min et une buse circulaire de diamètre 3 cm. Calculez la vitesse de sortie en m/s.", correctAnswer: 2.83, tolerance: 0.1, unit: "m/s", explanation: "Q = 12 L/min = 0,0002 m³/s. Section A = π(0,015)² = 7,07×10⁻⁴ m². v = Q/A = 0,0002 / 7,07×10⁻⁴ = 2,83 m/s", hints: ["Convertissez le débit : 12 L/min = 12/1000/60 m³/s", "Calculez la section : A = πr² avec r = 1,5 cm", "Utilisez v = Q/A"] },
+            { id: 12, category: 'bernoulli', type: 'qcm', question: "Si on réduit le diamètre de la buse de moitié, la vitesse :", options: ["Est divisée par 2", "Est multipliée par 2", "Est multipliée par 4", "Ne change pas"], correctIndex: 2, explanation: "Si le diamètre est divisé par 2, la section (A = πr²) est divisée par 4. Comme Q = Av constant, si A est divisé par 4, alors v est multiplié par 4.", hints: ["La section dépend du rayon au carré : A = πr²", "Si diamètre ÷ 2, alors rayon ÷ 2", "Si r → r/2, alors r² → r²/4"] },
+            { id: 27, category: 'bernoulli', type: 'qcm', question: "Dans l'équation de Bernoulli, le terme ½ρv² représente :", options: ["L'énergie potentielle", "La pression statique", "La pression dynamique", "La viscosité"], correctIndex: 2, explanation: "Le terme ½ρv² est la pression dynamique, qui représente l'énergie cinétique par unité de volume du fluide en mouvement.", hints: ["Ce terme contient la vitesse v", "Il représente l'énergie liée au mouvement", "Dynamique = en mouvement"] },
+
+            // VISCOSITÉ (4 questions)
+            { id: 13, category: 'viscosite', type: 'qcm', question: "La viscosité d'un fluide représente :", options: ["Sa densité", "Sa résistance à l'écoulement", "Sa température", "Sa pression"], correctIndex: 1, explanation: "La viscosité caractérise la résistance d'un fluide à l'écoulement. Plus un fluide est visqueux (comme le miel), plus il s'écoule lentement.", hints: ["Pensez à la différence entre l'eau et le miel", "Le miel a une viscosité plus élevée que l'eau", "C'est ce qui fait qu'un fluide s'écoule plus ou moins facilement"] },
+            { id: 14, category: 'viscosite', type: 'qcm', question: "Que se passe-t-il avec la viscosité de l'eau quand la température augmente ?", options: ["Elle augmente", "Elle diminue", "Elle reste constante", "Elle double"], correctIndex: 1, explanation: "La viscosité des liquides diminue quand la température augmente. L'eau chaude (35°C) est moins visqueuse que l'eau froide (20°C).", hints: ["Pensez à l'huile : elle est plus fluide chaude", "Les molécules bougent plus vite avec la chaleur", "La résistance à l'écoulement diminue"] },
+            { id: 15, category: 'viscosite', type: 'qcm', question: "Pourquoi utilise-t-on de l'eau chaude (35-37°C) pour la relaxation ?", options: ["Pour éviter les infections", "Pour augmenter la poussée d'Archimède", "Pour réduire la viscosité et faciliter les mouvements", "Pour augmenter la pression"], correctIndex: 2, explanation: "L'eau chaude a une viscosité plus faible, ce qui réduit la résistance aux mouvements et facilite la mobilisation articulaire.", hints: ["La viscosité change avec la température", "Une viscosité plus faible = moins de résistance", "Cela rend les mouvements plus faciles"] },
+            { id: 16, category: 'viscosite', type: 'qcm', question: "Quelle est l'unité SI de la viscosité dynamique ?", options: ["Pa", "Pa·s", "N/m", "m²/s"], correctIndex: 1, explanation: "La viscosité dynamique (η) s'exprime en Pascal-seconde (Pa·s). La viscosité cinématique (ν) s'exprime en m²/s.", hints: ["C'est une unité composée de pression et de temps", "Le Pascal est impliqué", "On multiplie le Pascal par une unité de temps"] },
+
+            // REYNOLDS (5 questions)
+            { id: 17, category: 'reynolds', type: 'qcm', question: "Le nombre de Reynolds caractérise :", options: ["La température du fluide", "Le régime d'écoulement du fluide", "La pression du fluide", "La masse volumique du fluide"], correctIndex: 1, explanation: "Le nombre de Reynolds (Re) est un nombre sans dimension qui détermine si l'écoulement est laminaire, transitionnel ou turbulent.", hints: ["C'est un nombre sans dimension", "Il permet de classifier les écoulements", "Laminaire, transitionnel ou turbulent sont des types de..."] },
+            { id: 18, category: 'reynolds', type: 'qcm', question: "Pour Re < 2000, l'écoulement est :", options: ["Turbulent", "Transitionnel", "Laminaire", "Chaotique"], correctIndex: 2, explanation: "Un nombre de Reynolds inférieur à 2000 indique un écoulement laminaire, régulier avec des lignes de courant parallèles.", hints: ["C'est l'écoulement le plus régulier et organisé", "Les lignes de courant sont parallèles", "C'est le contraire de turbulent"] },
+            { id: 19, category: 'reynolds', type: 'calcul', question: "Calculez Re pour un bras (D = 10 cm) se déplaçant à 0,4 m/s dans l'eau (ν = 10⁻⁶ m²/s).", correctAnswer: 40000, tolerance: 1000, unit: "", explanation: "Re = (v × D) / ν = (0,4 × 0,1) / (10⁻⁶) = 0,04 / 10⁻⁶ = 40 000. Écoulement turbulent.", hints: ["Utilisez Re = (v × D) / ν", "Convertissez D en mètres : 10 cm = 0,1 m", "Attention à 10⁻⁶ = 0,000001"] },
+            { id: 20, category: 'reynolds', type: 'qcm', question: "Quel mouvement génère plus de résistance dans l'eau ?", options: ["Mouvement lent (Re faible, laminaire)", "Mouvement rapide (Re élevé, turbulent)", "Les deux sont équivalents", "Cela ne dépend pas de la vitesse"], correctIndex: 1, explanation: "Un mouvement rapide génère un Re élevé et un écoulement turbulent, qui crée beaucoup plus de résistance qu'un écoulement laminaire.", hints: ["La résistance augmente avec la turbulence", "Les tourbillons créent plus de résistance", "Re élevé = turbulent = plus de résistance"] },
+            { id: 29, category: 'reynolds', type: 'qcm', question: "Pour moduler l'intensité d'un exercice en piscine, le kinésithérapeute peut agir sur :", options: ["La profondeur uniquement", "La température uniquement", "La vitesse uniquement", "La vitesse, la profondeur et la température"], correctIndex: 3, explanation: "Le kinésithérapeute peut moduler : la vitesse (influence Re), la profondeur (modifie le poids via Archimède), et la température (change la viscosité).", hints: ["Plusieurs paramètres peuvent être ajustés", "Pensez aux principes vus : Archimède, viscosité, Reynolds", "Chaque paramètre a un effet sur l'exercice"] },
+
+            // CLINIQUE (6 questions)
+            { id: 21, category: 'clinique', type: 'qcm', question: "Pour un patient en post-opératoire de prothèse de hanche, quel niveau d'immersion pour commencer la rééducation ?", options: ["Chevilles (charge 100%)", "Genoux (charge 75%)", "Taille (charge 25-35%)", "Épaules (charge 10%)"], correctIndex: 3, explanation: "L'immersion jusqu'aux épaules réduit la charge à environ 10% du poids, permettant une mobilisation très précoce sans contrainte excessive sur la hanche opérée.", hints: ["Plus l'immersion est profonde, moins le patient supporte de poids", "En post-op immédiat, on veut minimiser les contraintes", "Il faut le niveau qui donne le plus d'allègement"] },
+            { id: 22, category: 'clinique', type: 'qcm', question: "Quel est l'avantage principal des jets thérapeutiques ?", options: ["Ils augmentent la température corporelle", "Ils créent un massage mécanique et stimulent la circulation", "Ils réduisent la pression hydrostatique", "Ils augmentent la poussée d'Archimède"], correctIndex: 1, explanation: "Les jets créent une pression dynamique qui masse les tissus, améliore la circulation locale, et peut avoir des effets de drainage et de décontraction musculaire.", hints: ["Pensez à l'effet mécanique direct des jets sur les tissus", "C'est un effet local, pas global", "Les jets peuvent stimuler quelque chose localement"] },
+            { id: 23, category: 'clinique', type: 'qcm', question: "Pour un renforcement musculaire intensif en piscine, quelle température est préférable ?", options: ["25-28°C", "32-34°C", "35-37°C", "38-40°C"], correctIndex: 0, explanation: "Une eau plus froide (25-28°C) a une viscosité plus élevée, créant plus de résistance aux mouvements, idéal pour le renforcement intensif.", hints: ["Pour le renforcement, on veut plus de résistance", "La viscosité augmente quand la température diminue", "Eau plus froide = plus de résistance"] },
+            { id: 24, category: 'clinique', type: 'qcm', question: "Quelle est une contre-indication absolue à l'hydrothérapie ?", options: ["Arthrose légère", "Phlébite aiguë", "Surpoids", "Faiblesse musculaire"], correctIndex: 1, explanation: "La phlébite aiguë (thrombose veineuse) est une contre-indication absolue car la pression et l'activité pourraient mobiliser le thrombus avec risque d'embolie pulmonaire.", hints: ["Il faut identifier un problème circulatoire grave", "Un caillot sanguin pourrait se déplacer", "C'est une urgence médicale qui nécessite repos strict"] },
+            { id: 28, category: 'clinique', type: 'qcm', question: "Un patient obèse de 120 kg bénéficie particulièrement de l'hydrothérapie car :", options: ["L'eau augmente son métabolisme", "La poussée d'Archimède réduit les contraintes articulaires", "L'eau froide brûle plus de calories", "La pression augmente la force musculaire"], correctIndex: 1, explanation: "Pour un patient obèse, la poussée d'Archimède permet de réduire considérablement le poids apparent et donc les contraintes sur les articulations, facilitant l'exercice physique.", hints: ["Quel est le problème principal pour une personne en surpoids lors de l'exercice ?", "L'effet principal de l'immersion concerne le poids ressenti", "Pensez à la force qui pousse vers le haut"] },
+            { id: 30, category: 'clinique', type: 'qcm', question: "Dans quelle situation la pression hydrostatique peut-elle être thérapeutique ?", options: ["Pour réduire un œdème des membres inférieurs", "Pour augmenter la tension artérielle", "Pour traiter une fracture", "Pour augmenter la température corporelle"], correctIndex: 0, explanation: "La pression hydrostatique exerce une compression externe qui peut favoriser la résorption d'un œdème des membres inférieurs par effet de drainage.", hints: ["La pression peut avoir un effet de compression", "Cet effet peut aider à réduire un gonflement", "Pensez aux bas de contention, mais avec l'eau"] }
+        ];
+
+        function selectQuizCategory(category) {
+            currentQuizCategory = category;
+            currentQuizIndex = 0;
+            quizScore = 0;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            quizQuestions = category === 'all' ? [...allQuizQuestions] : allQuizQuestions.filter(q => q.category === category);
+            quizQuestions.sort(() => Math.random() - 0.5);
+            loadQuizQuestion();
+        }
+
+        function loadQuizQuestion() {
+            if (currentQuizIndex >= quizQuestions.length) { showQuizResults(); return; }
+            quizAnswered = false;
+            quizHintLevel = 0;
+            const q = quizQuestions[currentQuizIndex];
+            let html = `<div class="quiz-container"><div class="quiz-header"><div class="quiz-progress">Question ${currentQuizIndex + 1} / ${quizQuestions.length}</div><div class="quiz-score">Score : ${quizScore} / ${currentQuizIndex}</div></div><div class="quiz-question">${q.question}</div>`;
+            if (q.type === 'qcm') {
+                html += `<div class="quiz-options">${q.options.map((opt, i) => `<div class="quiz-option" onclick="selectQuizOption(${i})">${opt}</div>`).join('')}</div>`;
+            } else {
+                html += `<div><input type="number" id="quizCalculInput" class="quiz-input" placeholder="Entrez votre réponse" step="0.01"><p style="margin-top:10px;color:#666;"><strong>Unité :</strong> ${q.unit || 'Valeur numérique'}</p></div>`;
+            }
+            html += `<div id="quizHintBox" class="hint-box"></div><div id="quizExplanation" class="quiz-explanation"></div><div class="quiz-navigation"><div class="quiz-btn-group"><button class="btn" onclick="showQuizHint()">💡 Indice</button>${q.type === 'calcul' ? '<button class="btn" onclick="checkCalculAnswer()">✓ Vérifier</button>' : '<button class="btn" id="validateBtn" onclick="validateQuizAnswer()" disabled>✓ Valider</button>'}</div><button class="btn" onclick="nextQuizQuestion()" id="nextQuizBtn" style="display:none;">➡️ Suivant</button></div></div>`;
+            document.getElementById('quizMainContainer').innerHTML = html;
+        }
+
+        function selectQuizOption(index) {
+            if (quizAnswered) return;
+            document.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.quiz-option')[index].classList.add('selected');
+            document.getElementById('validateBtn').disabled = false;
+        }
+
+        function showQuizHint() {
+            const q = quizQuestions[currentQuizIndex];
+            const hintBox = document.getElementById('quizHintBox');
+            if (quizHintLevel < q.hints.length) {
+                hintBox.className = 'hint-box visible';
+                hintBox.innerHTML = `<div class="hint-level">💡 Indice ${quizHintLevel + 1}/${q.hints.length}</div><p>${q.hints[quizHintLevel]}</p>`;
+                quizHintLevel++;
+            } else {
+                hintBox.className = 'hint-box visible';
+                hintBox.innerHTML = `<div class="hint-level">💡 Tous les indices utilisés</div><p>Vous avez vu tous les indices disponibles. Tentez une réponse !</p>`;
+            }
+        }
+
+        function validateQuizAnswer() {
+            if (quizAnswered) return;
+            const q = quizQuestions[currentQuizIndex];
+            const selectedOption = document.querySelector('.quiz-option.selected');
+            if (!selectedOption) return;
+            const selectedIndex = Array.from(document.querySelectorAll('.quiz-option')).indexOf(selectedOption);
+            const isCorrect = selectedIndex === q.correctIndex;
+            quizAnswered = true;
+            document.querySelectorAll('.quiz-option').forEach(opt => { opt.classList.add('disabled'); opt.onclick = null; });
+            if (isCorrect) { selectedOption.classList.add('correct'); quizScore++; } else { selectedOption.classList.add('incorrect'); document.querySelectorAll('.quiz-option')[q.correctIndex].classList.add('correct'); }
+            document.getElementById('quizExplanation').className = 'quiz-explanation visible';
+            document.getElementById('quizExplanation').innerHTML = `<h4>${isCorrect ? '✓ Correct !' : '✗ Incorrect'}</h4><p>${q.explanation}</p>`;
+            document.getElementById('validateBtn').style.display = 'none';
+            document.getElementById('nextQuizBtn').style.display = 'block';
+            document.querySelector('.quiz-score').textContent = `Score : ${quizScore} / ${currentQuizIndex + 1}`;
+        }
+
+        function checkCalculAnswer() {
+            if (quizAnswered) return;
+            const q = quizQuestions[currentQuizIndex];
+            const userAnswer = parseFloat(document.getElementById('quizCalculInput').value);
+            if (isNaN(userAnswer)) { alert('Veuillez entrer une valeur numérique valide.'); return; }
+            const isCorrect = Math.abs(userAnswer - q.correctAnswer) <= q.tolerance;
+            quizAnswered = true;
+            document.getElementById('quizCalculInput').disabled = true;
+            if (isCorrect) quizScore++;
+            document.getElementById('quizExplanation').className = 'quiz-explanation visible';
+            document.getElementById('quizExplanation').innerHTML = `<h4>${isCorrect ? '✓ Correct !' : '✗ Incorrect'}</h4><p><strong>Réponse attendue :</strong> ${q.correctAnswer} ${q.unit}</p><p>${q.explanation}</p>`;
+            document.getElementById('nextQuizBtn').style.display = 'block';
+            document.querySelector('.quiz-score').textContent = `Score : ${quizScore} / ${currentQuizIndex + 1}`;
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            loadQuizQuestion();
+        }
+
+        function showQuizResults() {
+            const percentage = Math.round((quizScore / quizQuestions.length) * 100);
+            let message = '', emoji = '';
+            if (percentage >= 90) { message = 'Excellent ! Vous maîtrisez parfaitement la mécanique des fluides !'; emoji = '🏆'; }
+            else if (percentage >= 75) { message = 'Très bien ! Vous avez une bonne compréhension du sujet.'; emoji = '🌟'; }
+            else if (percentage >= 60) { message = 'Bien ! Continuez à réviser pour consolider vos connaissances.'; emoji = '👍'; }
+            else { message = 'Continuez vos efforts ! Relisez les sections de cours et réessayez.'; emoji = '📚'; }
+            document.getElementById('quizMainContainer').innerHTML = `<div class="quiz-final-score"><h3>${emoji} Quiz terminé !</h3><div class="score-display">${quizScore} / ${quizQuestions.length}</div><p style="font-size:1.3em;margin:20px 0;"><strong>${percentage}%</strong></p><p style="font-size:1.1em;color:#666;margin:20px 0;">${message}</p><div style="margin-top:30px;"><button class="btn" onclick="selectQuizCategory('${currentQuizCategory}')">🔄 Recommencer</button><button class="btn" onclick="selectQuizCategory('all')">📚 Nouveau quiz (toutes catégories)</button></div></div>`;
+        }
+
+        selectQuizCategory('all');
+    </script>
+</body>
+</html>
