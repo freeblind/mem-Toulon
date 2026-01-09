@@ -1,0 +1,3066 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physiologie - Kinésithérapie Bloc 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1em;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .level-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .level-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .level-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .course-section {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .course-section.active {
+            display: block;
+        }
+
+        .course-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .course-section p, .course-section ul {
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .course-section ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .example-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .example-box strong {
+            color: #667eea;
+        }
+
+        canvas {
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: block;
+            max-width: 100%;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .canvas-controls label {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .canvas-controls input[type="range"] {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .canvas-controls button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .canvas-controls button:hover {
+            background: #764ba2;
+        }
+
+        .flashcard {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 30px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .flashcard.flipped {
+            background: #667eea;
+            color: white;
+        }
+
+        .flashcard-text {
+            font-size: 1.3em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-know, .btn-hesitate, .btn-unknown {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-know {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-know:hover {
+            background: #218838;
+        }
+
+        .btn-hesitate {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-hesitate:hover {
+            background: #e0a800;
+        }
+
+        .btn-unknown {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-unknown:hover {
+            background: #c82333;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .flashcard-controls button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .flashcard-controls button:hover {
+            background: #764ba2;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .quiz-question {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-question h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .quiz-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .quiz-option.correct {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #dc3545;
+            background: #dc3545;
+            color: white;
+        }
+
+        .quiz-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-controls button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .quiz-controls button:hover {
+            background: #764ba2;
+        }
+
+        .exercise {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .exercise h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .exercise textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .exercise-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .exercise-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-help {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-help:hover {
+            background: #138496;
+        }
+
+        .btn-correction {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-correction:hover {
+            background: #764ba2;
+        }
+
+        .correction-box {
+            display: none;
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .correction-box.active {
+            display: block;
+        }
+
+        .help-box {
+            display: none;
+            background: #cce5ff;
+            border: 2px solid #17a2b8;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .help-box.active {
+            display: block;
+        }
+
+        .definition-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .definition-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .formula-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .formula-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #856404;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                border-bottom: 1px solid #dee2e6;
+                border-left: 3px solid transparent;
+            }
+
+            .tab.active {
+                border-left-color: #667eea;
+                border-bottom-color: #dee2e6;
+            }
+
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🫁 Physiologie</h1>
+            <p class="subtitle">Kinésithérapie - Bloc 1</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('cours')">📚 Cours</button>
+            <button class="tab" onclick="showTab('flashcards')">🎴 Flashcards</button>
+            <button class="tab" onclick="showTab('quiz')">❓ Quiz</button>
+            <button class="tab" onclick="showTab('qcm')">☑️ QCM</button>
+            <button class="tab" onclick="showTab('vraifaux')">✓✗ Vrai/Faux</button>
+            <button class="tab" onclick="showTab('exercices')">✍️ Exercices</button>
+            <button class="tab" onclick="showTab('definitions')">📖 Définitions</button>
+            <button class="tab" onclick="showTab('formules')">🧮 Formules</button>
+        </div>
+
+        <!-- COURS -->
+        <div id="cours" class="content active">
+            <h2>Cours de Physiologie</h2>
+            
+            <div class="level-selector">
+                <button class="level-btn active" onclick="showLevel('vulga')">Vulgarisation</button>
+                <button class="level-btn" onclick="showLevel('base')">Niveau Base</button>
+                <button class="level-btn" onclick="showLevel('avance')">Niveau Avancé</button>
+            </div>
+
+            <!-- Niveau Vulgarisation -->
+            <div id="vulga" class="course-section active">
+                <h3>🌟 Comprendre la Physiologie - Version Simple</h3>
+                
+                <h4>🎯 Qu'est-ce que la physiologie ?</h4>
+                <p>
+                    La physiologie, c'est l'étude de <strong>comment fonctionne le corps humain</strong>. Imagine ton corps comme une usine ultra-sophistiquée où chaque organe a un rôle précis. La physiologie explique comment ton cœur pompe le sang, comment tes poumons captent l'oxygène, comment tes muscles se contractent, et comment tous ces systèmes communiquent entre eux.
+                </p>
+                <p>
+                    En kinésithérapie, comprendre la physiologie est essentiel car tu dois savoir ce qui se passe dans le corps de ton patient pour l'aider à récupérer ou améliorer ses capacités physiques.
+                </p>
+
+                <h4>❤️ Le système cardiovasculaire : la pompe de la vie</h4>
+                <p>
+                    Le cœur est comme une pompe qui bat environ <strong>100 000 fois par jour</strong>. Il envoie le sang dans tout le corps à travers des tuyaux (les vaisseaux sanguins). Le sang transporte l'oxygène et les nutriments vers tes muscles et organes, et ramène les déchets.
+                </p>
+                <p>
+                    Quand tu fais de l'exercice, ton cœur bat plus vite pour envoyer plus de sang vers tes muscles qui travaillent. C'est normal ! Un cœur au repos bat environ 60-80 fois par minute, mais peut monter à 180-200 pendant un effort intense.
+                </p>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Madame Legrand, 70 ans, récupère d'une opération du genou. Elle ne peut pas marcher longtemps sans se fatiguer. Tu sais que son système cardiovasculaire s'est affaibli pendant son immobilisation. Tu commences par de petits exercices (5 minutes de marche) et tu augmentes progressivement. Tu surveilles sa fréquence cardiaque pour t'assurer qu'elle ne force pas trop.
+                </div>
+
+                <h4>🫁 Le système respiratoire : capter l'oxygène</h4>
+                <p>
+                    Tes poumons sont comme deux éponges géantes qui se gonflent et se dégonflent environ <strong>20 000 fois par jour</strong>. Quand tu inspires, l'air entre et l'oxygène passe dans ton sang. Quand tu expires, tu rejettes le CO₂ (un déchet).
+                </p>
+                <p>
+                    Les poumons et le cœur travaillent en équipe : les poumons captent l'oxygène, et le cœur l'envoie partout dans le corps. Si l'un des deux fonctionne mal, tu t'essouffles rapidement.
+                </p>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Monsieur Dubois a une BPCO (maladie des poumons liée au tabac). Il s'essouffle en s'habillant. Tu lui apprends des techniques de respiration : expirer lèvres pincées pour vider complètement ses poumons, respirer avec le ventre (diaphragme) plutôt qu'avec les épaules. Tu lui fais faire des exercices d'endurance adaptés pour améliorer sa capacité respiratoire.
+                </div>
+
+                <h4>Animation : Échanges gazeux pulmonaires</h4>
+                <div class="canvas-controls">
+                    <label>Fréquence respiratoire :</label>
+                    <input type="range" id="breathRate" min="10" max="30" value="15" oninput="updateBreathRate(this.value)">
+                    <span id="breathRateValue">15</span> resp/min
+                    <button onclick="toggleAnimation('breath')">▶️ Démarrer/Arrêter</button>
+                </div>
+                <canvas id="lungCanvas" width="600" height="400"></canvas>
+
+                <h4>💪 Le système musculaire : bouger et tenir debout</h4>
+                <p>
+                    Tu as environ <strong>650 muscles</strong> dans ton corps ! Ils te permettent de bouger, de te tenir debout, de respirer, de digérer... Certains muscles travaillent longtemps sans se fatiguer (comme ceux du dos qui te maintiennent droit), d'autres sont puissants mais se fatiguent vite (comme ceux des cuisses quand tu sprintes).
+                </p>
+                <p>
+                    Les muscles ont besoin d'oxygène et de sucre (glucose) pour fonctionner. Plus tu les utilises, plus ils deviennent forts et endurants. Si tu ne les utilises pas, ils s'affaiblissent (atrophie).
+                </p>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Lucas, 25 ans, s'est rompu le ligament croisé du genou. Après 6 semaines d'immobilisation, son quadriceps (muscle de la cuisse) a fondu : il a perdu 30% de sa masse musculaire ! Ton rôle est de le faire retravailler progressivement : d'abord des contractions statiques (sans bouger), puis des exercices contre résistance légère, puis des exercices fonctionnels (squats, montées de marche) pour retrouver force et coordination.
+                </div>
+
+                <h4>🧠 Le système nerveux : le chef d'orchestre</h4>
+                <p>
+                    Le système nerveux est comme un réseau électrique ultra-rapide. Le cerveau est le centre de commande, et les nerfs sont les câbles qui transmettent les ordres à tout le corps. Quand tu veux lever ton bras, ton cerveau envoie un signal électrique en quelques millisecondes.
+                </p>
+                <p>
+                    Le système nerveux contrôle aussi des choses automatiques : ton cœur qui bat, ta respiration, ta digestion, ton équilibre... Tu n'as pas besoin d'y penser, ça fonctionne tout seul !
+                </p>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Madame Petit a fait un AVC qui a touché son côté droit. Son cerveau ne peut plus envoyer correctement les ordres à son bras et sa jambe droite. Heureusement, le cerveau peut "réapprendre" grâce à la plasticité neuronale. Tu lui fais répéter des mouvements encore et encore (lever le bras, saisir un objet, marcher). Petit à petit, son cerveau crée de nouvelles connexions et elle récupère de la mobilité.
+                </div>
+
+                <h4>🏃 L'adaptation à l'effort : pourquoi ton corps change ?</h4>
+                <p>
+                    Quand tu fais du sport régulièrement, ton corps s'adapte de manière incroyable :
+                </p>
+                <ul>
+                    <li>Ton cœur devient plus efficace (il peut pomper plus de sang à chaque battement)</li>
+                    <li>Tes poumons peuvent capter plus d'oxygène</li>
+                    <li>Tes muscles deviennent plus forts et plus endurants</li>
+                    <li>Tes os se renforcent</li>
+                    <li>Ton cerveau améliore la coordination de tes mouvements</li>
+                </ul>
+                <p>
+                    C'est le principe de <strong>l'entraînement</strong> : si tu challenges ton corps, il devient meilleur. Mais attention : il faut aussi du repos pour récupérer !
+                </p>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Sophie veut courir un semi-marathon mais elle s'essouffle après 2 km. Tu construis un programme progressif sur 3 mois : d'abord alterner marche et course (30 sec / 30 sec), puis augmenter progressivement la durée de course. Tu expliques l'importance du repos (2-3 séances par semaine au début) et de l'hydratation. Tu surveilles qu'elle ne progresse pas trop vite (risque de blessure). Après 3 mois, son corps s'est adapté : sa VO₂max a augmenté de 20%, elle peut maintenant courir 10 km sans s'arrêter.
+                </div>
+
+                <h4>⚖️ L'homéostasie : l'équilibre parfait</h4>
+                <p>
+                    Ton corps adore la stabilité. Il travaille en permanence pour maintenir tout en équilibre : température à 37°C, taux de sucre dans le sang stable, bon niveau d'hydratation, pH sanguin constant... C'est ce qu'on appelle l'<strong>homéostasie</strong>.
+                </p>
+                <p>
+                    Par exemple, quand il fait chaud, tu transpires pour te rafraîchir. Quand tu manges, ton corps sécrète de l'insuline pour gérer le sucre. Quand tu te lèves brusquement, ta pression artérielle s'ajuste pour que tu ne tombes pas dans les pommes.
+                </p>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Monsieur Blanc, 80 ans, fait des malaises quand il se lève de son lit le matin (hypotension orthostatique). Son corps ne régule plus bien sa pression artérielle. Tu lui apprends à se lever en 3 temps : d'abord s'asseoir au bord du lit 30 secondes, puis se lever doucement en prenant appui. Tu lui fais aussi des exercices de renforcement des mollets (qui aident à faire remonter le sang vers le cœur) et tu conseilles de bien s'hydrater.
+                </div>
+
+                <h4>🔥 Le métabolisme énergétique : d'où vient l'énergie ?</h4>
+                <p>
+                    Tes muscles fonctionnent grâce à un "carburant" appelé <strong>ATP</strong>. C'est comme l'essence d'une voiture. Ton corps peut fabriquer de l'ATP de 3 façons différentes :
+                </p>
+                <ul>
+                    <li><strong>Système phosphagène</strong> : ultra-rapide mais dure 10 secondes (pour un sprint ou soulever quelque chose de très lourd)</li>
+                    <li><strong>Système anaérobie lactique</strong> : rapide, dure 30 secondes à 2 minutes, produit de l'acide lactique qui brûle (course de 400m)</li>
+                    <li><strong>Système aérobie</strong> : lent mais peut durer des heures, utilise l'oxygène (marathon, vélo longue distance)</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Thomas, footballeur amateur, se blesse souvent aux ischio-jambiers en fin de match. Tu analyses : le foot alterne sprints (anaérobie) et course modérée (aérobie). Ses muscles passent leur temps à changer de système énergétique. Tu lui fais un programme spécifique : intervalles haute intensité (30 sec sprint / 30 sec récup) pour améliorer sa capacité anaérobie, et travail aérobie pour améliorer sa récupération entre les sprints. Résultat : moins de fatigue musculaire, moins de blessures.
+                </div>
+
+                <h4>🩺 Ce qu'un kiné DOIT comprendre en physiologie</h4>
+                <p>
+                    En tant que futur kiné, tu dois maîtriser la physiologie pour :
+                </p>
+                <ul>
+                    <li><strong>Évaluer correctement ton patient</strong> : comprendre pourquoi il est essoufflé, pourquoi il a mal, pourquoi il fatigue vite</li>
+                    <li><strong>Adapter tes exercices</strong> : savoir quelle intensité, quelle durée, quelle fréquence selon l'objectif</li>
+                    <li><strong>Expliquer au patient</strong> : vulgariser ce qui se passe dans son corps pour qu'il comprenne et adhère au traitement</li>
+                    <li><strong>Progresser en sécurité</strong> : ne pas aller trop vite, respecter les capacités physiologiques du patient</li>
+                    <li><strong>Reconnaître les signaux d'alerte</strong> : savoir quand arrêter (douleur thoracique, vertige, malaise...)</li>
+                    <li><strong>Optimiser la récupération</strong> : comprendre l'importance du repos, de l'hydratation, de la nutrition</li>
+                </ul>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="level-btn" onclick="document.getElementById('base').scrollIntoView({behavior: 'smooth'}); showLevel('base');" style="padding: 15px 30px; font-size: 1.1em;">
+                        📘 Passons au Niveau Base →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Niveau Base -->
+            <div id="base" class="course-section">
+                <h3>📘 Physiologie - Niveau Base</h3>
+                
+                <h4>🎯 Introduction à la physiologie humaine</h4>
+                <p>
+                    La physiologie étudie les fonctions et mécanismes des organismes vivants à différents niveaux d'organisation : moléculaire, cellulaire, tissulaire, organique et systémique. Elle explique le <strong>"comment"</strong> (par opposition à l'anatomie qui explique le "quoi").
+                </p>
+
+                <h4>❤️ Système Cardiovasculaire</h4>
+                
+                <p><strong>Anatomie fonctionnelle du cœur :</strong></p>
+                <ul>
+                    <li>4 cavités : 2 oreillettes (réception), 2 ventricules (éjection)</li>
+                    <li>Valves : tricuspide, pulmonaire, mitrale, aortique (circulation unidirectionnelle)</li>
+                    <li>Système de conduction : nœud sinusal (pacemaker naturel) → nœud AV → faisceau de His → fibres de Purkinje</li>
+                </ul>
+
+                <p><strong>Le cycle cardiaque :</strong></p>
+                <ul>
+                    <li><strong>Diastole</strong> : relaxation, remplissage des ventricules</li>
+                    <li><strong>Systole auriculaire</strong> : contraction des oreillettes (complète le remplissage)</li>
+                    <li><strong>Systole ventriculaire</strong> : contraction des ventricules, éjection du sang</li>
+                    <li>Durée totale au repos : ~0,8 seconde</li>
+                </ul>
+
+                <p><strong>Le débit cardiaque (Q) :</strong></p>
+                <ul>
+                    <li><strong>Formule : Q = FC × VES</strong></li>
+                    <li>FC (fréquence cardiaque) : 60-100 bpm au repos, jusqu'à 180-200 à l'effort maximal</li>
+                    <li>VES (volume d'éjection systolique) : 70 mL au repos, jusqu'à 120-140 mL à l'effort chez le sportif</li>
+                    <li>Q au repos : ~5 L/min, peut atteindre 20-30 L/min à l'effort maximal</li>
+                </ul>
+
+                <p><strong>Régulation de la pression artérielle :</strong></p>
+                <ul>
+                    <li><strong>PAM = (PAS + 2×PAD) / 3</strong> (Pression Artérielle Moyenne)</li>
+                    <li>Valeurs normales : PAS 120 mmHg / PAD 80 mmHg → PAM ≈ 93 mmHg</li>
+                    <li><strong>Barorécepteurs</strong> : détecteurs de pression dans la crosse aortique et les sinus carotidiens</li>
+                    <li>Si PA ↓ : activation sympathique (↑FC, ↑contractilité, vasoconstriction)</li>
+                    <li>Si PA ↑ : activation parasympathique (↓FC, vasodilatation)</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Patient post-infarctus. Tu dois comprendre que son VES est réduit (partie du myocarde nécrosée). Pour maintenir un Q suffisant, son cœur compense en augmentant la FC au repos (tachycardie). Ton programme de réadaptation cardiaque vise à améliorer progressivement le VES (renforcement du myocarde sain restant) pour que la FC de repos puisse diminuer. Tu surveilles constamment FC et PA pendant les exercices.
+                </div>
+
+                <h4>🫁 Système Respiratoire</h4>
+
+                <p><strong>Mécanique ventilatoire :</strong></p>
+                <ul>
+                    <li><strong>Inspiration</strong> : contraction du diaphragme (75% du travail) + intercostaux externes → ↑volume thoracique → ↓pression intra-alvéolaire → entrée d'air</li>
+                    <li><strong>Expiration au repos</strong> : passive, relaxation du diaphragme, retour élastique des poumons</li>
+                    <li><strong>Expiration forcée</strong> : intercostaux internes + muscles abdominaux</li>
+                </ul>
+
+                <p><strong>Volumes et capacités pulmonaires :</strong></p>
+                <ul>
+                    <li><strong>VT (Volume courant)</strong> : ~500 mL au repos</li>
+                    <li><strong>VRI (Volume de réserve inspiratoire)</strong> : ~3000 mL</li>
+                    <li><strong>VRE (Volume de réserve expiratoire)</strong> : ~1200 mL</li>
+                    <li><strong>VR (Volume résiduel)</strong> : ~1200 mL (reste dans les poumons)</li>
+                    <li><strong>CV (Capacité vitale)</strong> : VT + VRI + VRE = ~4700 mL</li>
+                    <li><strong>CPT (Capacité pulmonaire totale)</strong> : CV + VR = ~5900 mL</li>
+                </ul>
+
+                <p><strong>Ventilation :</strong></p>
+                <ul>
+                    <li><strong>V̇E = VT × f</strong> (Ventilation minute) : ~6-8 L/min au repos, jusqu'à 100-150 L/min à l'effort maximal</li>
+                    <li><strong>V̇A = (VT - VD) × f</strong> (Ventilation alvéolaire) : exclut l'espace mort (VD ≈ 150 mL)</li>
+                    <li>Espace mort anatomique : voies aériennes qui ne participent pas aux échanges</li>
+                </ul>
+
+                <p><strong>Échanges gazeux :</strong></p>
+                <ul>
+                    <li>Loi de Fick : diffusion proportionnelle à la surface, à la différence de pression, inversement proportionnelle à l'épaisseur</li>
+                    <li><strong>Alvéoles → Sang capillaire :</strong> O₂ diffuse (PO₂ alvéolaire 100 mmHg → sang 40 mmHg), CO₂ diffuse en sens inverse</li>
+                    <li>Hémoglobine : transporte 98% de l'O₂, chaque molécule fixe 4 molécules d'O₂</li>
+                    <li>Courbe de dissociation de l'hémoglobine : forme sigmoïde, effet Bohr (↓pH ou ↑CO₂ ou ↑température → ↓affinité pour O₂ → meilleure libération aux tissus actifs)</li>
+                </ul>
+
+                <p><strong>Régulation de la respiration :</strong></p>
+                <ul>
+                    <li><strong>Centre respiratoire</strong> : bulbe rachidien (automatique, 12-20 cycles/min au repos)</li>
+                    <li><strong>Chimiorécepteurs centraux</strong> : sensibles au CO₂ et pH du LCR (principal stimulus)</li>
+                    <li><strong>Chimiorécepteurs périphériques</strong> : sensibles à l'O₂, CO₂, pH sanguin (glomus carotidien et aortique)</li>
+                    <li>Contrôle volontaire possible (cortex) mais limité</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Patient BPCO avec emphysème. La destruction alvéolaire réduit la surface d'échange (↓capacité de diffusion). L'hyperinflation piège l'air (↑VR) et aplatit le diaphragme (↓efficacité mécanique). Tu enseignes la respiration à lèvres pincées (augmente la pression dans les voies aériennes, évite leur collapsus), le renforcement des muscles respiratoires accessoires, et le positionnement optimal (penché en avant, bras appuyés → décharge le diaphragme).
+                </div>
+
+                <h4>Animation : Contraction musculaire</h4>
+                <div class="canvas-controls">
+                    <label>Intensité de stimulation :</label>
+                    <input type="range" id="muscleStimulus" min="0" max="100" value="50" oninput="updateMuscleStimulus(this.value)">
+                    <span id="muscleStimulusValue">50</span>%
+                    <button onclick="toggleAnimation('muscle')">▶️ Démarrer/Arrêter</button>
+                </div>
+                <canvas id="muscleCanvas" width="600" height="400"></canvas>
+
+                <h4>💪 Système Musculaire</h4>
+
+                <p><strong>Structure du muscle squelettique :</strong></p>
+                <ul>
+                    <li>Organisation hiérarchique : muscle → faisceau → fibre musculaire → myofibrille → sarcomère</li>
+                    <li><strong>Sarcomère</strong> : unité contractile (ligne Z à ligne Z), contient filaments d'actine (fins) et myosine (épais)</li>
+                    <li>Bandes : bande A (myosine), bande I (actine), zone H (myosine seule), ligne M (centre)</li>
+                </ul>
+
+                <p><strong>Contraction musculaire (théorie des filaments glissants) :</strong></p>
+                <ul>
+                    <li><strong>1. Potentiel d'action</strong> → propagation le long du sarcolemme et tubules T</li>
+                    <li><strong>2. Libération de Ca²⁺</strong> depuis le réticulum sarcoplasmique</li>
+                    <li><strong>3. Ca²⁺ se lie à la troponine</strong> → démasque sites de liaison sur l'actine</li>
+                    <li><strong>4. Têtes de myosine se lient à l'actine</strong> (ponts d'union)</li>
+                    <li><strong>5. Hydrolyse d'ATP</strong> → têtes de myosine pivotent → filaments d'actine glissent vers le centre du sarcomère</li>
+                    <li><strong>6. Nouvelle molécule d'ATP</strong> → détachement → répétition du cycle</li>
+                    <li>Relaxation : recapture du Ca²⁺ (nécessite ATP)</li>
+                </ul>
+
+                <p><strong>Types de fibres musculaires :</strong></p>
+                <ul>
+                    <li><strong>Type I (lentes oxydatives)</strong> : beaucoup de mitochondries, beaucoup de myoglobine (rouges), peu de fatigue, contraction lente, endurance</li>
+                    <li><strong>Type IIa (rapides oxydatives-glycolytiques)</strong> : intermédiaires, assez résistantes à la fatigue</li>
+                    <li><strong>Type IIx/IIb (rapides glycolytiques)</strong> : peu de mitochondries, blanches, fatigue rapide, contraction puissante et rapide</li>
+                    <li>Proportion génétiquement déterminée mais modifiable par l'entraînement (surtout IIa ↔ IIx)</li>
+                </ul>
+
+                <p><strong>Unité motrice et recrutement :</strong></p>
+                <ul>
+                    <li><strong>Unité motrice</strong> : 1 motoneurone + toutes les fibres qu'il innerve</li>
+                    <li><strong>Principe de Henneman</strong> : recrutement par taille croissante (petites UM → grandes UM)</li>
+                    <li>Effort léger : Type I uniquement</li>
+                    <li>Effort modéré : Type I + Type IIa</li>
+                    <li>Effort maximal : tous les types recrutés</li>
+                </ul>
+
+                <p><strong>Métabolisme énergétique musculaire :</strong></p>
+                <ul>
+                    <li><strong>Système des phosphagènes (ATP-PC)</strong> : immédiat, 10-15 secondes max, pas de déchet, reconstitution lente (plusieurs minutes)</li>
+                    <li><strong>Système glycolytique anaérobie</strong> : rapide, 30-120 secondes, produit lactate et H⁺ (acidose → brûlure, fatigue), glucose → 2 ATP</li>
+                    <li><strong>Système oxydatif aérobie</strong> : lent à démarrer mais quasi-illimité, glucose → 36-38 ATP, lipides → 100+ ATP, nécessite O₂</li>
+                    <li>Seuil lactique : ~50-85% VO₂max selon entraînement</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Sportif préparant un trail de 50 km. Tu analyses les besoins : 80% effort aérobie (Type I) + 20% passages techniques intenses (Type IIa). Programme : 3 sorties longues/semaine (2h+) à intensité modérée pour développer les mitochondries et l'oxydation des lipides + 1 séance d'intervalles (5 min rapide / 3 min récup) pour repousser le seuil lactique + 1 séance de côtes courtes pour la puissance. Tu expliques la stratégie nutritionnelle (glucides avant/pendant) et l'importance de la récupération (synthèse protéique, réparation tissulaire).
+                </div>
+
+                <h4>🧠 Système Nerveux</h4>
+
+                <p><strong>Organisation du système nerveux :</strong></p>
+                <ul>
+                    <li><strong>SNC</strong> : encéphale (cerveau, cervelet, tronc cérébral) + moelle épinière</li>
+                    <li><strong>SNP</strong> : nerfs crâniens (12 paires) + nerfs rachidiens (31 paires)</li>
+                    <li><strong>Système somatique</strong> : contrôle volontaire (motoneurones → muscles squelettiques)</li>
+                    <li><strong>Système autonome</strong> : contrôle involontaire (sympathique vs parasympathique)</li>
+                </ul>
+
+                <p><strong>Le neurone et la transmission de l'influx :</strong></p>
+                <ul>
+                    <li><strong>Potentiel de repos</strong> : -70 mV (pompe Na⁺/K⁺-ATPase maintient gradient)</li>
+                    <li><strong>Potentiel d'action</strong> : dépolarisation (entrée Na⁺) → +30 mV → repolarisation (sortie K⁺) → retour à -70 mV</li>
+                    <li>Loi du tout-ou-rien : un potentiel d'action se déclenche ou pas, toujours de même amplitude</li>
+                    <li>Conduction saltatoire (myéline) : 120 m/s vs 1 m/s sans myéline</li>
+                    <li><strong>Synapse</strong> : libération neurotransmetteurs (acétylcholine, dopamine, sérotonine, etc.)</li>
+                </ul>
+
+                <p><strong>Contrôle moteur :</strong></p>
+                <ul>
+                    <li><strong>Cortex moteur</strong> : planification et initiation du mouvement volontaire</li>
+                    <li><strong>Ganglions de la base</strong> : sélection et initiation des programmes moteurs</li>
+                    <li><strong>Cervelet</strong> : coordination, timing, apprentissage moteur, ajustement en temps réel</li>
+                    <li><strong>Moelle épinière</strong> : réflexes, générateurs centraux de rythme (marche)</li>
+                    <li><strong>Voies descendantes</strong> : corticospinales (pyramidales, précises), extrapyramidales (posture, tonus)</li>
+                </ul>
+
+                <p><strong>Proprioception et feedback sensoriel :</strong></p>
+                <ul>
+                    <li><strong>Fuseaux neuromusculaires</strong> : détectent étirement du muscle, réflexe myotatique (protecteur)</li>
+                    <li><strong>Organes tendineux de Golgi</strong> : détectent tension, réflexe myotatique inverse (protège le tendon)</li>
+                    <li><strong>Récepteurs articulaires</strong> : position, mouvement, pression</li>
+                    <li><strong>Récepteurs cutanés</strong> : toucher, pression, vibration</li>
+                    <li>Intégration multimodale au niveau central pour contrôle postural et moteur fin</li>
+                </ul>
+
+                <p><strong>Plasticité neuronale :</strong></p>
+                <ul>
+                    <li>Capacité du SN à se modifier structurellement et fonctionnellement</li>
+                    <li><strong>À court terme</strong> : potentialisation/dépression synaptique</li>
+                    <li><strong>À long terme</strong> : synaptogenèse, élagage synaptique, myélinisation</li>
+                    <li>Maximale dans l'enfance mais présente toute la vie</li>
+                    <li>Principe : "neurons that fire together, wire together"</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Patient hémiplégique post-AVC gauche (lésion cortex moteur). Le membre supérieur droit est flasque puis spastique. Tu comprends que la voie corticospinale est lésée → perte du contrôle volontaire fin. La spasticité apparaît car les voies descendantes inhibitrices sont interrompues → hyperréflexie. Ton approche : thérapie contrainte induite (forcer l'utilisation du membre atteint 6h/jour pour stimuler la plasticité), travail de la dissociation des mouvements, étirements doux pour gérer la spasticité, stimulation sensorielle (proprioception, toucher) pour reconstruire la carte corticale.
+                </div>
+
+                <h4>🔄 Homéostasie et régulation</h4>
+
+                <p><strong>Concept d'homéostasie :</strong></p>
+                <ul>
+                    <li>Maintien de la stabilité du milieu intérieur malgré variations externes</li>
+                    <li><strong>Boucle de régulation</strong> : récepteur → centre intégrateur → effecteur → feedback</li>
+                    <li><strong>Feedback négatif</strong> : 99% des régulations (stabilise), ex: thermorégulation</li>
+                    <li><strong>Feedback positif</strong> : rare (amplifie), ex: accouchement, coagulation</li>
+                </ul>
+
+                <p><strong>Exemples de régulations homéostatiques :</strong></p>
+                <ul>
+                    <li><strong>Thermorégulation</strong> : 37°C ± 0,5°C, hypothalamus = thermostat, frissons/sudation/vasodilatation-constriction</li>
+                    <li><strong>Glycémie</strong> : 0,7-1,1 g/L, insuline (↓glycémie) vs glucagon (↑glycémie)</li>
+                    <li><strong>pH sanguin</strong> : 7,35-7,45, tampons (bicarbonate), ajustement respiratoire (CO₂) et rénal (H⁺)</li>
+                    <li><strong>Volémie et osmolarité</strong> : ADH, système rénine-angiotensine-aldostérone, ANP</li>
+                </ul>
+
+                <h4>🏃 Adaptations physiologiques à l'exercice</h4>
+
+                <p><strong>Adaptations cardiovasculaires à l'entraînement :</strong></p>
+                <ul>
+                    <li>↑ VES au repos et à l'effort (hypertrophie physiologique, ↑contractilité)</li>
+                    <li>↓ FC repos (50-60 bpm chez sportif) → "cœur d'athlète"</li>
+                    <li>↑ Q max (jusqu'à 35-40 L/min chez athlète d'élite)</li>
+                    <li>↑ capillarisation musculaire → meilleure extraction O₂</li>
+                    <li>↑ volume sanguin total, ↑ hémoglobine</li>
+                </ul>
+
+                <p><strong>Adaptations respiratoires :</strong></p>
+                <ul>
+                    <li>↑ V̇E max (peut atteindre 150-200 L/min)</li>
+                    <li>↑ efficacité ventilatoire (moins de ventilation pour même VO₂)</li>
+                    <li>↑ capacité de diffusion pulmonaire</li>
+                    <li>↑ force et endurance muscles respiratoires</li>
+                </ul>
+
+                <p><strong>Adaptations musculaires :</strong></p>
+                <ul>
+                    <li><strong>Entraînement endurance</strong> : ↑ mitochondries, ↑ enzymes oxydatives, ↑ capillarisation, conversion IIx → IIa, ↑ stocks glycogène, ↑ utilisation lipides</li>
+                    <li><strong>Entraînement force</strong> : hypertrophie (↑ diamètre fibres), ↑ protéines contractiles, adaptations neurales (↑ recrutement, ↑ synchronisation)</li>
+                </ul>
+
+                <p><strong>VO₂max et déterminants de la performance aérobie :</strong></p>
+                <ul>
+                    <li><strong>VO₂max = Q max × (CaO₂ - CvO₂) max</strong></li>
+                    <li>Déterminé par : capacité cardiovasculaire (Q max), capacité de transport O₂ (hémoglobine), capacité d'extraction O₂ (mitochondries musculaires)</li>
+                    <li>Valeurs : 35-40 mL/kg/min (sédentaire) vs 70-90 mL/kg/min (cycliste élite)</li>
+                    <li>Entraînable : +15-25% en 3-6 mois</li>
+                </ul>
+
+                <h4>📋 Ce qu'un kiné DOIT maîtriser - Niveau Base</h4>
+                <ul>
+                    <li><strong>Interpréter les signes vitaux</strong> : FC, PA, FR, SpO₂ - savoir ce qui est normal/anormal selon contexte</li>
+                    <li><strong>Calculer le débit cardiaque</strong> et comprendre les facteurs qui l'influencent</li>
+                    <li><strong>Prescrire l'intensité d'exercice</strong> : % FCmax, % VO₂max, échelle de Borg, zones d'entraînement</li>
+                    <li><strong>Identifier les systèmes énergétiques</strong> sollicités selon le type d'effort</li>
+                    <li><strong>Adapter le programme</strong> selon pathologie (cardiaque, respiratoire, neuro, ortho)</li>
+                    <li><strong>Reconnaître les signaux d'alerte</strong> : angine, dyspnée sévère, arythmie, hypoglycémie, malaise</li>
+                    <li><strong>Comprendre la fatigue</strong> : centrale vs périphérique, aiguë vs chronique</li>
+                </ul>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="level-btn" onclick="document.getElementById('avance').scrollIntoView({behavior: 'smooth'}); showLevel('avance');" style="padding: 15px 30px; font-size: 1.1em;">
+                        🎓 Passons au Niveau Avancé →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Niveau Avancé -->
+            <div id="avance" class="course-section">
+                <h3>🎓 Physiologie - Niveau Avancé</h3>
+                
+                <p>
+                    Au niveau avancé, la physiologie intègre les mécanismes moléculaires et cellulaires avec les fonctions systémiques. C'est le niveau attendu pour la pratique clinique experte et la compréhension des pathologies complexes.
+                </p>
+
+                <h4>❤️ Physiologie Cardiovasculaire Approfondie</h4>
+
+                <p><strong>Électrophysiologie cardiaque :</strong></p>
+                <ul>
+                    <li><strong>Potentiel d'action cardiaque</strong> : 
+                        <ul>
+                            <li>Phase 0 : dépolarisation rapide (canaux Na⁺ voltage-dépendants)</li>
+                            <li>Phase 1 : repolarisation précoce (sortie K⁺)</li>
+                            <li>Phase 2 : plateau (entrée Ca²⁺ = sortie K⁺)</li>
+                            <li>Phase 3 : repolarisation (sortie K⁺)</li>
+                            <li>Phase 4 : potentiel de repos (-90 mV) ou dépolarisation spontanée (cellules pacemaker)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Automatisme</strong> : nœud sinusal (60-100 bpm), nœud AV (40-60 bpm), His-Purkinje (20-40 bpm)</li>
+                    <li><strong>Couplage excitation-contraction</strong> : PA → entrée Ca²⁺ → libération Ca²⁺ du RS (Ca²⁺-induced Ca²⁺ release) → contraction</li>
+                    <li>Période réfractaire absolue : protection contre tétanie cardiaque</li>
+                </ul>
+
+                <p><strong>Cycle cardiaque et hémodynamique :</strong></p>
+                <ul>
+                    <li><strong>Précharge</strong> : étirement ventriculaire en fin de diastole (≈ PTDVG), dépend du retour veineux</li>
+                    <li><strong>Loi de Frank-Starling</strong> : ↑ précharge → ↑ étirement myocytes → ↑ force contraction (optimisation chevauchement actine-myosine)</li>
+                    <li><strong>Contractilité (inotropisme)</strong> : force indépendante de la précharge, modulée par système sympathique (↑ [Ca²⁺]ᵢ)</li>
+                    <li><strong>Postcharge</strong> : résistance à l'éjection (≈ PA pour VG), ↑ postcharge → ↓ VES</li>
+                    <li><strong>Compliance ventriculaire</strong> : relation pression-volume en diastole, altérée en hypertrophie/fibrose</li>
+                </ul>
+
+                <p><strong>Régulation cardiovasculaire intégrée :</strong></p>
+                <ul>
+                    <li><strong>Contrôle neural</strong> :
+                        <ul>
+                            <li>Sympathique : récepteurs β₁ cardiaques (↑FC, ↑contractilité) + récepteurs α₁ vasculaires (vasoconstriction)</li>
+                            <li>Parasympathique : récepteurs muscariniques M₂ (↓FC, ↓conduction AV), peu d'effet sur contractilité</li>
+                        </ul>
+                    </li>
+                    <li><strong>Baroréflexe</strong> : gain élevé (-30 battements/min par ΔPA de 10 mmHg), adaptation à court terme</li>
+                    <li><strong>Contrôle hormonal</strong> :
+                        <ul>
+                            <li>Système rénine-angiotensine-aldostérone : AngII (vasoconstriction puissante), aldostérone (rétention Na⁺/H₂O)</li>
+                            <li>ADH/vasopressine : réabsorption H₂O, vasoconstriction haute dose</li>
+                            <li>ANP/BNP : sécrétion si distension auriculaire/ventriculaire → natriurèse, vasodilatation</li>
+                        </ul>
+                    </li>
+                    <li><strong>Autorégulation locale</strong> : métabolique (↑CO₂, ↑K⁺, ↑adénosine, ↓O₂ → vasodilatation), myogénique (étirement → vasoconstriction)</li>
+                </ul>
+
+                <p><strong>Équations fondamentales :</strong></p>
+                <ul>
+                    <li><strong>Débit cardiaque</strong> : Q = FC × VES</li>
+                    <li><strong>PAM</strong> = Q × RVP ou PAM = (PAS + 2×PAD) / 3</li>
+                    <li><strong>Loi de Poiseuille</strong> : Q = (πΔPr⁴)/(8ηL) → le rayon est critique (r⁴ !)</li>
+                    <li><strong>Loi de Fick</strong> : VO₂ = Q × (CaO₂ - CvO₂)</li>
+                    <li><strong>Équation de Karvonen</strong> : FC cible = FC repos + % × (FC max - FC repos)</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple clinique avancé :</strong> Patient insuffisant cardiaque à fraction d'éjection réduite (IC-FEr, FEVG 30%). Physiopathologie : nécrose myocardique → ↓contractilité → ↓VES → activation neurohormonale compensatrice (sympathique + SRAA) → tachycardie + vasoconstriction + rétention hydrosodée → ↑précharge et ↑postcharge → dilatation ventriculaire (remodelage) → cercle vicieux. Ton programme de réadaptation vise la désensibilisation adrénergique (↓FC repos), l'amélioration de la fonction endothéliale (vasodilatation par NO), et le reconditionnement musculaire périphérique (↓extraction O₂ périphérique → ↓demande cardiaque). Exercices aérobies modérés (50-70% VO₂pic) 30-45 min, 3-5×/semaine. Surveillance stricte : FC, PA, dyspnée, arythmie, œdèmes.
+                </div>
+
+                <h4>🫁 Physiologie Respiratoire Approfondie</h4>
+
+                <p><strong>Mécanique respiratoire avancée :</strong></p>
+                <ul>
+                    <li><strong>Compliance pulmonaire</strong> (C) : C = ΔV / ΔP (normale : ~200 mL/cmH₂O)
+                        <ul>
+                            <li>↓ en fibrose, œdème, atélectasie (poumons "rigides")</li>
+                            <li>↑ en emphysème (destruction élastine, poumons "flasques")</li>
+                        </ul>
+                    </li>
+                    <li><strong>Résistance des voies aériennes</strong> (R) : proportionnelle à 1/r⁴ (loi de Poiseuille)
+                        <ul>
+                            <li>↑ en asthme, BPCO, bronchite (bronchoconstriction, inflammation, mucus)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Constante de temps</strong> : τ = R × C, détermine vitesse remplissage/vidange alvéolaire
+                        <ul>
+                            <li>Hétérogénéité des constantes de temps → mauvaise distribution ventilatoire</li>
+                        </ul>
+                    </li>
+                    <li><strong>Pression transpulmonaire</strong> : P_TP = P_alvéolaire - P_pleurale, maintient les poumons ouverts</li>
+                    <li><strong>Surfactant pulmonaire</strong> : phospholipides (dipalmitoyl phosphatidylcholine), ↓ tension superficielle → ↑ compliance, prévient atélectasie (loi de Laplace : P = 2T/r)</li>
+                </ul>
+
+                <p><strong>Échanges gazeux et transport :</strong></p>
+                <ul>
+                    <li><strong>Équation des gaz alvéolaires</strong> : PAO₂ = FiO₂(P_atm - P_H₂O) - PACO₂/R
+                        <ul>
+                            <li>Au niveau de la mer : PAO₂ ≈ 0,21(760-47) - 40/0,8 ≈ 100 mmHg</li>
+                        </ul>
+                    </li>
+                    <li><strong>Gradient alvéolo-artériel</strong> : P(A-a)O₂ = PAO₂ - PaO₂ (normal <15 mmHg)
+                        <ul>
+                            <li>↑ en troubles de la diffusion, shunt, déséquilibre V̇/Q̇</li>
+                        </ul>
+                    </li>
+                    <li><strong>Rapport ventilation/perfusion</strong> (V̇/Q̇) : optimal = 0,8-1,0
+                        <ul>
+                            <li>Apex pulmonaire : V̇/Q̇ élevé (beaucoup de ventilation, peu de perfusion)</li>
+                            <li>Base pulmonaire : V̇/Q̇ bas (gravité → ↑ perfusion)</li>
+                            <li>V̇/Q̇ = 0 : shunt (perfusion sans ventilation) → hypoxémie réfractaire O₂</li>
+                            <li>V̇/Q̇ = ∞ : espace mort (ventilation sans perfusion) → hyperventilation compensatrice</li>
+                        </ul>
+                    </li>
+                    <li><strong>Diffusion alvéolo-capillaire</strong> : loi de Fick
+                        <ul>
+                            <li>V̇_gas = (A/T) × D × (P₁ - P₂)</li>
+                            <li>Limitée par diffusion : emphysème, fibrose, œdème (↑T)</li>
+                            <li>Limitée par perfusion : sujet sain au repos (équilibration en 0,25 sec, transit capillaire 0,75 sec)</li>
+                            <li>Athlète à effort maximal : peut devenir limité par diffusion (transit capillaire <0,5 sec)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><strong>Transport de l'oxygène :</strong></p>
+                <ul>
+                    <li><strong>CaO₂ = (1,34 × [Hb] × SaO₂) + (0,003 × PaO₂)</strong>
+                        <ul>
+                            <li>Hb normale : 15 g/dL → CaO₂ ≈ 20 mL O₂/dL sang</li>
+                            <li>O₂ dissous négligeable au repos (<2%) mais important en hyperoxie/hyperbarie</li>
+                        </ul>
+                    </li>
+                    <li><strong>Courbe de dissociation Hb-O₂</strong> : sigmoïde, P₅₀ ≈ 27 mmHg
+                        <ul>
+                            <li>Plateau (PO₂ >60 mmHg) : SaO₂ maintenue malgré ↓PO₂ (sécurité)</li>
+                            <li>Partie raide (PO₂ <60 mmHg) : grosse ↓SaO₂ si ↓PO₂ (tissus)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Effet Bohr</strong> : ↓pH ou ↑CO₂ ou ↑température → courbe déplacée à droite → ↓affinité Hb-O₂ → meilleure libération O₂ aux tissus actifs</li>
+                    <li><strong>2,3-DPG</strong> : ↑ en altitude, anémie → ↓affinité → facilite libération O₂</li>
+                </ul>
+
+                <p><strong>Transport du CO₂ :</strong></p>
+                <ul>
+                    <li>70% sous forme HCO₃⁻ (anhydrase carbonique : CO₂ + H₂O ⇌ H₂CO₃ ⇌ H⁺ + HCO₃⁻)</li>
+                    <li>23% lié à l'hémoglobine (carbaminohémoglobine)</li>
+                    <li>7% dissous</li>
+                    <li><strong>Effet Haldane</strong> : Hb désoxygénée fixe mieux CO₂ (tissus) / Hb oxygénée libère mieux CO₂ (poumons)</li>
+                </ul>
+
+                <p><strong>Régulation de la ventilation - niveau avancé :</strong></p>
+                <ul>
+                    <li><strong>Chimiorécepteurs centraux</strong> (bulbe) : sensibles [H⁺] du LCR (pas directement CO₂)
+                        <ul>
+                            <li>CO₂ traverse barrière hémato-encéphalique → ↑[H⁺] LCR → stimulation</li>
+                            <li>Responsables de 70% de la réponse au CO₂</li>
+                        </ul>
+                    </li>
+                    <li><strong>Chimiorécepteurs périphériques</strong> (glomus carotidien/aortique) : PO₂, PCO₂, pH
+                        <ul>
+                            <li>Réponse immédiate (centrale retardée 20-30 sec)</li>
+                            <li>Stimulation significative seulement si PaO₂ <60 mmHg</li>
+                        </ul>
+                    </li>
+                    <li><strong>Réponse ventilatoire au CO₂</strong> : ~2-3 L/min/mmHg augmentation de V̇E si ↑PACO₂ 1 mmHg</li>
+                    <li><strong>Réponse à l'hypoxie</strong> : hyperbolique, forte stimulation si PaO₂ <60 mmHg</li>
+                    <li><strong>Commande centrale</strong> : générateurs de rythme (pre-Bötzinger complex), modulation corticale (volontaire)</li>
+                    <li><strong>Afférences périphériques</strong> : mécanorécepteurs pulmonaires (stretch receptors, J receptors), propriocepteurs musculaires</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple clinique avancé :</strong> Patient BPCO sévère (VEMS 35% théorique, emphysème panlobulaire). Physiopathologie complexe : destruction alvéolaire → ↓ surface échange (↓DLCO) + perte recul élastique (↑compliance) → collapsus expiratoire dynamique des voies aériennes → piégeage aérien (↑VR, ↑CPT) → hyperinflation → aplatissement diaphragme (↓efficacité mécanique, désavantage longueur-tension) + distension thoracique (↑travail respiratoire). Hypoxémie chronique (↓V̇/Q̇, diffusion limitée) → vasoconstriction pulmonaire hypoxique → hypertension pulmonaire → cœur pulmonaire chronique. Hypercapnie permissive (adaptation chimiorécepteurs centraux, hypoxie devient stimulus principal). Ton intervention : entraînement muscles inspiratoires (threshold IMT, 30% PIM, 30 min/j), exercices diaphragmatiques, renforcement quadriceps (corrélation VEMS-force cuisses faible en BPCO), réentraînement à l'effort (interval training mieux toléré que continu), apprentissage techniques économie énergétique (positionnement, lèvres pincées), gestion exacerbations, coordination interdisciplinaire (pneumo, diet, O₂ domicile si indiqué).
+                </div>
+
+                <h4>💪 Physiologie Neuromusculaire Avancée</h4>
+
+                <p><strong>Bases moléculaires de la contraction :</strong></p>
+                <ul>
+                    <li><strong>Complexe troponine-tropomyosine</strong> : régulation Ca²⁺-dépendante
+                        <ul>
+                            <li>Tropomyosine : masque sites liaison myosine sur actine</li>
+                            <li>Troponine C : fixe Ca²⁺ → changement conformationnel</li>
+                            <li>Troponine I : inhibe interaction actine-myosine (relâchée par Ca²⁺)</li>
+                            <li>Troponine T : ancre le complexe sur tropomyosine</li>
+                        </ul>
+                    </li>
+                    <li><strong>Cycle des ponts d'union</strong> :
+                        <ul>
+                            <li>1. Myosine-ADP-Pi liée à actine (état de forte affinité)</li>
+                            <li>2. Libération Pi → pivot de la tête (power stroke) → raccourcissement</li>
+                            <li>3. Libération ADP</li>
+                            <li>4. Liaison ATP → dissociation actine-myosine (état faible affinité)</li>
+                            <li>5. Hydrolyse ATP → ADP + Pi → réarmement tête myosine</li>
+                            <li>Vitesse : ~5 cycles/sec (fibres lentes) vs ~50 cycles/sec (fibres rapides)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Rigor mortis</strong> : absence ATP post-mortem → ponts actine-myosine permanents → rigidité cadavérique</li>
+                </ul>
+
+                <p><strong>Bioénergétique musculaire approfondie :</strong></p>
+                <ul>
+                    <li><strong>Système phosphagène</strong> :
+                        <ul>
+                            <li>Créatine kinase : PCr + ADP ⇌ Cr + ATP</li>
+                            <li>Stocks : ~120 mmol/kg muscle, épuisés en 10-15 sec effort maximal</li>
+                            <li>Reconstitution : 3-5 min (50% en 30 sec avec O₂)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Glycolyse anaérobie</strong> :
+                        <ul>
+                            <li>Glucose → 2 pyruvate → 2 lactate + 2 ATP (+ 2 NADH oxydés)</li>
+                            <li>Puissance : 5 mmol ATP/kg/sec, capacité limitée (~300 mmol lactate/kg)</li>
+                            <li>Lactate ≠ cause fatigue directe, mais H⁺ associé ↓pH → inhibition enzymes glycolytiques + compétition Ca²⁺</li>
+                        </ul>
+                    </li>
+                    <li><strong>Métabolisme oxydatif</strong> :
+                        <ul>
+                            <li>Glucose : glycolyse aérobie → pyruvate → acétyl-CoA → cycle Krebs + chaîne respiratoire → 36-38 ATP</li>
+                            <li>Lipides : β-oxydation → acétyl-CoA → 129 ATP/palmitate (C16)</li>
+                            <li>Puissance faible (<1 mmol ATP/kg/sec) mais capacité quasi-illimitée</li>
+                            <li>Crossover concept : ↑intensité → ↑glucides, ↓lipides (malgré VO₂ identique)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Quotient respiratoire</strong> : RQ = VCO₂/VO₂
+                        <ul>
+                            <li>RQ = 0,7 : oxydation lipides pure</li>
+                            <li>RQ = 1,0 : oxydation glucides pure</li>
+                            <li>RQ >1,0 : hyperventilation (CO₂ non métabolique, zone anaérobie)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><strong>Typologie et plasticité des fibres musculaires :</strong></p>
+                <ul>
+                    <li><strong>Isoformes de myosine</strong> : détermine vitesse contraction (ATPase myosine)
+                        <ul>
+                            <li>Type I : MyHC-I (lente)</li>
+                            <li>Type IIa : MyHC-IIa (rapide intermédiaire)</li>
+                            <li>Type IIx : MyHC-IIx (très rapide)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Caractéristiques métaboliques</strong> :
+                        <ul>
+                            <li>Type I : ↑↑ mitochondries, ↑↑ capillaires, ↑↑ myoglobine, ↑ enzymes oxydatives, ↓ glycolytiques</li>
+                            <li>Type IIx : ↓ mitochondries, ↓ capillaires, ↑↑ enzymes glycolytiques, stocks glycogène élevés</li>
+                        </ul>
+                    </li>
+                    <li><strong>Plasticité</strong> : continuum I ↔ IIa ↔ IIx
+                        <ul>
+                            <li>Entraînement endurance : IIx → IIa (↑ mitochondries, ↑ capillaires)</li>
+                            <li>Désentraînement/immobilisation : IIa → IIx</li>
+                            <li>Conversion I ↔ II possible mais limitée, longue (mois-années)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><strong>Contrôle neural du mouvement - niveau avancé :</strong></p>
+                <ul>
+                    <li><strong>Hiérarchie du contrôle moteur</strong> :
+                        <ul>
+                            <li>Niveau spinal : réflexes (myotatique, nociceptif), CPG (central pattern generators)</li>
+                            <li>Niveau tronc cérébral : posture, équilibre (vestibulo-spinal, réticulo-spinal)</li>
+                            <li>Niveau sous-cortical : ganglions base (sélection actions), cervelet (coordination, apprentissage)</li>
+                            <li>Niveau cortical : planification, exécution volontaire (aire motrice primaire, prémotrice, supplémentaire)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Voies descendantes</strong> :
+                        <ul>
+                            <li>Faisceau corticospinal latéral : contrôle volontaire fin distal (main, doigts), décussation bulbaire</li>
+                            <li>Faisceau corticospinal ventral : contrôle axial et proximal</li>
+                            <li>Faisceaux extrapyramidaux : posture (vestibulo-spinal), locomotion (réticulo-spinal)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Unité motrice et gradation de force</strong> :
+                        <ul>
+                            <li>Recrutement spatial : principe taille (Henneman), S → FR → FF</li>
+                            <li>Codage fréquentiel : ↑fréquence décharge → sommation → tétanos (fusion >50 Hz)</li>
+                            <li>Synchronisation : coordination temporelle recrutement UM</li>
+                        </ul>
+                    </li>
+                    <li><strong>Fatigue centrale vs périphérique</strong> :
+                        <ul>
+                            <li>Centrale : ↓commande descendante, ↓recrutement UM, altération neuromodulation (↓dopamine, ↑sérotonine)</li>
+                            <li>Périphérique : échec excitation-contraction (↓Ca²⁺ RS), accumulation métabolites (H⁺, Pi, ADP), déplétion substrats</li>
+                            <li>Twitch interpolation technique : évaluation activation volontaire</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple clinique avancé :</strong> Athlète marathon en préparation JO (objectif sub-2h10). Analyse physiologique : VO₂max 78 mL/kg/min, seuil lactique à 88% VO₂max (excellent), économie de course optimale (capacité tenir 42 km à 21 km/h = 20,3 km/h théorique sur marathon). Limites identifiées : (1) capacité glucidique limitée (glycogène musculaire ~500 g + hépatique 100 g = 2400 kcal, marathon demande ~3000 kcal → déplétion après 30 km → "mur"), (2) coût thermique élevé (production chaleur 15-20× métabolisme basal, risque hyperthermie). Programme optimisé : (1) longues sorties hebdomadaires 35-40 km à allure cible pour ↑ densité mitochondriale, ↑ enzymes β-oxydation, ↑ utilisation lipides (épargne glycogène), (2) séances tempo 15-20 km à allure légèrement supra-seuil pour repousser seuil lactique, (3) séances VO₂max courtes (5×1000m R2') maintien VO₂max sans fatigue excessive, (4) stratégie nutritionnelle : "train-low compete-high" (certaines séances à jeun → adaptation mitochondriale, compétition carb-loading), apports glucides course (60-90 g/h dès km 5), (5) acclimatation chaleur si course en climat chaud (10-14 jours exposition, ↑volume plasmatique, ↑capacité sudation, ↓seuils déclenchement). Monitoring : HRV quotidienne (fatigue), lactate tests mensuels (seuil), anthropométrie (composition corporelle optimale IMC 19-20).
+                </div>
+
+                <h4>🧠 Neuroplasticité et Apprentissage Moteur</h4>
+
+                <p><strong>Mécanismes de la plasticité synaptique :</strong></p>
+                <ul>
+                    <li><strong>Potentialisation à long terme (LTP)</strong> : ↑ efficacité synaptique durable
+                        <ul>
+                            <li>Mécanisme : stimulation répétée → ↑ récepteurs AMPA → ↑ réponse postsynaptique</li>
+                            <li>Dépendante NMDA (calcium-dépendant)</li>
+                            <li>Base cellulaire mémoire et apprentissage</li>
+                        </ul>
+                    </li>
+                    <li><strong>Dépression à long terme (LTD)</strong> : ↓ efficacité synaptique
+                        <ul>
+                            <li>Élagage synaptique, raffinement circuits</li>
+                        </ul>
+                    </li>
+                    <li><strong>Plasticité structurale</strong> :
+                        <ul>
+                            <li>Synaptogenèse : création nouvelles synapses (heures-jours)</li>
+                            <li>Neurogenèse adulte : limitée (hippocampe, zone sous-ventriculaire)</li>
+                            <li>Sprouting axonal : repousse collatérales après lésion</li>
+                            <li>Myélinisation adaptative : ↑ vitesse conduction voies utilisées</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><strong>Réorganisation corticale :</strong></p>
+                <ul>
+                    <li><strong>Cartes somatotopiques</strong> : représentation corps dans cortex (homonculus moteur/sensitif)</li>
+                    <li><strong>Principe "use it or lose it"</strong> : zones peu utilisées réduites, zones actives expansées</li>
+                    <li><strong>Post-lésion cérébrale</strong> :
+                        <ul>
+                            <li>Récupération spontanée (jours-semaines) : résolution œdème, reperfusion pénombre</li>
+                            <li>Réorganisation périlésionnelle : zones adjacentes prennent relais</li>
+                            <li>Recrutement aires controlatérales : compensation (mais souvent moins efficace)</li>
+                            <li>Fenêtre critique : 3-6 premiers mois (plasticité maximale)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Principes rééducation optimale</strong> :
+                        <ul>
+                            <li>Intensité : haute fréquence répétitions (>100-200/séance)</li>
+                            <li>Spécificité : tâches fonctionnelles significatives (pas exercices abstraits)</li>
+                            <li>Feedback : connaissance résultats immédiate</li>
+                            <li>Variabilité : variations contextuelles (généralisation)</li>
+                            <li>Récompense : motivation, engagement (dopamine facilite plasticité)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4>🏋️ Adaptations à l'Entraînement - Niveau Expert</h4>
+
+                <p><strong>Entraînement de force - adaptations neurales vs structurales :</strong></p>
+                <ul>
+                    <li><strong>Phase neurale (0-8 semaines)</strong> :
+                        <ul>
+                            <li>↑ recrutement UM (surtout hauts seuils, Type II)</li>
+                            <li>↑ fréquence décharge (↑force par sommation)</li>
+                            <li>↑ synchronisation inter-UM</li>
+                            <li>↓ co-contraction antagonistes</li>
+                            <li>Gains force 20-40% sans hypertrophie significative</li>
+                        </ul>
+                    </li>
+                    <li><strong>Phase hypertrophique (>8-12 semaines)</strong> :
+                        <ul>
+                            <li>↑ synthèse protéines contractiles (actine, myosine)</li>
+                            <li>↑ section transverse fibres (AST muscle)</li>
+                            <li>Hyperplasie controversée chez humain (peu probable)</li>
+                            <li>Type II > Type I hypertrophie</li>
+                        </ul>
+                    </li>
+                    <li><strong>Variables programmation</strong> :
+                        <ul>
+                            <li>Hypertrophie optimale : 6-12 reps, 65-85% 1RM, repos 1-2 min, volume élevé (10-20 séries/groupe/semaine)</li>
+                            <li>Force maximale : 1-6 reps, >85% 1RM, repos 3-5 min, fréquence élevée</li>
+                            <li>Puissance : 3-6 reps, 30-60% 1RM, vitesse maximale, repos complet</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><strong>Entraînement endurance - adaptations centrales et périphériques :</strong></p>
+                <ul>
+                    <li><strong>Adaptations cardiovasculaires</strong> :
+                        <ul>
+                            <li>↑ masse VG (hypertrophie excentrique physiologique)</li>
+                            <li>↑ VES (↑ précharge + ↑ contractilité)</li>
+                            <li>Bradycardie repos (↑ tonus parasympathique)</li>
+                            <li>↑ volémie (+15-20%), ↑ masse Hb</li>
+                            <li>↑ densité capillaire myocardique</li>
+                        </ul>
+                    </li>
+                    <li><strong>Adaptations musculaires</strong> :
+                        <ul>
+                            <li>↑↑ densité mitochondriale (+40-100% en 6 mois)</li>
+                            <li>↑ enzymes oxydatives (citrate synthase, succinate déshydrogénase)</li>
+                            <li>↑ capillarisation (+15-20% densité capillaires)</li>
+                            <li>↑ myoglobine (↑ O₂ diffusion intracellulaire)</li>
+                            <li>↑ stocks glycogène musculaire (+50-100%)</li>
+                            <li>↑ activité lipoprotéine lipase (↑ utilisation lipides)</li>
+                            <li>Conversion fibres IIx → IIa (pas vers Type I)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Adaptations métaboliques</strong> :
+                        <ul>
+                            <li>↑ seuil lactique (production retardée + clearance améliorée)</li>
+                            <li>↑ économie substrat (↑ utilisation lipides intensités submaxes)</li>
+                            <li>↑ sensibilité insuline</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><strong>Surcharge et récupération :</strong></p>
+                <ul>
+                    <li><strong>Principes adaptation</strong> : stress (entraînement) → fatigue → récupération → surcompensation (adaptation)</li>
+                    <li><strong>Syndrome surentraînement</strong> : déséquilibre stress/récupération prolongé
+                        <ul>
+                            <li>Formes : surentraînement sympathique (↑ agressivité, insomnie, ↑ FC repos) vs parasympathique (↓ performance, ↓ FC effort, fatigue)</li>
+                            <li>Marqueurs : ↓ HRV, ↑ cortisol/testostérone ratio, perturbations immunitaires</li>
+                            <li>Traitement : repos complet semaines-mois</li>
+                        </ul>
+                    </li>
+                    <li><strong>Fenêtre métabolique</strong> : 30-120 min post-effort
+                        <ul>
+                            <li>↑ sensibilité insuline, ↑ captation glucides</li>
+                            <li>↑ synthèse protéique musculaire (si apports protéines)</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4>📚 Maîtrise attendue du kinésithérapeute - Niveau Expert</h4>
+                <p><strong>Compétences cliniques avancées :</strong></p>
+                <ul>
+                    <li><strong>Analyse physiologique intégrée</strong> : identifier facteurs limitants performance (central vs périphérique, cardiovasculaire vs respiratoire vs musculaire)</li>
+                    <li><strong>Interprétation épreuves effort</strong> : VO₂max, seuils ventilatoires, cinétique VO₂, économie geste</li>
+                    <li><strong>Prescription individualisée</strong> : intensité (zones FC, puissance, allure), volume, fréquence selon pathologie et objectif</li>
+                    <li><strong>Périodisation entraînement</strong> : macrocycles, mésocycles, microcycles, gestion fatigue/forme</li>
+                    <li><strong>Pathophysiologie</strong> : comprendre cascade physiopathologique (IC, BPCO, diabète, obésité, etc.) pour adapter programme</li>
+                    <li><strong>Pharmacologie appliquée</strong> : effets médicaments sur réponse effort (β-bloquants, diurétiques, bronchodilatateurs, etc.)</li>
+                    <li><strong>Évaluation neurologique</strong> : tonus, force, coordination, sensibilité, réflexes → localisation lésion</li>
+                    <li><strong>Raisonnement clinique</strong> : hypothético-déductif, reconnaissance patterns, décision basée preuves</li>
+                </ul>
+
+                <p><strong>Références incontournables :</strong></p>
+                <ul>
+                    <li>Guyton & Hall - Textbook of Medical Physiology</li>
+                    <li>West - Respiratory Physiology: The Essentials</li>
+                    <li>Levick - An Introduction to Cardiovascular Physiology</li>
+                    <li>Widmaier - Vander's Human Physiology</li>
+                    <li>Åstrand & Rodahl - Textbook of Work Physiology</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- FLASHCARDS -->
+        <div id="flashcards" class="content">
+            <h2>Flashcards Physiologie</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCards">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="knownCards">0</div>
+                    <div class="stat-label">Je gère</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="hesitateCards">0</div>
+                    <div class="stat-label">Hésitant</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="unknownCards">0</div>
+                    <div class="stat-label">Non su</div>
+                </div>
+            </div>
+
+            <div class="flashcard-controls">
+                <button onclick="startFlashcards('all')">Toutes les cartes</button>
+                <button onclick="startFlashcards('difficult')">Hésitant + Non su</button>
+                <button onclick="startFlashcards('unknown')">Non su uniquement</button>
+                <button onclick="saveProgress()">💾 Sauvegarder</button>
+                <button onclick="loadProgress()">📂 Charger</button>
+                <button onclick="exportProgress()">⬇️ Exporter</button>
+                <input type="file" id="importFile" style="display:none" onchange="importProgress(event)">
+                <button onclick="document.getElementById('importFile').click()">⬆️ Importer</button>
+                <button onclick="resetProgress()">🔄 Réinitialiser</button>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%">0/0</div>
+            </div>
+
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <div class="flashcard-text" id="flashcardText">Cliquez sur "Démarrer" pour commencer</div>
+                <div class="flashcard-buttons" id="flashcardButtons" style="display: none;">
+                    <button class="btn-know" onclick="event.stopPropagation(); markCard('known')">✓ Je gère</button>
+                    <button class="btn-hesitate" onclick="event.stopPropagation(); markCard('hesitate')">? Hésitant</button>
+                    <button class="btn-unknown" onclick="event.stopPropagation(); markCard('unknown')">✗ Non su</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="content">
+            <h2>Quiz Physiologie</h2>
+            
+            <div class="quiz-controls">
+                <button onclick="startQuiz()">🎲 Lancer le Quiz</button>
+                <button onclick="showQuizAnswer()">👁️ Voir la réponse</button>
+                <button onclick="nextQuizQuestion()">➡️ Question suivante</button>
+            </div>
+
+            <div id="quizContainer"></div>
+        </div>
+
+        <!-- QCM -->
+        <div id="qcm" class="content">
+            <h2>QCM Physiologie</h2>
+            
+            <div class="quiz-controls">
+                <button onclick="startQCM()">🎲 Lancer le QCM</button>
+                <button onclick="submitQCM()">✓ Valider mes réponses</button>
+                <button onclick="nextQCM()">➡️ QCM suivant</button>
+            </div>
+
+            <div id="qcmContainer"></div>
+            <div id="qcmScore"></div>
+        </div>
+
+        <!-- VRAI/FAUX -->
+        <div id="vraifaux" class="content">
+            <h2>Vrai ou Faux - Physiologie</h2>
+            
+            <div class="quiz-controls">
+                <button onclick="startVraiFaux()">🎲 Lancer Vrai/Faux</button>
+                <button onclick="checkVraiFaux()">✓ Vérifier</button>
+                <button onclick="nextVraiFaux()">➡️ Question suivante</button>
+            </div>
+
+            <div id="vraiFauxContainer"></div>
+        </div>
+
+        <!-- EXERCICES -->
+        <div id="exercices" class="content">
+            <h2>Exercices Pratiques</h2>
+            
+            <div class="exercise" id="exercise1">
+                <h4>Exercice 1 : Calcul du débit cardiaque</h4>
+                <p>Un patient a une fréquence cardiaque de 75 bpm et un volume d'éjection systolique de 70 mL. Calculez son débit cardiaque.</p>
+                <textarea id="answer1" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(1)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(1)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help1">
+                    <strong>💡 Aide :</strong> Rappelez-vous la formule du débit cardiaque : Q = FC × VES. N'oubliez pas de convertir les unités si nécessaire.
+                </div>
+                <div class="correction-box" id="correction1">
+                    <strong>✓ Correction proposée :</strong><br>
+                    Q = FC × VES<br>
+                    Q = 75 bpm × 70 mL<br>
+                    Q = 5250 mL/min = 5,25 L/min<br><br>
+                    Le débit cardiaque normal au repos est d'environ 5 L/min. Ce patient présente donc un débit cardiaque normal.
+                </div>
+            </div>
+
+            <div class="exercise" id="exercise2">
+                <h4>Exercice 2 : Cas clinique - Dyspnée à l'effort</h4>
+                <p>Madame Dupont, 65 ans, consulte pour une dyspnée d'effort. Elle s'essouffle en montant un étage. Quels systèmes physiologiques devez-vous évaluer et pourquoi ?</p>
+                <textarea id="answer2" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(2)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(2)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help2">
+                    <strong>💡 Aide :</strong> Pensez aux systèmes impliqués dans l'apport d'oxygène aux muscles lors de l'effort. Réfléchissez à la chaîne complète : de l'entrée d'air jusqu'à l'utilisation de l'O₂ par les muscles.
+                </div>
+                <div class="correction-box" id="correction2">
+                    <strong>✓ Correction proposée :</strong><br>
+                    <strong>1. Système respiratoire :</strong> Évaluer la fonction ventilatoire (capacités pulmonaires, fréquence respiratoire, saturation en O₂). Rechercher une pathologie obstructive ou restrictive.<br><br>
+                    <strong>2. Système cardiovasculaire :</strong> Évaluer la fonction cardiaque (fréquence cardiaque, pression artérielle, débit cardiaque). Rechercher une insuffisance cardiaque ou une pathologie valvulaire.<br><br>
+                    <strong>3. Système musculaire :</strong> Évaluer la force et l'endurance musculaire. Un déconditionnement peut augmenter la demande en O₂ pour un même effort.<br><br>
+                    <strong>4. Système sanguin :</strong> Vérifier l'hémoglobine (capacité de transport de l'O₂). Une anémie peut causer une dyspnée d'effort.<br><br>
+                    L'approche kinésithérapique inclura une évaluation complète, puis un programme adapté de réentraînement à l'effort si indiqué.
+                </div>
+            </div>
+
+            <div class="exercise" id="exercise3">
+                <h4>Exercice 3 : Physiologie de l'exercice</h4>
+                <p>Expliquez ce qui se passe au niveau physiologique lorsqu'un patient passe d'une position allongée à une position debout (réflexe orthostatique).</p>
+                <textarea id="answer3" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(3)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(3)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help3">
+                    <strong>💡 Aide :</strong> Pensez à l'effet de la gravité sur le sang et aux mécanismes de compensation mis en place par le système nerveux autonome pour maintenir la pression artérielle.
+                </div>
+                <div class="correction-box" id="correction3">
+                    <strong>✓ Correction proposée :</strong><br>
+                    <strong>1. Changement initial :</strong> Lors du passage en position debout, environ 500-700 mL de sang sont redistribués vers les membres inférieurs par gravité. Cela réduit le retour veineux vers le cœur.<br><br>
+                    <strong>2. Détection :</strong> Les barorécepteurs aortiques et carotidiens détectent la baisse de pression artérielle.<br><br>
+                    <strong>3. Réponse autonome :</strong><br>
+                    - Activation sympathique : augmentation de la fréquence cardiaque (+10-15 bpm), augmentation de la contractilité myocardique, vasoconstriction périphérique<br>
+                    - Inhibition parasympathique<br><br>
+                    <strong>4. Résultat :</strong> Maintien de la pression artérielle et de la perfusion cérébrale. Temps de réponse : 1-3 secondes.<br><br>
+                    <strong>Implications en kiné :</strong> Chez certains patients (alités prolongés, personnes âgées, pathologies neurologiques), ce mécanisme peut être défaillant → hypotension orthostatique → risque de chute. Il faut alors lever le patient progressivement.
+                </div>
+            </div>
+
+            <div class="exercise" id="exercise4">
+                <h4>Exercice 4 : Analyse d'un test d'effort</h4>
+                <p>Un patient de 50 ans effectue un test d'effort. Ses données :<br>
+                - FC repos : 70 bpm<br>
+                - FC max atteinte : 165 bpm (FCmax théorique = 170 bpm)<br>
+                - VO₂ pic : 32 mL/kg/min<br>
+                - Seuil ventilatoire : 24 mL/kg/min (75% VO₂ pic)<br>
+                - PA repos : 130/85 mmHg, PA effort max : 190/90 mmHg<br><br>
+                Analysez ces résultats et proposez des intensités d'entraînement.</p>
+                <textarea id="answer4" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(4)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(4)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help4">
+                    <strong>💡 Aide :</strong> Comparez VO₂ pic aux normes (35-40 pour sédentaire), analysez la FC (réserve cardiaque), évaluez le seuil ventilatoire (bon si >50% VO₂ pic), vérifiez la PA. Pour la prescription : zone aérobie = 60-85% VO₂ pic ou 60-80% FC réserve.
+                </div>
+                <div class="correction-box" id="correction4">
+                    <strong>✓ Correction proposée :</strong><br>
+                    <strong>1. Capacité aérobie :</strong> VO₂ pic = 32 mL/kg/min → légèrement sous la norme pour un sédentaire (35-40). Capacité fonctionnelle faible. Marge de progression importante.<br><br>
+                    <strong>2. Réponse cardiaque :</strong> FC max = 165/170 (97% théorique) → bon effort maximal. Réserve de FC = 165-70 = 95 bpm. Réponse chronotrope normale.<br><br>
+                    <strong>3. Seuil ventilatoire :</strong> 24 mL/kg/min (75% VO₂ pic) → excellent ! Signifie bonne efficacité aérobie. Le patient peut travailler longtemps en zone aérobie.<br><br>
+                    <strong>4. PA :</strong> Repos limite haute (130/85 → pré-hypertension). À l'effort : augmentation normale de la PAS, PAD stable (bon). Surveiller évolution.<br><br>
+                    <strong>5. Prescription d'entraînement :</strong><br>
+                    - Zone endurance (60-75% VO₂ pic) : 19-24 mL/kg/min ou FC 127-141 bpm → 30-45 min, 3-4×/sem<br>
+                    - Zone seuil (75-85% VO₂ pic) : 24-27 mL/kg/min ou FC 141-151 bpm → intervalles 3-5 min, 1-2×/sem<br>
+                    - Objectif : améliorer VO₂ max de 15-20% en 3 mois, surveiller PA
+                </div>
+            </div>
+
+            <div class="exercise" id="exercise5">
+                <h4>Exercice 5 : Cas BPCO avec désaturation</h4>
+                <p>Monsieur Martin, 68 ans, BPCO sévère (VEMS 40% théorique). Au repos : SpO₂ 92%, FR 22/min. En marche (50m) : SpO₂ chute à 85%, dyspnée intense, FR 32/min.<br><br>
+                Expliquez les mécanismes physiopathologiques de cette désaturation à l'effort et proposez une approche de réentraînement adaptée.</p>
+                <textarea id="answer5" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(5)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(5)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help5">
+                    <strong>💡 Aide :</strong> BPCO → destruction alvéoles (↓surface échange) + obstruction bronches (↑résistance). À l'effort : ↑demande O₂ mais le système est limité. Pensez aussi au temps de transit capillaire réduit à l'effort. Pour le réentraînement : oxygène si SpO₂ <88%, intervalles courts, récupération longue.
+                </div>
+                <div class="correction-box" id="correction5">
+                    <strong>✓ Correction proposée :</strong><br>
+                    <strong>Mécanismes physiopathologiques :</strong><br>
+                    1. <strong>Destruction parenchyme pulmonaire :</strong> emphysème → ↓surface d'échange alvéolaire → ↓capacité de diffusion (DLCO diminuée)<br>
+                    2. <strong>Déséquilibres V̇/Q̇ :</strong> zones mal ventilées mais perfusées (shunt physiologique) → hypoxémie<br>
+                    3. <strong>Limitation diffusion à l'effort :</strong> ↑débit cardiaque → ↓temps transit capillaire (<0,5 sec) → équilibration O₂ incomplète<br>
+                    4. <strong>Hyperinflation dynamique :</strong> piégeage aérien → ↑travail respiratoire → ↑consommation O₂ muscles respiratoires → moins d'O₂ pour muscles locomoteurs<br>
+                    5. <strong>Hypoventilation relative :</strong> obstruction bronchique → ↑résistances → ventilation inefficace malgré ↑FR<br><br>
+                    <strong>Approche de réentraînement :</strong><br>
+                    1. <strong>Oxygénothérapie effort :</strong> si SpO₂ <88% → O₂ 2-4 L/min pour maintenir SpO₂ >90%<br>
+                    2. <strong>Entraînement intermittent :</strong> 30 sec effort / 1-2 min récup (ratio 1:2 ou 1:3), mieux toléré que continu<br>
+                    3. <strong>Intensité modérée :</strong> 50-70% capacité max, monitorer SpO₂ en continu<br>
+                    4. <strong>Techniques respiratoires :</strong> expiration lèvres pincées (↓collapsus bronchique), respiration diaphragmatique<br>
+                    5. <strong>Renforcement périphérique :</strong> quadriceps+++ (corrélation avec capacité fonctionnelle en BPCO)<br>
+                    6. <strong>Désensibilisation dyspnée :</strong> exposition progressive, techniques relaxation<br>
+                    7. <strong>Surveillance :</strong> SpO₂, dyspnée (Borg), FC, arrêt si SpO₂ <85% malgré O₂
+                </div>
+            </div>
+
+            <div class="exercise" id="exercise6">
+                <h4>Exercice 6 : Optimisation performance sportive</h4>
+                <p>Athlète féminine, 28 ans, triathlète, prépare Ironman (3,8 km natation + 180 km vélo + 42 km course). Données test :<br>
+                - VO₂max : 58 mL/kg/min<br>
+                - Seuil lactique : 48 mL/kg/min (83% VO₂max)<br>
+                - FC max : 192 bpm, FC seuil : 165 bpm<br>
+                - Durée prévisionnelle course : 11-12h<br><br>
+                Analysez les systèmes énergétiques sollicités et proposez une stratégie de préparation physiologique (entraînement + nutrition).</p>
+                <textarea id="answer6" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(6)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(6)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help6">
+                    <strong>💡 Aide :</strong> 11-12h d'effort = quasi exclusivement aérobie. Problèmes : déplétion glycogène après 2-3h (store limité), déshydratation, thermorégulation. Solutions : entraînement volume (↑mitochondries, ↑utilisation lipides), nutrition périodique, acclimatation chaleur si besoin.
+                </div>
+                <div class="correction-box" id="correction6">
+                    <strong>✓ Correction proposée :</strong><br>
+                    <strong>Analyse systèmes énergétiques :</strong><br>
+                    1. <strong>Prédominance aérobie absolue :</strong> 11-12h = 100% métabolisme oxydatif<br>
+                    2. <strong>Intensité course :</strong> ~65-75% VO₂max (sous seuil lactique) pour tenir la distance<br>
+                    3. <strong>Problématique énergétique :</strong><br>
+                    - Coût énergétique total : ~8000-9000 kcal<br>
+                    - Stocks glucides : glycogène musculaire 500g + hépatique 100g = ~2400 kcal → épuisement après 3-4h si pas d'apports<br>
+                    - Lipides : réserves quasi-illimitées mais oxydation plus lente (besoin O₂++)<br><br>
+                    <strong>Stratégie entraînement :</strong><br>
+                    1. <strong>Volume aérobie :</strong> 15-20h/semaine, sorties longues 4-6h (↑densité mitochondriale, ↑enzymes oxydatives, ↑capillarisation)<br>
+                    2. <strong>Entraînement "fat-adapted" :</strong> certaines séances longues à jeun ou low-carb → ↑utilisation lipides → épargne glycogène<br>
+                    3. <strong>Travail au seuil :</strong> 1-2×/sem, tempo 60-90 min à 75-85% VO₂max → repousse seuil lactique<br>
+                    4. <strong>Spécificité enchaînements :</strong> brick sessions (vélo→course) → adaptation neuromusculaire<br>
+                    5. <strong>Thermorégulation :</strong> si course en climat chaud → acclimatation 10-14j (↑volume plasmatique +10-15%, ↑capacité sudation)<br><br>
+                    <strong>Stratégie nutritionnelle :</strong><br>
+                    1. <strong>Pré-course :</strong> carb-loading 3j avant (8-10 g glucides/kg/j) → saturation stocks glycogène (+50-100%)<br>
+                    2. <strong>Pendant course :</strong><br>
+                    - Glucides : 60-90 g/h dès le début (mix glucose+fructose pour absorption optimale)<br>
+                    - Hydratation : 400-800 mL/h selon sudation, électrolytes (Na⁺ 500-700 mg/L)<br>
+                    - Entraîner le système digestif à l'effort (tolérance)<br>
+                    3. <strong>Récupération :</strong> 1,2 g protéines/kg/j + glucides dans fenêtre 2h post-effort<br><br>
+                    <strong>Monitoring :</strong> HRV quotidienne (fatigue), lactate tests mensuels, composition corporelle (% masse grasse optimale ~15-18% pour endurance féminine)
+                </div>
+            </div>
+        </div>
+
+        <!-- DEFINITIONS -->
+        <div id="definitions" class="content">
+            <h2>Définitions à connaître</h2>
+
+            <div class="definition-card">
+                <h4>Homéostasie</h4>
+                <p>Capacité d'un organisme à maintenir un état d'équilibre interne stable malgré les variations de l'environnement externe. Exemples : régulation de la température corporelle (37°C), du pH sanguin (7,35-7,45), de la glycémie (0,7-1,1 g/L), de la pression artérielle.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Débit cardiaque (Q)</h4>
+                <p>Volume de sang éjecté par le cœur par unité de temps. Exprimé en L/min. Formule : Q = FC × VES. Au repos chez l'adulte : environ 5 L/min. Peut atteindre 20-30 L/min à l'effort maximal chez un athlète.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Volume d'éjection systolique (VES)</h4>
+                <p>Volume de sang éjecté par le ventricule gauche à chaque contraction. Environ 70 mL au repos chez l'adulte sédentaire. Peut augmenter jusqu'à 120-140 mL à l'effort chez un athlète entraîné. Principal déterminant de l'adaptation cardiovasculaire à l'entraînement.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Précharge</h4>
+                <p>Étirement ou tension de la paroi ventriculaire en fin de diastole (avant contraction). Déterminée par le retour veineux. Plus la précharge est élevée, plus la contraction sera forte selon la loi de Frank-Starling. Approximativement égale au volume télédiastolique ventriculaire.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Postcharge</h4>
+                <p>Résistance que le ventricule doit vaincre pour éjecter le sang. Pour le ventricule gauche, approximativement égale à la pression artérielle. Une augmentation de la postcharge diminue le volume d'éjection systolique. Augmentée en hypertension artérielle.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Loi de Frank-Starling</h4>
+                <p>Principe selon lequel la force de contraction du myocarde est proportionnelle à l'étirement initial des fibres musculaires cardiaques. Mécanisme intrinsèque d'ajustement : plus le cœur est rempli en diastole (↑précharge), plus il éjecte de sang en systole (↑VES). Résulte de l'optimisation du chevauchement actine-myosine.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Baroréflexe</h4>
+                <p>Mécanisme réflexe de régulation rapide de la pression artérielle. Les barorécepteurs (aorte, carotides) détectent les variations de PA et ajustent l'activité du système nerveux autonome. Si PA↓ : activation sympathique (↑FC, vasoconstriction). Si PA↑ : activation parasympathique (↓FC, vasodilatation).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Ventilation alvéolaire (V̇A)</h4>
+                <p>Volume d'air frais atteignant les alvéoles pulmonaires par minute et participant réellement aux échanges gazeux. Formule : V̇A = (VT - VD) × f, où VT = volume courant, VD = espace mort anatomique (~150 mL), f = fréquence respiratoire. Plus importante que la ventilation minute pour l'efficacité respiratoire.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Espace mort anatomique</h4>
+                <p>Volume des voies aériennes conductrices qui ne participent pas aux échanges gazeux (nez, trachée, bronches). Environ 150 mL chez l'adulte, soit 1/3 du volume courant au repos. Ce volume est ventilé mais pas perfusé (V̇/Q̇ = ∞).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Compliance pulmonaire (C)</h4>
+                <p>Mesure de la distensibilité (capacité d'étirement) des poumons. Formule : C = ΔVolume / ΔPression. Normale : ~200 mL/cmH₂O. Diminuée dans les maladies restrictives (fibrose, œdème) → poumons "rigides". Augmentée dans l'emphysème (destruction élastine) → poumons "flasques".</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Rapport ventilation/perfusion (V̇/Q̇)</h4>
+                <p>Rapport entre la ventilation alvéolaire et le débit sanguin pulmonaire. Optimal : 0,8-1,0. Hétérogène dans le poumon (apex : V̇/Q̇ élevé, base : V̇/Q̇ bas). Si V̇/Q̇ = 0 (shunt) : sang perfuse mais pas ventilé → hypoxémie. Si V̇/Q̇ = ∞ : ventilé mais pas perfusé → espace mort.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>VO₂max</h4>
+                <p>Consommation maximale d'oxygène. Représente la capacité maximale de l'organisme à transporter et utiliser l'oxygène pendant un effort. Exprimée en mL/kg/min. Valeurs : 35-40 (sédentaire) vs 70-90 (athlète élite). Meilleur indicateur de la capacité aérobie. Déterminée par les capacités cardiovasculaire, respiratoire et musculaire.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Seuil anaérobie (seuil lactique)</h4>
+                <p>Intensité d'exercice au-delà de laquelle la production de lactate dépasse sa clearance, entraînant son accumulation dans le sang. Correspond au moment où le métabolisme anaérobie devient significatif. Généralement situé entre 50-85% de la VO₂max selon l'entraînement. Important pour la prescription d'exercice.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Effet Bohr</h4>
+                <p>Phénomène par lequel l'acidité (↓pH), l'hypercapnie (↑CO₂) et l'hyperthermie (↑température) diminuent l'affinité de l'hémoglobine pour l'oxygène. Courbe de dissociation Hb-O₂ déplacée vers la droite. Avantage physiologique : facilite la libération d'O₂ dans les tissus métaboliquement actifs (muscles à l'effort) qui produisent justement plus de CO₂, H⁺ et chaleur.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Effet Haldane</h4>
+                <p>Phénomène selon lequel l'hémoglobine désoxygénée a une plus grande affinité pour le CO₂ que l'hémoglobine oxygénée. Conséquence : au niveau des tissus, l'Hb déchargée en O₂ capte mieux le CO₂ ; au niveau pulmonaire, l'Hb oxygénée libère le CO₂ qui sera expiré. Optimise ainsi le transport bidirectionnel des gaz.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Sarcomère</h4>
+                <p>Unité contractile de base du muscle strié squelettique et cardiaque. S'étend d'une ligne Z à la suivante. Contient des filaments fins (actine) et épais (myosine) dont l'interaction produit le raccourcissement musculaire. Longueur optimale : 2,0-2,2 μm (meilleur chevauchement actine-myosine). Raccourcit lors de la contraction (théorie des filaments glissants).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>ATP (Adénosine Triphosphate)</h4>
+                <p>Molécule énergétique universelle de la cellule. Seule source d'énergie directement utilisable pour la contraction musculaire. Hydrolyse : ATP → ADP + Pi + énergie. Stocks musculaires très limités (~5 mmol/kg), épuisés en 2-3 secondes d'effort maximal. Doit être constamment régénéré par les 3 systèmes énergétiques (phosphagène, glycolytique, oxydatif).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Créatine Phosphate (PCr)</h4>
+                <p>Réserve d'énergie immédiatement disponible dans le muscle. Permet la régénération rapide de l'ATP : PCr + ADP → Créatine + ATP (créatine kinase). Stocks : ~120 mmol/kg muscle. Système le plus rapide mais limité : épuisé en 10-15 secondes d'effort maximal. Reconstitution : 50% en 30 sec, complète en 3-5 min (nécessite O₂).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Fibres musculaires Type I (lentes oxydatives)</h4>
+                <p>Fibres à contraction lente, très résistantes à la fatigue. Caractéristiques : nombreuses mitochondries, haute capillarisation, myoglobine abondante (aspect rouge), métabolisme aérobie, faible puissance mais endurance élevée. Recrutées en premier (principe Henneman). Sollicitées dans les efforts prolongés de faible à moyenne intensité (marathon, posture).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Fibres musculaires Type II (rapides)</h4>
+                <p>Fibres à contraction rapide. Deux sous-types : Type IIa (oxydatives-glycolytiques, résistance modérée) et Type IIx (glycolytiques pures, fatigue rapide). Caractéristiques : peu de mitochondries, faible capillarisation, métabolisme anaérobie, haute puissance mais endurance limitée. Recrutées lors d'efforts intenses (sprint, sauts, force maximale).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Unité motrice</h4>
+                <p>Ensemble constitué d'un motoneurone alpha et toutes les fibres musculaires qu'il innerve. Unité fonctionnelle du contrôle moteur : loi du tout-ou-rien. Taille variable : petites UM (20-100 fibres, muscles fins) vs grandes UM (>1000 fibres, muscles puissants). Toutes les fibres d'une UM sont du même type.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Principe de Henneman</h4>
+                <p>Principe de recrutement ordonné des unités motrices selon leur taille : lors d'une contraction volontaire progressive, les petites UM (Type I, faible force) sont recrutées en premier, puis les UM de taille croissante (Type IIa, Type IIx). Ordre inverse lors de la fatigue (grandes UM abandonnent en premier). Mécanisme : les petits motoneurones ont un seuil d'excitation plus bas.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Potentiel d'action</h4>
+                <p>Signal électrique rapide et transitoire qui se propage le long de la membrane excitable (neurone, muscle). Durée : 1-2 ms (neurone). Phases : dépolarisation (entrée Na⁺, -70 mV → +30 mV), repolarisation (sortie K⁺, retour à -70 mV). Loi du tout-ou-rien : amplitude constante. Période réfractaire : empêche propagation rétrograde. Vitesse : 0,5-120 m/s selon myélinisation.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Proprioception</h4>
+                <p>Sens de la position et du mouvement du corps et des segments corporels dans l'espace, indépendamment de la vision. Assurée par des mécanorécepteurs : fuseaux neuromusculaires (étirement musculaire), organes tendineux de Golgi (tension), récepteurs articulaires (position, mouvement), récepteurs cutanés. Essentielle pour l'équilibre, la coordination motrice et la prévention des blessures.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Fuseaux neuromusculaires</h4>
+                <p>Récepteurs sensoriels situés dans le muscle (parallèles aux fibres), sensibles à l'étirement. Rôles : (1) informent le SNC sur la longueur et la vitesse d'étirement du muscle (proprioception), (2) déclenchent le réflexe myotatique d'étirement (contraction réflexe du muscle étiré pour le protéger). Innervés par fibres Ia (rapides) et II (lentes).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Organes tendineux de Golgi</h4>
+                <p>Récepteurs sensoriels situés dans les tendons (en série avec les fibres musculaires), sensibles à la tension. Rôles : (1) informent sur la force de contraction, (2) déclenchent le réflexe myotatique inverse (relaxation du muscle si tension excessive pour protéger le tendon de la rupture). Innervés par fibres Ib. Seuil d'activation élevé (protection).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Plasticité neuronale</h4>
+                <p>Capacité du système nerveux à modifier sa structure et son fonctionnement en réponse à l'expérience, l'apprentissage ou une lésion. Mécanismes : potentialisation/dépression à long terme (LTP/LTD), synaptogenèse, sprouting axonal, réorganisation des cartes corticales, neurogenèse (limitée). Maximale dans l'enfance mais présente toute la vie. Fondamentale pour l'apprentissage moteur et la récupération post-AVC.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Myoglobine</h4>
+                <p>Protéine similaire à l'hémoglobine, présente dans les muscles. Fonctions : (1) stockage local d'oxygène (~4 mL O₂/kg muscle), (2) facilite la diffusion de l'O₂ du capillaire vers les mitochondries. Affinité pour O₂ supérieure à l'hémoglobine. Concentration élevée dans les fibres Type I (aspect rouge foncé). Augmente avec l'entraînement en endurance.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Surfactant pulmonaire</h4>
+                <p>Mélange de phospholipides (90%, principalement dipalmitoyl phosphatidylcholine) et protéines (10%) sécrété par les pneumocytes de type II. Fonctions : diminue la tension superficielle alvéolaire → (1) augmente la compliance pulmonaire (facilite l'inspiration), (2) prévient l'atélectasie (collapsus alvéolaire en fin d'expiration), (3) égalise les pressions entre petites et grandes alvéoles (loi de Laplace : P = 2T/r).</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Hypotension orthostatique</h4>
+                <p>Chute anormale de la pression artérielle lors du passage en position debout. Définition : baisse ≥20 mmHg PAS ou ≥10 mmHg PAD dans les 3 minutes suivant le lever. Causes : échec du baroréflexe (âge, déconditionnement, neuropathie, médicaments). Symptômes : vertiges, vision trouble, malaise, risque de chute. Prise en charge kinésithérapique : lever progressif, exercices de pompe musculaire, renforcement des mollets.</p>
+            </div>
+        </div>
+
+        <!-- FORMULES -->
+        <div id="formules" class="content">
+            <h2>Formules à connaître par cœur</h2>
+
+            <div class="formula-box">
+                <h4>Débit Cardiaque</h4>
+                <div class="formula">Q = FC × VES</div>
+                <p>Q : Débit cardiaque (L/min)<br>
+                FC : Fréquence cardiaque (bpm)<br>
+                VES : Volume d'éjection systolique (mL)</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Pression Artérielle Moyenne</h4>
+                <div class="formula">PAM = (PAS + 2×PAD) / 3</div>
+                <p>PAM : Pression artérielle moyenne (mmHg)<br>
+                PAS : Pression artérielle systolique<br>
+                PAD : Pression artérielle diastolique</p>
+                <p style="margin-top:10px;"><strong>Alternative :</strong> PAM = PAD + 1/3(PAS - PAD)</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Relation PAM - Débit - Résistance</h4>
+                <div class="formula">PAM = Q × RVP</div>
+                <p>PAM : Pression artérielle moyenne<br>
+                Q : Débit cardiaque<br>
+                RVP : Résistance vasculaire périphérique</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Ventilation Minute</h4>
+                <div class="formula">V̇E = VT × f</div>
+                <p>V̇E : Ventilation minute (L/min)<br>
+                VT : Volume courant (mL)<br>
+                f : Fréquence respiratoire (cycles/min)</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Ventilation Alvéolaire</h4>
+                <div class="formula">V̇A = (VT - VD) × f</div>
+                <p>V̇A : Ventilation alvéolaire (L/min)<br>
+                VT : Volume courant (mL)<br>
+                VD : Espace mort anatomique (mL)<br>
+                f : Fréquence respiratoire (cycles/min)</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Contenu Artériel en Oxygène</h4>
+                <div class="formula">CaO₂ = (1,34 × [Hb] × SaO₂) + (0,003 × PaO₂)</div>
+                <p>CaO₂ : Contenu artériel en O₂ (mL O₂/dL sang)<br>
+                Hb : Hémoglobine (g/dL)<br>
+                SaO₂ : Saturation artérielle en O₂ (%)<br>
+                PaO₂ : Pression partielle artérielle en O₂ (mmHg)<br>
+                1,34 : capacité de transport de l'Hb (mL O₂/g Hb)<br>
+                0,003 : coefficient de solubilité de l'O₂</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Transport d'Oxygène</h4>
+                <div class="formula">DO₂ = Q × CaO₂</div>
+                <p>DO₂ : Livraison d'oxygène aux tissus (mL O₂/min)<br>
+                Q : Débit cardiaque (L/min)<br>
+                CaO₂ : Contenu artériel en O₂ (mL O₂/dL)</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Loi de Fick (Débit Cardiaque)</h4>
+                <div class="formula">Q = VO₂ / (CaO₂ - CvO₂)</div>
+                <p>Q : Débit cardiaque (L/min)<br>
+                VO₂ : Consommation d'oxygène (mL/min)<br>
+                CaO₂ : Contenu artériel en O₂<br>
+                CvO₂ : Contenu veineux mêlé en O₂</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Loi de Fick (Diffusion)</h4>
+                <div class="formula">V̇gas = (A/T) × D × (P₁ - P₂)</div>
+                <p>V̇gas : Débit de diffusion du gaz<br>
+                A : Surface d'échange<br>
+                T : Épaisseur de la membrane<br>
+                D : Coefficient de diffusion du gaz<br>
+                (P₁ - P₂) : Différence de pression partielle</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Équation des Gaz Alvéolaires</h4>
+                <div class="formula">PAO₂ = FiO₂(Patm - PH₂O) - PACO₂/R</div>
+                <p>PAO₂ : Pression alvéolaire en O₂ (mmHg)<br>
+                FiO₂ : Fraction inspirée en O₂ (0,21 à l'air ambiant)<br>
+                Patm : Pression atmosphérique (760 mmHg au niveau de la mer)<br>
+                PH₂O : Pression de vapeur d'eau saturée (47 mmHg à 37°C)<br>
+                PACO₂ : Pression alvéolaire en CO₂ (~40 mmHg)<br>
+                R : Quotient respiratoire (~0,8)</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Gradient Alvéolo-Artériel en O₂</h4>
+                <div class="formula">P(A-a)O₂ = PAO₂ - PaO₂</div>
+                <p>P(A-a)O₂ : Gradient alvéolo-artériel<br>
+                Normal : <15 mmHg chez l'adulte jeune<br>
+                Augmente avec l'âge et les pathologies pulmonaires</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Compliance Pulmonaire</h4>
+                <div class="formula">C = ΔV / ΔP</div>
+                <p>C : Compliance (mL/cmH₂O)<br>
+                ΔV : Variation de volume<br>
+                ΔP : Variation de pression<br>
+                Normale : ~200 mL/cmH₂O</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Fréquence Cardiaque Maximale Théorique</h4>
+                <div class="formula">FCmax = 220 - âge</div>
+                <p>Formule simplifiée pour estimer la fréquence cardiaque maximale théorique (bpm)<br>
+                Variabilité individuelle : ±10-15 bpm</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Fréquence Cardiaque Cible (Karvonen)</h4>
+                <div class="formula">FC cible = FC repos + %intensité × (FCmax - FC repos)</div>
+                <p>Méthode de Karvonen pour calculer les zones d'entraînement<br>
+                Utilise la réserve de fréquence cardiaque<br>
+                Plus précise que le simple %FCmax</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Loi de Poiseuille</h4>
+                <div class="formula">Q = (π × ΔP × r⁴) / (8 × η × L)</div>
+                <p>Q : Débit sanguin<br>
+                ΔP : Différence de pression<br>
+                r : Rayon du vaisseau (TRÈS IMPORTANT : r⁴ !)<br>
+                η : Viscosité du sang<br>
+                L : Longueur du vaisseau<br>
+                <strong>Implication clinique :</strong> Doubler le rayon multiplie le débit par 16 !</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Loi de Laplace (Tension Pariétale)</h4>
+                <div class="formula">T = P × r</div>
+                <p>T : Tension pariétale<br>
+                P : Pression transmurale<br>
+                r : Rayon<br>
+                Application : ventricule, alvéoles, vaisseaux</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Indice de Masse Corporelle</h4>
+                <div class="formula">IMC = Poids / Taille²</div>
+                <p>Poids en kg<br>
+                Taille en mètres<br>
+                IMC exprimé en kg/m²<br>
+                Normal : 18,5 - 24,9 kg/m²</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Quotient Respiratoire</h4>
+                <div class="formula">QR = VCO₂ / VO₂</div>
+                <p>QR : Quotient respiratoire<br>
+                VCO₂ : Production de CO₂<br>
+                VO₂ : Consommation d'O₂<br>
+                Glucides : QR = 1,0<br>
+                Lipides : QR = 0,7<br>
+                Protéines : QR = 0,8<br>
+                QR >1,0 : seuil anaérobie dépassé</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Capacité Vitale</h4>
+                <div class="formula">CV = VT + VRI + VRE</div>
+                <p>CV : Capacité vitale (~4700 mL)<br>
+                VT : Volume courant (~500 mL)<br>
+                VRI : Volume de réserve inspiratoire (~3000 mL)<br>
+                VRE : Volume de réserve expiratoire (~1200 mL)</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Capacité Pulmonaire Totale</h4>
+                <div class="formula">CPT = CV + VR</div>
+                <p>CPT : Capacité pulmonaire totale (~5900 mL)<br>
+                CV : Capacité vitale (~4700 mL)<br>
+                VR : Volume résiduel (~1200 mL)</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== GESTION DES ONGLETS ==========
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // ========== GESTION DES NIVEAUX DE COURS ==========
+        function showLevel(level) {
+            const levels = document.querySelectorAll('.course-section');
+            const buttons = document.querySelectorAll('.level-btn');
+            
+            levels.forEach(l => l.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(level).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // ========== ANIMATIONS CANVAS ==========
+        let breathAnimationRunning = false;
+        let breathRate = 15;
+        let muscleAnimationRunning = false;
+        let muscleStimulus = 50;
+
+        function updateBreathRate(value) {
+            breathRate = value;
+            document.getElementById('breathRateValue').textContent = value;
+        }
+
+        function updateMuscleStimulus(value) {
+            muscleStimulus = value;
+            document.getElementById('muscleStimulusValue').textContent = value;
+        }
+
+        function toggleAnimation(type) {
+            if (type === 'breath') {
+                breathAnimationRunning = !breathAnimationRunning;
+                if (breathAnimationRunning) animateLungs();
+            } else if (type === 'muscle') {
+                muscleAnimationRunning = !muscleAnimationRunning;
+                if (muscleAnimationRunning) animateMuscle();
+            }
+        }
+
+        function animateLungs() {
+            const canvas = document.getElementById('lungCanvas');
+            const ctx = canvas.getContext('2d');
+            let phase = 0;
+
+            function draw() {
+                if (!breathAnimationRunning) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Poumons
+                const expansion = Math.sin(phase) * 30;
+                
+                // Poumon gauche
+                ctx.fillStyle = phase > Math.PI ? '#ff6b6b' : '#74c0fc';
+                ctx.beginPath();
+                ctx.ellipse(200, 200, 80 + expansion, 120 + expansion, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Poumon droit
+                ctx.beginPath();
+                ctx.ellipse(400, 200, 80 + expansion, 120 + expansion, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Trachée
+                ctx.fillStyle = '#495057';
+                ctx.fillRect(290, 50, 20, 100);
+                
+                // Bronches
+                ctx.beginPath();
+                ctx.moveTo(300, 150);
+                ctx.lineTo(200, 180);
+                ctx.moveTo(300, 150);
+                ctx.lineTo(400, 180);
+                ctx.strokeStyle = '#495057';
+                ctx.lineWidth = 8;
+                ctx.stroke();
+                
+                // Molécules O2 et CO2
+                const numMolecules = 5;
+                for (let i = 0; i < numMolecules; i++) {
+                    const offset = (phase + i * 0.4) % (Math.PI * 2);
+                    const y = 200 + Math.sin(offset) * 60;
+                    
+                    // O2 (bleu)
+                    ctx.fillStyle = '#1971c2';
+                    ctx.beginPath();
+                    ctx.arc(150 + Math.cos(offset) * 40, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // CO2 (rouge)
+                    ctx.fillStyle = '#c92a2a';
+                    ctx.beginPath();
+                    ctx.arc(450 - Math.cos(offset) * 40, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Texte
+                ctx.fillStyle = '#000';
+                ctx.font = '16px Arial';
+                ctx.fillText(phase > Math.PI ? 'EXPIRATION' : 'INSPIRATION', 230, 380);
+                ctx.fillText(`${breathRate} respirations/min`, 220, 30);
+                
+                phase += (breathRate / 60) * 0.1;
+                requestAnimationFrame(draw);
+            }
+            
+            draw();
+        }
+
+        function animateMuscle() {
+            const canvas = document.getElementById('muscleCanvas');
+            const ctx = canvas.getContext('2d');
+            let phase = 0;
+
+            function draw() {
+                if (!muscleAnimationRunning) return;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const contraction = (muscleStimulus / 100) * Math.sin(phase) * 40;
+                
+                // Filaments d'actine (fins)
+                ctx.strokeStyle = '#fa5252';
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 6; i++) {
+                    const y = 100 + i * 40;
+                    ctx.beginPath();
+                    ctx.moveTo(100, y);
+                    ctx.lineTo(300 - contraction, y);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(500, y);
+                    ctx.lineTo(300 + contraction, y);
+                    ctx.stroke();
+                }
+                
+                // Filaments de myosine (épais)
+                ctx.strokeStyle = '#1971c2';
+                ctx.lineWidth = 5;
+                for (let i = 0; i < 5; i++) {
+                    const y = 120 + i * 40;
+                    ctx.beginPath();
+                    ctx.moveTo(250 - contraction, y);
+                    ctx.lineTo(350 + contraction, y);
+                    ctx.stroke();
+                    
+                    // Têtes de myosine
+                    if (contraction > 10) {
+                        for (let j = 0; j < 3; j++) {
+                            ctx.fillStyle = '#1971c2';
+                            ctx.beginPath();
+                            ctx.arc(270 - contraction + j * 30, y, 4, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(330 + contraction - j * 30, y, 4, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+                }
+                
+                // Lignes Z
+                ctx.strokeStyle = '#495057';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(100, 80);
+                ctx.lineTo(100, 280);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(500, 80);
+                ctx.lineTo(500, 280);
+                ctx.stroke();
+                
+                // Texte
+                ctx.fillStyle = '#000';
+                ctx.font = '16px Arial';
+                ctx.fillText(contraction > 0 ? 'CONTRACTION' : 'RELAXATION', 240, 330);
+                ctx.fillText(`Stimulation: ${muscleStimulus}%`, 230, 360);
+                ctx.fillText('Actine (rouge)', 100, 50);
+                ctx.fillText('Myosine (bleu)', 450, 50);
+                
+                phase += 0.05;
+                requestAnimationFrame(draw);
+            }
+            
+            draw();
+        }
+
+        // ========== FLASHCARDS ==========
+        const flashcardsData = [
+            // Cardiovasculaire
+            {q: "Qu'est-ce que l'homéostasie ?", a: "Capacité du corps à maintenir un équilibre interne stable (température, pH, glycémie, etc.) malgré les variations externes."},
+            {q: "Quelle est la formule du débit cardiaque ?", a: "Q = FC × VES (Débit cardiaque = Fréquence cardiaque × Volume d'éjection systolique)"},
+            {q: "Quelle est la formule de la PAM ?", a: "PAM = (PAS + 2×PAD) / 3 (Pression Artérielle Moyenne)"},
+            {q: "Qu'est-ce que le volume d'éjection systolique ?", a: "Volume de sang éjecté par le ventricule gauche à chaque contraction. Environ 70 mL au repos."},
+            {q: "Combien de sang le cœur éjecte-t-il par minute au repos ?", a: "Environ 5 litres par minute (débit cardiaque au repos)"},
+            {q: "Qu'est-ce que la précharge cardiaque ?", a: "Étirement du ventricule en fin de diastole, déterminé par le retour veineux. Plus la précharge est élevée, plus la contraction est forte (loi de Frank-Starling)."},
+            {q: "Qu'est-ce que la postcharge ?", a: "Résistance à l'éjection ventriculaire, approximativement égale à la pression artérielle pour le ventricule gauche. Une postcharge élevée réduit le VES."},
+            {q: "Quel est le rôle des barorécepteurs ?", a: "Détectent les variations de pression artérielle (crosse aortique et sinus carotidiens). Si PA baisse : activation sympathique. Si PA monte : activation parasympathique."},
+            {q: "Que se passe-t-il lors du passage couché→debout ?", a: "500-700 mL de sang redistribués vers les jambes. Les barorécepteurs détectent la baisse de PA. Réponse sympathique : ↑FC, ↑contractilité, vasoconstriction"},
+            {q: "Qu'est-ce que la loi de Poiseuille ?", a: "Q = (πΔPr⁴)/(8ηL). Le débit sanguin est proportionnel à r⁴ (rayon à la puissance 4). Doubler le rayon multiplie le débit par 16 !"},
+            
+            // Respiratoire
+            {q: "Qu'est-ce que la VO₂max ?", a: "Consommation maximale d'oxygène. C'est la capacité maximale du corps à utiliser l'O₂ pendant l'effort. Indicateur de condition physique aérobie."},
+            {q: "Qu'est-ce que la ventilation alvéolaire ?", a: "Volume d'air frais atteignant les alvéoles pulmonaires par minute. V̇A = (VT - VD) × f"},
+            {q: "Quelle est la différence entre ventilation minute et ventilation alvéolaire ?", a: "V̇E (minute) = volume total entrant/sortant. V̇A (alvéolaire) = V̇E - espace mort (150 mL). Seule V̇A participe aux échanges gazeux."},
+            {q: "Qu'est-ce que l'espace mort anatomique ?", a: "Volume des voies aériennes qui ne participent pas aux échanges gazeux (trachée, bronches). Environ 150 mL"},
+            {q: "Qu'est-ce que la compliance pulmonaire ?", a: "Capacité d'étirement des poumons. C = ΔV/ΔP. Diminuée en fibrose (poumons rigides), augmentée en emphysème (destruction élastine)."},
+            {q: "Comment fonctionne l'effet Bohr ?", a: "↓pH ou ↑CO₂ ou ↑température → courbe Hb-O₂ déplacée à droite → ↓affinité Hb-O₂ → meilleure libération O₂ aux tissus actifs (muscles)"},
+            {q: "Qu'est-ce que le rapport V̇/Q̇ ?", a: "Rapport ventilation/perfusion. Optimal = 0,8-1,0. Si V̇/Q̇ = 0 (shunt) : perfusion sans ventilation → hypoxémie. Si V̇/Q̇ = ∞ : ventilation sans perfusion (espace mort)."},
+            {q: "Quelle est la formule du transport d'O₂ ?", a: "CaO₂ = (1,34 × [Hb] × SaO₂) + (0,003 × PaO₂). L'hémoglobine transporte 98% de l'O₂, la dissolution seulement 2%."},
+            {q: "Quel est le rôle du surfactant pulmonaire ?", a: "Phospholipides qui diminuent la tension superficielle alvéolaire → augmente compliance → prévient l'atélectasie (collapsus alvéolaire)."},
+            {q: "Comment le CO₂ est-il transporté dans le sang ?", a: "70% sous forme HCO₃⁻ (bicarbonate), 23% lié à l'hémoglobine (carbaminohémoglobine), 7% dissous dans le plasma."},
+            
+            // Musculaire
+            {q: "Quels sont les 3 types de fibres musculaires ?", a: "Type I (lentes oxydatives - endurance), Type IIa (rapides oxydatives-glycolytiques - intermédiaires), Type IIx (rapides glycolytiques - puissance)"},
+            {q: "Qu'est-ce qu'un sarcomère ?", a: "Unité contractile du muscle, entre deux lignes Z. Contient filaments d'actine (fins) et myosine (épais). Le raccourcissement du sarcomère = contraction musculaire."},
+            {q: "Quel est le rôle du calcium dans la contraction musculaire ?", a: "Le Ca²⁺ se lie à la troponine C → changement de conformation → démasquage des sites de liaison sur l'actine → formation ponts actine-myosine → contraction"},
+            {q: "Quel est le rôle de l'ATP dans la contraction ?", a: "1) Fournit l'énergie pour le power stroke (myosine pivote), 2) Permet le détachement du pont actine-myosine, 3) Réarme la tête de myosine. Aussi nécessaire pour recapture du Ca²⁺ (relaxation)."},
+            {q: "Qu'est-ce que le principe de Henneman ?", a: "Principe de recrutement des unités motrices par taille croissante : petites UM d'abord (Type I, faible force), puis grandes UM (Type II, forte force)."},
+            {q: "Quels sont les 3 systèmes énergétiques musculaires ?", a: "1) Phosphagène ATP-PCr (10-15 sec, immédiat), 2) Glycolytique anaérobie (30-120 sec, produit lactate), 3) Oxydatif aérobie (quasi-illimité, lent)"},
+            {q: "Qu'est-ce que le seuil anaérobie (seuil lactique) ?", a: "Intensité d'exercice au-delà de laquelle le métabolisme anaérobie devient prépondérant avec accumulation de lactate. Généralement 50-85% VO₂max selon entraînement."},
+            {q: "Pourquoi les fibres de Type I sont-elles rouges ?", a: "Forte concentration en myoglobine (protéine qui lie O₂, similaire à l'hémoglobine) + nombreuses mitochondries + haute capillarisation. Les fibres Type II sont plus pâles."},
+            {q: "Combien d'ATP produit le glucose en aérobie vs anaérobie ?", a: "Aérobie (avec O₂) : 36-38 ATP. Anaérobie (sans O₂, glycolyse seule) : seulement 2 ATP. L'aérobie est 18x plus efficace !"},
+            {q: "Qu'est-ce que la créatine phosphate (PCr) ?", a: "Réserve d'énergie immédiatement disponible dans le muscle. PCr + ADP → Créatine + ATP (créatine kinase). Épuisé en 10-15 sec d'effort maximal."},
+            
+            // Nerveux
+            {q: "Qu'est-ce qu'un potentiel d'action ?", a: "Signal électrique qui se propage le long d'un neurone ou d'une fibre musculaire, causé par des mouvements d'ions Na⁺ (dépolarisation) et K⁺ (repolarisation). Durée : 1-2 ms."},
+            {q: "Qu'est-ce que la proprioception ?", a: "Sens de la position et du mouvement du corps dans l'espace, grâce aux récepteurs sensoriels (fuseaux neuromusculaires, organes tendineux de Golgi, récepteurs articulaires)"},
+            {q: "Qu'est-ce que la plasticité neuronale ?", a: "Capacité du système nerveux à se réorganiser et créer de nouvelles connexions synaptiques. Fondamentale dans l'apprentissage, la récupération post-AVC et la rééducation."},
+            {q: "Quel est le rôle des fuseaux neuromusculaires ?", a: "Détectent l'étirement du muscle. Provoquent le réflexe myotatique (contraction réflexe du muscle étiré) pour le protéger d'un étirement excessif."},
+            {q: "Quel est le rôle des organes tendineux de Golgi ?", a: "Détectent la tension dans le tendon. Provoquent le réflexe myotatique inverse (relaxation du muscle) pour protéger le tendon d'une tension excessive."},
+            {q: "Quelle est la vitesse de conduction d'un nerf myélinisé ?", a: "Jusqu'à 120 m/s grâce à la conduction saltatoire (saute de nœud de Ranvier en nœud). Sans myéline : seulement 0,5-2 m/s."},
+            {q: "Qu'est-ce que le principe 'neurons that fire together, wire together' ?", a: "Base de la plasticité synaptique : quand deux neurones sont activés simultanément et répétitivement, leur connexion se renforce (potentialisation à long terme - LTP)."},
+            {q: "Qu'est-ce que la fatigue centrale vs périphérique ?", a: "Centrale : diminution de la commande nerveuse descendante, altération recrutement UM. Périphérique : échec au niveau muscle (↓Ca²⁺, accumulation métabolites, déplétion substrats)."},
+            
+            // Régulation et adaptation
+            {q: "Quelle est la fréquence cardiaque maximale théorique ?", a: "FCmax = 220 - âge (en bpm). Formule simplifiée, variabilité individuelle importante (±10-15 bpm)."},
+            {q: "Qu'est-ce que la loi de Frank-Starling ?", a: "Plus le ventricule est étiré en diastole (↑précharge), plus la contraction est forte. Mécanisme : étirement optimal des sarcomères → ↑ nombre de ponts actine-myosine"},
+            {q: "Qu'est-ce que la ventilation minute au repos ?", a: "V̇E = VT × f = 500 mL × 12-20 cycles/min = 6-8 L/min au repos. Peut atteindre 100-200 L/min à l'effort maximal chez l'athlète."},
+            {q: "Combien y a-t-il de sang dans le corps humain ?", a: "Environ 5 litres chez l'adulte (7% du poids corporel). Volume plasmatique ~3L, globules rouges ~2L."},
+            {q: "Qu'est-ce que la loi de Fick pour le débit cardiaque ?", a: "Q = VO₂ / (CaO₂ - CvO₂). Permet de calculer le débit cardiaque via la consommation d'O₂ et la différence artério-veineuse en O₂."},
+            {q: "Quelle est la principale adaptation cardiovasculaire à l'entraînement d'endurance ?", a: "↑ Volume d'Éjection Systolique (VES) au repos et à l'effort grâce à l'hypertrophie physiologique du ventricule gauche. Permet une ↓ FC de repos (bradycardie)."},
+            {q: "Qu'est-ce que le 'cœur d'athlète' ?", a: "Adaptation à l'entraînement : hypertrophie VG, ↑VES (jusqu'à 120-140 mL), ↓FC repos (40-60 bpm), ↑Q max. C'est une adaptation physiologique bénéfique, pas pathologique."},
+            {q: "Comment l'entraînement en endurance modifie-t-il les muscles ?", a: "↑ densité mitochondriale (+40-100%), ↑ enzymes oxydatives, ↑ capillarisation, ↑ myoglobine, ↑ stocks glycogène, conversion fibres IIx → IIa, ↑ utilisation lipides"}
+        ];
+
+        let currentFlashcardIndex = 0;
+        let flashcardsToShow = [];
+        let flashcardStatus = {};
+        let isFlipped = false;
+
+        function initFlashcards() {
+            flashcardsData.forEach((card, index) => {
+                if (!flashcardStatus[index]) {
+                    flashcardStatus[index] = 'unknown';
+                }
+            });
+            updateFlashcardStats();
+        }
+
+        function startFlashcards(mode) {
+            flashcardsToShow = [];
+            
+            flashcardsData.forEach((card, index) => {
+                if (mode === 'all') {
+                    flashcardsToShow.push(index);
+                } else if (mode === 'difficult' && (flashcardStatus[index] === 'hesitate' || flashcardStatus[index] === 'unknown')) {
+                    flashcardsToShow.push(index);
+                } else if (mode === 'unknown' && flashcardStatus[index] === 'unknown') {
+                    flashcardsToShow.push(index);
+                }
+            });
+
+            if (flashcardsToShow.length === 0) {
+                alert('Aucune carte à afficher dans cette catégorie !');
+                return;
+            }
+
+            // Mélanger les cartes
+            flashcardsToShow.sort(() => Math.random() - 0.5);
+            
+            currentFlashcardIndex = 0;
+            showFlashcard();
+        }
+
+        function showFlashcard() {
+            if (flashcardsToShow.length === 0) return;
+
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            const card = flashcardsData[cardIndex];
+            
+            document.getElementById('flashcardText').textContent = card.q;
+            document.getElementById('flashcardButtons').style.display = 'none';
+            document.getElementById('flashcard').classList.remove('flipped');
+            isFlipped = false;
+
+            updateProgress();
+        }
+
+        function flipCard() {
+            if (flashcardsToShow.length === 0) return;
+
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            const card = flashcardsData[cardIndex];
+            
+            isFlipped = !isFlipped;
+            
+            if (isFlipped) {
+                document.getElementById('flashcardText').textContent = card.a;
+                document.getElementById('flashcardButtons').style.display = 'flex';
+                document.getElementById('flashcard').classList.add('flipped');
+            } else {
+                document.getElementById('flashcardText').textContent = card.q;
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+            }
+        }
+
+        function markCard(status) {
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            flashcardStatus[cardIndex] = status;
+            
+            currentFlashcardIndex++;
+            
+            if (currentFlashcardIndex >= flashcardsToShow.length) {
+                alert('Toutes les cartes ont été révisées ! 🎉');
+                document.getElementById('flashcardText').textContent = 'Cliquez sur "Démarrer" pour recommencer';
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+                flashcardsToShow = [];
+            } else {
+                showFlashcard();
+            }
+            
+            updateFlashcardStats();
+        }
+
+        function updateProgress() {
+            const total = flashcardsToShow.length;
+            const current = currentFlashcardIndex + 1;
+            const percentage = (current / total) * 100;
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = `${current}/${total}`;
+        }
+
+        function updateFlashcardStats() {
+            const total = flashcardsData.length;
+            let known = 0, hesitate = 0, unknown = 0;
+            
+            for (let key in flashcardStatus) {
+                if (flashcardStatus[key] === 'known') known++;
+                else if (flashcardStatus[key] === 'hesitate') hesitate++;
+                else if (flashcardStatus[key] === 'unknown') unknown++;
+            }
+            
+            document.getElementById('totalCards').textContent = total;
+            document.getElementById('knownCards').textContent = known;
+            document.getElementById('hesitateCards').textContent = hesitate;
+            document.getElementById('unknownCards').textContent = unknown;
+        }
+
+        function saveProgress() {
+            localStorage.setItem('physio_flashcards', JSON.stringify(flashcardStatus));
+            alert('Progression sauvegardée ! 💾');
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('physio_flashcards');
+            if (saved) {
+                flashcardStatus = JSON.parse(saved);
+                updateFlashcardStats();
+                alert('Progression chargée ! 📂');
+            } else {
+                alert('Aucune sauvegarde trouvée.');
+            }
+        }
+
+        function exportProgress() {
+            const dataStr = JSON.stringify(flashcardStatus, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'physio_flashcards_backup.json';
+            link.click();
+            alert('Fichier exporté ! ⬇️');
+        }
+
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    flashcardStatus = JSON.parse(e.target.result);
+                    updateFlashcardStats();
+                    saveProgress();
+                    alert('Fichier importé avec succès ! ⬆️');
+                } catch (error) {
+                    alert('Erreur lors de l\'importation du fichier.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetProgress() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les flashcards ?')) {
+                flashcardStatus = {};
+                initFlashcards();
+                saveProgress();
+                alert('Progression réinitialisée ! 🔄');
+            }
+        }
+
+        // ========== QUIZ ==========
+        const quizData = [
+            {
+                q: "Un patient a une fréquence cardiaque de 80 bpm et un débit cardiaque de 6 L/min. Quel est son volume d'éjection systolique ?",
+                a: "75 mL (VES = Q / FC = 6000 mL / 80 = 75 mL)"
+            },
+            {
+                q: "Pourquoi la fréquence cardiaque augmente-t-elle lors d'un exercice physique ?",
+                a: "Pour augmenter le débit cardiaque et répondre à la demande accrue en oxygène des muscles actifs. Le système nerveux sympathique stimule le nœud sinusal."
+            },
+            {
+                q: "Quelle est la différence entre ventilation minute et ventilation alvéolaire ?",
+                a: "La ventilation minute (V̇E) est le volume total d'air entrant et sortant des poumons. La ventilation alvéolaire (V̇A) exclut l'espace mort anatomique et représente l'air participant réellement aux échanges gazeux."
+            },
+            {
+                q: "Expliquez pourquoi un patient anémique peut présenter une dyspnée d'effort malgré des poumons sains.",
+                a: "L'anémie réduit la capacité de transport de l'O₂ (↓ hémoglobine). Pour compenser, le débit cardiaque et la ventilation augmentent. À l'effort, ces mécanismes compensatoires deviennent insuffisants → dyspnée."
+            },
+            {
+                q: "Comment les barorécepteurs régulent-ils la pression artérielle ?",
+                a: "Les barorécepteurs détectent les variations de pression dans l'aorte et les carotides. Si PA↓ : activation sympathique (↑FC, vasoconstriction). Si PA↑ : activation parasympathique (↓FC, vasodilatation)."
+            },
+            {
+                q: "Un athlète a une FC de repos de 45 bpm. Son débit cardiaque au repos est de 5 L/min. Calculez son VES et expliquez cette adaptation.",
+                a: "VES = Q/FC = 5000/45 = 111 mL. C'est un 'cœur d'athlète' : l'entraînement en endurance provoque une hypertrophie physiologique du VG → ↑VES → possibilité de ↓FC repos (bradycardie) tout en maintenant Q."
+            },
+            {
+                q: "Pourquoi un patient BPCO avec emphysème a-t-il un thorax 'en tonneau' ?",
+                a: "L'emphysème détruit l'élastine pulmonaire → perte du recul élastique → piégeage aérien → hyperinflation chronique (↑VR, ↑CPT) → distension thoracique permanente = aspect 'en tonneau'."
+            },
+            {
+                q: "Quelle est la différence entre la loi de Frank-Starling et l'effet inotrope positif ?",
+                a: "Frank-Starling : ↑précharge (étirement) → ↑force contraction (mécanisme intrinsèque, optimisation chevauchement actine-myosine). Inotropisme : ↑contractilité par ↑[Ca²⁺]ᵢ (mécanisme extrinsèque, activation sympathique), indépendant de l'étirement."
+            },
+            {
+                q: "Pourquoi les coureurs de marathon ont-ils une FC de repos basse ?",
+                a: "Adaptations à l'entraînement : ↑VES (hypertrophie VG) + ↑tonus parasympathique (dominance vagale) → FC repos peut descendre à 40-50 bpm tout en maintenant un débit cardiaque normal (Q = FC × VES)."
+            },
+            {
+                q: "Expliquez comment la plasticité neuronale permet la récupération après un AVC.",
+                a: "Après lésion cérébrale, les zones périlésionnelles saines peuvent prendre en charge les fonctions perdues via : synaptogenèse (nouvelles connexions), sprouting axonal (repousse), réorganisation des cartes corticales. La rééducation intensive stimule ces mécanismes (principe 'use it or lose it')."
+            },
+            {
+                q: "Un patient hyperventile (V̇E = 20 L/min, f = 40/min). Calculez son volume courant moyen.",
+                a: "VT = V̇E / f = 20000 mL / 40 = 500 mL. C'est normal en volume mais la fréquence est très élevée (normale 12-20/min). Hyperventilation → ↓CO₂ → alcalose respiratoire possible."
+            },
+            {
+                q: "Pourquoi les fibres musculaires de Type I sont-elles plus résistantes à la fatigue ?",
+                a: "↑ mitochondries → ↑ production ATP aérobie (quasi-illimitée si O₂), ↑ capillaires → meilleur apport O₂, ↑ myoglobine → réserve O₂ locale, ↑ enzymes oxydatives → métabolisme efficace lipides. Peu de production lactate."
+            },
+            {
+                q: "Quel est l'impact d'un β-bloquant (ex: propranolol) sur la réponse cardiovasculaire à l'exercice ?",
+                a: "Blocage récepteurs β₁ cardiaques → ↓FC max (impossible d'atteindre FC cible classique) → ↓Q max → ↓VO₂max. Il faut adapter la prescription d'exercice : utiliser RPE (échelle Borg) plutôt que FC, ou formule FC cible = (FC repos + 30) + 70% réserve."
+            },
+            {
+                q: "Pourquoi un sprinter de 100m ne peut-il pas maintenir sa vitesse maximale pendant 400m ?",
+                a: "Le sprint maximal utilise le système ATP-PCr (10-15 sec) puis glycolyse anaérobie (30-120 sec) → accumulation lactate et H⁺ → acidose → inhibition enzymes glycolytiques → fatigue. Sur 400m (45-60 sec), impossible de maintenir puissance maximale des 100 premiers mètres."
+            },
+            {
+                q: "Comment l'effet Bohr optimise-t-il la livraison d'oxygène aux muscles actifs pendant l'exercice ?",
+                a: "Muscles actifs produisent ↑CO₂ + ↑H⁺ (acidose lactique) + ↑température → effet Bohr → courbe Hb-O₂ déplacée à droite → ↓affinité Hb pour O₂ → libération facilitée de l'O₂ exactement là où il est le plus nécessaire (autorégulation locale)."
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let quizOrder = [];
+
+        function startQuiz() {
+            quizOrder = [...Array(quizData.length).keys()];
+            quizOrder.sort(() => Math.random() - 0.5);
+            currentQuizIndex = 0;
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            if (quizOrder.length === 0) {
+                document.getElementById('quizContainer').innerHTML = '<p>Cliquez sur "Lancer le Quiz" pour commencer</p>';
+                return;
+            }
+
+            const question = quizData[quizOrder[currentQuizIndex]];
+            document.getElementById('quizContainer').innerHTML = `
+                <div class="quiz-question">
+                    <h4>Question ${currentQuizIndex + 1}/${quizOrder.length}</h4>
+                    <p>${question.q}</p>
+                    <div id="quizAnswer" style="display:none; margin-top: 20px; padding: 15px; background: #d4edda; border-radius: 8px;">
+                        <strong>Réponse :</strong><br>${question.a}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showQuizAnswer() {
+            const answerDiv = document.getElementById('quizAnswer');
+            if (answerDiv) {
+                answerDiv.style.display = 'block';
+            }
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex >= quizOrder.length) {
+                alert('Quiz terminé ! 🎉');
+                currentQuizIndex = 0;
+            }
+            showQuizQuestion();
+        }
+
+        // ========== QCM ==========
+        const qcmData = [
+            {
+                q: "Quel est le débit cardiaque normal au repos chez un adulte sain ?",
+                options: ["2-3 L/min", "5-6 L/min", "10-12 L/min", "15-20 L/min"],
+                correct: 1
+            },
+            {
+                q: "Parmi ces éléments, lequel n'est PAS un composant de la boucle de régulation de l'homéostasie ?",
+                options: ["Récepteur", "Centre de contrôle", "Effecteur", "Inhibiteur"],
+                correct: 3
+            },
+            {
+                q: "Quel type de fibre musculaire est principalement recruté lors d'un effort de faible intensité prolongé ?",
+                options: ["Type IIx", "Type IIa", "Type I", "Toutes également"],
+                correct: 2
+            },
+            {
+                q: "La compliance pulmonaire mesure :",
+                options: [
+                    "La résistance des voies aériennes",
+                    "La capacité d'étirement des poumons",
+                    "Le volume d'air expiré en 1 seconde",
+                    "La saturation en oxygène"
+                ],
+                correct: 1
+            },
+            {
+                q: "Lors d'une hypotension orthostatique, que se passe-t-il ?",
+                options: [
+                    "La pression artérielle augmente en position debout",
+                    "La pression artérielle reste stable",
+                    "La pression artérielle chute en position debout",
+                    "La fréquence cardiaque diminue"
+                ],
+                correct: 2
+            },
+            {
+                q: "Quelle formule permet de calculer la pression artérielle moyenne (PAM) ?",
+                options: [
+                    "PAM = (PAS + PAD) / 2",
+                    "PAM = PAS - PAD",
+                    "PAM = (PAS + 2×PAD) / 3",
+                    "PAM = PAS × PAD"
+                ],
+                correct: 2
+            },
+            {
+                q: "Quel est l'espace mort anatomique typique chez l'adulte ?",
+                options: ["50 mL", "150 mL", "500 mL", "1000 mL"],
+                correct: 1
+            },
+            {
+                q: "Le système ATP-PCr (phosphagène) peut fournir de l'énergie pendant environ :",
+                options: ["2-5 secondes", "10-15 secondes", "60-90 secondes", "5-10 minutes"],
+                correct: 1
+            },
+            {
+                q: "Quelle est la VO₂max typique d'un adulte sédentaire ?",
+                options: ["20-25 mL/kg/min", "35-40 mL/kg/min", "55-60 mL/kg/min", "75-80 mL/kg/min"],
+                correct: 1
+            },
+            {
+                q: "L'effet Bohr décrit :",
+                options: [
+                    "L'augmentation de l'affinité de l'hémoglobine pour l'O₂ en milieu acide",
+                    "La diminution de l'affinité de l'hémoglobine pour l'O₂ en milieu acide",
+                    "L'augmentation du débit cardiaque à l'effort",
+                    "La régulation de la ventilation par le CO₂"
+                ],
+                correct: 1
+            },
+            {
+                q: "Le principe de Henneman concerne :",
+                options: [
+                    "La contraction cardiaque",
+                    "Le recrutement des unités motrices",
+                    "Les échanges gazeux alvéolaires",
+                    "La régulation de la pression artérielle"
+                ],
+                correct: 1
+            },
+            {
+                q: "Quelle est la vitesse de conduction d'un nerf myélinisé ?",
+                options: ["0,5-2 m/s", "10-20 m/s", "50-120 m/s", "200-300 m/s"],
+                correct: 2
+            },
+            {
+                q: "Le seuil lactique se situe généralement à :",
+                options: ["30-40% VO₂max", "50-85% VO₂max", "90-95% VO₂max", "100% VO₂max"],
+                correct: 1
+            },
+            {
+                q: "Quelle hormone provoque une augmentation de la fréquence cardiaque ?",
+                options: ["Acétylcholine", "Adrénaline", "Insuline", "Aldostérone"],
+                correct: 1
+            },
+            {
+                q: "La loi de Frank-Starling stipule que :",
+                options: [
+                    "Plus la FC est élevée, plus le VES est faible",
+                    "Plus le ventricule est étiré, plus la contraction est forte",
+                    "Plus la PA est élevée, plus le débit est faible",
+                    "Plus l'exercice est intense, plus la FC augmente"
+                ],
+                correct: 1
+            },
+            {
+                q: "Combien d'ATP produit le glucose par glycolyse anaérobie ?",
+                options: ["2 ATP", "6 ATP", "12 ATP", "36-38 ATP"],
+                correct: 0
+            },
+            {
+                q: "Quel pourcentage de l'O₂ est transporté par l'hémoglobine (vs dissous dans le plasma) ?",
+                options: ["50%", "70%", "85%", "98%"],
+                correct: 3
+            },
+            {
+                q: "La fréquence cardiaque de repos d'un athlète d'endurance entraîné peut descendre à :",
+                options: ["100-110 bpm", "80-90 bpm", "60-70 bpm", "40-50 bpm"],
+                correct: 3
+            },
+            {
+                q: "Quel est le pH sanguin normal ?",
+                options: ["6,8-7,0", "7,35-7,45", "7,8-8,0", "8,2-8,4"],
+                correct: 1
+            },
+            {
+                q: "L'hypertrophie du ventricule gauche chez un sportif d'endurance est due à :",
+                options: [
+                    "Une surcharge de postcharge chronique",
+                    "Une adaptation à l'entraînement en force",
+                    "Une adaptation à l'entraînement en endurance (surcharge de précharge)",
+                    "Une pathologie cardiaque"
+                ],
+                correct: 2
+            },
+            {
+                q: "Quel est le volume courant (VT) typique au repos chez l'adulte ?",
+                options: ["150 mL", "500 mL", "1500 mL", "3000 mL"],
+                correct: 1
+            },
+            {
+                q: "La capacité vitale (CV) représente :",
+                options: [
+                    "Le volume d'air inspiré lors d'une respiration normale",
+                    "Le volume maximum d'air pouvant être expiré après une inspiration maximale",
+                    "Le volume d'air restant dans les poumons après expiration maximale",
+                    "Le volume total des poumons"
+                ],
+                correct: 1
+            },
+            {
+                q: "Combien de molécules d'O₂ peut transporter une molécule d'hémoglobine ?",
+                options: ["1", "2", "4", "8"],
+                correct: 2
+            },
+            {
+                q: "Quelle est la température corporelle normale ?",
+                options: ["35°C", "37°C", "39°C", "40°C"],
+                correct: 1
+            },
+            {
+                q: "Le nœud sinusal est situé dans :",
+                options: ["Le ventricule gauche", "L'oreillette droite", "L'oreillette gauche", "Le ventricule droit"],
+                correct: 1
+            },
+            {
+                q: "Quel est le principal stimulus de la régulation respiratoire au repos ?",
+                options: ["La PaO₂", "La PaCO₂", "Le pH musculaire", "La température"],
+                correct: 1
+            },
+            {
+                q: "La myoglobine est présente principalement dans :",
+                options: ["Le sang", "Les muscles", "Les poumons", "Le cœur uniquement"],
+                correct: 1
+            },
+            {
+                q: "Un sarcomère s'étend de :",
+                options: ["Ligne M à ligne M", "Ligne Z à ligne Z", "Bande A à bande A", "Bande I à bande I"],
+                correct: 1
+            },
+            {
+                q: "Quel ion est essentiel pour déclencher la contraction musculaire ?",
+                options: ["Sodium (Na⁺)", "Potassium (K⁺)", "Calcium (Ca²⁺)", "Chlore (Cl⁻)"],
+                correct: 2
+            },
+            {
+                q: "Le réflexe myotatique est déclenché par :",
+                options: [
+                    "Les organes tendineux de Golgi",
+                    "Les fuseaux neuromusculaires",
+                    "Les récepteurs articulaires",
+                    "Les barorécepteurs"
+                ],
+                correct: 1
+            },
+            {
+                q: "Quelle est la durée approximative d'un cycle cardiaque au repos ?",
+                options: ["0,3 seconde", "0,8 seconde", "1,5 seconde", "2,0 secondes"],
+                correct: 1
+            },
+            {
+                q: "La période réfractaire absolue du cœur empêche :",
+                options: [
+                    "La bradycardie",
+                    "La tachycardie",
+                    "La tétanisation cardiaque",
+                    "L'arythmie"
+                ],
+                correct: 2
+            },
+            {
+                q: "Dans la loi de Poiseuille, le débit est proportionnel à :",
+                options: ["r² (rayon au carré)", "r³ (rayon au cube)", "r⁴ (rayon puissance 4)", "r⁵ (rayon puissance 5)"],
+                correct: 2
+            },
+            {
+                q: "Le 2,3-DPG (diphosphoglycérate) :",
+                options: [
+                    "Augmente l'affinité de l'Hb pour l'O₂",
+                    "Diminue l'affinité de l'Hb pour l'O₂",
+                    "N'affecte pas l'Hb",
+                    "Transporte le CO₂"
+                ],
+                correct: 1
+            },
+            {
+                q: "La ventilation minute au repos est d'environ :",
+                options: ["2-3 L/min", "6-8 L/min", "15-20 L/min", "30-40 L/min"],
+                correct: 1
+            }
+        ];
+
+        let currentQCMIndex = 0;
+        let qcmOrder = [];
+        let qcmAnswers = [];
+        let qcmValidated = false;
+
+        function startQCM() {
+            qcmOrder = [...Array(qcmData.length).keys()];
+            qcmOrder.sort(() => Math.random() - 0.5);
+            currentQCMIndex = 0;
+            qcmAnswers = [];
+            qcmValidated = false;
+            document.getElementById('qcmScore').innerHTML = '';
+            showQCMQuestion();
+        }
+
+        function showQCMQuestion() {
+            if (qcmOrder.length === 0) {
+                document.getElementById('qcmContainer').innerHTML = '<p>Cliquez sur "Lancer le QCM" pour commencer</p>';
+                return;
+            }
+
+            const qcm = qcmData[qcmOrder[currentQCMIndex]];
+            qcmValidated = false;
+            
+            let optionsHTML = '';
+            const shuffledOptions = [...qcm.options];
+            const indices = [...Array(shuffledOptions.length).keys()];
+            indices.sort(() => Math.random() - 0.5);
+            
+            indices.forEach(i => {
+                optionsHTML += `
+                    <div class="quiz-option" onclick="selectQCMOption(${i})">
+                        ${shuffledOptions[i]}
+                    </div>
+                `;
+            });
+
+            document.getElementById('qcmContainer').innerHTML = `
+                <div class="quiz-question">
+                    <h4>QCM ${currentQCMIndex + 1}/${qcmOrder.length}</h4>
+                    <p>${qcm.q}</p>
+                    <div class="quiz-options" id="qcmOptions">
+                        ${optionsHTML}
+                    </div>
+                </div>
+            `;
+            
+            qcmAnswers[currentQCMIndex] = {
+                originalIndices: indices,
+                selected: -1,
+                correct: qcm.correct
+            };
+        }
+
+        function selectQCMOption(displayIndex) {
+            if (qcmValidated) return;
+
+            const options = document.querySelectorAll('#qcmOptions .quiz-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            options[displayIndex].classList.add('selected');
+            
+            const originalIndex = qcmAnswers[currentQCMIndex].originalIndices[displayIndex];
+            qcmAnswers[currentQCMIndex].selected = originalIndex;
+        }
+
+        function submitQCM() {
+            if (qcmAnswers[currentQCMIndex].selected === -1) {
+                alert('Veuillez sélectionner une réponse.');
+                return;
+            }
+
+            qcmValidated = true;
+            const qcm = qcmData[qcmOrder[currentQCMIndex]];
+            const options = document.querySelectorAll('#qcmOptions .quiz-option');
+            
+            options.forEach((opt, displayIndex) => {
+                const originalIndex = qcmAnswers[currentQCMIndex].originalIndices[displayIndex];
+                if (originalIndex === qcm.correct) {
+                    opt.classList.add('correct');
+                } else if (originalIndex === qcmAnswers[currentQCMIndex].selected) {
+                    opt.classList.add('incorrect');
+                }
+            });
+        }
+
+        function nextQCM() {
+            currentQCMIndex++;
+            if (currentQCMIndex >= qcmOrder.length) {
+                let score = 0;
+                qcmOrder.forEach((qcmIdx, i) => {
+                    if (qcmAnswers[i] && qcmAnswers[i].selected === qcmData[qcmIdx].correct) {
+                        score++;
+                    }
+                });
+                
+                const percentage = (score / qcmOrder.length) * 100;
+                document.getElementById('qcmScore').innerHTML = `
+                    <div style="background: #d4edda; padding: 20px; border-radius: 10px; text-align: center; margin-top: 20px;">
+                        <h3>QCM terminé ! 🎉</h3>
+                        <p style="font-size: 2em; font-weight: bold; color: #28a745;">${score}/${qcmOrder.length}</p>
+                        <p style="font-size: 1.2em;">${percentage.toFixed(0)}%</p>
+                    </div>
+                `;
+                document.getElementById('qcmContainer').innerHTML = '';
+                currentQCMIndex = 0;
+            } else {
+                showQCMQuestion();
+            }
+        }
+
+        // ========== VRAI/FAUX ==========
+        const vraiFauxData = [
+            {q: "Le débit cardiaque est le produit de la fréquence cardiaque par le volume d'éjection systolique.", a: true},
+            {q: "Les fibres musculaires de type IIx sont les plus résistantes à la fatigue.", a: false},
+            {q: "L'homéostasie désigne la capacité du corps à maintenir son équilibre interne.", a: true},
+            {q: "La ventilation alvéolaire inclut le volume de l'espace mort anatomique.", a: false},
+            {q: "Les barorécepteurs détectent les variations de pression artérielle.", a: true},
+            {q: "La fréquence cardiaque maximale théorique est de 200 bpm pour tous les adultes.", a: false},
+            {q: "Le seuil anaérobie correspond au moment où le métabolisme aérobie devient prépondérant.", a: false},
+            {q: "La plasticité neuronale permet au système nerveux de se réorganiser après une lésion.", a: true},
+            {q: "Un patient anémique présente une capacité de transport de l'oxygène normale.", a: false},
+            {q: "La proprioception est assurée par les fuseaux neuromusculaires et les organes tendineux de Golgi.", a: true},
+            {q: "L'hémoglobine transporte environ 50% de l'oxygène sanguin.", a: false},
+            {q: "La glycolyse anaérobie produit 36-38 ATP par molécule de glucose.", a: false},
+            {q: "Le système ATP-PCr peut fournir de l'énergie pendant environ 10-15 secondes.", a: true},
+            {q: "La loi de Frank-Starling indique qu'une augmentation de la précharge augmente la force de contraction.", a: true},
+            {q: "Les fibres de Type I sont principalement glycolytiques.", a: false},
+            {q: "L'effet Bohr facilite la libération d'oxygène dans les tissus actifs.", a: true},
+            {q: "Le surfactant pulmonaire augmente la tension superficielle alvéolaire.", a: false},
+            {q: "Un athlète d'endurance a généralement une fréquence cardiaque de repos plus élevée qu'un sédentaire.", a: false},
+            {q: "Le CO₂ est le principal stimulus de la régulation respiratoire au repos.", a: true},
+            {q: "Les nerfs myélinisés conduisent l'influx nerveux plus rapidement que les nerfs non myélinisés.", a: true},
+            {q: "Le volume d'éjection systolique diminue lors de l'entraînement en endurance.", a: false},
+            {q: "L'espace mort anatomique est d'environ 500 mL chez l'adulte.", a: false},
+            {q: "La créatine phosphate (PCr) peut être reconstituée sans oxygène.", a: false},
+            {q: "Le principe de Henneman décrit le recrutement des unités motrices par taille croissante.", a: true},
+            {q: "L'hypotension orthostatique se caractérise par une augmentation de la PA en position debout.", a: false},
+            {q: "Le calcium est nécessaire pour la contraction musculaire.", a: true},
+            {q: "Le nœud sinusal est le pacemaker naturel du cœur.", a: true},
+            {q: "Une molécule d'hémoglobine peut transporter 2 molécules d'oxygène.", a: false},
+            {q: "La myoglobine stocke l'oxygène dans les muscles.", a: true},
+            {q: "La compliance pulmonaire augmente dans la fibrose pulmonaire.", a: false},
+            {q: "Le métabolisme aérobie produit plus d'ATP que le métabolisme anaérobie.", a: true},
+            {q: "La postcharge représente l'étirement du ventricule en fin de diastole.", a: false},
+            {q: "Les fibres de Type II sont plus riches en mitochondries que les fibres de Type I.", a: false},
+            {q: "Le volume résiduel peut être expiré volontairement.", a: false},
+            {q: "L'acétylcholine augmente la fréquence cardiaque.", a: false},
+            {q: "La conduction saltatoire se produit dans les nerfs myélinisés.", a: true},
+            {q: "Le pH sanguin normal est d'environ 7,4.", a: true},
+            {q: "La VO₂max ne peut pas être améliorée par l'entraînement.", a: false},
+            {q: "Le sarcomère est l'unité contractile du muscle.", a: true},
+            {q: "Les organes tendineux de Golgi détectent l'étirement du muscle.", a: false},
+            {q: "La ventilation minute est égale au volume courant multiplié par la fréquence respiratoire.", a: true},
+            {q: "Le système nerveux parasympathique augmente la fréquence cardiaque.", a: false},
+            {q: "L'effet Haldane concerne le transport du CO₂.", a: true},
+            {q: "La période réfractaire absolue empêche une nouvelle contraction cardiaque immédiate.", a: true},
+            {q: "Les capillaires pulmonaires sont plus nombreux chez un athlète entraîné.", a: true},
+            {q: "Le glycogène musculaire est une source d'énergie à court terme uniquement.", a: false},
+            {q: "La potentialisation à long terme (LTP) est un mécanisme de plasticité synaptique.", a: true},
+            {q: "Doubler le rayon d'un vaisseau sanguin double le débit selon la loi de Poiseuille.", a: false},
+            {q: "Les chimiorécepteurs centraux sont principalement sensibles au CO₂.", a: true},
+            {q: "Le 2,3-DPG facilite la libération d'oxygène par l'hémoglobine.", a: true}
+        ];
+
+        let currentVFIndex = 0;
+        let vfOrder = [];
+        let vfAnswered = false;
+
+        function startVraiFaux() {
+            vfOrder = [...Array(vraiFauxData.length).keys()];
+            vfOrder.sort(() => Math.random() - 0.5);
+            currentVFIndex = 0;
+            showVraiFauxQuestion();
+        }
+
+        function showVraiFauxQuestion() {
+            if (vfOrder.length === 0) {
+                document.getElementById('vraiFauxContainer').innerHTML = '<p>Cliquez sur "Lancer Vrai/Faux" pour commencer</p>';
+                return;
+            }
+
+            vfAnswered = false;
+            const vf = vraiFauxData[vfOrder[currentVFIndex]];
+            
+            document.getElementById('vraiFauxContainer').innerHTML = `
+                <div class="quiz-question">
+                    <h4>Question ${currentVFIndex + 1}/${vfOrder.length}</h4>
+                    <p>${vf.q}</p>
+                    <div class="quiz-options" id="vfOptions">
+                        <div class="quiz-option" onclick="selectVF(true)">✓ VRAI</div>
+                        <div class="quiz-option" onclick="selectVF(false)">✗ FAUX</div>
+                    </div>
+                    <div id="vfFeedback" style="display:none; margin-top: 20px;"></div>
+                </div>
+            `;
+        }
+
+        function selectVF(answer) {
+            if (vfAnswered) return;
+
+            const options = document.querySelectorAll('#vfOptions .quiz-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            
+            if (answer) {
+                options[0].classList.add('selected');
+            } else {
+                options[1].classList.add('selected');
+            }
+        }
+
+        function checkVraiFaux() {
+            if (vfAnswered) return;
+
+            const selected = document.querySelector('#vfOptions .quiz-option.selected');
+            if (!selected) {
+                alert('Veuillez sélectionner une réponse.');
+                return;
+            }
+
+            vfAnswered = true;
+            const vf = vraiFauxData[vfOrder[currentVFIndex]];
+            const userAnswer = selected.textContent.includes('VRAI');
+            const feedback = document.getElementById('vfFeedback');
+            
+            if (userAnswer === vf.a) {
+                feedback.style.background = '#d4edda';
+                feedback.style.border = '2px solid #28a745';
+                feedback.innerHTML = '<strong>✓ Correct !</strong>';
+                selected.classList.add('correct');
+            } else {
+                feedback.style.background = '#f8d7da';
+                feedback.style.border = '2px solid #dc3545';
+                feedback.innerHTML = `<strong>✗ Incorrect.</strong> La bonne réponse est : <strong>${vf.a ? 'VRAI' : 'FAUX'}</strong>`;
+                selected.classList.add('incorrect');
+            }
+            
+            feedback.style.display = 'block';
+            feedback.style.padding = '15px';
+            feedback.style.borderRadius = '8px';
+        }
+
+        function nextVraiFaux() {
+            currentVFIndex++;
+            if (currentVFIndex >= vfOrder.length) {
+                alert('Vrai/Faux terminé ! 🎉');
+                currentVFIndex = 0;
+            }
+            showVraiFauxQuestion();
+        }
+
+        // ========== EXERCICES ==========
+        function showHelp(exerciseNum) {
+            const helpBox = document.getElementById('help' + exerciseNum);
+            helpBox.classList.toggle('active');
+        }
+
+        function showCorrection(exerciseNum) {
+            const correctionBox = document.getElementById('correction' + exerciseNum);
+            correctionBox.classList.toggle('active');
+        }
+
+        // ========== INITIALISATION ==========
+        window.onload = function() {
+            initFlashcards();
+        };
+    </script>
+</body>
+</html>
