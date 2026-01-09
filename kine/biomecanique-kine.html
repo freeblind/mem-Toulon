@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biomécanique - Kinésithérapie Bloc 1</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
+        h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .subtitle { opacity: 0.9; font-size: 1.1em; }
+        .tabs { display: flex; background: #f8f9fa; border-bottom: 2px solid #dee2e6; overflow-x: auto; flex-wrap: wrap; }
+        .tab { padding: 15px 25px; cursor: pointer; border: none; background: transparent; font-size: 1em; transition: all 0.3s; border-bottom: 3px solid transparent; white-space: nowrap; }
+        .tab:hover { background: rgba(102, 126, 234, 0.1); }
+        .tab.active { border-bottom-color: #667eea; color: #667eea; font-weight: bold; }
+        .content { padding: 30px; display: none; }
+        .content.active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .level-selector { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .level-btn { padding: 10px 20px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 25px; cursor: pointer; transition: all 0.3s; font-weight: bold; }
+        .level-btn:hover { background: #667eea; color: white; }
+        .level-btn.active { background: #667eea; color: white; }
+        .course-section { display: none; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .course-section.active { display: block; }
+        .course-section h3 { color: #667eea; margin-bottom: 15px; }
+        .course-section h4 { color: #495057; margin-top: 20px; margin-bottom: 10px; }
+        .course-section p, .course-section ul { line-height: 1.8; color: #333; }
+        .course-section ul { margin-left: 20px; margin-top: 10px; }
+        .example-box { background: #e7f3ff; border-left: 4px solid #667eea; padding: 15px; margin-top: 15px; border-radius: 5px; }
+        .example-box strong { color: #667eea; }
+        .important-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-top: 15px; border-radius: 5px; }
+        canvas { border: 2px solid #667eea; border-radius: 10px; margin: 20px auto; display: block; max-width: 100%; background: white; }
+        .canvas-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .canvas-controls label { font-weight: bold; color: #667eea; }
+        .canvas-controls input[type="range"] { flex: 1; min-width: 150px; }
+        .canvas-controls button { padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .canvas-controls button:hover { background: #764ba2; }
+        .flashcard { background: white; border: 2px solid #667eea; border-radius: 15px; padding: 30px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .flashcard:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .flashcard.flipped { background: #667eea; color: white; }
+        .flashcard-text { font-size: 1.3em; text-align: center; margin-bottom: 20px; }
+        .flashcard-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-know, .btn-hesitate, .btn-unknown { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .btn-know { background: #28a745; color: white; }
+        .btn-know:hover { background: #218838; }
+        .btn-hesitate { background: #ffc107; color: #333; }
+        .btn-hesitate:hover { background: #e0a800; }
+        .btn-unknown { background: #dc3545; color: white; }
+        .btn-unknown:hover { background: #c82333; }
+        .flashcard-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .flashcard-controls button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        .flashcard-controls button:hover { background: #764ba2; }
+        .progress-bar { background: #e9ecef; border-radius: 10px; height: 20px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.9em; font-weight: bold; }
+        .quiz-question { background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px; }
+        .quiz-question h4 { color: #667eea; margin-bottom: 15px; font-size: 1.2em; }
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+        .quiz-option { padding: 15px; background: white; border: 2px solid #dee2e6; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .quiz-option:hover { border-color: #667eea; background: #f0f4ff; }
+        .quiz-option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .quiz-option.correct { border-color: #28a745; background: #28a745; color: white; }
+        .quiz-option.incorrect { border-color: #dc3545; background: #dc3545; color: white; }
+        .quiz-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .quiz-controls button { padding: 12px 25px; background: #667eea; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; font-size: 1em; }
+        .quiz-controls button:hover { background: #764ba2; }
+        .exercise { background: #f8f9fa; padding: 25px; border-radius: 10px; margin-bottom: 20px; }
+        .exercise h4 { color: #667eea; margin-bottom: 15px; }
+        .exercise textarea { width: 100%; min-height: 150px; padding: 15px; border: 2px solid #dee2e6; border-radius: 8px; font-family: inherit; font-size: 1em; margin-bottom: 10px; }
+        .exercise-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .exercise-buttons button { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        .btn-help { background: #17a2b8; color: white; }
+        .btn-help:hover { background: #138496; }
+        .btn-correction { background: #667eea; color: white; }
+        .btn-correction:hover { background: #764ba2; }
+        .correction-box { display: none; background: #d4edda; border: 2px solid #28a745; border-radius: 8px; padding: 15px; margin-top: 15px; }
+        .correction-box.active { display: block; }
+        .help-box { display: none; background: #cce5ff; border: 2px solid #17a2b8; border-radius: 8px; padding: 15px; margin-top: 15px; }
+        .help-box.active { display: block; }
+        .formula-card { background: white; border: 2px solid #667eea; border-radius: 10px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .formula-card h4 { color: #667eea; margin-bottom: 10px; }
+        .formula { font-size: 1.5em; font-weight: bold; color: #495057; margin: 15px 0; font-family: 'Courier New', monospace; background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center; }
+        .formula-details { background: #e7f3ff; padding: 15px; border-radius: 5px; margin-top: 10px; }
+        .formula-example { background: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 10px; border-left: 4px solid #ffc107; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; border: 2px solid #667eea; border-radius: 10px; padding: 20px; text-align: center; }
+        .stat-number { font-size: 2.5em; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; margin-top: 5px; }
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8em; }
+            .tabs { flex-direction: column; }
+            .tab { border-bottom: 1px solid #dee2e6; border-left: 3px solid transparent; }
+            .tab.active { border-left-color: #667eea; border-bottom-color: #dee2e6; }
+            .content { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Biomécanique</h1>
+            <p class="subtitle">Kinésithérapie - Bloc 1 - Belgique</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('cours')">📚 Cours</button>
+            <button class="tab" onclick="showTab('flashcards')">🎴 Flashcards</button>
+            <button class="tab" onclick="showTab('quiz')">❓ Quiz</button>
+            <button class="tab" onclick="showTab('qcm')">☑️ QCM</button>
+            <button class="tab" onclick="showTab('vraifaux')">✓✗ Vrai/Faux</button>
+            <button class="tab" onclick="showTab('exercices')">✍️ Exercices</button>
+            <button class="tab" onclick="showTab('formules')">🧮 Formules</button>
+            <button class="tab" onclick="showTab('outils')">🛠️ Outils</button>
+        </div>
+
+        <!-- Contenu simplifié pour ne pas dépasser les limites -->
+        <div id="cours" class="content active">
+    <h2>📚 Cours de Biomécanique</h2>
+
+    <div class="level-selector">
+        <button class="level-btn active" data-level="vulgarisation" onclick="setCourseLevel('vulgarisation')">🌱 Vulgarisation</button>
+        <button class="level-btn" data-level="base" onclick="setCourseLevel('base')">📘 Base</button>
+        <button class="level-btn" data-level="avance" onclick="setCourseLevel('avance')">🚀 Avancé</button>
+    </div>
+
+    <!-- ===================== NIVEAU VULGARISATION ===================== -->
+    <div class="course-section active" id="course-vulgarisation">
+        <h3>Niveau Vulgarisation (Bloc 1)</h3>
+
+        <h4>1) À quoi sert la biomécanique en kiné ?</h4>
+        <p>
+            La biomécanique applique les lois de la mécanique (forces, moments, travail, énergie) au corps humain pour
+            <strong>comprendre le mouvement</strong>, <strong>expliquer les contraintes sur les tissus</strong> (os, tendon, cartilage…)
+            et <strong>raisonner les exercices</strong> (rééducation, prévention, performance).
+        </p>
+
+        <div class="important-box">
+            <strong>Idée-clé :</strong> un mouvement “simple” peut imposer de très grandes forces internes (muscles, tendons),
+            surtout quand les bras de levier sont défavorables (ex : biceps au coude).
+        </div>
+
+        <h4>2) Les leviers du corps (en très simple)</h4>
+        <ul>
+            <li><strong>Levier 1er genre</strong> : l’appui est au milieu (balance). Exemple clinique : certains mouvements de la tête.</li>
+            <li><strong>Levier 2e genre</strong> : la charge est au milieu. Exemple : se mettre sur la pointe des pieds (triceps sural).</li>
+            <li><strong>Levier 3e genre</strong> : le muscle est au milieu. Le plus fréquent dans le corps : grande vitesse/amplitude, mais force musculaire élevée.</li>
+        </ul>
+        <div class="example-box">
+            <strong>Exemple (coude) :</strong> tenir une charge à la main crée un moment important car la distance jusqu’au coude est grande,
+            alors que l’insertion du biceps est proche du coude.
+        </div>
+
+        <h4>3) Équilibre : centre de gravité et base de support</h4>
+        <ul>
+            <li><strong>Centre de gravité</strong> : point où “s’applique” le poids global du corps (en position anatomique, proche du bassin).</li>
+            <li><strong>Base de support</strong> : surface au sol délimitée par les points de contact (plus large = plus stable).</li>
+            <li><strong>Stabilité</strong> : meilleure si la projection du centre de gravité reste dans la base de support.</li>
+        </ul>
+
+        <h4>4) Applications kiné (exemples)</h4>
+        <ul>
+            <li><strong>Squat</strong> : plus le tronc est incliné, plus le moment sur la hanche augmente.</li>
+            <li><strong>Épaule</strong> : bras tendu = grand bras de levier → effort deltoïde plus élevé.</li>
+            <li><strong>Marche</strong> : analyser “appui vs oscillation”, comprendre la réaction du sol et la propulsion.</li>
+        </ul>
+    </div>
+
+    <!-- ===================== NIVEAU BASE ===================== -->
+    <div class="course-section" id="course-base">
+        <h3>Niveau Base (attendus Bloc 1)</h3>
+
+        <h4>1) Grandeurs, unités et vecteurs</h4>
+        <ul>
+            <li><strong>Scalaire</strong> : valeur seule (masse en kg, énergie en J).</li>
+            <li><strong>Vecteur</strong> : valeur + direction + sens (force en N, vitesse en m/s).</li>
+            <li><strong>Poids</strong> : P = m × g (g ≈ 9,81 m/s²).</li>
+        </ul>
+
+        <h4>2) Statique : équilibre du corps rigide</h4>
+        <p>
+            En statique, un système est à l’équilibre si :
+        </p>
+        <ul>
+            <li>Somme des forces = 0</li>
+            <li>Somme des moments = 0</li>
+        </ul>
+        <div class="example-box">
+            <strong>Astuce méthode :</strong> faire un <em>schéma de corps libre</em> (forces externes, points d’appui, distances),
+            puis écrire les équations d’équilibre.
+        </div>
+
+        <h4>3) Moment de force (torque)</h4>
+        <p>
+            Le moment mesure la tendance d’une force à faire tourner un segment :
+        </p>
+        <div class="formula">M = F × d⊥</div>
+        <ul>
+            <li><strong>d⊥</strong> : bras de levier perpendiculaire (distance minimale à l’axe).</li>
+            <li>Si la force passe par l’axe → d⊥ = 0 → pas de moment.</li>
+        </ul>
+
+        <h4>4) Cinématique (décrire le mouvement)</h4>
+        <ul>
+            <li><strong>Position</strong> (m), <strong>vitesse</strong> (m/s), <strong>accélération</strong> (m/s²).</li>
+            <li>Angulaire : <strong>θ</strong> (rad ou °), <strong>ω</strong> (rad/s), <strong>α</strong> (rad/s²).</li>
+        </ul>
+
+        <h4>5) Cinétique (expliquer le mouvement)</h4>
+        <ul>
+            <li><strong>2e loi de Newton</strong> : F = m × a (la force résultante produit l’accélération).</li>
+            <li><strong>3e loi</strong> : action–réaction (ex : réaction du sol lors de l’appui).</li>
+        </ul>
+
+        <h4>6) Travail, puissance, énergie</h4>
+        <div class="formula">W = F × d × cos(θ)</div>
+        <div class="formula">P = W/Δt = F × v</div>
+        <div class="important-box">
+            <strong>Interprétation :</strong> si θ = 90°, cos(θ)=0 → la force ne fait pas de travail (ex : force purement “de maintien” perpendiculaire au déplacement).
+        </div>
+
+        <h4>7) Propriétés mécaniques des tissus</h4>
+        <ul>
+            <li><strong>Contrainte (stress)</strong> : σ = F/A (Pa).</li>
+            <li><strong>Déformation (strain)</strong> : ε = ΔL/L0 (sans unité).</li>
+            <li><strong>Module de Young</strong> : E = σ/ε (rigidité).</li>
+            <li>Courbe contrainte–déformation : zone “toe”, zone linéaire, puis endommagement/rupture (tendons/ligaments).</li>
+        </ul>
+
+        <h4>8) Centre de gravité et stabilité</h4>
+        <ul>
+            <li>En position anatomique, le centre de gravité global est souvent décrit <strong>près du bassin</strong> (approximativement en avant de S2).</li>
+            <li>Stabilité ↑ si base de support ↑, si centre de gravité ↓, et si la projection reste dans le polygone de sustentation.</li>
+        </ul>
+    </div>
+
+    <!-- ===================== NIVEAU AVANCÉ ===================== -->
+    <div class="course-section" id="course-avance">
+        <h3>Niveau Avancé (aperçu Bloc 1 → Bloc 2)</h3>
+
+        <h4>1) Analyse 3D du mouvement</h4>
+        <ul>
+            <li>Plans (sagittal, frontal, transversal) et axes associés.</li>
+            <li>Angles articulaires (cinématique) + forces/moments (cinétique) pour décrire un geste.</li>
+        </ul>
+
+        <h4>2) Dynamique inverse (inverse dynamics)</h4>
+        <p>
+            En pratique (ex : analyse de marche), on utilise la cinématique mesurée + les forces externes (réaction du sol) pour estimer
+            les <strong>moments articulaires nets</strong>. Ces moments sont ensuite interprétés (modèles) pour discuter des contributions musculaires.
+        </p>
+
+        <h4>3) Biomécanique osseuse : adaptation au chargement</h4>
+        <p>
+            La loi de Wolff décrit l’adaptation osseuse : l’os se remodèle en fonction des contraintes mécaniques (surcharge → adaptation/renforcement, décharge → perte de densité).
+        </p>
+
+        <h4>4) Modèle de Hill (muscle)</h4>
+        <ul>
+            <li>Le muscle est modélisé par un élément contractile + éléments élastiques en série/parallèle (modèle “Hill-type”).</li>
+            <li>Relation force–vitesse : en concentrique, force ↓ quand vitesse ↑ ; en excentrique, la force peut dépasser l’isométrique.</li>
+        </ul>
+
+        <h4>5) Cycle étirement–raccourcissement (SSC)</h4>
+        <p>
+            Une phase excentrique rapide peut stocker de l’énergie élastique (tendon) puis améliorer la phase concentrique suivante (ex : saut).
+        </p>
+
+        <h4>6) Marche : points repères</h4>
+        <ul>
+            <li>Cycle : <strong>~60% phase d’appui</strong> et <strong>~40% phase oscillante</strong> (varie avec la vitesse).</li>
+            <li>Comprendre : double appui, propulsion, et rôle de la réaction du sol.</li>
+        </ul>
+
+        <h4>Sources (pour aller plus loin)</h4>
+        <ul>
+            <li>OpenStax (mécanique) : travail/énergie, contraintes–déformations (cours ouverts)</li>
+            <li>NCBI Bookshelf (revues médicales) : bases du cycle de marche et remodelage osseux</li>
+        </ul>
+        <div class="important-box">
+            <strong>Conseil révision :</strong> maîtrise d’abord les schémas de corps libre + les moments. C’est la “colonne vertébrale” du raisonnement en biomécanique clinique.
+        </div>
+    </div>
+</div>
+
+        <div id="flashcards" class="content">
+            <h2>Flashcards Biomécanique</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCards">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="knownCards">0</div>
+                    <div class="stat-label">Maîtrisé</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="hesitateCards">0</div>
+                    <div class="stat-label">Hésitant</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="unknownCards">0</div>
+                    <div class="stat-label">Non su</div>
+                </div>
+            </div>
+
+            <div class="flashcard-controls">
+                <button onclick="startFlashcards('all')">📚 Toutes</button>
+                <button onclick="startFlashcards('difficult')">📙 Difficiles</button>
+                <button onclick="startFlashcards('unknown')">📕 Non su</button>
+                <button onclick="saveProgress()">💾 Sauvegarder</button>
+                <button onclick="loadProgress()">📂 Charger</button>
+                <button onclick="exportProgress()">⬇️ Exporter</button>
+                <input type="file" id="importFile" style="display:none" onchange="importProgress(event)" accept=".json">
+                <button onclick="document.getElementById('importFile').click()">⬆️ Importer</button>
+                <button onclick="resetProgress()">🔄 Reset</button>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%">0/0</div>
+            </div>
+
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <div class="flashcard-text" id="flashcardText">Cliquez sur "Démarrer" pour commencer</div>
+                <div class="flashcard-buttons" id="flashcardButtons" style="display: none;">
+                    <button class="btn-know" onclick="event.stopPropagation(); markCard('known')">✓ Maîtrisé</button>
+                    <button class="btn-hesitate" onclick="event.stopPropagation(); markCard('hesitate')">? Hésitant</button>
+                    <button class="btn-unknown" onclick="event.stopPropagation(); markCard('unknown')">✗ Non su</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="quiz" class="content">
+            <h2>Quiz Biomécanique</h2>
+            <div class="quiz-controls">
+                <button onclick="startQuiz()">🎲 Lancer</button>
+                <button onclick="showQuizAnswer()">👁️ Réponse</button>
+                <button onclick="nextQuizQuestion()">➡️ Suivant</button>
+            </div>
+            <div id="quizContainer"></div>
+        </div>
+
+        <div id="qcm" class="content">
+            <h2>QCM Biomécanique</h2>
+            <div class="quiz-controls">
+                <button onclick="startQCM()">🎲 Lancer</button>
+                <button onclick="submitQCM()">✓ Valider</button>
+                <button onclick="nextQCM()">➡️ Suivant</button>
+            </div>
+            <div id="qcmContainer"></div>
+            <div id="qcmScore"></div>
+        </div>
+
+        <div id="vraifaux" class="content">
+            <h2>Vrai ou Faux</h2>
+            <div class="quiz-controls">
+                <button onclick="startVraiFaux()">🎲 Lancer</button>
+                <button onclick="checkVraiFaux()">✓ Vérifier</button>
+                <button onclick="nextVraiFaux()">➡️ Suivant</button>
+            </div>
+            <div id="vraiFauxContainer"></div>
+        </div>
+
+        <div id="exercices" class="content">
+    <h2>✍️ Exercices Pratiques</h2>
+    <p>Exercices de biomécanique (Bloc 1) : calculs, raisonnement clinique, démarche étape par étape.</p>
+    <div id="exercisesContainer"></div>
+</div>
+
+        <div id="formules" class="content">
+            <h2>📐 Formules Essentielles</h2>
+            
+            <div class="formula-card">
+                <h4>Moment de Force</h4>
+                <div class="formula">M = F × d⊥</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • M : Newton-mètre (N·m)<br>
+                    • F : Force (N)<br>
+                    • d⊥ : Bras de levier perpendiculaire (m)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> Biceps tenant 10 kg à 35 cm du coude, inséré à 5 cm<br>
+                    M_charge = 98.1 N × 0.35 m = 34.3 N·m<br>
+                    F_biceps = 34.3 / 0.05 = 686 N
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>2e Loi de Newton</h4>
+                <div class="formula">F = m × a</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • F : Force résultante (N)<br>
+                    • m : Masse (kg)<br>
+                    • a : Accélération (m/s²)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> Accélérer 70 kg à 2 m/s²<br>
+                    F = 70 × 2 = 140 N
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Travail Mécanique</h4>
+                <div class="formula">W = F × d × cos(θ)</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • W : Travail (J = Joules)<br>
+                    • F : Force (N)<br>
+                    • d : Déplacement (m)<br>
+                    • θ : Angle entre force et déplacement
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> Soulever 80 kg sur 0.5 m<br>
+                    W = (80 × 9.81) × 0.5 = 392.4 J
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Puissance</h4>
+                <div class="formula">P = W / Δt = F × v</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • P : Puissance (W = Watts)<br>
+                    • W : Travail (J)<br>
+                    • Δt : Temps (s)<br>
+                    • v : Vitesse (m/s)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> 392.4 J en 2 secondes<br>
+                    P = 392.4 / 2 = 196.2 W
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Énergie Cinétique</h4>
+                <div class="formula">Ec = ½ m v²</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • Ec : Énergie cinétique (J)<br>
+                    • m : Masse (kg)<br>
+                    • v : Vitesse (m/s)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> 70 kg à 5 m/s<br>
+                    Ec = 0.5 × 70 × 25 = 875 J
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Énergie Potentielle</h4>
+                <div class="formula">Ep = m × g × h</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • Ep : Énergie potentielle (J)<br>
+                    • m : Masse (kg)<br>
+                    • g : 9.81 m/s²<br>
+                    • h : Hauteur (m)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> 70 kg à 1.5 m<br>
+                    Ep = 70 × 9.81 × 1.5 = 1030 J
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Contrainte (Stress)</h4>
+                <div class="formula">σ = F / A</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • σ : Contrainte (Pa = N/m² ou MPa)<br>
+                    • F : Force (N)<br>
+                    • A : Aire section (m²)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> Tendon 40 mm², force 2000 N<br>
+                    σ = 2000 / 40 = 50 MPa
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Déformation (Strain)</h4>
+                <div class="formula">ε = ΔL / L₀</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • ε : Déformation (sans unité ou %)<br>
+                    • ΔL : Changement longueur (m)<br>
+                    • L₀ : Longueur initiale (m)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> Ligament 30 mm étiré de 5 mm<br>
+                    ε = 5 / 30 = 0.167 = 16.7%
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Module de Young</h4>
+                <div class="formula">E = σ / ε</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • E : Module élasticité (Pa ou MPa)<br>
+                    • σ : Contrainte (Pa)<br>
+                    • ε : Déformation (sans unité)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> σ = 25 MPa, ε = 0.1<br>
+                    E = 25 / 0.1 = 250 MPa
+                </div>
+            </div>
+
+            <div class="formula-card">
+                <h4>Vitesse de Marche</h4>
+                <div class="formula">v = Cadence × Longueur_pas</div>
+                <div class="formula-details">
+                    <strong>Unités :</strong><br>
+                    • v : Vitesse (m/s)<br>
+                    • Cadence : pas/s<br>
+                    • Longueur_pas : (m)
+                </div>
+                <div class="formula-example">
+                    <strong>Exemple :</strong> 110 pas/min, 0.75 m/pas<br>
+                    v = (110/60) × 0.75 = 1.375 m/s
+                </div>
+            </div>
+        </div>
+
+        <div id="outils" class="content">
+            <h2>🛠️ Outils Interactifs</h2>
+            
+            <h3>Calculateur de Moment de Force</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <label>Force (N): <input type="number" id="force1" value="100"></label><br><br>
+                <label>Distance (m): <input type="number" id="dist1" step="0.01" value="0.35"></label><br><br>
+                <button onclick="calcMoment()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">Calculer</button>
+                <div id="result1" style="margin-top: 15px; font-weight: bold; color: #667eea;"></div>
+            </div>
+
+            <h3>Simulateur de Levier</h3>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                <canvas id="leverCanvas" width="600" height="300"></canvas>
+                <div class="canvas-controls">
+                    <label>Type: </label>
+                    <select id="leverType" onchange="drawLever()">
+                        <option value="1">1er genre</option>
+                        <option value="2">2e genre</option>
+                        <option value="3" selected>3e genre</option>
+                    </select>
+                    <label>Charge (kg): </label>
+                    <input type="number" id="leverLoad" value="10" onchange="drawLever()">
+                </div>
+                <button onclick="drawLever()" style="margin-top: 10px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">Mettre à jour</button>
+                <div id="leverInfo" style="margin-top: 15px; padding: 15px; background: white; border-radius: 5px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== GESTION ONGLETS ==========
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // ========== FLASHCARDS ==========
+        const flashcardsData = [
+            {q: "Qu'est-ce que la biomécanique ?", a: "La science qui applique les principes de la mécanique au système musculo-squelettique pour comprendre et analyser le mouvement humain."},
+            {q: "Quelle est la formule du moment de force ?", a: "M = F × d⊥ où M est le moment (N·m), F la force (N) et d⊥ le bras de levier perpendiculaire (m)."},
+            {q: "Quels sont les 3 types de leviers ?", a: "1er genre (inter-appui), 2e genre (inter-résistant), 3e genre (inter-moteur). Le corps utilise surtout le 3e genre."},
+            {q: "Qu'est-ce qu'un levier de 3e genre ?", a: "La force est entre l'appui et la résistance. Désavantage mécanique mais grande vitesse et amplitude. Exemple: flexion du coude."},
+            {q: "Où se situe le centre de gravité ?", a: "Souvent décrit près du bassin, approximativement en avant de S2 en position anatomique. Sa position varie selon la posture."},
+            {q: "Qu'est-ce que la base de support ?", a: "La surface délimitée par les points de contact avec le sol. Plus elle est large, plus l'équilibre est stable."},
+            {q: "Définissez la cinématique.", a: "Étude de la description du mouvement (position, vitesse, accélération) sans considération des forces qui le causent."},
+            {q: "Définissez la cinétique.", a: "Étude des forces qui créent ou modifient le mouvement. Inclut les lois de Newton."},
+            {q: "Énoncez la 2e loi de Newton.", a: "F = m × a. L'accélération est proportionnelle à la force et inversement proportionnelle à la masse."},
+            {q: "Énoncez la 3e loi de Newton.", a: "Pour chaque action, il existe une réaction égale et opposée. Les forces s'appliquent sur des corps différents."},
+            {q: "Qu'est-ce que la quantité de mouvement ?", a: "p = m × v (kg·m/s). C'est la mesure du mouvement d'un corps. Plus difficile à arrêter si grande."},
+            {q: "Qu'est-ce que l'impulsion ?", a: "I = F × Δt (N·s). L'impulsion change la quantité de mouvement. Augmenter le temps réduit la force nécessaire."},
+            {q: "Formule du travail mécanique ?", a: "W = F × d × cos(θ) en Joules. Travail positif si force et déplacement même sens, négatif sinon."},
+            {q: "Formule de la puissance ?", a: "P = W / Δt ou P = F × v en Watts. C'est le taux auquel le travail est effectué."},
+            {q: "Formule de l'énergie cinétique ?", a: "Ec = ½ m v² en Joules. Énergie du mouvement, proportionnelle au carré de la vitesse."},
+            {q: "Formule de l'énergie potentielle ?", a: "Ep = m × g × h en Joules. Énergie de position, proportionnelle à la hauteur."},
+            {q: "Qu'est-ce que la contrainte ?", a: "σ = F / A. Force par unité de surface (Pa ou MPa). Mesure le stress mécanique sur un tissu."},
+            {q: "Qu'est-ce que la déformation ?", a: "ε = ΔL / L₀. Changement de longueur relatif, sans unité ou en %. Mesure l'allongement ou compression."},
+            {q: "Qu'est-ce que le module de Young ?", a: "E = σ / ε. Mesure de la rigidité d'un matériau (Pa ou MPa). Plus E est élevé, plus rigide."},
+            {q: "Zone élastique vs zone plastique ?", a: "Élastique: déformation réversible. Plastique: déformation permanente (dommage). Au-delà: rupture."},
+            {q: "Qu'est-ce qu'une chaîne cinétique fermée ?", a: "Extrémité distale fixe (ex: squat, push-up). Plus fonctionnel, active plusieurs articulations, meilleur pour stabilité."},
+            {q: "Qu'est-ce qu'une chaîne cinétique ouverte ?", a: "Extrémité distale libre (ex: extension genou assis). Permet isolation musculaire, contrôle précis."},
+            {q: "Qu'est-ce que la loi de Wolff ?", a: "L'os se remodèle selon les contraintes appliquées. Surcharge → densification. Décharge → résorption."},
+            {q: "Les 5 types de contraintes tissulaires ?", a: "Tension (étirement), Compression (écrasement), Cisaillement (forces parallèles opposées), Torsion (rotation), Flexion (courbure)."},
+            {q: "Qu'est-ce que le cycle étirement-raccourcissement ?", a: "Phase excentrique (stockage d'énergie élastique, surtout dans les tendons) + transition courte + phase concentrique (restitution). Utilisé dans les sauts et les changements de direction."},
+            {q: "Relation force-longueur musculaire ?", a: "Force active maximale autour d'une longueur optimale. Si le muscle est trop raccourci ou trop allongé, la force active diminue."},
+            {q: "Relation force-vitesse musculaire ?", a: "Concentrique : plus la vitesse de raccourcissement augmente, plus la force diminue. Excentrique : en allongement actif, la force peut dépasser l'isométrique (selon conditions)."},
+            {q: "Vitesse de marche normale ?", a: "Dépend de l'âge, de la taille et de la condition. La vitesse augmente quand la cadence et/ou la longueur de pas augmentent (v ≈ cadence × longueur de pas)."},
+            {q: "Phases de la marche ?", a: "60% appui (contact, mise en charge, appui inter, propulsion) + 40% oscillante (flexion, passage, extension)."},
+            {q: "Qu'est-ce que le signe de Trendelenburg ?", a: "Chute du bassin côté controlatéral lors de l'appui unipodal. Indique faiblesse du moyen fessier."}
+        ];
+
+        let currentFlashcardIndex = 0;
+        let flashcardsToShow = [];
+        let flashcardStatus = {};
+        let isFlipped = false;
+
+        function initFlashcards() {
+            flashcardsData.forEach((card, index) => {
+                if (!flashcardStatus[index]) flashcardStatus[index] = 'unknown';
+            });
+            updateFlashcardStats();
+        }
+
+        function startFlashcards(mode) {
+            flashcardsToShow = [];
+            flashcardsData.forEach((card, index) => {
+                if (mode === 'all') flashcardsToShow.push(index);
+                else if (mode === 'difficult' && (flashcardStatus[index] === 'hesitate' || flashcardStatus[index] === 'unknown')) flashcardsToShow.push(index);
+                else if (mode === 'unknown' && flashcardStatus[index] === 'unknown') flashcardsToShow.push(index);
+            });
+            if (flashcardsToShow.length === 0) { alert('Aucune carte !'); return; }
+            flashcardsToShow.sort(() => Math.random() - 0.5);
+            currentFlashcardIndex = 0;
+            showFlashcard();
+        }
+
+        function showFlashcard() {
+            if (flashcardsToShow.length === 0) return;
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            const card = flashcardsData[cardIndex];
+            document.getElementById('flashcardText').textContent = card.q;
+            document.getElementById('flashcardButtons').style.display = 'none';
+            document.getElementById('flashcard').classList.remove('flipped');
+            isFlipped = false;
+            updateProgress();
+        }
+
+        function flipCard() {
+            if (flashcardsToShow.length === 0) return;
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            const card = flashcardsData[cardIndex];
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                document.getElementById('flashcardText').textContent = card.a;
+                document.getElementById('flashcardButtons').style.display = 'flex';
+                document.getElementById('flashcard').classList.add('flipped');
+            } else {
+                document.getElementById('flashcardText').textContent = card.q;
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+            }
+        }
+
+        function markCard(status) {
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            flashcardStatus[cardIndex] = status;
+            currentFlashcardIndex++;
+            if (currentFlashcardIndex >= flashcardsToShow.length) {
+                alert('Terminé ! 🎉');
+                document.getElementById('flashcardText').textContent = 'Cliquez sur "Démarrer"';
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+                flashcardsToShow = [];
+            } else {
+                showFlashcard();
+            }
+            updateFlashcardStats();
+        }
+
+        function updateProgress() {
+            const total = flashcardsToShow.length;
+            const current = currentFlashcardIndex + 1;
+            const percentage = (current / total) * 100;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = current + '/' + total;
+        }
+
+        function updateFlashcardStats() {
+            const total = flashcardsData.length;
+            let known = 0, hesitate = 0, unknown = 0;
+            for (let key in flashcardStatus) {
+                if (flashcardStatus[key] === 'known') known++;
+                else if (flashcardStatus[key] === 'hesitate') hesitate++;
+                else if (flashcardStatus[key] === 'unknown') unknown++;
+            }
+            document.getElementById('totalCards').textContent = total;
+            document.getElementById('knownCards').textContent = known;
+            document.getElementById('hesitateCards').textContent = hesitate;
+            document.getElementById('unknownCards').textContent = unknown;
+        }
+
+        function saveProgress() {
+            localStorage.setItem('biomech_flashcards', JSON.stringify(flashcardStatus));
+            alert('Sauvegardé ! 💾');
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('biomech_flashcards');
+            if (saved) {
+                flashcardStatus = JSON.parse(saved);
+                updateFlashcardStats();
+                alert('Chargé ! 📂');
+            } else alert('Aucune sauvegarde.');
+        }
+
+        function exportProgress() {
+            const dataStr = JSON.stringify(flashcardStatus, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'biomech_flashcards.json';
+            link.click();
+            alert('Exporté ! ⬇️');
+        }
+
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    flashcardStatus = JSON.parse(e.target.result);
+                    updateFlashcardStats();
+                    saveProgress();
+                    alert('Importé ! ⬆️');
+                } catch (error) {
+                    alert('Erreur import');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetProgress() {
+            if (confirm('Réinitialiser ?')) {
+                flashcardStatus = {};
+                initFlashcards();
+                saveProgress();
+                alert('Réinitialisé ! 🔄');
+            }
+        }
+
+        // ========== OUTILS ==========
+        function calcMoment() {
+            const f = parseFloat(document.getElementById('force1').value);
+            const d = parseFloat(document.getElementById('dist1').value);
+            const m = f * d;
+            document.getElementById('result1').innerHTML = 
+                'Moment de force = ' + m.toFixed(2) + ' N·m';
+        }
+
+                function drawLever() {
+            const canvas = document.getElementById('leverCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const type = document.getElementById('leverType').value;
+            const loadKg = parseFloat(document.getElementById('leverLoad').value);
+            const g = 9.81;
+            const loadN = loadKg * g;
+
+            // Petites distances "pédagogiques" (m) pour illustrer les avantages mécaniques.
+            // L'utilisateur règle uniquement la charge (kg).
+            let dLoad = 0.30;     // bras de levier de la charge (m)
+            let dEffort = 0.05;   // bras de levier de l'effort (m)
+            let title = '';
+            let example = '';
+
+            if (type === '1') {
+                title = 'Levier 1er genre (inter-appui) – Exemple : extension de la tête';
+                // Pivot au milieu, charge d'un côté, effort de l'autre
+                dLoad = 0.10;    // charge proche (ex: poids de la tête par rapport à l’articulation atlanto-occipitale)
+                dEffort = 0.05;  // bras des extenseurs cervicaux (illustratif)
+                example = 'Plus équilibré : avantage mécanique dépend des distances.';
+            } else if (type === '2') {
+                title = 'Levier 2e genre (inter-résistant) – Exemple : montée sur pointe (triceps sural)';
+                // Charge entre pivot et effort : avantage mécanique souvent > 1
+                dLoad = 0.05;     // bras de levier du poids du corps (illustratif)
+                dEffort = 0.15;   // bras du tendon d’Achille (illustratif)
+                example = 'Avantage mécanique : l’effort peut être < charge.';
+            } else {
+                title = 'Levier 3e genre (inter-moteur) – Exemple : biceps au coude';
+                dLoad = 0.35;
+                dEffort = 0.05;
+                example = 'Très fréquent : grande vitesse/amplitude, mais effort musculaire élevé.';
+            }
+
+            // Calculs
+            const momentLoad = loadN * dLoad;      // N·m
+            const effortN = momentLoad / dEffort;  // N
+            const mechAdv = dEffort / dLoad;       // MA (effort arm / load arm)
+
+            // Dessin simplifié
+            ctx.fillStyle = '#667eea';
+            ctx.font = '16px Arial';
+            ctx.fillText(title, 120, 30);
+
+            // Barre
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(80, 150);
+            ctx.lineTo(520, 150);
+            ctx.stroke();
+
+            // Positionnements graphiques
+            let xPivot = 120, xLoad = 300, xEffort = 480;
+            if (type === '1') { xPivot = 300; xLoad = 430; xEffort = 170; }
+            else if (type === '2') { xPivot = 120; xLoad = 260; xEffort = 480; }
+            else { xPivot = 120; xEffort = 210; xLoad = 450; }
+
+            // Pivot
+            ctx.fillStyle = '#dc3545';
+            ctx.fillRect(xPivot - 5, 140, 10, 20);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Appui', xPivot - 18, 185);
+
+            // Charge
+            ctx.fillStyle = '#ffc107';
+            ctx.fillRect(xLoad - 15, 150, 30, 30);
+            ctx.fillStyle = '#333';
+            ctx.fillText('Charge', xLoad - 18, 205);
+
+            // Effort (flèche)
+            ctx.strokeStyle = '#28a745';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(xEffort, 150);
+            ctx.lineTo(xEffort, 80);
+            ctx.stroke();
+            ctx.fillStyle = '#333';
+            ctx.fillText('Effort', xEffort - 18, 75);
+
+            // Infos
+            document.getElementById('leverInfo').innerHTML =
+                '<strong>' + example + '</strong><br><br>' +
+                '<strong>Données pédagogiques :</strong><br>' +
+                'Charge = ' + loadKg.toFixed(1) + ' kg (' + loadN.toFixed(1) + ' N)<br>' +
+                'Bras de levier charge d = ' + dLoad.toFixed(2) + ' m<br>' +
+                'Bras de levier effort d = ' + dEffort.toFixed(2) + ' m<br><br>' +
+                '<strong>Calculs :</strong><br>' +
+                'Moment de la charge = F × d = ' + momentLoad.toFixed(2) + ' N·m<br>' +
+                'Effort nécessaire = Moment / d_effort = ' + effortN.toFixed(0) + ' N (' + (effortN / g).toFixed(1) + ' kg)<br>' +
+                'Avantage mécanique (d_effort/d_charge) = ' + mechAdv.toFixed(2) + '<br>' +
+                (mechAdv > 1 ? '<em>Levier avantageux (effort &lt; charge)</em>' : '<em>Levier désavantageux (effort &gt; charge)</em>');
+        }
+
+                // ========== COURS : NIVEAUX ==========
+        function setCourseLevel(level) {
+            const sections = document.querySelectorAll('#cours .course-section');
+            const btns = document.querySelectorAll('#cours .level-btn');
+            sections.forEach(s => s.classList.remove('active'));
+            btns.forEach(b => b.classList.remove('active'));
+            const target = document.getElementById('course-' + level);
+            if (target) target.classList.add('active');
+            const btn = document.querySelector('#cours .level-btn[data-level="' + level + '"]');
+            if (btn) btn.classList.add('active');
+        }
+
+        // ========== QUIZ (questions ouvertes) ==========
+        const quizData = [
+            {
+                q: "Un patient tient 5 kg à 30 cm du coude. Le biceps s'insère à 4 cm. Quelle force doit produire le biceps (sans co-contraction) ?",
+                a: "Convertir la masse en force : F = 5 × 9,81 = 49,1 N.\nMoment de la charge : M = 49,1 × 0,30 = 14,7 N·m.\nÉquilibre au coude : F_biceps = M / 0,04 = 367,5 N (≈ 37,5 kgf)."
+            },
+            {
+                q: "Définir : cinématique vs cinétique. Donne un exemple clinique pour chacune.",
+                a: "Cinématique = description du mouvement (angles, vitesses) sans forces. Exemple : mesurer l'angle de flexion du genou pendant la marche.\nCinétique = causes du mouvement (forces, moments). Exemple : estimer le moment d'extension du genou à partir de la réaction du sol."
+            },
+            {
+                q: "Écrire les conditions d'équilibre en statique (plan).",
+                a: "Somme des forces = 0 (ΣFx=0 et ΣFy=0) et somme des moments = 0 (ΣM=0) autour d'un point choisi."
+            },
+            {
+                q: "Un sac de 8 kg est porté à la main, 0,60 m en avant de l'épaule. Quelle est la valeur du moment au niveau de l'épaule (approx.) ?",
+                a: "Force du sac : F = 8 × 9,81 = 78,5 N.\nMoment : M = 78,5 × 0,60 = 47,1 N·m."
+            },
+            {
+                q: "Explique pourquoi un levier de 3e genre est très fréquent dans le corps malgré un désavantage mécanique.",
+                a: "Levier 3e genre : insertion musculaire proche de l'articulation → bras de levier muscle petit → effort élevé, MAIS cela permet grande vitesse angulaire et grande amplitude au segment distal (mouvement rapide/fonctionnel)."
+            },
+            {
+                q: "Travail mécanique : donner la formule et interpréter le rôle de l'angle θ.",
+                a: "W = F × d × cos(θ).\nSi θ=0° : travail maximal (force dans le sens du déplacement).\nSi θ=90° : travail nul (force perpendiculaire au déplacement).\nSi θ>90° : travail négatif (freinage, excentrique)."
+            },
+            {
+                q: "Puissance : donner 2 expressions et une interprétation en rééducation.",
+                a: "P = W/Δt et P = F × v.\nInterprétation : produire la même force plus vite = puissance plus élevée (important pour monter les escaliers, se relever, saut…)."
+            },
+            {
+                q: "Définir contrainte (σ) et déformation (ε). Donner les unités.",
+                a: "Contrainte : σ = F/A (Pa = N/m²).\nDéformation : ε = ΔL/L0 (sans unité, souvent en %)."
+            },
+            {
+                q: "Un tendon subit 1500 N sur une section de 60 mm². Calculer la contrainte en MPa.",
+                a: "A = 60 mm² = 60×10⁻⁶ m² = 6,0×10⁻⁵ m².\nσ = 1500 / 6,0×10⁻⁵ = 25 000 000 Pa = 25 MPa."
+            },
+            {
+                q: "Explique la différence entre centre de masse et centre de pression (CoP) en posturographie.",
+                a: "Centre de masse (CoM) = point représentant la distribution de masse du corps.\nCentre de pression (CoP) = point d'application résultant des forces de réaction du sol sous les pieds (mesuré par plate-forme).\nLe contrôle postural ajuste le CoP pour maintenir la projection du CoM dans la base de support."
+            },
+            {
+                q: "Décrire brièvement les phases du cycle de marche et leurs proportions chez un adulte à vitesse confortable.",
+                a: "Cycle = environ 60% phase d'appui (contact au sol) et 40% phase oscillante (pied en l'air). Les proportions varient avec la vitesse."
+            },
+            {
+                q: "Pourquoi la force musculaire peut-elle être > au poids porté dans certains gestes (ex: coude, épaule) ?",
+                a: "À cause des bras de levier : les insertions musculaires sont proches de l'articulation (petit d), alors que la charge est loin (grand d). Pour équilibrer les moments, F_muscle doit être élevée."
+            },
+            {
+                q: "Donner un exemple de cisaillement au niveau d'une articulation (vie quotidienne) et expliquer le risque.",
+                a: "Exemple : glisser vers l'avant sur une chaise (bassin avance) → cisaillement sur la colonne lombaire/disques.\nRisque : augmentation contraintes sur structures passives et douleur si contrôle insuffisant."
+            },
+            {
+                q: "Qu'est-ce que la 3e loi de Newton ? Appliquer à la marche.",
+                a: "Action-réaction : si le pied pousse le sol vers l'arrière et vers le bas, le sol exerce une force égale et opposée sur le corps (réaction du sol) qui contribue à la propulsion et au soutien."
+            },
+            {
+                q: "Dans un squat, citer 2 facteurs qui augmentent le moment au genou ou à la hanche.",
+                a: "1) Augmenter la distance horizontale entre la ligne d'action du poids (centre de masse) et l'articulation (bras de levier).\n2) Augmenter la charge externe (haltère, sac)."
+            },
+            {
+                q: "Différence chaîne cinétique ouverte vs fermée (avec un exemple de renforcement).",
+                a: "Ouverte : segment distal libre (ex : extension du genou assis).\nFermée : segment distal fixé (ex : squat).\nLa fermée sollicite souvent plus la coordination et la stabilité."
+            },
+            {
+                q: "Définir avantage mécanique d'un levier et donner l'expression.",
+                a: "Avantage mécanique (AM) = bras de levier effort / bras de levier charge.\nAM > 1 : effort < charge (levier avantageux). AM < 1 : effort > charge."
+            },
+            {
+                q: "Une force de 120 N est appliquée avec un bras de levier perpendiculaire de 0,25 m. Calculer le moment.",
+                a: "M = 120 × 0,25 = 30 N·m."
+            },
+            {
+                q: "Explique en une phrase la loi de Wolff (os) et donne une conséquence clinique.",
+                a: "L'os se remodèle selon les contraintes mécaniques : plus de charge → adaptation/renforcement ; moins de charge → perte de densité.\nConséquence : immobilisation prolongée → déminéralisation, d'où reprise progressive du chargement."
+            }
+        ];
+
+        let quizOrder = [];
+        let quizIndex = 0;
+        let quizAnswerShown = false;
+
+        function startQuiz() {
+            quizOrder = quizData.map((_, i) => i).sort(() => Math.random() - 0.5);
+            quizIndex = 0;
+            quizAnswerShown = false;
+            renderQuiz();
+        }
+
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            if (!quizOrder.length) {
+                container.innerHTML = '<div class="quiz-question"><p>Clique sur "🎲 Lancer" pour démarrer.</p></div>';
+                return;
+            }
+            const item = quizData[quizOrder[quizIndex]];
+            container.innerHTML = `
+                <div class="quiz-question">
+                    <h4>Question ${quizIndex + 1} / ${quizOrder.length}</h4>
+                    <p style="line-height:1.8; margin-bottom: 15px;">${item.q}</p>
+                    <div id="quizAnswer" class="correction-box" style="display:${quizAnswerShown ? 'block' : 'none'};">
+                        <strong>Réponse :</strong><br><pre style="white-space:pre-wrap; font-family:inherit; margin-top:10px;">${item.a}</pre>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showQuizAnswer() {
+            if (!quizOrder.length) return;
+            quizAnswerShown = true;
+            const ans = document.getElementById('quizAnswer');
+            if (ans) ans.style.display = 'block';
+        }
+
+        function nextQuizQuestion() {
+            if (!quizOrder.length) return;
+            quizIndex++;
+            if (quizIndex >= quizOrder.length) {
+                alert('Quiz terminé ! 🎉');
+                quizOrder = [];
+                quizIndex = 0;
+                quizAnswerShown = false;
+            }
+            quizAnswerShown = false;
+            renderQuiz();
+        }
+
+        // ========== QCM ==========
+        const qcmData = [
+            { q: "Quelle est l'unité d'une force ?", options: ["kg", "N", "J", "W"], correct: 1 },
+            { q: "Le moment de force s'exprime en :", options: ["N", "N·m", "Pa", "kg·m/s"], correct: 1 },
+            { q: "Un levier de 3e genre est :", options: ["Inter-appui", "Inter-résistant", "Inter-moteur", "Toujours avantageux"], correct: 2 },
+            { q: "Dans le corps, le type de levier le plus fréquent est :", options: ["1er genre", "2e genre", "3e genre", "Aucun"], correct: 2 },
+            { q: "Cinématique = étude :", options: ["Des forces", "Du mouvement sans forces", "Des tissus", "Des pathologies"], correct: 1 },
+            { q: "Cinétique = étude :", options: ["Des forces qui causent le mouvement", "Des angles uniquement", "Du bruit articulaire", "De l'équilibre chimique"], correct: 0 },
+            { q: "2e loi de Newton :", options: ["F = m × a", "W = F × d", "P = W/Δt", "σ = F/A"], correct: 0 },
+            { q: "Le travail mécanique W est maximal si l'angle θ entre force et déplacement vaut :", options: ["0°", "45°", "90°", "180°"], correct: 0 },
+            { q: "Si θ = 90°, le travail W vaut :", options: ["Maximal", "0", "Négatif", "Impossible à calculer"], correct: 1 },
+            { q: "Puissance P (une expression) :", options: ["P = F/A", "P = m×a", "P = W/Δt", "P = v/Δt"], correct: 2 },
+            { q: "Contrainte (stress) :", options: ["σ = ΔL/L0", "σ = F/A", "σ = m×g", "σ = F×d"], correct: 1 },
+            { q: "Déformation (strain) :", options: ["ε = ΔL/L0", "ε = F/A", "ε = F×d", "ε = W/Δt"], correct: 0 },
+            { q: "Module de Young :", options: ["E = σ/ε", "E = ε/σ", "E = F×d", "E = m×a"], correct: 0 },
+            { q: "Une chaîne cinétique fermée signifie :", options: ["Segment distal libre", "Segment distal fixé", "Aucune articulation", "Toujours un mouvement 3D"], correct: 1 },
+            { q: "Exemple de chaîne ouverte :", options: ["Squat", "Pompe", "Extension genou assis", "Montée sur marche"], correct: 2 },
+            { q: "Exemple de chaîne fermée :", options: ["Flexion du coude avec haltère", "Extension genou assis", "Squat", "Rotation du poignet"], correct: 2 },
+            { q: "La 3e loi de Newton correspond à :", options: ["Action-réaction", "Inertie", "Gravitation", "Conservation de l'énergie"], correct: 0 },
+            { q: "Le centre de pression (CoP) est :", options: ["Un point au niveau de S2", "Le point d'application résultant de la réaction du sol", "Toujours fixe", "Le centre anatomique du pied"], correct: 1 },
+            { q: "Dans un levier, l'avantage mécanique (AM) est :", options: ["d_charge / d_effort", "d_effort / d_charge", "F_charge / F_effort", "Toujours 1"], correct: 1 },
+            { q: "Si AM < 1 :", options: ["Effort < charge", "Effort = charge", "Effort > charge", "Moment nul"], correct: 2 },
+            { q: "La marche normale comporte environ :", options: ["40% appui / 60% oscillation", "60% appui / 40% oscillation", "50/50", "90/10"], correct: 1 },
+            { q: "La réaction du sol est une force :", options: ["Interne", "Externe", "Toujours nulle", "Toujours horizontale"], correct: 1 },
+            { q: "Un schéma de corps libre sert à :", options: ["Dessiner les muscles en couleur", "Lister les forces et leurs points d'application", "Calculer la VO2 max", "Mesurer la douleur"], correct: 1 },
+            { q: "Le bras de levier perpendiculaire d⊥ est :", options: ["La distance la plus courte à l'axe", "La longueur du segment osseux", "Toujours la même", "Une unité de force"], correct: 0 },
+            { q: "La contrainte s'exprime souvent en :", options: ["m/s", "MPa", "kg", "rad"], correct: 1 },
+            { q: "Une augmentation de la vitesse de marche tend à :", options: ["Augmenter le % de double appui", "Diminuer le % de double appui", "Supprimer la phase d'appui", "Rendre l'appui toujours 80%"], correct: 1 },
+            { q: "Dans un levier 2e genre (inter-résistant), l'AM est souvent :", options: ["< 1", "> 1", "= 0", "Toujours négatif"], correct: 1 },
+            { q: "Le “toe region” (tendon/ligament) correspond plutôt à :", options: ["Alignement des fibres au début de charge", "Rupture immédiate", "Zone parfaitement linéaire", "Zone sans déformation"], correct: 0 },
+            { q: "Une déformation plastique signifie :", options: ["Déformation réversible", "Déformation permanente", "Absence de contrainte", "Travail nul"], correct: 1 },
+            { q: "Le travail excentrique correspond le plus souvent à :", options: ["Travail négatif", "Travail nul", "Travail maximal positif", "Pas de force"], correct: 0 },
+            { q: "Le moment est maximal quand :", options: ["La force est alignée avec l'axe", "d⊥ est maximal", "d⊥ = 0", "La charge est 0"], correct: 1 },
+            { q: "Loi de Wolff :", options: ["L'os ne change jamais", "L'os s'adapte aux contraintes", "Le tendon s'adapte aux hormones", "Le cartilage se calcifie toujours"], correct: 1 },
+            { q: "Dynamique inverse =", options: ["Calculer les forces à partir du mouvement + forces externes", "Calculer le mouvement à partir des forces internes uniquement", "Mesurer la douleur", "Mesurer la souplesse"], correct: 0 },
+            { q: "Une force de frottement s'oppose :", options: ["Au poids", "Au mouvement relatif", "À la gravité", "Au moment"], correct: 1 },
+            { q: "Unité d'énergie :", options: ["N", "J", "Pa", "kg"], correct: 1 },
+            { q: "Unité de puissance :", options: ["J", "W", "N", "m"], correct: 1 },
+            { q: "Énergie potentielle gravitationnelle :", options: ["Ep = 1/2 mv²", "Ep = mgh", "Ep = F/A", "Ep = Fd"], correct: 1 },
+            { q: "Énergie cinétique :", options: ["Ec = 1/2 mv²", "Ec = mgh", "Ec = σ/ε", "Ec = W/Δt"], correct: 0 }
+        ];
+
+        let qcmOrder = [];
+        let qcmIndex = 0;
+        let qcmSelected = null;
+        let qcmAnswered = false;
+        let qcmScoreVal = 0;
+
+        function startQCM() {
+            qcmOrder = qcmData.map((_, i) => i).sort(() => Math.random() - 0.5);
+            qcmIndex = 0;
+            qcmSelected = null;
+            qcmAnswered = false;
+            qcmScoreVal = 0;
+            renderQCM();
+            document.getElementById('qcmScore').innerHTML = '';
+        }
+
+        function renderQCM() {
+            const container = document.getElementById('qcmContainer');
+            if (!qcmOrder.length) {
+                container.innerHTML = '<div class="quiz-question"><p>Clique sur "🎲 Lancer" pour démarrer un QCM.</p></div>';
+                return;
+            }
+            const item = qcmData[qcmOrder[qcmIndex]];
+            container.innerHTML = `
+                <div class="quiz-question">
+                    <h4>QCM ${qcmIndex + 1} / ${qcmOrder.length}</h4>
+                    <p style="line-height:1.8; margin-bottom: 15px;">${item.q}</p>
+                    <div class="quiz-options">
+                        ${item.options.map((opt, i) => `
+                            <div class="quiz-option" id="qcmOpt${i}" onclick="selectQCMOption(${i})">${opt}</div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectQCMOption(i) {
+            if (!qcmOrder.length) return;
+            if (qcmAnswered) return;
+            qcmSelected = i;
+            // UI
+            const opts = document.querySelectorAll('#qcmContainer .quiz-option');
+            opts.forEach(o => o.classList.remove('selected'));
+            const el = document.getElementById('qcmOpt' + i);
+            if (el) el.classList.add('selected');
+        }
+
+        function submitQCM() {
+            if (!qcmOrder.length) return;
+            if (qcmAnswered) return;
+            if (qcmSelected === null) { alert('Choisis une réponse.'); return; }
+
+            const item = qcmData[qcmOrder[qcmIndex]];
+            const opts = document.querySelectorAll('#qcmContainer .quiz-option');
+            opts.forEach((o, i) => {
+                o.classList.remove('selected');
+                if (i === item.correct) o.classList.add('correct');
+                else if (i === qcmSelected) o.classList.add('incorrect');
+            });
+
+            if (qcmSelected === item.correct) qcmScoreVal++;
+            qcmAnswered = true;
+
+            document.getElementById('qcmScore').innerHTML =
+                '<div class="important-box"><strong>Score :</strong> ' + qcmScoreVal + ' / ' + (qcmIndex + 1) + '</div>';
+        }
+
+        function nextQCM() {
+            if (!qcmOrder.length) return;
+            qcmIndex++;
+            if (qcmIndex >= qcmOrder.length) {
+                alert('QCM terminé ! 🎉');
+                document.getElementById('qcmScore').innerHTML =
+                    '<div class="important-box"><strong>Score final :</strong> ' + qcmScoreVal + ' / ' + qcmOrder.length + '</div>';
+                qcmOrder = [];
+                qcmIndex = 0;
+                qcmSelected = null;
+                qcmAnswered = false;
+                renderQCM();
+                return;
+            }
+            qcmSelected = null;
+            qcmAnswered = false;
+            renderQCM();
+        }
+
+        // ========== VRAI / FAUX ==========
+        const vraiFauxData = [
+            { q: "Le moment de force se calcule avec M = F × d⊥.", a: true },
+            { q: "Si la force passe par l'axe de rotation, le moment est maximal.", a: false },
+            { q: "La cinématique étudie les forces responsables du mouvement.", a: false },
+            { q: "La cinétique étudie les forces et moments responsables du mouvement.", a: true },
+            { q: "La marche normale est environ 60% appui et 40% oscillation.", a: true },
+            { q: "Un levier de 2e genre est généralement désavantageux mécaniquement.", a: false },
+            { q: "Un levier de 3e genre est souvent utilisé pour obtenir vitesse et amplitude.", a: true },
+            { q: "Le travail mécanique est nul si la force est perpendiculaire au déplacement.", a: true },
+            { q: "La puissance est le travail divisé par le temps.", a: true },
+            { q: "La contrainte est une force par unité de surface.", a: true },
+            { q: "La déformation ε a des unités de Newton.", a: false },
+            { q: "Le module de Young reflète la rigidité : plus E est grand, plus c'est rigide.", a: true },
+            { q: "Une déformation plastique est toujours réversible.", a: false },
+            { q: "En chaîne cinétique fermée, l'extrémité distale est fixe.", a: true },
+            { q: "Le centre de pression (CoP) est identique au centre de masse (CoM).", a: false },
+            { q: "La réaction du sol est une force externe.", a: true },
+            { q: "En statique plane, l'équilibre impose ΣF=0 et ΣM=0.", a: true },
+            { q: "Dans un levier, l'avantage mécanique est d_effort/d_charge.", a: true },
+            { q: "Si AM < 1, l'effort est inférieur à la charge.", a: false },
+            { q: "Loi de Wolff : l'os s'adapte aux contraintes mécaniques.", a: true },
+            { q: "Le “toe region” d'un tendon correspond au redressement/alignment des fibres au début de charge.", a: true },
+            { q: "Le travail excentrique est typiquement positif.", a: false },
+            { q: "Le moment au genou augmente si la ligne de gravité s'éloigne du genou (bras de levier ↑).", a: true },
+            { q: "Augmenter la base de support diminue la stabilité.", a: false },
+            { q: "Une accélération est un changement de vitesse (valeur ou direction).", a: true },
+            { q: "L'énergie cinétique dépend du carré de la vitesse.", a: true },
+            { q: "L'énergie potentielle gravitationnelle dépend de la hauteur.", a: true },
+            { q: "L'unité de puissance est le Joule.", a: false },
+            { q: "Unité de contrainte : Pascal (Pa).", a: true },
+            { q: "La 3e loi de Newton s'applique sur le même corps uniquement.", a: false },
+            { q: "En marche, le double appui diminue quand la vitesse augmente.", a: true },
+            { q: "La force de frottement est toujours parallèle à la surface de contact.", a: true },
+            { q: "Un schéma de corps libre doit représenter les forces externes et leurs points d'application.", a: true },
+            { q: "Si d⊥ double, le moment double (à force constante).", a: true },
+            { q: "La force musculaire nécessaire au coude est souvent très proche de la charge (1:1).", a: false },
+            { q: "Le bras de levier dépend de l'angle : il peut changer au cours du mouvement.", a: true },
+            { q: "En équilibre, on choisit souvent le point de calcul des moments pour simplifier les inconnues.", a: true },
+            { q: "La chaîne ouverte est toujours plus “fonctionnelle” que la chaîne fermée.", a: false },
+            { q: "Dans le squat, avancer les genoux augmente généralement le moment au genou.", a: true },
+            { q: "La stabilité augmente si le centre de gravité est plus bas.", a: true },
+            { q: "Le travail est une forme de transfert d'énergie.", a: true },
+            { q: "La réaction du sol peut être décomposée en composantes verticale et horizontale.", a: true },
+            { q: "La marche ne comporte jamais de phase de double appui.", a: false },
+            { q: "Les leviers de 1er genre ont toujours un avantage mécanique > 1.", a: false },
+            { q: "Le moment (torque) est un vecteur (il a une direction).", a: true },
+            { q: "L'accélération angulaire est la dérivée de la vitesse angulaire.", a: true },
+            { q: "Le centre de masse est fixe quelle que soit la posture.", a: false },
+            { q: "En levier 2e genre, la force musculaire peut être inférieure à la charge.", a: true }
+        ];
+
+        let vfOrder = [];
+        let vfIndex = 0;
+        let vfSelected = null;
+        let vfChecked = false;
+
+        function startVraiFaux() {
+            vfOrder = vraiFauxData.map((_, i) => i).sort(() => Math.random() - 0.5);
+            vfIndex = 0;
+            vfSelected = null;
+            vfChecked = false;
+            renderVraiFaux();
+        }
+
+        function renderVraiFaux() {
+            const container = document.getElementById('vraiFauxContainer');
+            if (!vfOrder.length) {
+                container.innerHTML = '<div class="quiz-question"><p>Clique sur "🎲 Lancer" pour démarrer.</p></div>';
+                return;
+            }
+            const item = vraiFauxData[vfOrder[vfIndex]];
+            container.innerHTML = `
+                <div class="quiz-question">
+                    <h4>Vrai/Faux ${vfIndex + 1} / ${vfOrder.length}</h4>
+                    <p style="line-height:1.8; margin-bottom: 15px;">${item.q}</p>
+                    <div class="quiz-options">
+                        <div class="quiz-option" id="vfTrue" onclick="selectVraiFaux(true)">Vrai</div>
+                        <div class="quiz-option" id="vfFalse" onclick="selectVraiFaux(false)">Faux</div>
+                    </div>
+                    <div id="vfFeedback" class="correction-box" style="display:none; margin-top:15px;"></div>
+                </div>
+            `;
+        }
+
+        function selectVraiFaux(val) {
+            if (!vfOrder.length) return;
+            if (vfChecked) return;
+            vfSelected = val;
+            document.getElementById('vfTrue').classList.remove('selected');
+            document.getElementById('vfFalse').classList.remove('selected');
+            document.getElementById(val ? 'vfTrue' : 'vfFalse').classList.add('selected');
+        }
+
+        function checkVraiFaux() {
+            if (!vfOrder.length) return;
+            if (vfChecked) return;
+            if (vfSelected === null) { alert('Choisis Vrai ou Faux.'); return; }
+
+            const item = vraiFauxData[vfOrder[vfIndex]];
+            const isCorrect = (vfSelected === item.a);
+
+            // couleurs
+            const t = document.getElementById('vfTrue');
+            const f = document.getElementById('vfFalse');
+            t.classList.remove('selected'); f.classList.remove('selected');
+            if (item.a === true) t.classList.add('correct'); else t.classList.add('incorrect');
+            if (item.a === false) f.classList.add('correct'); else f.classList.add('incorrect');
+
+            const fb = document.getElementById('vfFeedback');
+            fb.style.display = 'block';
+            fb.innerHTML = isCorrect ? '<strong>✅ Correct</strong>' : '<strong>❌ Incorrect</strong>';
+            vfChecked = true;
+        }
+
+        function nextVraiFaux() {
+            if (!vfOrder.length) return;
+            vfIndex++;
+            if (vfIndex >= vfOrder.length) {
+                alert('Série terminée ! 🎉');
+                vfOrder = [];
+                vfIndex = 0;
+                vfSelected = null;
+                vfChecked = false;
+                renderVraiFaux();
+                return;
+            }
+            vfSelected = null;
+            vfChecked = false;
+            renderVraiFaux();
+        }
+
+        // ========== EXERCICES ==========
+        const exercisesData = [
+            {
+                title: "Exercice 1 — Moment au coude (levier 3e genre)",
+                statement: "Un patient tient 6 kg à 35 cm du coude (avant-bras horizontal). Le biceps s'insère à 5 cm.\n1) Calcule le moment de la charge au coude.\n2) Calcule la force du biceps nécessaire (équilibre).\n3) Interprète le résultat (avantage mécanique).",
+                help: "Étapes :\n• Convertir kg → N (×9,81)\n• Moment : M = F × d\n• Force biceps : F = M / d_biceps\n• AM = d_biceps / d_charge",
+                correction: "F_charge = 6×9,81 = 58,9 N\nM = 58,9×0,35 = 20,6 N·m\nF_biceps = 20,6 / 0,05 = 412 N (≈ 42 kgf)\nAM = 0,05/0,35 = 0,14 → désavantage : le muscle doit produire ~7× la charge."
+            },
+            {
+                title: "Exercice 2 — Travail et puissance (montée de marche)",
+                statement: "Une personne de 70 kg monte une marche de 0,20 m.\n1) Estime le travail mécanique minimal contre la gravité.\n2) Si elle met 0,5 s, quelle puissance moyenne ?",
+                help: "Travail gravitationnel : W = m×g×h.\nPuissance : P = W/Δt.",
+                correction: "W = 70×9,81×0,20 = 137,3 J\nP = 137,3 / 0,5 = 274,6 W"
+            },
+            {
+                title: "Exercice 3 — Contrainte dans un tendon",
+                statement: "Un tendon supporte 2000 N. Sa section est de 80 mm².\n1) Calculer la contrainte σ en MPa.\n2) Dire ce qui se passe si la section diminue (toutes choses égales).",
+                help: "Convertir mm² en m² : 1 mm² = 10⁻⁶ m².\nσ = F/A.",
+                correction: "A = 80×10⁻⁶ = 8,0×10⁻⁵ m²\nσ = 2000 / 8,0×10⁻⁵ = 25 000 000 Pa = 25 MPa\nSi A diminue, σ augmente → risque mécanique plus élevé."
+            },
+            {
+                title: "Exercice 4 — Équilibre et base de support",
+                statement: "Explique (avec un schéma si tu veux) pourquoi écarter les pieds améliore la stabilité en station debout.\nPuis cite 2 stratégies posturales utilisées quand on est perturbé.",
+                help: "Mots-clés : base de support, projection du centre de gravité, polygone de sustentation.\nStratégies : cheville, hanche, pas.",
+                correction: "Écarter les pieds ↑ la base de support : la projection du centre de gravité a plus de marge avant de sortir du polygone, donc stabilité ↑.\nStratégies classiques : stratégie de cheville (petites perturbations), stratégie de hanche (plus grandes), stratégie du pas (récupération)."
+            },
+            {
+                title: "Exercice 5 — Analyse simple du cycle de marche",
+                statement: "Définis les phases 'appui' et 'oscillation' et donne leurs proportions approximatives en marche normale.\nExplique ce qui arrive au double appui quand la vitesse augmente.",
+                help: "Retenir : appui ~60%, oscillation ~40% (variable).\nQuand la vitesse ↑, le double appui ↓ et peut disparaître en course.",
+                correction: "Appui : pied en contact avec le sol (~60%).\nOscillation : pied en l'air (~40%).\nQuand la vitesse ↑, le temps de double appui diminue ; en course il n'y a plus de double appui (phase aérienne)."
+            },
+            {
+                title: "Exercice 6 — Levier 2e genre : pointe des pieds (pédagogique)",
+                statement: "En te basant sur l'outil 'Simulateur de Levier' (type 2), explique pourquoi ce levier est considéré comme 'avantageux'.\nRelie cela au rôle du triceps sural lors de la propulsion.",
+                help: "Regarde l'avantage mécanique AM = d_effort / d_charge.\nSi AM > 1, l'effort nécessaire peut être plus faible que la charge.",
+                correction: "Dans un levier 2e genre, la charge est entre pivot et effort, et le bras de levier de l'effort est souvent plus grand : AM > 1.\nCela permet au triceps sural de produire la propulsion avec une efficacité mécanique relative (selon les distances), surtout en fin d'appui."
+            },
+            {
+                title: "Exercice 7 — Schéma de corps libre (FBD) : sac à dos",
+                statement: "Tu portes un sac à dos. Explique avec un schéma de corps libre quelles forces externes agissent sur le système 'corps + sac' en station debout.\nQuel est le rôle des forces de réaction du sol ?",
+                help: "Forces externes : poids total (vers le bas), réactions du sol (vers le haut) sous chaque pied, éventuellement frottements (horizontaux).\nEn statique : ΣF=0, ΣM=0.",
+                correction: "FBD :\n• Poids (corps + sac) vers le bas au niveau du centre de gravité global.\n• Réactions du sol sous les pieds (verticales) + éventuelles composantes horizontales si déséquilibre.\nRôle : compenser le poids (ΣFy=0) et fournir les moments nécessaires pour l'équilibre."
+            },
+            {
+                title: "Exercice 8 — Interprétation clinique : bras de levier à l'épaule",
+                statement: "Pourquoi lever le bras tendu (abduction) fatigue rapidement l'épaule ?\nPropose 2 adaptations pour faciliter l'exercice chez un patient douloureux.",
+                help: "Mots-clés : bras de levier, moment, insertion deltoïde, charge au bout du bras.\nAdaptations : plier le coude, réduire amplitude, support du membre, charge plus faible.",
+                correction: "Bras tendu : la charge (poids du membre/charge externe) est loin de l'épaule → grand bras de levier → moment élevé → deltoïde/coiffe doivent fournir une grande force.\nAdaptations :\n1) Plier le coude ou rapprocher la charge du corps (d diminue).\n2) Réduire l'amplitude ou utiliser un support/plan incliné.\n3) Diminuer la charge externe."
+            }
+
+            ,
+            {q: "Différence entre masse et poids ?", a: "Masse (kg) = quantité de matière. Poids (N) = force gravitationnelle : P = m×g."},
+            {q: "Qu'est-ce qu'un schéma de corps libre (FBD) ?", a: "Un dessin simplifié d'un segment/système avec toutes les forces externes (et parfois inconnues) et leurs points d'application."},
+            {q: "Que signifie d⊥ dans M = F × d⊥ ?", a: "Le bras de levier perpendiculaire : la distance minimale entre l'axe de rotation et la ligne d'action de la force."},
+            {q: "Base de support (BOS) : comment l'augmenter ?", a: "Écarter les pieds, ajouter un appui (main), élargir la surface de contact."},
+            {q: "Qu'est-ce qu'une force de réaction du sol (GRF) ?", a: "Force exercée par le sol sur le pied lors du contact ; elle peut être décomposée en composantes verticale et horizontale."},
+            {q: "Qu'est-ce qu'un couple de forces ?", a: "Deux forces parallèles, opposées et séparées par une distance, produisant une rotation sans translation nette."},
+            {q: "Moment interne vs moment externe ?", a: "Moment externe : dû aux forces externes (poids, charge, GRF). Moment interne : produit par muscles/tissus pour équilibrer ou créer le mouvement."},
+            {q: "Qu'est-ce que la friction (frottement) ?", a: "Force tangentielle qui s'oppose au glissement entre deux surfaces en contact."},
+            {q: "Définir flexion/extension en termes de plan.", a: "Flexion/extension : mouvements surtout dans le plan sagittal autour d'un axe médio-latéral."},
+            {q: "Définir abduction/adduction en termes de plan.", a: "Abduction/adduction : surtout dans le plan frontal autour d'un axe antéro-postérieur."},
+            {q: "Définir rotation interne/externe en termes de plan.", a: "Rotations : surtout dans le plan transversal autour d'un axe longitudinal."},
+            {q: "Pourquoi le bras de levier varie pendant le mouvement ?", a: "Parce que la ligne d'action d'une force (poids, muscle) et l'axe changent avec l'angle articulaire."},
+            {q: "Qu'est-ce que la contrainte de cisaillement ?", a: "Une contrainte liée à des forces parallèles à la surface, qui tendent à faire glisser deux plans l'un sur l'autre."},
+            {q: "Viscoélasticité : deux propriétés simples ?", a: "Dépendance au temps : fluage (déformation augmente sous charge constante) et relaxation (contrainte diminue sous déformation constante)."},
+            {q: "Pourquoi la posture influence le centre de gravité ?", a: "Parce que la distribution de masse des segments change quand on bouge les membres ou le tronc."},
+            {q: "Quelle différence entre centre de masse (CoM) et centre de gravité (CoG) ?", a: "En biomécanique terrestre, on les confond souvent : CoG est le point d'application du poids ; CoM décrit la distribution de masse. Ils sont très proches si g est uniforme."},
+            {q: "Dynamique inverse : à quoi sert-elle en clinique ?", a: "À estimer les moments articulaires nets à partir du mouvement mesuré et des forces externes (ex: GRF) pour interpréter la marche ou un geste."},
+            {q: "Qu'est-ce qu'un moment articulaire net ?", a: "Le résultat global des contributions musculaires et passives à l'articulation (souvent présenté en N·m)."},
+            {q: "Pourquoi plier le coude facilite une abduction de l'épaule ?", a: "Parce que le poids du membre et/ou la charge se rapprochent de l'épaule : le bras de levier externe diminue, donc le moment diminue."},
+            {q: "Pourquoi le double appui diminue quand on marche plus vite ?", a: "À vitesse plus élevée, le temps de transfert d'appui se réduit ; en course, il peut disparaître au profit d'une phase aérienne."},
+            {q: "Qu'est-ce qu'une contrainte en compression ?", a: "Une contrainte qui tend à écraser le matériau (forces dirigées vers l'intérieur)."},
+            {q: "Qu'est-ce qu'une contrainte en tension ?", a: "Une contrainte qui tend à étirer le matériau (forces dirigées vers l'extérieur)."},
+            {q: "Pourquoi l'os et le tendon sont-ils anisotropes ?", a: "Leurs propriétés mécaniques dépendent de la direction des fibres/structures (collagène, trabécules, etc.)."},
+            {q: "Différence force externe / force interne ?", a: "Externe : provient de l'environnement (poids, GRF, charge). Interne : produite par les muscles et tissus (tension, compression)."}
+
+        ];
+
+        function renderExercises() {
+            const container = document.getElementById('exercisesContainer');
+            container.innerHTML = exercisesData.map((ex, i) => `
+                <div class="exercise">
+                    <h4>${ex.title}</h4>
+                    <p style="white-space:pre-wrap; line-height:1.8;">${ex.statement}</p>
+                    <textarea placeholder="Écris ta réponse ici..."></textarea>
+                    <div class="exercise-buttons">
+                        <button class="btn-help" onclick="toggleHelp(${i})">💡 Aide</button>
+                        <button class="btn-correction" onclick="toggleCorrection(${i})">✅ Correction</button>
+                    </div>
+                    <div class="help-box" id="help${i}">
+                        <strong>Indices :</strong><br><pre style="white-space:pre-wrap; font-family:inherit; margin-top:10px;">${ex.help}</pre>
+                    </div>
+                    <div class="correction-box" id="correction${i}">
+                        <strong>Correction :</strong><br><pre style="white-space:pre-wrap; font-family:inherit; margin-top:10px;">${ex.correction}</pre>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHelp(i) {
+            const el = document.getElementById('help' + i);
+            if (!el) return;
+            el.classList.toggle('active');
+        }
+
+        function toggleCorrection(i) {
+            const el = document.getElementById('correction' + i);
+            if (!el) return;
+            el.classList.toggle('active');
+        }
+
+        // ========== INITIALISATION ==========
+        window.onload = function() {
+            initFlashcards();
+            drawLever();
+            renderQuiz();
+            renderQCM();
+            renderVraiFaux();
+            renderExercises();
+        };
+    </script>
+</body>
+</html>
