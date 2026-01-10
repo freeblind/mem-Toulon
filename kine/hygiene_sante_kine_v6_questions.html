@@ -1,0 +1,2786 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hygiène et Santé - Formation Interactive MEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Space+Mono:wght@400;700&family=Merriweather:wght@300;400;700&display=swap');
+        
+        :root {
+            --primary: #2c5f2d;
+            --secondary: #97c55e;
+            --accent: #ff6b35;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
+            --warning: #ffd23f;
+            --danger: #c1121f;
+            --info: #0077b6;
+            --success: #06a77d;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Merriweather', serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.8;
+        }
+        
+        nav {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        nav h1 {
+            font-family: 'Crimson Pro', serif;
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .nav-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 2px solid white;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: white;
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn.active { background: var(--accent); border-color: var(--accent); }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 3rem 2rem; }
+        
+        .section { display: none; animation: fadeIn 0.5s; }
+        .section.active { display: block; }
+        /* Contenu complémentaire du cours (affiché uniquement quand la section est active) */
+        #cours-supplement { display: none; }
+        .section.active #cours-supplement { display: block; }
+
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary);
+        }
+        
+        .card h2 {
+            font-family: 'Crimson Pro', serif;
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--secondary);
+            padding-bottom: 0.5rem;
+        }
+        
+        .card h3 {
+            font-family: 'Crimson Pro', serif;
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+            border-left: 5px solid var(--accent);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+        
+        .kine-box {
+            background: linear-gradient(135deg, #09203f 0%, #537895 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+        }
+        
+        .canvas-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        canvas {
+            max-width: 100%;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover { background: #f5f5f5; }
+        
+        ul, ol { margin-left: 2rem; margin-top: 1rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.5rem; }
+        strong { color: var(--primary); font-weight: 700; }
+        
+        /* Flashcards — version "session" (modèle Massage) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: 900;
+            color: var(--primary);
+            font-family: 'Crimson Pro', serif;
+        }
+
+        .stat-label {
+            color: var(--secondary);
+            margin-top: 8px;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .flashcard-controls button {
+            padding: 14px 22px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .flashcard-controls button:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+        }
+
+        .progress-container {
+            background: rgba(0,0,0,0.1);
+            border-radius: 50px;
+            height: 30px;
+            margin: 1.2rem 0 2rem 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        }
+
+        .flashcard {
+            background: white;
+            border: 3px solid var(--primary);
+            border-radius: 20px;
+            padding: 50px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flashcard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.35s;
+        }
+
+        .flashcard:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.22);
+        }
+
+        .flashcard.flipped {
+            background: var(--primary);
+            color: white;
+        }
+
+        .flashcard.flipped::before {
+            opacity: 1;
+        }
+
+        .flashcard-text {
+            font-size: 1.35em;
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            line-height: 1.45;
+        }
+
+        .flashcard-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            position: relative;
+            z-index: 1;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-know, .btn-hesitate, .btn-unknown {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 800;
+            transition: all 0.25s;
+            font-size: 1.02em;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .btn-know {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-know:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-hesitate {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-hesitate:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-unknown {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-unknown:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsive (flashcards) */
+        @media (max-width: 768px) {
+            .flashcard { padding: 28px; min-height: 260px; }
+        }
+
+/* Formules */
+        .formula-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .formula {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .formula-explanation {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .unit {
+            color: var(--warning);
+            font-weight: bold;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav h1 { font-size: 1.5rem; }
+            .nav-buttons { justify-content: center; }
+            .flashcard-container { grid-template-columns: 1fr; }
+            .container { padding: 1.5rem 1rem; }
+        }
+    
+        .display-controls{
+            display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; justify-content:center;
+            margin-left: 1rem;
+        }
+        .tiny-btn{
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: .45rem .7rem;
+            border-radius: 999px;
+            cursor:pointer;
+            font-weight:700;
+            transition: transform .1s ease, background .2s ease;
+            user-select:none;
+        }
+        .tiny-btn:hover{ background: rgba(255,255,255,0.20); transform: translateY(-1px); }
+        .tiny-btn:active{ transform: translateY(0); }
+        body.high-contrast{
+            filter: contrast(1.12) saturate(1.02);
+        }
+        body.font-sm { font-size: 15px; }
+        body.font-md { font-size: 16px; }
+        body.font-lg { font-size: 18px; }
+        body.font-xl { font-size: 20px; }
+        /* Kiné panels: meilleure lisibilité */
+        .kine-box{
+            background: rgba(255,255,255,0.95);
+            color: #0f172a;
+            border-left: 8px solid #2c5f2d;
+            padding: 1.5rem 1.5rem;
+            border-radius: 18px;
+            margin: 1.5rem 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+        }
+        .kine-box h3,.kine-box h4{ color:#0b3d0b; margin-top: 0; }
+        .kine-grid{
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .kine-card{
+            background: white;
+            color:#0f172a;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 18px;
+            padding: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        .kine-card h4{ margin:0 0 .5rem 0; color:#0b3d0b; }
+        .checklist{ list-style:none; padding-left:0; margin:.75rem 0 0 0;}
+        .checklist li{ display:flex; gap:.6rem; align-items:flex-start; padding:.35rem 0;}
+        .checklist input{ transform: translateY(.15rem) scale(1.1); }
+        .muted{ color: rgba(15,23,42,0.75); }
+
+        /* ==================== EXERCICES (UI) ==================== */
+        .exercise{
+            background: rgba(255,255,255,0.98);
+            border: 1px solid rgba(15,23,42,0.10);
+            border-radius: 18px;
+            padding: 1.5rem;
+            margin: 1.25rem 0;
+            box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+        }
+        .exercise h3{ margin-top: 0; }
+
+        .exercise-input{
+            width: 100%;
+            min-height: 240px;
+            padding: 1rem 1.05rem;
+            margin-top: .75rem;
+            border-radius: 14px;
+            border: 1px solid rgba(15,23,42,0.18);
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            background: #ffffff;
+        }
+        .exercise-input:focus{
+            outline: none;
+            border-color: rgba(44,95,45,0.65);
+            box-shadow: 0 0 0 4px rgba(151,197,94,0.25);
+        }
+
+        .exercise-actions{
+            display: flex;
+            flex-wrap: wrap;
+            gap: .6rem;
+            margin-top: .75rem;
+        }
+
+        .tips-btn, .correction-btn{
+            border: none;
+            border-radius: 999px;
+            padding: .65rem 1rem;
+            cursor: pointer;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            font-size: .9rem;
+            transition: transform .12s ease, filter .12s ease;
+        }
+        .tips-btn{ background: rgba(151,197,94,0.28); color: #0b3d0b; }
+        .correction-btn{ background: rgba(44,95,45,0.12); color: #0b3d0b; }
+
+        .tips-btn:hover, .correction-btn:hover{ transform: translateY(-1px); filter: brightness(0.98); }
+        .tips-btn:active, .correction-btn:active{ transform: translateY(0); }
+
+        .tips, .correction{
+            display: none;
+            margin-top: .85rem;
+            padding: 1rem 1.05rem;
+            border-radius: 14px;
+            border: 1px solid rgba(15,23,42,0.08);
+            background: rgba(248,250,252,0.98);
+        }
+        .tips.show, .correction.show{ display: block; }
+        .tips strong, .correction strong{ color: #0b3d0b; }
+
+
+    
+        /* ==================== QCM & Vrai/Faux — template V4 ==================== */
+        .qcm-container{
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.2rem 0;
+            border: 2px solid rgba(44,95,45,0.15);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        }
+        .qcm-container .question{
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+        .qcm-container .options{
+            display: grid;
+            gap: .7rem;
+            margin-bottom: 1rem;
+        }
+        .qcm-container label.option{
+            display: flex;
+            gap: .7rem;
+            align-items: flex-start;
+            padding: .85rem 1rem;
+            border-radius: 14px;
+            border: 1px solid rgba(15,23,42,0.14);
+            cursor: pointer;
+            transition: transform .08s ease, border-color .15s ease, background .15s ease;
+            background: rgba(255,255,255,0.9);
+        }
+        .qcm-container label.option:hover{
+            transform: translateY(-1px);
+            border-color: rgba(44,95,45,0.35);
+            background: rgba(151,197,94,0.10);
+        }
+        .qcm-container label.option input{
+            margin-top: .2rem;
+        }
+        .submit-btn{
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: .75rem 1.2rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 800;
+            font-family: 'Space Mono', monospace;
+            transition: filter .15s ease, transform .08s ease;
+        }
+        .submit-btn:hover{ filter: brightness(0.95); transform: translateY(-1px); }
+        .submit-btn:active{ transform: translateY(0); }
+        .result{
+            margin-top: 1rem;
+            padding: 1rem 1.05rem;
+            border-radius: 14px;
+            border: 1px solid rgba(15,23,42,0.12);
+        }
+        .result.success{
+            background: rgba(6,167,125,0.12);
+            border-color: rgba(6,167,125,0.25);
+        }
+        .result.error{
+            background: rgba(193,18,31,0.08);
+            border-color: rgba(193,18,31,0.22);
+        }
+        .result .explication{
+            margin-top: .6rem;
+            opacity: .95;
+        }
+
+    </style>
+</head>
+<body>
+    <nav>
+        <h1>🏥 Hygiène et Santé — Kinésithérapie (Bloc 1)</h1>
+        <div class="nav-buttons">
+            <button class="nav-btn active" onclick="showSection('cours', this)">📚 Cours</button>
+            <button class="nav-btn" onclick="showSection('flashcards', this)">🃏 Flashcards</button>
+            <button class="nav-btn" onclick="showSection('qcm', this)">✅ QCM</button>
+            <button class="nav-btn" onclick="showSection('vrai-faux', this)">❓ Vrai/Faux</button>
+            <button class="nav-btn" onclick="showSection('exercices', this)">📝 Exercices</button>
+            <button class="nav-btn" onclick="showSection('formules', this)">🧮 Formules</button>
+            <button class="nav-btn" onclick="showSection('kine', this)">🏃 Application Kiné</button>
+        </div>
+    
+        <div class="display-controls" role="group" aria-label="Options d'affichage">
+            <button class="tiny-btn" onclick="changeFont(-1)" title="Diminuer la taille du texte">A−</button>
+            <button class="tiny-btn" onclick="changeFont(1)" title="Augmenter la taille du texte">A+</button>
+            <button class="tiny-btn" onclick="toggleContrast()" title="Améliorer le contraste">Contraste</button>
+        </div>
+
+    </nav>
+
+    <div class="container">
+        <!-- SECTION COURS -->
+        <div id="cours" class="section active">
+            <div class="card">
+                <h2>📖 Introduction : Définition de la Santé</h2>
+                
+                <div class="canvas-container">
+                    <canvas id="healthCanvas" width="800" height="400"></canvas>
+                    <p style="color: white; margin-top: 1rem;">Visualisation des déterminants de la santé selon l'OMS</p>
+                </div>
+                
+                <h3>🎯 Définition de la santé</h3>
+                <p>La définition de la santé varie selon chacun, mais il existe une notion de normes :</p>
+                <ul>
+                    <li><strong>Approche quantitative</strong> : L'état de santé est mesurable (tension artérielle, IMC, prise de sang…)</li>
+                    <li>Paramètres hors normes = facteur de risque pour la santé</li>
+                    <li>Santé = maintien des paramètres dans les normes</li>
+                </ul>
+                
+                <div class="warning-box">
+                    <strong>⚠️ Attention :</strong> Cette définition est trop restrictive !
+                </div>
+                
+                <div class="highlight-box">
+                    <h4>📌 Définition OMS (à connaître pour l'examen)</h4>
+                    <p><strong>"La santé est un état de complet bien-être physique, mental et social, et ne consiste pas seulement en une absence de maladie ou d'infirmité."</strong></p>
+                    <p>Conditions préalables à la santé : paix, abris, nourriture…</p>
+                </div>
+                
+                <h3>🧬 Déterminants de la santé</h3>
+                
+                <table>
+                    <tr>
+                        <th>Déterminant</th>
+                        <th>Pourcentage</th>
+                        <th>Exemples</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Mode de vie</strong></td>
+                        <td>53%</td>
+                        <td>Alimentation, activité physique, consommation de substances, stress</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Environnementaux</strong></td>
+                        <td>21%</td>
+                        <td>Éducation, emploi, conditions de santé, petite enfance, culture</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Biologiques</strong></td>
+                        <td>16%</td>
+                        <td>Génétique, processus d'évolution humain, système interne du corps</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Services de santé</strong></td>
+                        <td>10%</td>
+                        <td>Niveau de revenu, statut social, réseaux de soutien, services de santé</td>
+                    </tr>
+                </table>
+                
+                <div class="info-box">
+                    <strong>💡 Point important :</strong> Le mode de vie représente plus de la moitié des facteurs influençant la santé !
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>📊 Espérance de vie</h2>
+                
+                <h3>🔢 Définitions</h3>
+                <ul>
+                    <li><strong>Espérance de vie à la naissance</strong> : durée de vie moyenne qu'un nouveau-né connaîtrait s'il vieillissait dans les conditions de mortalité de son année de naissance</li>
+                    <li><strong>Espérance de vie à un âge donné</strong> : nombre moyen d'années supplémentaires à vivre à cet âge</li>
+                </ul>
+                
+                <div class="highlight-box">
+                    <p><strong>En Belgique et en France : EV > 80 ans</strong></p>
+                    <p>Depuis 70 ans, l'espérance de vie augmente grâce à :</p>
+                    <ul>
+                        <li>La qualité de vie : alimentation, confort, hygiène</li>
+                        <li>Qualité et disponibilité des soins</li>
+                        <li>Techniques de dépistage précoce</li>
+                    </ul>
+                </div>
+                
+                <h3>💪 Espérance de vie en bonne santé (EVBS)</h3>
+                <p>EVBS = EV sans incapacité = nombre d'années en bonne santé qu'une personne peut s'attendre à vivre</p>
+                
+                <div class="warning-box">
+                    <p><strong>En Belgique :</strong></p>
+                    <ul>
+                        <li>EVBS = 67 ans</li>
+                        <li>EV = 81 ans</li>
+                        <li><strong>➡️ 14 ans de vie avec des incapacités</strong></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>🏃 Activité Physique et Sportive (APS)</h2>
+                
+                <div class="highlight-box">
+                    <h4>📌 Recommandations OMS (à connaître)</h4>
+                    <p><strong>En forme :</strong> 150 min d'activité modérée par SEMAINE</p>
+                    <p><strong>+ bénéfices :</strong> 300 min d'activité modérée</p>
+                    <p>Pour activité intensive, diviser le temps par 2</p>
+                    <p><strong>Exercices de renforcement :</strong> 2×/semaine</p>
+                </div>
+                
+                <div class="kine-box">
+                    <h4>🏃 Application en kinésithérapie</h4>
+                    <p>En tant que futur·e kinésithérapeute, vous devrez être attentif·ve aux habitudes de vie de vos patients. Un patient qui pratique une activité physique régulière aura une meilleure récupération et sera moins sujet aux complications.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>🎯 Les 4 stades de prévention</h2>
+                
+                <div class="card" style="background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%); color: white;">
+                    <h3 style="color: white;">1️⃣ Prévention PRIMAIRE</h3>
+                    <p>Ensemble des actes destinés à <strong>diminuer l'incidence d'une maladie</strong>. La maladie n'est pas encore là.</p>
+                    <p><strong>Exemples :</strong> se laver les mains, vaccins, bonne alimentation, préservatif…</p>
+                </div>
+                
+                <div class="card" style="background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white;">
+                    <h3 style="color: white;">2️⃣ Prévention SECONDAIRE</h3>
+                    <p>Ensemble d'actes destinés à <strong>agir au tout début de la maladie</strong></p>
+                    <p><strong>➡️ Dépistage</strong></p>
+                </div>
+                
+                <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                    <h3 style="color: white;">3️⃣ Prévention TERTIAIRE</h3>
+                    <p>Permet de <strong>diminuer les complications de la maladie</strong></p>
+                    <p><strong>Exemples :</strong> orthèse, prévention des complications du diabète</p>
+                </div>
+                
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h3 style="color: white;">4️⃣ Prévention QUATERNAIRE</h3>
+                    <p>Permet de <strong>protéger d'une surmédicalisation</strong></p>
+                </div>
+            </div>
+        </div>
+
+        
+            <div id="cours-supplement">
+<div class="card">
+                <h2>💉 Médecine préventive — Vaccination & immunité</h2>
+
+                <div class="highlight-box">
+                    <h4>🧠 Immunité : l’essentiel</h4>
+                    <ul>
+                        <li><strong>Immunité innée</strong> : présente dès la naissance, non spécifique, réponse rapide (barrières peau/muqueuses + globules blancs).</li>
+                        <li><strong>Immunité acquise (adaptative)</strong> : se développe après exposition à un antigène ou après vaccination ; repose sur lymphocytes <strong>B</strong> (anticorps) et <strong>T</strong> ; crée une <strong>mémoire immunitaire</strong>.</li>
+                    </ul>
+                </div>
+
+                <h3>📌 Principe de la vaccination</h3>
+                <p>Introduire un <strong>antigène</strong> pour stimuler une réponse immunitaire et protéger contre une maladie <strong>sans provoquer les symptômes</strong>. La protection peut diminuer avec le temps : <strong>rappels</strong> nécessaires.</p>
+
+                <h3>🧪 Types de vaccins (exemples du cours)</h3>
+                <table>
+                    <tr><th>Type</th><th>Définition</th><th>Exemples</th></tr>
+                    <tr><td><strong>Inactivés</strong></td><td>Agent pathogène mort</td><td>Poliomyélite</td></tr>
+                    <tr><td><strong>Vivants atténués</strong></td><td>Agent affaibli, ne provoque pas la maladie</td><td>ROR : rougeole, rubéole, oreillons</td></tr>
+                    <tr><td><strong>Sous-unités</strong></td><td>Fragments inoffensifs de l’agent pathogène</td><td>(exemples variables)</td></tr>
+                    <tr><td><strong>Anatoxines</strong></td><td>Toxine neutralisée</td><td>Diphtérie, tétanos</td></tr>
+                </table>
+
+                <div class="info-box">
+                    <strong>📅 Santé publique & calendrier vaccinal</strong>
+                    <ul>
+                        <li><strong>Protection individuelle</strong> + <strong>protection collective</strong> (couverture élevée = moins de circulation).</li>
+                        <li><strong>Éradication</strong> possible (ex. variole, éradication en 1980).</li>
+                        <li><strong>Belgique</strong> : seul vaccin légalement obligatoire = <strong>poliomyélite</strong> (depuis 1966, certificat requis). Les autres sont fortement recommandés et souvent exigés pour l’entrée en crèche.</li>
+                        <li>En Fédération Wallonie-Bruxelles, les vaccins recommandés sont gratuits via le programme de vaccination. L’<strong>ONE</strong> propose notamment vaccinations gratuites et conseils (0–6 ans) + suivi prénatal/pédiatrique.</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>🧩 Idées reçues fréquentes</strong>
+                    <ul>
+                        <li>« Les vaccins provoquent la maladie » → faux : agents <strong>inactivés</strong> ou <strong>atténués</strong>.</li>
+                        <li>« Les maladies ont disparu donc inutile » → faux : arrêt = risque de réapparition.</li>
+                        <li>« L’aluminium est toxique » → doses très faibles, utilisé comme <strong>adjuvant</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🧼 Hygiène & état de santé — IAS (infections associées aux soins)</h2>
+
+                <div class="highlight-box">
+                    <h4>📌 Définition</h4>
+                    <p>IAS (nosocomiales/hospitalières) : infections contractées en milieu de soins chez un patient admis pour une autre raison. Diagnostic <strong>après 48 h d’hospitalisation</strong> ou après la sortie (ex. urinaires, respiratoires, sanguines…).</p>
+                </div>
+
+                <h3>📉 Impact (cours)</h3>
+                <ul>
+                    <li><strong>Fréquence</strong> : 6,4 % des hospitalisations européennes.</li>
+                    <li>Europe : 3,2 millions de patients/an ; mortalité 4,5 %.</li>
+                    <li>Conséquences : maladies plus graves, invalidité long terme, prolongation des séjours (+4 jours en moyenne), coûts et charge de travail accrue.</li>
+                </ul>
+
+                <h3>⚠️ Facteurs favorisant</h3>
+                <ul>
+                    <li>Sensibilité des patients : vieillissement, immunodépression (greffes, traitements lourds).</li>
+                    <li>Antibiothérapie.</li>
+                    <li>Conditions hospitalières : séjour prolongé, mobilité/proximité entre patients, actes invasifs, manque de formation.</li>
+                </ul>
+
+                <h3>🧩 Chaîne de transmission</h3>
+                <ul>
+                    <li><strong>Endogène</strong> : auto-infections par des micro-organismes présents chez le patient.</li>
+                    <li><strong>Exogène</strong> : micro-organismes de l’environnement (matériel, personnel, autres patients).</li>
+                </ul>
+
+                <div class="info-box">
+                    <strong>✅ Stratégies de prévention</strong>
+                    <ul>
+                        <li>Nettoyage + <strong>désinfection</strong> (réduction temporaire des micro-organismes pathogènes).</li>
+                        <li>Surveillance épidémiologique ; contrôle de l’utilisation des antibiotiques.</li>
+                        <li>Précautions générales et spécifiques ; isolement et précautions additionnelles si besoin.</li>
+                        <li>Gestion déchets infectieux et linge ; antibiothérapie ciblée après identification de l’agent.</li>
+                    </ul>
+                </div>
+
+                <div class="kine-box">
+                    <h4>🧑‍⚕️ Application en kinésithérapie</h4>
+                    <div class="kine-grid">
+                        <div class="kine-card">
+                            <h4>Cabinet / salle de soins</h4>
+                            <p class="muted">Objectif : casser la chaîne de transmission exogène (surfaces + matériel).</p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> <span>Désinfecter la table, le matériel et les zones de contact entre chaque patient.</span></li>
+                                <li><input type="checkbox"> <span>Hygiène des mains avant/après contact ; ongles courts, pas de bijoux.</span></li>
+                                <li><input type="checkbox"> <span>Gestion du linge (serviettes, draps) et des déchets.</span></li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Patients vulnérables</h4>
+                            <p class="muted">Vieillissement, immunodépression (greffes, traitements lourds) : vigilance accrue.</p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> <span>Adapter l’organisation (créneaux, séparation, matériel dédié si nécessaire).</span></li>
+                                <li><input type="checkbox"> <span>Renforcer désinfection + précautions additionnelles selon le contexte.</span></li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Travail en équipe</h4>
+                            <p class="muted">Le cours insiste sur l’adhésion des patients + l’application des protocoles par les soignants.</p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> <span>Rappeler les règles simples au patient (mains, toux/éternuements, matériel).</span></li>
+                                <li><input type="checkbox"> <span>Standardiser vos routines (check-list fin de séance).</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📚 Repères historiques (cours)</h3>
+                <ul>
+                    <li>1846 — Ignace Semmelweis : importance du lavage des mains.</li>
+                    <li>1860 — Louis Pasteur : découverte des microbes, bases de l’asepsie.</li>
+                    <li>1866 — Joseph Lister : acide phénique et antisepsie.</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <h4>🏥 Comité d’hygiène hospitalière : missions</h4>
+                    <ul>
+                        <li>Réduire durées de séjour et charge de travail.</li>
+                        <li>Améliorer satisfaction des patients et réputation de l’institution.</li>
+                        <li>Garantir des indicateurs de qualité et diminuer les coûts pour la société.</li>
+                    </ul>
+                </div>
+            </div>
+
+
+
+</div>
+
+<!-- SECTION FLASHCARDS -->
+        <div id="flashcards" class="section">
+            <div class="card">
+                <h2>🃏 Flashcards — Révision intelligente</h2>
+                <p style="margin-bottom: 1.5rem; opacity: 0.9;">Clique sur une carte pour afficher la réponse, puis indique ton niveau. Utilise les modes pour réviser ciblé.</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCards">0</div>
+                        <div class="stat-label">📚 Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="maitriseCards">0</div>
+                        <div class="stat-label">✓ Maîtrisé</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="hesitantCards">0</div>
+                        <div class="stat-label">~ Hésitant</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="apprendreCards">0</div>
+                        <div class="stat-label">✗ À apprendre</div>
+                    </div>
+                </div>
+
+                <div class="flashcard-controls">
+                    <button onclick="startFlashcards('all')">📚 Toutes les cartes</button>
+                    <button onclick="startFlashcards('apprendre')">🔴 À apprendre uniquement</button>
+                    <button onclick="startFlashcards('revoir')">🟡 Hésitant + À apprendre</button>
+                    <button onclick="saveProgress()">💾 Sauvegarder</button>
+                    <button onclick="exportProgress()">⬇️ Exporter JSON</button>
+                    <button onclick="triggerImport()">⬆️ Importer JSON</button>
+                    <button onclick="resetProgress()">🔄 Réinitialiser</button>
+                </div>
+
+                <input type="file" id="importFlashcardsInput" accept=".json" style="display:none" onchange="importProgress(event)" />
+
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressFill" style="width: 0%">0/0</div>
+                </div>
+
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div class="flashcard-text" id="flashcardText">Clique sur « Toutes les cartes » pour commencer ta révision.</div>
+                    <div class="flashcard-buttons" id="flashcardButtons" style="display: none;">
+                        <button class="btn-know" onclick="event.stopPropagation(); markCard('maitrise')">✓ Maîtrisé</button>
+                        <button class="btn-hesitate" onclick="event.stopPropagation(); markCard('hesitant')">~ Hésitant</button>
+                        <button class="btn-unknown" onclick="event.stopPropagation(); markCard('apprendre')">✗ À apprendre</button>
+                    </div>
+                </div>
+            </div>
+        </div><div id="flashcard-container" class="flashcard-container"></div>
+            </div>
+        </div>
+
+        <!-- SECTION QCM -->
+        <div id="qcm" class="section">
+            <div class="card">
+                <h2>✅ QCM - Testez vos connaissances</h2>
+                <p style="margin-bottom: 2rem;">Ces QCM couvrent l'ensemble du cours. Certaines questions ont plusieurs réponses possibles.</p>
+                <div id="qcm-container"></div>
+            </div>
+        </div>
+
+        <!-- SECTION VRAI/FAUX -->
+        <div id="vrai-faux" class="section">
+            <div class="card">
+                <h2>❓ Vrai ou Faux</h2>
+                <p style="margin-bottom: 2rem;">Testez votre compréhension avec ces affirmations.</p>
+                <div id="vrai-faux-container"></div>
+            </div>
+        </div>
+
+        <!-- SECTION EXERCICES -->
+        <div id="exercices" class="section">
+            <div class="card">
+                <h2>📝 Exercices pratiques</h2>
+                <p style="margin-bottom: 2rem;">Mettez en pratique vos connaissances avec des cas cliniques réalistes.</p>
+                <div id="exercices-container"></div>
+            </div>
+        </div>
+
+        <!-- SECTION FORMULES -->
+        <div id="formules" class="section">
+            <div class="card">
+                <h2>🧮 Formules et unités</h2>
+                <p style="margin-bottom: 2rem;">Toutes les formules essentielles avec explications et exemples concrets.</p>
+                <div id="formules-container"></div>
+            </div>
+        </div>
+
+        <!-- SECTION KINÉ -->
+        <div id="kine" class="section">
+            <div class="card">
+                <h2>🏃 Application en kinésithérapie — ce que vous devez savoir (cours → pratique)</h2>
+
+                <div class="kine-box">
+                    <h3>🧠 1) Anamnèse orientée “hygiène & santé”</h3>
+                    <div class="kine-grid">
+                        <div class="kine-card">
+                            <h4>Habitudes de vie (modifiables)</h4>
+                            <ul>
+                                <li>Sommeil (jeune adulte ≈ 8 h ; sommeil insuffisant = risque obésité/diabète/HTA + impacts cognition).</li>
+                                <li>Sédentarité : temps assis &gt; 7 h/jour ; comportement sédentaire &lt; 1,5 kcal.</li>
+                                <li>Activité physique : vérifier si recommandations OMS atteintes (150 min modérée/semaine ou 75 min intense + renforcement 2×/semaine ; bénéfices jusqu’à 300 min).</li>
+                                <li>Alimentation : balance énergétique ; repère du cours (30% lipides / 15% protides / 55% glucides).</li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Facteurs de risque & priorisation</h4>
+                            <ul>
+                                <li>Surpoids/obésité : risque MCV/diabète/TMS/cancers ; coût sociétal majeur.</li>
+                                <li>Diabète : dépistage/éducation (glycémie : normale 70–100 mg/dl ; 100–126 = anomalie ; &gt;126 = diabète).</li>
+                                <li>Cancers : 30% des décès liés à facteurs comportementaux (IMC élevé, faible fruits/légumes, manque d’exercice, tabac, alcool).</li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Prévention — parler “stade”</h4>
+                            <ul>
+                                <li><strong>Primaire</strong> : éviter l’apparition (hygiène, vaccins, alimentation…).</li>
+                                <li><strong>Secondaire</strong> : dépistage précoce.</li>
+                                <li><strong>Tertiaire</strong> : réduire complications (ex. orthèse, complications diabète).</li>
+                                <li><strong>Quaternaire</strong> : éviter surmédicalisation ; soins adaptés (fin de vie).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kine-box">
+                    <h3>🏋️ 2) Construire un conseil APS “qui colle au cours”</h3>
+                    <div class="kine-grid">
+                        <div class="kine-card">
+                            <h4>Objectifs santé (condition physique “santé”)</h4>
+                            <ul>
+                                <li>Se mouvoir sans fatigue, avec vigueur musculaire.</li>
+                                <li>Bonne amplitude articulaire, coordination, récupération.</li>
+                                <li>Maintien du poids de santé.</li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Exemples d’arguments motivationnels (cours)</h4>
+                            <ul>
+                                <li>APS intense : ↓ 20–30% risque coronaropathies & AVC ; APS modérée : ↓ 10–20%.</li>
+                                <li>Sarcopénie : endurance ↓ perte masse ; musculation ↓ atrophie ; exercice préserve temps de réaction.</li>
+                                <li>Ostéoporose : APS favorise masse osseuse max et réduit perte densité ; attention au risque de fracture.</li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Obésité : repère Lipomax</h4>
+                            <p class="muted">Le cours : effort faible à modéré (&lt; 60% VO2 max) et longtemps → plus d’oxydation des graisses. Un entraînement plus intense peut aussi être très efficace pour maigrir.</p>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> <span>Proposer 2–3 séances “faible à modéré” longues</span></li>
+                                <li><input type="checkbox"> <span>+ 1 séance plus intense (si OK) / progression</span></li>
+                                <li><input type="checkbox"> <span>Renforcement 2×/semaine</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <strong>📝 “Sport sur ordonnance” (logique du cours)</strong>
+                        <p>Prescription APS → (re)validation/encadrement par le kiné → APS collective encadrée → APS moins encadrée (cours collectifs/salle) → patient autonome. En France, concept plus utilisé ; en Belgique, certaines communes seulement, avec soutien parfois via des mutualités.</p>
+                    </div>
+                </div>
+
+                <div class="kine-box">
+                    <h3>🧼 3) Hygiène en cabinet : réduire le risque d’IAS (logique “hôpital” appliquée au soin)</h3>
+                    <div class="kine-grid">
+                        <div class="kine-card">
+                            <h4>Mesures “socle”</h4>
+                            <ul class="checklist">
+                                <li><input type="checkbox"> <span>Hygiène des mains (avant/après patient + après surfaces).</span></li>
+                                <li><input type="checkbox"> <span>Nettoyage + désinfection des surfaces et du matériel entre patients.</span></li>
+                                <li><input type="checkbox"> <span>Gestion du linge et des déchets (séparation, sacs, routine).</span></li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Situations à risque</h4>
+                            <ul>
+                                <li>Patients immunodéprimés (greffes, traitements lourds) ou âgés.</li>
+                                <li>Actes plus “invasifs” (plaies, matériel partagé, contact peau-à-peau prolongé).</li>
+                                <li>Organisation : enchaînement de patients, manque de temps = risque.</li>
+                            </ul>
+                        </div>
+                        <div class="kine-card">
+                            <h4>Routines rapides (exemple)</h4>
+                            <ol>
+                                <li>Fin de séance : linge → déchets → désinfection table/poignées.</li>
+                                <li>Avant patient suivant : hygiène des mains → matériel prêt (propre).</li>
+                                <li>Chaque fin de journée : contrôle stocks, zones contact, poubelles, linge.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+</div>
+    </div>
+
+    <script>
+        // ==================== NAVIGATION ====================
+        function showSection(sectionId, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const section = document.getElementById(sectionId);
+            if (section) section.classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const targetBtn = btn || (window.event && window.event.target);
+            if (targetBtn && targetBtn.classList) targetBtn.classList.add('active');
+
+            window.scrollTo(0, 0);
+        }
+
+        // Déplace le contenu complémentaire dans la section Cours (évite qu'il s'affiche dans les autres modes)
+        document.addEventListener('DOMContentLoaded', () => {
+            const supp = document.getElementById('cours-supplement');
+            const cours = document.getElementById('cours');
+            if (supp && cours) cours.appendChild(supp);
+        });
+
+
+        // ==================== AFFICHAGE (VISIBILITÉ) ====================
+        const fontSteps = ['font-sm', 'font-md', 'font-lg', 'font-xl'];
+        function applyDisplaySettings() {
+            try{
+                const font = localStorage.getItem('fontStep') || 'font-md';
+                const contrast = localStorage.getItem('highContrast') === '1';
+                document.body.classList.remove(...fontSteps);
+                document.body.classList.add(font);
+                document.body.classList.toggle('high-contrast', contrast);
+            }catch(e){}
+        }
+
+        function changeFont(delta) {
+            const current = localStorage.getItem('fontStep') || 'font-md';
+            let idx = Math.max(0, Math.min(fontSteps.length - 1, fontSteps.indexOf(current)));
+            idx = Math.max(0, Math.min(fontSteps.length - 1, idx + delta));
+            localStorage.setItem('fontStep', fontSteps[idx]);
+            applyDisplaySettings();
+        }
+
+        function toggleContrast() {
+            const cur = localStorage.getItem('highContrast') === '1';
+            localStorage.setItem('highContrast', cur ? '0' : '1');
+            applyDisplaySettings();
+        }
+
+
+        // ==================== CANVAS ====================
+        function drawHealthDeterminants() {
+            const canvas = document.getElementById('healthCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            const data = [
+                { label: 'Mode de vie', value: 53, color: '#2c5f2d' },
+                { label: 'Environnement', value: 21, color: '#97c55e' },
+                { label: 'Génétique', value: 16, color: '#ff6b35' },
+                { label: 'Services santé', value: 10, color: '#0077b6' }
+            ];
+            
+            let startAngle = 0;
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 150;
+            
+            data.forEach(item => {
+                const sliceAngle = (item.value / 100) * 2 * Math.PI;
+                
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle = item.color;
+                ctx.fill();
+                
+                const textAngle = startAngle + sliceAngle / 2;
+                const textX = centerX + Math.cos(textAngle) * (radius * 0.7);
+                const textY = centerY + Math.sin(textAngle) * (radius * 0.7);
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(item.label, textX, textY - 10);
+                ctx.fillText(item.value + '%', textX, textY + 10);
+                
+                startAngle += sliceAngle;
+            });
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Déterminants de la Santé', centerX, 30);
+        }
+        
+        window.addEventListener('load', drawHealthDeterminants);
+
+        // ==================== FLASHCARDS ====================
+        const flashcardsData = [
+            { question: "Quelle est la définition de la santé selon l’OMS ?", answer: "État de complet bien-être physique, mental et social, et ne consiste pas seulement en une absence de maladie ou d'infirmité." },
+            { question: "Selon le cours, comment définit-on la santé dans une approche quantitative ?", answer: "L’état de santé est mesurable (tension artérielle, IMC, prise de sang…) ; paramètres hors normes = facteur de risque ; santé = maintien des paramètres dans les normes (définition jugée trop restrictive)." },
+            { question: "Quels sont les 4 déterminants de la santé ?", answer: "Biologiques ; environnementaux ; mode de vie ; sécurité sociale / services de santé (niveau de revenu, statut social, réseaux, services)." },
+            { question: "Selon le cours, quelle est la répartition des déterminants ?", answer: "Mode de vie 53% ; environnementaux 21% ; biologiques 16% ; services de santé 10%." },
+            { question: "Quelle est la définition de l’espérance de vie (EV) ?", answer: "Durée de vie moyenne ; EV à la naissance = durée de vie moyenne qu’aurait un nouveau-né s’il vieillissait dans les conditions de mortalité de l’année de naissance." },
+            { question: "Que signifie l’espérance de vie à un âge donné ?", answer: "Nombre moyen d’années supplémentaires à vivre à cet âge." },
+            { question: "Selon le cours, quelle est l’espérance de vie en Belgique/France ?", answer: "EV > 80 ans." },
+            { question: "Selon le cours, pourquoi l’EV a augmenté ?", answer: "Qualité de vie (alimentation, confort, hygiène), qualité/disponibilité des soins, dépistage précoce ; baisse mortalité <5 ans, VIH, paludisme." },
+            { question: "Quelle est la définition de l’espérance de vie en bonne santé (EVBS) ?", answer: "Espérance de vie en bonne santé = EV sans incapacité (absence d’incapacité et de limitation d’activité)." },
+            { question: "Selon le cours, quelle est l’espérance de vie en bonne santé (EVBS) en Belgique ?", answer: "EVBS ≈ 67 ans ; EV ≈ 81 ans → ~14 ans de vie avec incapacités." },
+            { question: "Quelles sont les 3 principales causes de mortalité en Belgique ?", answer: "Maladies cardio-vasculaires ; cancers ; maladies respiratoires." },
+            { question: "Selon le cours, quelle est la répartition des causes de mortalité chez les femmes en Belgique ?", answer: "MCV ≈ 28,4% ; cancers ≈ 25,9% ; maladies respiratoires ≈ 10,7%." },
+            { question: "Selon le cours, quelle est la répartition des causes de mortalité chez les hommes en Belgique ?", answer: "Cancers ≈ 30% ; MCV ≈ 26% ; maladies respiratoires ≈ 11%." },
+            { question: "Donne des exemples de facteurs de risque modifiables. ?", answer: "Tabac, alcool, alimentation déséquilibrée, sédentarité, stress, manque de sommeil." },
+            { question: "Selon le cours, quel est l’impact de tabac sur l’EV ?", answer: "Fumeurs : ~8 ans d’EV en moins et ~7 ans en mauvaise santé ; ex-fumeurs : ~2,5 ans d’EV en moins." },
+            { question: "Selon le cours, que faut-il retenir sur le sommeil ?", answer: "Très important ; jeune adulte ≈ 8 h ; mauvais sommeil → risques (obésité, diabète, HTA, patho cardiaque) + impact apprentissage/mémorisation." },
+            { question: "Quelle est la définition de la comportement sédentaire ?", answer: "Moment où la dépense énergétique est < 1,5 kcal (posture couchée ou assise)." },
+            { question: "Selon le cours, quand est-on sédentaire ?", answer: "Si le temps passé assis est > 7 h/jour." },
+            { question: "Quelle est la définition de l’inactivité physique ?", answer: "Niveau d’activité physique qui ne répond pas aux recommandations actuelles." },
+            { question: "Selon le cours, quelle est la répartition des macronutriments ?", answer: "Environ 30% lipides, 15% protides, 55% glucides." },
+            { question: "Quelle est la définition de l’obésité selon l’OMS ?", answer: "Excès de masse grasse entraînant des conséquences néfastes pour la santé." },
+            { question: "Selon le cours, que faut-il retenir sur Obésité enfant : donnée ?", answer: "En 2012, ~42 millions d’enfants étaient en surpoids." },
+            { question: "Selon le cours, que faut-il retenir sur Obésité : trajectoire ?", answer: "Environ 30% des adultes obèses le sont depuis l’enfance." },
+            { question: "Selon le cours, que faut-il retenir sur Surpoids enfant : risques ?", answer: "≈60% des enfants/adolescents en surpoids ont un risque de MCV ; ≈25% ont >2 facteurs de risque." },
+            { question: "Selon le cours, que faut-il retenir sur Obésité : coût ?", answer: "En Belgique, représente ~10% du budget de l’INAMI." },
+            { question: "Selon le cours, que faut-il retenir sur Conséquences de l’obésité ?", answer: "MCV, diabète, troubles musculo-squelettiques, cancers (et autres maladies chroniques)." },
+            { question: "Selon le cours, quelle est la définition de la diabète ?", answer: "Pancréas ne produit pas assez d’insuline OU organisme n’utilise pas efficacement l’insuline → augmentation du glucose sanguin." },
+            { question: "Selon le cours, que faut-il retenir sur Normes glycémie à jeun ?", answer: "70–100 mg/dl normal ; 100–126 mg/dl anomalie discrète ; >126 mg/dl = diabète." },
+            { question: "Selon le cours, que faut-il retenir sur Symptômes du diabète ?", answer: "Polyurie, polydipsie, fatigue." },
+            { question: "Selon le cours, que faut-il retenir sur Diabète type I ?", answer: "Insulino-dépendant, souvent vers l’adolescence, génétique ; destruction auto-immune des cellules β → injections d’insuline inévitables." },
+            { question: "Selon le cours, que faut-il retenir sur Diabète type II ?", answer: "Non insulino-dépendant ; lié au mode de vie (surpoids IMC>25, sédentarité, HTA…) ; résistance à l’insuline puis épuisement pancréatique." },
+            { question: "Selon le cours, que faut-il retenir sur Diabète type II : risques ?", answer: "Risque cardio-vasculaire ; HTA/dyslipidémie ; HDL-cholestérol < 0,4 g/L." },
+            { question: "Selon le cours, que faut-il retenir sur Diabète de grossesse ?", answer: "Apparaît pendant la grossesse (hormones) puis disparaît après l’accouchement." },
+            { question: "Selon le cours, que faut-il retenir sur Cancer Belgique ?", answer: "> 70 000 cas." },
+            { question: "Selon le cours, que faut-il retenir sur Probabilité diagnostic cancer ?", answer: "Environ 1/3 des hommes et 1/4 des femmes sont diagnostiqués d’un cancer." },
+            { question: "Que faut-il retenir sur Cancers les plus fréquents (homme) ?", answer: "Prostate > poumon > côlon." },
+            { question: "Que faut-il retenir sur Cancers les plus fréquents (femme) ?", answer: "Sein > côlon > poumon." },
+            { question: "Selon le cours, que faut-il retenir sur Cancers enfant ?", answer: "Leucémie > lymphome > tumeurs au cerveau." },
+            { question: "Selon le cours, que faut-il retenir sur Décès par cancer : part comportementale ?", answer: "≈30% liés à IMC élevé, faible fruits/légumes, manque d’exercice, tabac, alcool." },
+            { question: "Que faut-il retenir sur Charte d’Ottawa (promotion santé) ?", answer: "Processus donnant aux populations un plus grand contrôle sur leur santé (les rendre acteurs)." },
+            { question: "Selon le cours, quelle est la définition de l’éducation à la santé ?", answer: "Activité d’information visant à informer et inciter à la santé ; accompagne la promotion de la santé." },
+            { question: "Selon le cours, quelle est la définition de la système de santé ?", answer: "Ensemble de moyens pour réaliser les objectifs d’une politique de santé (soins formels/informels, recherche…)." },
+            { question: "Selon le cours, que faut-il retenir sur OMS : rôle ?", answer: "Basée en Suisse ; objectif : amener les États membres au niveau de santé le plus élevé possible." },
+            { question: "Selon le cours, quelle est la définition de la prévention ?", answer: "Ensemble de mesures pour éviter accident/épidémie/maladie ; la médecine préventive vise à éviter maladies et handicaps." },
+            { question: "Que faut-il retenir sur Prévention primaire ?", answer: "Diminuer l’incidence : réduire causes/facteurs de risque (hygiène des mains, vaccins, alimentation, préservatif…)." },
+            { question: "Que faut-il retenir sur Prévention secondaire ?", answer: "Agir au tout début : dépistage." },
+            { question: "Que faut-il retenir sur Prévention tertiaire ?", answer: "Diminuer les complications (ex. orthèse, complications diabète)." },
+            { question: "Que faut-il retenir sur Prévention quaternaire ?", answer: "Protéger de la surmédicalisation ; traitements adaptés (notamment fin de vie)." },
+            { question: "Selon le cours, que faut-il retenir sur Enjeux prévention ?", answer: "Lutte contre sédentarité = dépend du mode de vie + nécessite coordination (environnement, politiques, médecins…)." },
+            { question: "Selon le cours, que faut-il retenir sur Dépense “ancêtres” ?", answer: "Pour dépenser autant que nos ancêtres : ~19 km de marche/jour." },
+            { question: "Selon le cours, quelle est la définition de la condition physique ?", answer: "Endurance cardio-respiratoire + endurance/force musculo-squelettique + vitesse + souplesse + agilité + équilibre + temps de réaction + composition corporelle." },
+            { question: "Selon le cours, que faut-il retenir sur Condition physique “santé” ?", answer: "Se mouvoir sans fatigue avec vigueur musculaire, bonne amplitude articulaire, coordination, récupération, maintien du poids de santé." },
+            { question: "Selon le cours, quelle est la définition de l’APS ?", answer: "Le fait de se mouvoir." },
+            { question: "Selon le cours, quelle est la définition de la sport ?", answer: "Notion de performance (différent de l’APS)." },
+            { question: "Selon le cours, que faut-il retenir sur Recommandations OMS APS ?", answer: "150 min/semaine d’activité modérée (bénéfices : 300 min) ; activité intense = temps divisé par 2 ; renforcement 2×/semaine." },
+            { question: "Selon le cours, que faut-il retenir sur APS & MCV : mécanisme ?", answer: "Diminution FC → moins de travail du myocarde → moins de risque CV ; adaptations cardiaques (dilatation cavités, hypertrophie) → meilleure économie." },
+            { question: "Selon le cours, à −10 bpm, quelle économie d’O2 observe-t-on ?", answer: "Environ 15% d’économie d’O2." },
+            { question: "Selon le cours, que faut-il retenir sur APS intense : effet prévention ?", answer: "Réduit d’environ 20–30% le risque de coronaropathies et AVC." },
+            { question: "Selon le cours, que faut-il retenir sur APS modérée : effet prévention ?", answer: "Réduit d’environ 10–20% le risque de pathologies." },
+            { question: "Selon le cours, quelle est la définition de la sarcopénie ?", answer: "Perte de muscle et de force musculaire liée à l’âge." },
+            { question: "Selon le cours, que faut-il retenir sur Sarcopénie : rôle de l’exercice ?", answer: "Endurance ↓ perte masse ; musculation ↓ atrophie ; exercice préserve temps de réaction." },
+            { question: "Selon le cours, que faut-il retenir sur Lipomax ?", answer: "Effort faible à modéré (<60% VO2 max) et le plus longtemps : le corps brûle davantage de graisse ; au-delà du seuil anaérobie, plus de glucides." },
+            { question: "Selon le cours, que faut-il retenir sur APS pour lutter contre le diabète ?", answer: "3 piliers : alimentation équilibrée, activité physique régulière, traitement approprié ; moins de gras/inflammation + plus de muscle = meilleure régulation." },
+            { question: "Selon le cours, que faut-il retenir sur APS & cancer ?", answer: "Rôle vital en prévention et traitement à tous les stades ; commencer tôt ; programme personnalisé et attention contre-indications." },
+            { question: "Selon le cours, que faut-il retenir sur APS : réduction risque cancer ?", answer: "≈40% cancer côlon (1h30/semaine) ; ≈30% cancer sein (4h/semaine)." },
+            { question: "Selon le cours, quelle est la définition de l’ostéoporose ?", answer: "Diminution densité osseuse liée à l’âge ; augmente risque de fracture (+70% fracture de hanche)." },
+            { question: "Selon le cours, que faut-il retenir sur Ostéoporose : fréquence ?", answer: "≈40% femmes et ≈10% hommes." },
+            { question: "Selon le cours, que faut-il retenir sur Ostéoporose : APS ?", answer: "APS favorise masse osseuse maximale et réduit perte densité ; attention au risque de fracture pendant l’APS." },
+            { question: "Selon le cours, que faut-il retenir sur APS & santé mentale ?", answer: "Améliore qualité de vie : expériences positives, baisse stress (endorphines), meilleur rapport au corps, participation sociale ; effets cerveau (sommeil, humeur…)." },
+            { question: "Selon le cours, que faut-il retenir sur Sport sur ordonnance ?", answer: "Peut être prescrit ; en France concept plus utilisé ; en Belgique seulement certaines communes ; pas de remboursement assurance maladie mais certaines mutualités." },
+            { question: "Selon le cours, que faut-il retenir sur Prévention FWB ?", answer: "Vaccination, prévention maladies infectieuses ; dépistages (sein, intestin…) ; HTA/tabac/cholestérol/surpoids ; promo bucco-dentaire ; prévention violence/trauma/suicide." },
+            { question: "Selon le cours, que faut-il retenir sur École : acteurs ?", answer: "Centres PMS ou services PSE : visites médicales, dépistages, programmes de promotion santé ; PMS public et gratuit ; secret professionnel." },
+            { question: "Selon le cours, que faut-il retenir sur Santé au travail : SIPP ?", answer: "Service interne de prévention et protection au travail : assister l’employeur (bien-être au travail), approche multidisciplinaire ; aspects psychosociaux (violences, harcèlement, discrimination)." },
+            { question: "Selon le cours, que faut-il retenir sur Principe système belge ?", answer: "Système d’assurance sociale basé sur la solidarité ; conception libérale (professionnels indépendants, payés à l’acte) ; libre choix du patient." },
+            { question: "Selon le cours, que faut-il retenir sur 3 niveaux de soins ?", answer: "Soins primaires (MG, 1ère ligne), secondaires (spécialistes), tertiaires (soins complexes en hôpital)." },
+            { question: "Selon le cours, que faut-il retenir sur MG : DMG ?", answer: "Le médecin généraliste gère le dossier médical global (DMG), à renouveler 1×/2 ans ; meilleure prise en charge si consultation chez son MG." },
+            { question: "Selon le cours, que faut-il retenir sur Urgences : remarque ?", answer: "Souvent surchargées ; 70% des patients se présentent spontanément ; 20–40% pourraient être vus par un généraliste." },
+            { question: "Que faut-il retenir sur Sécurité sociale : principe ?", answer: "Solidarité (sain/malade, travailleurs/chômeurs, familles avec/sans enfants…)." },
+            { question: "Selon le cours, que faut-il retenir sur Cotisation salariés ?", answer: "Environ 13% du revenu." },
+            { question: "Selon le cours, que faut-il retenir sur 7 piliers sécu ?", answer: "Soins de santé ; pensions ; chômage ; prestations familiales ; maladies pro ; accidents du travail ; congés payés." },
+            { question: "Selon le cours, que faut-il retenir sur INAMI : rôle ?", answer: "Gère/contrôle l’assurance obligatoire soins de santé et indemnités d’incapacité ; budget réparti entre mutualités." },
+            { question: "Selon le cours, que faut-il retenir sur Mutualités ?", answer: "Exécutent assurance obligatoire (remboursements soins/médicaments, forfait hospitalisation, indemnités incapacité). Peuvent proposer assurance complémentaire." },
+            { question: "Selon le cours, que faut-il retenir sur CAAMI ?", answer: "Caisse auxiliaire : assurance obligatoire sans assurance complémentaire payante." },
+            { question: "Selon le cours, que faut-il retenir sur Vaccination : principe ?", answer: "Antigène → réponse immunitaire + mémoire ; protège sans symptômes ; rappels si besoin." },
+            { question: "Selon le cours, que faut-il retenir sur Vaccins inactivés ?", answer: "Agents pathogènes morts (ex. poliomyélite)." },
+            { question: "Selon le cours, que faut-il retenir sur Vaccins vivants atténués ?", answer: "Agents affaiblis (ex. ROR)." },
+            { question: "Selon le cours, que faut-il retenir sur Vaccins anatoxines ?", answer: "Toxine neutralisée (ex. diphtérie, tétanos)." },
+            { question: "Que faut-il retenir sur Idée reçue : “vaccins provoquent la maladie” ?", answer: "Faux : agents inactivés/atténués." },
+            { question: "Que faut-il retenir sur Protection collective (vaccination) ?", answer: "Plus la couverture est élevée, moins l’agent pathogène circule → protège aussi les vulnérables/non vaccinés." },
+            { question: "Selon le cours, que faut-il retenir sur Belgique : vaccin obligatoire ?", answer: "Poliomyélite, obligatoire depuis 1966 (certificat requis)." },
+            { question: "Selon le cours, que faut-il retenir sur ONE : missions ?", answer: "Organisme FWB : consultations prénatales, consultations pédiatriques 0–6 ans, vaccinations gratuites, dépistages néonataux, éducation/sensibilisation." },
+            { question: "Selon le cours, quelle est la définition de l’IAS ?", answer: "Infections associées aux soins : contractées en milieu de soins ; diagnostic après 48h d’hospitalisation ou après la sortie." },
+            { question: "Selon le cours, que faut-il retenir sur IAS : fréquence Europe ?", answer: "≈6,4% des hospitalisations ; 3,2 millions/an ; mortalité 4,5%." },
+            { question: "Selon le cours, que faut-il retenir sur IAS : conséquences ?", answer: "Plus graves ; invalidité ; prolongation séjour (+4 jours) ; coûts ; charge émotionnelle et travail accru." },
+            { question: "Selon le cours, que faut-il retenir sur IAS : facteurs ?", answer: "Vieillissement, immunodépression, antibiothérapie, séjour prolongé, actes invasifs, manque de formation." },
+            { question: "Selon le cours, que faut-il retenir sur IAS : endogène vs exogène ?", answer: "Endogène = micro-organismes du patient ; exogène = environnement (matériel, personnel, autres patients)." },
+            { question: "Selon le cours, que faut-il retenir sur Hygiène hospitalière : actions clés ?", answer: "Nettoyage ; désinfection ; conservation de l’hygiène." },
+            { question: "Selon le cours, que faut-il retenir sur Historique hygiène ?", answer: "Semmelweis (1846 lavage mains), Pasteur (1860 microbes/asepsie), Lister (1866 antisepsie acide phénique)." },
+            { question: "Selon le cours, que faut-il retenir sur Comité d’hygiène hospitalière : missions ?", answer: "Réduire durées de séjour et charge de travail ; améliorer satisfaction/réputation ; garantir indicateurs de qualité et diminuer coûts." }
+        ];
+
+
+                let flashcardStatuses = {};
+        let currentIndex = 0;
+        let flashcardsToShow = [];
+        let isFlipped = false;
+
+        function loadProgress() {
+            const saved = localStorage.getItem('flashcardStatuses');
+            if (saved) {
+                try {
+                    flashcardStatuses = JSON.parse(saved) || {};
+                } catch (e) {
+                    flashcardStatuses = {};
+                }
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem('flashcardStatuses', JSON.stringify(flashcardStatuses));
+        }
+
+        function initFlashcards() {
+            loadProgress();
+
+            // Valeur par défaut : "à apprendre"
+            flashcardsData.forEach((_, i) => {
+                if (!flashcardStatuses[i]) flashcardStatuses[i] = 'apprendre';
+            });
+
+            updateFlashcardStats();
+            resetSessionUI();
+            saveProgress();
+        }
+
+        function resetSessionUI() {
+            const progressFill = document.getElementById('progressFill');
+            if (progressFill) {
+                progressFill.style.width = '0%';
+                progressFill.textContent = '0/0';
+            }
+            const text = document.getElementById('flashcardText');
+            if (text) {
+                text.innerHTML = 'Clique sur « Toutes les cartes » pour commencer ta révision.';
+            }
+            const buttons = document.getElementById('flashcardButtons');
+            if (buttons) buttons.style.display = 'none';
+
+            const cardEl = document.getElementById('flashcard');
+            if (cardEl) cardEl.classList.remove('flipped');
+
+            isFlipped = false;
+            flashcardsToShow = [];
+            currentIndex = 0;
+        }
+
+        function startFlashcards(mode) {
+            flashcardsToShow = [];
+
+            flashcardsData.forEach((_, index) => {
+                const status = flashcardStatuses[index] || 'apprendre';
+
+                if (mode === 'all' ||
+                    (mode === 'apprendre' && status === 'apprendre') ||
+                    (mode === 'revoir' && (status === 'hesitant' || status === 'apprendre'))) {
+                    flashcardsToShow.push(index);
+                }
+            });
+
+            if (flashcardsToShow.length === 0) {
+                alert('Aucune carte dans cette catégorie ! 🎉\n\nSi tout est maîtrisé, lance "Toutes les cartes" pour revoir au hasard.');
+                resetSessionUI();
+                return;
+            }
+
+            // Mélange
+            flashcardsToShow.sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            showCard();
+        }
+
+        function showCard() {
+            if (flashcardsToShow.length === 0) return;
+
+            const card = flashcardsData[flashcardsToShow[currentIndex]];
+            document.getElementById('flashcardText').innerHTML = (card.question || '').replace(/\n/g, '<br>');
+            document.getElementById('flashcardButtons').style.display = 'none';
+            document.getElementById('flashcard').classList.remove('flipped');
+
+            isFlipped = false;
+            updateSessionProgress();
+        }
+
+        function flipCard() {
+            if (flashcardsToShow.length === 0) return;
+
+            const card = flashcardsData[flashcardsToShow[currentIndex]];
+            isFlipped = !isFlipped;
+
+            if (isFlipped) {
+                document.getElementById('flashcardText').innerHTML = (card.answer || '').replace(/\n/g, '<br>');
+                document.getElementById('flashcardButtons').style.display = 'flex';
+                document.getElementById('flashcard').classList.add('flipped');
+            } else {
+                document.getElementById('flashcardText').innerHTML = (card.question || '').replace(/\n/g, '<br>');
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+            }
+        }
+
+        function markCard(status) {
+            const idx = flashcardsToShow[currentIndex];
+            flashcardStatuses[idx] = status;
+
+            saveProgress();
+            updateFlashcardStats();
+
+            currentIndex++;
+
+            if (currentIndex >= flashcardsToShow.length) {
+                alert('Toutes les cartes de cette session sont révisées ! 🎉\n\nRegarde tes stats pour suivre ta progression.');
+                document.getElementById('flashcardText').innerHTML = 'Session terminée ! Clique sur un mode pour recommencer.';
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+                flashcardsToShow = [];
+                currentIndex = 0;
+                isFlipped = false;
+                updateSessionProgress();
+                return;
+            }
+
+            showCard();
+        }
+
+        function updateSessionProgress() {
+            const total = flashcardsToShow.length;
+            const current = total === 0 ? 0 : (currentIndex + 1);
+            const percentage = total === 0 ? 0 : (current / total) * 100;
+
+            const progressFill = document.getElementById('progressFill');
+            if (!progressFill) return;
+
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = `${current}/${total}`;
+        }
+
+        function updateFlashcardStats() {
+            const total = flashcardsData.length;
+
+            let maitrise = 0, hesitant = 0, apprendre = 0;
+            for (let key in flashcardStatuses) {
+                if (flashcardStatuses[key] === 'maitrise') maitrise++;
+                else if (flashcardStatuses[key] === 'hesitant') hesitant++;
+                else apprendre++;
+            }
+
+            const elTotal = document.getElementById('totalCards');
+            if (elTotal) elTotal.textContent = total;
+
+            const elM = document.getElementById('maitriseCards');
+            if (elM) elM.textContent = maitrise;
+
+            const elH = document.getElementById('hesitantCards');
+            if (elH) elH.textContent = hesitant;
+
+            const elA = document.getElementById('apprendreCards');
+            if (elA) elA.textContent = apprendre;
+        }
+
+        function exportProgress() {
+            const difficult = [];
+
+            flashcardsData.forEach((card, index) => {
+                const st = flashcardStatuses[index] || 'apprendre';
+                if (st === 'hesitant' || st === 'apprendre') {
+                    difficult.push({
+                        status: st,
+                        question: card.question,
+                        answer: card.answer
+                    });
+                }
+            });
+
+            const stats = {
+                total: flashcardsData.length,
+                maitrise: Object.values(flashcardStatuses).filter(s => s === 'maitrise').length,
+                hesitant: Object.values(flashcardStatuses).filter(s => s === 'hesitant').length,
+                apprendre: Object.values(flashcardStatuses).filter(s => s === 'apprendre').length
+            };
+
+            const dataStr = JSON.stringify({
+                date: new Date().toISOString(),
+                statistics: stats,
+                difficult_cards: difficult
+            }, null, 2);
+
+            const blob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'hygiene_progression_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ Export réussi !\n\nLe fichier contient toutes les cartes "Hésitant" et "À apprendre" pour révision ciblée.');
+        }
+
+        function triggerImport() {
+            const input = document.getElementById('importFlashcardsInput');
+            if (input) input.click();
+        }
+
+        function importProgress(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+
+                    // 1) Format "modèle Massage" : difficult_cards + statistics
+                    if (imported && imported.difficult_cards && Array.isArray(imported.difficult_cards)) {
+                        let updated = 0;
+
+                        imported.difficult_cards.forEach(card => {
+                            const idx = flashcardsData.findIndex(c => c.question === card.question);
+                            if (idx !== -1 && (card.status === 'maitrise' || card.status === 'hesitant' || card.status === 'apprendre')) {
+                                flashcardStatuses[idx] = card.status;
+                                updated++;
+                            }
+                        });
+
+                        alert(`✅ Import réussi !\n\n${updated} cartes importées.\nDate export : ${imported.date ? new Date(imported.date).toLocaleDateString() : 'inconnue'}`);
+                    }
+                    // 2) Ancien format Hygiène : { apprendre: [...], hesitant: [...], date }
+                    else if (imported && Array.isArray(imported.apprendre) && Array.isArray(imported.hesitant)) {
+                        let updated = 0;
+
+                        imported.apprendre.forEach(card => {
+                            const idx = flashcardsData.findIndex(c => c.question === card.question);
+                            if (idx !== -1) { flashcardStatuses[idx] = 'apprendre'; updated++; }
+                        });
+
+                        imported.hesitant.forEach(card => {
+                            const idx = flashcardsData.findIndex(c => c.question === card.question);
+                            if (idx !== -1) { flashcardStatuses[idx] = 'hesitant'; updated++; }
+                        });
+
+                        alert(`✅ Import réussi !\n\n${updated} cartes importées.\nDate export : ${imported.date ? new Date(imported.date).toLocaleDateString() : 'inconnue'}`);
+                    }
+                    // 3) Format simple : { "0": "apprendre", "1": "maitrise", ... }
+                    else if (imported && typeof imported === 'object') {
+                        let updated = 0;
+                        Object.keys(imported).forEach(k => {
+                            const idx = parseInt(k, 10);
+                            const st = imported[k];
+                            if (Number.isFinite(idx) && idx >= 0 && idx < flashcardsData.length &&
+                                (st === 'maitrise' || st === 'hesitant' || st === 'apprendre')) {
+                                flashcardStatuses[idx] = st;
+                                updated++;
+                            }
+                        });
+                        alert(`✅ Import réussi !\n\n${updated} cartes importées.`);
+                    } else {
+                        alert('❌ Format non reconnu.\n\nImportez un JSON exporté depuis ce fichier (ou un export ancien).');
+                    }
+
+                    saveProgress();
+                    updateFlashcardStats();
+                    resetSessionUI();
+                } catch (error) {
+                    alert('❌ Erreur lors de l\'importation.\n\nVérifie que le fichier JSON est valide.');
+                    console.error('Import error:', error);
+                }
+            };
+
+            reader.readAsText(file);
+            // Reset input pour permettre import même fichier
+            event.target.value = '';
+        }
+
+        function resetProgress() {
+            if (confirm('⚠️ Réinitialiser toute ta progression flashcards ?\n\nCette action est irréversible.')) {
+                flashcardStatuses = {};
+                initFlashcards();
+                alert('🔄 Progression réinitialisée !');
+            }
+        }
+
+        // ==================== QCM ====================
+        const qcmData = [
+            {
+                question: "Selon l\u2019OMS, la sant\u00e9 est :",
+                options: [
+                    "L\u2019absence de maladie uniquement",
+                    "Un \u00e9tat de complet bien-\u00eatre physique, mental et social",
+                    "Un \u00e9tat mesurable uniquement par des param\u00e8tres biologiques",
+                    "Un \u00e9tat de performance sportive"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "D\u00e9finition OMS : bien-\u00eatre physique, mental et social ; pas seulement absence de maladie."
+            },
+            {
+                question: "Quel d\u00e9terminant p\u00e8se le plus dans le cours (r\u00e9partition en %) ?",
+                options: [
+                    "Biologiques",
+                    "Environnementaux",
+                    "Mode de vie",
+                    "Services de sant\u00e9"
+                ],
+                correct: [2],
+                multiple: false,
+                explanation: "Le mode de vie est donn\u00e9 comme principal d\u00e9terminant (53%)."
+            },
+            {
+                question: "En Belgique, l\u2019EVBS (esp\u00e9rance de vie en bonne sant\u00e9) indiqu\u00e9e dans le cours est d\u2019environ :",
+                options: [
+                    "57 ans",
+                    "67 ans",
+                    "77 ans",
+                    "81 ans"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Le cours cite EVBS \u2248 67 ans pour la Belgique."
+            },
+            {
+                question: "Une personne est consid\u00e9r\u00e9e comme s\u00e9dentaire si :",
+                options: [
+                    "Elle marche moins de 19 km/jour",
+                    "Sa d\u00e9pense \u00e9nerg\u00e9tique est <1,5 kcal en posture assise/couch\u00e9e",
+                    "Elle est assise plus de 7 h/jour",
+                    "B et C"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "Le cours d\u00e9finit le comportement s\u00e9dentaire (<1,5 kcal) et indique s\u00e9dentaire si assis >7 h/jour."
+            },
+            {
+                question: "La r\u00e9partition macronutritionnelle de r\u00e9f\u00e9rence donn\u00e9e dans le cours est :",
+                options: [
+                    "30% glucides / 15% lipides / 55% protides",
+                    "30% lipides / 15% protides / 55% glucides",
+                    "15% lipides / 30% protides / 55% glucides",
+                    "55% lipides / 30% protides / 15% glucides"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Le cours propose 30% lipides, 15% protides, 55% glucides."
+            },
+            {
+                question: "L\u2019ob\u00e9sit\u00e9 est d\u00e9finie (OMS) comme :",
+                options: [
+                    "Une masse grasse insuffisante",
+                    "Un exc\u00e8s de masse grasse entra\u00eenant des cons\u00e9quences n\u00e9fastes",
+                    "Un IMC toujours >40",
+                    "Une maladie uniquement g\u00e9n\u00e9tique"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "D\u00e9finition OMS cit\u00e9e : exc\u00e8s de masse grasse avec cons\u00e9quences n\u00e9fastes."
+            },
+            {
+                question: "Le diab\u00e8te est diagnostiqu\u00e9 (cours) si la glyc\u00e9mie \u00e0 jeun est :",
+                options: [
+                    "<70 mg/dl",
+                    "Entre 70 et 100 mg/dl",
+                    "Entre 100 et 126 mg/dl",
+                    ">126 mg/dl"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "Le cours : diab\u00e8te si glyc\u00e9mie >126 mg/dl ; 100\u2013126 = anomalie discr\u00e8te."
+            },
+            {
+                question: "Quels sympt\u00f4mes font partie du cours pour le diab\u00e8te ?",
+                options: [
+                    "Polyurie",
+                    "Polydipsie",
+                    "Fatigue",
+                    "Les trois"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "Le cours cite polyurie, polydipsie, fatigue."
+            },
+            {
+                question: "Le diab\u00e8te de type II est associ\u00e9 dans le cours \u00e0 :",
+                options: [
+                    "Un mode de vie (surpoids, s\u00e9dentarit\u00e9, HTA)",
+                    "Uniquement une cause g\u00e9n\u00e9tique",
+                    "Une destruction auto-immune des cellules \u03b2",
+                    "Une absence totale de risque cardio-vasculaire"
+                ],
+                correct: [0],
+                multiple: false,
+                explanation: "Type II : li\u00e9 au mode de vie ; r\u00e9sistance \u00e0 l\u2019insuline puis \u00e9puisement pancr\u00e9atique ; risque CV."
+            },
+            {
+                question: "En Belgique (cours), quel vaccin est le seul l\u00e9galement obligatoire ?",
+                options: [
+                    "ROR",
+                    "DTP",
+                    "Poliomy\u00e9lite",
+                    "H\u00e9patite B"
+                ],
+                correct: [2],
+                multiple: false,
+                explanation: "Le cours : poliomy\u00e9lite obligatoire depuis 1966 (certificat)."
+            },
+            {
+                question: "Quelle phrase d\u00e9crit correctement l\u2019immunit\u00e9 inn\u00e9e ?",
+                options: [
+                    "Sp\u00e9cifique et lente",
+                    "Pr\u00e9sente d\u00e8s la naissance, non sp\u00e9cifique, rapide",
+                    "Uniquement bas\u00e9e sur les anticorps",
+                    "Acquise apr\u00e8s vaccination uniquement"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Immunit\u00e9 inn\u00e9e : pr\u00e9sente d\u00e8s la naissance, non sp\u00e9cifique, rapide."
+            },
+            {
+                question: "L\u2019immunit\u00e9 acquise (adaptative) repose surtout sur :",
+                options: [
+                    "Lymphocytes B et T",
+                    "Peau et muqueuses uniquement",
+                    "Globules rouges",
+                    "Plaquettes"
+                ],
+                correct: [0],
+                multiple: false,
+                explanation: "Le cours : immunit\u00e9 adaptative via lymphocytes B (anticorps) et T."
+            },
+            {
+                question: "Quel type de vaccin contient une toxine neutralis\u00e9e ?",
+                options: [
+                    "Inactiv\u00e9",
+                    "Vivant att\u00e9nu\u00e9",
+                    "Sous-unit\u00e9",
+                    "Anatoxine"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "Anatoxines : toxine neutralis\u00e9e (ex. dipht\u00e9rie, t\u00e9tanos)."
+            },
+            {
+                question: "Concernant l\u2019efficacit\u00e9 vaccinale (cours), laquelle est correcte ?",
+                options: [
+                    "On ne peut jamais tomber malade apr\u00e8s vaccination",
+                    "Les \u00e9checs sont plus fr\u00e9quents pour des vaccins comme la grippe (souches variables)",
+                    "Un vaccin efficace provoque forc\u00e9ment la maladie",
+                    "Les maladies post-vaccin sont toujours plus graves"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Le cours : grippe moins efficace (souches \u00e9voluent) ; maladie souvent moins grave si survient."
+            },
+            {
+                question: "Le r\u00f4le de la vaccination en sant\u00e9 publique inclut :",
+                options: [
+                    "Protection individuelle",
+                    "Protection collective",
+                    "\u00c9radication possible (variole)",
+                    "Toutes ces r\u00e9ponses"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "Le cours liste ces trois r\u00f4les."
+            },
+            {
+                question: "Selon le cours, les recommandations OMS pour l\u2019APS \u201cen forme\u201d sont :",
+                options: [
+                    "75 min mod\u00e9r\u00e9e/semaine",
+                    "150 min mod\u00e9r\u00e9e/semaine",
+                    "300 min mod\u00e9r\u00e9e/semaine obligatoire",
+                    "150 min intense/semaine"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "150 min mod\u00e9r\u00e9e/semaine ; b\u00e9n\u00e9fices jusqu\u2019\u00e0 300 min ; intense = temps /2."
+            },
+            {
+                question: "Dans le cours, l\u2019APS intense r\u00e9duit le risque de coronaropathies et AVC d\u2019environ :",
+                options: [
+                    "5\u201310%",
+                    "10\u201320%",
+                    "20\u201330%",
+                    "40\u201350%"
+                ],
+                correct: [2],
+                multiple: false,
+                explanation: "APS intense : \u221220 \u00e0 \u221230% (cours)."
+            },
+            {
+                question: "La sarcop\u00e9nie est :",
+                options: [
+                    "Une augmentation de masse musculaire",
+                    "Une perte de muscle et de force li\u00e9e \u00e0 l\u2019\u00e2ge",
+                    "Une infection respiratoire",
+                    "Une forme de diab\u00e8te"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "D\u00e9finition du cours."
+            },
+            {
+                question: "Pour l\u2019ob\u00e9sit\u00e9, le cours \u00e9voque le \u201cLipomax\u201d :",
+                options: [
+                    "Effort tr\u00e8s intense et court",
+                    "Effort faible \u00e0 mod\u00e9r\u00e9 (<60% VO2 max) et le plus longtemps",
+                    "Repos complet",
+                    "Uniquement musculation lourde"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Lipomax : faible \u00e0 mod\u00e9r\u00e9, longtemps ; au-del\u00e0 du seuil ana\u00e9robie \u2192 plus de glucides."
+            },
+            {
+                question: "Pour lutter contre le diab\u00e8te, le cours parle de 3 piliers :",
+                options: [
+                    "Alimentation \u00e9quilibr\u00e9e, activit\u00e9 physique r\u00e9guli\u00e8re, traitement appropri\u00e9",
+                    "Sommeil, tabac, alcool",
+                    "Vaccination, antibioth\u00e9rapie, d\u00e9pistage",
+                    "Hydratation, stretching, m\u00e9ditation"
+                ],
+                correct: [0],
+                multiple: false,
+                explanation: "Les 3 piliers sont explicit\u00e9s dans le cours."
+            },
+            {
+                question: "Le cours indique que l\u2019APS en pr\u00e9vention du cancer r\u00e9duit environ :",
+                options: [
+                    "30% du cancer du c\u00f4lon (1h30/sem)",
+                    "40% du cancer du c\u00f4lon (1h30/sem)",
+                    "40% du cancer du sein (4h/sem)",
+                    "50% de tous les cancers"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Le cours : ~40% c\u00f4lon (1h30/sem) ; ~30% sein (4h/sem)."
+            },
+            {
+                question: "L\u2019ost\u00e9oporose est d\u00e9crite comme :",
+                options: [
+                    "Une augmentation de densit\u00e9 osseuse",
+                    "Une diminution de densit\u00e9 osseuse li\u00e9e \u00e0 l\u2019\u00e2ge augmentant le risque de fracture",
+                    "Une infection urinaire",
+                    "Une pathologie uniquement masculine"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "D\u00e9finition du cours."
+            },
+            {
+                question: "En Belgique (cours), la s\u00e9curit\u00e9 sociale repose sur :",
+                options: [
+                    "Le libre march\u00e9",
+                    "La solidarit\u00e9 entre cat\u00e9gories (sain/malade, travailleurs/ch\u00f4meurs\u2026)",
+                    "Le b\u00e9n\u00e9volat",
+                    "Le paiement int\u00e9gral par le patient"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Principe de solidarit\u00e9 d\u00e9crit dans le cours."
+            },
+            {
+                question: "Combien de r\u00e9gimes de s\u00e9curit\u00e9 sociale sont cit\u00e9s en Belgique (cours) ?",
+                options: [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                correct: [2],
+                multiple: false,
+                explanation: "3 r\u00e9gimes : salari\u00e9s, ind\u00e9pendants, fonctionnaires."
+            },
+            {
+                question: "Le cours cite 7 piliers de la s\u00e9curit\u00e9 sociale. Lesquels appartiennent \u00e0 la liste ?",
+                options: [
+                    "Soins de sant\u00e9",
+                    "Pensions",
+                    "Ch\u00f4mage",
+                    "Toutes ces r\u00e9ponses"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "Soins de sant\u00e9, pensions, ch\u00f4mage, prestations familiales, maladies pro, accidents du travail, cong\u00e9s pay\u00e9s."
+            },
+            {
+                question: "L\u2019INAMI (cours) est :",
+                options: [
+                    "Un h\u00f4pital",
+                    "Un organisme qui g\u00e8re/contr\u00f4le l\u2019assurance obligatoire soins de sant\u00e9 et indemnit\u00e9s",
+                    "Une mutuelle",
+                    "Un service de police"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "D\u00e9finition du cours."
+            },
+            {
+                question: "Le dossier m\u00e9dical global (DMG) est associ\u00e9 \u00e0 :",
+                options: [
+                    "Le m\u00e9decin g\u00e9n\u00e9raliste",
+                    "Le pharmacien",
+                    "Le kin\u00e9 uniquement",
+                    "Les urgences"
+                ],
+                correct: [0],
+                multiple: false,
+                explanation: "Le MG g\u00e8re le DMG ; renouvellement 1\u00d7/2 ans, meilleur remboursement."
+            },
+            {
+                question: "Concernant les urgences (cours) :",
+                options: [
+                    "70% des patients arrivent avec avis m\u00e9dical pr\u00e9alable",
+                    "70% se pr\u00e9sentent spontan\u00e9ment",
+                    "0% de cas non urgents",
+                    "Elles ne sont jamais surcharg\u00e9es"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Le cours : 70% se pr\u00e9sentent spontan\u00e9ment ; 20\u201340% pourraient aller chez le g\u00e9n\u00e9raliste."
+            },
+            {
+                question: "La pr\u00e9vention quaternaire vise \u00e0 :",
+                options: [
+                    "Augmenter les examens inutiles",
+                    "Pr\u00e9venir la surm\u00e9dicalisation",
+                    "Remplacer la pr\u00e9vention primaire",
+                    "\u00c9radiquer les microbes"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Quaternaire : prot\u00e9ger d\u2019une surm\u00e9dicalisation."
+            },
+            {
+                question: "Le cours d\u00e9finit une IAS comme diagnostiqu\u00e9e :",
+                options: [
+                    "Toujours avant l\u2019hospitalisation",
+                    "Apr\u00e8s 48 h d\u2019hospitalisation ou apr\u00e8s la sortie",
+                    "Uniquement en cabinet",
+                    "Uniquement chez les enfants"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "D\u00e9finition du cours : apr\u00e8s 48h ou post-sortie."
+            },
+            {
+                question: "La fr\u00e9quence des IAS en Europe (cours) est d\u2019environ :",
+                options: [
+                    "0,6% des hospitalisations",
+                    "6,4% des hospitalisations",
+                    "16% des hospitalisations",
+                    "64% des hospitalisations"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "6,4% cit\u00e9 dans le cours."
+            },
+            {
+                question: "Les IAS entra\u00eenent en moyenne une prolongation de s\u00e9jour d\u2019environ :",
+                options: [
+                    "+1 jour",
+                    "+2 jours",
+                    "+4 jours",
+                    "+10 jours"
+                ],
+                correct: [2],
+                multiple: false,
+                explanation: "Le cours indique +4 jours en moyenne."
+            },
+            {
+                question: "Parmi les facteurs favorisant les IAS, on retrouve (cours) :",
+                options: [
+                    "Immunod\u00e9pression",
+                    "S\u00e9jour prolong\u00e9",
+                    "Actes invasifs",
+                    "Toutes ces r\u00e9ponses"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "La liste du cours inclut tous ces \u00e9l\u00e9ments."
+            },
+            {
+                question: "Les infections exog\u00e8nes correspondent \u00e0 :",
+                options: [
+                    "Micro-organismes d\u00e9j\u00e0 pr\u00e9sents dans le corps du patient",
+                    "Micro-organismes de l\u2019environnement (mat\u00e9riel, personnel, autres patients)",
+                    "Une r\u00e9action allergique",
+                    "Une infection uniquement virale"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Exog\u00e8ne = environnement (cours)."
+            },
+            {
+                question: "Quelle mesure fait partie des strat\u00e9gies de pr\u00e9vention des infections (cours) ?",
+                options: [
+                    "Surveillance \u00e9pid\u00e9miologique",
+                    "Contr\u00f4le de l\u2019utilisation des antibiotiques",
+                    "Pr\u00e9cautions g\u00e9n\u00e9rales/sp\u00e9cifiques",
+                    "Toutes ces r\u00e9ponses"
+                ],
+                correct: [3],
+                multiple: false,
+                explanation: "Ces mesures sont list\u00e9es dans le cours."
+            },
+            {
+                question: "Quel acteur doit adh\u00e9rer aux r\u00e8gles d\u2019hygi\u00e8ne, selon le cours ?",
+                options: [
+                    "Patients uniquement",
+                    "Personnel uniquement",
+                    "Patients et personnel",
+                    "Uniquement le comit\u00e9 d\u2019hygi\u00e8ne"
+                ],
+                correct: [2],
+                multiple: false,
+                explanation: "Le cours mentionne patients + personnel (travail en \u00e9quipe)."
+            },
+            {
+                question: "Qui a mis en \u00e9vidence l\u2019importance du lavage des mains (cours) ?",
+                options: [
+                    "Jenner",
+                    "Semmelweis",
+                    "Lister",
+                    "Pasteur"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Semmelweis (1846) : lavage des mains."
+            },
+            {
+                question: "Joseph Lister (cours) est associ\u00e9 \u00e0 :",
+                options: [
+                    "D\u00e9couverte des microbes",
+                    "Usage de l\u2019acide ph\u00e9nique pour l\u2019antisepsie",
+                    "Premier vaccin contre la rage",
+                    "D\u00e9finition OMS de la sant\u00e9"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Lister (1866) : acide ph\u00e9nique, antisepsie."
+            },
+            {
+                question: "L\u2019ONE (cours) est :",
+                options: [
+                    "Un service hospitalier",
+                    "Un organisme public FWB promouvant la sant\u00e9 des enfants et familles",
+                    "Un m\u00e9dicament",
+                    "Une assurance priv\u00e9e"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Le cours d\u00e9crit l\u2019ONE et ses missions (0\u20136 ans, vaccinations gratuites\u2026)."
+            },
+            {
+                question: "PMS/PSE (cours) \u00e0 l\u2019\u00e9cole :",
+                options: [
+                    "Assurent uniquement le sport de comp\u00e9tition",
+                    "R\u00e9alisaient des visites m\u00e9dicales, d\u00e9pistages, programmes de promotion sant\u00e9",
+                    "G\u00e8rent l\u2019assurance maladie",
+                    "S\u2019occupent des urgences hospitali\u00e8res"
+                ],
+                correct: [1],
+                multiple: false,
+                explanation: "Le cours : PMS/PSE assurent d\u00e9pistages et promotion sant\u00e9 en milieu scolaire."
+            }
+        ];
+
+        
+        
+        function initQCM() {
+            const container = document.getElementById('qcm-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            qcmData.forEach((qcm, qIndex) => {
+                const qcmEl = document.createElement('div');
+                qcmEl.className = 'qcm-container';
+
+                const inputType = 'checkbox'; // autorise la sélection multiple (même si la question n'en a qu'une)
+                const optionsHtml = qcm.options.map((option, oIndex) => `
+                    <label class="option">
+                        <input type="${inputType}" name="qcm-${qIndex}" value="${oIndex}">
+                        <span>${option}</span>
+                    </label>
+                `).join('');
+
+                qcmEl.innerHTML = `
+                    <div class="question">
+                        Question ${qIndex + 1} ${ (Array.isArray(qcm.correct) && qcm.correct.length > 1) ? '(Plusieurs réponses possibles)' : ''}
+                        <br>${qcm.question}
+                    </div>
+                    <div class="options">${optionsHtml}</div>
+                    <button class="submit-btn" type="button" onclick="checkQCM(${qIndex})">Vérifier</button>
+                    <div class="result" id="result-${qIndex}" style="display: none;"></div>
+                `;
+
+                container.appendChild(qcmEl);
+            });
+        }
+
+        function arraysEqualAsSets(a, b) {
+            if (a.length !== b.length) return false;
+            const sa = a.slice().sort((x,y)=>x-y).join(',');
+            const sb = b.slice().sort((x,y)=>x-y).join(',');
+            return sa === sb;
+        }
+
+        function checkQCM(qIndex) {
+            const qcm = qcmData[qIndex];
+            const inputs = document.querySelectorAll(`input[name="qcm-${qIndex}"]:checked`);
+            const selected = Array.from(inputs).map(i => parseInt(i.value, 10));
+
+            if (selected.length === 0) {
+                alert('Veuillez sélectionner au moins une réponse');
+                return;
+            }
+
+            const ok = arraysEqualAsSets(qcm.correct, selected);
+            const resultDiv = document.getElementById(`result-${qIndex}`);
+            resultDiv.style.display = 'block';
+
+            const exp = qcm.explanation
+                ? `<div class="explication"><strong>Explication :</strong> ${qcm.explanation}</div>`
+                : '';
+
+            if (ok) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ Bonne réponse.${exp}`;
+            } else {
+                const bonnes = qcm.correct.map(i => `« ${qcm.options[i]} »`).join(', ');
+                const label = qcm.correct.length > 1 ? 'Bonnes réponses' : 'Bonne réponse';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Mauvaise réponse. <strong>${label} :</strong> ${bonnes}.${exp}`;
+            }
+        }
+
+
+        // ==================== VRAI/FAUX ====================
+        const vraiFauxData = [
+            {
+                        "statement": "Selon l’OMS, la santé correspond uniquement à l’absence de maladie.",
+                        "answer": false,
+                        "explanation": "Dans le cours, la santé est définie comme un état de bien‑être physique, mental et social, pas seulement l’absence de maladie.",
+                        "simple": "Être en bonne santé, ce n’est pas juste « ne pas être malade » : c’est aussi se sentir bien dans sa tête et dans sa vie.",
+                        "level": "Connaître la définition OMS et savoir la distinguer d’une définition biomédicale."
+            },
+            {
+                        "statement": "La prévention primaire concerne des actions réalisées avant l’apparition de la maladie (ex : vaccination, hygiène des mains).",
+                        "answer": true,
+                        "explanation": "La prévention primaire vise à diminuer l’incidence : la maladie n’est pas encore là, on agit sur les causes et facteurs de risque (ex : lavage des mains, vaccins).",
+                        "simple": "On agit « avant » : on évite que la maladie arrive.",
+                        "level": "Savoir citer les 4 niveaux de prévention et donner 1 exemple pour chacun."
+            },
+            {
+                        "statement": "La prévention secondaire correspond au dépistage et à la prise en charge très précoce pour éviter l’évolution de la maladie.",
+                        "answer": true,
+                        "explanation": "Dans le cours, la prévention secondaire est l’ensemble d’actes au tout début de la maladie, notamment le dépistage, pour s’opposer à son évolution.",
+                        "simple": "On cherche la maladie tôt pour la traiter vite.",
+                        "level": "Savoir associer « prévention secondaire » ↔ dépistage/examens précoces."
+            },
+            {
+                        "statement": "La prévention tertiaire a pour objectif principal de réduire les complications et les séquelles d’une maladie déjà installée.",
+                        "answer": true,
+                        "explanation": "La prévention tertiaire vise à diminuer les complications (ex : orthèses, prévention des complications du diabète).",
+                        "simple": "La maladie est là : on évite que ça s’aggrave.",
+                        "level": "Savoir relier prévention tertiaire à rééducation, adaptation, limitation du handicap."
+            },
+            {
+                        "statement": "La prévention quaternaire vise à protéger les patients contre la surmédicalisation et les soins inutiles.",
+                        "answer": true,
+                        "explanation": "Le cours précise que la prévention quaternaire protège d’une surmédicalisation et encourage des traitements adaptés (notamment en fin de vie).",
+                        "simple": "Parfois, « trop soigner » peut faire du mal : on évite les actes inutiles.",
+                        "level": "Comprendre l’idée et donner un exemple (ex : éviter examens inutiles / iatrogénie)."
+            },
+            {
+                        "statement": "Les recommandations OMS du cours indiquent environ 150 minutes d’activité physique modérée par semaine pour être en forme.",
+                        "answer": true,
+                        "explanation": "Le cours mentionne 150 min/semaine d’activité modérée, avec bénéfices supplémentaires jusqu’à 300 min.",
+                        "simple": "Bouger un peu chaque semaine (ex : ~30 min × 5 jours).",
+                        "level": "Connaître l’ordre de grandeur des recommandations et savoir les traduire en conseil patient."
+            },
+            {
+                        "statement": "Selon le cours, les bénéfices sur la santé continuent d’augmenter jusqu’à environ 300 minutes d’activité modérée par semaine.",
+                        "answer": true,
+                        "explanation": "Le cours mentionne des bénéfices jusqu’à 300 min d’activité modérée/semaine.",
+                        "simple": "Plus on bouge (raisonnablement), plus on gagne en santé, jusqu’à un certain point.",
+                        "level": "Savoir nuancer : 150 min = base, 300 min = bénéfices ++."
+            },
+            {
+                        "statement": "Pour une activité physique intensive, le cours propose de diviser le temps recommandé par deux.",
+                        "answer": true,
+                        "explanation": "Le cours indique que pour une activité intensive, on peut diviser le temps par 2 (ex : ~75 min/semaine au lieu de 150).",
+                        "simple": "Si c’est « plus intense », on peut en faire moins longtemps.",
+                        "level": "Savoir adapter le conseil selon l’intensité."
+            },
+            {
+                        "statement": "Le cours recommande aussi du renforcement musculaire environ 2 fois par semaine.",
+                        "answer": true,
+                        "explanation": "Le cours cite des exercices de renforcement 2×/semaine.",
+                        "simple": "Pas que du cardio : on travaille aussi la force.",
+                        "level": "Être capable de proposer un conseil simple (renfo 2×/sem + activité d’endurance)."
+            },
+            {
+                        "statement": "Le cours cite la sédentarité comme un facteur de risque important, notamment lorsque le temps assis dépasse environ 7 heures par jour.",
+                        "answer": true,
+                        "explanation": "Dans l’application kiné du module, la sédentarité est reliée au temps assis élevé (ex : >7 h/j).",
+                        "simple": "Rester assis toute la journée, c’est mauvais même si on fait un peu de sport.",
+                        "level": "Savoir distinguer activité physique et comportement sédentaire (deux notions différentes)."
+            },
+            {
+                        "statement": "Le système de santé belge est décrit dans le cours comme un système d’assurance sociale basé sur la solidarité.",
+                        "answer": true,
+                        "explanation": "Le cours présente le principe de base : assurance sociale/solidarité, avec assurance obligatoire gérée par plusieurs acteurs (mutuelles, INAMI, autorités…).",
+                        "simple": "On cotise, et ça aide à financer les soins pour tous.",
+                        "level": "Connaître les grands principes (solidarité, assurance obligatoire, acteurs)."
+            },
+            {
+                        "statement": "Le cours indique que le patient a un libre choix du professionnel et un accès libre au spécialiste dans le système belge.",
+                        "answer": true,
+                        "explanation": "Le cours mentionne le libre choix du patient (établissement/professionnel) et le libre accès au spécialiste.",
+                        "level": "Pouvoir citer 1–2 caractéristiques organisationnelles du système belge."
+            },
+            {
+                        "statement": "L’INAMI est cité dans le cours comme un acteur de la gestion du système de santé belge.",
+                        "answer": true,
+                        "explanation": "Le cours liste l’INAMI parmi les institutions responsables de la gestion du système (avec SPF Santé publique, Sciensano, KCE…).",
+                        "simple": "C’est un organisme clé qui organise une partie du remboursement/assurance.",
+                        "level": "Savoir identifier INAMI comme institution centrale (sans entrer dans tous les détails)."
+            },
+            {
+                        "statement": "À l’école, le cours mentionne les centres PMS et/ou le service PSE pour les visites médicales, dépistages et actions de promotion de la santé.",
+                        "answer": true,
+                        "explanation": "Le cours décrit le rôle des PMS/PSE : visites médicales, dépistages et programmes de promotion de la santé.",
+                        "level": "Connaître les acteurs de prévention en milieu scolaire (PMS/PSE) et leurs missions."
+            },
+            {
+                        "statement": "En Belgique, le seul vaccin obligatoire mentionné dans le cours est celui contre la poliomyélite, obligatoire depuis 1966.",
+                        "answer": true,
+                        "explanation": "Le cours indique : poliomyélite = seul vaccin obligatoire depuis 1966 (certificat requis).",
+                        "simple": "En Belgique, seul le vaccin polio est légalement obligatoire.",
+                        "level": "Savoir citer polio obligatoire + comprendre « recommandé ≠ obligatoire »."
+            },
+            {
+                        "statement": "Dans le cours, les vaccins recommandés sont décrits comme payants en Fédération Wallonie‑Bruxelles.",
+                        "answer": false,
+                        "explanation": "Le cours précise qu’en Fédération Wallonie‑Bruxelles, les vaccins recommandés sont gratuits via le programme de vaccination.",
+                        "simple": "Beaucoup de vaccins pour les enfants sont gratuits (programme public).",
+                        "level": "Connaître l’idée d’accès gratuit via programme de vaccination."
+            },
+            {
+                        "statement": "Le cours attribue à l’ONE (Office de la Naissance et de l’Enfance) un rôle de promotion de la santé des enfants et des familles.",
+                        "answer": true,
+                        "explanation": "Le cours décrit l’ONE comme organisme public (FWB) dont le rôle est de promouvoir la santé des enfants et des familles (consultations, dépistages, vaccinations…).",
+                        "simple": "L’ONE aide les familles : suivi grossesse, suivi enfants, conseils, vaccins.",
+                        "level": "Savoir ce qu’est l’ONE et citer 2 missions."
+            },
+            {
+                        "statement": "Le cours indique que l’ONE réalise notamment le suivi des enfants de 0 à 6 ans et propose des vaccinations gratuites.",
+                        "answer": true,
+                        "explanation": "Le cours liste les consultations pédiatriques : prévention et suivi des enfants de 0 à 6 ans + vaccinations gratuites.",
+                        "level": "Connaître la tranche d’âge et le rôle préventif."
+            },
+            {
+                        "statement": "Les vaccins inactivés contiennent des agents pathogènes morts (exemple cité : poliomyélite).",
+                        "answer": true,
+                        "explanation": "Le cours précise : vaccins inactivés = agents pathogènes morts ; exemple : poliomyélite.",
+                        "simple": "Le microbe est « tué » : il ne peut pas provoquer la maladie, mais il entraîne une réponse immunitaire.",
+                        "level": "Savoir reconnaître les grands types de vaccins et donner 1 exemple."
+            },
+            {
+                        "statement": "Les vaccins vivants atténués contiennent des agents pathogènes affaiblis (ex : rougeole, rubéole, oreillons).",
+                        "answer": true,
+                        "explanation": "Le cours : vaccins vivants atténués = agents affaiblis ; exemples ROR (rougeole, rubéole, oreillons).",
+                        "simple": "Le microbe est vivant mais très affaibli : il entraîne une bonne immunité.",
+                        "level": "Connaître l’idée « vivant atténué » et les précautions (patients immunodéprimés → prudence)."
+            },
+            {
+                        "statement": "Les vaccins anatoxines contiennent une toxine neutralisée (ex : diphtérie, tétanos).",
+                        "answer": true,
+                        "explanation": "Le cours : vaccins anatoxines = toxine neutralisée ; exemples : diphtérie, tétanos.",
+                        "simple": "On vaccine contre la toxine (le poison) plutôt que contre le microbe entier.",
+                        "level": "Savoir citer diphtérie/tétanos comme anatoxines."
+            },
+            {
+                        "statement": "Selon le cours, il est impossible de tomber malade lorsqu’on est vacciné.",
+                        "answer": false,
+                        "explanation": "Le cours indique qu’on peut tomber malade malgré la vaccination (efficacité variable, ex : grippe), mais les formes sont souvent moins graves.",
+                        "simple": "Le vaccin réduit surtout le risque et la gravité, mais ne protège pas à 100%.",
+                        "level": "Comprendre efficacité ≠ 100% et expliquer « échec vaccinal » simplement."
+            },
+            {
+                        "statement": "Le cours affirme que l’idée reçue « les vaccins provoquent la maladie » est correcte.",
+                        "answer": false,
+                        "explanation": "Le cours classe cette idée comme fausse : agents inactivés ou atténués, donc pas de maladie comme l’infection naturelle (hors effets secondaires).",
+                        "simple": "On peut avoir fièvre/douleur, mais ce n’est pas « attraper la maladie ».",
+                        "level": "Savoir répondre à une idée reçue classique avec un argument simple."
+            },
+            {
+                        "statement": "Le cours précise que l’immunité innée est présente dès la naissance et répond rapidement de manière non spécifique.",
+                        "answer": true,
+                        "explanation": "Le cours : immunité innée = présente dès la naissance, non spécifique, réponse rapide ; barrières (peau, muqueuses) et globules blancs.",
+                        "simple": "C’est la défense « automatique » du corps : rapide, pas ciblée sur un microbe précis.",
+                        "level": "Savoir différencier immunité innée vs adaptative (2–3 caractéristiques)."
+            },
+            {
+                        "statement": "Le cours précise que l’immunité adaptative est spécifique et développe une mémoire immunitaire.",
+                        "answer": true,
+                        "explanation": "L’immunité adaptative (acquise) est spécifique et crée une mémoire, d’où l’intérêt des rappels vaccinaux quand la protection diminue.",
+                        "simple": "Le corps « apprend » et se souvient : la prochaine fois, il répond plus vite.",
+                        "level": "Comprendre la notion de mémoire et le rôle des rappels."
+            },
+            {
+                        "statement": "Une IAS (infection associée aux soins) est définie dans le cours comme une infection contractée en milieu de soins, diagnostiquée après 48h d’hospitalisation ou après la sortie.",
+                        "answer": true,
+                        "explanation": "Le cours : IAS = contractée en milieu de soins ; diagnostiquée après 48 h d’hospitalisation ou après la sortie.",
+                        "simple": "C’est une infection attrapée à l’hôpital/structure de soins, pas celle pour laquelle on venait.",
+                        "level": "Savoir donner la définition + le critère temporel (≈48 h)."
+            },
+            {
+                        "statement": "Le cours donne comme fréquence des IAS environ 6,4% des hospitalisations européennes.",
+                        "answer": true,
+                        "explanation": "Dans la partie IAS, le cours cite 6,4% des hospitalisations européennes.",
+                        "level": "Connaître l’ordre de grandeur (fréquence) et l’importance en santé publique."
+            },
+            {
+                        "statement": "Le cours cite que les IAS augmentent en moyenne la durée de séjour d’environ 4 jours.",
+                        "answer": true,
+                        "explanation": "Le cours mentionne une prolongation de séjour moyenne d’environ +4 jours avec charges financières et émotionnelles élevées.",
+                        "level": "Savoir expliquer l’impact : séjours plus longs, coûts, morbidité/mortalité."
+            },
+            {
+                        "statement": "Les infections urinaires font partie des exemples d’IAS cités dans le cours.",
+                        "answer": true,
+                        "explanation": "Le cours donne comme exemples : infections urinaires, respiratoires, sanguines…",
+                        "level": "Savoir citer 2 localisations fréquentes d’IAS."
+            },
+            {
+                        "statement": "Le cours associe l’histoire de l’hygiène hospitalière à des figures comme Semmelweis, Pasteur et Lister.",
+                        "answer": true,
+                        "explanation": "Le cours rappelle Semmelweis (hygiène des mains), Pasteur (microbes/asepsie) et Lister (antisepsie).",
+                        "simple": "Ils ont montré que se laver les mains et désinfecter sauve des vies.",
+                        "level": "Savoir citer 1–2 noms et l’idée principale (microbes → hygiène)."
+            },
+            {
+                        "statement": "La surveillance épidémiologique et le contrôle de l’usage des antibiotiques font partie des mesures générales de prévention des infections citées dans le cours.",
+                        "answer": true,
+                        "explanation": "Dans les stratégies de prévention, le cours cite la surveillance épidémiologique et le contrôle de l’utilisation des antibiotiques.",
+                        "level": "Connaître les grandes familles de mesures (surveillance, antibiotiques, précautions)."
+            },
+            {
+                        "statement": "Le cours indique que l’adhésion du patient aux règles d’hygiène fait partie des éléments importants de prévention des IAS.",
+                        "answer": true,
+                        "explanation": "Le cours cite les patients comme acteurs concernés : adhésion aux règles d’hygiène.",
+                        "level": "Comprendre que la prévention est partagée (soignants + patients)."
+            },
+            {
+                        "statement": "Les infections endogènes sont décrites comme des auto-infections par des micro-organismes déjà présents dans le corps du patient.",
+                        "answer": true,
+                        "explanation": "Le cours : infections endogènes = auto-infections par micro-organismes présents dans le corps.",
+                        "simple": "Le microbe vient de soi-même (flore), pas de l’extérieur.",
+                        "level": "Savoir distinguer endogène vs exogène."
+            },
+            {
+                        "statement": "Rompre la chaîne de transmission repose notamment sur l’hygiène des mains et l’application de précautions standard.",
+                        "answer": true,
+                        "explanation": "Le cours relie la prévention aux précautions générales/spécifiques et à l’application des protocoles (dont l’hygiène).",
+                        "simple": "Le geste le plus utile : mains propres au bon moment.",
+                        "level": "Être capable de citer la mesure n°1 en cabinet/soins : hygiène des mains."
+            },
+            {
+                        "statement": "L’asepsie et l’antisepsie désignent exactement la même chose.",
+                        "answer": false,
+                        "explanation": "Dans le vocabulaire du cours, on distingue : asepsie (éviter l’introduction de microbes) vs antisepsie (détruire/réduire les microbes sur les tissus vivants).",
+                        "simple": "Asepsie = éviter de contaminer. Antisepsie = nettoyer/désinfecter la peau.",
+                        "level": "Savoir définir les 2 termes et donner 1 exemple de chaque."
+            },
+            {
+                        "statement": "En Belgique, l’espérance de vie en bonne santé (EVBS) mentionnée dans le cours est d’environ 67 ans.",
+                        "answer": true,
+                        "explanation": "Le cours indique EVBS ≈ 67 ans en Belgique (EV sans incapacité).",
+                        "simple": "C’est le nombre d’années vécues sans limitations importantes.",
+                        "level": "Connaître EVBS (définition) + ordre de grandeur."
+            },
+            {
+                        "statement": "Le cours indique une espérance de vie (EV) d’environ 81 ans en Belgique, soit environ 14 ans vécus avec des incapacités.",
+                        "answer": true,
+                        "explanation": "Le cours donne EV ≈ 81 ans et EVBS ≈ 67 ans, soit ~14 ans avec incapacités.",
+                        "simple": "On vit longtemps, mais pas toujours en pleine forme : d’où l’intérêt de la prévention.",
+                        "level": "Savoir interpréter EV vs EVBS (pas juste réciter les chiffres)."
+            },
+            {
+                        "statement": "Dans le cours, les maladies cardio‑vasculaires et les cancers sont citées parmi les principales causes de mortalité en Belgique.",
+                        "answer": true,
+                        "explanation": "Le cours liste MCV et cancers (ainsi que maladies respiratoires) comme causes majeures de mortalité.",
+                        "level": "Pouvoir relier prévention/APS/tabac à la réduction des risques MCV et cancers."
+            },
+            {
+                        "statement": "Le cours associe les maladies chroniques et certains traumatismes à des habitudes de vie défavorables (tabac, alcool, alimentation, sédentarité, stress, manque de sommeil).",
+                        "answer": true,
+                        "explanation": "Le cours précise que beaucoup de maladies chroniques et traumas sont liées aux mauvaises habitudes de vie citées.",
+                        "simple": "Beaucoup de risques santé viennent du quotidien : bouger, dormir, manger, gérer le stress.",
+                        "level": "Être capable d’identifier les principaux facteurs modifiables et de proposer un message de prévention."
+            },
+            {
+                        "statement": "Le cours indique qu’avec le vieillissement et l’immunodépression, la sensibilité des patients aux IAS augmente.",
+                        "answer": true,
+                        "explanation": "Le cours cite parmi les facteurs favorisant : vieillissement de la population et immunodépression (greffes, traitements lourds).",
+                        "level": "Savoir repérer les patients à risque (âge, immunodépression, soins invasifs…)."
+            },
+            {
+                        "statement": "Le cours affirme que l’arrêt de la vaccination n’aura pas de conséquence puisque certaines maladies ont disparu.",
+                        "answer": false,
+                        "explanation": "Le cours indique l’inverse : arrêter la vaccination entraînerait la réapparition de maladies.",
+                        "simple": "Si on arrête, la maladie peut revenir (moins de protection collective).",
+                        "level": "Comprendre la logique de couverture vaccinale (protection individuelle + collective)."
+            },
+            {
+                        "statement": "Selon le cours, les maladies contractées malgré un vaccin sont souvent moins graves.",
+                        "answer": true,
+                        "explanation": "Le cours précise que les maladies contractées malgré un vaccin sont souvent moins graves.",
+                        "level": "Savoir utiliser cet argument dans l’éducation du patient."
+            },
+            {
+                        "statement": "Le cours cite que la variole a été éradiquée en 1980 grâce à la vaccination.",
+                        "answer": true,
+                        "explanation": "Dans l’historique, le cours mentionne l’éradication de la variole en 1980.",
+                        "level": "Connaître 1 exemple majeur d’impact des vaccins (éradication/contrôle)."
+            },
+            {
+                        "statement": "Le cours associe la promotion de la santé à la prévention, en précisant que la médecine préventive en fait partie.",
+                        "answer": true,
+                        "explanation": "Le cours présente la médecine préventive comme faisant partie de la promotion de la santé.",
+                        "simple": "La prévention, c’est une grande partie de « promouvoir la santé ». ",
+                        "level": "Savoir articuler : promotion de la santé (large) ↔ prévention (actions concrètes)."
+            },
+            {
+                        "statement": "Le cours présente le sport uniquement comme une notion de santé, sans lien avec la performance.",
+                        "answer": false,
+                        "explanation": "Le cours distingue APS (se mouvoir) et sport (notion de performance).",
+                        "simple": "On peut bouger pour la santé sans faire du sport de performance.",
+                        "level": "Savoir différencier APS vs sport et adapter le discours aux patients."
+            },
+            {
+                        "statement": "Dans la prévention en milieu scolaire, le cours indique que les PMS offrent un service public et gratuit avec secret professionnel.",
+                        "answer": true,
+                        "explanation": "Le cours décrit les PMS : équipes (psycho, infirmier, assistants sociaux…), service public et gratuit, avec secret professionnel.",
+                        "level": "Connaître le rôle et le cadre (gratuit, secret pro)."
+            },
+            {
+                        "statement": "Dans le cours, la prévention est décrite comme un ensemble de mesures pour éviter qu’un accident, une épidémie ou une maladie ne surviennent.",
+                        "answer": true,
+                        "explanation": "Le cours définit la prévention comme une attitude/ensemble de mesures pour éviter accidents/épidémies/maladies.",
+                        "simple": "Prévenir = éviter que ça arrive.",
+                        "level": "Être capable de donner une définition simple et de la relier à des exemples en kiné."
+            },
+            {
+                        "statement": "Le cours indique que, pour dépenser autant que nos ancêtres, il faudrait marcher environ 19 km par jour.",
+                        "answer": true,
+                        "explanation": "Dans les enjeux de prévention, le cours cite : pour dépenser autant que nos ancêtres, il faudrait marcher ~19 km/jour.",
+                        "simple": "Avant, on bougeait beaucoup plus au quotidien.",
+                        "level": "Comprendre l’enjeu de mode de vie moderne → sédentarité."
+            },
+            {
+                        "statement": "Le cours décrit la condition physique comme incluant notamment endurance cardio‑respiratoire, force, souplesse, équilibre et composition corporelle.",
+                        "answer": true,
+                        "explanation": "Le cours liste des composantes : endurance cardio‑respiratoire, endurance musculo‑squelettique, force, vitesse, souplesse, agilité, équilibre, temps de réaction, composition corporelle.",
+                        "simple": "La forme, ce n’est pas juste le cardio : c’est aussi force, mobilité, équilibre…",
+                        "level": "Savoir citer quelques composantes et les relier à l’évaluation kiné de base."
+            },
+            {
+                        "statement": "Le cours présente la santé au travail comme incluant notamment la prévention des risques et l’accompagnement (ex : violences, harcèlement, discrimination).",
+                        "answer": true,
+                        "explanation": "La partie « santé au travail » mentionne l’aide/prise en charge des situations de violences, harcèlement, discrimination, en plus des aspects de prévention.",
+                        "level": "Comprendre que la santé inclut aussi les dimensions psycho‑sociales au travail."
+            }
+];
+
+
+        function initVraiFaux() {
+            const container = document.getElementById('vrai-faux-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            vraiFauxData.forEach((vf, index) => {
+                const vfEl = document.createElement('div');
+                vfEl.className = 'qcm-container';
+
+                vfEl.innerHTML = `
+                    <div class="question">Affirmation ${index + 1}<br>${vf.statement}</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="vf-${index}" value="true">
+                            <span>✅ VRAI</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="vf-${index}" value="false">
+                            <span>❌ FAUX</span>
+                        </label>
+                    </div>
+                    <button class="submit-btn" type="button" onclick="checkVraiFaux(${index})">Vérifier</button>
+                    <div class="result" id="vf-result-${index}" style="display: none;"></div>
+                `;
+
+                container.appendChild(vfEl);
+            });
+        }
+
+        function checkVraiFaux(index) {
+            const vf = vraiFauxData[index];
+            const selected = document.querySelector(`input[name="vf-${index}"]:checked`);
+
+            if (!selected) {
+                alert('Veuillez sélectionner une réponse');
+                return;
+            }
+
+            const userAnswer = selected.value === 'true';
+            const ok = userAnswer === vf.answer;
+
+            const resultDiv = document.getElementById(`vf-result-${index}`);
+            resultDiv.style.display = 'block';
+
+            const bonne = vf.answer ? 'VRAI' : 'FAUX';
+            const exp = vf.explanation
+                ? `<div class="explication"><strong>Explication :</strong> ${vf.explanation}</div>`
+                : '';
+
+            if (ok) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `✅ Bonne réponse. <strong>Réponse correcte :</strong> ${bonne}.${exp}`;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Mauvaise réponse. <strong>Réponse correcte :</strong> ${bonne}.${exp}`;
+            }
+        }
+
+
+        // ==================== EXERCICES ====================
+        const exercicesData = [
+            {
+                title: "Conseil APS pour patient s\u00e9dentaire (7h+ assis)",
+                description: "M. L., 42 ans, travaille assis 9h/jour. Il se plaint de fatigue et de douleurs lombaires. Il ne pratique pas d\u2019APS.",
+                question: "1) Le patient est-il s\u00e9dentaire selon le cours ? 2) Quelles recommandations OMS proposez-vous (volume + renforcement) ? 3) Donnez 3 id\u00e9es d\u2019actions concr\u00e8tes au quotidien.",
+                tips: "Rappelez la d\u00e9finition de s\u00e9dentarit\u00e9 (>7h assis/j) et les recommandations OMS (150 min mod\u00e9r\u00e9e/sem, 2\u00d7 renforcement).",
+                exemple: "Oui : >7h/j. Plan : 150 min mod\u00e9r\u00e9e/semaine (ex. 5\u00d730 min) + renforcement 2\u00d7/sem. Actions : pauses actives, marche, escaliers, d\u00e9placement actif."
+            },
+            {
+                title: "Ob\u00e9sit\u00e9 : strat\u00e9gie \u201cLipomax\u201d + progression",
+                description: "Mme P., 35 ans, IMC 31, essouffl\u00e9e \u00e0 l\u2019effort. Elle veut \u201cbr\u00fbler la graisse\u201d mais n\u2019aime pas courir.",
+                question: "Proposez un programme de d\u00e9part bas\u00e9 sur le cours (Lipomax <60% VO2 max), en pr\u00e9cisant fr\u00e9quence, dur\u00e9e, et progression sur 4 semaines.",
+                tips: "Lipomax = effort faible \u00e0 mod\u00e9r\u00e9 et longtemps ; le cours \u00e9voque aussi qu\u2019un entra\u00eenement plus intense peut \u00eatre efficace \u2192 progression prudente.",
+                exemple: "S1\u2013S2 : 3\u00d7/sem 30\u201345 min marche rapide/v\u00e9lo doux. S3\u2013S4 : 3\u00d7/sem 45\u201360 min + 1 s\u00e9ance un peu plus intense si tol\u00e9r\u00e9e. Renforcement 2\u00d7/sem."
+            },
+            {
+                title: "D\u00e9pistage : pr\u00e9vention secondaire",
+                description: "Mme A., 52 ans, re\u00e7oit une invitation pour une mammographie de d\u00e9pistage. Elle demande pourquoi ce n\u2019est pas de la pr\u00e9vention primaire.",
+                question: "Expliquez la diff\u00e9rence entre pr\u00e9vention primaire et secondaire, et classez la mammographie.",
+                tips: "Secondaire = d\u00e9pistage au tout d\u00e9but de la maladie ; primaire = \u00e9viter l\u2019apparition.",
+                exemple: "Mammographie de d\u00e9pistage = pr\u00e9vention secondaire (rep\u00e9rage pr\u00e9coce). Primaire : r\u00e9duire facteurs de risque, vaccins, hygi\u00e8ne, etc."
+            },
+            {
+                title: "Diab\u00e8te : interpr\u00e9ter une glyc\u00e9mie",
+                description: "Lors d\u2019un bilan, un patient vous dit : 'Mon m\u00e9decin a trouv\u00e9 une glyc\u00e9mie \u00e0 jeun \u00e0 118 mg/dl'.",
+                question: "Que signifie ce r\u00e9sultat selon le cours ? Quels conseils '3 piliers' pouvez-vous rappeler en kin\u00e9sith\u00e9rapie ?",
+                tips: "Normes : 70\u2013100 normal ; 100\u2013126 anomalie discr\u00e8te ; >126 diab\u00e8te. 3 piliers : alimentation, APS, traitement.",
+                exemple: "118 mg/dl = anomalie discr\u00e8te \u00e0 surveiller. Rappeler : alimentation \u00e9quilibr\u00e9e, APS r\u00e9guli\u00e8re, suivi du traitement m\u00e9dical."
+            },
+            {
+                title: "Vaccination : r\u00e9pondre \u00e0 une id\u00e9e re\u00e7ue",
+                description: "Un patient vous dit : 'Je ne me vaccine pas car les vaccins provoquent la maladie'.",
+                question: "R\u00e9pondez en vous basant sur le cours (agents inactiv\u00e9s/att\u00e9nu\u00e9s) et expliquez protection individuelle/collective.",
+                tips: "Le cours r\u00e9fute l\u2019id\u00e9e re\u00e7ue : agents inactiv\u00e9s/att\u00e9nu\u00e9s ; r\u00f4le couverture vaccinale.",
+                exemple: "Expliquer que les vaccins contiennent agents inactiv\u00e9s ou att\u00e9nu\u00e9s : ils stimulent l\u2019immunit\u00e9 sans sympt\u00f4mes. Plus de vaccin\u00e9s = moins de circulation = protection collective."
+            },
+            {
+                title: "Hygi\u00e8ne : pr\u00e9venir une IAS en cabinet",
+                description: "Vous encha\u00eenez 12 patients/jour. Vous utilisez table, \u00e9lastiques, tapis et \u00e9lectrodes r\u00e9utilisables.",
+                question: "Proposez une check-list simple (avant / apr\u00e8s patient / fin de journ\u00e9e) pour r\u00e9duire le risque d\u2019infections exog\u00e8nes.",
+                tips: "Cours : nettoyage + d\u00e9sinfection ; exog\u00e8ne = environnement (mat\u00e9riel/surfaces).",
+                exemple: "Apr\u00e8s patient : linge \u2192 d\u00e9chets \u2192 d\u00e9sinfection table/poign\u00e9es/mat\u00e9riel. Avant suivant : hygi\u00e8ne mains + mat\u00e9riel propre. Fin journ\u00e9e : zones contact + stock + poubelles/linge."
+            },
+            {
+                title: "IAS : identifier endog\u00e8ne vs exog\u00e8ne",
+                description: "Un patient hospitalis\u00e9 d\u00e9veloppe une infection urinaire \u00e0 J+4. On suspecte une contamination soit par sa flore, soit par environnement.",
+                question: "D\u00e9finissez endog\u00e8ne vs exog\u00e8ne et donnez 2 mesures de pr\u00e9vention cit\u00e9es dans le cours.",
+                tips: "Endog\u00e8ne = micro-organismes du patient ; exog\u00e8ne = environnement. Mesures : pr\u00e9cautions, d\u00e9sinfection, antibioth\u00e9rapie cibl\u00e9e, surveillance.",
+                exemple: "Endog\u00e8ne : auto-infection ; exog\u00e8ne : mat\u00e9riel/personnel/autres patients. Mesures : d\u00e9sinfection + pr\u00e9cautions + antibioth\u00e9rapie cibl\u00e9e apr\u00e8s identification."
+            },
+            {
+                title: "Syst\u00e8me de sant\u00e9 belge : orienter un patient",
+                description: "Un patient va souvent aux urgences pour des probl\u00e8mes non urgents. Il n\u2019a pas de m\u00e9decin traitant.",
+                question: "Expliquez les 3 niveaux de soins (primaire/secondaire/tertiaire) et l\u2019int\u00e9r\u00eat du DMG chez le m\u00e9decin g\u00e9n\u00e9raliste.",
+                tips: "Cours : urgences surcharg\u00e9es ; 70% viennent spontan\u00e9ment ; DMG = meilleur remboursement.",
+                exemple: "Soins primaires = 1er contact (MG) ; secondaires = sp\u00e9cialistes ; tertiaires = h\u00f4pital. DMG : coordination + meilleur remboursement."
+            },
+            {
+                title: "Sant\u00e9 au travail : r\u00f4le du SIPP",
+                description: "Dans votre futur cabinet, vous voulez structurer la pr\u00e9vention des risques (TMS, psychosociaux).",
+                question: "Que fait le SIPP selon le cours et quels aspects psychosociaux sont cit\u00e9s ?",
+                tips: "SIPP = service interne de pr\u00e9vention et protection au travail ; assist employeur ; approche multidisciplinaire ; violences/harc\u00e8lement/discrimination.",
+                exemple: "SIPP assiste l\u2019employeur pour le bien-\u00eatre au travail ; analyse des risques ; prise en charge aspects psychosociaux (accueil, conseils, aide face \u00e0 violence/harc\u00e8lement/discrimination)."
+            },
+            {
+                title: "Promotion de la sant\u00e9 : charte d\u2019Ottawa",
+                description: "Vous construisez un atelier 'Bouger plus' pour des patients chroniques.",
+                question: "Reliez votre atelier \u00e0 la charte d\u2019Ottawa : que signifie 'donner aux populations un plus grand contr\u00f4le sur leur sant\u00e9' ?",
+                tips: "Promotion sant\u00e9 = rendre acteurs ; coordination actions ; comportements individuels et soci\u00e9taux.",
+                exemple: "Atelier = autonomisation : comp\u00e9tences, objectifs r\u00e9alistes, auto-suivi, soutien social, environnement favorable (pauses actives, marche, etc.)."
+            }
+        ];
+
+        
+        function initExercices() {
+            const container = document.getElementById('exercices-container');
+            
+            exercicesData.forEach((ex, index) => {
+                const exEl = document.createElement('div');
+                exEl.className = 'exercise';
+                
+                exEl.innerHTML = `
+                    <h3>${ex.title}</h3>
+                    <p><strong>Situation :</strong> ${ex.description}</p>
+                    <p><strong>Question :</strong> ${ex.question}</p>
+                    <textarea class="exercise-input" rows="10" placeholder="Rédigez votre réponse ici..."></textarea>
+
+                    <div class="exercise-actions">
+                        <button class="tips-btn" onclick="toggleTips(${index})">💡 Indice</button>
+                        <button class="correction-btn" onclick="toggleCorrection(${index})">✅ Correction</button>
+                    </div>
+
+                    <div class="tips" id="tips-${index}">
+                        <p><strong>💡 Indice :</strong> ${ex.tips}</p>
+                    </div>
+                    <div class="correction" id="correction-${index}">
+                        <p><strong>✅ Correction proposée :</strong> ${ex.exemple}</p>
+                    </div>
+                `;
+                
+                container.appendChild(exEl);
+            });
+        }
+        
+        function toggleTips(index) {
+            const tips = document.getElementById(`tips-${index}`);
+            tips.classList.toggle('show');
+        }
+
+        function toggleCorrection(index) {
+            const corr = document.getElementById(`correction-${index}`);
+            if (corr) corr.classList.toggle('show');
+        }
+
+        // ==================== FORMULES ====================
+        const formulesData = [
+            {
+                name: "D\u00e9finition OMS de la sant\u00e9",
+                formula: "Sant\u00e9 = bien-\u00eatre physique, mental et social (pas seulement absence de maladie)",
+                units: "Concept",
+                explanation: "D\u00e9finition \u00e0 conna\u00eetre dans le cours.",
+                example: "\u00c0 r\u00e9citer : \u00ab complet bien-\u00eatre physique, mental et social\u2026 \u00bb"
+            },
+            {
+                name: "D\u00e9terminants de la sant\u00e9 (r\u00e9partition du cours)",
+                formula: "Mode de vie 53% \u2022 Environnement 21% \u2022 Biologiques 16% \u2022 Services de sant\u00e9 10%",
+                units: "%",
+                explanation: "Rep\u00e8re visuel utilis\u00e9 dans le cours.",
+                example: "Prioriser les leviers sur lesquels on peut agir : mode de vie."
+            },
+            {
+                name: "EV et EVBS (Belgique \u2014 cours)",
+                formula: "EV \u2248 81 ans \u2022 EVBS \u2248 67 ans \u2192 ~14 ans avec incapacit\u00e9s",
+                units: "ann\u00e9es",
+                explanation: "Chiffres donn\u00e9s dans le cours.",
+                example: "Interpr\u00e9tation : prolonger EVBS est un enjeu cl\u00e9."
+            },
+            {
+                name: "S\u00e9dentarit\u00e9 (cours)",
+                formula: "Comportement s\u00e9dentaire : d\u00e9pense < 1,5 kcal ; s\u00e9dentaire si assis > 7 h/jour",
+                units: "kcal ; heures/jour",
+                explanation: "D\u00e9finitions du cours \u00e0 utiliser en anamn\u00e8se.",
+                example: "9h assis/jour \u2192 s\u00e9dentarit\u00e9 confirm\u00e9e."
+            },
+            {
+                name: "Recommandations OMS APS (cours)",
+                formula: "150 min mod\u00e9r\u00e9e/sem (b\u00e9n\u00e9fices : 300) ; intense = temps/2 ; renforcement 2\u00d7/sem",
+                units: "minutes/semaine",
+                explanation: "Rep\u00e8re cl\u00e9 du module APS.",
+                example: "5\u00d730 min marche rapide + 2 s\u00e9ances renforcement."
+            },
+            {
+                name: "Macros (cours)",
+                formula: "30% lipides \u2022 15% protides \u2022 55% glucides",
+                units: "%",
+                explanation: "Rep\u00e8re simple : apports coh\u00e9rents avec d\u00e9penses.",
+                example: "Expliquer la balance \u00e9nerg\u00e9tique au patient."
+            },
+            {
+                name: "Glyc\u00e9mie \u00e0 jeun (cours)",
+                formula: "70\u2013100 mg/dl normal \u2022 100\u2013126 anomalie \u2022 >126 diab\u00e8te",
+                units: "mg/dl",
+                explanation: "Seuils du cours.",
+                example: "118 mg/dl \u2192 anomalie discr\u00e8te (surveillance)."
+            },
+            {
+                name: "Cancer : risque comportemental (cours)",
+                formula: "\u224830% des d\u00e9c\u00e8s par cancer li\u00e9s \u00e0 facteurs comportementaux et alimentaires",
+                units: "%",
+                explanation: "IMC \u00e9lev\u00e9, faible fruits/l\u00e9gumes, manque d\u2019exercice, tabac, alcool.",
+                example: "\u00c9ducation \u00e0 la sant\u00e9 : agir sur facteurs modifiables."
+            },
+            {
+                name: "APS : pr\u00e9vention CV (cours)",
+                formula: "APS intense : \u221220 \u00e0 \u221230% coronaropathies/AVC ; APS mod\u00e9r\u00e9e : \u221210 \u00e0 \u221220%",
+                units: "%",
+                explanation: "Chiffres de pr\u00e9vention primaire du cours.",
+                example: "Progression : augmenter volume avant intensit\u00e9."
+            },
+            {
+                name: "\u221210 bpm (cours)",
+                formula: "\u221210 bpm \u2248 \u00e9conomie d\u2019O2 de 15%",
+                units: "bpm ; %",
+                explanation: "Argument de physiologie de l\u2019exercice dans le cours.",
+                example: "Confort \u00e0 l\u2019effort am\u00e9lior\u00e9."
+            },
+            {
+                name: "IAS : chiffres Europe (cours)",
+                formula: "6,4% hospitalisations \u2022 3,2 M patients/an \u2022 mortalit\u00e9 4,5% \u2022 +4 jours s\u00e9jour",
+                units: "%; patients/an; %",
+                explanation: "Impact et co\u00fbts des IAS.",
+                example: "Importance des protocoles (mains, d\u00e9sinfection, pr\u00e9cautions)."
+            },
+            {
+                name: "Belgique : vaccin obligatoire (cours)",
+                formula: "Poliomy\u00e9lite obligatoire depuis 1966 (certificat requis)",
+                units: "R\u00e9glementation",
+                explanation: "Les autres vaccins sont fortement recommand\u00e9s (souvent exig\u00e9s en cr\u00e8che).",
+                example: "FWB : vaccins recommand\u00e9s gratuits via programme de vaccination."
+            }
+        ];
+
+        
+        function initFormules() {
+            const container = document.getElementById('formules-container');
+            
+            formulesData.forEach(formule => {
+                const formuleEl = document.createElement('div');
+                formuleEl.className = 'formula-card';
+                
+                formuleEl.innerHTML = `
+                    <h3>${formule.name}</h3>
+                    <div class="formula">${formule.formula}</div>
+                    <p><strong>📏 Unités :</strong> ${formule.units}</p>
+                    <div class="formula-explanation">
+                        <h4>💡 Explication :</h4>
+                        <p>${formule.explanation}</p>
+                        <h4>📚 Exemple :</h4>
+                        <p>${formule.example}</p>
+                    </div>
+                `;
+                
+                container.appendChild(formuleEl);
+            });
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            applyDisplaySettings();
+            initFlashcards();
+            initQCM();
+            initVraiFaux();
+            initExercices();
+            initFormules();
+        });
+    </script>
+</body>
+</html>
