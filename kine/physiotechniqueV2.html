@@ -1,0 +1,2516 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physiotechnique - Kinésithérapie Bloc 1</title>
+    <style>
+        * {margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}
+        .container{max-width:1200px;margin:0 auto;background:white;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);overflow:hidden;}
+        header{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:30px;text-align:center;}
+        h1{font-size:2.5em;margin-bottom:10px;}
+        .subtitle{opacity:0.9;font-size:1.1em;}
+        .tabs{display:flex;background:#f8f9fa;border-bottom:2px solid #dee2e6;overflow-x:auto;flex-wrap:wrap;}
+        .tab{padding:15px 25px;cursor:pointer;border:none;background:transparent;font-size:1em;transition:all 0.3s;border-bottom:3px solid transparent;white-space:nowrap;}
+        .tab:hover{background:rgba(102,126,234,0.1);}
+        .tab.active{border-bottom-color:#667eea;color:#667eea;font-weight:bold;}
+        .content{padding:30px;display:none;}
+        .content.active{display:block;animation:fadeIn 0.5s;}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+        .level-selector{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+        .level-btn{padding:10px 20px;border:2px solid #667eea;background:white;color:#667eea;border-radius:25px;cursor:pointer;transition:all 0.3s;font-weight:bold;}
+        .level-btn:hover{background:#667eea;color:white;}
+        .level-btn.active{background:#667eea;color:white;}
+        .course-section{display:none;background:#f8f9fa;padding:20px;border-radius:10px;margin-bottom:20px;}
+        .course-section.active{display:block;}
+        .course-section h3{color:#667eea;margin-bottom:15px;}
+        .course-section h4{color:#764ba2;margin-top:20px;margin-bottom:10px;}
+        .course-section p,.course-section ul{line-height:1.8;color:#333;margin-bottom:10px;}
+        .course-section ul{margin-left:20px;margin-top:10px;}
+        .example-box{background:#e7f3ff;border-left:4px solid #667eea;padding:15px;margin-top:15px;border-radius:5px;}
+        .example-box strong{color:#667eea;}
+        .warning-box{background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin-top:15px;border-radius:5px;}
+        .warning-box strong{color:#856404;}
+        .danger-box{background:#f8d7da;border-left:4px solid #dc3545;padding:15px;margin-top:15px;border-radius:5px;}
+        .danger-box strong{color:#721c24;}
+        .info-table{width:100%;border-collapse:collapse;margin:20px 0;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .info-table th,.info-table td{border:1px solid #dee2e6;padding:12px;text-align:left;}
+        .info-table th{background:#667eea;color:white;font-weight:bold;}
+        .info-table tr:nth-child(even){background:#f8f9fa;}
+        canvas{border:2px solid #667eea;border-radius:10px;margin:20px 0;display:block;max-width:100%;}
+        .canvas-controls{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+        .canvas-controls label{font-weight:bold;color:#667eea;}
+        .canvas-controls input[type="range"]{flex:1;min-width:150px;}
+        .canvas-controls button{padding:8px 15px;background:#667eea;color:white;border:none;border-radius:5px;cursor:pointer;}
+        .canvas-controls button:hover{background:#764ba2;}
+        .flashcard{background:white;border:2px solid #667eea;border-radius:15px;padding:30px;min-height:250px;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;transition:all 0.3s;box-shadow:0 5px 15px rgba(0,0,0,0.1);margin-bottom:20px;}
+        .flashcard:hover{transform:translateY(-5px);box-shadow:0 10px 25px rgba(0,0,0,0.2);}
+        .flashcard.flipped{background:#667eea;color:white;}
+        .flashcard-text{font-size:1.3em;text-align:center;margin-bottom:20px;}
+        .flashcard-buttons{display:flex;gap:10px;margin-top:20px;}
+        .btn-know,.btn-hesitate,.btn-unknown{padding:10px 20px;border:none;border-radius:25px;cursor:pointer;font-weight:bold;transition:all 0.3s;}
+        .btn-know{background:#28a745;color:white;}
+        .btn-know:hover{background:#218838;}
+        .btn-hesitate{background:#ffc107;color:#333;}
+        .btn-hesitate:hover{background:#e0a800;}
+        .btn-unknown{background:#dc3545;color:white;}
+        .btn-unknown:hover{background:#c82333;}
+        .flashcard-controls{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+        .flashcard-controls button{padding:10px 20px;background:#667eea;color:white;border:none;border-radius:25px;cursor:pointer;font-weight:bold;}
+        .flashcard-controls button:hover{background:#764ba2;}
+        .progress-bar{background:#e9ecef;border-radius:10px;height:20px;margin-bottom:20px;overflow:hidden;}
+        .progress-fill{background:linear-gradient(90deg,#667eea,#764ba2);height:100%;transition:width 0.3s;display:flex;align-items:center;justify-content:center;color:white;font-size:0.9em;font-weight:bold;}
+        .quiz-question{background:#f8f9fa;padding:25px;border-radius:10px;margin-bottom:20px;}
+        .quiz-question h4{color:#667eea;margin-bottom:15px;font-size:1.2em;}
+        .quiz-options{display:flex;flex-direction:column;gap:10px;}
+        .quiz-option{padding:15px;background:white;border:2px solid #dee2e6;border-radius:8px;cursor:pointer;transition:all 0.3s;}
+        .quiz-option:hover{border-color:#667eea;background:#f0f4ff;}
+        .quiz-option.selected{border-color:#667eea;background:#667eea;color:white;}
+        .quiz-option.correct{border-color:#28a745;background:#28a745;color:white;}
+        .quiz-option.incorrect{border-color:#dc3545;background:#dc3545;color:white;}
+        .quiz-controls{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+        .quiz-controls button{padding:12px 25px;background:#667eea;color:white;border:none;border-radius:25px;cursor:pointer;font-weight:bold;font-size:1em;}
+        .quiz-controls button:hover{background:#764ba2;}
+        .exercise{background:#f8f9fa;padding:25px;border-radius:10px;margin-bottom:20px;}
+        .exercise h4{color:#667eea;margin-bottom:15px;}
+        .exercise textarea{width:100%;min-height:150px;padding:15px;border:2px solid #dee2e6;border-radius:8px;font-family:inherit;font-size:1em;margin-bottom:10px;}
+        .exercise-buttons{display:flex;gap:10px;flex-wrap:wrap;}
+        .exercise-buttons button{padding:10px 20px;border:none;border-radius:25px;cursor:pointer;font-weight:bold;}
+        .btn-help{background:#17a2b8;color:white;}
+        .btn-help:hover{background:#138496;}
+        .btn-correction{background:#667eea;color:white;}
+        .btn-correction:hover{background:#764ba2;}
+        .correction-box{display:none;background:#d4edda;border:2px solid #28a745;border-radius:8px;padding:15px;margin-top:15px;}
+        .correction-box.active{display:block;}
+        .help-box{display:none;background:#cce5ff;border:2px solid #17a2b8;border-radius:8px;padding:15px;margin-top:15px;}
+        .help-box.active{display:block;}
+        .definition-card{background:white;border:2px solid #667eea;border-radius:10px;padding:20px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .definition-card h4{color:#667eea;margin-bottom:10px;}
+        .formula-box{background:#fff3cd;border:2px solid #ffc107;border-radius:10px;padding:20px;margin-bottom:15px;}
+        .formula-box h4{color:#856404;margin-bottom:10px;}
+        .formula{font-size:1.5em;font-weight:bold;color:#856404;margin:15px 0;font-family:'Courier New',monospace;}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:20px;}
+        .stat-card{background:white;border:2px solid #667eea;border-radius:10px;padding:20px;text-align:center;}
+        .stat-number{font-size:2.5em;font-weight:bold;color:#667eea;}
+        .stat-label{color:#666;margin-top:5px;}
+        @media(max-width:768px){
+            h1{font-size:1.8em;}
+            .tabs{flex-direction:column;}
+            .tab{border-bottom:1px solid #dee2e6;border-left:3px solid transparent;}
+            .tab.active{border-left-color:#667eea;border-bottom-color:#dee2e6;}
+            .content{padding:15px;}
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Physiotechnique</h1>
+            <p class="subtitle">Kinésithérapie - Bloc 1</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('cours')">📚 Cours</button>
+            <button class="tab" onclick="showTab('flashcards')">🎴 Flashcards</button>
+            <button class="tab" onclick="showTab('quiz')">❓ Quiz</button>
+            <button class="tab" onclick="showTab('qcm')">☑️ QCM</button>
+            <button class="tab" onclick="showTab('vraifaux')">✓✗ Vrai/Faux</button>
+            <button class="tab" onclick="showTab('exercices')">✍️ Exercices</button>
+            <button class="tab" onclick="showTab('definitions')">📖 Définitions</button>
+            <button class="tab" onclick="showTab('formules')">🧮 Formules</button>
+            <button class="tab" onclick="showTab('mnemotechniques')">💡 Mnémos</button>
+            <button class="tab" onclick="showTab('protocoles')">📋 Protocoles</button>
+        </div>
+
+        <!-- COURS -->
+        <div id="cours" class="content active">
+            <h2>Cours de Physiotechnique</h2>
+            
+            <div class="level-selector">
+                <button class="level-btn active" onclick="showLevel('vulga')">Vulgarisation</button>
+                <button class="level-btn" onclick="showLevel('base')">Niveau Base</button>
+                <button class="level-btn" onclick="showLevel('avance')">Niveau Avancé</button>
+            </div>
+
+            <!-- Niveau Vulgarisation -->
+            <div id="vulga" class="course-section active">
+                <h3>🌟 Comprendre la Physiotechnique - Version Simple</h3>
+                
+                <h4>🎯 Qu'est-ce que la physiotechnique ?</h4>
+                <p>
+                    La physiotechnique, c'est l'utilisation d'<strong>agents physiques</strong> (électricité, chaleur, froid, ondes, vibrations...) pour soigner et aider les patients. Contrairement aux techniques manuelles où c'est toi, le kiné, qui produit la force, ici ce sont des <strong>machines et appareils</strong> qui font le travail.
+                </p>
+                <p>
+                    Important : la physiotechnique est un <strong>adjuvant</strong>, c'est-à-dire un complément aux autres traitements. Elle ne remplace jamais la rééducation active, mais elle peut grandement l'améliorer !
+                </p>
+
+                <div class="warning-box">
+                    <strong>⚠️ À retenir :</strong> Ce n'est PAS le kinésithérapeute qui produit ces agents physiques, mais des appareils. Ton rôle est de savoir les utiliser correctement, de régler les paramètres, et de surveiller le patient.
+                </div>
+
+                <table class="info-table">
+                    <tr>
+                        <th>Indication</th>
+                        <th>Contre-indication</th>
+                    </tr>
+                    <tr>
+                        <td>Signe clinique, pathologie ou situation affectant un patient qui justifie l'intérêt d'un traitement</td>
+                        <td>Situation concernant le patient qui fait qu'un traitement ne sera pas dans son intérêt = peut engendrer des conséquences négatives, néfastes</td>
+                    </tr>
+                </table>
+
+                <h4>⚡ Les courants électriques : mettre de l'électricité sur le corps</h4>
+                <p>
+                    Oui, on peut mettre de l'électricité sur le corps sans danger ! Les courants électriques en physiotechnique sont contrôlés et servent à :
+                </p>
+                <ul>
+                    <li><strong>Diminuer la douleur</strong> (effet antalgique) : en "brouillant" les signaux de douleur</li>
+                    <li><strong>Faire contracter les muscles</strong> (effet excito-moteur) : pour renforcer ou réveiller un muscle faible</li>
+                    <li><strong>Améliorer la nutrition des tissus</strong> (effet trophique) : meilleure circulation, meilleure cicatrisation</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Madame Dubois, 55 ans, vient de se faire opérer du genou (prothèse). Son quadriceps (muscle de la cuisse) est très faible et elle ne peut presque pas le contracter volontairement. Tu lui mets des électrodes sur le quadriceps et tu envoies des courants électriques qui vont faire contracter le muscle. Ça va l'aider à "réveiller" son muscle et à le renforcer plus vite. Mais attention : tu lui demandes aussi de contracter volontairement en même temps ! L'électrostimulation seule ne suffit pas pour un effet fonctionnel.
+                </div>
+
+                <h4>🌡️ La chaleur : chauffer pour soigner</h4>
+                <p>
+                    Chauffer une zone du corps permet de :
+                </p>
+                <ul>
+                    <li><strong>Dilater les vaisseaux sanguins</strong> : plus de sang circule, meilleure nutrition des tissus</li>
+                    <li><strong>Relaxer les muscles</strong> : diminue les contractures et les tensions</li>
+                    <li><strong>Augmenter l'élasticité des tissus</strong> : les muscles, tendons et capsules articulaires deviennent plus souples</li>
+                    <li><strong>Diminuer la douleur</strong> : élève le seuil de perception de la douleur</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Monsieur Martin a une capsulite rétractile de l'épaule (épaule gelée) : son épaule est raide et douloureuse. Avant de faire des mobilisations, tu appliques une compresse chaude ou des ultrasons pour réchauffer l'articulation en profondeur. Les tissus deviennent plus élastiques, la douleur diminue, et tu peux mobiliser l'épaule plus facilement et avec plus d'amplitude.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Attention :</strong> Ne JAMAIS appliquer de chaleur sur une inflammation aiguë (rouge, chaud, gonflé) ! La chaleur va aggraver l'inflammation. On utilise la chaleur sur des problèmes <strong>chroniques</strong> (qui durent depuis longtemps) et des <strong>raideurs</strong>.
+                </div>
+
+                <h4>❄️ Le froid : refroidir pour guérir</h4>
+                <p>
+                    Le froid est l'opposé de la chaleur et a des effets différents :
+                </p>
+                <ul>
+                    <li><strong>Diminuer l'inflammation</strong> : réduit le gonflement et l'œdème</li>
+                    <li><strong>Diminuer la douleur</strong> : "endort" les récepteurs de la douleur</li>
+                    <li><strong>Rétrécir les vaisseaux sanguins</strong> : diminue le saignement dans les tissus</li>
+                    <li><strong>Ralentir le métabolisme</strong> : limite les dégâts après un traumatisme</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Thomas, footballeur amateur, se fait une entorse de cheville en match. Il vient te voir le lendemain : sa cheville est gonflée, bleue, douloureuse. Protocole POLICE : Protection (repos relatif), Optimal Loading (charge progressive), Ice (glace), Compression, Elevation. Tu appliques du froid (cold pack, cryo à air froid) 20 minutes, 3 fois par jour pendant les 48-72 premières heures. Ça va limiter l'œdème et la douleur.
+                </div>
+
+                <h4>🌊 Les ondes mécaniques : faire vibrer le corps</h4>
+                <p>
+                    Les ondes mécaniques sont des vibrations qui se propagent dans les tissus :
+                </p>
+                <ul>
+                    <li><strong>Plateforme vibrante</strong> : tu te tiens debout sur une plateforme qui vibre (20-100 Hz). Ça provoque des contractions musculaires réflexes → renforcement, amélioration équilibre</li>
+                    <li><strong>Pistolet de massage</strong> : vibrations localisées (5-50 Hz) pour relâcher les muscles, favoriser la récupération</li>
+                    <li><strong>Ultrasons</strong> : vibrations ultra-rapides (>20 000 Hz) qui chauffent les tissus EN PROFONDEUR (jusqu'à 3-5 cm). Très efficace sur les tendons, capsules, cicatrices</li>
+                    <li><strong>Ondes de choc</strong> : ondes très puissantes et brèves pour traiter les tendinopathies chroniques (tendinite d'Achille, aponévrosite plantaire...)</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Exemple concret en kiné :</strong> Sophie, coureuse, souffre d'une tendinopathie du tendon d'Achille depuis 6 mois. Les traitements classiques n'ont pas marché. Tu décides d'utiliser les ondes de choc radiales : 2000-3000 coups directement sur le tendon douloureux, 1 séance par semaine pendant 4-6 semaines. C'est douloureux pendant et juste après, mais ça va relancer la cicatrisation du tendon en créant une "bonne" inflammation, augmenter la vascularisation, et améliorer l'élasticité du tendon. Tu combines ça avec des exercices excentriques.
+                </div>
+
+                <h4>💧 La balnéothérapie : l'eau comme outil</h4>
+                <p>
+                    L'eau a des propriétés physiques incroyables pour la rééducation :
+                </p>
+                <ul>
+                    <li><strong>Poussée d'Archimède</strong> : dans l'eau, tu "pèses" moins lourd ! Immergé jusqu'au cou = tu ne supportes que 10% de ton poids. Ça permet de <strong>remettre en charge progressivement</strong></li>
+                    <li><strong>Résistance de l'eau</strong> : l'eau résiste aux mouvements → <strong>renforcement musculaire</strong> sans matériel</li>
+                    <li><strong>Pression hydrostatique</strong> : l'eau "masse" tout le corps → améliore la circulation, réduit l'œdème</li>
+                    <li><strong>Chaleur</strong> : eau chaude (34-36°C) → effet relaxant, antalgique</li>
+                </ul>
+
+                <div style="text-align:center;margin-top:30px;">
+                    <button class="level-btn" onclick="showLevel('base');document.getElementById('base').scrollIntoView({behavior:'smooth'});" style="padding:15px 30px;font-size:1.1em;">
+                        📘 Passons au Niveau Base →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Niveau Base -->
+            <div id="base" class="course-section">
+                <h3>📘 Physiotechnique - Niveau Base</h3>
+                
+                <h4>🎯 Introduction à la physiotechnique</h4>
+                <p>
+                    La physiotechnique regroupe l'ensemble des outils utilisant des <strong>agents physiques naturels ou artificiels</strong> dans un but thérapeutique. Elle se distingue de la kinésithérapie manuelle par le fait que ce n'est pas le thérapeute qui produit directement l'agent physique, mais un appareil.
+                </p>
+                <p><strong>Statut :</strong> La physiotechnique est un <strong>adjuvant</strong>, c'est-à-dire un complément aux autres traitements. Elle ne doit jamais être utilisée seule.</p>
+
+                <h4>⚡ Les Courants Électriques</h4>
+                
+                <p>Un courant électrique peut être :</p>
+                <ul>
+                    <li><strong>Constant vs Variable</strong> : Le courant constant (galvanique) a une intensité qui ne varie pas. Le courant variable change d'intensité (BF = Basse Fréquence <100Hz, TBF = Très Basse Fréquence 1-10Hz)</li>
+                    <li><strong>Unidirectionnel vs Bidirectionnel</strong> : Unidirectionnel = circule toujours dans le même sens. Bidirectionnel = change de sens régulièrement (le plus utilisé car moins de risque de brûlure)</li>
+                </ul>
+
+                <table class="info-table">
+                    <tr>
+                        <th>Type</th>
+                        <th>Fréquence</th>
+                        <th>Durée</th>
+                        <th>Effet</th>
+                        <th>Indication</th>
+                    </tr>
+                    <tr>
+                        <td><strong>BF BI</strong></td>
+                        <td>50-100 Hz</td>
+                        <td>&lt;0,1 ms</td>
+                        <td>Antalgique par gate control</td>
+                        <td>Douleurs localisées</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TBF IE</strong></td>
+                        <td>2-8 Hz</td>
+                        <td>0,2-2 ms</td>
+                        <td>Antalgique par endorphines</td>
+                        <td>Douleurs diffuses</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TBF IE</strong></td>
+                        <td>2-8 Hz</td>
+                        <td>0,1-0,6 ms</td>
+                        <td>Excito-moteur (secousses)</td>
+                        <td>Éveil musculaire</td>
+                    </tr>
+                    <tr>
+                        <td><strong>BF IT</strong></td>
+                        <td>20-80 Hz</td>
+                        <td>0,1-0,6 ms</td>
+                        <td>Excito-moteur (tétanisant)</td>
+                        <td>Renforcement musculaire</td>
+                    </tr>
+                </table>
+
+                <h5>Types de brûlures</h5>
+                <ul>
+                    <li><strong>Brûlure physique (effet Joule)</strong> : Dégagement de chaleur par résistance. Proportionnel à l'intensité²</li>
+                    <li><strong>Brûlure chimique</strong> : Avec courants unidirectionnels. Formation d'acides sous l'anode, de bases sous la cathode</li>
+                </ul>
+
+                <div class="danger-box">
+                    <strong>🚫 Contre-indications électrostimulation :</strong> Pacemaker, aire cardiaque, région antéro-latérale du cou, grossesse, phlébites, lésions cutanées, foyers tumoraux/infectieux
+                </div>
+
+                <h5>Électrostimulation Musculaire (ESM)</h5>
+                <div class="warning-box">
+                    <strong>⚠️ PRINCIPE FONDAMENTAL :</strong> L'ESM DOIT être accompagnée d'une contraction volontaire. Sans commande motrice du patient, l'efficacité thérapeutique fonctionnelle est nulle !
+                </div>
+
+                <p><strong>Concepts clés :</strong></p>
+                <ul>
+                    <li><strong>Unité motrice (UM)</strong> : Motoneurone + axone + toutes les fibres musculaires qu'il innerve</li>
+                    <li><strong>Sommation spatiale</strong> : ↑ intensité → ↑ nombre d'UM recrutées → ↑ force</li>
+                    <li><strong>Sommation temporelle</strong> : ↑ fréquence → secousses → contraction continue → tétanisation</li>
+                    <li><strong>Recrutement</strong> : Fibres superficielles recrutées en premier. Pour fibres profondes, faut ↑ intensité (attention brûlures !)</li>
+                </ul>
+
+                <h5>Gate Control (théorie du contrôle de porte)</h5>
+                <p>
+                    Stimulation des <strong>fibres Aβ</strong> (gros calibre, rapides, sensibilité tactile/proprioception) <strong>inhibe</strong> la transmission des influx nociceptifs des <strong>fibres Aδ et C</strong> (petit calibre, lentes, douleur).
+                </p>
+                <p>En gros : on "brouille" le signal de douleur en envoyant plein de signaux non-douloureux.</p>
+
+                <h5>Libération d'endorphines</h5>
+                <p>
+                    Les endorphines sont des morphines endogènes sécrétées par l'hypophyse et l'hypothalamus. Le courant TBF IE stimule leur libération → action antalgique de longue durée par fixation sur récepteurs morphiniques.
+                </p>
+
+                <h4>🌊 Les Ondes Mécaniques</h4>
+
+                <h5>1. Plateforme vibrante</h5>
+                <p><strong>Paramètres :</strong> F = 20-100 Hz (typiquement 30 Hz)</p>
+                <p><strong>Effet :</strong> Vibrations → contractions musculaires réflexes → renforcement, équilibre, densité osseuse</p>
+                <p><strong>Contre-indications :</strong> Prothèses <4 mois, ostéosynthèse <3 mois, fractures <3 mois, hernies discales, thromboses, pacemaker, grossesse, stérilet</p>
+
+                <h5>2. Ultrasons</h5>
+                <p><strong>Paramètres :</strong> F > 20 000 Hz. Application avec gel.</p>
+                <p><strong>Effets thermiques (37-42°C) :</strong></p>
+                <ul>
+                    <li>↑ extensibilité collagène</li>
+                    <li>Antispasmodique musculaire</li>
+                    <li>↓ douleur (antalgique)</li>
+                    <li>↑ débit sanguin (vasodilatation)</li>
+                </ul>
+                <p><strong>Indications :</strong> Lésions anciennes, chroniques, fibreuses. FIBROSES ! Capsulite rétractile, cicatrices, adhérences</p>
+                <div class="danger-box">
+                    <strong>🚫 Contre-indications :</strong> Lésions fraîches/aiguës, grossesse, cancers, rachis, tête/tronc, pacemaker, phlébites
+                </div>
+
+                <h5>3. Ondes de choc</h5>
+                <p><strong>Paramètres :</strong> F = 1-15 Hz, Pression 2-3 bars. 1000-3000 coups/séance, 1 séance/semaine, max 6 séances</p>
+                <p><strong>Effets :</strong></p>
+                <ul>
+                    <li><strong>Antalgique</strong> : active mécanismes inhibiteurs (après application)</li>
+                    <li><strong>Défibrosant</strong> : améliore élasticité tissus</li>
+                    <li><strong>Hypervascularisation</strong> : favorise cicatrisation</li>
+                </ul>
+                <p><strong>Indications :</strong> Tendinopathies (Achille, coude, épaule, patellaire), aponévrosites plantaires, calcifications périarticulaires</p>
+
+                <h4>🌡️ La Chaleur</h4>
+
+                <table class="info-table">
+                    <tr>
+                        <th></th>
+                        <th>Chaleur superficielle</th>
+                        <th>Chaleur profonde</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Profondeur</strong></td>
+                        <td>Jusqu'à 0,5 cm</td>
+                        <td>Jusqu'à 3,5 cm et +</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Techniques</strong></td>
+                        <td>Bouillottes, coussins/couvertures électriques, coussins gel chauffants, bains chauds/tourbillons, douches massages, sources air chaud pulsé, paraffine, hot packs, baumes, parafango, enveloppements chauds, hammam, compresse boue (tourbe noire), IR</td>
+                        <td>Ultrasons, Diathermie</td>
+                    </tr>
+                </table>
+
+                <p><strong>Effets physiologiques :</strong> Vasodilatation, ↑ débit sanguin, ↑ élasticité tissus, ↑ métabolisme, ↓ douleur, ↓ tonus musculaire</p>
+                <p><strong>Effets thérapeutiques :</strong> ↓ douleur, ↓ spasmes, amélioration cicatrisation, amélioration amplitudes articulaires</p>
+
+                <div class="danger-box">
+                    <strong>🚫 Contre-indications :</strong> Inflammation AIGUË, cancer, risque hémorragique, pathologies cardio-vasculaires, grossesse (région abdo/lombo-sacrée), troubles sensibilité
+                </div>
+
+                <h4>❄️ Le Froid - Cryothérapie</h4>
+
+                <p><strong>Effets physiologiques :</strong></p>
+                <ul>
+                    <li>↓ température (cutanée, intra-musculaire, intra-articulaire)</li>
+                    <li>Premiers 20 min : Vasoconstriction, ↓ débit sanguin</li>
+                    <li>Ensuite : Vasodilatation réactionnelle</li>
+                </ul>
+
+                <p><strong>Effets thérapeutiques :</strong></p>
+                <ul>
+                    <li>↓ douleur (neurapraxie)</li>
+                    <li>↓ œdème</li>
+                    <li>↓ inflammation</li>
+                    <li>↓ métabolisme</li>
+                    <li>↓ spasmes musculaires</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ Précautions :</strong>
+                    <ul>
+                        <li>Appliquer rapidement dans les 24 premières heures</li>
+                        <li>Température cutanée = mauvais indicateur</li>
+                        <li>Atténue adaptations entraînement si usage trop régulier</li>
+                    </ul>
+                </div>
+
+                <h5>Techniques locales</h5>
+                <ul>
+                    <li><strong>Vessie/glaçon</strong> : 20 min, 3×/jour</li>
+                    <li><strong>Cold pack</strong> : 20 min, 3×/jour</li>
+                    <li><strong>Cryo Cuff</strong> : Compression + froid, 20-30 min, température contrôlée</li>
+                    <li><strong>Spray cryogène</strong> : Chlorure éthyle, balayage rapide, effet flash</li>
+                    <li><strong>Cryo à air froid</strong> : Appareil soufflant air -30°C, 5-10 min</li>
+                    <li><strong>Cryo gazeuse CO₂</strong> : -78°C, balayage 30-90 sec</li>
+                    <li><strong>Game Ready</strong> : 15-30 min, froid + compression dynamique</li>
+                </ul>
+
+                <h5>Techniques globales</h5>
+                <ul>
+                    <li><strong>Immersion eau froide</strong> : 8-10°C, 6-10 min</li>
+                    <li><strong>Bain contrasté</strong> : Alternance chaud (38-45°C) / froid (10-20°C), 20-30 min</li>
+                    <li><strong>Cryothérapie corps entier</strong> : -110°C, 3 min</li>
+                </ul>
+
+                <h4>🔄 Chaud ou Froid selon la phase</h4>
+
+                <table class="info-table">
+                    <tr>
+                        <th>Phase</th>
+                        <th>Application</th>
+                    </tr>
+                    <tr>
+                        <td>Phase inflammatoire (4-6j)</td>
+                        <td>Froid ET chaud (débat)</td>
+                    </tr>
+                    <tr>
+                        <td>Phase prolifération</td>
+                        <td>Chaud</td>
+                    </tr>
+                    <tr>
+                        <td>Phase remodelage</td>
+                        <td>Chaud</td>
+                    </tr>
+                </table>
+
+                <h4>📱 Le Biofeedback</h4>
+
+                <p><strong>Définition :</strong> Procédé permettant de renvoyer au patient une information sur son état physiologique pour lui permettre de le corriger.</p>
+
+                <table class="info-table">
+                    <tr>
+                        <th>Biomécanique</th>
+                        <th>Physiologique</th>
+                    </tr>
+                    <tr>
+                        <td>Accéléromètre, Podomètre, Électrogoniométrie, Plaques de force, Biofeedback pression/force</td>
+                        <td>Myofeedback (EMG), Échographie temps réel, Moniteur FC, VFC, Spirométrie incitative</td>
+                    </tr>
+                </table>
+
+                <h5>Myofeedback (EMG de surface)</h5>
+                <p>Enregistre les potentiels d'action de la contraction musculaire, traduit leur intensité par signaux visuels/sonores.</p>
+                <p><strong>Indications :</strong> Visualiser contractions faibles, guider éveil musculaire, contrôler renforcement, doser intensité/durée, vérifier relâchement, rééducation périnéale</p>
+
+                <h4>💧 Autres Techniques</h4>
+
+                <h5>Pressothérapie</h5>
+                <p>Appliquer pression sur membre œdémateux → vidange vaisseaux lymphatiques → résorption œdème</p>
+                <p><strong>Paramètres :</strong> Pression 30 mmHg (jamais >60 mmHg !), 2-15 sec pression, 10-20 sec relâchement, 20-30 min</p>
+
+                <h5>Balnéothérapie</h5>
+                <p><strong>Propriétés exploitées :</strong></p>
+                <ul>
+                    <li><strong>Poussée d'Archimède</strong> : Eau niveau nombril = 50% poids, thorax = 30-40% poids, cou = 10% poids</li>
+                    <li><strong>Pression hydrostatique</strong> : Favorise circulation retour</li>
+                    <li><strong>Résistance</strong> : Renforcement musculaire (↑ si vitesse ↑ ou surface ↑)</li>
+                    <li><strong>Température</strong> : 34-36°C pour effets myorelaxants</li>
+                </ul>
+
+                <h5>Endermologie (LPG)</h5>
+                <p><strong>Principe :</strong> Mobilisation mécanique des tissus sous-cutanés par aspiration (30-80 kPa) + rouleau motorisé.</p>
+                <p><strong>Effets :</strong> Stimulation fibroblastes (↑collagène, ↑élastine), drainage lymphatique/veineux, décollement adhérences cicatricielles.</p>
+                <p><strong>Indications :</strong> Cicatrices pathologiques (adhérences, brides), lymphœdème post-cancer, fibrose tissulaire, récupération sportive.</p>
+                <p><strong>Protocole :</strong> 30-45 min, 1-2×/semaine, cure 10-15 séances</p>
+
+                <h5>Ventouses et Aspivenin</h5>
+                <p><strong>Principe :</strong> Aspiration locale créant dépression → hyperhémie (↑vascularisation), décollement adhérences myofasciales.</p>
+                <p><strong>Types :</strong></p>
+                <ul>
+                    <li><strong>Ventouses sèches</strong> : Aspiration simple (verre, plastique, silicone)</li>
+                    <li><strong>Ventouses scarifiées</strong> : Micro-incisions + aspiration</li>
+                    <li><strong>Aspivenin</strong> : Pompe manuelle extraction venin → IMPÉRATIF dans les 3 minutes après piqûre !</li>
+                </ul>
+                <p><strong>Applications :</strong> Contractures musculaires, trigger points, lombalgies/cervicalgies myofasciales</p>
+
+                <h5>Bains Galvaniques</h5>
+                <p><strong>Principe :</strong> Courant galvanique (continu) appliqué par électrodes immergées → ionophorèse + effet anti-sudoral.</p>
+                <p><strong>APPLICATION PRINCIPALE : Traitement HYPERHIDROSE (transpiration excessive)</strong></p>
+                <ul>
+                    <li><strong>Localisation :</strong> Mains (palmaire), pieds (plantaire), aisselles (axillaire)</li>
+                    <li><strong>Protocole :</strong> 15-20 mA, 20-30 min, 3×/semaine × 3 semaines, puis 1×/semaine entretien</li>
+                    <li><strong>Mécanisme :</strong> Obstruction temporaire glandes sudoripares → effet 4-6 semaines</li>
+                    <li><strong>Efficacité :</strong> 70-80% patients satisfaits</li>
+                </ul>
+
+                <h5>Ondes Électromagnétiques</h5>
+                
+                <p><strong>1️⃣ Rayons Ultraviolets (UV)</strong> - Longueur d'onde : 100-400 nm</p>
+                <ul>
+                    <li><strong>UVB :</strong> Synthèse vitamine D, érythème cutané</li>
+                    <li><strong>UVC :</strong> Germicide (destruction ADN bactérien) → désinfection matériel</li>
+                    <li><strong>Indications médicales :</strong> Psoriasis (photothérapie UVB 311 nm), vitiligo</li>
+                    <li><strong>⚠️ Risques :</strong> Brûlures, photosensibilisation, vieillissement cutané, cancers cutanés</li>
+                    <li><strong>Usage :</strong> Médical supervisé UNIQUEMENT, lunettes UV obligatoires</li>
+                </ul>
+
+                <p><strong>2️⃣ Rayons Infrarouges (IR)</strong> - Longueur d'onde : 760 nm à 1 mm</p>
+                <ul>
+                    <li><strong>Effet principal :</strong> THERMIQUE - Chaleur tissulaire profonde (40-42°C cutanée)</li>
+                    <li><strong>Pénétration :</strong> 1-10 mm (derme profond)</li>
+                    <li><strong>Effets :</strong> Vasodilatation, antalgique, ↑souplesse collagène, ↑métabolisme tissulaire</li>
+                    <li><strong>Indications :</strong> Douleurs chroniques, raideurs articulaires, contractures</li>
+                    <li><strong>Application :</strong> Lampe 30-50 cm, 15-20 min</li>
+                    <li><strong>CI :</strong> Inflammation aiguë (0-48h), troubles sensibilité, thrombose</li>
+                </ul>
+
+                <p><strong>3️⃣ Rayons X</strong> - Longueur d'onde : 0,01-10 nm</p>
+                <ul>
+                    <li><strong>⚠️ NON utilisés en physiothérapie</strong> - Diagnostic radiologie uniquement</li>
+                    <li><strong>Rôle kiné :</strong> Lecture radios pour adapter traitement, orientation patient si besoin</li>
+                    <li><strong>Risque :</strong> Rayonnements ionisants cancérigènes (effet cumulatif)</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>💡 Choix thérapeutique selon pathologie :</strong>
+                    <ul>
+                        <li>Douleur chronique musculaire → <strong>Infrarouges</strong> 15 min avant mobilisation</li>
+                        <li>Hyperhidrose mains/pieds → <strong>Bains galvaniques</strong> (1ère intention)</li>
+                        <li>Cicatrice rétractile → <strong>Endermologie</strong> LPG</li>
+                        <li>Contracture ponctuelle → <strong>Ventouses</strong></li>
+                        <li>Piqûre insecte → <strong>Aspivenin</strong> immédiat (<3 min !)</li>
+                    </ul>
+                </div>
+
+                <div style="text-align:center;margin-top:30px;">
+                    <button class="level-btn" onclick="showLevel('avance');document.getElementById('avance').scrollIntoView({behavior:'smooth'});" style="padding:15px 30px;font-size:1.1em;">
+                        🎓 Passons au Niveau Avancé →
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Niveau Avancé -->
+            <div id="avance" class="course-section">
+                <h3>🎓 Physiotechnique - Niveau Avancé</h3>
+                
+                <h4>⚡ Électrophysiologie Approfondie</h4>
+
+                <h5>Chronaxie et Rhéobase</h5>
+                <p><strong>Chronaxie :</strong> Durée minimale d'application d'un courant d'intensité double de la rhéobase nécessaire pour provoquer une contraction.</p>
+                <ul>
+                    <li>Muscle normalement innervé : 0,05-0,5 ms</li>
+                    <li>Muscle dénervé : >10 ms (nécessite courants plus longs, unidirectionnels)</li>
+                </ul>
+
+                <h5>Mécanismes d'action électrostimulation</h5>
+                <p><strong>Niveau cellulaire :</strong> Courant externe → dépolarisation membranaire → atteinte seuil → génération potentiel d'action</p>
+                <p><strong>Adaptations neuromusculaires :</strong></p>
+                <ul>
+                    <li>↑ synchronisation recrutement UM</li>
+                    <li>↑ fréquence décharge motoneurones</li>
+                    <li>Hypertrophie musculaire (si intensité + durée suffisantes)</li>
+                    <li>Conversion fibres IIx → IIa</li>
+                    <li>Mais : pas d'amélioration coordination inter-musculaire ni contrôle cortical</li>
+                </ul>
+
+                <p><strong>Limites :</strong></p>
+                <ul>
+                    <li>Gains force < entraînement volontaire à charge équivalente</li>
+                    <li>Transfert fonctionnel limité sans contraction volontaire associée</li>
+                    <li>Inconfort limite intensité maximale</li>
+                    <li>Recrutement préférentiel fibres superficielles</li>
+                </ul>
+
+                <h5>Gate Control - Détails physiologiques</h5>
+                <ul>
+                    <li><strong>Fibres Aβ</strong> : diamètre 5-12 μm, vitesse 30-70 m/s (tactile, proprioception)</li>
+                    <li><strong>Fibres Aδ</strong> : diamètre 2-5 μm, vitesse 12-30 m/s (douleur rapide)</li>
+                    <li><strong>Fibres C</strong> : diamètre 0,4-1,2 μm, vitesse 0,5-2 m/s (douleur lente)</li>
+                </ul>
+                <p><strong>Mécanisme :</strong> Activation Aβ par BF BI → interneurones inhibiteurs corne dorsale → inhibition présynaptique transmission Aδ/C → ↓ perception douloureuse</p>
+
+                <h5>Endorphines - Détails</h5>
+                <p>Peptides opioïdes endogènes : β-endorphine, enképhalines, dynorphines</p>
+                <p><strong>Mécanisme :</strong> TBF IE → activation fibres Aδ/C → libération endorphines (hypothalamus/hypophyse) → fixation récepteurs μ, δ, κ → inhibition transmission douleur</p>
+                <p><strong>Caractéristiques :</strong></p>
+                <ul>
+                    <li>Latence : 20-40 min pour effet maximal</li>
+                    <li>Durée : effet persiste plusieurs heures</li>
+                    <li>Antagonisable par naloxone</li>
+                    <li>Pas de tolérance</li>
+                </ul>
+
+                <h4>🌊 Ultrasons - Biophysique Avancée</h4>
+
+                <h5>Propriétés physiques</h5>
+                <p><strong>Longueur d'onde :</strong> λ = c / f</p>
+                <ul>
+                    <li>À 1 MHz : λ ≈ 1,5 mm dans tissus mous</li>
+                    <li>À 3 MHz : λ ≈ 0,5 mm</li>
+                </ul>
+
+                <p><strong>Absorption :</strong> Dépend fréquence et type tissu</p>
+                <ul>
+                    <li>Tissus riches en collagène : absorption maximale (tendons, ligaments, capsules)</li>
+                    <li>Os : absorption très forte (attention "point chaud" à l'interface os/tissus mous)</li>
+                    <li>Sang/eau : absorption faible</li>
+                </ul>
+
+                <p><strong>Coefficient absorption (α) :</strong></p>
+                <ul>
+                    <li>Muscle : α = 0,1-0,2 dB/cm/MHz</li>
+                    <li>Tendon : α = 0,6-1,2 dB/cm/MHz</li>
+                    <li>Os cortical : α = 3-5 dB/cm/MHz</li>
+                </ul>
+
+                <h5>Mode pulsé vs continu</h5>
+                <table class="info-table">
+                    <tr>
+                        <th>Mode continu</th>
+                        <th>Mode pulsé</th>
+                    </tr>
+                    <tr>
+                        <td>Émission permanente. Effet thermique ++. Lésions chroniques</td>
+                        <td>Émission intermittente (cycle 1:1 à 1:9). Effet thermique +/-. Effets non-thermiques ++. Lésions aiguës/subaiguës</td>
+                    </tr>
+                </table>
+
+                <h5>Loi BNR (Beam Non-Uniformity Ratio)</h5>
+                <p>Rapport entre intensité max et intensité moyenne du faisceau ultrasonore. BNR idéal : <6 pour éviter points chauds.</p>
+
+                <h4>⚡ Ondes de Choc - Mécanismes</h4>
+
+                <h5>Mécanobiologie</h5>
+                <p><strong>Effets cellulaires :</strong></p>
+                <ul>
+                    <li>↑ expression facteurs croissance (TGF-β, IGF-I, VEGF)</li>
+                    <li>↑ synthèse collagène</li>
+                    <li>↑ prolifération fibroblastes et ténocytes</li>
+                    <li>Néo-angiogenèse (formation nouveaux vaisseaux)</li>
+                    <li>Apoptose cellules inflammatoires chroniques</li>
+                </ul>
+
+                <p><strong>Dose énergétique :</strong></p>
+                <ul>
+                    <li>Basse énergie (0,08-0,28 mJ/mm²) : douleur, inflammation chronique</li>
+                    <li>Énergie moyenne (0,28-0,60 mJ/mm²) : tendinopathies, calcifications</li>
+                    <li>Haute énergie (>0,60 mJ/mm²) : pseudarthroses, ostéonécroses</li>
+                </ul>
+
+                <h4>🧊 Cryothérapie - Physiologie Approfondie</h4>
+
+                <h5>Cinétique de refroidissement</h5>
+                <table class="info-table">
+                    <tr>
+                        <th>Profondeur</th>
+                        <th>Temps pour ↓5°C</th>
+                        <th>Temps récupération</th>
+                    </tr>
+                    <tr>
+                        <td>Cutanée</td>
+                        <td>~5 min</td>
+                        <td>10-15 min</td>
+                    </tr>
+                    <tr>
+                        <td>1 cm (sous-cutané)</td>
+                        <td>~10 min</td>
+                        <td>30-45 min</td>
+                    </tr>
+                    <tr>
+                        <td>2-3 cm (intra-musculaire)</td>
+                        <td>15-20 min</td>
+                        <td>60-90 min</td>
+                    </tr>
+                    <tr>
+                        <td>Intra-articulaire</td>
+                        <td>20-30 min</td>
+                        <td>>120 min</td>
+                    </tr>
+                </table>
+
+                <h5>Effets sur métabolisme</h5>
+                <p>Q₁₀ = 2-3 : pour chaque ↓10°C, métabolisme ÷2 à ÷3</p>
+                <p>Si température tissulaire passe de 37°C à 27°C → métabolisme ÷4 à ÷9</p>
+
+                <h5>DOMS (Delayed Onset Muscle Soreness)</h5>
+                <p><strong>Cryothérapie post-exercice :</strong></p>
+                <ul>
+                    <li>↓ DOMS à 24-96h (modeste)</li>
+                    <li>↓ perception fatigue (effet psychologique ++)</li>
+                    <li>Mais : ↓ adaptations hypertrophie/force si systématique (↓ signaux anaboliques)</li>
+                </ul>
+                <p><strong>Recommandation :</strong> Utilisation ponctuelle OK, mais pas systématique après chaque entraînement</p>
+
+                <h4>🌡️ Thermothérapie - Applications Cliniques</h4>
+
+                <h5>Températures thérapeutiques</h5>
+                <table class="info-table">
+                    <tr>
+                        <th>Température</th>
+                        <th>Effets</th>
+                    </tr>
+                    <tr>
+                        <td>37-40°C (Légère)</td>
+                        <td>↑ circulation locale, relaxation</td>
+                    </tr>
+                    <tr>
+                        <td>40-45°C (Vigoureuse)</td>
+                        <td>↑↑ débit sanguin, ↑ extensibilité collagène, analgésie</td>
+                    </tr>
+                    <tr>
+                        <td>>45°C (Thermique)</td>
+                        <td>Risque brûlures, dénaturation protéines</td>
+                    </tr>
+                </table>
+
+                <h5>Temps application optimal</h5>
+                <ul>
+                    <li>Superficiel : 15-20 min (plateau thermique à 10 min)</li>
+                    <li>Profond (US) : 8-10 min (↑ température dès 5 min, plateau à 8 min)</li>
+                </ul>
+
+                <h4>📊 Niveaux de Preuve Scientifique</h4>
+
+                <table class="info-table">
+                    <tr>
+                        <th>Modalité</th>
+                        <th>Indication</th>
+                        <th>Niveau preuve</th>
+                    </tr>
+                    <tr>
+                        <td>Électrostimulation</td>
+                        <td>Renforcement post-op</td>
+                        <td>Modéré (B)</td>
+                    </tr>
+                    <tr>
+                        <td>TENS</td>
+                        <td>Douleur aiguë</td>
+                        <td>Modéré (B)</td>
+                    </tr>
+                    <tr>
+                        <td>Ultrasons</td>
+                        <td>Capsulite rétractile</td>
+                        <td>Modéré (B)</td>
+                    </tr>
+                    <tr>
+                        <td>Ondes de choc</td>
+                        <td>Tendinopathies chroniques</td>
+                        <td>Fort (A)</td>
+                    </tr>
+                    <tr>
+                        <td>Cryothérapie</td>
+                        <td>Traumatisme aigu</td>
+                        <td>Fort (A)</td>
+                    </tr>
+                    <tr>
+                        <td>Chaleur</td>
+                        <td>Raideur chronique</td>
+                        <td>Modéré (B)</td>
+                    </tr>
+                    <tr>
+                        <td>Plateforme vibrante</td>
+                        <td>Équilibre personne âgée</td>
+                        <td>Modéré (B)</td>
+                    </tr>
+                </table>
+
+                <p><strong>Niveaux :</strong> A = Recommandé, B = Peut être recommandé, C = Option possible, D = Pas recommandé</p>
+
+                <h4>🔬 Prise en Charge Evidence-Based</h4>
+
+                <p><strong>Principes EBP (Evidence-Based Practice) :</strong></p>
+                <ol>
+                    <li><strong>Meilleures preuves scientifiques</strong> : Consulter littérature, méta-analyses</li>
+                    <li><strong>Expertise clinique</strong> : Expérience, formation continue</li>
+                    <li><strong>Préférences patient</strong> : Écoute, objectifs partagés</li>
+                    <li><strong>Contexte</strong> : Disponibilité, coût, faisabilité</li>
+                </ol>
+
+                <p><strong>Intégration physiotechnique :</strong></p>
+                <ul>
+                    <li>Jamais modalité unique de traitement</li>
+                    <li>Toujours associée à thérapie active (exercices, éducation)</li>
+                    <li>Objectifs SMART définis avec patient</li>
+                    <li>Réévaluation régulière (si pas d'amélioration à 2-3 séances → questionner pertinence)</li>
+                </ul>
+
+                <div class="warning-box">
+                    <strong>⚠️ Attention aux effets contextuels :</strong> Une partie de l'efficacité perçue peut être due à l'effet placebo, la relation thérapeutique, les attentes positives. C'est OK et thérapeutique, mais ne doit pas remplacer les traitements actifs prouvés.
+                </div>
+
+            </div>
+        </div>
+
+        <!-- FLASHCARDS -->
+        <div id="flashcards" class="content">
+            <h2>Flashcards Physiotechnique</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalCards">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="knownCards">0</div>
+                    <div class="stat-label">Maîtrisé</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="hesitateCards">0</div>
+                    <div class="stat-label">Hésitant</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="unknownCards">0</div>
+                    <div class="stat-label">À apprendre</div>
+                </div>
+            </div>
+
+            <div class="flashcard-controls">
+                <button onclick="startFlashcards('all')">Toutes les cartes</button>
+                <button onclick="startFlashcards('difficult')">Hésitant + À apprendre</button>
+                <button onclick="startFlashcards('unknown')">À apprendre uniquement</button>
+                <button onclick="saveProgress()">💾 Sauvegarder</button>
+                <button onclick="loadProgress()">📂 Charger</button>
+                <button onclick="exportProgress()">⬇️ Exporter</button>
+                <input type="file" id="importFile" style="display:none" onchange="importProgress(event)">
+                <button onclick="document.getElementById('importFile').click()">⬆️ Importer</button>
+                <button onclick="resetProgress()">🔄 Réinitialiser</button>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width:0%">0/0</div>
+            </div>
+
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+                <div class="flashcard-text" id="flashcardText">Cliquez sur "Démarrer" pour commencer</div>
+                <div class="flashcard-buttons" id="flashcardButtons" style="display:none;">
+                    <button class="btn-know" onclick="event.stopPropagation();markCard('known')">✓ Maîtrisé</button>
+                    <button class="btn-hesitate" onclick="event.stopPropagation();markCard('hesitate')">? Hésitant</button>
+                    <button class="btn-unknown" onclick="event.stopPropagation();markCard('unknown')">✗ À apprendre</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZ -->
+        <div id="quiz" class="content">
+            <h2>Quiz Physiotechnique</h2>
+            
+            <div class="quiz-controls">
+                <button onclick="startQuiz()">🎲 Lancer le Quiz</button>
+                <button onclick="showQuizAnswer()">👁️ Voir la réponse</button>
+                <button onclick="nextQuizQuestion()">➡️ Question suivante</button>
+            </div>
+
+            <div id="quizContainer"></div>
+        </div>
+
+        <!-- QCM -->
+        <div id="qcm" class="content">
+            <h2>QCM Physiotechnique</h2>
+            
+            <div class="quiz-controls">
+                <button onclick="startQCM()">🎲 Lancer le QCM</button>
+                <button onclick="submitQCM()">✓ Valider mes réponses</button>
+                <button onclick="nextQCM()">➡️ QCM suivant</button>
+            </div>
+
+            <div id="qcmContainer"></div>
+            <div id="qcmScore"></div>
+        </div>
+
+        <!-- VRAI/FAUX -->
+        <div id="vraifaux" class="content">
+            <h2>Vrai ou Faux - Physiotechnique</h2>
+            
+            <div class="quiz-controls">
+                <button onclick="startVraiFaux()">🎲 Lancer Vrai/Faux</button>
+                <button onclick="nextVraiFaux()">➡️ Question suivante</button>
+            </div>
+            <p style="background:#e7f3ff;padding:10px;border-radius:5px;margin-bottom:15px;">
+                💡 <strong>Cliquez directement sur Vrai ou Faux</strong> pour voir la correction instantanément !
+            </p>
+
+            <div id="vraiFauxContainer"></div>
+        </div>
+
+        <!-- EXERCICES -->
+        <div id="exercices" class="content">
+            <h2>Exercices Pratiques</h2>
+            
+            <div class="exercise">
+                <h4>Exercice 1 : Choix de courant pour douleur localisée</h4>
+                <p>Un patient consulte pour une douleur localisée au genou suite à une entorse de grade 2 (8 jours post-trauma). Quel type de courant électrique utiliseriez-vous et pourquoi ?</p>
+                <textarea id="answer1" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(1)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(1)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help1">
+                    <strong>💡 Aide :</strong> Pensez aux différents types de courants et leurs effets spécifiques. Pour une douleur localisée, quel mécanisme d'action serait le plus approprié ?
+                </div>
+                <div class="correction-box" id="correction1">
+                    <strong>✓ Correction :</strong><br>
+                    <strong>Courant recommandé : BF BI (Basse Fréquence Bidirectionnel)</strong><br><br>
+                    <strong>Paramètres :</strong> 50-100 Hz, durée impulsion <0,1 ms<br><br>
+                    <strong>Justification :</strong><br>
+                    - Effet antalgique par gate control (inhibition transmission douleur)<br>
+                    - Douleur localisée → parfait pour application locale<br>
+                    - 8 jours post-trauma → phase subaiguë, inflammation diminue<br>
+                    - Bidirectionnel → moins de risque de brûlure chimique<br><br>
+                    <strong>Placement électrodes :</strong> Autour de la zone douloureuse, pas directement sur l'articulation gonflée<br>
+                    <strong>Durée :</strong> 20-30 minutes, 2-3×/jour si nécessaire<br>
+                    <strong>Association :</strong> POLICE protocol (cryothérapie, compression, élévation) + mobilisation progressive
+                </div>
+            </div>
+
+            <div class="exercise">
+                <h4>Exercice 2 : Protocole cryothérapie entorse cheville</h4>
+                <p>Sophie, 28 ans, se tord la cheville en descendant d'un trottoir. Elle vient vous voir 2h après le trauma. Cheville gonflée, ecchymose débutante, douleur intense à la palpation. Proposez un protocole de cryothérapie complet pour les 72 premières heures.</p>
+                <textarea id="answer2" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(2)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(2)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help2">
+                    <strong>💡 Aide :</strong> Rappelez-vous le protocole POLICE et les différentes techniques de cryothérapie locale. Quelle fréquence et durée d'application ?
+                </div>
+                <div class="correction-box" id="correction2">
+                    <strong>✓ Correction :</strong><br>
+                    <strong>Protocole POLICE (72 premières heures) :</strong><br><br>
+                    <strong>P - Protection :</strong> Attelle/strapping si nécessaire, éviter appui total<br>
+                    <strong>OL - Optimal Loading :</strong> Mise en charge progressive dès que toléré (pas d'immobilisation complète)<br>
+                    <strong>I - Ice (Glace) :</strong><br>
+                    - Technique : Cold pack ou Game Ready (idéal : compression + froid)<br>
+                    - Durée : 20 minutes par application<br>
+                    - Fréquence : 3-4 fois par jour<br>
+                    - Période : 48-72h minimum<br>
+                    - Attention : Protéger peau (serviette fine), surveiller sensation<br><br>
+                    <strong>C - Compression :</strong> Bandage élastique (pas trop serré, vérifier pouls distal)<br>
+                    <strong>E - Elevation :</strong> Surélever membre au repos (au-dessus niveau cœur)<br><br>
+                    <strong>Évolution J3-J7 :</strong><br>
+                    - Continuer cryothérapie si douleur/œdème persistants<br>
+                    - Débuter mobilisations actives douces<br>
+                    - Début proprioception en décharge<br>
+                    - Pas de chaleur avant 5-7 jours !
+                </div>
+            </div>
+
+            <div class="exercise">
+                <h4>Exercice 3 : Ultrasons vs Ondes de choc pour tendinopathie</h4>
+                <p>Marc, 45 ans, souffre d'une tendinopathie calcifiante de l'épaule depuis 8 mois. Douleur chronique, limitation mobilité. Échographie : calcification 1,2 cm dans supra-épineux. Comparez ultrasons et ondes de choc pour ce cas. Lequel choisiriez-vous et pourquoi ?</p>
+                <textarea id="answer3" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(3)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(3)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help3">
+                    <strong>💡 Aide :</strong> Considérez la nature chronique de la lésion, la présence de calcification, et les indications spécifiques de chaque modalité.
+                </div>
+                <div class="correction-box" id="correction3">
+                    <strong>✓ Correction :</strong><br>
+                    <strong>CHOIX : Ondes de choc (privilégiées pour ce cas)</strong><br><br>
+                    <strong>Comparaison :</strong><br><br>
+                    <table class="info-table">
+                        <tr>
+                            <th>Critère</th>
+                            <th>Ultrasons</th>
+                            <th>Ondes de choc</th>
+                        </tr>
+                        <tr>
+                            <td>Calcifications</td>
+                            <td>Effet modéré</td>
+                            <td>Fragmentation calcification +++</td>
+                        </tr>
+                        <tr>
+                            <td>Tendinopathie chronique</td>
+                            <td>Effet thermique, assouplissement</td>
+                            <td>Relance cicatrisation, néovascularisation +++</td>
+                        </tr>
+                        <tr>
+                            <td>Durée traitement</td>
+                            <td>12-15 séances</td>
+                            <td>4-6 séances</td>
+                        </tr>
+                        <tr>
+                            <td>Efficacité</td>
+                            <td>Modérée</td>
+                            <td>Niveau preuve A pour tendinopathies calcifiantes</td>
+                        </tr>
+                        <tr>
+                            <td>Douleur pendant</td>
+                            <td>Aucune</td>
+                            <td>Oui (modérée à forte)</td>
+                        </tr>
+                    </table><br>
+                    <strong>Protocole ondes de choc recommandé :</strong><br>
+                    - Énergie : 0,28-0,40 mJ/mm² (moyenne)<br>
+                    - Nombre coups : 2000-2500 par séance<br>
+                    - Fréquence : 1 séance/semaine<br>
+                    - Total : 4-6 séances<br>
+                    - Application directe sur calcification (repérage écho)<br><br>
+                    <strong>Associer :</strong> Exercices excentriques supra-épineux, étirements capsule postérieure, correction posture
+                </div>
+            </div>
+
+            <div class="exercise">
+                <h4>Exercice 4 : Électrostimulation post-chirurgie LCA</h4>
+                <p>Patient opéré LCA (ligament croisé antérieur) il y a 3 semaines. Quadriceps très faible (testing 2/5), amyotrophie visible. Proposez un protocole d'électrostimulation pour les 4 prochaines semaines.</p>
+                <textarea id="answer4" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(4)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(4)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help4">
+                    <strong>💡 Aide :</strong> Pensez progression : éveil musculaire → renforcement. Quels types de courants utiliser à chaque phase ?
+                </div>
+                <div class="correction-box" id="correction4">
+                    <strong>✓ Correction :</strong><br>
+                    <strong>Semaines 3-4 (Éveil musculaire) :</strong><br>
+                    - Type courant : TBF IE (2-8 Hz)<br>
+                    - Durée impulsion : 0,1-0,6 ms<br>
+                    - Effet : Secousses musculaires isolées<br>
+                    - Intensité : Seuil moteur (contraction visible)<br>
+                    - Durée séance : 10-15 min<br>
+                    - Fréquence : 2×/jour<br>
+                    - IMPÉRATIF : Contraction volontaire simultanée !<br>
+                    - Position : Assis, genou 60° flexion<br><br>
+                    <strong>Semaines 5-6 (Renforcement progressif) :</strong><br>
+                    - Type courant : BF IT (20-80 Hz) début spectre<br>
+                    - Durée impulsion : 0,1-0,6 ms<br>
+                    - Effet : Tétanisation (contraction continue)<br>
+                    - Programme : 5 sec ON / 15 sec OFF (ratio 1:3)<br>
+                    - 10 contractions par série, 3 séries<br>
+                    - Intensité : Maximum tolérable<br>
+                    - Fréquence : 1×/jour + exercices actifs<br><br>
+                    <strong>À partir semaine 7 :</strong><br>
+                    - Augmenter temps ON : 8 sec ON / 24 sec OFF<br>
+                    - Augmenter fréquence vers 50-80 Hz<br>
+                    - Associer TOUJOURS travail volontaire :<br>
+                      * Isométrique<br>
+                      * Puis concentrique/excentrique<br>
+                      * Puis fonctionnel (squat, fentes, step)<br><br>
+                    <strong>⚠️ Rappel crucial :</strong> ESM seule = inefficace ! Doit être couplée avec contraction volontaire et rééducation active pour transfert fonctionnel.
+                </div>
+            </div>
+
+            <div class="exercise">
+                <h4>Exercice 5 : Biofeedback EMG pour incontinence urinaire</h4>
+                <p>Patiente 55 ans, incontinence urinaire d'effort post-accouchements. Elle ne perçoit pas bien la contraction de son périnée. Expliquez comment utiliser le biofeedback EMG dans sa rééducation.</p>
+                <textarea id="answer5" placeholder="Écrivez votre réponse ici..."></textarea>
+                <div class="exercise-buttons">
+                    <button class="btn-help" onclick="showHelp(5)">💡 Aide</button>
+                    <button class="btn-correction" onclick="showCorrection(5)">✓ Voir la correction</button>
+                </div>
+                <div class="help-box" id="help5">
+                    <strong>💡 Aide :</strong> Le biofeedback permet de visualiser une contraction invisible. Comment cela aide l'apprentissage moteur ?
+                </div>
+                <div class="correction-box" id="correction5">
+                    <strong>✓ Correction :</strong><br>
+                    <strong>Principe du biofeedback EMG périnéal :</strong><br>
+                    Sonde vaginale ou anale avec électrodes → détecte activité électrique muscles périnée → traduit en signal visuel/sonore → patiente voit/entend sa contraction<br><br>
+                    <strong>Protocole rééducation :</strong><br><br>
+                    <strong>Phase 1 - Prise de conscience (2-3 séances) :</strong><br>
+                    - Patiente allongée, jambes fléchies<br>
+                    - Demander contraction périnée (« retenir urine/gaz »)<br>
+                    - Observer signal EMG sur écran<br>
+                    - Identifier contraction correcte vs parasites (abdos, fessiers)<br>
+                    - Apprendre à isoler périnée<br><br>
+                    <strong>Phase 2 - Renforcement (4-6 séances) :</strong><br>
+                    - Contractions maintenues : 5-10 sec, 10-15 répétitions<br>
+                    - Objectif : atteindre seuil cible (ex: 30 μV)<br>
+                    - Feedback visuel : barre qui monte = motivation<br>
+                    - Progression : augmenter durée puis intensité<br><br>
+                    <strong>Phase 3 - Endurance (4-6 séances) :</strong><br>
+                    - Contractions longues : 30-60 sec<br>
+                    - Relâchement complet entre contractions (important !)<br>
+                    - Vérifier absence hypertonie de repos<br><br>
+                    <strong>Phase 4 - Fonctionnel (3-4 séances) :</strong><br>
+                    - Contractions en positions variées (debout, squat)<br>
+                    - Lors d'effort (toux, saut sur place)<br>
+                    - Automatisation du « verrou périnéal »<br><br>
+                    <strong>Exercices à domicile :</strong> 3×10 contractions/jour SANS appareil (transfert apprentissage)<br><br>
+                    <strong>Avantages biofeedback :</strong><br>
+                    - Objectivation contraction invisible<br>
+                    - Motivation (voir progrès)<br>
+                    - Apprentissage plus rapide<br>
+                    - Évite compensations
+                </div>
+            </div>
+        </div>
+
+        <!-- DEFINITIONS -->
+        <div id="definitions" class="content">
+            <h2>Définitions à connaître</h2>
+
+
+            <div class="definition-card">
+                <h4>Cryo Cuff</h4>
+                <p>Dispositif combinant cryothérapie et compression dynamique. Manchon gonflable relié à glacière contenant eau glacée + glace. Pompe assure circulation eau froide et compression intermittente contrôlée. Avantages : température constante, compression ajustable, maintien prolongé. Indications : Post-op genou/épaule, entorses, œdèmes post-traumatiques. Protocole : 20-30 min, 3-4×/jour premières 72h.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Spray Cryogène</h4>
+                <p>Chlorure d'éthyle en spray. Évaporation ultra-rapide → refroidissement intense cutané instantané (-10 à -15°C). Effet : neurapraxie locale immédiate (quelques secondes), permet infiltration/geste douloureux. Application : Balayage rapide 5-10 cm, 2-3 passages. Usage : Avant injection, retrait corps étranger, trigger points. CI : Application prolongée (gelures), zones sensibles.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Cryothérapie à Air Froid</h4>
+                <p>Appareil soufflant air froid (-10 à -30°C) de manière contrôlée. Différence vs spray : application prolongée possible, température régulée, sans contact direct. Avantages : Dosage précis, zones difficiles d'accès (main, pied), mobilisation simultanée possible. Protocole : 5-10 min, distance 10-15 cm. Applications : Synovites, ténosynovites, rééducation post-trauma avec mobilisation.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Parafango</h4>
+                <p>Mélange paraffine + boue thermale (fango). Température application : 42-50°C. Propriétés : Rétention thermique prolongée (25-30 min), effet mécanique compressif léger, minéraux boue (effet reminéralisant allégué). Applications : Rhumatologie (arthrose, raideurs), zones étendues (rachis, membres). Technique : Application épaisse (1-2 cm), couverture isolante, retrait après refroidissement. Réutilisable après chauffage.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Bains à Tourbillons (Whirlpool)</h4>
+                <p>Bain eau chaude (36-40°C) avec jets hydromassants créant turbulences. Effets : Thermique (vasodilatation) + mécanique (massage tissus mous, décollement peaux mortes). Indications : Plaies chroniques (détersion mécanique), brûlures cicatrisées, raideurs articulaires distales (mains/pieds), préparation mobilisation. Protocole : 15-20 min, température progressive. CI : Plaies infectées actives, thrombose.</p>
+            </div>
+
+            <div class="definition-card">
+                <h4>Hammam (Bain Vapeur)</h4>
+                <p>Exposition vapeur d'eau saturée chaude (40-50°C), humidité 100%. Effets : Vasodilatation généralisée, sudation intense (détoxification alléguée), relaxation musculaire profonde, ↑extensibilité tissulaire. Applications kiné : Préparation massage/mobilisation (décontraction globale), récupération sportive, pathologies respiratoires chroniques (humidification voies aériennes). Durée : 10-20 min. CI : Cardiovasculaires, grossesse, hypotension.</p>
+            </div>
+        </div>
+
+        <!-- FORMULES -->
+        <div id="formules" class="content">
+            <h2>Formules à connaître</h2>
+
+            <div class="formula-box">
+                <h4>Loi d'Ohm</h4>
+                <div class="formula">U = R × I</div>
+                <p>U : Tension (Volts)<br>
+                R : Résistance (Ohms)<br>
+                I : Intensité (Ampères)</p>
+                <p><strong>Explication :</strong> La tension nécessaire pour faire passer un courant est proportionnelle à la résistance du tissu. Peau sèche = haute résistance → besoin de plus de tension. Peau humide = basse résistance → moins de tension nécessaire.</p>
+                <p><strong>Application clinique :</strong> Nettoyer et humecter la peau avant électrostimulation pour ↓ résistance → meilleur passage courant + moins d'inconfort.</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Effet Joule (Brûlure physique)</h4>
+                <div class="formula">Q = R × I² × t</div>
+                <p>Q : Chaleur produite (Joules)<br>
+                R : Résistance (Ohms)<br>
+                I : Intensité (Ampères)<br>
+                t : Temps (secondes)</p>
+                <p><strong>Explication :</strong> La chaleur produite est proportionnelle au CARRÉ de l'intensité. Doubler l'intensité = 4× plus de chaleur ! D'où importance de surveiller intensité et durée application.</p>
+                <p><strong>Application clinique :</strong> Risque brûlure si électrode mal positionnée (petit contact → haute densité courant → ↑ chaleur locale). Toujours vérifier bon contact électrodes.</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Longueur d'onde Ultrasons</h4>
+                <div class="formula">λ = c / f</div>
+                <p>λ : Longueur d'onde (mm)<br>
+                c : Vitesse son dans le milieu (~1500 m/s tissus mous)<br>
+                f : Fréquence (Hz)</p>
+                <p><strong>Exemple :</strong> Ultrasons 1 MHz : λ = 1500 / 1 000 000 = 0,0015 m = 1,5 mm</p>
+                <p><strong>Application clinique :</strong> Fréquence élevée (3 MHz) = longueur d'onde courte = absorption superficielle. Fréquence basse (1 MHz) = longueur d'onde longue = pénétration profonde.</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Coefficient de température Q₁₀</h4>
+                <div class="formula">Q₁₀ = 2 à 3</div>
+                <p>Pour chaque diminution de température de 10°C, le métabolisme est divisé par 2 à 3.</p>
+                <p><strong>Exemple :</strong> Température tissulaire passe de 37°C à 27°C (↓10°C)<br>
+                → Métabolisme divisé par 2 à 3<br>
+                → Diminution besoins oxygène<br>
+                → Protection tissulaire après trauma</p>
+                <p><strong>Application clinique :</strong> Cryothérapie immédiate post-trauma ralentit métabolisme → ↓ hypoxie secondaire → ↓ extension lésion.</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Poussée d'Archimède</h4>
+                <div class="formula">F = ρ × V × g</div>
+                <p>F : Force ascendante (Newtons)<br>
+                ρ : Masse volumique eau (1000 kg/m³)<br>
+                V : Volume corps immergé (m³)<br>
+                g : Accélération pesanteur (9,81 m/s²)</p>
+                <p><strong>Simplification pratique :</strong></p>
+                <ul>
+                    <li>Eau à niveau nombril : Poids apparent = 50% poids réel</li>
+                    <li>Eau à niveau thorax : Poids apparent = 30-40% poids réel</li>
+                    <li>Eau à niveau cou : Poids apparent = 10% poids réel</li>
+                </ul>
+                <p><strong>Application clinique :</strong> Patient 80 kg en rééducation post-prothèse hanche. Immersion thorax → supporte seulement 24-32 kg → peut commencer marche sans risque pour prothèse.</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Résistance de l'eau</h4>
+                <div class="formula">F = ½ × ρ × S × Cd × v²</div>
+                <p>F : Force résistance (Newtons)<br>
+                ρ : Masse volumique eau<br>
+                S : Surface frontale objet<br>
+                Cd : Coefficient traînée<br>
+                v : Vitesse déplacement</p>
+                <p><strong>Explication :</strong> Résistance proportionnelle à v². Doubler vitesse = 4× plus de résistance !</p>
+                <p><strong>Application clinique :</strong> En balnéothérapie, adapter résistance en modulant vitesse mouvement (lent = facile, rapide = difficile) ou surface (palmes, planches).</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Densité énergétique Ondes de choc</h4>
+                <div class="formula">E (mJ/mm²)</div>
+                <p><strong>Dosage thérapeutique :</strong></p>
+                <ul>
+                    <li>Basse énergie : 0,08-0,28 mJ/mm² (douleur, inflammation chronique)</li>
+                    <li>Énergie moyenne : 0,28-0,60 mJ/mm² (tendinopathies, calcifications)</li>
+                    <li>Haute énergie : >0,60 mJ/mm² (pseudarthroses, ostéonécroses)</li>
+                </ul>
+                <p><strong>Application clinique :</strong> Tendinopathie Achille → 0,3-0,4 mJ/mm², 2000-2500 coups, 1×/semaine, 4-6 séances.</p>
+            </div>
+
+            <div class="formula-box">
+                <h4>Pression hydrostatique</h4>
+                <div class="formula">P = ρ × g × h</div>
+                <p>P : Pression (Pa)<br>
+                ρ : Masse volumique eau (1000 kg/m³)<br>
+                g : Accélération pesanteur (9,81 m/s²)<br>
+                h : Profondeur immersion (m)</p>
+                <p><strong>Exemple :</strong> À 1 m profondeur : P = 1000 × 9,81 × 1 ≈ 10 000 Pa = 0,1 bar</p>
+                <p><strong>Application clinique :</strong> Pression hydrostatique favorise retour veineux → ↓ œdèmes membres inférieurs. Effet « bas de contention » naturel.</p>
+            </div>
+
+            <div class="definition-card" style="background:#e7f3ff;border-left:5px solid #667eea;">
+                <h4>⚡ Protocole Hyperhidrose par Bains Galvaniques</h4>
+                <p><strong>Indication :</strong> Hyperhidrose primaire palmaire, plantaire ou axillaire. Transpiration excessive gênante socialement, échec traitements topiques.</p>
+                
+                <p><strong>📋 Évaluation initiale :</strong></p>
+                <ul>
+                    <li>Test gravimétrique : quantifier transpiration (normal <50 mg/5 min, pathologique >100 mg/min)</li>
+                    <li>Test iode-amidon (Minor) : cartographie zones hypersécrétantes</li>
+                    <li>Échelle qualité de vie (HDSS : Hyperhidrosis Disease Severity Scale)</li>
+                    <li>Éliminer causes secondaires : hyperthyroïdie, diabète, ménopause, médicaments</li>
+                    <li>Vérifier contre-indications : pacemaker, plaies cutanées, grossesse, épilepsie</li>
+                </ul>
+
+                <p><strong>⚙️ Matériel nécessaire :</strong></p>
+                <ul>
+                    <li>Générateur courant galvanique (15-20 mA)</li>
+                    <li>2 bacs plastique (mains ou pieds) ou électrodes éponges (aisselles)</li>
+                    <li>Électrodes inox immergées</li>
+                    <li>Eau du robinet (conductrice) température ambiante</li>
+                    <li>Chronomètre</li>
+                </ul>
+
+                <p><strong>🔧 PROTOCOLE - Phase d'attaque (3 semaines) :</strong></p>
+                <p><strong>Séance type :</strong></p>
+                <ol>
+                    <li><strong>Installation :</strong> Patient assis confortablement, mains/pieds immergés dans bacs séparés</li>
+                    <li><strong>Polarité :</strong> Inverser à mi-séance (10 min + puis 10 min −) pour éviter irritation</li>
+                    <li><strong>Intensité :</strong> Augmentation progressive S1→S3
+                        <ul>
+                            <li>Semaine 1 : 10-12 mA</li>
+                            <li>Semaine 2 : 12-15 mA</li>
+                            <li>Semaine 3 : 15-20 mA (max toléré sans inconfort)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Durée :</strong> 20-30 minutes totales</li>
+                    <li><strong>Fréquence :</strong> 3 séances/semaine (ex: lundi-mercredi-vendredi)</li>
+                    <li><strong>Sensation :</strong> Picotements légers normaux, arrêt si douleur/brûlure</li>
+                </ol>
+
+                <p><strong>Technique alternée mains-pieds :</strong></p>
+                <ul>
+                    <li>Si hyperhidrose palmaire ET plantaire : alterner séances (3× mains/semaine, 3× pieds/semaine suivante)</li>
+                    <li>OU traiter simultanément si 4 bacs disponibles</li>
+                </ul>
+
+                <p><strong>🔄 Phase d'entretien (dès amélioration) :</strong></p>
+                <ul>
+                    <li><strong>Fréquence :</strong> 1 séance/semaine</li>
+                    <li><strong>Intensité :</strong> Maintenir 15-20 mA</li>
+                    <li><strong>Durée :</strong> 20 minutes</li>
+                    <li><strong>Adaptation :</strong> Si récidive entre séances → revenir 2×/semaine temporairement</li>
+                </ul>
+
+                <p><strong>📊 Résultats attendus :</strong></p>
+                <ul>
+                    <li><strong>Amélioration :</strong> Perceptible dès 2ème semaine (↓50-70% transpiration)</li>
+                    <li><strong>Efficacité :</strong> 70-80% patients satisfaits (HDSS ≥2 points)</li>
+                    <li><strong>Durée effet :</strong> 4-6 semaines post-traitement</li>
+                    <li><strong>Maintenance :</strong> Séances entretien indéfiniment pour maintien</li>
+                </ul>
+
+                <p><strong>⚠️ Effets secondaires et gestion :</strong></p>
+                <ul>
+                    <li><strong>Sécheresse cutanée excessive :</strong> Crème hydratante quotidienne</li>
+                    <li><strong>Érythème modéré :</strong> Normal, disparaît en 1-2h</li>
+                    <li><strong>Vésicules :</strong> ARRÊT, ↓ intensité séance suivante</li>
+                    <li><strong>Hyperhidrose compensatrice :</strong> Transpiration accrue autre zone (rare, transitoire)</li>
+                </ul>
+
+                <p><strong>📝 Conseils associés au patient :</strong></p>
+                <ul>
+                    <li>Hygiène rigoureuse zones traitées (savon doux, séchage minutieux)</li>
+                    <li>Éviter crèmes grasses avant séance (↓ conductivité)</li>
+                    <li>Chaussettes/chaussures matériaux respirants</li>
+                    <li>Gestion stress (facteur aggravant hyperhidrose)</li>
+                </ul>
+
+                <div class="example-box">
+                    <strong>Cas clinique :</strong> Mathieu, 22 ans, étudiant. Hyperhidrose palmaire sévère depuis adolescence (HDSS 4/4). Gêne sociale majeure : évite serrer mains, difficultés écriture examens (feuilles mouillées). Échec antiperspirants topiques (chlorure aluminium 20%).<br><br>
+                    <strong>Traitement :</strong> Bains galvaniques mains selon protocole. Après 3 semaines (9 séances) : mains sèches 80% du temps, HDSS 2/4, amélioration qualité vie spectaculaire. Entretien 1×/semaine maintient résultats 8 mois suivi. Patient très satisfait, reprise vie sociale normale.
+                </div>
+
+                <div class="warning-box" style="background:#fff3cd;border-left:5px solid #ffc107;padding:15px;margin-top:15px;">
+                    <strong>⚠️ Alternatives si échec :</strong>
+                    <ul>
+                        <li>Toxine botulique (injections tous les 6-9 mois, coûteux)</li>
+                        <li>Médicaments anticholinergiques (effets secondaires systémiques)</li>
+                        <li>Sympathectomie thoracique (chirurgie, dernier recours, risque hyperhidrose compensatrice sévère)</li>
+                    </ul>
+                    Bains galvaniques = 1ère intention traitement non-invasif, meilleur rapport efficacité/risque/coût !
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MNÉMOTECHNIQUES -->
+        <div id="mnemotechniques" class="content">
+            <h2>💡 Moyens Mnémotechniques</h2>
+            <p style="background:#e7f3ff;padding:15px;border-radius:8px;margin-bottom:20px;">
+                <strong>✨ Comment ça marche ?</strong> Comme "Papa Maman A Table" pour la mitose (Prophase, Métaphase, Anaphase, Télophase), chaque MOT = une LETTRE de l'acronyme. Choisissez la phrase qui vous parle, ou créez la vôtre ! 🧠
+            </p>
+
+            <div class="definition-card" style="background:#fff3cd;">
+                <h4>📋 BF BI (Basse Fréquence BiIdirectionnelle)</h4>
+                <p><strong>Choisissez votre phrase :</strong></p>
+                <p class="formula">□ "<strong>B</strong>éa <strong>F</strong>ait des <strong>B</strong>isous <strong>I</strong>ci"</p>
+                <p class="formula">□ "<strong>B</strong>runo <strong>F</strong>rappe <strong>B</strong>idirectionnellement <strong>I</strong>ci"</p>
+                <p class="formula">□ "<strong>B</strong>elle <strong>F</strong>ille <strong>B</strong>oit <strong>I</strong>ci"</p>
+                <p class="formula">□ À vous : ___________________</p>
+                <p><strong>📍 Quand l'utiliser ?</strong> TENS gate control pour douleur LOCALISÉE (entorse, tendinite, douleur postop, névralgie)</p>
+                <p><strong>⚙️ Paramètres :</strong> 50-100 Hz, faible intensité (fourmillements), 20-30 min, effet IMMÉDIAT mais BREF</p>
+            </div>
+
+            <div class="definition-card" style="background:#d4edda;">
+                <h4>📋 TBF IE (Très Basse Fréquence Impulsion Exponentielle)</h4>
+                <p><strong>Choisissez votre phrase :</strong></p>
+                <p class="formula">□ "<strong>T</strong>on <strong>B</strong>eau-<strong>F</strong>rère <strong>I</strong>nvite <strong>E</strong>mma"</p>
+                <p class="formula">□ "<strong>T</strong>rès <strong>B</strong>elle <strong>F</strong>ille <strong>I</strong>nvente <strong>E</strong>xercices"</p>
+                <p class="formula">□ "<strong>T</strong>homas <strong>B</strong>oit du <strong>F</strong>anta, <strong>I</strong>l <strong>E</strong>xplose"</p>
+                <p class="formula">□ À vous : ___________________</p>
+                <p><strong>📍 Quand l'utiliser ?</strong> 
+                <br>• <strong>Endorphines :</strong> Douleurs DIFFUSES (lombalgie, fibromyalgie, arthrose généralisée)
+                <br>• <strong>Éveil musculaire :</strong> Post-op immédiat (S3-4) pour éviter l'atrophie (LCA, prothèse)
+                </p>
+                <p><strong>⚙️ Paramètres :</strong> 2-8 Hz, intensité élevée (secousses visibles), 30-45 min, effet RETARDÉ (20-40 min) mais LONG (heures)</p>
+            </div>
+
+            <div class="definition-card" style="background:#ffeaa7;">
+                <h4>📋 BF IT (Basse Fréquence Interrompue Triangulaire)</h4>
+                <p><strong>Choisissez votre phrase :</strong></p>
+                <p class="formula">□ "<strong>B</strong>ernard <strong>F</strong>ait des <strong>I</strong>nterruptions <strong>T</strong>riangulaires"</p>
+                <p class="formula">□ "<strong>B</strong>runo <strong>F</strong>rappe <strong>I</strong>ntensivement <strong>T</strong>oujours"</p>
+                <p class="formula">□ "<strong>B</strong>elle <strong>F</strong>orce <strong>I</strong>nterrompue <strong>T</strong>étanise"</p>
+                <p class="formula">□ À vous : ___________________</p>
+                <p><strong>📍 Quand l'utiliser ?</strong> RENFORCEMENT musculaire post-immobilisation (LCA S5+, fracture consolidée, prothèse, atrophie)</p>
+                <p><strong>⚙️ Paramètres :</strong> 20-80 Hz, intensité forte (tétanos visible), ratio travail/repos 1:3 puis 1:2, 15-20 min</p>
+                <p><strong>🎯 Objectif :</strong> Hypertrophie + force, toujours combiné avec exercice actif volontaire</p>
+            </div>
+
+            <div class="definition-card" style="background:#dfe6e9;">
+                <h4>🧊 POLICE (Trauma aigu - 72h)</h4>
+                <p><strong>💡 C'EST DÉJÀ un mnémo ! Chaque lettre = une action</strong></p>
+                <ul>
+                    <li><strong>P</strong> = Protection</li>
+                    <li><strong>O</strong> = Optimal Loading (charge progressive !)</li>
+                    <li><strong>L</strong> = Load (bouger dès que possible)</li>
+                    <li><strong>I</strong> = Ice (20 min, 3-4×/j, 48-72h)</li>
+                    <li><strong>C</strong> = Compression (modérée)</li>
+                    <li><strong>E</strong> = Elevation (>cœur)</li>
+                </ul>
+                <p><strong>📍 Quand l'utiliser ?</strong> Entorse cheville, claquage musculaire, contusion, traumatisme aigu (0-72h post-traumatisme)</p>
+                <p><strong>⚠️ Piège :</strong> OL ≠ immobiliser ! C'est Optimal Loading = mobiliser intelligemment</p>
+            </div>
+
+            <div class="definition-card" style="background:#fab1a0;">
+                <h4>❤️ PEACE (Phase aiguë)</h4>
+                <p><strong>💡 C'EST DÉJÀ un mnémo ! Chaque lettre = une action</strong></p>
+                <ul>
+                    <li><strong>P</strong> = Protection</li>
+                    <li><strong>E</strong> = Elevation</li>
+                    <li><strong>A</strong> = Avoid anti-inflammatories (pas systématique !)</li>
+                    <li><strong>C</strong> = Compression</li>
+                    <li><strong>E</strong> = Education (expliquer au patient)</li>
+                </ul>
+                <p><strong>📍 Quand l'utiliser ?</strong> Phase AIGUË (J0-J5) après traumatisme : entorse, claquage, contusion</p>
+                <p><strong>💊 Important :</strong> Éviter les anti-inflammatoires qui peuvent retarder la guérison naturelle</p>
+            </div>
+
+            <div class="definition-card" style="background:#ff7675;">
+                <h4>💪 LOVE (Phase subaiguë)</h4>
+                <p><strong>💡 C'EST DÉJÀ un mnémo ! Chaque lettre = une action</strong></p>
+                <ul>
+                    <li><strong>L</strong> = Load (charge progressive)</li>
+                    <li><strong>O</strong> = Optimism (mental positif)</li>
+                    <li><strong>V</strong> = Vascularisation (cardio léger)</li>
+                    <li><strong>E</strong> = Exercise (actif > passif)</li>
+                </ul>
+                <p><strong>📍 Quand l'utiliser ?</strong> Phase SUBAIGUË (J3-J21) : reprise progressive après traumatisme</p>
+                <p><strong>🎯 Objectif :</strong> Stimuler la guérison active par le mouvement et l'exercice dosé</p>
+            </div>
+
+            <div class="definition-card" style="background:#fd79a8;">
+                <h4>⚡ Contre-indications Électrostimulation</h4>
+                <p><strong>Phrase courte :</strong></p>
+                <p class="formula">"<strong>P</strong>as <strong>C</strong>hoquer <strong>O</strong>ncologie, <strong>N</strong>uque, <strong>T</strong>hrombose, <strong>R</strong>égion-cœur, <strong>E</strong>nceinte"</p>
+                <ul>
+                    <li><strong>P</strong>acemaker (ABSOLU - risque vital !)</li>
+                    <li><strong>C</strong>ou antérieur (risque vagal)</li>
+                    <li><strong>O</strong>ncologie (stimulation tumorale)</li>
+                    <li><strong>N</strong>uque (risque vagal)</li>
+                    <li><strong>T</strong>hrombose (risque embolie)</li>
+                    <li><strong>R</strong>égion cardiaque (arythmie)</li>
+                    <li><strong>E</strong>nceinte abdomen (contractions utérines)</li>
+                </ul>
+                <p><strong>⚠️ TOUJOURS vérifier AVANT toute électrostimulation !</strong></p>
+            </div>
+
+            <div class="definition-card" style="background:#74b9ff;">
+                <h4>🌊 Ultrasons : 1 MHz vs 3 MHz</h4>
+                <p><strong>Règle simple :</strong></p>
+                <p class="formula">"<strong>1</strong> = <strong>P</strong>rofond (3-5 cm)"</p>
+                <p class="formula">"<strong>3</strong> = <strong>S</strong>uperficiel (1-2 cm)"</p>
+                <p><strong>Phrase :</strong></p>
+                <p class="formula">"<strong>UN</strong> voyage <strong>P</strong>rofond, <strong>TROIS</strong> tours en <strong>S</strong>urface"</p>
+                <p><strong>📍 Quand utiliser 1 MHz ?</strong> Articulations PROFONDES : épaule (capsulite), hanche, rachis, genouprofond</p>
+                <p><strong>📍 Quand utiliser 3 MHz ?</strong> Articulations SUPERFICIELLES : coude (épicondylite), poignet, cheville, doigts</p>
+                <p><strong>🎯 Effet :</strong> Thermique (échauffement tissulaire) pour rigidités, contractures, tendinopathies chroniques</p>
+            </div>
+
+            <div class="definition-card" style="background:#55efc4;">
+                <h4>🎯 Gate Control</h4>
+                <p><strong>Mnémo : "RBL"</strong></p>
+                <p class="formula">"<strong>R</strong>apide, <strong>B</strong>ref, <strong>L</strong>ocal"</p>
+                <p><strong>vs Endorphines : "DLD"</strong></p>
+                <p class="formula">"<strong>D</strong>ifféré, <strong>L</strong>ong, <strong>D</strong>iffus"</p>
+                <p><strong>📍 Utiliser Gate Control quand :</strong> Douleur AIGUË, LOCALISÉE, besoin d'effet RAPIDE (entorse, postop immédiat)</p>
+                <p><strong>📍 Utiliser Endorphines quand :</strong> Douleur CHRONIQUE, DIFFUSE, besoin d'effet DURABLE (lombalgie, fibromyalgie)</p>
+            </div>
+
+            <div class="definition-card" style="background:#6c5ce7;">
+                <h4>📊 Fibres Nerveuses</h4>
+                <p><strong>Ordre : "ABC"</strong></p>
+                <p class="formula">"<strong>A</strong>β (rapide) > <strong>A</strong>δ (moyen) > <strong>C</strong> (lent)"</p>
+                <p>Plus la lettre est au DÉBUT de l'alphabet = plus c'est RAPIDE</p>
+            </div>
+
+            <div class="definition-card" style="background:#fdcb6e;">
+                <h4>🌡️ Chaud ou Froid ?</h4>
+                <p><strong>Phrases :</strong></p>
+                <p class="formula">"<strong>R</strong>ouge <strong>R</strong>écent → <strong>F</strong>ROID"</p>
+                <p class="formula">"<strong>CH</strong>ronique → <strong>CH</strong>AUD"</p>
+                <p><strong>📍 FROID (cryothérapie) quand :</strong> 
+                <br>• Traumatisme AIGU (0-72h) : entorse, claquage, contusion
+                <br>• Inflammation active (rouge, chaud, gonflé)
+                <br>• Post-effort intense (DOMS)
+                <br>• 🎯 Effet : ↓douleur, ↓inflammation, ↓œdème
+                </p>
+                <p><strong>📍 CHAUD (thermothérapie) quand :</strong> 
+                <br>• Douleur CHRONIQUE : lombalgie, arthrose, contractures
+                <br>• Raideur articulaire, limitation mobilité
+                <br>• Avant exercice (préparation musculaire)
+                <br>• 🎯 Effet : ↑vascularisation, décontraction, souplesse
+                </p>
+            </div>
+
+            <div class="definition-card" style="background:#e17055;">
+                <h4>🔥 Q₁₀ Cryothérapie</h4>
+                <p><strong>Phrase :</strong></p>
+                <p class="formula">"<strong>DIX</strong> degrés moins = métabo divisé <strong>DEUX-TROIS</strong>"</p>
+                <p><strong>📍 Application clinique :</strong> Cryothérapie diminue métabolisme tissulaire → ↓besoins en O₂ → protection cellulaire en cas d'ischémie (trauma)</p>
+                <p><strong>💡 Exemple :</strong> 37°C → 27°C (10°C de moins) = métabolisme ÷2 ou ÷3 → limite dégâts secondaires post-trauma</p>
+            </div>
+
+            <div class="definition-card" style="background:#00b894;">
+                <h4>💧 Archimède - Balnéothérapie</h4>
+                <p><strong>3 niveaux :</strong></p>
+                <p class="formula">"<strong>N</strong>ombril = <strong>MO</strong>itié (50%)"</p>
+                <p class="formula">"<strong>THO</strong>rax = <strong>TRO</strong>is-dix (30%)"</p>
+                <p class="formula">"<strong>CO</strong>u = <strong>CO</strong>smos (10%)"</p>
+                <p><strong>📍 Utiliser balnéothérapie quand :</strong> 
+                <br>• Reprise précoce post-trauma (↓contraintes articulaires)
+                <br>• Obésité, arthrose (décharge)
+                <br>• Rééducation neurologique (facilitation)
+                <br>• Renforcement sans stress articulaire
+                </p>
+                <p><strong>💡 Astuce pratique :</strong> Eau au nombril = patient porte 50% de son poids → idéal début rééducation</p>
+            </div>
+
+            <div class="definition-card" style="background:#a29bfe;">
+                <h4>💪 ESM Post-LCA (Protocole)</h4>
+                <p><strong>3 phases : "ERT"</strong></p>
+                <p class="formula">"<strong>É</strong>veiller, <strong>R</strong>enforcer, <strong>T</strong>étaniser"</p>
+                <ul>
+                    <li><strong>É</strong>veil (S3-4) : TBF IE, secousses légères, 2×/j, éviter atrophie</li>
+                    <li><strong>R</strong>enforcement (S5-8) : BF IT début, ratio 1:3, hypertrophie</li>
+                    <li><strong>T</strong>étanisation (S9+) : BF IT intensif, ratio 1:2, force maximale</li>
+                </ul>
+                <p><strong>📍 Application :</strong> TOUTE chirurgie avec immobilisation (LCA, prothèse genou/hanche, fracture)</p>
+                <p><strong>⚠️ Important :</strong> TOUJOURS combiner ESM avec exercice actif volontaire !</p>
+            </div>
+
+            <div class="definition-card" style="background:#ff7675;">
+                <h4>🎯 Chronaxie</h4>
+                <p><strong>Phrases :</strong></p>
+                <p class="formula">"Normal = <strong>MOINS</strong> d'1 ms"</p>
+                <p class="formula">"Dénervé = <strong>DIZ</strong>aine ms (>10)"</p>
+                <p><strong>📍 Utilisation clinique :</strong> Test électrodiagnostic pour différencier muscle sain vs dénervé</p>
+                <p><strong>💡 Si chronaxie >10 ms :</strong> Lésion nerveuse complète → adapter protocole ESM (impulsions triangulaires longues)</p>
+                <p><strong>🎯 Application :</strong> Paralysie faciale, lésion nerf périphérique, radiculopathie</p>
+            </div>
+
+            <div class="definition-card" style="background:#00cec9;">
+                <h4>🌊 Ondes de Choc - Dosages</h4>
+                <p><strong>Dosages : "BMH"</strong></p>
+                <p class="formula">"<strong>B</strong>asse = <strong>B</strong>obos, <strong>M</strong>oyenne = <strong>M</strong>uscles, <strong>H</strong>aute = os <strong>H</strong>orribles"</p>
+                <ul>
+                    <li><strong>B</strong>asse (0,08-0,28 mJ/mm²) : Douleur myofasciale, trigger points</li>
+                    <li><strong>M</strong>oyenne (0,28-0,60 mJ/mm²) : Tendinopathies (épitrochléite, Achille, rotateurs), calcifications</li>
+                    <li><strong>H</strong>aute (>0,60 mJ/mm²) : Pseudarthrose, retard consolidation</li>
+                </ul>
+                <p><strong>📍 Quand utiliser :</strong> Tendinopathies CHRONIQUES (>3 mois) résistantes aux autres traitements</p>
+                <p><strong>⚠️ CI :</strong> Infection, tumeur, grossesse, troubles coagulation, zone épiphysaire enfant</p>
+            </div>
+
+            <div class="definition-card" style="background:#fab1a0;">
+                <h4>🎨 Astuces Visuelles</h4>
+                <p><strong>BI vs IE :</strong></p>
+                <p class="formula"><strong>BI</strong> = <strong>BI</strong>ses ⟷ (bidirectionnel)</p>
+                <p class="formula"><strong>IE</strong> = <strong>E</strong>xplosion 📈 (exponentielle)</p>
+                <p><strong>Racines nerveuses :</strong></p>
+                <p class="formula"><strong>Dor</strong>sale = <strong>S</strong>ensitive (le S siffle)</p>
+                <p class="formula">Ven<strong>TR</strong>ale = Mo<strong>TR</strong>ice (TR roule)</p>
+            </div>
+
+            <div class="definition-card" style="background:#a29bfe;">
+                <h4>💦 Hyperhidrose - Bains Galvaniques</h4>
+                <p><strong>Protocole "3-3-3" :</strong></p>
+                <p class="formula">"<strong>3</strong> fois/semaine × <strong>3</strong> semaines = <strong>3</strong>0 minutes"</p>
+                <p><strong>📍 Quand utiliser :</strong> Hyperhidrose palmaire (mains moites), plantaire (pieds), axillaire (aisselles)</p>
+                <p><strong>⚙️ Paramètres :</strong> 15-20 mA, 20-30 min, courant galvanique en immersion</p>
+                <p><strong>🎯 Résultat :</strong> Efficacité 70-80%, effet maintenu 4-6 semaines, entretien 1×/semaine</p>
+            </div>
+
+            <div class="definition-card" style="background:#fab1a0;">
+                <h4>☀️ Ondes EM - "UVA UVB UVC, IR pour toi et moi"</h4>
+                <p><strong>Mnémo ordre d'onde :</strong></p>
+                <p class="formula">"Plus c'est COURT en nm = Plus c'est DANGEREUX"</p>
+                <ul>
+                    <li><strong>UV</strong> (100-400 nm) : Danger (brûlure, cancer) → Médical supervisé</li>
+                    <li><strong>IR</strong> (760 nm-1 mm) : Sans danger → Usage kiné courant</li>
+                    <li><strong>Rayons X</strong> (<10 nm) : Très dangereux → Diagnostic uniquement</li>
+                </ul>
+                <p><strong>📍 Application IR :</strong> Lampe à 30-50 cm, 15-20 min, T° 40-42°C, pour douleurs chroniques/raideurs</p>
+            </div>
+
+            <div class="definition-card" style="background:#a29bfe;">
+                <h4>✍️ Créez VOS propres mnémos !</h4>
+                <p><strong>Méthode "Papa Maman A Table" :</strong></p>
+                <ol>
+                    <li><strong>Prenez l'acronyme</strong> : Ex. TENS → T.E.N.S.</li>
+                    <li><strong>Un mot par lettre</strong> : <strong>T</strong>ruc <strong>E</strong>ncore <strong>N</strong>ul <strong>S</strong>ouvent</li>
+                    <li><strong>Phrase qui a du sens</strong> : plus c'est logique/drôle, mieux!</li>
+                </ol>
+
+                <p><strong>💡 Règles d'OR :</strong></p>
+                <ul>
+                    <li>✅ <strong>COURT</strong> : 3-5 mots max</li>
+                    <li>✅ <strong>LOGIQUE</strong> : ça raconte quelque chose</li>
+                    <li>✅ <strong>PERSONNEL</strong> : vos références</li>
+                    <li>✅ <strong>DRÔLE/CHOQUANT</strong> : le cerveau retient mieux!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- PROTOCOLES -->
+        <div id="protocoles" class="content">
+            <h2>Protocoles Cliniques</h2>
+
+            <div class="definition-card">
+                <h4>Protocole POLICE (Traumatisme aigu)</h4>
+                <p><strong>Applicable :</strong> Premières 72h post-traumatisme (entorses, contusions, élongations musculaires)</p>
+                <p><strong>P - Protection :</strong></p>
+                <ul>
+                    <li>Éviter aggravation lésion</li>
+                    <li>Attelle/strapping si nécessaire (mais pas immobilisation complète prolongée)</li>
+                    <li>Décharge partielle si douleur importante</li>
+                </ul>
+                <p><strong>OL - Optimal Loading (Charge optimale) :</strong></p>
+                <ul>
+                    <li>⚠️ PAS de repos complet !</li>
+                    <li>Mise en charge progressive dès que toléré</li>
+                    <li>Mouvements actifs dans amplitudes non douloureuses</li>
+                    <li>Principe : le mouvement favorise cicatrisation (mécanotransduction)</li>
+                </ul>
+                <p><strong>I - Ice (Glace) :</strong></p>
+                <ul>
+                    <li>Application : 20 minutes</li>
+                    <li>Fréquence : 3-4 fois par jour</li>
+                    <li>Durée : 48-72 heures minimum</li>
+                    <li>Technique : Cold pack, Game Ready, cryothérapie gazeuse</li>
+                    <li>Précaution : Protéger peau (serviette fine)</li>
+                </ul>
+                <p><strong>C - Compression :</strong></p>
+                <ul>
+                    <li>Bandage élastique modérément serré</li>
+                    <li>↓ œdème et hématome</li>
+                    <li>Vérifier pouls distal (ne pas trop serrer !)</li>
+                    <li>Enlever la nuit</li>
+                </ul>
+                <p><strong>E - Elevation :</strong></p>
+                <ul>
+                    <li>Surélever membre lésé au-dessus niveau cœur</li>
+                    <li>Favorise drainage œdème par gravité</li>
+                    <li>Surtout au repos et la nuit</li>
+                </ul>
+                <div class="warning-box">
+                    <strong>⚠️ Évolution :</strong> Après 72h, réévaluer. Si amélioration, continuer charge progressive. Si aggravation ou stagnation, consulter médecin (imagerie ?).
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <h4>Protocole PEACE and LOVE (Gestion globale lésion)</h4>
+                <p><strong>Phase aiguë (0-3 jours) : PEACE</strong></p>
+                <p><strong>P - Protection :</strong> Limiter mouvements aggravants (0-3 jours), puis reprise progressive</p>
+                <p><strong>E - Elevation :</strong> Membre élevé >cœur aussi souvent que possible</p>
+                <p><strong>A - Avoid anti-inflammatories :</strong></p>
+                <ul>
+                    <li>Éviter AINS (ibuprofène...) : peuvent retarder cicatrisation</li>
+                    <li>Éviter glace excessive (>15-20 min) : peut ralentir inflammation nécessaire</li>
+                    <li>Inflammation est NORMALE et UTILE dans phase aiguë !</li>
+                </ul>
+                <p><strong>C - Compression :</strong> Bandage ou manchon compression</p>
+                <p><strong>E - Education :</strong></p>
+                <ul>
+                    <li>Expliquer processus guérison</li>
+                    <li>Bénéfices approche active</li>
+                    <li>Éviter traitements passifs excessifs</li>
+                    <li>Rassurer sur pronostic</li>
+                </ul>
+                <p><strong>Phase subaiguë/chronique (>3 jours) : LOVE</strong></p>
+                <p><strong>L - Load (Charge) :</strong></p>
+                <ul>
+                    <li>Reprise progressive activité normale</li>
+                    <li>Douleur = guide (peut être présente mais tolérable)</li>
+                    <li>Stress mécanique optimal stimule réparation tissulaire</li>
+                    <li>Reprendre sport dès que possible (progressif)</li>
+                </ul>
+                <p><strong>O - Optimism :</strong></p>
+                <ul>
+                    <li>Attitude positive = meilleur pronostic</li>
+                    <li>Éviter catastrophisme</li>
+                    <li>Renforcer auto-efficacité patient</li>
+                </ul>
+                <p><strong>V - Vascularisation :</strong></p>
+                <ul>
+                    <li>Exercice cardiovasculaire dès J3-7</li>
+                    <li>↑ apport sanguin → ↑ facteurs croissance → meilleure cicatrisation</li>
+                    <li>Exemples : vélo, natation si membre inférieur lésé</li>
+                </ul>
+                <p><strong>E - Exercise (Exercices) :</strong></p>
+                <ul>
+                    <li>Approche ACTIVE dès que possible</li>
+                    <li>Mobilité → Force → Proprioception → Fonction</li>
+                    <li>Exercices spécifiques au tissu lésé</li>
+                    <li>Progression : douleur tolérable pendant ET après exercice</li>
+                </ul>
+            </div>
+
+            <div class="definition-card">
+                <h4>Protocole Tendinopathie (Cook & Purdam)</h4>
+                <p><strong>Phase 1 - Réactive (0-2 semaines post-douleur) :</strong></p>
+                <ul>
+                    <li>REPOS relatif de l'activité provocatrice</li>
+                    <li>Modifier charge (↓ volume/intensité)</li>
+                    <li>Cryothérapie post-activité (15-20 min)</li>
+                    <li>Exercices isométriques lourds (↓ douleur immédiate)</li>
+                    <li>Exemple : 5× 45 sec contraction max isométrique, 2 min repos</li>
+                </ul>
+                <p><strong>Phase 2 - Dysréparation (2-12 semaines) :</strong></p>
+                <ul>
+                    <li>Exercices excentriques (gold standard)</li>
+                    <li>Protocole Alfredson (Achille) : 3×15 excentriques, 2×/jour, 12 semaines</li>
+                    <li>Charge progressive (inconfort tolérable)</li>
+                    <li>Continuer activité sport si douleur <5/10 et non aggravante lendemain</li>
+                </ul>
+                <p><strong>Phase 3 - Dégénérative (>3 mois, échec conservateur) :</strong></p>
+                <ul>
+                    <li>Ondes de choc radiales : 2000-3000 coups, 0,3-0,4 mJ/mm², 1×/sem, 4-6 séances</li>
+                    <li>Continuer exercices excentriques</li>
+                    <li>Envisager infiltration (PRP ?) ou chirurgie si échec complet</li>
+                </ul>
+                <div class="example-box">
+                    <strong>Exemple Tendinopathie Achille :</strong><br>
+                    Semaine 1-2 : Isométriques + ↓ course<br>
+                    Semaine 3-14 : Excentriques Alfredson (talon sur rebord marche, monter mollet sain, descendre lentement mollet lésé, 3×15, 2×/jour)<br>
+                    Semaine 15+ : Progression charge (course, sauts), maintien excentriques 3×/sem
+                </div>
+            </div>
+
+            <div class="definition-card">
+                <h4>Protocole Capsulite Rétractile Épaule</h4>
+                <p><strong>Phase 1 - Douloureuse (0-3 mois) :</strong></p>
+                <ul>
+                    <li>Objectif : ↓ douleur, éviter raideur excessive</li>
+                    <li>Thermothérapie superficielle avant mobilisation (hot pack 15-20 min)</li>
+                    <li>Mobilisations actives-aidées dans amplitudes non douloureuses</li>
+                    <li>TENS ou courants BF BI si douleur importante</li>
+                    <li>Éviter mobilisations forcées (aggravent inflammation)</li>
+                </ul>
+                <p><strong>Phase 2 - Raide (3-9 mois) :</strong></p>
+                <ul>
+                    <li>Objectif : récupération amplitudes</li>
+                    <li>Ultrasons mode continu (1 MHz, 1-2 W/cm², 8-10 min) AVANT mobilisation</li>
+                    <li>Chaleur profonde → ↑ extensibilité capsule</li>
+                    <li>Mobilisations passives progressives (gains maintenus par auto-rééducation)</li>
+                    <li>Étirements capsulaires spécifiques (capsule postérieure ++)</li>
+                    <li>Renforcement excentrique rotateurs (prévention récidive)</li>
+                </ul>
+                <p><strong>Phase 3 - Résolution (9-24 mois) :</strong></p>
+                <ul>
+                    <li>Maintien acquis</li>
+                    <li>Renforcement global épaule</li>
+                    <li>Retour activités/sport progressif</li>
+                </ul>
+            </div>
+
+            <div class="definition-card">
+                <h4>Protocole Électrostimulation Post-Chirurgie</h4>
+                <p><strong>Semaine 1-2 post-op :</strong></p>
+                <ul>
+                    <li>Repos, gestion douleur/œdème</li>
+                    <li>Pas d'électrostimulation (cicatrice fraîche)</li>
+                </ul>
+                <p><strong>Semaine 3-4 (Éveil musculaire) :</strong></p>
+                <ul>
+                    <li>Type : TBF IE (2-8 Hz), 0,1-0,6 ms</li>
+                    <li>Effet : Secousses isolées</li>
+                    <li>Intensité : Seuil moteur (contraction visible)</li>
+                    <li>Durée : 10-15 min, 2×/jour</li>
+                    <li>⚠️ Toujours avec contraction volontaire simultanée !</li>
+                </ul>
+                <p><strong>Semaine 5-8 (Renforcement léger) :</strong></p>
+                <ul>
+                    <li>Type : BF IT (20-40 Hz début), 0,1-0,6 ms</li>
+                    <li>Programme : 5s ON / 15s OFF (ratio 1:3)</li>
+                    <li>10 contractions × 3 séries</li>
+                    <li>Intensité : Maximum tolérable</li>
+                    <li>1×/jour + exercices actifs</li>
+                </ul>
+                <p><strong>Semaine 9+ (Renforcement intensif) :</strong></p>
+                <ul>
+                    <li>Fréquence : 50-80 Hz</li>
+                    <li>8s ON / 24s OFF</li>
+                    <li>Intensité maximale</li>
+                    <li>Intégration exercices fonctionnels (squat, step, etc.)</li>
+                    <li>Sevrage progressif ESM (autonomie patient)</li>
+                </ul>
+            </div>
+
+            <div class="definition-card">
+                <h4>Protocole Rééducation Périnéale (Biofeedback EMG)</h4>
+                <p><strong>Séance 1-2 (Évaluation et prise de conscience) :</strong></p>
+                <ul>
+                    <li>Testing manuel périnée (score Oxford 0-5)</li>
+                    <li>Placement sonde vaginale/anale EMG</li>
+                    <li>Identifier contraction correcte vs parasites (abdos, fessiers, adducteurs)</li>
+                    <li>Apprentissage contraction isolée périnée</li>
+                    <li>Exercices : 5-10 contractions brèves (5 sec), observer signal EMG</li>
+                </ul>
+                <p><strong>Séance 3-8 (Renforcement) :</strong></p>
+                <ul>
+                    <li>Objectif : atteindre seuil EMG (ex: 30 μV)</li>
+                    <li>Contractions maintenues : 5-10 sec</li>
+                    <li>10-15 répétitions × 3 séries</li>
+                    <li>Repos complet entre contractions (vérifier relâchement EMG)</li>
+                    <li>Progression : ↑ durée puis ↑ intensité</li>
+                </ul>
+                <p><strong>Séance 9-14 (Endurance) :</strong></p>
+                <ul>
+                    <li>Contractions longues : 30-60 sec</li>
+                    <li>5-8 répétitions</li>
+                    <li>Travail résistance fatigue</li>
+                </ul>
+                <p><strong>Séance 15-18 (Fonctionnel) :</strong></p>
+                <ul>
+                    <li>Positions variées : debout, squat</li>
+                    <li>Contractions lors effort (toux, saut)</li>
+                    <li>Automatisation « verrou périnéal »</li>
+                    <li>Sevrage biofeedback (autonomie)</li>
+                </ul>
+                <p><strong>Exercices domicile :</strong> 3×10 contractions/jour (sans appareil)</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ========== GESTION DES ONGLETS ==========
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // ========== GESTION DES NIVEAUX DE COURS ==========
+        function showLevel(level) {
+            const levels = document.querySelectorAll('.course-section');
+            const buttons = document.querySelectorAll('.level-btn');
+            
+            levels.forEach(l => l.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(level).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // ========== GESTION DES EXERCICES ==========
+        function showHelp(exerciseNum) {
+            const helpBox = document.getElementById('help' + exerciseNum);
+            helpBox.classList.toggle('active');
+        }
+
+        function showCorrection(exerciseNum) {
+            const correctionBox = document.getElementById('correction' + exerciseNum);
+            correctionBox.classList.toggle('active');
+        }
+
+        // ========== FLASHCARDS DATA ==========
+        const flashcardsData = [
+            // Généralités
+            {q: "Qu'est-ce que la physiotechnique ?", a: "Ensemble des techniques utilisant des agents physiques (produits par des appareils, pas par le thérapeute) dans un but thérapeutique. Statut : adjuvant (complément aux autres traitements)."},
+            {q: "Quelle est la différence entre indication et contre-indication ?", a: "Indication = situation justifiant l'intérêt d'un traitement. Contre-indication = situation où le traitement peut être néfaste pour le patient."},
+            
+            // Courants électriques
+            {q: "Quels sont les 2 types de brûlures possibles avec les courants électriques ?", a: "1) Brûlure physique (effet Joule) : chaleur par résistance, proportionnelle à I². 2) Brûlure chimique : électrolyse avec courants unidirectionnels (acides sous anode, bases sous cathode)."},
+            {q: "Qu'est-ce que la chronaxie ?", a: "Durée minimale d'application d'un courant d'intensité double de la rhéobase pour provoquer une contraction. Muscle normalement innervé : 0,05-0,5 ms. Muscle dénervé : >10 ms."},
+            {q: "Quels sont les paramètres du courant BF BI ?", a: "Basse Fréquence Bidirectionnel : 50-100 Hz, durée <0,1 ms. Effet : Antalgique par gate control. Indication : douleurs localisées."},
+            {q: "Quels sont les paramètres du courant TBF IE pour analgésie ?", a: "Très Basse Fréquence Impulsion Exponentielle : 2-8 Hz, durée 0,2-2 ms. Effet : Antalgique par libération endorphines. Indication : douleurs diffuses."},
+            {q: "Quels sont les paramètres du courant TBF IE pour excito-moteur ?", a: "2-8 Hz, durée 0,1-0,6 ms. Effet : Secousses musculaires isolées. Indication : Éveil musculaire, prise de conscience."},
+            {q: "Quels sont les paramètres du courant BF IT ?", a: "Basse Fréquence Interrompue Triangulaire : 20-80 Hz, durée 0,1-0,6 ms. Effet : Tétanisation musculaire. Indication : Renforcement musculaire."},
+            {q: "Qu'est-ce qu'une unité motrice ?", a: "Ensemble constitué d'un motoneurone alpha, son axone et toutes les fibres musculaires qu'il innerve. Toutes les fibres se contractent ensemble (loi du tout-ou-rien)."},
+            {q: "Qu'est-ce que la sommation spatiale ?", a: "Augmentation de la force par recrutement d'un plus grand nombre d'unités motrices. En électrostimulation : ↑ intensité → ↑ nombre UM → ↑ force."},
+            {q: "Qu'est-ce que la sommation temporelle ?", a: "Augmentation de la force par augmentation de la fréquence de stimulation. Secousses → sommation → contraction continue → tétanisation (>20 Hz)."},
+            {q: "Pourquoi l'électrostimulation DOIT être associée à la contraction volontaire ?", a: "Sans contraction volontaire simultanée, pas d'efficacité thérapeutique fonctionnelle ! L'ESM seule ne produit pas de transfert aux activités et n'améliore pas le contrôle moteur cortical."},
+            {q: "Quelles sont les contre-indications absolues de l'électrostimulation ?", a: "Pacemaker, aire cardiaque, région antéro-latérale du cou, grossesse (région abdo/lombo-sacrée), phlébites, foyers tumoraux/infectieux actifs."},
+            
+            // Gate Control et Endorphines
+            {q: "Expliquez le principe du gate control.", a: "Stimulation fibres Aβ (gros calibre, rapides, tactile) inhibe transmission douleur des fibres Aδ et C (petit calibre, lentes) au niveau corne dorsale moelle. On 'brouille' le signal douloureux."},
+            {q: "Quelles fibres sont impliquées dans le gate control ?", a: "Fibres Aβ (5-12 μm, 30-70 m/s, tactile) inhibent Aδ (2-5 μm, 12-30 m/s, douleur rapide) et C (0,4-1,2 μm, 0,5-2 m/s, douleur lente)."},
+            {q: "Comment fonctionne l'analgésie par endorphines ?", a: "Courant TBF IE → activation fibres Aδ/C → libération endorphines (hypothalamus/hypophyse) → fixation récepteurs μ, δ, κ → inhibition douleur. Latence 20-40 min, effet plusieurs heures."},
+            {q: "Quelle est la différence entre TENS haute fréquence et basse fréquence ?", a: "HF (50-100 Hz) = gate control, effet immédiat mais bref. BF (2-8 Hz) = endorphines, latence 20-40 min mais effet prolongé."},
+            
+            // Ondes mécaniques
+            {q: "Quels sont les paramètres de la plateforme vibrante ?", a: "Fréquence 20-100 Hz (typiquement 30 Hz). Effet : contractions réflexes → renforcement, équilibre, densité osseuse."},
+            {q: "Quelles sont les principales contre-indications de la plateforme vibrante ?", a: "Prothèses <4 mois, ostéosynthèse <3 mois, fractures <3 mois, hernies discales, thromboses, pacemaker, grossesse, stérilet."},
+            {q: "Quels sont les effets thermiques des ultrasons ?", a: "Température 37-42°C : ↑ extensibilité collagène, ↓ spasmes musculaires, ↓ douleur, ↑ débit sanguin (vasodilatation)."},
+            {q: "Quelle est la différence entre ultrasons 1 MHz et 3 MHz ?", a: "1 MHz : pénétration profonde (3-5 cm), λ = 1,5 mm. 3 MHz : pénétration superficielle (1-2 cm), λ = 0,5 mm. Plus la fréquence est élevée, plus l'absorption est superficielle."},
+            {q: "Quelles sont les indications principales des ultrasons ?", a: "Lésions chroniques, fibreuses : capsulites rétractiles, cicatrices, adhérences, contractures. Tissus riches en collagène (tendons, ligaments, capsules)."},
+            {q: "Quelles sont les contre-indications des ultrasons ?", a: "Lésions aiguës/fraîches, grossesse, cancers, rachis, tête/tronc, pacemaker, phlébites, zones ischémiques."},
+            {q: "Quels sont les paramètres des ondes de choc ?", a: "Fréquence 1-15 Hz, Pression 2-3 bars. 1000-3000 coups/séance, 1 séance/semaine, maximum 6 séances."},
+            {q: "Quels sont les effets des ondes de choc ?", a: "Antalgique (après application), défibrosant (↑ élasticité), hypervascularisation (néo-angiogenèse), fragmentation calcifications, ↑ facteurs croissance."},
+            {q: "Quelle est l'indication principale des ondes de choc ?", a: "Tendinopathies chroniques (Achille, coude, épaule, rotulien), aponévrosites plantaires, calcifications périarticulaires. Niveau de preuve A."},
+            
+            // Thermothérapie
+            {q: "Quelle est la différence entre chaleur superficielle et profonde ?", a: "Superficielle : jusqu'à 0,5 cm (bouillottes, hot packs, IR). Profonde : jusqu'à 3,5 cm+ (ultrasons, diathermie)."},
+            {q: "Quels sont les effets physiologiques de la chaleur ?", a: "Vasodilatation, ↑ débit sanguin, ↑ élasticité tissus, ↑ métabolisme, ↓ douleur, ↓ tonus musculaire, ↑ vitesse conduction nerveuse."},
+            {q: "Quelles sont les contre-indications absolues de la thermothérapie ?", a: "Inflammation AIGUË (rouge, chaud, gonflé), cancer, risque hémorragique, pathologies cardio-vasculaires sévères, troubles sensibilité."},
+            {q: "Quelles températures sont thérapeutiques en thermothérapie ?", a: "37-40°C (légère) : circulation, relaxation. 40-45°C (vigoureuse) : débit sanguin++, extensibilité collagène, analgésie. >45°C : risque brûlures."},
+            
+            // Cryothérapie
+            {q: "Quels sont les effets physiologiques du froid ?", a: "Vasoconstriction puis vasodilatation réactive, ↓ température tissulaire, ↓ métabolisme (Q₁₀ = 2-3), ↓ inflammation, ↓ œdème, neurapraxie (↓ douleur)."},
+            {q: "Combien de temps faut-il pour refroidir un tissu profond ?", a: "Cutané : ~5 min. 1 cm sous-cutané : ~10 min. 2-3 cm intra-musculaire : 15-20 min. Intra-articulaire : 20-30 min."},
+            {q: "Qu'est-ce que le coefficient Q₁₀ ?", a: "Q₁₀ = 2 à 3. Pour chaque ↓10°C, le métabolisme est divisé par 2 à 3. Application : cryothérapie post-trauma ralentit métabolisme → ↓ hypoxie secondaire."},
+            {q: "Quelles sont les techniques de cryothérapie locale ?", a: "Vessie de glace (20 min, 3×/j), cold pack (20 min, 3×/j), cryo gazeuse (CO₂ -78°C, 30-90 sec), Game Ready (15-30 min, froid + compression)."},
+            {q: "Quelles sont les techniques de cryothérapie globale ?", a: "Immersion eau froide (8-10°C, 6-10 min), bains contrastés (chaud 38-45°C / froid 10-20°C), cryothérapie corps entier (-110°C, 3 min)."},
+            {q: "Quel est l'effet de la cryothérapie systématique post-entraînement ?", a: "↓ DOMS modeste, ↓ perception fatigue. MAIS : ↓ adaptations hypertrophie/force si usage systématique (↓ signaux anaboliques). Recommandation : usage ponctuel OK, pas systématique."},
+            
+            // Biofeedback
+            {q: "Qu'est-ce que le biofeedback ?", a: "Procédé permettant au patient de prendre conscience d'un processus physiologique normalement inconscient via signal visuel/sonore. Favorise apprentissage moteur et autorégulation."},
+            {q: "Quels sont les deux types de biofeedback ?", a: "Biomécanique (accéléromètre, électrogoniométrie, plaques de force, pression) et Physiologique (EMG/myofeedback, échographie temps réel, FC, spirométrie)."},
+            {q: "Quelles sont les indications du myofeedback (EMG) ?", a: "Visualiser contractions faibles, guider éveil musculaire, contrôler renforcement, rééducation périnéale, relaxation musculaire (biofeedback inversé), rééducation neurologique."},
+            
+            // Balnéothérapie
+            {q: "Quelle est la poussée d'Archimède à différentes profondeurs ?", a: "Nombril : 50% poids. Thorax : 30-40% poids. Cou : 10% poids. Permet décharge progressive en rééducation."},
+            {q: "Qu'est-ce que la pression hydrostatique et son effet ?", a: "Pression exercée par l'eau : P = ρ × g × h. Effet 'bas de contention' naturel → favorise retour veineux → ↓ œdèmes membres inférieurs."},
+            {q: "Comment la résistance de l'eau varie avec la vitesse ?", a: "F ∝ v². Doubler la vitesse = 4× plus de résistance ! Application : adapter difficulté en modulant vitesse ou surface (palmes, planches)."},
+            
+            // Autres
+            {q: "Quels sont les paramètres de la pressothérapie ?", a: "Pression 30 mmHg (jamais >60 mmHg !), cycles 2-15 sec pression / 10-20 sec relâchement, durée 20-30 min. Indication : lymphœdèmes, insuffisance veineuse."},
+            {q: "Qu'est-ce que le SEF (Stimulation Électrique Fonctionnelle) ?", a: "Électrostimulation déclenchée lors d'une activité fonctionnelle pour assister/suppléer fonction motrice déficiente. Ex : stimulation releveurs pied lors marche chez hémiplégique."},
+            
+            // Protocoles
+            {q: "Que signifie POLICE ?", a: "P=Protection, OL=Optimal Loading (charge progressive), I=Ice (glace 20 min, 3-4×/j, 48-72h), C=Compression, E=Elevation. Protocole traumatisme aigu premières 72h."},
+            {q: "Que signifie PEACE and LOVE ?", a: "Phase aiguë (PEACE) : Protection, Elevation, Avoid anti-inflammatories, Compression, Education. Phase subaiguë (LOVE) : Load, Optimism, Vascularisation, Exercise."},
+            {q: "Quelle est la principale différence entre RICE et POLICE ?", a: "RICE = Rest (repos complet). POLICE = Optimal Loading (charge progressive dès que toléré). Le mouvement favorise la cicatrisation !"},
+            {q: "Pourquoi éviter les AINS en phase aiguë selon PEACE ?", a: "Les AINS peuvent retarder la cicatrisation. L'inflammation est normale et utile dans la phase aiguë (signaux de réparation). Sauf si douleur insupportable."},
+            
+            // Niveaux de preuve
+            {q: "Quel est le niveau de preuve des ondes de choc pour tendinopathies chroniques ?", a: "Niveau A (fort) = Recommandé. C'est le traitement conservateur avec le meilleur niveau de preuve pour tendinopathies chroniques."},
+            {q: "Quel est le niveau de preuve de l'électrostimulation pour renforcement post-op ?", a: "Niveau B (modéré) = Peut être recommandé. Efficace mais DOIT être associé à contraction volontaire et rééducation active."},
+            
+            // Détails avancés
+            {q: "Qu'est-ce que le BNR en ultrasons ?", a: "Beam Non-Uniformity Ratio : rapport entre intensité max et intensité moyenne du faisceau. BNR idéal <6 pour éviter points chauds (surchauffe locale)."},
+            {q: "Quelle est la différence entre mode continu et pulsé en ultrasons ?", a: "Continu : émission permanente, effet thermique++, lésions chroniques. Pulsé : émission intermittente, effet thermique+/-, effets non-thermiques++, lésions aiguës/subaiguës."},
+            {q: "Quels sont les dosages énergétiques des ondes de choc ?", a: "Basse énergie (0,08-0,28 mJ/mm²) : douleur. Moyenne (0,28-0,60) : tendinopathies. Haute (>0,60) : pseudarthroses, ostéonécroses."},
+            {q: "Quels sont les effets cellulaires des ondes de choc ?", a: "↑ facteurs croissance (TGF-β, IGF-I, VEGF), ↑ synthèse collagène, ↑ prolifération fibroblastes, néo-angiogenèse, apoptose cellules inflammatoires chroniques."},
+            {q: "Quelle est la différence entre nociception et douleur ?", a: "Nociception = processus physiologique de détection/transmission stimuli nocifs. Douleur = expérience subjective intégrant composantes sensorielle + émotionnelle + cognitive. Nociception ≠ douleur."},
+            {q: "Qu'est-ce que la douleur chronique ?", a: "Douleur >3 mois, au-delà durée normale guérison. Peut devenir maladie en soi. Composantes : sensorielle + émotionnelle + cognitive + comportementale. Nécessite approche biopsychosociale."},
+            
+            // Applications cliniques
+            {q: "Protocole Alfredson pour tendinopathie Achille ?", a: "Exercices excentriques : 3×15 répétitions, 2×/jour, 12 semaines. Talon sur rebord marche, monter mollet sain, descendre lentement mollet lésé. Gold standard tendinopathies."},
+            {q: "Protocole électrostimulation post-LCA semaines 3-4 ?", a: "TBF IE (2-8 Hz, 0,1-0,6 ms), secousses isolées, seuil moteur, 10-15 min, 2×/jour. AVEC contraction volontaire simultanée !"},
+            {q: "Protocole électrostimulation post-LCA semaines 5-8 ?", a: "BF IT (20-40 Hz, 0,1-0,6 ms), 5s ON / 15s OFF, 10 contractions × 3 séries, intensité max tolérable, 1×/jour + exercices actifs."},
+            {q: "Protocole capsulite rétractile phase raide ?", a: "Ultrasons mode continu (1 MHz, 1-2 W/cm², 8-10 min) AVANT mobilisation → ↑ extensibilité capsule → mobilisations passives progressives + étirements capsulaires."},
+            {q: "Protocole biofeedback EMG périnéal phases 1-2 ?", a: "Phase 1 (2-3 séances) : Prise de conscience, identifier contraction correcte vs parasites. Phase 2 (4-6 séances) : Renforcement, 5-10 sec, 10-15 reps, atteindre seuil (ex: 30 μV)."},
+            
+            // Formules importantes
+            {q: "Formule loi d'Ohm ?", a: "U = R × I. Tension = Résistance × Intensité. Application : peau humide ↓ résistance → meilleur passage courant."},
+            {q: "Formule effet Joule ?", a: "Q = R × I² × t. Chaleur proportionnelle au CARRÉ de l'intensité ! Doubler intensité = 4× plus de chaleur."},
+            {q: "Formule longueur d'onde ultrasons ?", a: "λ = c / f. À 1 MHz : λ ≈ 1,5 mm. À 3 MHz : λ ≈ 0,5 mm dans tissus mous."},
+            {q: "Formule poussée d'Archimède ?", a: "F = ρ × V × g. Force ascendante = masse volumique eau × volume immergé × gravité."},
+            {q: "Formule résistance eau ?", a: "F = ½ × ρ × S × Cd × v². Résistance proportionnelle à v² (vitesse au carré)."},
+            
+            // Endermologie, Ventouses, Bains galvaniques
+            {q: "Qu'est-ce que l'endermologie (LPG) ?", a: "Mobilisation mécanique tissus sous-cutanés par aspiration (30-80 kPa) + rouleau motorisé. Effets : stimulation fibroblastes, drainage lymphatique, décollement adhérences. Indications : cicatrices pathologiques, lymphœdème, fibrose."},
+            {q: "Quelles sont les applications des ventouses en kinésithérapie ?", a: "Aspiration locale → hyperhémie, décollement myofascial. Applications : contractures musculaires, trigger points, lombalgies/cervicalgies myofasciales, préparation massage sportif."},
+            {q: "Qu'est-ce que l'Aspivenin et quand l'utiliser ?", a: "Pompe manuelle extracteur de venin. Utilisation : piqûres guêpes/abeilles, morsures. IMPÉRATIF : application dans les 3 minutes pour être efficace. Effet : extraction venin par aspiration."},
+            {q: "Comment fonctionne le traitement de l'hyperhidrose par bains galvaniques ?", a: "Courant continu (15-20 mA) en immersion → ionophorèse → obstruction temporaire glandes sudoripares (coagulation protéines). Protocole : 20-30 min, 3×/semaine × 3 semaines. Efficacité : 70-80%, effet 4-6 semaines."},
+            {q: "Quelles sont les localisations traitées par bains galvaniques pour hyperhidrose ?", a: "Hyperhidrose palmaire (mains), plantaire (pieds), axillaire (aisselles). Protocole identique pour les 3 zones. Amélioration significative qualité de vie patient."},
+            
+            // Ondes électromagnétiques
+            {q: "Quels sont les 3 types d'ondes électromagnétiques en physiothérapie ?", a: "1) UV (100-400 nm) : érythème, vitamine D, germicide. 2) Infrarouges (760 nm-1 mm) : effet thermique, antalgique. 3) Rayons X (0,01-10 nm) : diagnostic uniquement, pas usage thérapeutique kiné."},
+            {q: "Quels sont les effets physiologiques des rayons infrarouges ?", a: "Effet thermique (40-42°C cutanée) → vasodilatation, ↑débit sanguin, effet antalgique, décontraction musculaire, ↑souplesse collagène, ↑métabolisme tissulaire, facilite cicatrisation."},
+            {q: "Quelles sont les indications des infrarouges en kinésithérapie ?", a: "Douleurs musculo-squelettiques chroniques (lombalgies, cervicalgies), raideurs articulaires (arthrose, capsulites), contractures musculaires, troubles circulatoires stade I-II. Application : lampe 30-50 cm, 15-20 min."},
+            {q: "Quelles sont les contre-indications des infrarouges ?", a: "Inflammation aiguë (0-48h), œdème récent, troubles sensitifs (risque brûlure), tumeurs, infections actives, insuffisance circulatoire sévère, thrombose, zones métalliques."},
+            {q: "Quels sont les dangers des rayons ultraviolets ?", a: "Photosensibilisation (médicaments), érythème sévère (brûlure), vieillissement cutané prématuré, cancers cutanés (usage excessif). TOUJOURS : lunettes UV obligatoires, dosimétrie précise, usage médical supervisé uniquement."},
+            {q: "Quel est le rôle du kinésithérapeute concernant les rayons X ?", a: "Lecture des radiographies pour adapter le traitement (fracture consolidée ?, arthrose sévère ?, cal vicieux ?). Orientation patient vers médecin si aggravation radiologique. Pas d'utilisation thérapeutique (diagnostic uniquement)."}
+        ];
+
+        let currentFlashcardIndex = 0;
+        let flashcardsToShow = [];
+        let flashcardStatus = {};
+        let isFlipped = false;
+
+        function initFlashcards() {
+            flashcardsData.forEach((card, index) => {
+                if (!flashcardStatus[index]) {
+                    flashcardStatus[index] = 'unknown';
+                }
+            });
+            updateFlashcardStats();
+        }
+
+        function startFlashcards(mode) {
+            flashcardsToShow = [];
+            
+            flashcardsData.forEach((card, index) => {
+                if (mode === 'all') {
+                    flashcardsToShow.push(index);
+                } else if (mode === 'difficult' && (flashcardStatus[index] === 'hesitate' || flashcardStatus[index] === 'unknown')) {
+                    flashcardsToShow.push(index);
+                } else if (mode === 'unknown' && flashcardStatus[index] === 'unknown') {
+                    flashcardsToShow.push(index);
+                }
+            });
+
+            if (flashcardsToShow.length === 0) {
+                alert('Aucune carte à afficher dans cette catégorie !');
+                return;
+            }
+
+            flashcardsToShow.sort(() => Math.random() - 0.5);
+            currentFlashcardIndex = 0;
+            showFlashcard();
+        }
+
+        function showFlashcard() {
+            if (flashcardsToShow.length === 0) return;
+
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            const card = flashcardsData[cardIndex];
+            
+            document.getElementById('flashcardText').textContent = card.q;
+            document.getElementById('flashcardButtons').style.display = 'none';
+            document.getElementById('flashcard').classList.remove('flipped');
+            isFlipped = false;
+
+            updateProgress();
+        }
+
+        function flipCard() {
+            if (flashcardsToShow.length === 0) return;
+
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            const card = flashcardsData[cardIndex];
+            
+            isFlipped = !isFlipped;
+            
+            if (isFlipped) {
+                document.getElementById('flashcardText').textContent = card.a;
+                document.getElementById('flashcardButtons').style.display = 'flex';
+                document.getElementById('flashcard').classList.add('flipped');
+            } else {
+                document.getElementById('flashcardText').textContent = card.q;
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+            }
+        }
+
+        function markCard(status) {
+            const cardIndex = flashcardsToShow[currentFlashcardIndex];
+            flashcardStatus[cardIndex] = status;
+            
+            currentFlashcardIndex++;
+            
+            if (currentFlashcardIndex >= flashcardsToShow.length) {
+                alert('Toutes les cartes ont été révisées ! 🎉');
+                document.getElementById('flashcardText').textContent = 'Cliquez sur "Démarrer" pour recommencer';
+                document.getElementById('flashcardButtons').style.display = 'none';
+                document.getElementById('flashcard').classList.remove('flipped');
+                flashcardsToShow = [];
+            } else {
+                showFlashcard();
+            }
+            
+            updateFlashcardStats();
+        }
+
+        function updateProgress() {
+            const total = flashcardsToShow.length;
+            const current = currentFlashcardIndex + 1;
+            const percentage = (current / total) * 100;
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = `${current}/${total}`;
+        }
+
+        function updateFlashcardStats() {
+            const total = flashcardsData.length;
+            let known = 0, hesitate = 0, unknown = 0;
+            
+            for (let key in flashcardStatus) {
+                if (flashcardStatus[key] === 'known') known++;
+                else if (flashcardStatus[key] === 'hesitate') hesitate++;
+                else if (flashcardStatus[key] === 'unknown') unknown++;
+            }
+            
+            document.getElementById('totalCards').textContent = total;
+            document.getElementById('knownCards').textContent = known;
+            document.getElementById('hesitateCards').textContent = hesitate;
+            document.getElementById('unknownCards').textContent = unknown;
+        }
+
+        function saveProgress() {
+            localStorage.setItem('physiotech_flashcards', JSON.stringify(flashcardStatus));
+            alert('Progression sauvegardée ! 💾');
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('physiotech_flashcards');
+            if (saved) {
+                flashcardStatus = JSON.parse(saved);
+                updateFlashcardStats();
+                alert('Progression chargée ! 📂');
+            } else {
+                alert('Aucune sauvegarde trouvée.');
+            }
+        }
+
+        function exportProgress() {
+            const dataStr = JSON.stringify(flashcardStatus, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'physiotech_flashcards_backup.json';
+            link.click();
+            alert('Fichier exporté ! ⬇️');
+        }
+
+        function importProgress(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    flashcardStatus = JSON.parse(e.target.result);
+                    updateFlashcardStats();
+                    saveProgress();
+                    alert('Fichier importé avec succès ! ⬆️');
+                } catch (error) {
+                    alert('Erreur lors de l\'importation du fichier.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetProgress() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les flashcards ?')) {
+                flashcardStatus = {};
+                initFlashcards();
+                saveProgress();
+                alert('Progression réinitialisée ! 🔄');
+            }
+        }
+
+        // ========== QUIZ DATA ==========
+        const quizData = [
+            {q: "Un patient a une douleur localisée au coude (épicondylite latérale). Quel type de courant utilisez-vous et pourquoi ?", a: "BF BI (50-100 Hz, <0,1 ms). Effet antalgique par gate control. Douleur localisée → application locale efficace. Électrodes autour zone douloureuse, 20-30 min."},
+            {q: "Expliquez pourquoi l'électrostimulation seule (sans contraction volontaire) est inefficace pour le renforcement fonctionnel.", a: "L'ESM recrute principalement fibres superficielles de manière non-physiologique. Sans commande motrice volontaire : pas d'adaptation corticale, pas de coordination inter-musculaire, pas de transfert fonctionnel. L'ESM doit TOUJOURS être associée à contraction volontaire."},
+            {q: "Pourquoi utilise-t-on des ultrasons plutôt que chaleur superficielle pour capsulite rétractile ?", a: "Capsule articulaire profonde (2-3 cm). Ultrasons pénètrent jusqu'à 3-5 cm avec effet thermique ciblé → ↑ extensibilité collagène capsulaire. Chaleur superficielle ne pénètre que 0,5 cm → inefficace sur capsule."},
+            {q: "Un sportif veut utiliser cryothérapie après chaque entraînement. Quels sont les avantages et inconvénients ?", a: "Avantages : ↓ DOMS modéré, ↓ perception fatigue, ↓ inflammation si lésion. Inconvénients : ↓ adaptations entraînement si usage systématique (↓ signaux anaboliques nécessaires hypertrophie/force). Recommandation : ponctuel OK, pas systématique."},
+            {q: "Comparez gate control et libération endorphines pour analgésie. Quand utiliser l'un ou l'autre ?", a: "Gate control (BF BI 50-100 Hz) : effet immédiat, durée brève, douleurs localisées. Endorphines (TBF IE 2-8 Hz) : latence 20-40 min, effet prolongé (heures), douleurs diffuses/chroniques. Choisir selon type/durée douleur."},
+            {q: "Pourquoi faut-il appliquer le froid rapidement après un traumatisme (dans les 24h) ?", a: "Vasoconstriction rapide → ↓ saignement tissulaire → ↓ œdème. ↓ métabolisme (Q₁₀) → ↓ hypoxie secondaire → limite extension lésion. Neurapraxie → ↓ douleur immédiate. Efficacité maximale si application précoce."},
+            {q: "Quelle est la différence entre POLICE et PEACE & LOVE ?", a: "POLICE : protocole simple premières 72h (Protection, Optimal Loading, Ice, Compression, Elevation). PEACE & LOVE : approche complète phase aiguë (PEACE) + phase subaiguë (LOVE), intègre dimension éducation, psychologique, reprise activité."},
+            {q: "Pourquoi le protocole PEACE recommande d'éviter les anti-inflammatoires en phase aiguë ?", a: "Inflammation aiguë est normale et nécessaire (signaux réparation tissulaire, facteurs croissance). AINS peuvent retarder cicatrisation. Sauf si douleur insupportable altère fonction/sommeil."},
+            {q: "Un patient a tendinopathie Achille chronique (>6 mois, échec traitement conservateur). Comparez ultrasons et ondes de choc.", a: "Ultrasons : effet thermique modéré, 12-15 séances, efficacité modeste. Ondes de choc : fragmentation tissu dégénératif, néovascularisation, 4-6 séances, niveau preuve A, mais douloureux pendant séance. → Ondes de choc privilégiées pour chronique résistant."},
+            {q: "Expliquez la progression d'un protocole d'électrostimulation post-chirurgie (ex: LCA) de S3 à S12.", a: "S3-4 : TBF IE (2-8 Hz), secousses, éveil musculaire, 2×/j. S5-8 : BF IT (20-40 Hz), tétanisation, renforcement léger, ratio 1:3. S9+ : BF IT (50-80 Hz), intensif, ratio 1:3, + exercices fonctionnels. Toujours avec contraction volontaire !"},
+            {q: "Comment la poussée d'Archimède est-elle utilisée en rééducation prothèse de hanche ?", a: "Allègement progressif : eau au cou (10% poids) → thorax (30-40%) → nombril (50%) → sortie eau. Permet marche précoce sans contrainte excessive sur prothèse, tout en stimulant proprioception et renforcement progressif."},
+            {q: "Pourquoi le biofeedback EMG est-il utile en rééducation périnéale ?", a: "Périnée = muscles invisibles, contraction non observable. EMG transforme activité électrique en signal visible/audible → patient voit sa contraction → apprentissage moteur plus rapide, meilleure isolation périnée vs parasites (abdos/fessiers), motivation (progrès objectivables)."},
+            {q: "Quelle est la différence entre courant constant et courant variable en termes de risques ?", a: "Constant (galvanique) : toujours unidirectionnel → risque élevé brûlure chimique (électrolyse, acides/bases). Variable : change de sens → risque réduit brûlure chimique. Donc courants variables (BF, TBF) privilégiés en pratique moderne."},
+            {q: "Comment choisir entre 1 MHz et 3 MHz pour ultrasons ?", a: "1 MHz : lésions profondes (2-5 cm) - épaule, hanche, tendons profonds. 3 MHz : lésions superficielles (1-2 cm) - coude, poignet, cheville. Principe : fréquence élevée → absorption superficielle."},
+            {q: "Expliquez le principe du mode pulsé en ultrasons et ses indications.", a: "Mode pulsé : émission intermittente (ex: 1 ms ON / 4 ms OFF). ↓ effet thermique, privilégie effets non-thermiques (mécaniques, cavitation). Indications : lésions aiguës/subaiguës où chaleur déconseillée. Mode continu : effet thermique++, lésions chroniques/fibreuses."},
+            {q: "Pourquoi les ondes de choc sont-elles douloureuses pendant application et comment gérer ?", a: "Ondes haute énergie stimulent nocicepteurs. Mécanisme antalgique vient APRÈS (désensibilisation, gate control). Gestion : expliquer au patient (douleur normale et thérapeutique), commencer basse énergie puis progression, analgésie locale si intolérance. Douleur post-séance normal 24-48h."},
+            {q: "Quels sont les 3 systèmes énergétiques sollicités et comment les optimiser en réentraînement post-trauma ?", a: "1) ATP-PCr (10-15 sec) : sprints courts. 2) Glycolytique anaérobie (30-120 sec) : intervalles haute intensité. 3) Aérobie (>2 min) : endurance. Post-trauma : d'abord aérobie (base), puis mixte, puis anaérobie (puissance). Progression adaptée phase cicatrisation."},
+            {q: "Pourquoi mesurer la chronaxie et à quoi sert ce test ?", a: "Chronaxie détecte dénervation musculaire. Muscle normalement innervé : 0,05-0,5 ms. Dénervé : >10 ms (nécessite impulsions plus longues). Applications : diagnostic lésion nerf périphérique, adaptation paramètres électrostimulation muscle dénervé."},
+            {q: "Comment expliquer à un patient la différence entre douleur nociceptive et chronique ?", a: "Nociceptive : signal d'alarme utile, lésion tissu réelle, localisée, proportionnelle, répond antalgiques. Chronique : >3 mois, peut persister sans lésion, devient maladie en soi, composante émotionnelle/cognitive importante, nécessite approche globale (bio-psycho-sociale). Éducation essentielle !"},
+            {q: "Quelle est la température thérapeutique optimale en balnéothérapie et pourquoi ?", a: "34-36°C. Raisons : neutre thermiquement (pas de stress chaud/froid), myorelaxant, favorise mouvements sans fatigue excessive. <32°C : inconfort, rigidité. >38°C : fatigue cardiovasculaire, ↓ tonus excessif."},
+            {
+                q: "Quelles sont les 3 modalités d'application de l'endermologie en kinésithérapie ?",
+                a: "1) Cicatrices pathologiques (adhérences, brides), 2) Lymphœdème (drainage), 3) Récupération sportive (drainage post-effort). Paramètres : 30-80 kPa, 30-45 min, 1-2×/semaine."
+            },
+            {
+                q: "Expliquez le protocole complet de traitement de l'hyperhidrose palmaire par bains galvaniques.",
+                a: "Phase d'attaque : 15-20 mA, 20-30 min, 3×/semaine pendant 3 semaines. Phase d'entretien : 1×/semaine. Mécanisme : obstruction temporaire glandes sudoripares par coagulation protéines. Efficacité : 70-80%, effet maintenu 4-6 semaines."
+            },
+            {
+                q: "Comparez les rayons infrarouges courts et longs en terme de pénétration et d'usage clinique.",
+                a: "IR courts (760-1500 nm) : pénétration derme profond 1-10 mm, chaleur tissulaire profonde, idéal articulations/muscles. IR longs (1500 nm-1 mm) : absorption superficielle épiderme, chaleur cutanée, confort patient. Les deux ont effet thermique antalgique."
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let quizOrder = [];
+
+        function startQuiz() {
+            quizOrder = [...Array(quizData.length).keys()];
+            quizOrder.sort(() => Math.random() - 0.5);
+            currentQuizIndex = 0;
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            if (quizOrder.length === 0) {
+                document.getElementById('quizContainer').innerHTML = '<p>Cliquez sur "Lancer le Quiz" pour commencer</p>';
+                return;
+            }
+
+            const question = quizData[quizOrder[currentQuizIndex]];
+            document.getElementById('quizContainer').innerHTML = `
+                <div class="quiz-question">
+                    <h4>Question ${currentQuizIndex + 1}/${quizOrder.length}</h4>
+                    <p>${question.q}</p>
+                    <div id="quizAnswer" style="display:none;margin-top:20px;padding:15px;background:#d4edda;border-radius:8px;">
+                        <strong>Réponse :</strong><br>${question.a}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showQuizAnswer() {
+            const answerDiv = document.getElementById('quizAnswer');
+            if (answerDiv) answerDiv.style.display = 'block';
+        }
+
+        function nextQuizQuestion() {
+            currentQuizIndex++;
+            if (currentQuizIndex >= quizOrder.length) {
+                alert('Quiz terminé ! 🎉');
+                currentQuizIndex = 0;
+            }
+            showQuizQuestion();
+        }
+
+        // ========== QCM DATA ==========
+        const qcmData = [
+            {q: "Quel courant pour douleur localisée ?", options: ["BF BI 50-100 Hz", "TBF IE 2-8 Hz", "BF IT 20-80 Hz", "Courant constant"], correct: 0},
+            {q: "Quel effet des endorphines ?", options: ["Immédiat mais bref", "Latence 20-40 min, effet prolongé", "Uniquement local", "Aucun effet antalgique"], correct: 1},
+            {q: "Chronaxie muscle dénervé ?", options: ["0,05-0,5 ms", "1-5 ms", ">10 ms", "Variable selon muscle"], correct: 2},
+            {q: "Contre-indication électrostimulation ?", options: ["Douleur chronique", "Pacemaker", "Muscle faible", "Cicatrice ancienne"], correct: 1},
+            {q: "Effet ultrasons thermique ?", options: ["10-20°C", "25-30°C", "37-42°C", "50-60°C"], correct: 2},
+            {q: "Fréquence plateforme vibrante typique ?", options: ["5-10 Hz", "30 Hz", "100 Hz", "200 Hz"], correct: 1},
+            {q: "Nombre coups ondes de choc par séance ?", options: ["100-500", "1000-3000", "5000-10000", "Variable"], correct: 1},
+            {q: "Niveau preuve ondes de choc tendinopathies ?", options: ["A (fort)", "B (modéré)", "C (faible)", "D (pas recommandé)"], correct: 0},
+            {q: "Q₁₀ en cryothérapie ?", options: ["1", "2-3", "5-10", "20-30"], correct: 1},
+            {q: "Durée application cryothérapie locale ?", options: ["5 min", "10 min", "20 min", "60 min"], correct: 2},
+            {q: "Température balnéothérapie optimale ?", options: ["25-30°C", "34-36°C", "38-40°C", "42-45°C"], correct: 1},
+            {q: "Poids apparent eau niveau thorax ?", options: ["10%", "30-40%", "50%", "70%"], correct: 1},
+            {q: "Pression pressothérapie typique ?", options: ["10 mmHg", "30 mmHg", "60 mmHg", "100 mmHg"], correct: 1},
+            {q: "Dans POLICE, que signifie OL ?", options: ["Only Light exercises", "Optimal Loading", "Orthotic Limitation", "Observe and Listen"], correct: 1},
+            {q: "Première phase guérison PEACE & LOVE ?", options: ["LOVE", "PEACE", "REST", "RICE"], correct: 1},
+            {q: "Fibres inhibées par gate control ?", options: ["Aα", "Aβ", "Aδ et C", "Aucune"], correct: 2},
+            {q: "Vitesse fibres C (douleur lente) ?", options: ["0,5-2 m/s", "5-10 m/s", "30-70 m/s", "100-120 m/s"], correct: 0},
+            {q: "BNR idéal en ultrasons ?", options: ["<2", "<6", "<10", "<20"], correct: 1},
+            {q: "Longueur d'onde US 1 MHz tissus mous ?", options: ["0,5 mm", "1,5 mm", "5 mm", "15 mm"], correct: 1},
+            {q: "Mode US pour lésion aiguë ?", options: ["Continu", "Pulsé", "Les deux", "Aucun (CI)"], correct: 1},
+            {q: "Effet principal chaleur sur collagène ?", options: ["↓ extensibilité", "↑ extensibilité", "Pas d'effet", "Dénaturation"], correct: 1},
+            {q: "CI absolue thermothérapie ?", options: ["Douleur chronique", "Raideur", "Inflammation aiguë", "Cicatrice"], correct: 2},
+            {q: "Type biofeedback pour contraction invisible ?", options: ["Accéléromètre", "EMG/Myofeedback", "FC", "Spirométrie"], correct: 1},
+            {q: "Indication principale SEF ?", options: ["Renforcement sportif", "Analgésie", "Fonction motrice déficiente", "Relaxation"], correct: 2},
+            {q: "Ratio électrostimulation renforcement débutant ?", options: ["1:1", "1:2", "1:3", "1:5"], correct: 2},
+            {q: "Progression fréquence ESM renforcement ?", options: ["2-8 Hz → 20-40 Hz → 50-80 Hz", "80 Hz constant", "100 Hz → 20 Hz", "Variable aléatoire"], correct: 0},
+            {q: "Temps refroidissement tissu intra-musculaire 2-3 cm ?", options: ["5 min", "10 min", "15-20 min", "60 min"], correct: 2},
+            {q: "Protocole Alfredson durée totale ?", options: ["2 semaines", "4 semaines", "12 semaines", "24 semaines"], correct: 2},
+            {q: "Dosage ondes choc tendinopathies ?", options: ["0,08-0,28 mJ/mm²", "0,28-0,60 mJ/mm²", ">0,60 mJ/mm²", "Variable"], correct: 1},
+            {q: "Principal avantage biofeedback EMG ?", options: ["↑ force maximale", "Visualisation contraction invisible", "Analgésie", "↑ endurance"], correct: 1},
+            {
+                q: "Quelle est l'application PRINCIPALE des bains galvaniques en kinésithérapie ?",
+                options: ["Renforcement musculaire", "Traitement de l'hyperhidrose", "Antalgie par endorphines", "Cicatrisation"],
+                correct: 1
+            },
+            {
+                q: "Quelle est la longueur d'onde des rayons infrarouges ?",
+                options: ["100-400 nm", "760 nm - 1 mm", "0,01-10 nm", "1-10 mm"],
+                correct: 1
+            },
+            {
+                q: "Quel type d'onde électromagnétique est utilisé pour la désinfection (germicide) ?",
+                options: ["UVA", "UVB", "UVC", "Infrarouges"],
+                correct: 2
+            },
+            {
+                q: "Quelle est la température cutanée cible lors d'une application d'infrarouges ?",
+                options: ["35-37°C", "40-42°C", "45-50°C", "55-60°C"],
+                correct: 1
+            },
+            {
+                q: "L'endermologie (LPG) fonctionne par :",
+                options: ["Courant électrique", "Aspiration + rouleau motorisé", "Ondes ultrasonores", "Chaleur profonde"],
+                correct: 1
+            },
+            {
+                q: "Dans quel délai l'Aspivenin doit-il être appliqué après une piqûre pour être efficace ?",
+                options: ["Dans la minute", "Dans les 3 minutes", "Dans les 10 minutes", "Dans l'heure"],
+                correct: 1
+            }
+        ];
+
+        let currentQCMIndex = 0;
+        let qcmOrder = [];
+        let qcmAnswers = [];
+        let qcmValidated = false;
+
+        function startQCM() {
+            qcmOrder = [...Array(qcmData.length).keys()];
+            qcmOrder.sort(() => Math.random() - 0.5);
+            currentQCMIndex = 0;
+            qcmAnswers = [];
+            qcmValidated = false;
+            document.getElementById('qcmScore').innerHTML = '';
+            showQCMQuestion();
+        }
+
+        function showQCMQuestion() {
+            if (qcmOrder.length === 0) {
+                document.getElementById('qcmContainer').innerHTML = '<p>Cliquez sur "Lancer le QCM" pour commencer</p>';
+                return;
+            }
+
+            const qcm = qcmData[qcmOrder[currentQCMIndex]];
+            qcmValidated = false;
+            
+            let optionsHTML = '';
+            const indices = [...Array(qcm.options.length).keys()];
+            indices.sort(() => Math.random() - 0.5);
+            
+            indices.forEach((originalIndex, displayIndex) => {
+                optionsHTML += `
+                    <div class="quiz-option" onclick="selectQCMOption(${displayIndex})">
+                        ${qcm.options[originalIndex]}
+                    </div>
+                `;
+            });
+
+            document.getElementById('qcmContainer').innerHTML = `
+                <div class="quiz-question">
+                    <h4>QCM ${currentQCMIndex + 1}/${qcmOrder.length}</h4>
+                    <p>${qcm.q}</p>
+                    <div class="quiz-options" id="qcmOptions">
+                        ${optionsHTML}
+                    </div>
+                </div>
+            `;
+            
+            qcmAnswers[currentQCMIndex] = {
+                originalIndices: indices,
+                selected: -1,
+                correct: qcm.correct
+            };
+        }
+
+        function selectQCMOption(displayIndex) {
+            if (qcmValidated) return;
+            const options = document.querySelectorAll('#qcmOptions .quiz-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            options[displayIndex].classList.add('selected');
+            qcmAnswers[currentQCMIndex].selected = qcmAnswers[currentQCMIndex].originalIndices[displayIndex];
+        }
+
+        function submitQCM() {
+            if (qcmAnswers[currentQCMIndex].selected === -1) {
+                alert('Veuillez sélectionner une réponse.');
+                return;
+            }
+            qcmValidated = true;
+            const qcm = qcmData[qcmOrder[currentQCMIndex]];
+            const options = document.querySelectorAll('#qcmOptions .quiz-option');
+            options.forEach((opt, displayIndex) => {
+                const originalIndex = qcmAnswers[currentQCMIndex].originalIndices[displayIndex];
+                if (originalIndex === qcm.correct) opt.classList.add('correct');
+                else if (originalIndex === qcmAnswers[currentQCMIndex].selected) opt.classList.add('incorrect');
+            });
+        }
+
+        function nextQCM() {
+            currentQCMIndex++;
+            if (currentQCMIndex >= qcmOrder.length) {
+                let score = 0;
+                qcmOrder.forEach((qcmIdx, i) => {
+                    if (qcmAnswers[i] && qcmAnswers[i].selected === qcmData[qcmIdx].correct) score++;
+                });
+                const percentage = (score / qcmOrder.length) * 100;
+                document.getElementById('qcmScore').innerHTML = `
+                    <div style="background:#d4edda;padding:20px;border-radius:10px;text-align:center;margin-top:20px;">
+                        <h3>QCM terminé ! 🎉</h3>
+                        <p style="font-size:2em;font-weight:bold;color:#28a745;">${score}/${qcmOrder.length}</p>
+                        <p style="font-size:1.2em;">${percentage.toFixed(0)}%</p>
+                    </div>
+                `;
+                document.getElementById('qcmContainer').innerHTML = '';
+                currentQCMIndex = 0;
+            } else {
+                showQCMQuestion();
+            }
+        }
+
+        // ========== VRAI/FAUX DATA ==========
+        const vraiFauxData = [
+            {q: "La physiotechnique est un traitement principal, pas un adjuvant.", a: false},
+            {q: "Le courant bidirectionnel présente moins de risque de brûlure chimique que l'unidirectionnel.", a: true},
+            {q: "La chronaxie d'un muscle dénervé est <1 ms.", a: false},
+            {q: "L'électrostimulation sans contraction volontaire a une efficacité fonctionnelle nulle.", a: true},
+            {q: "Le gate control utilise des courants haute fréquence (50-100 Hz).", a: true},
+            {q: "Les endorphines ont un effet antalgique immédiat.", a: false},
+            {q: "Le BF IT produit une tétanisation musculaire.", a: true},
+            {q: "Les ultrasons à 3 MHz pénètrent plus profondément que ceux à 1 MHz.", a: false},
+            {q: "Les ondes de choc ont un niveau de preuve A pour les tendinopathies chroniques.", a: true},
+            {q: "Le mode pulsé des ultrasons privilégie les effets thermiques.", a: false},
+            {q: "La plateforme vibrante est contre-indiquée en cas de pacemaker.", a: true},
+            {q: "Le Q₁₀ en cryothérapie est de 10-20.", a: false},
+            {q: "Il faut appliquer le froid 20 minutes, 3-4 fois par jour pendant 48-72h post-trauma.", a: true},
+            {q: "La chaleur est indiquée en phase aiguë inflammatoire.", a: false},
+            {q: "La poussée d'Archimède réduit le poids apparent à 10% quand immergé jusqu'au cou.", a: true},
+            {q: "La résistance de l'eau est proportionnelle à la vitesse.", a: false},
+            {q: "Le biofeedback EMG est utile pour visualiser des contractions invisibles.", a: true},
+            {q: "POLICE signifie Protection, Optimal Loading, Ice, Compression, Elevation.", a: true},
+            {q: "Dans PEACE & LOVE, il faut éviter les anti-inflammatoires en phase aiguë.", a: true},
+            {q: "Le protocole RICE recommande le repos complet.", a: true},
+            {q: "Le protocole POLICE recommande la charge progressive dès que toléré.", a: true},
+            {q: "Les fibres Aβ sont plus lentes que les fibres C.", a: false},
+            {q: "Les fibres C ont un diamètre plus petit que les fibres Aδ.", a: true},
+            {q: "Le BNR idéal des ultrasons est >10.", a: false},
+            {q: "L'effet Joule est proportionnel au carré de l'intensité.", a: true},
+            {q: "La longueur d'onde des ultrasons à 1 MHz dans les tissus mous est environ 1,5 mm.", a: true},
+            {q: "La pressothérapie ne doit jamais dépasser 60 mmHg.", a: true},
+            {q: "Le SEF aide à suppléer une fonction motrice déficiente.", a: true},
+            {q: "La sommation spatiale augmente la force en recrutant plus d'unités motrices.", a: true},
+            {q: "La sommation temporelle augmente la fréquence de stimulation.", a: true},
+            {q: "Le temps de refroidissement intra-musculaire (2-3 cm) est d'environ 5 minutes.", a: false},
+            {q: "Le protocole Alfredson dure 12 semaines.", a: true},
+            {q: "Les ondes de choc sont indolores pendant l'application.", a: false},
+            {q: "La douleur chronique persiste au-delà de 3 mois.", a: true},
+            {q: "Nociception et douleur sont synonymes.", a: false},
+            {q: "La température optimale de balnéothérapie est 34-36°C.", a: true},
+            {q: "La cryothérapie systématique post-entraînement améliore toutes les adaptations.", a: false},
+            {q: "Les AINS peuvent retarder la cicatrisation en phase aiguë.", a: true},
+            {q: "Un muscle normalement innervé a une chronaxie de 0,05-0,5 ms.", a: true},
+            {q: "Le myofeedback utilise l'EMG de surface.", a: true},
+            {q: "Les bains galvaniques sont efficaces à 70-80% pour traiter l'hyperhidrose.", a: true},
+            {q: "L'Aspivenin est efficace même 30 minutes après la piqûre.", a: false},
+            {q: "Les rayons X sont utilisés en physiothérapie pour le traitement thermique profond.", a: false},
+            {q: "Les infrarouges pénètrent jusqu'à 1-10 mm de profondeur dans les tissus.", a: true},
+            {q: "L'endermologie combine aspiration et rouleau motorisé.", a: true},
+            {q: "Les rayons UVC sont utilisés pour la synthèse de vitamine D.", a: false},
+            {q: "La lampe infrarouge doit être placée à 30-50 cm de la peau.", a: true},
+            {q: "Les ventouses sèches nécessitent toujours des micro-incisions cutanées.", a: false},
+            {q: "L'hyperhidrose plantaire peut être traitée par bains galvaniques.", a: true},
+            {q: "Les rayons infrarouges sont contre-indiqués en phase d'inflammation aiguë.", a: true}
+        ];
+
+        let currentVFIndex = 0;
+        let vfOrder = [];
+        let vfAnswered = false;
+
+        function startVraiFaux() {
+            vfOrder = [...Array(vraiFauxData.length).keys()];
+            vfOrder.sort(() => Math.random() - 0.5);
+            currentVFIndex = 0;
+            showVraiFauxQuestion();
+        }
+
+        function showVraiFauxQuestion() {
+            if (vfOrder.length === 0) {
+                document.getElementById('vraiFauxContainer').innerHTML = '<p>Cliquez sur "Lancer Vrai/Faux" pour commencer</p>';
+                return;
+            }
+            vfAnswered = false;
+            const vf = vraiFauxData[vfOrder[currentVFIndex]];
+            document.getElementById('vraiFauxContainer').innerHTML = `
+                <div class="quiz-question">
+                    <h4>Question ${currentVFIndex + 1}/${vfOrder.length}</h4>
+                    <p>${vf.q}</p>
+                    <div class="quiz-options" id="vfOptions">
+                        <div class="quiz-option" onclick="selectVF(true)">✓ VRAI</div>
+                        <div class="quiz-option" onclick="selectVF(false)">✗ FAUX</div>
+                    </div>
+                    <div id="vfFeedback" style="display:none;margin-top:20px;"></div>
+                </div>
+            `;
+        }
+
+        function selectVF(answer) {
+            if (vfAnswered) return;
+            const options = document.querySelectorAll('#vfOptions .quiz-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            if (answer) options[0].classList.add('selected');
+            else options[1].classList.add('selected');
+            
+            // Validation automatique immédiate
+            checkVraiFaux();
+        }
+
+        function checkVraiFaux() {
+            if (vfAnswered) return;
+            const selected = document.querySelector('#vfOptions .quiz-option.selected');
+            if (!selected) {
+                alert('Veuillez sélectionner une réponse.');
+                return;
+            }
+            vfAnswered = true;
+            const vf = vraiFauxData[vfOrder[currentVFIndex]];
+            const userAnswer = selected.textContent.includes('VRAI');
+            const feedback = document.getElementById('vfFeedback');
+            if (userAnswer === vf.a) {
+                feedback.style.background = '#d4edda';
+                feedback.style.border = '2px solid #28a745';
+                feedback.innerHTML = '<strong>✓ Correct !</strong>';
+                selected.classList.add('correct');
+            } else {
+                feedback.style.background = '#f8d7da';
+                feedback.style.border = '2px solid #dc3545';
+                feedback.innerHTML = `<strong>✗ Incorrect.</strong> La bonne réponse est : <strong>${vf.a ? 'VRAI' : 'FAUX'}</strong>`;
+                selected.classList.add('incorrect');
+            }
+            feedback.style.display = 'block';
+            feedback.style.padding = '15px';
+            feedback.style.borderRadius = '8px';
+        }
+
+        function nextVraiFaux() {
+            currentVFIndex++;
+            if (currentVFIndex >= vfOrder.length) {
+                alert('Vrai/Faux terminé ! 🎉');
+                currentVFIndex = 0;
+            }
+            showVraiFauxQuestion();
+        }
+
+        // ========== INITIALISATION ==========
+        window.onload = function() {
+            initFlashcards();
+        };
+    </script>
+</body>
+</html>
