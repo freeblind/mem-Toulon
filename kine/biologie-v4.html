@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Biologie cellulaire & bases – 1re année Kiné (Belgique) – Offline</title>
+<style>
+  /* Reset et base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--fg);
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+  }
+
+  header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: white;
+  }
+
+  .subtitle {
+    opacity: 0.9;
+    font-size: 1.1em;
+    color: white;
+  }
+
+  .content-wrapper {
+    padding: 30px;
+  }
+
+  :root{
+    --bg:#ffffff; --fg:#111; --muted:#666; --card:#f7f7f7; --border:#ddd; --accent:#667eea; --warn:#c80; --bad:#c33;
+  }
+  h2{font-size:1.8em;margin:0 0 10px;}
+  .sub{color:var(--muted);margin:0 0 16px;font-size:13px;}
+  nav{display:flex;flex-wrap:wrap;gap:0;margin:0;background:#f8f9fa;border-bottom:2px solid #dee2e6;padding:0}
+  nav button{border:none;background:transparent;padding:15px 25px;cursor:pointer;font-size:1em;transition:all 0.3s;border-bottom:3px solid transparent;white-space:nowrap}
+  nav button:hover{background:rgba(102,126,234,0.1)}
+  nav button.active{border-bottom-color:#667eea;color:#667eea;font-weight:bold}
+  section{display:none}
+  section.active{display:block}
+  .grid{display:grid;grid-template-columns:1fr;gap:12px}
+  @media(min-width:920px){.grid{grid-template-columns:1.1fr 0.9fr}}
+  .card{border:1px solid var(--border);background:var(--card);padding:14px;border-radius:14px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .spacer{flex:1}
+  .btn{border:1px solid var(--border);background:#fff;padding:8px 10px;border-radius:10px;cursor:pointer}
+  .btn.primary{border-color:#111;background:#111;color:#fff}
+  .btn.good{border-color:var(--accent);color:var(--accent);background:#fff}
+  .btn.warn{border-color:var(--warn);color:var(--warn);background:#fff}
+  .btn.bad{border-color:var(--bad);color:var(--bad);background:#fff}
+  .btn.ghost{background:transparent}
+  .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:#fff;padding:6px 10px;border-radius:999px;font-size:12px;color:#222}
+  .muted{color:var(--muted)}
+  .small{font-size:12px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  textarea{width:100%;border:1px solid var(--border);border-radius:12px;padding:10px;font-family:inherit}
+  input[type="text"], select{border:1px solid var(--border);border-radius:12px;padding:8px 10px;font-family:inherit;background:#fff}
+  details summary{cursor:pointer}
+  hr{border:none;border-top:1px solid var(--border);margin:12px 0}
+  .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media(min-width:720px){.kpi{grid-template-columns:repeat(4,1fr)}}
+  .kpi .box{border:1px solid var(--border);background:#fff;border-radius:14px;padding:10px}
+  .kpi .n{font-size:18px;font-weight:700}
+  .qtitle{font-weight:700;margin:0 0 6px}
+  .tag{font-size:11px;border:1px solid var(--border);border-radius:999px;padding:2px 8px;background:#fff;color:#222}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .answer{display:none;margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:12px;background:#fff}
+  .answer.show{display:block}
+  .list{margin:0;padding-left:18px}
+  .toast{position:fixed;right:16px;bottom:16px;background:#111;color:#fff;padding:10px 12px;border-radius:12px;opacity:0;transform:translateY(10px);transition:all .2s ease;max-width:340px}
+  .toast.show{opacity:1;transform:translateY(0)}
+  .draglist{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+  .dragitem{border:1px solid var(--border);background:#fff;border-radius:12px;padding:10px;cursor:grab}
+  .dragitem.dragging{opacity:.5}
+  .ok{color:var(--accent);font-weight:700}
+  .bad{color:var(--bad);font-weight:700}
+  .svgwrap{border:1px solid var(--border);background:#fff;border-radius:14px;padding:10px}
+  .legend-grid{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:920px){.legend-grid{grid-template-columns:1fr 1fr}}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+
+  /* Flashcards avec effet flip - Style "Hygiène" (visuel uniquement) */
+.flashcard-flip{
+  width: 100%;
+  margin: 18px 0;
+  perspective: 1200px;
+}
+.flashcard-flip:focus{ outline: none; }
+.flashcard-flip[tabindex="0"]:focus-visible{
+  box-shadow: 0 0 0 4px rgba(102,126,234,0.25);
+  border-radius: 24px;
+}
+
+.flashcard-inner{
+  position: relative;
+  width: 100%;
+  min-height: 340px;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 22px;
+}
+
+.flashcard-flip.flipped .flashcard-inner{
+  transform: rotateY(180deg);
+}
+
+.flashcard-face{
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 44px 34px;
+  border-radius: 22px;
+  border: 2px solid var(--accent);
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.flashcard-flip:hover .flashcard-face{
+  box-shadow: 0 16px 45px rgba(0,0,0,0.18);
+}
+
+.flashcard-front .qtitle{
+  font-size: clamp(18px, 2.0vw, 26px);
+  text-align: center;
+  margin: 0 0 8px;
+  max-width: 980px;
+}
+
+.flashcard-front #flashMeta{
+  font-size: 13px;
+  opacity: 0.85;
+  text-align: center;
+  max-width: 980px;
+}
+
+.flashcard-back{
+  transform: rotateY(180deg);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.flashcard-flip-content{
+  font-size: clamp(16px, 1.4vw + 10px, 22px);
+  line-height: 1.6;
+  text-align: center;
+  max-width: 980px;
+  width: 100%;
+}
+
+/* On garde #flashA (utilisé par le JS), mais on neutralise son style "answer" uniquement dans la carte */
+#flashCard #flashA{
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+/* Front: pas de réponse visible */
+#flashCard:not(.flipped) #flashA{
+  visibility: hidden;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Back: réponse visible */
+#flashCard.flipped #flashA{
+  visibility: visible;
+  pointer-events: auto;
+  height: auto;
+}
+
+.flashcard-flip-meta{
+  margin-top: 18px;
+  font-size: 0.95em;
+  opacity: 0.75;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .flashcard-inner{ transition: none; }
+}
+
+/* Styles existants (non utilisés ici, conservés) */
+.flashcard-btns-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.btn-flash-ok, .btn-flash-hes, .btn-flash-no, .btn-flash-out {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+  font-size: 0.95em;
+}
+.btn-flash-ok { background: #28a745; color: white; }
+.btn-flash-ok:hover { background: #218838; transform: scale(1.05); }
+.btn-flash-hes { background: #ffc107; color: #333; }
+.btn-flash-hes:hover { background: #e0a800; transform: scale(1.05); }
+.btn-flash-no { background: #dc3545; color: white; }
+.btn-flash-no:hover { background: #c82333; transform: scale(1.05); }
+.btn-flash-out { background: #6c757d; color: white; }
+.btn-flash-out:hover { background: #5a6268; transform: scale(1.05); }
+
+.progress-bar-custom {
+  background: #e9ecef;
+  border-radius: 10px;
+  height: 20px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  height: 100%;
+  transition: width 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<h1>Biologie cellulaire & bases (1re année Kinésithérapie – Belgique)</h1>
+<p class="sub">Fichier autonome (hors ligne). Flashcards aléatoires, QCM, Vrai/Faux, exercices d’ordre, questions ouvertes, définitions, et sauvegarde (navigateur + export/import fichier).</p>
+
+<nav id="tabs">
+  <button class="active" data-tab="cours">Cours</button>
+  <button data-tab="defs">Définitions</button>
+  <button data-tab="flash">Flashcards</button>
+  <button data-tab="qcm">QCM / Vrai-Faux</button>
+  <button data-tab="ordre">Exercices d’ordre</button>
+  <button data-tab="ouvert">Questions ouvertes</button>
+  <button data-tab="save">Sauvegarde</button>
+</nav>
+
+<section id="cours" class="active">
+  <div class="grid">
+    <div class="card">
+      <h2 style="margin:0 0 8px">Cours (vulgarisé + niveau attendu)</h2>
+      <p class="muted small" style="margin:0 0 10px">Objectif : comprendre les notions fondamentales et surtout <b>les expliquer clairement</b> (mots simples + vocabulaire académique), en reliant structure → fonction.</p>
+
+      <details open>
+        <summary><b>1) La cellule : organites & fonctions</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> Une cellule humaine (eucaryote) peut être vue comme une “organisation” où chaque structure a une fonction. L’idée clé en biologie cellulaire est : <b>la forme sert la fonction</b>. Par exemple, une cellule très active (muscle, neurone) a souvent beaucoup de mitochondries car elle consomme beaucoup d’ATP.</p>
+
+          <p style="margin-top:10px"><b>Repères indispensables : organites majeurs</b></p>
+          <ul class="list">
+            <li><b>Membrane plasmique</b> : bicouche lipidique + protéines ; échanges, récepteurs, adhérence.</li>
+            <li><b>Noyau</b> : ADN et transcription ; contrôle de l’expression des gènes.</li>
+            <li><b>Ribosomes</b> : fabrication des protéines (traduction) ; libres (protéines cytosoliques) ou sur le RER.</li>
+            <li><b>RER</b> : synthèse de protéines destinées à la membrane/à la sécrétion ; début de maturation.</li>
+            <li><b>REL</b> : lipides, stockage Ca²⁺, détox (selon les tissus).</li>
+            <li><b>Appareil de Golgi</b> : maturation, tri et adressage (vésicules).</li>
+            <li><b>Mitochondries</b> : production d’ATP ; rôle dans le métabolisme énergétique.</li>
+            <li><b>Lysosomes</b> : digestion intracellulaire (recyclage).</li>
+            <li><b>Cytosquelette</b> : forme, transport interne, division, mouvements (actine/microtubules…).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Membrane : comment les substances traversent ? (niveau 1re année)</b></p>
+          <ul class="list">
+            <li><b>Diffusion simple</b> : passage passif de petites molécules liposolubles.</li>
+            <li><b>Diffusion facilitée</b> : passage passif via canal/transporteur (toujours selon gradient).</li>
+            <li><b>Transport actif</b> : contre gradient, nécessite énergie (ex : pompe Na⁺/K⁺).</li>
+            <li><b>Endocytose/Exocytose</b> : transport vésiculaire (entrée/sortie de “gros” éléments).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Pourquoi c’est utile en kiné ?</b></p>
+          <ul class="list">
+            <li>Comprendre métabolisme (ATP), fatigue, récupération et adaptation à l’effort.</li>
+            <li>Comprendre excitabilité (gradients ioniques), contraction et signalisation.</li>
+            <li>Comprendre réparation tissulaire (prolifération, synthèse protéique, MEC).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>identifier les organites majeurs et associer <b>organite → rôle</b></li>
+            <li>expliquer <b>structure → fonction</b> (ex : mitochondries/ATP ; RER/Golgi/sécrétion)</li>
+            <li>décrire les grands modes de transport membranaire (diffusion, transport actif, vésicules)</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Confondre RER/REL ; croire que “toute diffusion nécessite une pompe” ; oublier que les protéines de membrane (récepteurs, canaux) donnent des fonctions spécialisées.</p>
+        </div>
+
+      </details>
+
+      <details>
+        <summary><b>2) Cycle cellulaire : mitose</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> La mitose est la division des cellules somatiques. Elle permet de produire <b>2 cellules filles</b> (en général) <b>génétiquement identiques</b>, utile pour la croissance, le renouvellement et la réparation.</p>
+
+          <p style="margin-top:10px"><b>Avant la mitose</b></p>
+          <ul class="list">
+            <li><b>Interphase</b> : G1 (croissance), S (réplication de l’ADN), G2 (préparation).</li>
+            <li>Après la phase S, chaque chromosome est constitué de <b>2 chromatides sœurs</b> reliées au centromère.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Phases de la mitose (PMAT)</b></p>
+          <ul class="list">
+            <li><b>Prophase</b> : condensation des chromosomes ; mise en place du fuseau.</li>
+            <li><b>Métaphase</b> : alignement des chromosomes au centre (plaque équatoriale).</li>
+            <li><b>Anaphase</b> : séparation des chromatides sœurs → migration vers les pôles.</li>
+            <li><b>Télophase</b> : reformation des noyaux ; décondensation.</li>
+            <li><b>Cytocinèse</b> : séparation du cytoplasme → 2 cellules.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Idée de contrôle (checkpoints)</b></p>
+          <p>Le cycle cellulaire comporte des <b>points de contrôle</b> : la cellule vérifie l’intégrité de l’ADN et la bonne séparation des chromosomes. C’est une base pour comprendre pourquoi des erreurs peuvent conduire à des anomalies de division.</p>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>donner l’ordre <b>PMAT</b> et décrire l’événement principal de chaque phase</li>
+            <li>expliquer que la mitose <b>conserve le nombre de chromosomes</b></li>
+            <li>reconnaître les termes : chromatide sœur, centromère, fuseau (niveau intro)</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Mélanger métaphase/anaphase ; confondre chromosome et chromatide ; oublier que la réplication a lieu avant (phase S).</p>
+        </div>
+
+      </details>
+
+      <details>
+        <summary><b>3) Méiose : diversité génétique</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> La méiose se déroule dans les cellules germinales et produit des <b>gamètes</b>. Elle réduit le nombre de chromosomes (cellules <b>haploïdes</b>) et crée de la <b>diversité génétique</b> (important pour la variabilité entre individus).</p>
+
+          <p style="margin-top:10px"><b>Deux divisions successives</b></p>
+          <ul class="list">
+            <li><b>Méiose I (réductionnelle)</b> : séparation des <b>chromosomes homologues</b> → réduction du nombre de chromosomes.</li>
+            <li><b>Méiose II (équationnelle)</b> : séparation des <b>chromatides sœurs</b>, comme une mitose.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>D’où vient la diversité ?</b></p>
+          <ul class="list">
+            <li><b>Assortiment indépendant</b> : distribution aléatoire des chromosomes homologues.</li>
+            <li><b>Crossing-over</b> (prophase I) : échanges de segments entre chromatides homologues.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Comparaison rapide mitose vs méiose</b></p>
+          <ul class="list">
+            <li><b>Mitose</b> : 1 division → 2 cellules identiques, nombre de chromosomes conservé.</li>
+            <li><b>Méiose</b> : 2 divisions → 4 cellules différentes, nombre de chromosomes réduit.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>expliquer l’objectif (gamètes + diversité) et le résultat (haploïde)</li>
+            <li>différencier méiose I vs méiose II (homologues vs chromatides)</li>
+            <li>définir crossing-over (idée, sans détails moléculaires avancés)</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Dire que la méiose “fait 2 cellules” ; confondre homologues et chromatides sœurs ; oublier que la diversité vient aussi de l’assortiment.</p>
+        </div>
+
+      </details>
+
+      <details>
+        <summary><b>4) ADN : réplication, gènes, mutations (bases)</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> L’ADN est l’archive de l’information génétique. Avant une division, il doit être copié : c’est la <b>réplication</b>. Un <b>gène</b> est une portion d’ADN utilisée pour produire un ARN (souvent une protéine). Les différences entre individus proviennent notamment des <b>allèles</b> et des variations de séquence.</p>
+
+          <p style="margin-top:10px"><b>Réplication : idées essentielles</b></p>
+          <ul class="list">
+            <li><b>Semi-conservative</b> : chaque nouvelle double hélice contient 1 brin ancien + 1 brin nouveau.</li>
+            <li><b>Sens 5’→3’</b> : l’ADN polymérase allonge toujours le nouveau brin dans ce sens (idée).</li>
+            <li><b>Brin directeur</b> : synthèse continue ; <b>brin retardé</b> : synthèse discontinue (fragments d’Okazaki) puis “soudure” par ligase.</li>
+            <li>Rôles (niveau intro) : <b>hélicase</b> ouvre, <b>primase</b> démarre (amorce), <b>polymérase</b> allonge, <b>ligase</b> relie.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Génétique : vocabulaire minimal</b></p>
+          <ul class="list">
+            <li><b>Gène</b> : segment d’ADN porteur d’une information.</li>
+            <li><b>Allèle</b> : version possible d’un gène.</li>
+            <li><b>Génotype</b> : ensemble des allèles ; <b>phénotype</b> : caractères observables.</li>
+            <li><b>Dominant/récessif</b> : notions de base (selon le gène et le contexte).</li>
+            <li><b>Mutation</b> : changement de séquence ; peut être neutre, délétère ou (rarement) avantageux.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>expliquer la réplication (semi-conservative) et le sens 5’→3’ (idée générale)</li>
+            <li>différencier brin directeur / retardé (continu vs fragments)</li>
+            <li>utiliser correctement gène/allèle/génotype/phénotype</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Confondre réplication (copie ADN) et transcription (copie en ARN) ; oublier que le brin retardé nécessite des fragments reliés ; utiliser “gène” et “chromosome” comme synonymes.</p>
+        </div>
+
+      </details>
+
+      <details>
+        <summary><b>5) Transcription & traduction : synthèse protéique</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> Une protéine est une “machine” biologique (enzyme, récepteur, canal, structure…). Pour la fabriquer, la cellule suit deux étapes : <b>transcription</b> (ADN → ARNm) puis <b>traduction</b> (ARNm → chaîne d’acides aminés) au ribosome.</p>
+
+          <p style="margin-top:10px"><b>1) Transcription (chez l’humain : noyau)</b></p>
+          <ul class="list">
+            <li>Une enzyme (ARN polymérase) copie l’information d’un gène en <b>ARN</b>.</li>
+            <li>Chez les eucaryotes, l’ARNm est souvent <b>maturé</b> : coiffe/queue + <b>épissage</b> (introns retirés, exons assemblés).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>2) Traduction (ribosome : cytoplasme / RER)</b></p>
+          <ul class="list">
+            <li>Le ribosome lit l’ARNm par <b>codons</b> (triplets).</li>
+            <li>Les <b>ARNt</b> apportent les acides aminés via leur <b>anticodon</b>.</li>
+            <li><b>Sites A/P/E</b> : A (arrivée), P (porte la chaîne), E (sortie).</li>
+            <li>La synthèse s’arrête sur un <b>codon stop</b> (libération de la protéine).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Protéines et destination (idée)</b></p>
+          <p>Les protéines “n’ont pas toutes la même destination”. Celles destinées à être sécrétées ou insérées dans une membrane passent souvent par <b>RER → Golgi → vésicules</b>.</p>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>décrire les 2 étapes (ADN→ARNm ; ARNm→protéine) et leur localisation</li>
+            <li>expliquer codon/anticodon et rôle des ARNt (niveau intro)</li>
+            <li>situer A/P/E et comprendre le principe d’initiation/élongation/terminaison (idée générale)</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Dire que la traduction se fait “dans le noyau” ; confondre ARNm et ARNt ; oublier l’épissage chez les eucaryotes.</p>
+        </div>
+
+      </details>
+
+      <details>
+        <summary><b>6) Communication cellulaire</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> Les cellules ne travaillent jamais “en solo” : elles échangent des informations pour s’adapter (effort, stress, inflammation, réparation tissulaire…). Un <b>signal</b> est une molécule (ou un contact) émise par une cellule et perçue par une autre. La cellule cible répond <b>uniquement</b> si elle possède le <b>récepteur</b> adapté.</p>
+
+          <p style="margin-top:10px"><b>Grandes modalités de communication</b></p>
+          <ul class="list">
+            <li><b>Endocrine</b> : hormones dans le sang (action à distance). Exemple : insuline.</li>
+            <li><b>Paracrine</b> : médiateurs locaux agissant sur des cellules voisines. Exemple : facteurs de croissance en cicatrisation.</li>
+            <li><b>Autocrine</b> : la cellule répond à son propre signal (fréquent en régulation).</li>
+            <li><b>Synaptique</b> : neurotransmetteurs à la synapse (rapide et ciblé). Exemple : synapse neuromusculaire.</li>
+            <li><b>Contact-dépendant</b> : signal transmis par <b>contact direct</b> entre membranes (important en développement, immunité, réparation).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Récepteurs : où sont-ils et que font-ils ?</b></p>
+          <ul class="list">
+            <li><b>Récepteurs membranaires</b> : pour signaux hydrophiles (peptides, protéines, beaucoup de neurotransmetteurs). Ils déclenchent des <b>cascades</b> internes.</li>
+            <li><b>Récepteurs intracellulaires</b> (cytoplasme/noyau) : pour signaux lipophiles (ex : certaines hormones stéroïdes). Ils modifient l’<b>expression des gènes</b> (effets plus lents).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Cascades de signalisation (niveau intro)</b></p>
+          <p>Une cascade est une suite d’étapes qui <b>amplifie</b> le message : un seul ligand peut activer plusieurs protéines, qui en activent d’autres, etc. Deux idées clés :</p>
+          <ul class="list">
+            <li><b>Second messagers</b> : petites molécules qui relaient le signal à l’intérieur (exemples classiques : <b>Ca²⁺</b>, <b>AMPc</b>).</li>
+            <li><b>Phosphorylation</b> : ajout d’un phosphate par une <b>kinase</b> (et retrait par une phosphatase). Cela change l’activité d’une protéine (ON/OFF, localisation…).</li>
+          </ul>
+          <p class="muted small" style="margin-top:6px">Exemples de “familles” de récepteurs (sans détails excessifs) : <b>récepteurs couplés aux protéines G (GPCR)</b> et <b>récepteurs à activité kinase</b> (ex : certains récepteurs de facteurs de croissance).</p>
+
+          <p style="margin-top:10px"><b>Adhérence cellulaire et matrice extracellulaire (MEC)</b></p>
+          <p>La communication ne passe pas seulement par des molécules diffusibles : le <b>contact</b> et l’<b>ancrage</b> donnent aussi des informations (“où suis-je ?”, “est-ce que je dois migrer ?”, “me diviser ?”).</p>
+          <ul class="list">
+            <li><b>Molécules d’adhérence cellulaire (CAM)</b> : protéines de surface qui permettent l’attache cellule–cellule ou cellule–MEC.</li>
+            <li><b>Intégrines</b> : relient la cellule à la <b>matrice extracellulaire</b> (collagène, fibronectine…) et transmettent des signaux mécaniques/chimiques (<i>mécanotransduction</i>, idée générale).</li>
+            <li><b>Cadherines</b> : adhérence cellule–cellule (importante pour la cohésion des tissus).</li>
+            <li><b>Sélectines</b> et <b>famille des immunoglobulines</b> : impliquées notamment dans l’adhérence/migration des cellules (ex : immunité, inflammation).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Jonctions (repères utiles)</b></p>
+          <ul class="list">
+            <li><b>Jonctions serrées</b> : barrière entre cellules (étanchéité).</li>
+            <li><b>Jonctions d’ancrage</b> (desmosomes, hémidesmosomes) : résistance mécanique.</li>
+            <li><b>Jonctions communicantes</b> (gap junctions) : passage direct de petits ions/molécules entre cellules (coordination locale).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Pourquoi c’est utile en kiné ?</b></p>
+          <ul class="list">
+            <li>Inflammation et réparation tissulaire : médiateurs, migration cellulaire, remodelage de la MEC.</li>
+            <li>Adaptation à l’effort : signaux qui modulent la synthèse de protéines, la croissance et la réparation.</li>
+            <li>Neuro-musculaire : transmission synaptique et régulation des canaux.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>reconnaître les <b>types de signaux</b> (endocrine, paracrine, autocrine, synaptique, contact)</li>
+            <li>expliquer qu’un <b>récepteur</b> déclenche une <b>cascade</b> (amplification)</li>
+            <li>citer au moins 2 <b>second messagers</b> (Ca²⁺, AMPc) et comprendre l’idée de <b>phosphorylation</b></li>
+            <li>décrire le rôle général des <b>molécules d’adhérence</b> et de la <b>MEC</b> (intégrines/cadherines : niveau intro)</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Confondre mode de communication (endocrine/paracrine…) avec le type de récepteur ; croire que “toutes les cellules répondent” à une hormone ; oublier que l’adhérence et la MEC sont aussi des signaux.</p>
+        </div>
+</details>
+
+      <details>
+        <summary><b>7) Potentiel d’action & synapse (bases utiles en kiné)</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> Le système nerveux utilise des signaux électriques rapides. Un <b>potentiel d’action</b> (PA) est une variation transitoire du potentiel de membrane qui se propage le long d’un axone. À la <b>synapse</b>, le signal devient chimique (neurotransmetteur) puis redevient électrique dans la cellule suivante.</p>
+
+          <p style="margin-top:10px"><b>Potentiel d’action : logique ionique (attendu)</b></p>
+          <ul class="list">
+            <li><b>Repos</b> : gradients Na⁺/K⁺ maintenus ; membrane négative (valeur typique ~ -70 mV, selon le cours).</li>
+            <li><b>Seuil</b> : si atteint → ouverture de canaux <b>Na⁺ voltage-dépendants</b>.</li>
+            <li><b>Dépolarisation</b> : entrée de Na⁺ (montée rapide).</li>
+            <li><b>Repolarisation</b> : inactivation Na⁺ + ouverture des canaux <b>K⁺</b> → sortie K⁺.</li>
+            <li><b>Hyperpolarisation</b> : canaux K⁺ restent ouverts un peu plus longtemps.</li>
+            <li><b>Période réfractaire</b> : limite la fréquence et impose un sens de propagation (idée).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Myéline (idée importante)</b></p>
+          <p>Sur un axone myélinisé, le PA se propage plus vite par <b>conduction saltatoire</b> (de nœud en nœud).</p>
+
+          <p style="margin-top:10px"><b>Synapse chimique : rôle du Ca²⁺ (attendu)</b></p>
+          <ul class="list">
+            <li>PA arrive au bouton pré-synaptique → ouverture de canaux <b>Ca²⁺</b> voltage-dépendants.</li>
+            <li><b>Entrée de Ca²⁺</b> → fusion des vésicules → libération du neurotransmetteur.</li>
+            <li>Neurotransmetteur se fixe sur les récepteurs post-synaptiques → ouverture/fermeture de canaux.</li>
+            <li>Réponse : <b>EPSP</b> (excitation) ou <b>IPSP</b> (inhibition), selon les ions/canaux impliqués.</li>
+            <li>Arrêt : recapture, dégradation enzymatique ou diffusion.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>remettre les étapes d’un PA dans l’ordre et citer Na⁺/K⁺ et leurs rôles</li>
+            <li>expliquer le rôle du <b>Ca²⁺</b> dans la libération synaptique</li>
+            <li>comprendre que la myéline augmente la vitesse (conduction saltatoire)</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Inverser Na⁺/K⁺ ; oublier l’inactivation Na⁺ ; croire que le Ca²⁺ est “l’ion du PA” (il est central surtout pour la libération synaptique).</p>
+        </div>
+
+      </details>
+
+      <details>
+        <summary><b>8) Système immunitaire (bases)</b></summary>
+        
+        <div class="card" style="margin-top:10px">
+          <p><b>Explication (vulgarisée, académique).</b> Le système immunitaire protège contre microbes et aide à gérer les dommages. On distingue <b>immunité innée</b> (rapide, non spécifique) et <b>immunité adaptative</b> (spécifique, mémoire).</p>
+
+          <p style="margin-top:10px"><b>Immunité innée (réponse rapide)</b></p>
+          <ul class="list">
+            <li><b>Barrières</b> : peau, muqueuses (première ligne).</li>
+            <li><b>Inflammation</b> : réponse locale (rougeur, chaleur, douleur, tuméfaction) visant à recruter des cellules.</li>
+            <li><b>Phagocytose</b> : capture/digestion par macrophages et neutrophiles (exemples).</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Immunité adaptative (spécifique)</b></p>
+          <ul class="list">
+            <li><b>Lymphocytes B</b> : production d’anticorps (via plasmocytes) + mémoire.</li>
+            <li><b>Lymphocytes T</b> : réponse cellulaire (aide/coordonner, éliminer des cellules infectées — idée générale).</li>
+            <li><b>Antigène</b> : élément reconnu comme “étranger”.</li>
+            <li><b>Mémoire</b> : réponse plus rapide lors d’une nouvelle exposition.</li>
+          </ul>
+
+          <p style="margin-top:10px"><b>Vaccination (principe)</b></p>
+          <p>La vaccination expose l’organisme à un antigène (ou dérivé) de façon contrôlée pour créer une <b>mémoire immunitaire</b> sans faire la maladie (principe général).</p>
+
+          <p style="margin-top:10px"><b>Niveau attendu.</b> Être capable de :</p>
+          <ul class="list">
+            <li>différencier innée vs adaptative (vitesse, spécificité, mémoire)</li>
+            <li>définir antigène/anticorps et rôle B/T (niveau base)</li>
+            <li>expliquer l’idée générale de l’inflammation et de la phagocytose</li>
+          </ul>
+
+          <p class="muted small"><b>Pièges fréquents.</b> Dire que les anticorps sont produits par les lymphocytes T ; confondre “réponse rapide” et “réponse spécifique” ; oublier que l’inflammation est une réponse de l’innée.</p>
+        </div>
+
+      </details>
+
+      <hr>
+      <p class="small muted"><b>Références (sources académiques courantes)</b> : “Molecular Biology of the Cell” (Alberts), “Essential Cell Biology” (Alberts), “Molecular Cell Biology” (Lodish), et supports de cours institutionnels de biologie/physiologie (niveau bachelier santé). Cette appli est un support d’entraînement, pas un remplacement de ton cours.</p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px">Suivi rapide</h2>
+      <div class="kpi" id="kpi"></div>
+      <div class="hint">Les statuts viennent de tes flashcards (Maîtrisé / Hésitant / Non su / Pas au programme).</div>
+      <hr>
+      <h3 style="margin:0 0 8px">Recherche rapide (définitions)</h3>
+      <div class="row">
+        <input id="defSearch" type="text" placeholder="ex : ribosome, mitose, antigène..." style="flex:1" />
+        <button class="btn" id="defSearchBtn">Chercher</button>
+      </div>
+      <div id="defSearchRes" class="small" style="margin-top:10px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="defs">
+  <div class="card">
+    <div class="row">
+      <h2 style="margin:0">Définitions</h2>
+      <span class="spacer"></span>
+      <span class="pill"><span class="mono" id="defCount">0</span> définitions</span>
+    </div>
+    <p class="muted small">Toutes les définitions sont aussi disponibles en flashcards.</p>
+    <div id="defList"></div>
+  </div>
+</section>
+
+<section id="flash">
+  <div class="grid">
+    <div class="card">
+      <div class="row">
+        <h2 style="margin:0">Flashcards</h2>
+        <span class="spacer"></span>
+        <span class="pill">Mode : 
+          <select id="flashMode">
+            <option value="all">Toutes (hors “pas au programme”)</option>
+            <option value="unknown">Non su uniquement</option>
+            <option value="hes_unknown">Hésitant + Non su</option>
+            <option value="new">Non vues / non notées</option>
+            <option value="include_all">Toutes (incl. “pas au programme”)</option>
+          </select>
+        </span>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <span class="pill">Aléatoire : 
+          <select id="flashShuffle">
+            <option value="on">Oui</option>
+            <option value="off">Non</option>
+          </select>
+        </span>
+        <span class="pill">Afficher réponse par défaut : 
+          <select id="flashAutoReveal">
+            <option value="no">Non</option>
+            <option value="yes">Oui</option>
+          </select>
+        </span>
+        <span class="spacer"></span>
+        <button class="btn" id="flashNextTop">Carte suivante</button>
+      </div>
+
+      <div class="card" style="margin-top:12px;background:#fff">
+  <div class="row">
+    <span class="spacer"></span>
+    <span class="tag" id="flashStatusTag">Non noté</span>
+  </div>
+
+  <div class="flashcard-flip" id="flashCard" tabindex="0" role="button" aria-label="Retourner la carte">
+    <div class="flashcard-inner">
+      <div class="flashcard-face flashcard-front">
+        <div class="flashcard-flip-content">
+          <div class="qtitle" id="flashQ">—</div>
+          <div class="small muted" id="flashMeta">—</div>
+          <div class="flashcard-flip-meta">Clique (ou Espace/Entrée) pour voir la réponse</div>
+        </div>
+      </div>
+
+      <div class="flashcard-face flashcard-back">
+        <div class="flashcard-flip-content answer" id="flashA"></div>
+        <div class="flashcard-flip-meta">Clique pour revenir à la question</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn ghost" id="flashToggle" style="margin-top:10px">Afficher / masquer la réponse</button>
+
+  <div class="row" style="margin-top:12px">
+    <button class="btn good" id="rateOk">Maîtrisé</button>
+    <button class="btn warn" id="rateHes">Hésitant</button>
+    <button class="btn bad" id="rateNo">Non su</button>
+    <button class="btn" id="rateOut">Pas au programme</button>
+    <span class="spacer"></span>
+    <button class="btn" id="flashNext">Carte suivante</button>
+  </div>
+
+  <div class="hint">Astuce : note ta carte après avoir essayé de répondre. Les modes “Non su” et “Hésitant + Non su” servent à réviser ce qui bloque.</div>
+</div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px">Gestion</h2>
+      <div class="row">
+        <button class="btn" id="flashResetSession">Réinitialiser la session (ordre)</button>
+        <button class="btn" id="flashClearProgress">Effacer tous les statuts</button>
+      </div>
+      <hr>
+      <h3 style="margin:0 0 8px">Statistiques</h3>
+      <div id="flashStats" class="small"></div>
+      <hr>
+      <h3 style="margin:0 0 8px">Notes perso (optionnel)</h3>
+      <p class="muted small">Tu peux écrire une note liée à la carte courante (utile pour tes pièges / moyens mnémotechniques).</p>
+      <textarea id="flashNote" rows="5" placeholder="Note personnelle pour cette carte…"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="saveNote">Sauver la note</button>
+        <span class="small muted" id="noteInfo"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="qcm">
+  <div class="card">
+    <div class="row">
+      <h2 style="margin:0">QCM & Vrai/Faux</h2>
+      <span class="spacer"></span>
+      <span class="pill"><span class="mono" id="qcmCount">0</span> questions</span>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <span class="pill">Type :
+        <select id="qcmType">
+          <option value="all">Tout</option>
+          <option value="mcq">QCM (multi-réponses)</option>
+          <option value="tf">Vrai / Faux</option>
+        </select>
+      </span>
+      <span class="pill">Thème :
+        <select id="qcmTheme"></select>
+      </span>
+      <span class="spacer"></span>
+      <button class="btn" id="qcmNew">Nouvelle question</button>
+      <button class="btn primary" id="qcmCheck">Corriger</button>
+    </div>
+
+    <div class="card" style="margin-top:12px;background:#fff">
+      <div class="qtitle" id="qcmQ">—</div>
+      <div class="tags" id="qcmTags"></div>
+      <div id="qcmOptions" style="margin-top:10px"></div>
+      <div class="answer" id="qcmFeedback"></div>
+    </div>
+
+    <p class="hint">QCM : plusieurs réponses peuvent être justes. V/F : choisis vrai ou faux, puis corrige.</p>
+  </div>
+</section>
+
+<section id="ordre">
+  <div class="card">
+    <div class="row">
+      <h2 style="margin:0">Exercices d’ordre</h2>
+      <span class="spacer"></span>
+      <span class="pill"><span class="mono" id="ordCount">0</span> exercices</span>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <span class="pill">Thème :
+        <select id="ordTheme"></select>
+      </span>
+      <span class="spacer"></span>
+      <button class="btn" id="ordNew">Nouveau</button>
+      <button class="btn primary" id="ordCheck">Vérifier</button>
+      <button class="btn" id="ordReset">Mélanger à nouveau</button>
+    </div>
+
+    <div class="card" style="margin-top:12px;background:#fff">
+      <div class="qtitle" id="ordTitle">—</div>
+      <div class="muted small" id="ordHint">Glisse-dépose les étapes (ou utilise les boutons ↑ ↓ si ton navigateur bloque le drag&drop).</div>
+      <ul class="draglist" id="ordList"></ul>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="moveUp">↑ Monter</button>
+        <button class="btn" id="moveDown">↓ Descendre</button>
+        <span class="spacer"></span>
+        <span class="small muted" id="ordSelectInfo">Clique une étape pour la sélectionner.</span>
+      </div>
+      <div class="answer" id="ordFeedback"></div>
+    </div>
+  </div>
+</section>
+
+<section id="ouvert">
+  <div class="card">
+    <div class="row">
+      <h2 style="margin:0">Questions ouvertes</h2>
+      <span class="spacer"></span>
+      <span class="pill"><span class="mono" id="openCount">0</span> questions</span>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <span class="pill">Thème :
+        <select id="openTheme"></select>
+      </span>
+      <span class="spacer"></span>
+      <button class="btn" id="openNew">Nouvelle question</button>
+      <button class="btn" id="openShow">Afficher la réponse type</button>
+      <button class="btn" id="openClear">Effacer ma réponse</button>
+    </div>
+
+    <div class="card" style="margin-top:12px;background:#fff">
+      <div class="qtitle" id="openQ">—</div>
+      <div class="tags" id="openTags"></div>
+      <textarea id="openMe" rows="6" placeholder="Ta réponse…"></textarea>
+      <div class="answer" id="openA"></div>
+    </div>
+    <p class="hint">But : s’entraîner à expliquer clairement (comme à l’oral/écrit). L’auto-correction se fait en comparant avec la réponse type.</p>
+  </div>
+</section>
+<section id="save">
+  <div class="grid">
+    <div class="card">
+      <h2 style="margin:0 0 8px">Sauvegarde</h2>
+      <p class="muted small">Par défaut, tes statuts (flashcards + notes) sont sauvegardés automatiquement dans le navigateur (localStorage). Ici tu peux aussi exporter/importer un fichier.</p>
+
+      <div class="card" style="background:#fff">
+        <h3 style="margin:0 0 8px">Export vers disque</h3>
+        <div class="row">
+          <span class="pill">Exporter :
+            <select id="exportMode">
+              <option value="all">Tout (progrès complet)</option>
+              <option value="hes_unknown">Hésitant + Non su</option>
+              <option value="unknown">Non su uniquement</option>
+            </select>
+          </span>
+          <span class="spacer"></span>
+          <button class="btn primary" id="exportBtn">Télécharger JSON</button>
+        </div>
+        <p class="hint">Tu pourras recharger ce fichier sur n’importe quel ordinateur.</p>
+      </div>
+
+      <div class="card" style="background:#fff;margin-top:12px">
+        <h3 style="margin:0 0 8px">Import depuis disque</h3>
+        <input id="importFile" type="file" accept="application/json" />
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="importBtn">Importer</button>
+          <button class="btn" id="importMergeBtn">Importer (fusionner)</button>
+        </div>
+        <p class="hint">“Importer” remplace tout. “Fusionner” garde tes données actuelles et ajoute/écrase seulement ce qui existe dans le fichier.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px">Contrôle</h2>
+      <div class="card" style="background:#fff">
+        <div class="row">
+          <button class="btn bad" id="hardReset">Tout réinitialiser (local)</button>
+          <span class="small muted">⚠️ Efface statuts + notes dans ce navigateur.</span>
+        </div>
+      </div>
+      <hr>
+      <h3 style="margin:0 0 8px">Contenu inclus</h3>
+      <ul class="list small">
+        <li>Flashcards : biologie cellulaire, cycle cellulaire, génétique, transcription/traduction, communication, potentiel d’action, synapse, immunité.</li>
+        <li>QCM & V/F : multi-réponses + feedback.</li>
+        <li>Exercices d’ordre : étapes clés (potentiel d’action, synapse, traduction, mitose, réplication…)</li>
+        <li>Questions ouvertes : réponses types.</li>
+        <li>Cellule à légender : schéma simple.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================
+   Données (contenu)
+   ========================= */
+
+const DEFINITIONS = [
+  {term:"Cellule", def:"Unité structurale et fonctionnelle de base du vivant."},
+  {term:"Membrane plasmique", def:"Barrière sélective (bicouche lipidique + protéines) qui contrôle les échanges et la communication."},
+  {term:"Cytoplasme", def:"Ensemble du cytosol et des organites (hors noyau)."},
+  {term:"Noyau", def:"Organite contenant l’ADN et contrôlant l’expression des gènes (transcription)."},
+  {term:"ADN", def:"Molécule support de l’information génétique, organisée en gènes."},
+  {term:"Chromosome", def:"ADN condensé associé à des protéines, visible lors de la division cellulaire."},
+  {term:"Gène", def:"Portion d’ADN contenant l’information pour produire un ARN (souvent à l’origine d’une protéine)."},
+  {term:"Allèle", def:"Version d’un gène (variantes possibles)."},
+  {term:"Génotype", def:"Ensemble des allèles d’un individu pour un ou plusieurs gènes."},
+  {term:"Phénotype", def:"Caractères observables résultant du génotype et de l’environnement."},
+  {term:"Ribosome", def:"Complexe ARN/protéines qui réalise la traduction de l’ARNm en protéine."},
+  {term:"RE rugueux (RER)", def:"Réticulum endoplasmique portant des ribosomes, impliqué dans la synthèse de protéines destinées à la membrane ou à la sécrétion."},
+  {term:"RE lisse (REL)", def:"Réticulum sans ribosomes : synthèse de lipides, stockage Ca²⁺, détoxification (selon type cellulaire)."},
+  {term:"Appareil de Golgi", def:"Maturation, tri et expédition des protéines/lipides (vésicules)."},
+  {term:"Mitochondrie", def:"Organite produisant l’ATP par respiration cellulaire."},
+  {term:"Lysosome", def:"Vésicule contenant des enzymes de digestion intracellulaire."},
+  {term:"ATP", def:"Molécule énergétique utilisée par la cellule pour de nombreux processus."},
+  {term:"Cycle cellulaire", def:"Suite d’étapes menant à la division : interphase (G1, S, G2) puis mitose (M)."},
+  {term:"Mitose", def:"Division des cellules somatiques donnant 2 cellules filles génétiquement identiques (en général)."},
+  {term:"Méiose", def:"Division produisant des gamètes avec réduction du nombre de chromosomes et diversité génétique."},
+  {term:"Réplication", def:"Copie de l’ADN avant division ; processus semi-conservatif."},
+  {term:"Transcription", def:"Production d’un ARN à partir de l’ADN (chez l’humain : dans le noyau)."},
+  {term:"ARNm", def:"ARN messager : copie d’un gène, utilisée pour fabriquer une protéine."},
+  {term:"ARNt", def:"ARN de transfert : apporte un acide aminé au ribosome ; porte un anticodon."},
+  {term:"Codon", def:"Triplet de nucléotides sur l’ARNm correspondant à un acide aminé (ou stop)."},
+  {term:"Traduction", def:"Lecture de l’ARNm par le ribosome pour synthétiser une chaîne d’acides aminés (protéine)."},
+  {term:"Site A/P/E (ribosome)", def:"Sites de la traduction : A (arrivée ARNt), P (porteur chaîne), E (sortie)."},
+  {term:"Communication endocrine", def:"Signal via hormones circulant dans le sang (action à distance)."},
+  {term:"Communication paracrine", def:"Signal local agissant sur des cellules proches."},
+  {term:"Communication autocrine", def:"Signal agissant sur la cellule qui le sécrète."},
+  {term:"Communication synaptique", def:"Transmission entre neurones (ou neurone-muscle) via synapse."},
+  {term:"Potentiel de repos", def:"État électrique stable d’une membrane (différence de charges) avant stimulation."},
+  {term:"Dépolarisation", def:"Phase où le potentiel devient moins négatif (souvent entrée Na⁺)."},
+  {term:"Repolarisation", def:"Retour vers le potentiel de repos (souvent sortie K⁺)."},
+  {term:"Hyperpolarisation", def:"Potentiel plus négatif que le repos, transitoire."},
+  {term:"Synapse chimique", def:"Jonction où un neurotransmetteur transmet un signal d’une cellule à une autre."},
+  {term:"Neurotransmetteur", def:"Molécule libérée dans la fente synaptique pour transmettre un signal."},
+  {term:"Immunité innée", def:"Défense rapide, non spécifique (barrières, inflammation, phagocytose…)."},
+  {term:"Immunité adaptative", def:"Réponse spécifique, plus lente au début, avec mémoire (lymphocytes B/T)."},
+  {term:"Antigène", def:"Élément reconnu comme “étranger” pouvant déclencher une réponse immunitaire."},
+  {term:"Anticorps", def:"Protéine produite par les lymphocytes B (plasmocytes) se liant spécifiquement à un antigène."},
+  {term:"Lymphocyte B", def:"Cellule de l’immunité adaptative impliquée dans la production d’anticorps."},
+  {term:"Lymphocyte T", def:"Cellule de l’immunité adaptative impliquée dans la réponse cellulaire (différents sous-types)."},
+  {term:"Cytosquelette", def:"Réseau de filaments (actine, microtubules, filaments intermédiaires) qui donne forme, transport interne et mouvements."},
+  {term:"Microtubules", def:"Éléments du cytosquelette impliqués dans le transport (kinesine/dynéine) et le fuseau mitotique."},
+  {term:"Actine", def:"Filaments impliqués dans la motilité cellulaire, contraction et cortex sous-membranaire."},
+  {term:"Pompe Na⁺/K⁺", def:"Transport actif qui expulse 3 Na⁺ et fait entrer 2 K⁺ ; contribue aux gradients ioniques et au potentiel de repos."},
+  {term:"Diffusion simple", def:"Passage passif selon gradient, sans transporteur (petites molécules liposolubles)."},
+  {term:"Diffusion facilitée", def:"Passage passif via canal/transporteur selon gradient (ex : canaux ioniques, GLUT)."},
+  {term:"Transport actif", def:"Transport contre gradient nécessitant énergie (ATP ou couplage)."},
+  {term:"Osmose", def:"Diffusion de l’eau à travers une membrane selon gradient de solutés."},
+  {term:"Endocytose", def:"Entrée de matériel par invagination membranaire (phagocytose, pinocytose, endocytose médiée par récepteur)."},
+  {term:"Exocytose", def:"Sortie de matériel via fusion de vésicules avec la membrane."},
+  {term:"Apoptose", def:"Mort cellulaire programmée, contrôlée, sans inflammation majeure (en général)."},
+  {term:"Nécrose", def:"Mort cellulaire non contrôlée (souvent), avec rupture membranaire et inflammation."},
+  {term:"Interphase", def:"Période entre deux divisions : G1 (croissance), S (réplication), G2 (préparation)."},
+  {term:"Point de contrôle", def:"Étape de surveillance (checkpoint) qui vérifie l’ADN et la progression (G1/S, G2/M, fuseau)."},
+  {term:"Chromatide sœur", def:"Chacune des deux copies d’un chromosome après réplication, reliées au centromère."},
+  {term:"Centromère", def:"Région du chromosome où s’attachent les microtubules via le kinétochore."},
+  {term:"Crossing-over", def:"Échange de segments entre chromatides homologues en méiose I, source de diversité."},
+  {term:"Nucléotide", def:"Unité de base des acides nucléiques : base + sucre + phosphate."},
+  {term:"ADN polymérase", def:"Enzyme qui synthétise un nouveau brin d’ADN (allongement 5’→3’)."},
+  {term:"Hélicase", def:"Enzyme qui sépare les deux brins d’ADN (ouvre la double hélice)."},
+  {term:"Primase", def:"Enzyme qui synthétise une amorce d’ARN pour démarrer la réplication."},
+  {term:"Fragments d’Okazaki", def:"Courts segments du brin discontinu synthétisés sur le brin retardé."},
+  {term:"Ligase", def:"Enzyme qui relie des fragments d’ADN (joint les fragments d’Okazaki)."},
+  {term:"Épissage", def:"Maturation de l’ARNm : retrait des introns et assemblage des exons (eucaryotes)."},
+  {term:"Introns/Exons", def:"Introns : séquences retirées ; exons : séquences conservées dans l’ARNm mature."},
+  {term:"Acide aminé", def:"Brique de base des protéines, assemblée en chaîne polypeptidique."},
+  {term:"Récepteur membranaire", def:"Protéine de membrane qui détecte un ligand extracellulaire et déclenche une réponse."},
+  {term:"Second messager", def:"Molécule intracellulaire relayant un signal (ex : AMP cyclique, Ca²⁺) — niveau intro."},
+  {term:"Phosphorylation", def:"Ajout d’un phosphate (souvent par une kinase) modifiant l’activité d’une protéine."},
+  {term:"Période réfractaire", def:"Période après un PA où il est difficile/impossible d’en déclencher un autre (canaux Na⁺)."},
+  {term:"Myéline", def:"Gaine isolante augmentant la vitesse de conduction (conduction saltatoire)."},
+  {term:"Conduction saltatoire", def:"Propagation du PA de nœud de Ranvier en nœud sur axone myélinisé."},
+  {term:"Synapse neuromusculaire", def:"Synapse entre motoneurone et fibre musculaire (souvent acétylcholine)."},
+  {term:"Inflammation", def:"Réponse de l’innée : rougeur, chaleur, douleur, tuméfaction (principe général)."},
+  {term:"Phagocytose", def:"Capture et digestion de particules/microbes par des cellules (ex : macrophages, neutrophiles)."},
+  {term:"Cellule présentatrice d’antigène", def:"Cellule qui présente un antigène aux lymphocytes T (principe, niveau base)."},
+  {term:"Vaccination", def:"Exposition contrôlée à un antigène pour induire une mémoire immunitaire (principe)."}
+];
+
+function makeFlashFromDefs(defs){
+  return defs.map((d, idx)=>({
+    id:`def_${idx}`,
+    theme:"Définitions",
+    tags:["Définitions"],
+    q:`Définis : ${d.term}`,
+    a:d.def
+  }));
+}
+
+const FLASHCARDS_EXTRA = [
+  {id:"fc_cell_1", theme:"Cellule", tags:["Organites"], q:"Quel organite contient l’ADN chez une cellule humaine ?", a:"Le noyau."},
+  {id:"fc_cell_2", theme:"Cellule", tags:["Organites"], q:"Rôle principal des mitochondries ?", a:"Produire de l’ATP (énergie) via la respiration cellulaire."},
+  {id:"fc_cell_3", theme:"Cellule", tags:["Organites"], q:"Différence simple RER vs REL ?", a:"RER : ribosomes, protéines pour sécrétion/membrane. REL : lipides, stockage Ca²⁺, détox."},
+  {id:"fc_cell_4", theme:"Cellule", tags:["Membrane"], q:"À quoi sert la membrane plasmique (en une phrase) ?", a:"Elle sépare intérieur/extérieur et contrôle les échanges et la communication."},
+  {id:"fc_cycle_1", theme:"Cycle cellulaire", tags:["Mitose"], q:"But principal de la mitose ?", a:"Produire 2 cellules filles génétiquement identiques pour croissance/renouvellement."},
+  {id:"fc_cycle_2", theme:"Cycle cellulaire", tags:["Mitose"], q:"Ordre des phases de mitose ?", a:"Prophase → Métaphase → Anaphase → Télophase (+ cytocinèse)."},
+  {id:"fc_cycle_3", theme:"Cycle cellulaire", tags:["Méiose"], q:"But principal de la méiose ?", a:"Produire des gamètes et augmenter la diversité génétique."},
+  {id:"fc_cycle_4", theme:"Cycle cellulaire", tags:["Méiose"], q:"Résultat de la méiose (idée générale) ?", a:"Cellules haploïdes (nombre de chromosomes réduit) et génétiquement différentes."},
+  {id:"fc_dna_1", theme:"ADN & génétique", tags:["Réplication"], q:"Que signifie “réplication semi-conservative” ?", a:"Chaque nouvelle molécule d’ADN contient un brin ancien et un brin nouvellement synthétisé."},
+  {id:"fc_dna_2", theme:"ADN & génétique", tags:["Génétique"], q:"Différence gène vs allèle ?", a:"Un gène = segment d’ADN ; un allèle = version possible de ce gène."},
+  {id:"fc_dna_3", theme:"ADN & génétique", tags:["Génétique"], q:"Génotype vs phénotype ?", a:"Génotype = allèles ; phénotype = caractères observables (gènes + environnement)."},
+  {id:"fc_dna_4", theme:"ADN & génétique", tags:["Mutations"], q:"Une mutation peut-elle être neutre ?", a:"Oui : elle peut ne pas changer la protéine ou ne pas avoir d’effet observable."},
+  {id:"fc_prot_1", theme:"Synthèse protéique", tags:["Transcription"], q:"Transcription : on passe de quoi à quoi ?", a:"ADN → ARNm (copie d’information)." },
+  {id:"fc_prot_2", theme:"Synthèse protéique", tags:["Traduction"], q:"Traduction : on passe de quoi à quoi ?", a:"ARNm → protéine (chaîne d’acides aminés)." },
+  {id:"fc_prot_3", theme:"Synthèse protéique", tags:["Ribosome"], q:"Sites A/P/E du ribosome : associe A, P, E.", a:"A : arrivée ARNt ; P : porte la chaîne ; E : sortie."},
+  {id:"fc_prot_4", theme:"Synthèse protéique", tags:["Codon"], q:"Qu’est-ce qu’un codon ?", a:"Un triplet de bases sur l’ARNm correspondant à un acide aminé (ou stop)."},
+  {id:"fc_comm_1", theme:"Communication", tags:["Types"], q:"Différence endocrine vs paracrine ?", a:"Endocrine : hormones dans le sang (loin). Paracrine : signal local (proche)."},
+  {id:"fc_comm_2", theme:"Communication", tags:["Récepteurs"], q:"Pourquoi un signal ne fonctionne pas si la cellule n’a pas le récepteur ?", a:"Sans récepteur, le signal n’est pas reconnu, donc pas de réponse cellulaire."},
+  {id:"fc_pa_1", theme:"Neurophysio (bases)", tags:["Potentiel d’action"], q:"Ions principaux d’une dépolarisation classique ?", a:"Entrée de Na⁺ via des canaux voltage-dépendants (général)." },
+  {id:"fc_pa_2", theme:"Neurophysio (bases)", tags:["Potentiel d’action"], q:"Ions principaux de la repolarisation classique ?", a:"Sortie de K⁺ via des canaux voltage-dépendants (général)." },
+  {id:"fc_syn_1", theme:"Neurophysio (bases)", tags:["Synapse"], q:"Étapes simplifiées d’une synapse chimique ?", a:"PA arrive → libération neurotransmetteur → fixation récepteurs → réponse post-synaptique → arrêt du signal (recapture/dégradation/diffusion)."},
+  {id:"fc_syn_2", theme:"Neurophysio (bases)", tags:["Synapse"], q:"Pourquoi la synapse permet un signal “dans un sens” (souvent) ?", a:"Le neurotransmetteur est libéré côté pré-synaptique et les récepteurs sont côté post-synaptique."},
+  {id:"fc_imm_1", theme:"Immunité (bases)", tags:["Innée/Adaptative"], q:"Immunité innée vs adaptative (résumé) ?", a:"Innée : rapide, non spécifique. Adaptative : spécifique, mémoire, plus lente au départ."},
+  {id:"fc_imm_2", theme:"Immunité (bases)", tags:["B/T"], q:"Rôle général des lymphocytes B ?", a:"Produire des anticorps (via plasmocytes) + mémoire."},
+  {id:"fc_imm_3", theme:"Immunité (bases)", tags:["B/T"], q:"Rôle général des lymphocytes T (très simplifié) ?", a:"Réponse cellulaire : aider/coordonner, ou éliminer des cellules infectées (selon sous-types)."},
+  {id:"fc_mem_1", theme:"Cellule", tags:["Membrane", "Transport"], q:"Diffusion simple : quels types de molécules passent le plus facilement ?", a:"Petites molécules liposolubles et non chargées (principe)."},
+  {id:"fc_mem_2", theme:"Cellule", tags:["Membrane", "Transport"], q:"Diffusion facilitée : nécessite-t-elle de l’ATP ?", a:"Non : c’est passif (selon gradient) mais via un canal/transporteur."},
+  {id:"fc_mem_3", theme:"Cellule", tags:["Membrane", "Transport"], q:"Transport actif : que signifie “contre gradient” ?", a:"Déplacer une substance du faible vers le fort (nécessite énergie directement/indirectement)."},
+  {id:"fc_mem_4", theme:"Cellule", tags:["Membrane", "Transport"], q:"Pompe Na⁺/K⁺ : quel est le bilan ionique par cycle ?", a:"3 Na⁺ sortent et 2 K⁺ entrent (principe)."},
+  {id:"fc_mem_5", theme:"Cellule", tags:["Membrane", "Transport"], q:"Osmose : l’eau va vers le milieu le plus… ?", a:"Le plus concentré en solutés (osmolarité la plus élevée), à travers une membrane perméable à l’eau."},
+  {id:"fc_cyto_1", theme:"Cellule", tags:["Cytosquelette"], q:"Donne 3 rôles du cytosquelette.", a:"Forme/structure, transport intracellulaire, mouvements (ex : migration, division)."},
+  {id:"fc_cyto_2", theme:"Cellule", tags:["Cytosquelette"], q:"Quel élément forme le fuseau mitotique ?", a:"Les microtubules."},
+  {id:"fc_mit_1", theme:"Cycle cellulaire", tags:["Mitose"], q:"Que se passe-t-il en métaphase ?", a:"Les chromosomes s’alignent sur la plaque équatoriale."},
+  {id:"fc_mit_2", theme:"Cycle cellulaire", tags:["Mitose"], q:"Que se passe-t-il en anaphase ?", a:"Séparation des chromatides sœurs et migration vers les pôles."},
+  {id:"fc_mit_3", theme:"Cycle cellulaire", tags:["Checkpoints"], q:"Pourquoi les points de contrôle (checkpoints) sont importants ?", a:"Ils limitent la division si l’ADN est endommagé ou si le fuseau est incorrect (principe)."},
+  {id:"fc_mei_1", theme:"Cycle cellulaire", tags:["Méiose"], q:"À quel moment a lieu le crossing-over ?", a:"En prophase I de méiose (entre chromatides homologues)."},
+  {id:"fc_mei_2", theme:"Cycle cellulaire", tags:["Méiose"], q:"Différence clé méiose I vs méiose II ?", a:"Méiose I sépare les chromosomes homologues ; méiose II sépare les chromatides sœurs."},
+  {id:"fc_rep_1", theme:"ADN & génétique", tags:["Réplication"], q:"Rôle de l’hélicase ?", a:"Ouvrir la double hélice en séparant les deux brins."},
+  {id:"fc_rep_2", theme:"ADN & génétique", tags:["Réplication"], q:"Pourquoi faut-il une amorce pour l’ADN polymérase ?", a:"L’ADN polymérase allonge un brin existant : elle a besoin d’un 3’OH (principe)."},
+  {id:"fc_rep_3", theme:"ADN & génétique", tags:["Réplication"], q:"Brin directeur vs brin retardé ?", a:"Directeur : synthèse continue. Retardé : synthèse discontinue (fragments d’Okazaki)."},
+  {id:"fc_rep_4", theme:"ADN & génétique", tags:["Réplication"], q:"Rôle de la ligase ?", a:"Relier (sceller) les fragments d’ADN, notamment les fragments d’Okazaki."},
+  {id:"fc_trx_1", theme:"Synthèse protéique", tags:["Transcription"], q:"Chez l’humain, où se fait la transcription ?", a:"Dans le noyau (principe général)."},
+  {id:"fc_trx_2", theme:"Synthèse protéique", tags:["Transcription"], q:"À quoi sert l’épissage (eucaryotes) ?", a:"Retirer les introns et assembler les exons pour former un ARNm mature."},
+  {id:"fc_trl_1", theme:"Synthèse protéique", tags:["Traduction"], q:"Rôle de l’ARNt en une phrase ?", a:"Amener un acide aminé correspondant au codon (via anticodon)."},
+  {id:"fc_trl_2", theme:"Synthèse protéique", tags:["Traduction"], q:"Que signifie un “codon stop” ?", a:"Un signal d’arrêt de la traduction : libération de la chaîne polypeptidique."},
+  {id:"fc_sig_1", theme:"Communication", tags:["Récepteurs"], q:"Pourquoi une hormone peut agir sur certains tissus et pas d’autres ?", a:"Seules les cellules ayant le récepteur répondent au signal."},
+  {id:"fc_sig_2", theme:"Communication", tags:["Second messagers"], q:"Donne 2 exemples de second messagers (niveau intro).", a:"AMPc et Ca²⁺ (exemples classiques)."},
+  {id:"fc_neuro_1", theme:"Neurophysio (bases)", tags:["PA"], q:"Qu’est-ce que la période réfractaire (idée) ?", a:"Période où un nouveau PA est impossible/difficile car les canaux Na⁺ ne sont pas prêts."},
+  {id:"fc_neuro_2", theme:"Neurophysio (bases)", tags:["Conduction"], q:"Myéline : effet principal sur la conduction ?", a:"Augmente la vitesse (conduction saltatoire) et économise l’énergie."},
+  {id:"fc_neuro_3", theme:"Neurophysio (bases)", tags:["Synapse"], q:"Synapse neuromusculaire : neurotransmetteur le plus classique ?", a:"Acétylcholine (principe général)."},
+  {id:"fc_imm_4", theme:"Immunité (bases)", tags:["Innée"], q:"Deux exemples d’acteurs de l’immunité innée ?", a:"Neutrophiles/macrophages, complément, barrières, inflammation (exemples)."},
+  {id:"fc_imm_5", theme:"Immunité (bases)", tags:["Adaptative"], q:"Rôle général de la mémoire immunitaire ?", a:"Réponse plus rapide et plus efficace lors d’une nouvelle exposition au même antigène."},
+  {id:"fc_imm_6", theme:"Immunité (bases)", tags:["Vaccination"], q:"Principe de la vaccination (phrase simple) ?", a:"Induire une mémoire immunitaire sans faire la maladie (principe)."},
+  {id:"fc_pa_3", theme:"Neurophysio (bases)", tags:["PA", "Canaux"], q:"Pourquoi la dépolarisation s’arrête (PA classique) ?", a:"Car les canaux Na⁺ s’inactivent et les canaux K⁺ s’ouvrent → la repolarisation commence."},
+  {id:"fc_pa_4", theme:"Neurophysio (bases)", tags:["PA", "K⁺"], q:"Pourquoi y a-t-il souvent une hyperpolarisation après le PA ?", a:"Les canaux K⁺ restent ouverts un peu plus longtemps, donc trop de K⁺ sort transitoirement."},
+  {id:"fc_syn_3", theme:"Neurophysio (bases)", tags:["Synapse", "Ca²⁺"], q:"Quel ion déclenche la libération de neurotransmetteur dans une synapse chimique ?", a:"Le Ca²⁺ : son entrée pré-synaptique déclenche la fusion des vésicules (exocytose)."},
+  {id:"fc_syn_4", theme:"Neurophysio (bases)", tags:["Synapse", "EPSP/IPSP"], q:"Qu’est-ce qu’un EPSP / IPSP (idée générale) ?", a:"EPSP : dépolarisation post-synaptique (excitation). IPSP : hyperpolarisation (inhibition)."}
+];
+
+const FLASHCARDS = [...makeFlashFromDefs(DEFINITIONS), ...FLASHCARDS_EXTRA];
+
+// QCM + V/F
+const QCM = [
+// Cellule
+  {id:"q1", type:"mcq", theme:"Cellule", tags:["Organites"], q:"Quels éléments appartiennent au système endomembranaire ?", options:[
+    {t:"Réticulum endoplasmique", ok:true},
+    {t:"Appareil de Golgi", ok:true},
+    {t:"Mitochondrie", ok:false},
+    {t:"Lysosome", ok:true},
+  ], explain:"Le RE, Golgi et les vésicules (dont lysosomes) font partie du trafic endomembranaire ; la mitochondrie est un organite distinct."},
+  {id:"q2", type:"tf", theme:"Cellule", tags:["Membrane"], q:"La membrane plasmique est une barrière totalement imperméable.", ok:false, explain:"Elle est sélectivement perméable : certains éléments passent via diffusion, canaux, transporteurs, endocytose…"},
+  // Mitose / méiose
+  {id:"q3", type:"mcq", theme:"Cycle cellulaire", tags:["Mitose"], q:"La mitose permet généralement :", options:[
+    {t:"La production de deux cellules filles identiques", ok:true},
+    {t:"La production de gamètes", ok:false},
+    {t:"Le renouvellement tissulaire", ok:true},
+    {t:"Une réduction du nombre de chromosomes", ok:false},
+  ], explain:"La mitose conserve le nombre de chromosomes et sert au renouvellement. La méiose produit les gamètes."},
+  {id:"q4", type:"tf", theme:"Cycle cellulaire", tags:["Méiose"], q:"La méiose augmente la diversité génétique.", ok:true, explain:"Oui : assortiment des chromosomes et recombinaison (crossing-over) contribuent à la diversité."},
+  // Réplication / génétique
+  {id:"q5", type:"mcq", theme:"ADN & génétique", tags:["Réplication"], q:"Concernant la réplication de l’ADN :", options:[
+    {t:"Elle est semi-conservative", ok:true},
+    {t:"Elle copie l’ADN avant division cellulaire", ok:true},
+    {t:"Elle produit directement des protéines", ok:false},
+    {t:"Elle implique des enzymes (ex : ADN polymérase)", ok:true},
+  ], explain:"La réplication copie l’ADN. Les protéines sont produites par traduction, pas par réplication."},
+  {id:"q6", type:"tf", theme:"ADN & génétique", tags:["Génétique"], q:"Un allèle est une version d’un gène.", ok:true, explain:"Oui : un gène peut exister sous plusieurs allèles."},
+  // Transcription / traduction
+  {id:"q7", type:"mcq", theme:"Synthèse protéique", tags:["Traduction"], q:"À propos de la traduction :", options:[
+    {t:"Elle se déroule au ribosome", ok:true},
+    {t:"Elle utilise l’ARNm comme matrice", ok:true},
+    {t:"Elle transforme directement l’ADN en protéine", ok:false},
+    {t:"Elle nécessite des ARNt", ok:true},
+  ], explain:"On traduit l’ARNm. L’ADN est transcrit en ARNm avant."},
+  {id:"q8", type:"tf", theme:"Synthèse protéique", tags:["Transcription"], q:"Chez l’humain, la transcription a lieu dans le noyau.", ok:true, explain:"Oui (général). La traduction se fait dans le cytoplasme/RE."},
+  // Communication
+  {id:"q9", type:"mcq", theme:"Communication", tags:["Types"], q:"Quelle(s) proposition(s) correspond(ent) à une communication endocrine ?", options:[
+    {t:"Signal via circulation sanguine", ok:true},
+    {t:"Signal local entre cellules voisines", ok:false},
+    {t:"Hormones", ok:true},
+    {t:"Neurotransmetteur dans une synapse", ok:false},
+  ], explain:"Endocrine = hormones dans le sang (action à distance)."},
+  // Potentiel d'action / synapse
+  {id:"q10", type:"tf", theme:"Neurophysio (bases)", tags:["PA"], q:"La dépolarisation d’un potentiel d’action classique implique typiquement l’entrée de Na⁺.", ok:true, explain:"Oui (schéma classique)."},
+  {id:"q11", type:"mcq", theme:"Neurophysio (bases)", tags:["Synapse"], q:"Dans une synapse chimique, l’ordre le plus classique est :", options:[
+    {t:"PA arrive → libération NT → récepteurs post-synaptiques", ok:true},
+    {t:"Libération NT → PA arrive", ok:false},
+    {t:"Récepteurs post-synaptiques → libération NT", ok:false},
+    {t:"PA arrive → récepteurs post-synaptiques → libération NT", ok:false},
+  ], explain:"Le PA pré-synaptique déclenche la libération de neurotransmetteur, puis activation des récepteurs."},
+  // Immunité
+  {id:"q12", type:"mcq", theme:"Immunité (bases)", tags:["Innée/Adaptative"], q:"Concernant l’immunité :", options:[
+    {t:"L’innée est rapide et non spécifique", ok:true},
+    {t:"L’adaptative crée une mémoire", ok:true},
+    {t:"Les anticorps sont produits par les lymphocytes T", ok:false},
+    {t:"Les lymphocytes B participent à la production d’anticorps", ok:true},
+  ], explain:"Les anticorps sont produits par les lymphocytes B (plasmocytes)."},
+  {id:"q13", type:"mcq", theme:"Cellule", tags:["Transport"], q:"Lequel/lesquels sont des transports passifs ?", options:[
+    {t:"Diffusion simple", ok:true},
+    {t:"Diffusion facilitée", ok:true},
+    {t:"Pompe Na⁺/K⁺", ok:false},
+    {t:"Endocytose", ok:false}
+  ], explain:"Les transports passifs suivent le gradient et ne nécessitent pas d’ATP directement (diffusion simple/facilitée)."},
+  {id:"q14", type:"tf", theme:"Cellule", tags:["Transport"], q:"La pompe Na⁺/K⁺ est un transport actif.", ok:true, explain:"Oui : elle utilise l’ATP pour maintenir les gradients ioniques."},
+  {id:"q15", type:"mcq", theme:"Cycle cellulaire", tags:["Mitose"], q:"Pendant l’anaphase, il se passe :", options:[
+    {t:"Alignement des chromosomes au centre", ok:false},
+    {t:"Séparation des chromatides sœurs", ok:true},
+    {t:"Condensation initiale des chromosomes", ok:false},
+    {t:"Migration des chromatides vers les pôles", ok:true}
+  ], explain:"En anaphase, les chromatides sœurs se séparent et migrent vers les pôles."},
+  {id:"q16", type:"mcq", theme:"Cycle cellulaire", tags:["Méiose"], q:"La méiose permet :", options:[
+    {t:"Réduction du nombre de chromosomes", ok:true},
+    {t:"Production de gamètes", ok:true},
+    {t:"Deux cellules filles identiques", ok:false},
+    {t:"Diversité génétique", ok:true}
+  ], explain:"La méiose produit des gamètes haploïdes et augmente la diversité."},
+  {id:"q17", type:"mcq", theme:"ADN & génétique", tags:["Réplication"], q:"Concernant le brin retardé :", options:[
+    {t:"Synthèse continue", ok:false},
+    {t:"Synthèse discontinue", ok:true},
+    {t:"Fragments d’Okazaki", ok:true},
+    {t:"Ne nécessite pas de ligase", ok:false}
+  ], explain:"Le brin retardé est synthétisé en fragments d’Okazaki puis reliés par ligase."},
+  {id:"q18", type:"tf", theme:"Synthèse protéique", tags:["Épissage"], q:"L’épissage consiste à retirer les exons.", ok:false, explain:"Non : on retire les introns et on conserve/assemble les exons."},
+  {id:"q19", type:"mcq", theme:"Synthèse protéique", tags:["Traduction"], q:"Dans la traduction, quel couple est correct ?", options:[
+    {t:"Codon : sur ARNm", ok:true},
+    {t:"Codon : sur ARNt", ok:false},
+    {t:"Anticodon : sur ARNt", ok:true},
+    {t:"Anticodon : sur ARNm", ok:false}
+  ], explain:"Le codon est sur l’ARNm ; l’anticodon est sur l’ARNt."},
+  {id:"q20", type:"mcq", theme:"Communication", tags:["Récepteurs"], q:"Pour qu’un ligand (hormone) agisse, il faut :", options:[
+    {t:"Que toutes les cellules le reçoivent", ok:false},
+    {t:"Un récepteur adapté sur/ dans la cellule cible", ok:true},
+    {t:"Toujours un passage dans le noyau", ok:false},
+    {t:"Une réponse dépendant de la cascade activée", ok:true}
+  ], explain:"La spécificité dépend des récepteurs et des voies de signalisation."},
+  {id:"q21", type:"tf", theme:"Neurophysio (bases)", tags:["Myéline"], q:"La myéline tend à augmenter la vitesse de conduction.", ok:true, explain:"Oui : elle favorise la conduction saltatoire."},
+  {id:"q22", type:"mcq", theme:"Immunité (bases)", tags:["Innée/Adaptative"], q:"Quels éléments appartiennent surtout à l’immunité innée ?", options:[
+    {t:"Inflammation", ok:true},
+    {t:"Production d’anticorps spécifiques", ok:false},
+    {t:"Phagocytose", ok:true},
+    {t:"Mémoire immunitaire spécifique", ok:false}
+  ], explain:"Innée : inflammation, phagocytose ; adaptative : anticorps spécifiques et mémoire."},
+  {id:"q23", type:"mcq", theme:"Neurophysio (bases)", tags:["Synapse","Ca²⁺"], q:"Dans une synapse chimique, la libération du neurotransmetteur dépend surtout de :", options:[
+    {t:"L’entrée de Ca²⁺ dans le bouton pré-synaptique", ok:true},
+    {t:"La sortie de Ca²⁺ du bouton pré-synaptique", ok:false},
+    {t:"L’ouverture de canaux Ca²⁺ voltage-dépendants", ok:true},
+    {t:"La pompe Na⁺/K⁺ (directement, à court terme)", ok:false}
+  ], explain:"Le PA ouvre des canaux Ca²⁺ voltage-dépendants : l’entrée de Ca²⁺ déclenche l’exocytose des vésicules synaptiques."}
+];
+
+// Exercices d'ordre
+const ORDER = [
+{id:"o1", theme:"Neurophysio (bases)", title:"Potentiel d’action (étapes + ions)", steps:["Potentiel de repos (~ -70 mV) : gradients Na⁺/K⁺ maintenus notamment par la pompe Na⁺/K⁺", "Atteinte du seuil : ouverture de canaux Na⁺ voltage-dépendants", "Dépolarisation : entrée massive de Na⁺ (montée rapide du potentiel)", "Inactivation des canaux Na⁺ + ouverture retardée des canaux K⁺ voltage-dépendants", "Repolarisation : sortie de K⁺ (descente du potentiel)", "Hyperpolarisation : canaux K⁺ restent ouverts un peu trop longtemps (potentiel < repos)", "Fermeture progressive des canaux K⁺ + retour au repos (restauration des gradients à plus long terme)"]},
+  {id:"o2", theme:"Neurophysio (bases)", title:"Synapse chimique (étapes + Ca²⁺)", steps:["Arrivée du potentiel d’action au bouton pré-synaptique (dépolarisation de la membrane)", "Ouverture de canaux Ca²⁺ voltage-dépendants", "Entrée de Ca²⁺ dans le bouton pré-synaptique", "Fusion des vésicules synaptiques avec la membrane (exocytose) et libération du neurotransmetteur", "Diffusion du neurotransmetteur dans la fente synaptique", "Fixation du neurotransmetteur sur les récepteurs post-synaptiques", "Ouverture/fermeture de canaux ioniques post-synaptiques → potentiel post-synaptique (EPSP/IPSP)", "Arrêt du signal : recapture, dégradation enzymatique ou diffusion + recyclage des vésicules"]},
+  {id:"o3", theme:"Synthèse protéique", title:"Traduction au ribosome (version simple)", steps:[
+    "Fixation du ribosome sur l’ARNm",
+    "Arrivée d’un ARNt au site A",
+    "Formation de la liaison peptidique (transfert vers site P)",
+    "Translocation du ribosome (avancement d’un codon)",
+    "Sortie d’un ARNt au site E",
+    "Arrêt sur codon stop et libération de la protéine"
+  ]},
+  {id:"o4", theme:"Cycle cellulaire", title:"Mitose (ordre des phases)", steps:[
+    "Prophase",
+    "Métaphase",
+    "Anaphase",
+    "Télophase",
+    "Cytocinèse"
+  ]},
+  {id:"o5", theme:"ADN & génétique", title:"Réplication (schéma très simplifié)", steps:[
+    "Ouverture de la double hélice",
+    "Appariement de nucléotides complémentaires",
+    "Allongement du nouveau brin (5’→3’)",
+    "Formation de deux molécules d’ADN (semi-conservatif)"
+  ]},
+  {id:"o6", theme:"Synthèse protéique", title:"Transcription (version simple)", steps:["Ouverture locale de l’ADN (zone du gène)", "Synthèse d’un ARN complémentaire (ARN polymérase)", "Fin de transcription et libération du transcrit", "Maturation (coiffe/queue/épissage) – eucaryotes (idée générale)"]},
+  {id:"o7", theme:"Cycle cellulaire", title:"Cycle cellulaire (très simplifié)", steps:["G1 (croissance)", "S (réplication de l’ADN)", "G2 (préparation)", "Mitose (division nucléaire)", "Cytocinèse (division cellulaire)"]},
+  {id:"o8", theme:"Immunité (bases)", title:"Réponse innée (séquence typique, simplifiée)", steps:["Barrière / détection de l’agent", "Inflammation locale", "Recrutement de cellules (ex : neutrophiles/macrophages)", "Phagocytose et destruction", "Résolution / réparation"]},
+  {"id": "o9", "theme": "Neurophysio (bases)", "title": "Synapse neuromusculaire (jonction neuromusculaire – ACh, étapes)", "steps": ["Arrivée du potentiel d’action dans le bouton terminal du motoneurone", "Ouverture de canaux Ca²⁺ voltage-dépendants → entrée de Ca²⁺", "Exocytose de vésicules → libération d’acétylcholine (ACh)", "Diffusion de l’ACh et fixation sur les récepteurs nicotiniques de la plaque motrice", "Ouverture de canaux cationiques → entrée de Na⁺ (majoritaire) → potentiel de plaque motrice", "Si seuil atteint : déclenchement d’un potentiel d’action musculaire", "Fin du signal : dégradation de l’ACh par l’acétylcholinestérase + recapture/recyclage"]}
+];
+
+// Questions ouvertes
+const OPEN = [
+  {id:"op1", theme:"Cycle cellulaire", tags:["Mitose", "Méiose"], q:"Explique la différence entre mitose et méiose (but + résultat).", a:"Mitose : division des cellules somatiques donnant 2 cellules filles génétiquement identiques (en général) ; le nombre de chromosomes est conservé ; utile pour croissance et renouvellement.\\n\\nMéiose : division des cellules germinales produisant des gamètes ; réduction du nombre de chromosomes (haploïde) et diversité génétique (assortiment + crossing-over)."},
+  {id:"op2", theme:"Synthèse protéique", tags:["Transcription", "Traduction"], q:"Décris les deux grandes étapes de la synthèse des protéines et où elles se déroulent.", a:"Transcription : ADN → ARNm, dans le noyau (chez l’humain), avec maturation (coiffe/queue/épissage : idée). Traduction : ARNm → protéine, au ribosome dans le cytoplasme et/ou sur le RE rugueux."},
+  {id:"op3", theme:"Neurophysio (bases)", tags:["Potentiel d’action"], q:"Explique les grandes étapes d’un potentiel d’action (niveau 1re année).", a:"Repos : gradients Na⁺/K⁺. Seuil : ouverture canaux Na⁺. Dépolarisation : entrée de Na⁺. Repolarisation : inactivation Na⁺ + ouverture canaux K⁺ → sortie de K⁺. Hyperpolarisation transitoire puis retour au repos. Période réfractaire : limite la fréquence et impose un sens de propagation (idée)."},
+  {id:"op4", theme:"Communication", tags:["Types de signaux"], q:"Explique les types de communication cellulaire et donne un exemple de chacun.", a:"Endocrine : hormone dans le sang (ex : insuline). Paracrine : signal local (ex : facteurs de croissance). Autocrine : la cellule répond à son propre signal. Synaptique : neurotransmetteur à la synapse (ex : ACh à la jonction neuromusculaire). Contact-dépendant : signal via contact membrane–membrane (idée générale)."},
+  {id:"op5", theme:"Immunité (bases)", tags:["Innée", "Adaptative"], q:"Compare immunité innée et adaptative (vitesse, spécificité, mémoire).", a:"Innée : rapide, non spécifique, inflammation/phagocytose (principes). Adaptative : spécifique (B/T), plus lente au départ, crée une mémoire immunitaire ; anticorps produits par les lymphocytes B (plasmocytes)."},
+  {id:"op6", theme:"ADN & génétique", tags:["Réplication"], q:"Explique la réplication de l’ADN (idée générale) et pourquoi on dit qu’elle est semi-conservative.", a:"Avant la division, l’ADN est copié. Les deux brins se séparent et servent de matrices pour synthétiser des brins complémentaires. Semi-conservative : chaque nouvelle double hélice contient 1 brin ancien + 1 brin nouveau."},
+  {id:"op7", theme:"Synthèse protéique", tags:["Ribosome"], q:"Explique le rôle des sites A, P et E du ribosome pendant la traduction.", a:"Site A : arrivée de l’ARNt porteur d’un acide aminé. Site P : porte la chaîne polypeptidique en cours et permet la liaison peptidique. Site E : sortie de l’ARNt vide."},
+  {id:"op8", theme:"Cellule", tags:["Transport membranaire"], q:"Différencie diffusion simple, diffusion facilitée et transport actif, avec un exemple pour chacun.", a:"Diffusion simple : passage direct selon gradient (petites molécules liposolubles). Diffusion facilitée : selon gradient mais via canal/transporteur (ex : ions via canal, glucose via GLUT). Transport actif : contre gradient avec énergie (ex : pompe Na⁺/K⁺)."},
+  {id:"op9", theme:"Neurophysio (bases)", tags:["Myéline"], q:"Explique en quoi la myéline change la propagation du potentiel d’action.", a:"La myéline isole l’axone : le courant se propage plus vite par conduction saltatoire (de nœud de Ranvier en nœud). Cela augmente la vitesse de conduction et diminue les pertes."},
+  {id:"op10", theme:"Immunité (bases)", tags:["Vaccination"], q:"Explique le principe de la vaccination et le rôle de la mémoire immunitaire.", a:"La vaccination expose l’organisme à un antigène (ou dérivé) de façon contrôlée pour induire une mémoire immunitaire. Lors d’une exposition ultérieure, la réponse adaptative est plus rapide et plus efficace."}
+];
+
+/* =========================
+   Stockage (local)
+   ========================= */
+
+const LS_KEY = "kine_bio_v1_progress";
+const defaultProgress = { status:{}, notes:{}, settings:{} };
+
+function loadProgress(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return structuredClone(defaultProgress);
+    const obj = JSON.parse(raw);
+    return { ...structuredClone(defaultProgress), ...obj, status:{...(obj.status||{})}, notes:{...(obj.notes||{})}, settings:{...(obj.settings||{})} };
+  }catch(e){
+    return structuredClone(defaultProgress);
+  }
+}
+function saveProgress(){
+  localStorage.setItem(LS_KEY, JSON.stringify(PROGRESS));
+  refreshKPI();
+}
+let PROGRESS = loadProgress();
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 1400);
+}
+
+/* =========================
+   Tabs
+   ========================= */
+document.querySelectorAll("#tabs button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("#tabs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+    document.getElementById(tab).classList.add("active");
+  });
+});
+
+/* =========================
+   Définitions
+   ========================= */
+function renderDefs(){
+  const wrap = document.getElementById("defList");
+  wrap.innerHTML = "";
+  DEFINITIONS.forEach(d=>{
+    const el = document.createElement("div");
+    el.className = "card";
+    el.style.background = "#fff";
+    el.style.marginTop = "10px";
+    el.innerHTML = `<div class="row"><div><b>${escapeHtml(d.term)}</b></div></div><div class="small" style="margin-top:8px">${escapeHtml(d.def)}</div>`;
+    wrap.appendChild(el);
+  });
+  document.getElementById("defCount").textContent = String(DEFINITIONS.length);
+}
+document.getElementById("defSearchBtn").addEventListener("click", ()=>{
+  const q = (document.getElementById("defSearch").value||"").trim().toLowerCase();
+  const res = document.getElementById("defSearchRes");
+  if(!q){ res.textContent = "Écris un mot-clé."; return; }
+  const hits = DEFINITIONS.filter(d=>d.term.toLowerCase().includes(q) || d.def.toLowerCase().includes(q)).slice(0,10);
+  if(hits.length===0){ res.textContent = "Aucun résultat."; return; }
+  res.innerHTML = hits.map(h=>`<div style="margin-bottom:8px"><b>${escapeHtml(h.term)}</b> — ${escapeHtml(h.def)}</div>`).join("");
+});
+
+/* =========================
+   KPI
+   ========================= */
+function refreshKPI(){
+  const all = FLASHCARDS.length;
+  const s = PROGRESS.status || {};
+  let ok=0, hes=0, no=0, out=0, none=0;
+  for(const c of FLASHCARDS){
+    const st = s[c.id] || "none";
+    if(st==="ok") ok++;
+    else if(st==="hes") hes++;
+    else if(st==="no") no++;
+    else if(st==="out") out++;
+    else none++;
+  }
+  const k = document.getElementById("kpi");
+  k.innerHTML = `
+    <div class="box"><div class="muted small">Maîtrisé</div><div class="n">${ok}</div></div>
+    <div class="box"><div class="muted small">Hésitant</div><div class="n">${hes}</div></div>
+    <div class="box"><div class="muted small">Non su</div><div class="n">${no}</div></div>
+    <div class="box"><div class="muted small">Non noté</div><div class="n">${none}</div></div>
+  `;
+  refreshFlashStats();
+}
+
+/* =========================
+   Flashcards
+   ========================= */
+let flashPool = [];
+let flashIndex = 0;
+let currentCard = null;
+
+const flashModeEl = document.getElementById("flashMode");
+const flashShuffleEl = document.getElementById("flashShuffle");
+const flashAutoRevealEl = document.getElementById("flashAutoReveal");
+
+function getFilteredCards(){
+  const mode = flashModeEl.value;
+  const s = PROGRESS.status || {};
+  let list = FLASHCARDS.slice();
+  if(mode==="all"){
+    list = list.filter(c => (s[c.id]||"none")!=="out");
+  }else if(mode==="unknown"){
+    list = list.filter(c => (s[c.id]||"none")==="no");
+  }else if(mode==="hes_unknown"){
+    list = list.filter(c => {
+      const st = (s[c.id]||"none");
+      return st==="hes" || st==="no";
+    });
+  }else if(mode==="new"){
+    list = list.filter(c => (s[c.id]||"none")==="none");
+  }else if(mode==="include_all"){
+    // keep all
+  }
+  return list;
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+function rebuildFlashPool(){
+  flashPool = getFilteredCards();
+  if(flashShuffleEl.value==="on") shuffle(flashPool);
+  flashIndex = 0;
+  if(flashPool.length===0){
+    currentCard = null;
+    renderFlashEmpty();
+    return;
+  }
+  nextFlash();
+}
+
+function renderFlashEmpty(){
+  document.getElementById("flashQ").textContent = "Aucune carte dans ce mode.";
+  document.getElementById("flashMeta").textContent = "Change le mode pour continuer.";
+  document.getElementById("flashA").classList.remove("show");
+  document.getElementById("flashA").innerHTML = "";
+  document.getElementById("flashStatusTag").textContent = "—";
+  document.getElementById("flashNote").value = "";
+  document.getElementById("noteInfo").textContent = "";
+  setFlashFlipped(false);
+}
+
+function statusLabel(st){
+  if(st==="ok") return ["Maîtrisé", "ok"];
+  if(st==="hes") return ["Hésitant", "hes"];
+  if(st==="no") return ["Non su", "no"];
+  if(st==="out") return ["Pas au programme", "out"];
+  return ["Non noté", "none"];
+}
+let flashFlipped = false;
+
+function setFlashFlipped(on){
+  flashFlipped = !!on;
+  const cardEl = document.getElementById("flashCard");
+  const aEl = document.getElementById("flashA");
+  if(cardEl) cardEl.classList.toggle("flipped", flashFlipped);
+  // on garde aussi la classe .show pour compatibilité (styles existants / auto reveal)
+  if(aEl) aEl.classList.toggle("show", flashFlipped);
+}
+
+function toggleFlashFlip(){
+  if(!currentCard) return;
+  setFlashFlipped(!flashFlipped);
+}
+
+
+function renderFlash(){
+  if(!currentCard){ renderFlashEmpty(); return; }
+  document.getElementById("flashQ").textContent = currentCard.q;
+  document.getElementById("flashMeta").textContent = `${currentCard.theme}${(currentCard.tags && currentCard.tags.length)?(" • "+currentCard.tags.join(", ")):""} • ${flashIndex}/${flashPool.length}`;
+  document.getElementById("flashA").innerHTML = escapeHtml(currentCard.a).replaceAll("\n","<br>");
+  const st = (PROGRESS.status[currentCard.id]||"none");
+  const [lab] = statusLabel(st);
+  document.getElementById("flashStatusTag").textContent = lab;
+
+  const note = (PROGRESS.notes[currentCard.id] || "");
+  document.getElementById("flashNote").value = note;
+  document.getElementById("noteInfo").textContent = note ? "Note chargée." : "";
+  setFlashFlipped(flashAutoRevealEl.value==="yes");
+}
+
+function nextFlash(){
+  if(flashPool.length===0){ renderFlashEmpty(); return; }
+  if(flashIndex >= flashPool.length) flashIndex = 0;
+  currentCard = flashPool[flashIndex];
+  flashIndex++;
+  renderFlash();
+}
+
+document.getElementById("flashNext").addEventListener("click", nextFlash);
+document.getElementById("flashNextTop").addEventListener("click", nextFlash);
+document.getElementById("flashToggle").addEventListener("click", ()=>{ toggleFlashFlip(); });
+const flashCardEl = document.getElementById("flashCard");
+if(flashCardEl){
+  flashCardEl.addEventListener("click", (e)=>{
+    // Empêche de remonter si un jour on ajoute des boutons dans la carte
+    if(e && typeof e.stopPropagation === "function") e.stopPropagation();
+    toggleFlashFlip();
+  });
+  flashCardEl.addEventListener("keydown", (e)=>{
+    if(!e) return;
+    if(e.key === "Enter" || e.key === " "){
+      e.preventDefault();
+      toggleFlashFlip();
+    }
+  });
+}
+
+
+function setStatus(st){
+  if(!currentCard) return;
+  PROGRESS.status[currentCard.id] = st;
+  saveProgress();
+  const [lab] = statusLabel(st);
+  document.getElementById("flashStatusTag").textContent = lab;
+  // Après notation, on enchaîne
+  nextFlash();
+}
+
+document.getElementById("rateOk").addEventListener("click", ()=>setStatus("ok"));
+document.getElementById("rateHes").addEventListener("click", ()=>setStatus("hes"));
+document.getElementById("rateNo").addEventListener("click", ()=>setStatus("no"));
+document.getElementById("rateOut").addEventListener("click", ()=>setStatus("out"));
+
+flashModeEl.addEventListener("change", rebuildFlashPool);
+flashShuffleEl.addEventListener("change", rebuildFlashPool);
+flashAutoRevealEl.addEventListener("change", renderFlash);
+
+document.getElementById("flashResetSession").addEventListener("click", ()=>{
+  rebuildFlashPool();
+  toast("Session réinitialisée.");
+});
+document.getElementById("flashClearProgress").addEventListener("click", ()=>{
+  if(!confirm("Effacer tous les statuts et notes ?")) return;
+  PROGRESS = structuredClone(defaultProgress);
+  saveProgress();
+  rebuildFlashPool();
+  toast("Progrès effacé.");
+});
+document.getElementById("saveNote").addEventListener("click", ()=>{
+  if(!currentCard) return;
+  PROGRESS.notes[currentCard.id] = document.getElementById("flashNote").value || "";
+  saveProgress();
+  document.getElementById("noteInfo").textContent = "Note sauvegardée.";
+  toast("Note sauvegardée.");
+});
+
+function refreshFlashStats(){
+  const all = FLASHCARDS.length;
+  const s = PROGRESS.status || {};
+  let ok=0, hes=0, no=0, out=0, none=0;
+  for(const c of FLASHCARDS){
+    const st = s[c.id] || "none";
+    if(st==="ok") ok++;
+    else if(st==="hes") hes++;
+    else if(st==="no") no++;
+    else if(st==="out") out++;
+    else none++;
+  }
+  document.getElementById("flashStats").innerHTML =
+    `<div>Cartes : <b>${all}</b></div>
+     <div>Maîtrisé : <b>${ok}</b> • Hésitant : <b>${hes}</b> • Non su : <b>${no}</b> • Pas au programme : <b>${out}</b> • Non noté : <b>${none}</b></div>`;
+}
+
+/* =========================
+   QCM / Vrai-Faux
+   ========================= */
+const qcmThemeEl = document.getElementById("qcmTheme");
+const qcmTypeEl = document.getElementById("qcmType");
+let currentQ = null;
+
+function uniq(arr){ return [...new Set(arr)]; }
+
+function fillQcmThemes(){
+  const themes = uniq(QCM.map(q=>q.theme)).sort();
+  qcmThemeEl.innerHTML = `<option value="all">Tous</option>` + themes.map(t=>`<option value="${escapeAttr(t)}">${escapeHtml(t)}</option>`).join("");
+  document.getElementById("qcmCount").textContent = String(QCM.length);
+}
+function pickQcm(){
+  const type = qcmTypeEl.value;
+  const theme = qcmThemeEl.value;
+  let pool = QCM.slice();
+  if(type!=="all") pool = pool.filter(q=>q.type===type);
+  if(theme!=="all") pool = pool.filter(q=>q.theme===theme);
+  if(pool.length===0){ currentQ=null; renderQcmEmpty(); return; }
+  currentQ = pool[Math.floor(Math.random()*pool.length)];
+  renderQcm();
+}
+function renderQcmEmpty(){
+  document.getElementById("qcmQ").textContent = "Aucune question pour ce filtre.";
+  document.getElementById("qcmOptions").innerHTML = "";
+  document.getElementById("qcmFeedback").classList.remove("show");
+  document.getElementById("qcmFeedback").innerHTML = "";
+  document.getElementById("qcmTags").innerHTML = "";
+}
+function renderQcm(){
+  const q = currentQ;
+  document.getElementById("qcmQ").textContent = q.q;
+  document.getElementById("qcmTags").innerHTML = [`<span class="tag">${escapeHtml(q.type==="mcq"?"QCM":"Vrai/Faux")}</span>`,
+                                                  `<span class="tag">${escapeHtml(q.theme)}</span>`]
+                                                  .concat((q.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`)).join("");
+  const optWrap = document.getElementById("qcmOptions");
+  optWrap.innerHTML = "";
+  document.getElementById("qcmFeedback").classList.remove("show");
+  document.getElementById("qcmFeedback").innerHTML = "";
+
+  if(q.type==="mcq"){
+    q.options.forEach((o, idx)=>{
+      const id = `qopt_${q.id}_${idx}`;
+      const lab = document.createElement("label");
+      lab.style.display = "block";
+      lab.style.margin = "8px 0";
+      lab.innerHTML = `<input type="checkbox" id="${id}"> ${escapeHtml(o.t)}`;
+      optWrap.appendChild(lab);
+    });
+  }else{
+    // V/F
+    const idT = `qtf_${q.id}_t`;
+    const idF = `qtf_${q.id}_f`;
+    optWrap.innerHTML = `
+      <label style="display:block;margin:8px 0"><input type="radio" name="tf_${q.id}" id="${idT}" value="true"> Vrai</label>
+      <label style="display:block;margin:8px 0"><input type="radio" name="tf_${q.id}" id="${idF}" value="false"> Faux</label>
+    `;
+  }
+}
+
+function checkQcm(){
+  if(!currentQ) return;
+  const q = currentQ;
+  const fb = document.getElementById("qcmFeedback");
+
+  let ok = false;
+  if(q.type==="mcq"){
+    const chosen = q.options.map((o, idx)=>!!document.getElementById(`qopt_${q.id}_${idx}`)?.checked);
+    const truth  = q.options.map(o=>!!o.ok);
+    ok = chosen.every((v,i)=>v===truth[i]);
+    const correctTexts = q.options.filter(o=>o.ok).map(o=>o.t);
+    fb.innerHTML = (ok? `<div class="ok">✅ Correct</div>` : `<div class="bad">❌ Incorrect</div>`)
+      + `<div class="small" style="margin-top:8px"><b>Réponses attendues :</b> ${escapeHtml(correctTexts.join(" ; "))}</div>`
+      + `<div class="small muted" style="margin-top:8px">${escapeHtml(q.explain||"")}</div>`;
+  }else{
+    const sel = document.querySelector(`input[name="tf_${q.id}"]:checked`);
+    if(!sel){ fb.classList.add("show"); fb.innerHTML = `<div class="bad">Choisis Vrai ou Faux.</div>`; return; }
+    const val = (sel.value==="true");
+    ok = (val===!!q.ok);
+    fb.innerHTML = (ok? `<div class="ok">✅ Correct</div>` : `<div class="bad">❌ Incorrect</div>`)
+      + `<div class="small" style="margin-top:8px"><b>Réponse attendue :</b> ${q.ok? "Vrai" : "Faux"}</div>`
+      + `<div class="small muted" style="margin-top:8px">${escapeHtml(q.explain||"")}</div>`;
+  }
+  fb.classList.add("show");
+}
+
+document.getElementById("qcmNew").addEventListener("click", pickQcm);
+document.getElementById("qcmCheck").addEventListener("click", checkQcm);
+qcmTypeEl.addEventListener("change", pickQcm);
+qcmThemeEl.addEventListener("change", pickQcm);
+
+/* =========================
+   Exercices d'ordre
+   ========================= */
+const ordThemeEl = document.getElementById("ordTheme");
+let currentOrd = null;
+let selectedIndex = -1;
+
+function fillOrdThemes(){
+  const themes = uniq(ORDER.map(o=>o.theme)).sort();
+  ordThemeEl.innerHTML = `<option value="all">Tous</option>` + themes.map(t=>`<option value="${escapeAttr(t)}">${escapeHtml(t)}</option>`).join("");
+  document.getElementById("ordCount").textContent = String(ORDER.length);
+}
+
+function pickOrder(){
+  const th = ordThemeEl.value;
+  let pool = ORDER.slice();
+  if(th!=="all") pool = pool.filter(o=>o.theme===th);
+  if(pool.length===0){ currentOrd=null; renderOrdEmpty(); return; }
+  currentOrd = pool[Math.floor(Math.random()*pool.length)];
+  resetOrderList(true);
+}
+
+function renderOrdEmpty(){
+  document.getElementById("ordTitle").textContent = "Aucun exercice pour ce filtre.";
+  document.getElementById("ordList").innerHTML = "";
+  document.getElementById("ordFeedback").classList.remove("show");
+  document.getElementById("ordFeedback").innerHTML = "";
+}
+
+function resetOrderList(shuffleFirst){
+  if(!currentOrd) return renderOrdEmpty();
+  document.getElementById("ordTitle").textContent = `${currentOrd.title} — (${currentOrd.theme})`;
+  const list = currentOrd.steps.slice();
+  if(shuffleFirst) shuffle(list);
+  const ul = document.getElementById("ordList");
+  ul.innerHTML = "";
+  selectedIndex = -1;
+  list.forEach((txt, idx)=>{
+    ul.appendChild(makeDragItem(txt));
+  });
+  document.getElementById("ordFeedback").classList.remove("show");
+  document.getElementById("ordFeedback").innerHTML = "";
+}
+
+function makeDragItem(text){
+  const li = document.createElement("li");
+  li.className = "dragitem";
+  li.draggable = true;
+  li.textContent = text;
+
+  li.addEventListener("click", ()=>{
+    [...document.querySelectorAll(".dragitem")].forEach(x=>x.style.outline="none");
+    li.style.outline = "2px solid #111";
+    selectedIndex = [...document.querySelectorAll(".dragitem")].indexOf(li);
+  });
+
+  li.addEventListener("dragstart", (e)=>{
+    li.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", "drag");
+    e.dataTransfer.effectAllowed = "move";
+  });
+  li.addEventListener("dragend", ()=> li.classList.remove("dragging"));
+  return li;
+}
+
+const ordList = document.getElementById("ordList");
+ordList.addEventListener("dragover", (e)=>{
+  e.preventDefault();
+  const dragging = document.querySelector(".dragitem.dragging");
+  if(!dragging) return;
+  const after = getDragAfterElement(ordList, e.clientY);
+  if(after == null) ordList.appendChild(dragging);
+  else ordList.insertBefore(dragging, after);
+});
+
+function getDragAfterElement(container, y){
+  const items = [...container.querySelectorAll(".dragitem:not(.dragging)")];
+  return items.reduce((closest, child)=>{
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height/2;
+    if(offset < 0 && offset > closest.offset){
+      return {offset, element: child};
+    }
+    return closest;
+  }, {offset: Number.NEGATIVE_INFINITY, element: null}).element;
+}
+
+function currentOrdList(){
+  return [...document.querySelectorAll("#ordList .dragitem")].map(li=>li.textContent);
+}
+
+function checkOrder(){
+  if(!currentOrd) return;
+  const got = currentOrdList();
+  const exp = currentOrd.steps;
+  const ok = got.length===exp.length && got.every((v,i)=>v===exp[i]);
+  const fb = document.getElementById("ordFeedback");
+  fb.classList.add("show");
+  if(ok){
+    fb.innerHTML = `<div class="ok">✅ Correct</div>`;
+  }else{
+    // show first mismatch
+    let first=-1;
+    for(let i=0;i<Math.min(got.length, exp.length);i++){
+      if(got[i]!==exp[i]){ first=i; break; }
+    }
+    fb.innerHTML =
+      `<div class="bad">❌ Pas encore</div>
+       <div class="small" style="margin-top:8px"><b>Attendu :</b><br>${exp.map((s,i)=>`${i+1}. ${escapeHtml(s)}`).join("<br>")}</div>
+       <div class="small muted" style="margin-top:8px">${first>=0?("Premier écart à la position "+(first+1)+"."):""}</div>`;
+  }
+}
+
+document.getElementById("ordNew").addEventListener("click", pickOrder);
+document.getElementById("ordCheck").addEventListener("click", checkOrder);
+document.getElementById("ordReset").addEventListener("click", ()=>resetOrderList(true));
+ordThemeEl.addEventListener("change", pickOrder);
+
+function moveSelected(delta){
+  const items = [...document.querySelectorAll("#ordList .dragitem")];
+  if(selectedIndex<0 || selectedIndex>=items.length){ toast("Clique une étape à déplacer."); return; }
+  const newIndex = selectedIndex + delta;
+  if(newIndex<0 || newIndex>=items.length) return;
+  const li = items[selectedIndex];
+  const target = items[newIndex];
+  if(delta<0) ordList.insertBefore(li, target);
+  else ordList.insertBefore(target, li); // swap by inserting target before li
+  // refresh selection
+  [...document.querySelectorAll(".dragitem")].forEach(x=>x.style.outline="none");
+  const refreshed = [...document.querySelectorAll("#ordList .dragitem")];
+  refreshed[newIndex].style.outline="2px solid #111";
+  selectedIndex = newIndex;
+}
+document.getElementById("moveUp").addEventListener("click", ()=>moveSelected(-1));
+document.getElementById("moveDown").addEventListener("click", ()=>moveSelected(1));
+
+/* =========================
+   Questions ouvertes
+   ========================= */
+const openThemeEl = document.getElementById("openTheme");
+let currentOpen = null;
+
+function fillOpenThemes(){
+  const themes = uniq(OPEN.map(o=>o.theme)).sort();
+  openThemeEl.innerHTML = `<option value="all">Tous</option>` + themes.map(t=>`<option value="${escapeAttr(t)}">${escapeHtml(t)}</option>`).join("");
+  document.getElementById("openCount").textContent = String(OPEN.length);
+}
+
+function pickOpen(){
+  const th = openThemeEl.value;
+  let pool = OPEN.slice();
+  if(th!=="all") pool = pool.filter(o=>o.theme===th);
+  if(pool.length===0){ currentOpen=null; renderOpenEmpty(); return; }
+  currentOpen = pool[Math.floor(Math.random()*pool.length)];
+  renderOpen();
+}
+
+function renderOpenEmpty(){
+  document.getElementById("openQ").textContent = "Aucune question pour ce filtre.";
+  document.getElementById("openTags").innerHTML = "";
+  document.getElementById("openMe").value = "";
+  document.getElementById("openA").classList.remove("show");
+  document.getElementById("openA").innerHTML = "";
+}
+
+function renderOpen(){
+  document.getElementById("openQ").textContent = currentOpen.q;
+  document.getElementById("openTags").innerHTML = [`<span class="tag">${escapeHtml(currentOpen.theme)}</span>`]
+    .concat((currentOpen.tags||[]).map(t=>`<span class="tag">${escapeHtml(t)}</span>`)).join("");
+  document.getElementById("openMe").value = "";
+  document.getElementById("openA").classList.remove("show");
+  document.getElementById("openA").innerHTML = escapeHtml(currentOpen.a).replaceAll("\n","<br>");
+}
+
+document.getElementById("openNew").addEventListener("click", pickOpen);
+document.getElementById("openShow").addEventListener("click", ()=>{
+  if(!currentOpen) return;
+  document.getElementById("openA").classList.add("show");
+});
+document.getElementById("openClear").addEventListener("click", ()=>{
+  document.getElementById("openMe").value = "";
+});
+openThemeEl.addEventListener("change", pickOpen);
+
+/* =========================
+   Sauvegarde import/export
+   ========================= */
+function makeExportObject(mode){
+  const out = {
+    version:"kine_bio_v1",
+    savedAt: new Date().toISOString(),
+    status:{},
+    notes:{},
+  };
+  const s = PROGRESS.status || {};
+  const n = PROGRESS.notes || {};
+  const keep = (id)=>{
+    const st = s[id] || "none";
+    if(mode==="all") return true;
+    if(mode==="unknown") return st==="no";
+    if(mode==="hes_unknown") return st==="no" || st==="hes";
+    return true;
+  };
+  for(const c of FLASHCARDS){
+    if(keep(c.id)){
+      if(s[c.id]) out.status[c.id]=s[c.id];
+      if(n[c.id]) out.notes[c.id]=n[c.id];
+    }
+  }
+  return out;
+}
+
+function downloadJson(obj, filename){
+  const blob = new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 500);
+}
+
+document.getElementById("exportBtn").addEventListener("click", ()=>{
+  const mode = document.getElementById("exportMode").value;
+  const obj = makeExportObject(mode);
+  const stamp = new Date().toISOString().slice(0,10);
+  downloadJson(obj, `kine_bio_progress_${mode}_${stamp}.json`);
+  toast("Export téléchargé.");
+});
+
+async function readFileAsText(file){
+  return new Promise((resolve, reject)=>{
+    const r = new FileReader();
+    r.onload = ()=>resolve(String(r.result||""));
+    r.onerror = reject;
+    r.readAsText(file, "utf-8");
+  });
+}
+
+async function importProgress(replaceAll){
+  const inp = document.getElementById("importFile");
+  const file = inp.files && inp.files[0];
+  if(!file){ toast("Choisis un fichier JSON."); return; }
+  try{
+    const txt = await readFileAsText(file);
+    const obj = JSON.parse(txt);
+    const incoming = { status: obj.status||{}, notes: obj.notes||{} };
+
+    if(replaceAll){
+      PROGRESS.status = {...incoming.status};
+      PROGRESS.notes  = {...incoming.notes};
+    }else{
+      PROGRESS.status = {...(PROGRESS.status||{}), ...(incoming.status||{})};
+      PROGRESS.notes  = {...(PROGRESS.notes||{}),  ...(incoming.notes||{})};
+    }
+    saveProgress();
+    rebuildFlashPool();
+    toast(replaceAll? "Import remplacé." : "Import fusionné.");
+  }catch(e){
+    alert("Fichier invalide ou illisible.");
+  }
+}
+
+document.getElementById("importBtn").addEventListener("click", ()=>importProgress(true));
+document.getElementById("importMergeBtn").addEventListener("click", ()=>importProgress(false));
+
+document.getElementById("hardReset").addEventListener("click", ()=>{
+  if(!confirm("Tout réinitialiser dans ce navigateur ?")) return;
+  localStorage.removeItem(LS_KEY);
+  PROGRESS = structuredClone(defaultProgress);
+  saveProgress();
+  rebuildFlashPool();
+  toast("Tout a été réinitialisé.");
+});
+
+/* =========================
+   Utilitaires
+   ========================= */
+function escapeHtml(s){
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+function escapeAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
+
+/* =========================
+   Init
+   ========================= */
+renderDefs();
+fillQcmThemes();
+fillOrdThemes();
+fillOpenThemes();
+refreshKPI();
+rebuildFlashPool();
+pickQcm();
+pickOrder();
+pickOpen();
+</script>
+</body>
+</html>
