@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trainer Multi-écrans - Version corrigée</title>
+  <style>
+    :root{
+      --bg:#f7f7f7; --card:#fff; --b:#e5e5e5; --txt:#111; --muted:#666;
+      --shadow: 0 1px 0 rgba(0,0,0,.03);
+      --hotspot-hover: rgba(59, 130, 246, 0.15);
+      --primary: #3b82f6;
+    }
+    body{ margin:14px; font-family:system-ui, Arial, sans-serif; background:var(--bg); color:var(--txt); }
+    h2{ margin:0 0 10px 0; font-size:18px; }
+    .muted{ color:var(--muted); font-size:12px; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:stretch; }
+    .card{ background:var(--card); border:1px solid var(--b); border-radius:14px; padding:12px; box-shadow:var(--shadow); }
+    .card h3{ margin:0 0 8px 0; font-size:13px; color:var(--muted); font-weight:700; }
+    button, select, input, textarea{
+      font-size:14px; border:1px solid var(--b); border-radius:10px; padding:8px 10px; background:#fff; color:var(--txt);
+    }
+    button{ cursor:pointer; transition: all 0.2s; }
+    button:hover{ background:#f5f5f5; }
+    button.primary{ font-weight:800; background:var(--primary); color:#fff; border-color:var(--primary); }
+    button.primary:hover{ background:#2563eb; }
+    button:disabled{ opacity:.55; cursor:not-allowed; }
+    button.active{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    textarea{ width:100%; min-height:130px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .pill{ display:inline-flex; gap:8px; align-items:center; border:1px solid var(--b); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); }
+    .status{ border:1px dashed var(--b); border-radius:12px; padding:8px 10px; background:#fcfcfc; font-size:13px; }
+    .ok{ color:#0a7; font-weight:800; }
+    .ko{ color:#c33; font-weight:800; }
+
+    .screens{
+      display:grid; gap:12px;
+      grid-template-columns: 1fr;
+      align-items:start;
+    }
+    .screens.show-left{ grid-template-columns: 0.7fr 1fr; }
+    .screens.show-right{ grid-template-columns: 1fr 0.7fr; }
+    .screens.show-left.show-right{ grid-template-columns: 0.7fr 1fr 0.7fr; }
+
+    .screenCard{ padding:10px; }
+    .screenCard.editing{ outline:3px solid var(--primary); outline-offset:2px; }
+    .screenHeader{ display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:8px;}
+    .screenHeader .left{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .screenTitle{ font-weight:900; font-size:13px; }
+    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .toolbar .sep{ width:1px; height:24px; background:var(--b); margin:0 4px; }
+
+    .stageWrap{
+      position:relative; border:1px solid var(--b); border-radius:14px; overflow:hidden; background:#fff;
+      user-select:none;
+    }
+    .stageWrap img{ display:block; width:100%; height:auto; pointer-events:none; }
+    .overlay{ position:absolute; inset:0; }
+
+    .edgeBtn{
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:34px; height:54px; border-radius:12px;
+      border:1px solid var(--b); background:rgba(255,255,255,.85);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; cursor:pointer;
+      z-index:40;
+      backdrop-filter: blur(3px);
+    }
+    .edgeBtn.left{ left:8px; }
+    .edgeBtn.right{ right:8px; }
+
+    .lib{ display:flex; gap:10px; flex-wrap:wrap; }
+    .thumb{
+      width:120px; border:1px solid var(--b); border-radius:12px; overflow:hidden; background:#fff; cursor:pointer;
+      box-shadow:var(--shadow); transition: all 0.2s;
+    }
+    .thumb:hover{ transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .thumb img{ width:100%; height:80px; object-fit:cover; display:block; }
+    .thumb .cap{ padding:6px 8px; font-size:11px; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .thumb .status{ font-size:10px; padding:2px 8px; color:var(--muted); }
+    .thumb.editing{ outline:3px solid var(--primary); }
+
+    .item{
+      position:absolute; box-sizing:border-box;
+      transform: translate(var(--xpx,0px), var(--ypx,0px));
+      width: var(--wpx, 100px);
+      height: var(--hpx, 60px);
+      left:0; top:0;
+    }
+    .item .box{
+      position:absolute; inset:0;
+      border-radius:10px;
+      border:2px solid rgba(0,0,0,.35);
+      background: rgba(255,255,255,.06);
+    }
+    .item.hotspot .box{
+      border:2px dashed rgba(0,0,0,.35);
+      background: rgba(255,255,255,.03);
+    }
+    .item.hotspot.invisible .box{
+      border-color: transparent;
+      background: transparent;
+    }
+    
+    .mode-use .item.hotspot{
+      cursor: pointer;
+    }
+    .mode-use .item.hotspot:hover .box{
+      background: var(--hotspot-hover);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .mode-use .item.hotspot.invisible:hover .box{
+      background: var(--hotspot-hover);
+      border: 2px dashed rgba(59, 130, 246, 0.4);
+    }
+    
+    .item .label{
+      position:absolute; left:6px; top:6px; font-size:11px; color:#222; background:rgba(255,255,255,.9);
+      padding:2px 6px; border-radius:999px; border:1px solid rgba(0,0,0,.12);
+      pointer-events:none;
+      white-space: nowrap;
+    }
+    .item.text .box{ background: rgba(255,255,255,.65); border-style: solid; }
+    .item.text textarea{
+      position:absolute; inset:8px; resize:none; border:0; outline:none; background:transparent; padding:0;
+      font-size:14px;
+    }
+    .handle{
+      position:absolute; width:10px; height:10px; border-radius:3px;
+      background:#fff; border:1px solid rgba(0,0,0,.35);
+      z-index:5;
+    }
+    .h-nw{ left:-5px; top:-5px; cursor:nwse-resize; }
+    .h-ne{ right:-5px; top:-5px; cursor:nesw-resize; }
+    .h-sw{ left:-5px; bottom:-5px; cursor:nesw-resize; }
+    .h-se{ right:-5px; bottom:-5px; cursor:nwse-resize; }
+
+    .selected .box{ outline:3px solid rgba(0,0,0,.18); outline-offset:2px; }
+    .hidden{ display:none !important; }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .item.hotspot.clicked {
+      animation: pulse 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <h2>Trainer multi-écrans - Version corrigée</h2>
+  <div class="muted">Sélectionne une image à éditer dans la bibliothèque, puis ajoute des hotspots/rectangles/textes.</div>
+
+  <div class="row" style="margin-top:10px;">
+    <div class="card" style="min-width:360px;">
+      <h3>Contrôles</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <label class="pill">
+          Ajouter images
+          <input id="file" type="file" accept="image/*" multiple style="display:block; margin-top:6px;" />
+        </label>
+
+        <span class="pill">Mode
+          <select id="mode" style="margin-left:6px;">
+            <option value="edit">Édition</option>
+            <option value="use">Utilisation (clics)</option>
+          </select>
+        </span>
+
+        <button id="btnToggleLeft">Écran gauche</button>
+        <button id="btnToggleRight">Écran droit</button>
+        <button id="btnClearSel">Désélectionner</button>
+      </div>
+
+      <div class="status" style="margin-top:10px;">
+        <b>Info :</b> <span id="prompt">Ajoute des images, puis clique une vignette pour l'éditer.</span><br/>
+        <span id="feedback"></span>
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="btnExport" class="primary">Exporter JSON</button>
+        <button id="btnImport">Importer JSON</button>
+        <button id="btnReset">Reset projet</button>
+      </div>
+      <textarea id="json" placeholder="Export/Import ici"></textarea>
+    </div>
+
+    <div class="card" style="flex:1; min-width:360px;">
+      <h3>Bibliothèque d'images</h3>
+      <div class="muted">🎯 Clique une image pour l'ÉDITER. Utilise les boutons ci-dessous pour l'afficher sur un écran.</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:8px 0;">
+        <span class="pill">Images: <span id="imgCount">0</span></span>
+        <span class="pill">En édition: <span id="editingName">Aucune</span></span>
+
+        <span class="pill">Hotspots invisibles
+          <select id="hotspotVis" style="margin-left:6px;">
+            <option value="invisible">Oui</option>
+            <option value="visible">Non</option>
+          </select>
+        </span>
+      </div>
+      <div id="lib" class="lib"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <h3>Écrans</h3>
+    <div id="screens" class="screens show-left show-right">
+
+      <div id="leftCard" class="card screenCard">
+        <div class="screenHeader">
+          <div class="left">
+            <div class="screenTitle">Écran gauche (injecteur)</div>
+            <span class="pill">Image: <span id="leftName">—</span></span>
+          </div>
+          <div class="toolbar">
+            <button data-tool="hotspot">+ Hotspot</button>
+            <button data-tool="rect">+ Rectangle</button>
+            <button data-tool="text">+ Texte</button>
+          </div>
+        </div>
+        <div class="stageWrap" data-screen="left">
+          <img id="leftImg" alt="" />
+          <div class="overlay" id="leftOverlay"></div>
+        </div>
+      </div>
+
+      <div id="centerCard" class="card screenCard">
+        <div class="screenHeader">
+          <div class="left">
+            <div class="screenTitle">Écran centre (principal)</div>
+            <span class="pill">Image: <span id="centerName">—</span></span>
+          </div>
+          <div class="toolbar">
+            <button data-tool="hotspot">+ Hotspot</button>
+            <button data-tool="rect">+ Rectangle</button>
+            <button data-tool="text">+ Texte</button>
+          </div>
+        </div>
+        <div class="stageWrap" data-screen="center">
+          <img id="centerImg" alt="" />
+          <div class="overlay" id="centerOverlay"></div>
+        </div>
+      </div>
+
+      <div id="rightCard" class="card screenCard">
+        <div class="screenHeader">
+          <div class="left">
+            <div class="screenTitle">Écran droit (secondaire)</div>
+            <span class="pill">Image: <span id="rightName">—</span></span>
+          </div>
+          <div class="toolbar">
+            <button data-tool="hotspot">+ Hotspot</button>
+            <button data-tool="rect">+ Rectangle</button>
+            <button data-tool="text">+ Texte</button>
+          </div>
+        </div>
+        <div class="stageWrap" data-screen="right">
+          <img id="rightImg" alt="" />
+          <div class="overlay" id="rightOverlay"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="edgeBtn left" id="edgeLeft">◀</div>
+  <div class="edgeBtn right" id="edgeRight">▶</div>
+
+<script>
+(()=>{
+  "use strict";
+
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>document.querySelectorAll(s);
+
+  const file = $("#file");
+  const modeSel = $("#mode");
+  const hotspotVisSel = $("#hotspotVis");
+  const btnToggleLeft = $("#btnToggleLeft");
+  const btnToggleRight = $("#btnToggleRight");
+  const btnClearSel = $("#btnClearSel");
+  const btnExport = $("#btnExport");
+  const btnImport = $("#btnImport");
+  const btnReset = $("#btnReset");
+  const jsonTA = $("#json");
+  const libDiv = $("#lib");
+  const promptEl = $("#prompt");
+  const feedbackEl = $("#feedback");
+  const imgCountEl = $("#imgCount");
+  const editingNameEl = $("#editingName");
+  const edgeLeft = $("#edgeLeft");
+  const edgeRight = $("#edgeRight");
+  const screens = $("#screens");
+
+  let images = [];
+  let screenState = { left: null, center: null, right: null };
+  let editingImageId = null; // L'image qu'on est en train d'éditer
+  let showLeft = true;
+  let showRight = true;
+  let hotspotVisibility = "invisible";
+
+  let currentTool = null;
+  let selected = null;
+  let drawing = null;
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+  function setFeedback(msg, type){
+    feedbackEl.textContent = msg;
+    feedbackEl.className = type;
+  }
+
+  function updateLayoutClasses(){
+    screens.classList.toggle("show-left", showLeft);
+    screens.classList.toggle("show-right", showRight);
+    const lc = $("#leftCard"), rc = $("#rightCard");
+    lc.classList.toggle("hidden", !showLeft);
+    rc.classList.toggle("hidden", !showRight);
+  }
+
+  function getImageById(id){ return images.find(x=>x.id===id) || null; }
+
+  function setEditingImage(id){
+    editingImageId = id;
+    const im = getImageById(id);
+    editingNameEl.textContent = im ? im.name : "Aucune";
+    renderLibrary();
+    renderScreens();
+  }
+
+  function renderLibrary(){
+    imgCountEl.textContent = images.length;
+    libDiv.innerHTML = "";
+    
+    images.forEach(im=>{
+      const div = document.createElement("div");
+      div.className = "thumb";
+      if (editingImageId === im.id) div.classList.add("editing");
+
+      const img = document.createElement("img");
+      img.src = im.dataUrl;
+      
+      const cap = document.createElement("div");
+      cap.className = "cap";
+      cap.textContent = im.name;
+      
+      const status = document.createElement("div");
+      status.className = "status";
+      const screens = [];
+      if (screenState.left === im.id) screens.push("L");
+      if (screenState.center === im.id) screens.push("C");
+      if (screenState.right === im.id) screens.push("R");
+      status.textContent = screens.length ? `Sur: ${screens.join(", ")}` : "—";
+
+      div.appendChild(img);
+      div.appendChild(cap);
+      div.appendChild(status);
+      libDiv.appendChild(div);
+
+      // Clic gauche: sélectionner pour édition
+      div.addEventListener("click", (e)=>{
+        if (e.shiftKey || e.ctrlKey || e.metaKey) return;
+        setEditingImage(im.id);
+        setFeedback(`Édition de "${im.name}"`, "ok");
+      });
+      
+      // Menu contextuel: afficher sur écran
+      div.addEventListener("contextmenu", (e)=>{
+        e.preventDefault();
+        const scr = prompt("Afficher sur quel écran? (left/center/right)", "center");
+        if (scr && ["left","center","right"].includes(scr)){
+          screenState[scr] = im.id;
+          renderLibrary();
+          renderScreens();
+          setFeedback(`"${im.name}" sur ${scr}`, "ok");
+        }
+      });
+    });
+  }
+
+  function renderScreens(){
+    const isEdit = modeSel.value === "edit";
+    document.body.classList.toggle("mode-use", !isEdit);
+    
+    ["left","center","right"].forEach(screen=>{
+      const imgEl = $(`#${screen}Img`);
+      const nameEl = $(`#${screen}Name`);
+      const overlayEl = $(`#${screen}Overlay`);
+      const cardEl = $(`#${screen}Card`);
+
+      const imageId = screenState[screen];
+      const im = getImageById(imageId);
+      
+      // Marquer la card si on édite cette image
+      cardEl.classList.toggle("editing", editingImageId && editingImageId === imageId && isEdit);
+      
+      if (!im){
+        imgEl.src = "";
+        imgEl.style.display = "none";
+        nameEl.textContent = "—";
+        overlayEl.innerHTML = "";
+        return;
+      }
+
+      imgEl.src = im.dataUrl;
+      imgEl.style.display = "block";
+      nameEl.textContent = im.name;
+
+      overlayEl.innerHTML = "";
+      (im.items || []).forEach(it=>{
+        const div = document.createElement("div");
+        div.className = "item";
+        div.classList.add(it.type);
+
+        if (it.type === "hotspot" && hotspotVisibility === "invisible") div.classList.add("invisible");
+        if (selected && selected.imageId === im.id && selected.itemId === it.id) div.classList.add("selected");
+
+        div.dataset.imageId = im.id;
+        div.dataset.itemId = it.id;
+
+        const box = document.createElement("div");
+        box.className = "box";
+
+        let lbl = "";
+        if (it.type === "hotspot" && it.target){
+          const scr = it.target.screen || "?";
+          const tImg = getImageById(it.target.imageId);
+          lbl = tImg ? `→${scr}: ${tImg.name}` : `→${scr}`;
+        }
+        if (it.type === "rect") lbl = "rect";
+        if (it.type === "text") lbl = "txt";
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = lbl;
+
+        div.appendChild(box);
+        if (lbl) div.appendChild(label);
+
+        if (it.type === "text"){
+          const ta = document.createElement("textarea");
+          ta.value = it.text || "";
+          ta.readOnly = !isEdit;
+          ta.addEventListener("input", ()=>{ it.text = ta.value; });
+          div.appendChild(ta);
+        }
+
+        if (isEdit){
+          const nw = document.createElement("div"); nw.className = "handle h-nw"; div.appendChild(nw);
+          const ne = document.createElement("div"); ne.className = "handle h-ne"; div.appendChild(ne);
+          const sw = document.createElement("div"); sw.className = "handle h-sw"; div.appendChild(sw);
+          const se = document.createElement("div"); se.className = "handle h-se"; div.appendChild(se);
+        }
+
+        overlayEl.appendChild(div);
+        updateItemGeometry(div, it, screen);
+      });
+    });
+
+    attachItemInteractions();
+  }
+
+  function screenSizePx(screen){
+    const imgEl = $(`#${screen}Img`);
+    return { w: imgEl.offsetWidth || 1, h: imgEl.offsetHeight || 1 };
+  }
+
+  function pctToPx(pct, dim){ return (pct / 100) * dim; }
+  function pxToPct(px, dim){ return (px / dim) * 100; }
+
+  function updateItemGeometry(div, it, screen){
+    const { w, h } = screenSizePx(screen);
+    const xpx = pctToPx(it.x, w);
+    const ypx = pctToPx(it.y, h);
+    const wpx = pctToPx(it.w, w);
+    const hpx = pctToPx(it.h, h);
+
+    div.style.setProperty("--xpx", xpx + "px");
+    div.style.setProperty("--ypx", ypx + "px");
+    div.style.setProperty("--wpx", wpx + "px");
+    div.style.setProperty("--hpx", hpx + "px");
+  }
+
+  function getItemRef(imageId, itemId){
+    const im = getImageById(imageId);
+    if (!im) return null;
+    const it = im.items.find(x=>x.id === itemId);
+    if (!it) return null;
+    return { im, it };
+  }
+
+  function clearSelection(){
+    selected = null;
+    renderScreens();
+  }
+
+  function addItemToEditingImage(item){
+    if (!editingImageId){
+      setFeedback("Aucune image sélectionnée pour l'édition!", "ko");
+      return;
+    }
+    const im = getImageById(editingImageId);
+    if (!im) return;
+    im.items.push(item);
+    renderScreens();
+    setFeedback(`${item.type} ajouté à "${im.name}".`, "ok");
+  }
+
+  function promptTarget(){
+    const scr = prompt("Écran cible (left/center/right):", "center") || "center";
+    if (!["left","center","right"].includes(scr)) return { screen: "center", imageId: null };
+
+    const list = images.map((x, i) => `${i}: ${x.name}`).join("\n");
+    const raw = prompt(`Images:\n${list}\n\nNuméro de l'image cible (ou laisse vide):`, "");
+    const idx = parseInt(raw, 10);
+    const imageId = (idx >= 0 && images[idx]) ? images[idx].id : null;
+
+    return { screen: scr, imageId };
+  }
+
+  function attachItemInteractions(){
+    const isEdit = modeSel.value === "edit";
+    
+    $$(".item").forEach(div=>{
+      const imageId = div.dataset.imageId;
+      const itemId = div.dataset.itemId;
+      const ref = getItemRef(imageId, itemId);
+      if (!ref) return;
+      const { it } = ref;
+
+      if (it.type === "hotspot"){
+        div.style.cursor = isEdit ? "move" : "pointer";
+      }
+
+      if (!isEdit) return;
+
+      const box = div.querySelector(".box");
+      let dragState = null;
+
+      div.addEventListener("pointerdown", (e)=>{
+        if (e.target.closest("textarea")) return;
+        if (e.target.closest(".handle")) return;
+        e.stopPropagation();
+
+        selected = { imageId, itemId };
+        renderScreens();
+
+        const overlayEl = div.closest(".overlay");
+        const screen = overlayEl.closest("[data-screen]").dataset.screen;
+        const { w, h } = screenSizePx(screen);
+
+        dragState = {
+          mode: "move",
+          startX: e.clientX,
+          startY: e.clientY,
+          initX: it.x,
+          initY: it.y,
+          w, h
+        };
+
+        e.preventDefault();
+      });
+
+      $$(".handle", div).forEach(handle=>{
+        handle.addEventListener("pointerdown", (e)=>{
+          e.stopPropagation();
+          e.preventDefault();
+
+          const overlayEl = div.closest(".overlay");
+          const screen = overlayEl.closest("[data-screen]").dataset.screen;
+          const { w, h } = screenSizePx(screen);
+
+          let corner = "se";
+          if (handle.classList.contains("h-nw")) corner = "nw";
+          if (handle.classList.contains("h-ne")) corner = "ne";
+          if (handle.classList.contains("h-sw")) corner = "sw";
+
+          dragState = {
+            mode: "resize",
+            corner,
+            startX: e.clientX,
+            startY: e.clientY,
+            initX: it.x,
+            initY: it.y,
+            initW: it.w,
+            initH: it.h,
+            w, h
+          };
+        });
+      });
+
+      window.addEventListener("pointermove", (e)=>{
+        if (!dragState) return;
+        const dx = e.clientX - dragState.startX;
+        const dy = e.clientY - dragState.startY;
+
+        if (dragState.mode === "move"){
+          it.x = dragState.initX + pxToPct(dx, dragState.w);
+          it.y = dragState.initY + pxToPct(dy, dragState.h);
+        } else {
+          const c = dragState.corner;
+          if (c === "se"){
+            it.w = Math.max(5, dragState.initW + pxToPct(dx, dragState.w));
+            it.h = Math.max(5, dragState.initH + pxToPct(dy, dragState.h));
+          } else if (c === "sw"){
+            const newW = Math.max(5, dragState.initW - pxToPct(dx, dragState.w));
+            it.x = dragState.initX + dragState.initW - newW;
+            it.w = newW;
+            it.h = Math.max(5, dragState.initH + pxToPct(dy, dragState.h));
+          } else if (c === "ne"){
+            it.w = Math.max(5, dragState.initW + pxToPct(dx, dragState.w));
+            const newH = Math.max(5, dragState.initH - pxToPct(dy, dragState.h));
+            it.y = dragState.initY + dragState.initH - newH;
+            it.h = newH;
+          } else if (c === "nw"){
+            const newW = Math.max(5, dragState.initW - pxToPct(dx, dragState.w));
+            const newH = Math.max(5, dragState.initH - pxToPct(dy, dragState.h));
+            it.x = dragState.initX + dragState.initW - newW;
+            it.y = dragState.initY + dragState.initH - newH;
+            it.w = newW;
+            it.h = newH;
+          }
+        }
+
+        const overlayEl = div.closest(".overlay");
+        const screen = overlayEl.closest("[data-screen]").dataset.screen;
+        updateItemGeometry(div, it, screen);
+      });
+
+      window.addEventListener("pointerup", ()=>{
+        dragState = null;
+      });
+    });
+  }
+
+  // Tool buttons - attachés à tous les boutons de tous les écrans
+  $$("[data-tool]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if (!editingImageId){
+        setFeedback("Sélectionne d'abord une image à éditer dans la bibliothèque!", "ko");
+        return;
+      }
+      const tool = btn.dataset.tool;
+      currentTool = tool;
+      setFeedback(`Outil ${tool} activé. Dessine sur n'importe quel écran affichant l'image en édition.`, "");
+    });
+  });
+
+  function attachDrawingHandlers(screen){
+    const overlayEl = $(`#${screen}Overlay`);
+
+    overlayEl.addEventListener("pointerdown", (e)=>{
+      if (modeSel.value !== "edit") return;
+      if (!currentTool) return;
+      if (!editingImageId) return;
+      if (e.target.closest(".item")) return;
+      
+      // Vérifier que cet écran affiche l'image en édition
+      if (screenState[screen] !== editingImageId){
+        setFeedback(`Cet écran n'affiche pas l'image en édition!`, "ko");
+        return;
+      }
+
+      const rect = overlayEl.getBoundingClientRect();
+      const x0 = e.clientX - rect.left;
+      const y0 = e.clientY - rect.top;
+
+      const temp = document.createElement("div");
+      temp.className = "item " + currentTool;
+      temp.style.setProperty("--xpx", x0 + "px");
+      temp.style.setProperty("--ypx", y0 + "px");
+      temp.style.setProperty("--wpx", "0px");
+      temp.style.setProperty("--hpx", "0px");
+
+      const box = document.createElement("div");
+      box.className = "box";
+      temp.appendChild(box);
+      overlayEl.appendChild(temp);
+
+      drawing = { temp, x0, y0, screen };
+      e.preventDefault();
+    });
+
+    window.addEventListener("pointermove", (e)=>{
+      if (!drawing || !drawing.temp || drawing.screen !== screen) return;
+      const rect = overlayEl.getBoundingClientRect();
+      const xNow = e.clientX - rect.left;
+      const yNow = e.clientY - rect.top;
+
+      const wpx = Math.abs(xNow - drawing.x0);
+      const hpx = Math.abs(yNow - drawing.y0);
+      const xpx = Math.min(drawing.x0, xNow);
+      const ypx = Math.min(drawing.y0, yNow);
+
+      drawing.temp.style.setProperty("--xpx", xpx + "px");
+      drawing.temp.style.setProperty("--ypx", ypx + "px");
+      drawing.temp.style.setProperty("--wpx", wpx + "px");
+      drawing.temp.style.setProperty("--hpx", hpx + "px");
+    });
+
+    window.addEventListener("pointerup", ()=>{
+      if (!drawing || !drawing.temp || drawing.screen !== screen) return;
+
+      const wpx = parseFloat(drawing.temp.style.getPropertyValue("--wpx")) || 0;
+      const hpx = parseFloat(drawing.temp.style.getPropertyValue("--hpx")) || 0;
+
+      if (wpx < 5 || hpx < 5){
+        drawing.temp.remove();
+        drawing = null;
+        currentTool = null;
+        setFeedback("Zone trop petite, annulé.", "ko");
+        return;
+      }
+
+      const x0 = parseFloat(drawing.temp.style.getPropertyValue("--xpx")) || 0;
+      const y0 = parseFloat(drawing.temp.style.getPropertyValue("--ypx")) || 0;
+
+      if (drawing.temp) drawing.temp.remove();
+
+      const { w, h } = screenSizePx(screen);
+      const item = {
+        id: uid(),
+        type: currentTool,
+        x: pxToPct(x0, w),
+        y: pxToPct(y0, h),
+        w: pxToPct(wpx, w),
+        h: pxToPct(hpx, h),
+      };
+
+      if (currentTool === "text") item.text = "Texte...";
+      if (currentTool === "hotspot") item.target = promptTarget();
+
+      addItemToEditingImage(item);
+      drawing = null;
+      currentTool = null;
+    });
+  }
+
+  ["left","center","right"].forEach(attachDrawingHandlers);
+
+  // Hotspot clicks in use mode
+  $$(".overlay").forEach(ov=>{
+    ov.addEventListener("pointerdown", (e)=>{
+      if (e.target.closest(".item")) return;
+      if (modeSel.value==="edit") clearSelection();
+    });
+    
+    ov.addEventListener("click", (e)=>{
+      if (modeSel.value !== "use") return;
+      
+      let itemEl = e.target.closest(".item.hotspot");
+      
+      if (!itemEl && e.target.classList.contains("overlay")) {
+        const rect = ov.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const hotspots = ov.querySelectorAll(".item.hotspot");
+        
+        hotspots.forEach((hs) => {
+          const hsRect = hs.getBoundingClientRect();
+          const overlayRect = ov.getBoundingClientRect();
+          const hsX = hsRect.left - overlayRect.left;
+          const hsY = hsRect.top - overlayRect.top;
+          const hsW = hsRect.width;
+          const hsH = hsRect.height;
+          
+          if (x >= hsX && x <= hsX + hsW && y >= hsY && y <= hsY + hsH) {
+            itemEl = hs;
+          }
+        });
+      }
+      
+      if (!itemEl) return;
+      
+      e.stopPropagation();
+      
+      const imageId = itemEl.dataset.imageId;
+      const itemId = itemEl.dataset.itemId;
+      const ref = getItemRef(imageId, itemId);
+      
+      if (!ref) return;
+      
+      const it = ref.it;
+      
+      itemEl.classList.add("clicked");
+      setTimeout(()=>itemEl.classList.remove("clicked"), 300);
+      
+      if (!it.target) {
+        setFeedback("Hotspot sans cible définie.", "ko");
+        return;
+      }
+      
+      const targetScreen = it.target.screen;
+      const targetImageId = it.target.imageId;
+      
+      if (!targetScreen || !["left","center","right"].includes(targetScreen)){
+        setFeedback("Écran cible invalide.", "ko");
+        return;
+      }
+      
+      if (targetScreen === "left" && !showLeft){
+        showLeft = true;
+        updateLayoutClasses();
+      }
+      if (targetScreen === "right" && !showRight){
+        showRight = true;
+        updateLayoutClasses();
+      }
+      
+      if (targetImageId){
+        const targetImage = getImageById(targetImageId);
+        if (targetImage){
+          screenState[targetScreen] = targetImageId;
+          renderScreens();
+          setFeedback(`Navigation: ${targetImage.name} sur ${targetScreen}`, "ok");
+        } else {
+          setFeedback("Image cible introuvable.", "ko");
+        }
+      } else {
+        setFeedback(`Navigation vers écran ${targetScreen}`, "ok");
+      }
+    });
+  });
+
+  // Keyboard shortcuts
+  window.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape"){
+      currentTool = null; drawing = null;
+      setFeedback("Outil annulé.", "");
+    }
+    if ((e.key === "Delete" || e.key === "Backspace") && modeSel.value==="edit"){
+      if (!selected) return;
+      const ref = getItemRef(selected.imageId, selected.itemId);
+      if (!ref) return;
+      ref.im.items = ref.im.items.filter(x=>x.id !== selected.itemId);
+      selected = null;
+      renderScreens();
+      setFeedback("Élément supprimé.", "ok");
+    }
+  });
+
+  btnToggleLeft.addEventListener("click", ()=>{ showLeft = !showLeft; updateLayoutClasses(); });
+  btnToggleRight.addEventListener("click", ()=>{ showRight = !showRight; updateLayoutClasses(); });
+  edgeLeft.addEventListener("click", ()=>{ showLeft = !showLeft; updateLayoutClasses(); });
+  edgeRight.addEventListener("click", ()=>{ showRight = !showRight; updateLayoutClasses(); });
+
+  btnClearSel.addEventListener("click", ()=>{ clearSelection(); setFeedback("Sélection effacée.", ""); });
+
+  modeSel.addEventListener("change", ()=>{
+    updatePrompt();
+    renderScreens();
+  });
+
+  hotspotVisSel.addEventListener("change", ()=>{
+    hotspotVisibility = hotspotVisSel.value;
+    renderScreens();
+  });
+
+  function updatePrompt(){
+    if (modeSel.value === "edit"){
+      promptEl.textContent = "Édition: sélectionne une image, puis ajoute des hotspots/rectangles/textes.";
+      setFeedback("", "");
+    } else {
+      promptEl.textContent = "Utilisation: clique les hotspots pour naviguer.";
+      setFeedback("", "");
+    }
+  }
+
+  // Add images - N'assigne AUCUN écran automatiquement
+  file.addEventListener("change", async ()=>{
+    const files = [...(file.files || [])];
+    if (!files.length) return;
+
+    for (const f of files){
+      const dataUrl = await new Promise((res, rej)=>{
+        const fr = new FileReader();
+        fr.onload = ()=>res(fr.result);
+        fr.onerror = ()=>rej(new Error("read"));
+        fr.readAsDataURL(f);
+      });
+      images.push({ id: uid(), name: f.name, dataUrl, items: [] });
+    }
+
+    // Sélectionner automatiquement la première image pour édition
+    if (!editingImageId && images.length > 0){
+      setEditingImage(images[0].id);
+    }
+
+    renderLibrary();
+    renderScreens();
+    setFeedback("Images ajoutées. Clic droit sur une image pour l'afficher sur un écran.", "ok");
+  });
+
+  btnExport.addEventListener("click", ()=>{
+    const payload = {
+      v: 1,
+      images,
+      screenState,
+      showLeft, showRight,
+      ui: { hotspotVisibility }
+    };
+    jsonTA.value = JSON.stringify(payload, null, 2);
+    setFeedback("Export JSON OK.", "ok");
+  });
+
+  btnImport.addEventListener("click", ()=>{
+    try{
+      const p = JSON.parse(jsonTA.value || "");
+      if (!p || !Array.isArray(p.images)) throw new Error("format");
+
+      for (const im of p.images){
+        if (!im || typeof im.id!=="string" || typeof im.name!=="string" || typeof im.dataUrl!=="string") throw new Error("image");
+        if (!Array.isArray(im.items)) im.items = [];
+        for (const it of im.items){
+          if (!it || typeof it.id!=="string" || typeof it.type!=="string") throw new Error("item");
+          if (typeof it.x!=="number" || typeof it.y!=="number" || typeof it.w!=="number" || typeof it.h!=="number") throw new Error("geom");
+          if (it.type==="text" && typeof it.text!=="string") it.text = "";
+          if (it.type==="hotspot"){
+            if (!it.target || typeof it.target.screen!=="string") it.target = {screen:"center", imageId:null};
+          }
+        }
+      }
+
+      images = p.images;
+      screenState = p.screenState || {left:null, center:null, right:null};
+      showLeft = !!p.showLeft;
+      showRight = !!p.showRight;
+
+      hotspotVisibility = (p.ui && (p.ui.hotspotVisibility==="visible" || p.ui.hotspotVisibility==="invisible"))
+        ? p.ui.hotspotVisibility
+        : "invisible";
+      hotspotVisSel.value = hotspotVisibility;
+
+      updateLayoutClasses();
+      renderLibrary();
+      renderScreens();
+      setFeedback("Import JSON OK.", "ok");
+    } catch(err){
+      setFeedback("Import impossible: JSON invalide.", "ko");
+    }
+  });
+
+  btnReset.addEventListener("click", ()=>{
+    const ok = confirm("Reset complet ?");
+    if (!ok) return;
+    images = [];
+    screenState = { left:null, center:null, right:null };
+    editingImageId = null;
+    selected = null;
+    renderLibrary();
+    renderScreens();
+    setFeedback("Reset OK.", "ok");
+  });
+
+  window.addEventListener("contextmenu", (e)=>{
+    const itEl = e.target.closest(".item");
+    if (!itEl) return;
+    e.preventDefault();
+    if (modeSel.value !== "edit") return;
+
+    const imageId = itEl.dataset.imageId;
+    const itemId = itEl.dataset.itemId;
+    const ref = getItemRef(imageId, itemId);
+    if (!ref) return;
+    const { it } = ref;
+
+    if (it.type === "hotspot"){
+      const action = prompt("Hotspot: (1) changer cible, (2) supprimer. Tape 1 ou 2", "1");
+      if (action === "2"){
+        ref.im.items = ref.im.items.filter(x=>x.id !== itemId);
+        selected = null;
+        renderScreens();
+        setFeedback("Hotspot supprimé.", "ok");
+        return;
+      }
+      if (action === "1"){
+        it.target = promptTarget();
+        setFeedback("Cible hotspot mise à jour.", "ok");
+        renderScreens();
+      }
+    } else {
+      const action = prompt("Élément: (1) supprimer. Tape 1", "1");
+      if (action === "1"){
+        ref.im.items = ref.im.items.filter(x=>x.id !== itemId);
+        selected = null;
+        renderScreens();
+        setFeedback("Élément supprimé.", "ok");
+      }
+    }
+  });
+
+  updateLayoutClasses();
+  renderLibrary();
+  renderScreens();
+  updatePrompt();
+})();
+</script>
+</body>
+</html>

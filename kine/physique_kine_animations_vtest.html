@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animations Physique Ultra-Détaillées - Kinésithérapie</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9));
+            border-radius: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+            top: -50%;
+            left: -50%;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 1.4em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 2px solid rgba(102, 126, 234, 0.4);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: rgba(102, 126, 234, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animation-block {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .block-title {
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto 30px;
+            border-radius: 15px;
+            background: rgba(0,0,0,0.7);
+            box-shadow: 
+                0 15px 35px rgba(0,0,0,0.5),
+                inset 0 0 50px rgba(102, 126, 234, 0.1);
+            border: 3px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(102, 126, 234, 0.25);
+        }
+
+        .control-label {
+            display: block;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .control-value {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 6px 18px;
+            border-radius: 20px;
+            margin-left: 12px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.8);
+            transition: all 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .data-card {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .data-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .data-value {
+            font-size: 1.8em;
+            font-weight: 900;
+            color: #667eea;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            border-left: 5px solid #667eea;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .info-panel h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+        }
+
+        .equation {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 18px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            margin: 18px 0;
+            border: 2px solid rgba(102, 126, 234, 0.4);
+            color: #4facfe;
+            font-weight: 600;
+        }
+
+        .info-panel ul {
+            list-style: none;
+            line-height: 2;
+        }
+
+        .info-panel li::before {
+            content: "▸ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .legend {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 24px;
+            border-radius: 25px;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2em; }
+            .controls { grid-template-columns: 1fr; }
+            canvas { max-width: 100%; height: auto !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚛️ PHYSIQUE INTERACTIVE</h1>
+            <p class="subtitle">Animations Ultra-Détaillées | Kinésithérapie Bloc 1</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab active" data-section="cinematique">📐 Cinématique</button>
+            <button class="tab" data-section="forces">⚡ Forces</button>
+            <button class="tab" data-section="energie">🔋 Énergie</button>
+            <button class="tab" data-section="fluides">💧 Fluides</button>
+        </div>
+
+        <!-- CINÉMATIQUE -->
+        <div id="cinematique" class="section active">
+            <div class="animation-block">
+                <h2 class="block-title">🎯 Mouvement Parabolique (MRUA)</h2>
+                <canvas id="mruaCanvas" width="1400" height="700"></canvas>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label class="control-label">
+                            Vitesse initiale (v₀)
+                            <span class="control-value" id="v0Val">20.0</span> m/s
+                        </label>
+                        <input type="range" id="v0Slider" min="5" max="50" step="1" value="20">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            Angle (θ)
+                            <span class="control-value" id="angleVal">45</span>°
+                        </label>
+                        <input type="range" id="angleSlider" min="15" max="75" step="5" value="45">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            Gravité (g)
+                            <span class="control-value" id="gVal">9.81</span> m/s²
+                        </label>
+                        <input type="range" id="gSlider" min="1" max="20" step="0.5" value="9.81">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" id="btnLaunchMRUA">🚀 LANCER</button>
+                    <button class="btn btn-secondary" id="btnResetMRUA">🔄 RESET</button>
+                    <button class="btn btn-success" id="btnToggleVectors">📊 Vecteurs</button>
+                </div>
+
+                <div class="data-grid">
+                    <div class="data-card"><div class="data-label">Temps vol</div><div class="data-value" id="timeVal">0.00 s</div></div>
+                    <div class="data-card"><div class="data-label">Hauteur max</div><div class="data-value" id="maxHeightVal">0.0 m</div></div>
+                    <div class="data-card"><div class="data-label">Portée</div><div class="data-value" id="rangeVal">0.0 m</div></div>
+                    <div class="data-card"><div class="data-label">Vitesse</div><div class="data-value" id="velVal">0.0 m/s</div></div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-color" style="background: #ff6b6b;"></div><span>Vecteur vitesse</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: #4ecdc4;"></div><span>Vecteur accélération</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: #ffe66d;"></div><span>Trajectoire</span></div>
+                </div>
+
+                <div class="info-panel">
+                    <h3>📚 Équations du mouvement parabolique</h3>
+                    <div class="equation">x(t) = v₀ cos(θ) · t</div>
+                    <div class="equation">y(t) = v₀ sin(θ) · t - ½gt²</div>
+                    <div class="equation">Portée = (v₀² sin(2θ)) / g</div>
+                    <div class="equation">Hauteur max = (v₀² sin²(θ)) / (2g)</div>
+                    <ul>
+                        <li><strong>Angle optimal</strong> : 45° pour portée maximale (sans résistance air)</li>
+                        <li><strong>Application kiné</strong> : analyse du saut, lancer de balle, biomécanique sportive</li>
+                        <li><strong>Composantes</strong> : mouvement horizontal uniforme + mouvement vertical accéléré</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORCES -->
+        <div id="forces" class="section">
+            <div class="animation-block">
+                <h2 class="block-title">⚡ Plan Incliné & Décomposition Forces</h2>
+                <canvas id="forcesCanvas" width="1400" height="700"></canvas>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label class="control-label">
+                            Angle plan (θ)
+                            <span class="control-value" id="planeAngleVal">30</span>°
+                        </label>
+                        <input type="range" id="planeAngleSlider" min="10" max="60" step="5" value="30">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            Masse (m)
+                            <span class="control-value" id="massVal">10.0</span> kg
+                        </label>
+                        <input type="range" id="massSlider" min="1" max="30" step="1" value="10">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            Friction (μ)
+                            <span class="control-value" id="muVal">0.3</span>
+                        </label>
+                        <input type="range" id="muSlider" min="0" max="1" step="0.05" value="0.3">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" id="btnSimulatePlane">▶️ SIMULER</button>
+                    <button class="btn btn-secondary" id="btnResetPlane">🔄 RESET</button>
+                </div>
+
+                <div class="data-grid">
+                    <div class="data-card"><div class="data-label">Poids (W)</div><div class="data-value" id="weightVal">0.0 N</div></div>
+                    <div class="data-card"><div class="data-label">Normale (N)</div><div class="data-value" id="normalVal">0.0 N</div></div>
+                    <div class="data-card"><div class="data-label">W sin θ</div><div class="data-value" id="parVal">0.0 N</div></div>
+                    <div class="data-card"><div class="data-label">Friction (f)</div><div class="data-value" id="fricVal">0.0 N</div></div>
+                    <div class="data-card"><div class="data-label">F résultante</div><div class="data-value" id="netVal">0.0 N</div></div>
+                    <div class="data-card"><div class="data-label">Accélération</div><div class="data-value" id="accelVal">0.0 m/s²</div></div>
+                </div>
+
+                <div class="info-panel">
+                    <h3>📚 Décomposition des forces</h3>
+                    <div class="equation">W = mg (Poids)</div>
+                    <div class="equation">W_∥ = mg sin θ (Composante parallèle)</div>
+                    <div class="equation">N = mg cos θ (Force normale)</div>
+                    <div class="equation">f = μN (Force de friction)</div>
+                    <div class="equation">F_net = W_∥ - f → a = F_net/m</div>
+                    <ul>
+                        <li><strong>Équilibre</strong> : F_net = 0 (objet immobile ou vitesse constante)</li>
+                        <li><strong>Application kiné</strong> : rééducation sur plan incliné, exercices en pente</li>
+                        <li><strong>Friction</strong> : résistance au glissement, dépend de μ (nature des surfaces)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ÉNERGIE -->
+        <div id="energie" class="section">
+            <div class="animation-block">
+                <h2 class="block-title">🔋 Pendule & Conservation Énergie</h2>
+                <canvas id="energieCanvas" width="1400" height="700"></canvas>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label class="control-label">
+                            Longueur (L)
+                            <span class="control-value" id="lengthVal">3.0</span> m
+                        </label>
+                        <input type="range" id="lengthSlider" min="1" max="5" step="0.5" value="3">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            Angle initial (θ₀)
+                            <span class="control-value" id="theta0Val">60</span>°
+                        </label>
+                        <input type="range" id="theta0Slider" min="15" max="85" step="5" value="60">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" id="btnLaunchPendulum">▶️ LANCER</button>
+                    <button class="btn btn-secondary" id="btnResetPendulum">🔄 RESET</button>
+                </div>
+
+                <div class="data-grid">
+                    <div class="data-card"><div class="data-label">Angle θ</div><div class="data-value" id="thetaPVal">0°</div></div>
+                    <div class="data-card"><div class="data-label">Vitesse</div><div class="data-value" id="velPVal">0.0 m/s</div></div>
+                    <div class="data-card"><div class="data-label">E_cinétique</div><div class="data-value" id="kePVal">0.0 J</div></div>
+                    <div class="data-card"><div class="data-label">E_potentielle</div><div class="data-value" id="pePVal">0.0 J</div></div>
+                    <div class="data-card"><div class="data-label">E_totale</div><div class="data-value" id="tePVal">0.0 J</div></div>
+                </div>
+
+                <div class="info-panel">
+                    <h3>📚 Conservation de l'énergie mécanique</h3>
+                    <div class="equation">E_mécanique = E_cin + E_pot = constante</div>
+                    <div class="equation">E_cin = ½mv² | E_pot = mgh</div>
+                    <div class="equation">Au point haut : E_pot max, E_cin = 0</div>
+                    <div class="equation">Au point bas : E_cin max, E_pot = 0</div>
+                    <ul>
+                        <li><strong>Transformation</strong> : échange continu énergie potentielle ↔ cinétique</li>
+                        <li><strong>Application kiné</strong> : analyse de la marche (centre de masse oscille comme pendule)</li>
+                        <li><strong>Rendement</strong> : récupération élastique d'énergie lors de la locomotion</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLUIDES -->
+        <div id="fluides" class="section">
+            <div class="animation-block">
+                <h2 class="block-title">💧 Loi de Poiseuille & Écoulement Sanguin</h2>
+                <canvas id="fluidesCanvas" width="1400" height="700"></canvas>
+                
+                <div class="controls">
+                    <div class="control-group">
+                        <label class="control-label">
+                            Rayon (r)
+                            <span class="control-value" id="radiusVal">5.0</span> mm
+                        </label>
+                        <input type="range" id="radiusSlider" min="1" max="10" step="0.5" value="5">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            ΔPression (ΔP)
+                            <span class="control-value" id="pressureVal">100</span> Pa
+                        </label>
+                        <input type="range" id="pressureSlider" min="10" max="300" step="10" value="100">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">
+                            Viscosité (η)
+                            <span class="control-value" id="viscVal">4.0</span> mPa·s
+                        </label>
+                        <input type="range" id="viscSlider" min="1" max="10" step="0.5" value="4">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" id="btnStartFlow">▶️ ÉCOULEMENT</button>
+                    <button class="btn btn-secondary" id="btnStopFlow">⏸ PAUSE</button>
+                </div>
+
+                <div class="data-grid">
+                    <div class="data-card"><div class="data-label">Débit (Q)</div><div class="data-value" id="flowVal">0.0 mL/s</div></div>
+                    <div class="data-card"><div class="data-label">Vitesse moy</div><div class="data-value" id="avgVelVal">0.0 cm/s</div></div>
+                    <div class="data-card"><div class="data-label">Résistance</div><div class="data-value" id="resistVal">0.0 Pa·s/mL</div></div>
+                    <div class="data-card"><div class="data-label">Reynolds</div><div class="data-value" id="reynoldsVal">0</div></div>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-color" style="background: #ff6b6b;"></div><span>Particules de sang</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: #ffe66d;"></div><span>Centre (v_max)</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: #4ecdc4;"></div><span>Lignes de courant</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background: #4facfe;"></div><span>Profil parabolique</span></div>
+                </div>
+
+                <div class="info-panel">
+                    <h3>📚 Loi de Poiseuille (écoulement laminaire)</h3>
+                    <div class="equation">Q = (πΔPr⁴)/(8ηL)</div>
+                    <div class="equation">R = 8ηL/(πr⁴) (Résistance hydraulique)</div>
+                    <div class="equation">Re = ρvD/η (Nombre de Reynolds)</div>
+                    <ul>
+                        <li><strong>CRITIQUE</strong> : Dépendance en r⁴ ! Diviser r par 2 → Q divisé par 16</li>
+                        <li><strong>Application kiné</strong> : compression vasculaire, drainage lymphatique</li>
+                        <li><strong>Laminaire si Re < 2000</strong> : lignes de courant parallèles, résistance minimale</li>
+                        <li><strong>Pathologie</strong> : athérosclérose (↓r) → ↑↑résistance → ↓↓débit</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== GESTION NAVIGATION =====
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                
+                document.getElementById(sectionId).classList.add('active');
+                this.classList.add('active');
+            });
+        });
+
+        // ===== CINÉMATIQUE (MRUA) =====
+        let mruaActive = false;
+        let mruaTime = 0;
+        let mruaTrajectory = [];
+        let showVecs = true;
+
+        const v0Slider = document.getElementById('v0Slider');
+        const angleSlider = document.getElementById('angleSlider');
+        const gSlider = document.getElementById('gSlider');
+
+        v0Slider.oninput = () => document.getElementById('v0Val').textContent = v0Slider.value + '.0';
+        angleSlider.oninput = () => document.getElementById('angleVal').textContent = angleSlider.value;
+        gSlider.oninput = () => document.getElementById('gVal').textContent = gSlider.value;
+
+        document.getElementById('btnLaunchMRUA').addEventListener('click', () => {
+            mruaActive = true;
+            mruaTime = 0;
+            mruaTrajectory = [];
+        });
+
+        document.getElementById('btnResetMRUA').addEventListener('click', () => {
+            mruaActive = false;
+            mruaTime = 0;
+            mruaTrajectory = [];
+        });
+
+        document.getElementById('btnToggleVectors').addEventListener('click', () => {
+            showVecs = !showVecs;
+        });
+
+        function animateMRUA() {
+            const canvas = document.getElementById('mruaCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, hCanvas = canvas.height;
+
+            // Fond + grille
+            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillRect(0, 0, w, hCanvas);
+            
+            ctx.strokeStyle = 'rgba(102,126,234,0.15)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 70) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, hCanvas); ctx.stroke();
+            }
+            for (let y = 0; y < hCanvas; y += 70) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(100, hCanvas - 80); ctx.lineTo(w - 100, hCanvas - 80); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(100, hCanvas - 80); ctx.lineTo(100, 80); ctx.stroke();
+
+            ctx.fillStyle = '#fff';
+            ctx.font = '18px monospace';
+            ctx.fillText('x (m)', w - 150, hCanvas - 50);
+            ctx.fillText('y (m)', 120, 100);
+
+            if (mruaActive) {
+                mruaTime += 0.03;
+            }
+
+            const v0 = parseFloat(v0Slider.value);
+            const angle = parseFloat(angleSlider.value) * Math.PI / 180;
+            const g = parseFloat(gSlider.value);
+
+            const x = v0 * Math.cos(angle) * mruaTime;
+            const y = v0 * Math.sin(angle) * mruaTime - 0.5 * g * mruaTime * mruaTime;
+
+            const vx = v0 * Math.cos(angle);
+            const vy = v0 * Math.sin(angle) - g * mruaTime;
+            const v = Math.sqrt(vx*vx + vy*vy);
+
+            const scale = 15;
+            const px = 100 + x * scale;
+            const py = hCanvas - 80 - y * scale;
+
+            if (y >= 0 && mruaActive) {
+                mruaTrajectory.push({x: px, y: py});
+                if (mruaTrajectory.length > 600) mruaTrajectory.shift();
+            }
+
+            // Trajectoire
+            if (mruaTrajectory.length > 1) {
+                ctx.strokeStyle = '#ffe66d';
+                ctx.lineWidth = 4;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffe66d';
+                ctx.beginPath();
+                ctx.moveTo(mruaTrajectory[0].x, mruaTrajectory[0].y);
+                mruaTrajectory.forEach(p => ctx.lineTo(p.x, p.y));
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+
+            // Projectile
+            if (y >= 0) {
+                ctx.fillStyle = '#fff';
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = '#667eea';
+                ctx.beginPath();
+                ctx.arc(px, py, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Vecteurs
+                if (showVecs) {
+                    const vs = 8;
+                    // Vitesse
+                    ctx.strokeStyle = '#ff6b6b';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(px + vx*vs, py - vy*vs);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.font = 'bold 16px monospace';
+                    ctx.fillText('v', px + vx*vs + 15, py - vy*vs);
+
+                    // Accélération
+                    ctx.strokeStyle = '#4ecdc4';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(px, py);
+                    ctx.lineTo(px, py + g*5);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#4ecdc4';
+                    ctx.fillText('g', px + 15, py + g*5);
+                }
+            } else {
+                mruaActive = false;
+            }
+
+            // Données
+            const tFlight = 2 * v0 * Math.sin(angle) / g;
+            const hMax = (v0*v0 * Math.sin(angle)*Math.sin(angle)) / (2*g);
+            const range = (v0*v0 * Math.sin(2*angle)) / g;
+
+            document.getElementById('timeVal').textContent = mruaTime.toFixed(2) + ' s';
+            document.getElementById('maxHeightVal').textContent = hMax.toFixed(1) + ' m';
+            document.getElementById('rangeVal').textContent = range.toFixed(1) + ' m';
+            document.getElementById('velVal').textContent = v.toFixed(1) + ' m/s';
+
+            requestAnimationFrame(animateMRUA);
+        }
+
+        // ===== FORCES (Plan incliné) =====
+        let planeActive = false;
+        let planePos = 0;
+        let planeVel = 0;
+
+        const planeAngleSlider = document.getElementById('planeAngleSlider');
+        const massSlider = document.getElementById('massSlider');
+        const muSlider = document.getElementById('muSlider');
+
+        planeAngleSlider.oninput = () => document.getElementById('planeAngleVal').textContent = planeAngleSlider.value;
+        massSlider.oninput = () => document.getElementById('massVal').textContent = massSlider.value + '.0';
+        muSlider.oninput = () => document.getElementById('muVal').textContent = muSlider.value;
+
+        document.getElementById('btnSimulatePlane').addEventListener('click', () => {
+            planeActive = true;
+            planePos = 0;
+            planeVel = 0;
+        });
+
+        document.getElementById('btnResetPlane').addEventListener('click', () => {
+            planeActive = false;
+            planePos = 0;
+            planeVel = 0;
+        });
+
+        function animateForces() {
+            const canvas = document.getElementById('forcesCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, hCanvas = canvas.height;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillRect(0, 0, w, hCanvas);
+
+            const angle = parseFloat(planeAngleSlider.value) * Math.PI / 180;
+            const mass = parseFloat(massSlider.value);
+            const mu = parseFloat(muSlider.value);
+            const g = 9.81;
+
+            const weight = mass * g;
+            const normal = weight * Math.cos(angle);
+            const parallel = weight * Math.sin(angle);
+            const friction = mu * normal;
+            const netForce = parallel - friction;
+            const accel = netForce / mass;
+
+            if (planeActive) {
+                planeVel += accel * 0.02;
+                planePos += planeVel * 0.02;
+                if (planePos < 0) {
+                    planePos = 0;
+                    planeVel = 0;
+                }
+            }
+
+            // Plan
+            ctx.save();
+            ctx.translate(200, hCanvas - 150);
+
+            ctx.strokeStyle = 'rgba(102,126,234,0.5)';
+            ctx.fillStyle = 'rgba(102,126,234,0.15)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(1000, 0);
+            ctx.lineTo(1000, -1000 * Math.tan(angle));
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Objet
+            const ox = 150 + planePos * 80;
+            const oy = -ox * Math.tan(angle);
+
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = '#667eea';
+            ctx.fillRect(ox - 35, oy - 35, 70, 70);
+            ctx.shadowBlur = 0;
+
+            // Vecteurs forces
+            const fs = 2.5;
+
+            // Poids
+            ctx.strokeStyle = '#ff6b6b';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(ox, oy + weight*fs);
+            ctx.stroke();
+            ctx.fillStyle = '#ff6b6b';
+            ctx.font = 'bold 18px monospace';
+            ctx.fillText('W', ox + 15, oy + weight*fs/2);
+
+            // Normale
+            ctx.strokeStyle = '#4ecdc4';
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(ox - normal*fs*Math.sin(angle), oy - normal*fs*Math.cos(angle));
+            ctx.stroke();
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillText('N', ox - 40, oy - 40);
+
+            // Friction
+            ctx.strokeStyle = '#ffe66d';
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(ox - friction*fs*Math.cos(angle), oy + friction*fs*Math.sin(angle));
+            ctx.stroke();
+            ctx.fillStyle = '#ffe66d';
+            ctx.fillText('f', ox - 70, oy + 15);
+
+            ctx.restore();
+
+            // Données
+            document.getElementById('weightVal').textContent = weight.toFixed(1) + ' N';
+            document.getElementById('normalVal').textContent = normal.toFixed(1) + ' N';
+            document.getElementById('parVal').textContent = parallel.toFixed(1) + ' N';
+            document.getElementById('fricVal').textContent = friction.toFixed(1) + ' N';
+            document.getElementById('netVal').textContent = netForce.toFixed(1) + ' N';
+            document.getElementById('accelVal').textContent = accel.toFixed(2) + ' m/s²';
+
+            requestAnimationFrame(animateForces);
+        }
+
+        // ===== ÉNERGIE (Pendule) =====
+        let pendActive = false;
+        let pendTheta = 0;
+        let pendOmega = 0;
+
+        const lengthSlider = document.getElementById('lengthSlider');
+        const theta0Slider = document.getElementById('theta0Slider');
+
+        lengthSlider.oninput = () => document.getElementById('lengthVal').textContent = lengthSlider.value;
+        theta0Slider.oninput = () => document.getElementById('theta0Val').textContent = theta0Slider.value;
+
+        document.getElementById('btnLaunchPendulum').addEventListener('click', () => {
+            pendActive = true;
+            pendTheta = parseFloat(theta0Slider.value) * Math.PI / 180;
+            pendOmega = 0;
+        });
+
+        document.getElementById('btnResetPendulum').addEventListener('click', () => {
+            pendActive = false;
+            pendTheta = 0;
+            pendOmega = 0;
+        });
+
+        function animateEnergie() {
+            const canvas = document.getElementById('energieCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, hCanvas = canvas.height;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.8)';
+            ctx.fillRect(0, 0, w, hCanvas);
+
+            const L = parseFloat(lengthSlider.value) * 80;
+            const mass = 2;
+            const g = 9.81;
+
+            const cx = w / 2;
+            const cy = 150;
+
+            if (pendActive) {
+                const alpha = -(g / (L/80)) * Math.sin(pendTheta);
+                pendOmega += alpha * 0.02;
+                pendTheta += pendOmega * 0.02;
+            }
+
+            const px = cx + L * Math.sin(pendTheta);
+            const py = cy + L * Math.cos(pendTheta);
+
+            // Fil
+            ctx.strokeStyle = 'rgba(102,126,234,0.6)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(px, py);
+            ctx.stroke();
+
+            // Support
+            ctx.fillStyle = '#888';
+            ctx.fillRect(cx - 50, cy - 20, 100, 20);
+
+            // Masse
+            ctx.fillStyle = '#fff';
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = '#667eea';
+            ctx.beginPath();
+            ctx.arc(px, py, 25, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Énergies
+            const heightPend = L/80 * (1 - Math.cos(pendTheta));
+            const v = pendOmega * L/80;
+            const ke = 0.5 * mass * v * v;
+            const pe = mass * g * heightPend;
+            const te = ke + pe;
+
+            // Barres énergie
+            const barX = 100;
+            const barY = hCanvas - 200;
+            const barW = 60;
+
+            ctx.fillStyle = 'rgba(255,107,107,0.3)';
+            ctx.fillRect(barX, barY - ke*5, barW, ke*5);
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(barX, barY - ke*5, barW, 3);
+            ctx.font = 'bold 14px monospace';
+            ctx.fillText('E_cin', barX, barY + 30);
+
+            ctx.fillStyle = 'rgba(78,205,196,0.3)';
+            ctx.fillRect(barX + 100, barY - pe*5, barW, pe*5);
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(barX + 100, barY - pe*5, barW, 3);
+            ctx.fillText('E_pot', barX + 100, barY + 30);
+
+            ctx.fillStyle = 'rgba(255,230,109,0.3)';
+            ctx.fillRect(barX + 200, barY - te*5, barW, te*5);
+            ctx.fillStyle = '#ffe66d';
+            ctx.fillRect(barX + 200, barY - te*5, barW, 3);
+            ctx.fillText('E_tot', barX + 200, barY + 30);
+
+            // Données
+            document.getElementById('thetaPVal').textContent = (pendTheta * 180/Math.PI).toFixed(0) + '°';
+            document.getElementById('velPVal').textContent = v.toFixed(2) + ' m/s';
+            document.getElementById('kePVal').textContent = ke.toFixed(1) + ' J';
+            document.getElementById('pePVal').textContent = pe.toFixed(1) + ' J';
+            document.getElementById('tePVal').textContent = te.toFixed(1) + ' J';
+
+            requestAnimationFrame(animateEnergie);
+        }
+
+        // ===== FLUIDES (Poiseuille) =====
+        let flowActive = false;
+        let particles = [];
+
+        const radiusSlider = document.getElementById('radiusSlider');
+        const pressureSlider = document.getElementById('pressureSlider');
+        const viscSlider = document.getElementById('viscSlider');
+
+        radiusSlider.oninput = () => document.getElementById('radiusVal').textContent = radiusSlider.value;
+        pressureSlider.oninput = () => document.getElementById('pressureVal').textContent = pressureSlider.value;
+        viscSlider.oninput = () => document.getElementById('viscVal').textContent = viscSlider.value;
+
+        document.getElementById('btnStartFlow').addEventListener('click', () => {
+            flowActive = true;
+            if (particles.length === 0) {
+                const r = parseFloat(radiusSlider.value) * 10;
+                for (let i = 0; i < 120; i++) {
+                    particles.push({
+                        x: Math.random() * 1000 + 150,  // Position horizontale (gauche-droite)
+                        y: (Math.random() * 2 - 1) * r * 0.95,  // Distance du centre du tube (vertical)
+                        r: Math.random() * 2 + 2,
+                        trail: []
+                    });
+                }
+            }
+        });
+
+        document.getElementById('btnStopFlow').addEventListener('click', () => {
+            flowActive = false;
+        });
+
+        function animateFluides() {
+            const canvas = document.getElementById('fluidesCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, hCanvas = canvas.height;
+
+            ctx.fillStyle = 'rgba(0,0,0,0.85)';
+            ctx.fillRect(0, 0, w, hCanvas);
+
+            const r = parseFloat(radiusSlider.value) * 10;
+            const dP = parseFloat(pressureSlider.value);
+            const visc = parseFloat(viscSlider.value);
+            const L = 1000;
+
+            // Loi de Poiseuille
+            const Q = (Math.PI * dP * Math.pow(r/10, 4)) / (8 * visc/1000 * L/1000);
+            const avgVel = Q / (Math.PI * Math.pow(r/10, 2)) * 100;
+            const R = (8 * visc/1000 * L/1000) / (Math.PI * Math.pow(r/10, 4));
+            const rho = 1050;
+            const D = 2 * r/10 / 100;
+            const Re = rho * avgVel/100 * D / (visc/1000);
+
+            const vesselStart = 150;
+            const vesselEnd = w - 250;
+            const centerY = hCanvas / 2;
+
+            // === TEXTE ÉNORME : SENS DU FLUX ===
+            if (flowActive) {
+                ctx.fillStyle = 'rgba(255,230,109,0.8)';
+                ctx.font = 'bold 28px monospace';
+                ctx.fillText('⬅  ⬅  ⬅  ÉCOULEMENT', w/2 - 200, centerY - r - 80);
+                
+                ctx.font = 'bold 20px monospace';
+                ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                ctx.fillText('(droite → gauche)', w/2 - 120, centerY - r - 55);
+            }
+
+            // === TITRE PRINCIPAL AVEC VISCOSITÉ ===
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 24px monospace';
+            ctx.fillText(`VISCOSITÉ: ${visc.toFixed(1)} mPa·s`, 50, 50);
+            
+            // Indicateur visuel de viscosité (barre)
+            const viscMax = 10;
+            const viscBarWidth = 300;
+            const viscRatio = visc / viscMax;
+            
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.fillRect(50, 65, viscBarWidth, 25);
+            
+            const viscGrad = ctx.createLinearGradient(50, 65, 50 + viscBarWidth, 65);
+            viscGrad.addColorStop(0, '#4facfe');     // Faible viscosité = bleu (rapide)
+            viscGrad.addColorStop(0.5, '#ffe66d');   // Moyenne
+            viscGrad.addColorStop(1, '#ff6b6b');     // Haute viscosité = rouge (lent)
+            
+            ctx.fillStyle = viscGrad;
+            ctx.fillRect(50, 65, viscBarWidth * viscRatio, 25);
+            
+            ctx.strokeStyle = 'rgba(102,126,234,0.6)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(50, 65, viscBarWidth, 25);
+            
+            ctx.fillStyle = viscRatio < 0.3 ? '#4facfe' : (viscRatio < 0.7 ? '#ffe66d' : '#ff6b6b');
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText(viscRatio < 0.3 ? '💧 FLUIDE (rapide)' : (viscRatio < 0.7 ? '🌊 MOYEN' : '🍯 VISQUEUX (lent)'), 370, 83);
+
+            // === INDICATEUR DE VITESSE GLOBALE (SPEEDOMETER) ===
+            const speedoX = w - 180;
+            const speedoY = 150;
+            const speedoR = 70;
+            
+            // Cercle du speedometer
+            ctx.strokeStyle = 'rgba(102,126,234,0.5)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(speedoX, speedoY, speedoR, 0.75 * Math.PI, 2.25 * Math.PI);
+            ctx.stroke();
+            
+            // Graduation
+            for (let i = 0; i <= 10; i++) {
+                const angle = 0.75 * Math.PI + (i / 10) * 1.5 * Math.PI;
+                const x1 = speedoX + Math.cos(angle) * (speedoR - 10);
+                const y1 = speedoY + Math.sin(angle) * (speedoR - 10);
+                const x2 = speedoX + Math.cos(angle) * speedoR;
+                const y2 = speedoY + Math.sin(angle) * speedoR;
+                
+                ctx.strokeStyle = i <= 3 ? '#4facfe' : (i <= 7 ? '#ffe66d' : '#ff6b6b');
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+            
+            // Aiguille (proportionnelle à avgVel)
+            const maxVelDisplay = 50; // cm/s
+            const needleAngle = 0.75 * Math.PI + (Math.min(avgVel, maxVelDisplay) / maxVelDisplay) * 1.5 * Math.PI;
+            const needleLength = speedoR - 15;
+            
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 4;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#667eea';
+            ctx.beginPath();
+            ctx.moveTo(speedoX, speedoY);
+            ctx.lineTo(speedoX + Math.cos(needleAngle) * needleLength, 
+                       speedoY + Math.sin(needleAngle) * needleLength);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            
+            // Point central
+            ctx.fillStyle = '#667eea';
+            ctx.beginPath();
+            ctx.arc(speedoX, speedoY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Texte vitesse
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px monospace';
+            ctx.fillText(`${avgVel.toFixed(1)}`, speedoX - 30, speedoY + 50);
+            ctx.font = '12px monospace';
+            ctx.fillText('cm/s', speedoX - 20, speedoY + 65);
+
+            // === GRADIENT DE FOND DANS LE VAISSEAU (carte de vitesse) ===
+            if (flowActive) {
+                const gradient = ctx.createLinearGradient(vesselStart, centerY - r, vesselStart, centerY + r);
+                gradient.addColorStop(0, 'rgba(255, 50, 50, 0.15)');
+                gradient.addColorStop(0.3, 'rgba(255, 150, 50, 0.25)');
+                gradient.addColorStop(0.5, 'rgba(255, 255, 50, 0.35)');
+                gradient.addColorStop(0.7, 'rgba(255, 150, 50, 0.25)');
+                gradient.addColorStop(1, 'rgba(255, 50, 50, 0.15)');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(vesselStart, centerY - r, vesselEnd - vesselStart, 2*r);
+            }
+
+            // === PAROIS DU VAISSEAU ===
+            ctx.strokeStyle = 'rgba(102,126,234,0.7)';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(vesselStart, centerY - r);
+            ctx.lineTo(vesselEnd, centerY - r);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(vesselStart, centerY + r);
+            ctx.lineTo(vesselEnd, centerY + r);
+            ctx.stroke();
+
+            // Entrée/Sortie
+            ctx.fillStyle = 'rgba(102,126,234,0.3)';
+            ctx.fillRect(vesselStart - 20, centerY - r, 20, 2*r);
+            ctx.fillRect(vesselEnd, centerY - r, 20, 2*r);
+
+            // === FLÈCHES GÉANTES MONTRANT LE SENS DU FLUX (DROITE → GAUCHE) ===
+            if (flowActive) {
+                ctx.strokeStyle = 'rgba(255,230,109,0.6)';
+                ctx.fillStyle = 'rgba(255,230,109,0.6)';
+                ctx.lineWidth = 6;
+                
+                // 3 grosses flèches dans le tube
+                for (let i = 0; i < 3; i++) {
+                    const arrowX = vesselStart + 200 + i * 350;
+                    const arrowY = centerY;
+                    const arrowLen = 80;
+                    
+                    // Ligne de la flèche
+                    ctx.beginPath();
+                    ctx.moveTo(arrowX - arrowLen/2, arrowY);
+                    ctx.lineTo(arrowX + arrowLen/2, arrowY);
+                    ctx.stroke();
+                    
+                    // Pointe de la flèche (vers la GAUCHE ←)
+                    ctx.beginPath();
+                    ctx.moveTo(arrowX - arrowLen/2, arrowY);
+                    ctx.lineTo(arrowX - arrowLen/2 + 25, arrowY - 20);
+                    ctx.lineTo(arrowX - arrowLen/2 + 25, arrowY + 20);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+
+            // === LIGNES DE COURANT (STREAMLINES) ===
+            if (flowActive) {
+                ctx.strokeStyle = 'rgba(78,205,196,0.4)';
+                ctx.lineWidth = 1.5;
+                const numStreamlines = 7;
+                for (let i = 0; i < numStreamlines; i++) {
+                    const yPos = centerY + (i - (numStreamlines-1)/2) * (r * 1.8 / numStreamlines);
+                    const distFromCenter = Math.abs(yPos - centerY);
+                    const vRatio = 1 - Math.pow(distFromCenter / r, 2);
+                    
+                    if (vRatio > 0) {
+                        ctx.beginPath();
+                        ctx.setLineDash([10 * vRatio, 5]);
+                        ctx.moveTo(vesselStart, yPos);
+                        ctx.lineTo(vesselEnd, yPos);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                    }
+                }
+            }
+
+            // === PARTICULES AVEC TRAÎNÉES (vitesse ajustée selon viscosité) ===
+            // MOUVEMENT: Horizontal (DROITE → GAUCHE) le long du tube
+            // p.x = position horizontale (avance selon la vitesse)
+            // p.y = distance par rapport au centre du tube (fixe, détermine la vitesse selon profil parabolique)
+            if (flowActive) {
+                // FACTEUR CLEF : vitesse visuelle inversement proportionnelle à viscosité
+                // AUGMENTÉ pour rendre le mouvement ultra-visible
+                const speedFactor = 0.8 * (10 / visc); // Plus viscosité élevée, plus lent
+                
+                particles.forEach((p, idx) => {
+                    // Distance de la particule par rapport au centre du tube (axe vertical)
+                    const distFromCenter = Math.abs(p.y);
+                    const vMax = 2 * avgVel;
+                    const normalizedDist = distFromCenter / r;
+                    
+                    if (normalizedDist <= 1) {
+                        // Calcul vitesse selon profil parabolique de Poiseuille
+                        const v = vMax * (1 - normalizedDist * normalizedDist);
+                        
+                        if (!p.trail) p.trail = [];
+                        p.trail.push({x: p.x, y: p.y});
+                        if (p.trail.length > 15) p.trail.shift();
+                        
+                        // MOUVEMENT HORIZONTAL (DROITE → GAUCHE)
+                        // Plus la particule est proche du centre, plus elle va vite
+                        p.x -= v * speedFactor;
+                        
+                        // Réapparaît à droite quand sort à gauche
+                        if (p.x < vesselStart) {
+                            p.x = vesselEnd - 10;
+                            p.y = (Math.random() * 2 - 1) * r * 0.95;
+                            p.trail = [];
+                        }
+
+                        // Traînée
+                        if (p.trail.length > 1) {
+                            ctx.strokeStyle = `rgba(255, 107, 107, ${0.3 * (v / vMax)})`;
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.moveTo(p.trail[0].x, centerY + p.trail[0].y);
+                            for (let i = 1; i < p.trail.length; i++) {
+                                ctx.lineTo(p.trail[i].x, centerY + p.trail[i].y);
+                            }
+                            ctx.stroke();
+                        }
+
+                        // Couleur basée sur vitesse
+                        const speedRatio = v / vMax;
+                        const hue = 0;
+                        const saturation = 100;
+                        const lightness = 40 + speedRatio * 40;
+                        
+                        ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                        ctx.shadowBlur = 12 + speedRatio * 8;
+                        ctx.shadowColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+                        ctx.beginPath();
+                        ctx.arc(p.x, centerY + p.y, p.r + speedRatio, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+                });
+            }
+
+            // === PROFIL DE VITESSE (graphique à droite) ===
+            const graphX = vesselEnd + 80;
+            const graphW = 180;
+            
+            ctx.strokeStyle = 'rgba(102,126,234,0.6)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(graphX, centerY - r - 20, graphW, 2*r + 40);
+            
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText('Profil vitesse', graphX + 5, centerY - r - 30);
+            
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(graphX, centerY - r);
+            ctx.lineTo(graphX, centerY + r);
+            ctx.stroke();
+            
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(255,230,109,0.5)';
+            ctx.beginPath();
+            ctx.moveTo(graphX, centerY);
+            ctx.lineTo(graphX + graphW - 10, centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Parabole
+            ctx.strokeStyle = '#4facfe';
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#4facfe';
+            ctx.beginPath();
+            
+            const numPoints = 50;
+            for (let i = 0; i <= numPoints; i++) {
+                const yOffset = (i / numPoints - 0.5) * 2 * r;
+                const normalizedDist = Math.abs(yOffset) / r;
+                const vRatio = Math.max(0, 1 - normalizedDist * normalizedDist);
+                const xOffset = vRatio * (graphW - 20);
+                
+                if (i === 0) {
+                    ctx.moveTo(graphX + 10, centerY + yOffset);
+                } else {
+                    ctx.lineTo(graphX + 10 + xOffset, centerY + yOffset);
+                }
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            
+            // Labels
+            ctx.fillStyle = '#4facfe';
+            ctx.font = '13px monospace';
+            ctx.fillText('v_max', graphX + graphW - 50, centerY - 5);
+            ctx.fillText('0', graphX + 5, centerY + r + 15);
+            ctx.fillText('r', graphX - 25, centerY - r);
+            ctx.fillText('-r', graphX - 30, centerY + r + 5);
+
+            // === ANNOTATIONS ===
+            ctx.strokeStyle = '#f093fb';
+            ctx.fillStyle = '#f093fb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(vesselStart - 50, centerY);
+            ctx.lineTo(vesselStart - 10, centerY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(vesselStart - 10, centerY);
+            ctx.lineTo(vesselStart - 20, centerY - 8);
+            ctx.lineTo(vesselStart - 20, centerY + 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText('P₁', vesselStart - 80, centerY + 5);
+            
+            ctx.strokeStyle = '#4facfe';
+            ctx.fillStyle = '#4facfe';
+            ctx.beginPath();
+            ctx.moveTo(vesselEnd + 10, centerY);
+            ctx.lineTo(vesselEnd + 40, centerY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(vesselEnd + 40, centerY);
+            ctx.lineTo(vesselEnd + 30, centerY - 8);
+            ctx.lineTo(vesselEnd + 30, centerY + 8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillText('P₂', vesselEnd + 45, centerY + 5);
+
+            ctx.fillStyle = '#ffe66d';
+            ctx.font = 'bold 18px monospace';
+            ctx.fillText(`ΔP = ${dP} Pa`, w/2 - 80, centerY - r - 40);
+
+            // Régime d'écoulement
+            ctx.fillStyle = Re < 2000 ? '#4ecdc4' : '#ff6b6b';
+            ctx.font = 'bold 16px monospace';
+            const regime = Re < 2000 ? '🔵 LAMINAIRE' : '🔴 TURBULENT';
+            ctx.fillText(regime, w/2 - 80, 120);
+
+            // Données
+            document.getElementById('flowVal').textContent = Q.toFixed(2) + ' mL/s';
+            document.getElementById('avgVelVal').textContent = avgVel.toFixed(1) + ' cm/s';
+            document.getElementById('resistVal').textContent = R.toFixed(3) + ' Pa·s/mL';
+            document.getElementById('reynoldsVal').textContent = Re.toFixed(0);
+
+            requestAnimationFrame(animateFluides);
+        }
+
+        // Lancement animations
+        animateMRUA();
+        animateForces();
+        animateEnergie();
+        animateFluides();
+    </script>
+</body>
+</html>

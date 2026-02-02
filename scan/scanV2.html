@@ -1,0 +1,888 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trainer Multi-écrans (local)</title>
+  <style>
+    :root{
+      --bg:#f7f7f7; --card:#fff; --b:#e5e5e5; --txt:#111; --muted:#666;
+      --shadow: 0 1px 0 rgba(0,0,0,.03);
+    }
+    body{ margin:14px; font-family:system-ui, Arial, sans-serif; background:var(--bg); color:var(--txt); }
+    h2{ margin:0 0 10px 0; font-size:18px; }
+    .muted{ color:var(--muted); font-size:12px; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:stretch; }
+    .card{ background:var(--card); border:1px solid var(--b); border-radius:14px; padding:12px; box-shadow:var(--shadow); }
+    .card h3{ margin:0 0 8px 0; font-size:13px; color:var(--muted); font-weight:700; }
+    button, select, input, textarea{
+      font-size:14px; border:1px solid var(--b); border-radius:10px; padding:8px 10px; background:#fff; color:var(--txt);
+    }
+    button{ cursor:pointer; }
+    button.primary{ font-weight:800; }
+    button:disabled{ opacity:.55; cursor:not-allowed; }
+    textarea{ width:100%; min-height:130px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .pill{ display:inline-flex; gap:8px; align-items:center; border:1px solid var(--b); border-radius:999px; padding:6px 10px; font-size:12px; color:var(--muted); }
+    .status{ border:1px dashed var(--b); border-radius:12px; padding:8px 10px; background:#fcfcfc; font-size:13px; }
+    .ok{ color:#0a7; font-weight:800; }
+    .ko{ color:#c33; font-weight:800; }
+
+    .screens{
+      display:grid; gap:12px;
+      grid-template-columns: 1fr;
+      align-items:start;
+    }
+    .screens.show-left{ grid-template-columns: 0.7fr 1fr; }
+    .screens.show-right{ grid-template-columns: 1fr 0.7fr; }
+    .screens.show-left.show-right{ grid-template-columns: 0.7fr 1fr 0.7fr; }
+
+    .screenCard{ padding:10px; }
+    .screenHeader{ display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:8px;}
+    .screenHeader .left{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .screenTitle{ font-weight:900; font-size:13px; }
+    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .toolbar .sep{ width:1px; height:24px; background:var(--b); margin:0 4px; }
+
+    .stageWrap{
+      position:relative; border:1px solid var(--b); border-radius:14px; overflow:hidden; background:#fff;
+      user-select:none;
+      touch-action:none; /* important for pointer events dragging */
+    }
+    .stageWrap img{ display:block; width:100%; height:auto; }
+    .overlay{ position:absolute; inset:0; }
+
+    .edgeBtn{
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:34px; height:54px; border-radius:12px;
+      border:1px solid var(--b); background:rgba(255,255,255,.85);
+      display:flex; align-items:center; justify-content:center;
+      font-weight:900; cursor:pointer;
+      z-index:40;
+      backdrop-filter: blur(3px);
+    }
+    .edgeBtn.left{ left:8px; }
+    .edgeBtn.right{ right:8px; }
+
+    .lib{ display:flex; gap:10px; flex-wrap:wrap; }
+    .thumb{
+      width:120px; border:1px solid var(--b); border-radius:12px; overflow:hidden; background:#fff; cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+    .thumb img{ width:100%; height:80px; object-fit:cover; display:block; }
+    .thumb .cap{ padding:6px 8px; font-size:12px; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .thumb.active{ outline:3px solid rgba(0,0,0,.22); }
+
+    .item{
+      position:absolute; box-sizing:border-box;
+      transform: translate(var(--xpx,0px), var(--ypx,0px));
+      width: var(--wpx, 100px);
+      height: var(--hpx, 60px);
+      left:0; top:0;
+      touch-action:none;
+    }
+    .item .box{
+      position:absolute; inset:0;
+      border-radius:10px;
+      border:2px solid rgba(0,0,0,.35);
+      background: rgba(255,255,255,.06);
+    }
+    .item.hotspot .box{
+      border:2px dashed rgba(0,0,0,.35);
+      background: rgba(255,255,255,.03);
+    }
+    .item.hotspot.invisible .box{
+      border-color: transparent;
+      background: transparent;
+    }
+    .item .label{
+      position:absolute; left:6px; top:6px; font-size:12px; color:#222; background:rgba(255,255,255,.8);
+      padding:2px 6px; border-radius:999px; border:1px solid rgba(0,0,0,.12);
+      pointer-events:none;
+    }
+    .item.text .box{ background: rgba(255,255,255,.65); border-style: solid; }
+    .item.text textarea{
+      position:absolute; inset:8px; resize:none; border:0; outline:none; background:transparent; padding:0;
+      font-size:14px;
+    }
+    .handle{
+      position:absolute; width:10px; height:10px; border-radius:3px;
+      background:#fff; border:1px solid rgba(0,0,0,.35);
+      z-index:5;
+    }
+    .h-nw{ left:-5px; top:-5px; cursor:nwse-resize; }
+    .h-ne{ right:-5px; top:-5px; cursor:nesw-resize; }
+    .h-sw{ left:-5px; bottom:-5px; cursor:nesw-resize; }
+    .h-se{ right:-5px; bottom:-5px; cursor:nwse-resize; }
+
+    .selected .box{ outline:3px solid rgba(0,0,0,.18); outline-offset:2px; }
+    .hidden{ display:none !important; }
+  </style>
+</head>
+<body>
+  <h2>Trainer multi-écrans (local) — images + hotspots + rectangles + texte</h2>
+  <div class="muted">Tout est local. En “Utilisation”, cliquer un hotspot change l’image cible.</div>
+
+  <div class="row" style="margin-top:10px;">
+    <div class="card" style="min-width:360px;">
+      <h3>Contrôles</h3>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <label class="pill">
+          Ajouter images
+          <input id="file" type="file" accept="image/*" multiple style="display:block; margin-top:6px;" />
+        </label>
+
+        <span class="pill">Mode
+          <select id="mode" style="margin-left:6px;">
+            <option value="edit">Édition</option>
+            <option value="use">Utilisation (clics)</option>
+          </select>
+        </span>
+
+        <button id="btnToggleLeft">Afficher/Masquer écran gauche</button>
+        <button id="btnToggleRight">Afficher/Masquer écran droit</button>
+        <button id="btnClearSel">Désélectionner</button>
+      </div>
+
+      <div class="status" style="margin-top:10px;">
+        <b>Info :</b> <span id="prompt">Ajoute des images, puis clique une vignette pour l’afficher sur un écran.</span><br/>
+        <span id="feedback"></span>
+      </div>
+
+      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="btnExport" class="primary">Exporter JSON</button>
+        <button id="btnImport">Importer JSON</button>
+        <button id="btnReset">Reset projet</button>
+      </div>
+      <textarea id="json" placeholder="Export/Import ici"></textarea>
+      <div class="muted">Export contient les images (base64) + tous les items (hotspot/rect/texte) + cibles.</div>
+    </div>
+
+    <div class="card" style="flex:1; min-width:360px;">
+      <h3>Bibliothèque d’images</h3>
+      <div class="muted">Clique une vignette → elle s’affiche sur l’écran sélectionné (Centre/Gauche/Droite).</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:8px 0;">
+        <span class="pill">Écran cible
+          <select id="targetScreen" style="margin-left:6px;">
+            <option value="center">Centre</option>
+            <option value="left">Gauche (injecteur)</option>
+            <option value="right">Droite (secondaire)</option>
+          </select>
+        </span>
+        <span class="pill">Images: <span id="imgCount">0</span></span>
+
+        <span class="pill">Hotspots invisibles
+          <select id="hotspotVis" style="margin-left:6px;">
+            <option value="invisible">Oui</option>
+            <option value="visible">Non</option>
+          </select>
+        </span>
+      </div>
+      <div id="lib" class="lib"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <h3>Écrans</h3>
+    <div id="screens" class="screens show-left show-right">
+      <!-- Left screen -->
+      <div id="leftCard" class="card screenCard">
+        <div class="screenHeader">
+          <div class="left">
+            <div class="screenTitle">Écran gauche (injecteur)</div>
+            <span class="pill">Image: <span id="leftName">—</span></span>
+          </div>
+          <div class="toolbar">
+            <button data-tool="hotspot" data-screen="left">+ Hotspot</button>
+            <button data-tool="rect" data-screen="left">+ Rectangle</button>
+            <button data-tool="text" data-screen="left">+ Texte</button>
+          </div>
+        </div>
+        <div class="stageWrap" data-screen="left">
+          <img id="leftImg" alt="" />
+          <div class="overlay" id="leftOverlay"></div>
+        </div>
+      </div>
+
+      <!-- Center screen -->
+      <div id="centerCard" class="card screenCard">
+        <div class="screenHeader">
+          <div class="left">
+            <div class="screenTitle">Écran centre (principal)</div>
+            <span class="pill">Image: <span id="centerName">—</span></span>
+          </div>
+          <div class="toolbar">
+            <button data-tool="hotspot" data-screen="center">+ Hotspot</button>
+            <button data-tool="rect" data-screen="center">+ Rectangle</button>
+            <button data-tool="text" data-screen="center">+ Texte</button>
+          </div>
+        </div>
+
+        <div class="stageWrap" data-screen="center" id="centerStage">
+          <img id="centerImg" alt="" />
+          <div class="overlay" id="centerOverlay"></div>
+
+          <div class="edgeBtn left" id="edgeLeft" title="Afficher/Masquer écran gauche">«</div>
+          <div class="edgeBtn right" id="edgeRight" title="Afficher/Masquer écran droit">»</div>
+        </div>
+      </div>
+
+      <!-- Right screen -->
+      <div id="rightCard" class="card screenCard">
+        <div class="screenHeader">
+          <div class="left">
+            <div class="screenTitle">Écran droit (secondaire)</div>
+            <span class="pill">Image: <span id="rightName">—</span></span>
+          </div>
+          <div class="toolbar">
+            <button data-tool="hotspot" data-screen="right">+ Hotspot</button>
+            <button data-tool="rect" data-screen="right">+ Rectangle</button>
+            <button data-tool="text" data-screen="right">+ Texte</button>
+          </div>
+        </div>
+        <div class="stageWrap" data-screen="right">
+          <img id="rightImg" alt="" />
+          <div class="overlay" id="rightOverlay"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
+
+  const file = $("#file");
+  const modeSel = $("#mode");
+  const targetScreenSel = $("#targetScreen");
+  const hotspotVisSel = $("#hotspotVis");
+  const promptEl = $("#prompt");
+  const feedbackEl = $("#feedback");
+  const libEl = $("#lib");
+  const imgCountEl = $("#imgCount");
+
+  const screensWrap = $("#screens");
+  const leftCard = $("#leftCard"), rightCard = $("#rightCard");
+  const btnToggleLeft = $("#btnToggleLeft");
+  const btnToggleRight = $("#btnToggleRight");
+  const edgeLeft = $("#edgeLeft");
+  const edgeRight = $("#edgeRight");
+
+  const btnExport = $("#btnExport");
+  const btnImport = $("#btnImport");
+  const btnReset = $("#btnReset");
+  const jsonTA = $("#json");
+  const btnClearSel = $("#btnClearSel");
+
+  const screenEls = {
+    left:  { img: $("#leftImg"),  overlay: $("#leftOverlay"),  name: $("#leftName") },
+    center:{ img: $("#centerImg"),overlay: $("#centerOverlay"),name: $("#centerName") },
+    right: { img: $("#rightImg"), overlay: $("#rightOverlay"), name: $("#rightName") }
+  };
+
+  // Data
+  let images = []; // {id, name, dataUrl, items: []}
+  let screenState = { left:null, center:null, right:null };
+  let showLeft = true, showRight = true;
+
+  // UI prefs (saved)
+  let hotspotVisibility = "invisible"; // 'invisible' | 'visible'
+
+  // Editing state
+  let currentTool = null; // 'hotspot'|'rect'|'text'
+  let currentToolScreen = 'center';
+  let drawing = null; // {screen, startX, startY, tempDiv}
+  let selected = null; // {imageId, itemId, screen}
+
+  // Drag/resize
+  let drag = null; // {type, handle?, screen, imageId, itemId, start, orig}
+  const MIN_PX = 16;
+
+  function uid() {
+    return (crypto?.randomUUID ? crypto.randomUUID() : ('id_'+Math.random().toString(16).slice(2)));
+  }
+
+  function setFeedback(msg, cls=null){
+    feedbackEl.className = cls || "";
+    feedbackEl.textContent = msg || "";
+  }
+
+  function safeSetPointerCapture(el, pointerId){
+    // Fix for InvalidStateError: some browsers throw depending on event source/sequence.
+    try { el.setPointerCapture(pointerId); } catch(_) {}
+  }
+
+  function getImageById(id){ return images.find(x=>x.id===id) || null; }
+
+  function setScreenImage(screen, imageId){
+    screenState[screen] = imageId || null;
+    renderScreens();
+    renderLibrary();
+  }
+
+  function screenSizePx(screen){
+    const img = screenEls[screen].img;
+    return { w: img.clientWidth || 1, h: img.clientHeight || 1 };
+  }
+
+  function pctToPx(p, total){ return (p/100)*total; }
+  function pxToPct(px, total){ return (px/total)*100; }
+
+  function activeImageForScreen(screen){
+    const id = screenState[screen];
+    if (!id) return null;
+    return getImageById(id);
+  }
+
+  function updateLayoutClasses(){
+    screensWrap.classList.toggle("show-left", showLeft);
+    screensWrap.classList.toggle("show-right", showRight);
+    leftCard.classList.toggle("hidden", !showLeft);
+    rightCard.classList.toggle("hidden", !showRight);
+  }
+
+  function renderLibrary(){
+    imgCountEl.textContent = String(images.length);
+    libEl.innerHTML = "";
+    const targetScreen = targetScreenSel.value;
+
+    for (const im of images){
+      const t = document.createElement("div");
+      t.className = "thumb";
+      if (screenState[targetScreen] === im.id) t.classList.add("active");
+
+      const img = document.createElement("img");
+      img.src = im.dataUrl;
+
+      const cap = document.createElement("div");
+      cap.className = "cap";
+      cap.textContent = im.name;
+
+      t.appendChild(img);
+      t.appendChild(cap);
+
+      t.addEventListener("click", () => {
+        setScreenImage(targetScreen, im.id);
+        setFeedback(`Image "${im.name}" affichée sur l’écran ${targetScreen}.`, "ok");
+      });
+
+      libEl.appendChild(t);
+    }
+  }
+
+  function renderScreens(){
+    for (const screen of ["left","center","right"]){
+      const im = activeImageForScreen(screen);
+      const imgEl = screenEls[screen].img;
+      const nameEl = screenEls[screen].name;
+      const ovEl = screenEls[screen].overlay;
+
+      if (!im){
+        imgEl.removeAttribute("src");
+        nameEl.textContent = "—";
+        ovEl.innerHTML = "";
+        continue;
+      }
+
+      imgEl.src = im.dataUrl;
+      nameEl.textContent = im.name;
+
+      ovEl.innerHTML = "";
+      const {w,h} = screenSizePx(screen);
+
+      for (const it of im.items){
+        const div = document.createElement("div");
+        div.className = "item " + it.type;
+
+        if (it.type==="hotspot" && hotspotVisibility==="invisible") div.classList.add("invisible");
+
+        div.dataset.itemId = it.id;
+        div.dataset.imageId = im.id;
+        div.dataset.screen = screen;
+
+        const xpx = pctToPx(it.x, w);
+        const ypx = pctToPx(it.y, h);
+        const wpx = pctToPx(it.w, w);
+        const hpx = pctToPx(it.h, h);
+
+        div.style.setProperty("--xpx", `${xpx}px`);
+        div.style.setProperty("--ypx", `${ypx}px`);
+        div.style.setProperty("--wpx", `${Math.max(wpx, MIN_PX)}px`);
+        div.style.setProperty("--hpx", `${Math.max(hpx, MIN_PX)}px`);
+
+        const box = document.createElement("div");
+        box.className = "box";
+        div.appendChild(box);
+
+        const lab = document.createElement("div");
+        lab.className = "label";
+        lab.textContent = it.type==="hotspot" ? "hotspot" : (it.type==="rect" ? "cadre" : "texte");
+        div.appendChild(lab);
+
+        if (it.type==="text"){
+          const ta = document.createElement("textarea");
+          ta.value = it.text || "";
+          ta.addEventListener("input", () => { it.text = ta.value; });
+          div.appendChild(ta);
+        }
+
+        // Handles only in edit mode
+        if (modeSel.value === "edit"){
+          ["nw","ne","sw","se"].forEach(pos=>{
+            const hEl = document.createElement("div");
+            hEl.className = "handle h-" + pos;
+            hEl.dataset.handle = pos;
+            hEl.addEventListener("pointerdown", (e)=> onHandleDown(e, div, pos));
+            div.appendChild(hEl);
+          });
+        }
+
+        div.addEventListener("pointerdown", (e)=> onItemDown(e, div));
+        div.addEventListener("click", (e)=> onItemClick(e, it, screen));
+
+        if (selected && selected.imageId===im.id && selected.itemId===it.id){
+          div.classList.add("selected");
+        }
+
+        ovEl.appendChild(div);
+      }
+
+      imgEl.onload = () => { renderScreens(); };
+    }
+  }
+
+  function clearSelection(){
+    selected = null;
+    renderScreens();
+  }
+
+  function onItemClick(e, item, screen){
+    if (modeSel.value === "use" && item.type === "hotspot"){
+      if (item.target && item.target.imageId){
+        setScreenImage(item.target.screen || "center", item.target.imageId);
+        setFeedback(`Hotspot → écran ${item.target.screen} : image changée.`, "ok");
+      }
+    }
+  }
+
+  function onItemDown(e, div){
+    e.stopPropagation();
+
+    const screen = div.dataset.screen;
+    const imageId = div.dataset.imageId;
+    const itemId = div.dataset.itemId;
+
+    selected = { screen, imageId, itemId };
+    renderScreens();
+
+    if (modeSel.value !== "edit") return;
+    if (e.target.classList.contains("handle")) return;
+
+    safeSetPointerCapture(div, e.pointerId);
+
+    const rect = div.getBoundingClientRect();
+    drag = {
+      type: "move",
+      screen, imageId, itemId,
+      start: { x: e.clientX, y: e.clientY },
+      orig: { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+    };
+  }
+
+  function onHandleDown(e, div, handle){
+    if (modeSel.value !== "edit") return;
+    e.stopPropagation();
+
+    const screen = div.dataset.screen;
+    const imageId = div.dataset.imageId;
+    const itemId = div.dataset.itemId;
+
+    selected = { screen, imageId, itemId };
+    renderScreens();
+
+    safeSetPointerCapture(div, e.pointerId);
+
+    const rect = div.getBoundingClientRect();
+    drag = {
+      type: "resize",
+      handle,
+      screen, imageId, itemId,
+      start: { x: e.clientX, y: e.clientY },
+      orig: { left: rect.left, top: rect.top, width: rect.width, height: rect.height }
+    };
+  }
+
+  function getItemRef(imageId, itemId){
+    const im = getImageById(imageId);
+    if (!im) return null;
+    const it = im.items.find(x=>x.id===itemId);
+    if (!it) return null;
+    return { im, it };
+  }
+
+  function updateItemFromPx(screen, imageId, itemId, newRectPx){
+    const ref = getItemRef(imageId, itemId);
+    if (!ref) return;
+    const { it } = ref;
+
+    const stage = screenEls[screen].overlay.getBoundingClientRect();
+    const { w, h } = screenSizePx(screen);
+
+    const x = Math.max(0, newRectPx.left - stage.left);
+    const y = Math.max(0, newRectPx.top - stage.top);
+    const ww = Math.max(MIN_PX, newRectPx.width);
+    const hh = Math.max(MIN_PX, newRectPx.height);
+
+    it.x = pxToPct(x, w);
+    it.y = pxToPct(y, h);
+    it.w = pxToPct(ww, w);
+    it.h = pxToPct(hh, h);
+
+    renderScreens();
+  }
+
+  window.addEventListener("pointermove", (e)=>{
+    if (!drag) return;
+    const dx = e.clientX - drag.start.x;
+    const dy = e.clientY - drag.start.y;
+
+    let left = drag.orig.left;
+    let top = drag.orig.top;
+    let width = drag.orig.width;
+    let height = drag.orig.height;
+
+    if (drag.type === "move"){
+      left = drag.orig.left + dx;
+      top  = drag.orig.top + dy;
+    } else {
+      const h = drag.handle;
+      if (h.includes("w")){
+        left = drag.orig.left + dx;
+        width = drag.orig.width - dx;
+      }
+      if (h.includes("e")) width = drag.orig.width + dx;
+      if (h.includes("n")){
+        top = drag.orig.top + dy;
+        height = drag.orig.height - dy;
+      }
+      if (h.includes("s")) height = drag.orig.height + dy;
+
+      width = Math.max(MIN_PX, width);
+      height = Math.max(MIN_PX, height);
+    }
+
+    updateItemFromPx(drag.screen, drag.imageId, drag.itemId, {left, top, width, height});
+  });
+
+  window.addEventListener("pointerup", (e)=>{ drag = null; });
+
+  function setTool(tool, screen){
+    currentTool = tool;
+    currentToolScreen = screen;
+    setFeedback(`Outil: ${tool} sur écran ${screen}. Clique-glisse sur l’image.`, "");
+  }
+
+  $$(".toolbar button[data-tool]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      setTool(btn.dataset.tool, btn.dataset.screen);
+      modeSel.value = "edit";
+      updatePrompt();
+    });
+  });
+
+  function overlayForScreen(screen){ return screenEls[screen].overlay; }
+  function stageForScreen(screen){ return screenEls[screen].overlay.parentElement; }
+
+  function addItemToCurrentImage(screen, item){
+    const im = activeImageForScreen(screen);
+    if (!im){
+      setFeedback("Aucune image sur cet écran. Choisis une image d’abord.", "ko");
+      return;
+    }
+    im.items.push(item);
+    renderScreens();
+  }
+
+  function promptTarget(){
+    const scr = prompt('Cible hotspot: écran (left / center / right) ?', 'center');
+    const targetScreen = (scr==="left"||scr==="center"||scr==="right") ? scr : "center";
+    if (images.length === 0) return { screen: targetScreen, imageId: null };
+
+    const list = images.map((im, i)=> `${i+1}. ${im.name}`).join("\n");
+    const pick = prompt(`Cible hotspot: numéro d’image ?\n${list}`, "1");
+    const idx = Number(pick) - 1;
+    const target = images[idx] ? images[idx].id : images[0].id;
+    return { screen: targetScreen, imageId: target };
+  }
+
+  function attachDrawingHandlers(screen){
+    const stage = stageForScreen(screen);
+
+    stage.addEventListener("pointerdown", (e)=>{
+      if (modeSel.value !== "edit") return;
+      if (!currentTool || currentToolScreen !== screen) return;
+      if (e.target.closest(".item")) return;
+
+      const im = activeImageForScreen(screen);
+      if (!im){ setFeedback("Aucune image sur cet écran.", "ko"); return; }
+
+      const ov = overlayForScreen(screen);
+      const r = ov.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+
+      drawing = { screen, startX:x, startY:y, temp:null };
+
+      const temp = document.createElement("div");
+      temp.className = "item " + currentTool;
+      const box = document.createElement("div");
+      box.className = "box";
+      temp.appendChild(box);
+      ov.appendChild(temp);
+      drawing.temp = temp;
+
+      temp.style.setProperty("--xpx", `${x}px`);
+      temp.style.setProperty("--ypx", `${y}px`);
+      temp.style.setProperty("--wpx", `1px`);
+      temp.style.setProperty("--hpx", `1px`);
+
+      safeSetPointerCapture(stage, e.pointerId);
+    });
+
+    stage.addEventListener("pointermove", (e)=>{
+      if (!drawing || drawing.screen !== screen || !drawing.temp) return;
+      const ov = overlayForScreen(screen);
+      const r = ov.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+
+      const x0 = Math.min(drawing.startX, x);
+      const y0 = Math.min(drawing.startY, y);
+      const w  = Math.abs(drawing.startX - x);
+      const h  = Math.abs(drawing.startY - y);
+
+      drawing.temp.style.setProperty("--xpx", `${x0}px`);
+      drawing.temp.style.setProperty("--ypx", `${y0}px`);
+      drawing.temp.style.setProperty("--wpx", `${Math.max(w, MIN_PX)}px`);
+      drawing.temp.style.setProperty("--hpx", `${Math.max(h, MIN_PX)}px`);
+    });
+
+    stage.addEventListener("pointerup", (e)=>{
+      if (!drawing || drawing.screen !== screen) return;
+
+      const ov = overlayForScreen(screen);
+      const r = ov.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+
+      const x0 = Math.min(drawing.startX, x);
+      const y0 = Math.min(drawing.startY, y);
+      const wpx = Math.max(Math.abs(drawing.startX - x), MIN_PX);
+      const hpx = Math.max(Math.abs(drawing.startY - y), MIN_PX);
+
+      if (drawing.temp) drawing.temp.remove();
+
+      const { w, h } = screenSizePx(screen);
+      const item = {
+        id: uid(),
+        type: currentTool,
+        x: pxToPct(x0, w),
+        y: pxToPct(y0, h),
+        w: pxToPct(wpx, w),
+        h: pxToPct(hpx, h),
+      };
+
+      if (currentTool === "text") item.text = "Texte...";
+      if (currentTool === "hotspot") item.target = promptTarget();
+
+      addItemToCurrentImage(screen, item);
+      drawing = null;
+    });
+  }
+
+  ["left","center","right"].forEach(attachDrawingHandlers);
+
+  // Keyboard
+  window.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape"){
+      currentTool = null; drawing = null;
+      setFeedback("Outil annulé.", "");
+    }
+    if ((e.key === "Delete" || e.key === "Backspace") && modeSel.value==="edit"){
+      if (!selected) return;
+      const ref = getItemRef(selected.imageId, selected.itemId);
+      if (!ref) return;
+      ref.im.items = ref.im.items.filter(x=>x.id !== selected.itemId);
+      selected = null;
+      renderScreens();
+      setFeedback("Élément supprimé.", "ok");
+    }
+  });
+
+  // Toggle screens
+  btnToggleLeft.addEventListener("click", ()=>{ showLeft = !showLeft; updateLayoutClasses(); });
+  btnToggleRight.addEventListener("click", ()=>{ showRight = !showRight; updateLayoutClasses(); });
+  edgeLeft.addEventListener("click", ()=>{ showLeft = !showLeft; updateLayoutClasses(); });
+  edgeRight.addEventListener("click", ()=>{ showRight = !showRight; updateLayoutClasses(); });
+
+  btnClearSel.addEventListener("click", ()=>{ selected=null; renderScreens(); setFeedback("Sélection effacée.", ""); });
+
+  modeSel.addEventListener("change", updatePrompt);
+
+  hotspotVisSel.addEventListener("change", ()=>{
+    hotspotVisibility = hotspotVisSel.value;
+    renderScreens();
+  });
+
+  targetScreenSel.addEventListener("change", renderLibrary);
+
+  function updatePrompt(){
+    if (modeSel.value === "edit"){
+      promptEl.textContent = "Édition: ajoute/déplace/resize. Suppr=Delete. Hotspot=change d’image au clic (en utilisation).";
+      setFeedback("", "");
+    } else {
+      promptEl.textContent = "Utilisation: clique les hotspots pour naviguer entre images/écrans.";
+      setFeedback("", "");
+    }
+    renderScreens();
+  }
+
+  // Add images
+  file.addEventListener("change", async ()=>{
+    const files = [...(file.files || [])];
+    if (!files.length) return;
+
+    for (const f of files){
+      const dataUrl = await new Promise((res, rej)=>{
+        const fr = new FileReader();
+        fr.onload = ()=>res(fr.result);
+        fr.onerror = ()=>rej(new Error("read"));
+        fr.readAsDataURL(f);
+      });
+      images.push({ id: uid(), name: f.name, dataUrl, items: [] });
+    }
+
+    if (!screenState.center && images[0]) screenState.center = images[0].id;
+    if (!screenState.left && images[1]) screenState.left = images[1].id;
+    if (!screenState.right && images[2]) screenState.right = images[2].id;
+
+    renderLibrary();
+    renderScreens();
+    setFeedback("Images ajoutées.", "ok");
+  });
+
+  // Export/Import (includes everything: images, items, text, targets)
+  btnExport.addEventListener("click", ()=>{
+    const payload = {
+      v: 1,
+      images,
+      screenState,
+      showLeft, showRight,
+      ui: { hotspotVisibility }
+    };
+    jsonTA.value = JSON.stringify(payload, null, 2);
+    setFeedback("Export JSON OK.", "ok");
+  });
+
+  btnImport.addEventListener("click", ()=>{
+    try{
+      const p = JSON.parse(jsonTA.value || "");
+      if (!p || !Array.isArray(p.images)) throw new Error("format");
+
+      // Minimal validation of items
+      for (const im of p.images){
+        if (!im || typeof im.id!=="string" || typeof im.name!=="string" || typeof im.dataUrl!=="string") throw new Error("image");
+        if (!Array.isArray(im.items)) im.items = [];
+        for (const it of im.items){
+          if (!it || typeof it.id!=="string" || typeof it.type!=="string") throw new Error("item");
+          if (typeof it.x!=="number" || typeof it.y!=="number" || typeof it.w!=="number" || typeof it.h!=="number") throw new Error("geom");
+          if (it.type==="text" && typeof it.text!=="string") it.text = "";
+          if (it.type==="hotspot"){
+            if (!it.target || typeof it.target.screen!=="string") it.target = {screen:"center", imageId:null};
+          }
+        }
+      }
+
+      images = p.images;
+      screenState = p.screenState || {left:null, center:null, right:null};
+      showLeft = !!p.showLeft;
+      showRight = !!p.showRight;
+
+      hotspotVisibility = (p.ui && (p.ui.hotspotVisibility==="visible" || p.ui.hotspotVisibility==="invisible"))
+        ? p.ui.hotspotVisibility
+        : "invisible";
+      hotspotVisSel.value = hotspotVisibility;
+
+      updateLayoutClasses();
+      renderLibrary();
+      renderScreens();
+      setFeedback("Import JSON OK.", "ok");
+    } catch(err){
+      setFeedback("Import impossible: JSON invalide.", "ko");
+    }
+  });
+
+  btnReset.addEventListener("click", ()=>{
+    const ok = confirm("Reset complet (images + overlays) ?");
+    if (!ok) return;
+    images = [];
+    screenState = { left:null, center:null, right:null };
+    selected = null;
+    renderLibrary();
+    renderScreens();
+    setFeedback("Reset OK.", "ok");
+  });
+
+  $$(".overlay").forEach(ov=>{
+    ov.addEventListener("pointerdown", (e)=>{
+      if (e.target.closest(".item")) return;
+      if (modeSel.value==="edit") { selected=null; renderScreens(); }
+    });
+  });
+
+  window.addEventListener("contextmenu", (e)=>{
+    const itEl = e.target.closest(".item");
+    if (!itEl) return;
+    e.preventDefault();
+    if (modeSel.value !== "edit") return;
+
+    const imageId = itEl.dataset.imageId;
+    const itemId = itEl.dataset.itemId;
+    const ref = getItemRef(imageId, itemId);
+    if (!ref) return;
+    const { it } = ref;
+
+    if (it.type === "hotspot"){
+      const action = prompt("Hotspot: (1) changer cible, (2) supprimer. Tape 1 ou 2", "1");
+      if (action === "2"){
+        ref.im.items = ref.im.items.filter(x=>x.id !== itemId);
+        selected = null;
+        renderScreens();
+        setFeedback("Hotspot supprimé.", "ok");
+        return;
+      }
+      if (action === "1"){
+        it.target = promptTarget();
+        setFeedback("Cible hotspot mise à jour.", "ok");
+        renderScreens();
+      }
+    } else {
+      const action = prompt("Élément: (1) supprimer. Tape 1", "1");
+      if (action === "1"){
+        ref.im.items = ref.im.items.filter(x=>x.id !== itemId);
+        selected = null;
+        renderScreens();
+        setFeedback("Élément supprimé.", "ok");
+      }
+    }
+  });
+
+  // init
+  updateLayoutClasses();
+  renderLibrary();
+  renderScreens();
+  updatePrompt();
+})();
+</script>
+</body>
+</html>

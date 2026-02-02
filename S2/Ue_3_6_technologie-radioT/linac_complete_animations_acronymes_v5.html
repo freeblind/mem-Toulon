@@ -1,0 +1,3591 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formation Radiothérapie - Accélérateur de Particules</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #667eea;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            min-width: 150px;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 4px solid #667eea;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animation Canvas */
+        .animation-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .animation-canvas {
+            width: 100%;
+            height: 500px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        /* Flashcards - Affichage unique en gros plan */
+        .flashcard-container {
+            max-width: 900px;
+            margin: 0 auto 30px;
+        }
+
+        .flashcard-single {
+            width: 100%;
+            height: 550px;
+            perspective: 1000px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .flashcard {
+            height: 550px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard.flipped .flashcard-inner,
+        .flashcard-single.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow-y: auto;
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flashcard-front h3 {
+            font-size: 2em;
+            line-height: 1.4;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-back {
+            background: white;
+            color: #333;
+            transform: rotateY(180deg);
+            border: 3px solid #667eea;
+        }
+
+        .flashcard-back p {
+            font-size: 1.3em;
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .flashcard-navigation {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .nav-arrow-btn {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-arrow-btn:hover:not(:disabled) {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .nav-arrow-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .card-counter {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .flashcard-status {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .status-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .flip-hint {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .flashcard-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* Quiz */
+        .quiz-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .question-number {
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .question-type {
+            background: #6c757d;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #e7eaff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .open-answer {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .example-answer {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-top: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .example-answer.show {
+            display: block;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quiz-results {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .score-display {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #dee2e6;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s;
+        }
+
+        /* Animations spécifiques */
+        .accelerator-diagram {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .component {
+            position: absolute;
+            transition: all 0.5s;
+            cursor: pointer;
+        }
+
+        .component:hover {
+            transform: scale(1.05);
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffd700;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
+        .info-panel {
+            position: absolute;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            max-width: 350px;
+            display: none;
+            z-index: 100;
+        }
+
+        .info-panel.show {
+            display: block;
+            animation: popIn 0.3s;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .info-panel h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-panel p {
+            line-height: 1.6;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .nav-tab {
+                font-size: 0.9em;
+                padding: 15px 10px;
+            }
+
+            .animation-canvas {
+                height: 400px;
+            }
+
+            .flashcard-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .legend {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 8px 0;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+
+        .animation-speed {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .speed-slider {
+            flex: 1;
+            max-width: 200px;
+        }
+    
+        /* Acronymes */
+        .acronym-grid{
+            display:grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap:14px;
+        }
+        .acronym-card{
+            background:white;
+            border:2px solid #eef0f4;
+            border-radius:14px;
+            padding:16px 16px 14px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+        }
+        .acronym-card:hover{
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px rgba(0,0,0,0.10);
+            border-color:#667eea;
+        }
+        .acronym{
+            display:inline-block;
+            font-weight:800;
+            font-size:1.15em;
+            color:#667eea;
+            background:#eef2ff;
+            padding:6px 10px;
+            border-radius:10px;
+            margin-bottom:10px;
+        }
+        .acronym-full{
+            font-weight:700;
+            color:#222;
+            margin-bottom:6px;
+            line-height:1.3;
+        }
+        .acronym-def{
+            color:#666;
+            line-height:1.55;
+        }
+
+        /* Modal Acronymes */
+        .modal-overlay{
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding: 20px;
+            z-index: 1000;
+        }
+        .modal-card{
+            width: min(900px, 95vw);
+            max-height: 85vh;
+            overflow:auto;
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 2px solid #eef0f4;
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Radiothérapie - Accélérateur de Particules</h1>
+            <p>Formation MEM - Semestre 2 | Référentiel Berger-Levrault</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('animation')">🎬 Animations</button>
+            <button class="nav-tab" onclick="switchTab('flashcards')">📇 Flashcards</button>
+            <button class="nav-tab" onclick="switchTab('qcm')">✅ QCM</button>
+            <button class="nav-tab" onclick="switchTab('vraifaux')">❓ Vrai/Faux</button>
+            <button class="nav-tab" onclick="switchTab('ouvert')">📝 Questions Ouvertes</button>
+        <button class="nav-tab" onclick="switchTab('acronymes')">📚 Acronymes</button>
+        </div>
+
+        <div class="content">
+            <!-- ANIMATIONS -->
+            <div id="animation" class="tab-content active">
+                <h2>Animations de l'Accélérateur Linéaire</h2>
+                
+                <div class="animation-container">
+                    <h3>Vue d'ensemble de l'accélérateur</h3>
+                    <canvas id="mainCanvas" class="animation-canvas"></canvas>
+                    
+                    <div class="legend">
+                        <strong>Composants :</strong>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ff6b6b;"></div>
+                            <span>Générateur HT / Klystron</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #4ecdc4;"></div>
+                            <span>Guide d'onde / Structure accélératrice</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #95e1d3;"></div>
+                            <span>Système de déviation magnétique</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f38181;"></div>
+                            <span>Tête d'irradiation</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ffd93d;"></div>
+                            <span>Particules (électrons)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #6c5ce7;"></div>
+                            <span>Rayonnement X</span>
+                        </div>
+                    </div>
+
+                    <div class="animation-controls">
+                        <button class="btn btn-primary" onclick="startAnimation('main')">▶ Démarrer</button>
+                        <button class="btn btn-secondary" onclick="pauseAnimation('main')">⏸ Pause</button>
+                        <button class="btn btn-warning" onclick="resetAnimation('main')">↻ Réinitialiser</button>
+                        <div class="animation-speed">
+                            <label>Vitesse :</label>
+                            <input type="range" class="speed-slider" min="0.5" max="3" step="0.5" value="1" onchange="setAnimationSpeed(this.value)">
+                            <span id="speedDisplay">1x</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animation-container">
+                    <h3>Générateur et Canon à électrons</h3>
+                    <canvas id="generatorCanvas" class="animation-canvas"></canvas>
+                    <div class="animation-controls">
+                        <button class="btn btn-primary" onclick="startAnimation('generator')">▶ Démarrer</button>
+                        <button class="btn btn-secondary" onclick="pauseAnimation('generator')">⏸ Pause</button>
+                        <button class="btn btn-warning" onclick="resetAnimation('generator')">↻ Réinitialiser</button>
+                    </div>
+                </div>
+
+                <div class="animation-container">
+                    <h3>Structure accélératrice et guide d'onde</h3>
+                    <canvas id="acceleratorCanvas" class="animation-canvas"></canvas>
+                    <div class="animation-controls">
+                        <button class="btn btn-primary" onclick="startAnimation('accelerator')">▶ Démarrer</button>
+                        <button class="btn btn-secondary" onclick="pauseAnimation('accelerator')">⏸ Pause</button>
+                        <button class="btn btn-warning" onclick="resetAnimation('accelerator')">↻ Réinitialiser</button>
+                    </div>
+                </div>
+
+                <div class="animation-container">
+                    <h3>Système de déviation magnétique</h3>
+                    <canvas id="deviationCanvas" class="animation-canvas"></canvas>
+                    <div class="animation-controls">
+                        <button class="btn btn-primary" onclick="startAnimation('deviation')">▶ Démarrer</button>
+                        <button class="btn btn-secondary" onclick="pauseAnimation('deviation')">⏸ Pause</button>
+                        <button class="btn btn-warning" onclick="resetAnimation('deviation')">↻ Réinitialiser</button>
+                    </div>
+                </div>
+
+                <div class="animation-container">
+                    <h3>Tête d'irradiation (cible, filtres, collimateurs)</h3>
+                    <canvas id="headCanvas" class="animation-canvas"></canvas>
+                    <div class="animation-controls">
+                        <button class="btn btn-primary" onclick="startAnimation('head')">▶ Démarrer</button>
+                        <button class="btn btn-secondary" onclick="pauseAnimation('head')">⏸ Pause</button>
+                        <button class="btn btn-warning" onclick="resetAnimation('head')">↻ Réinitialiser</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FLASHCARDS -->
+            <div id="flashcards" class="tab-content">
+                <h2>Flashcards - Radiothérapie</h2>
+                
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalCards">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="masteredCards">0</div>
+                        <div class="stat-label">Maîtrisées</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="reviewCards">0</div>
+                        <div class="stat-label">À revoir</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="newCards">0</div>
+                        <div class="stat-label">Nouvelles</div>
+                    </div>
+                </div>
+
+                <div class="flashcard-filters">
+                    <button class="btn btn-primary" onclick="filterFlashcards('all')">Toutes</button>
+                    <button class="btn btn-success" onclick="filterFlashcards('mastered')">Maîtrisées</button>
+                    <button class="btn btn-warning" onclick="filterFlashcards('review')">À revoir</button>
+                    <button class="btn btn-secondary" onclick="filterFlashcards('new')">Nouvelles</button>
+                    <button class="btn btn-danger" onclick="resetAllFlashcards()">↻ Tout réinitialiser</button>
+                    <button class="btn btn-success" onclick="exportFlashcards()" style="background: #10b981;">💾 Exporter JSON</button>
+                    <button class="btn btn-primary" onclick="document.getElementById('import-flashcards').click()" style="background: #3b82f6;">📂 Importer JSON</button>
+                    
+                    <button class="btn btn-primary" onclick="toggleAcronymFlashcards()" style="background:#7c3aed;">➕ Acronymes</button>
+                    <button class="btn btn-secondary" onclick="removeAcronymFlashcards()" style="background:#4b5563;">➖ Retirer</button>
+<input type="file" id="import-flashcards" accept=".json" onchange="importFlashcards(event)" style="display: none;">
+                </div>
+
+                <div class="flashcard-navigation">
+                    <button class="nav-arrow-btn" id="prevCard" onclick="previousFlashcard()">⬅️ Précédent</button>
+                    <div class="card-counter">
+                        <span id="currentCardIndex">1</span> / <span id="totalCardsCount">0</span>
+                    </div>
+                    <button class="nav-arrow-btn" id="nextCard" onclick="nextFlashcard()">Suivant ➡️</button>
+                </div>
+
+                <div class="flashcard-container" id="flashcardContainer"></div>
+                <div class="flip-hint">👆 Cliquez sur la carte pour voir la réponse</div>
+            </div>
+
+            <!-- QCM -->
+            <div id="qcm" class="tab-content">
+                <h2>QCM - Questions à Choix Multiples</h2>
+                <div class="quiz-container" id="qcmContainer"></div>
+            </div>
+
+            <!-- VRAI/FAUX -->
+            <div id="vraifaux" class="tab-content">
+                <h2>Vrai ou Faux</h2>
+                <div class="quiz-container" id="vraifauxContainer"></div>
+            </div>
+
+            <!-- QUESTIONS OUVERTES -->
+            <div id="ouvert" class="tab-content">
+                <h2>Questions Ouvertes</h2>
+                <div class="quiz-container" id="ouvertContainer"></div>
+            
+            
+            </div>
+
+            <!-- ACRONYMES -->
+            <div id="acronymes" class="tab-content">
+                <h2>Acronymes de Radiothérapie</h2>
+
+                <div class="animation-container" style="margin-top: 20px;">
+                    <h3>Glossaire</h3>
+                    <p style="color:#666; margin: 10px 0 15px; line-height:1.6;">
+                        Retrouvez ici les acronymes les plus fréquents en radiothérapie (LINAC, MLC, IMRT, IGRT, etc.).
+                        Utilisez la recherche pour filtrer.
+                    </p>
+
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom: 15px;">
+                        <input id="acronymSearch" type="text" placeholder="Rechercher un acronyme (ex: PTV, DVH, CBCT...)"
+                               style="flex:1; min-width:260px; padding:12px 14px; border:2px solid #dee2e6; border-radius:10px; font-size:1em;"/>
+                        <button class="btn btn-secondary" onclick="resetAcronymSearch()">↻ Réinitialiser</button>
+                    </div>
+
+                    <div id="acronymGrid" class="acronym-grid">
+                        <div class="acronym-card">
+            <div class="acronym">LINAC</div>
+            <div class="acronym-full">Accélérateur linéaire</div>
+            <div class="acronym-def">Accélérateur de particules utilisé en radiothérapie externe.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">MLC</div>
+            <div class="acronym-full">Multi‑Leaf Collimator</div>
+            <div class="acronym-def">Collimateur multilames pour conformer le faisceau.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">IMRT</div>
+            <div class="acronym-full">Intensity Modulated Radiation Therapy</div>
+            <div class="acronym-def">Radiothérapie conformationnelle avec modulation d’intensité.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">VMAT</div>
+            <div class="acronym-full">Volumetric Modulated Arc Therapy</div>
+            <div class="acronym-def">IMRT en rotation (arcthérapie) avec modulation dynamique.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">IGRT</div>
+            <div class="acronym-full">Image Guided Radiation Therapy</div>
+            <div class="acronym-def">Radiothérapie guidée par l’image (vérification/ajustement du positionnement).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">CBCT</div>
+            <div class="acronym-full">Cone Beam CT</div>
+            <div class="acronym-def">Scanner embarqué en cône pour imagerie 3D sur la machine.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">EPID</div>
+            <div class="acronym-full">Electronic Portal Imaging Device</div>
+            <div class="acronym-def">Détecteur plan (imagerie portale) pour contrôles et IGRT.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">TPS</div>
+            <div class="acronym-full">Treatment Planning System</div>
+            <div class="acronym-def">Système informatique de planification (calcul dose, optimisation).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">CT</div>
+            <div class="acronym-full">Computed Tomography</div>
+            <div class="acronym-def">Scanner (imagerie de référence pour la dosimétrie).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">IRM / MRI</div>
+            <div class="acronym-full">Imagerie par Résonance Magnétique</div>
+            <div class="acronym-def">IRM, utile pour le contraste des tissus mous.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">PET</div>
+            <div class="acronym-full">Positron Emission Tomography</div>
+            <div class="acronym-def">TEP, imagerie fonctionnelle (métabolisme).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">GTV</div>
+            <div class="acronym-full">Gross Tumor Volume</div>
+            <div class="acronym-def">Volume tumoral macroscopique visible.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">CTV</div>
+            <div class="acronym-full">Clinical Target Volume</div>
+            <div class="acronym-def">GTV + extension microscopique potentielle.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">PTV</div>
+            <div class="acronym-full">Planning Target Volume</div>
+            <div class="acronym-def">CTV + marges (incertitudes setup/mouvements).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">OAR</div>
+            <div class="acronym-full">Organ At Risk</div>
+            <div class="acronym-def">Organe à risque à épargner (moelle, reins, etc.).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">DVH</div>
+            <div class="acronym-full">Dose Volume Histogram</div>
+            <div class="acronym-def">Histogramme dose‑volume (analyse plan).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">MU</div>
+            <div class="acronym-full">Monitor Unit</div>
+            <div class="acronym-def">Unité machine corrélée à la dose délivrée.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">SAD</div>
+            <div class="acronym-full">Source‑Axis Distance</div>
+            <div class="acronym-def">Distance source‑isocentre (souvent 100 cm).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">SSD</div>
+            <div class="acronym-full">Source‑Skin Distance</div>
+            <div class="acronym-def">Distance source‑peau (technique SSD).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">QA</div>
+            <div class="acronym-full">Quality Assurance</div>
+            <div class="acronym-def">Contrôles qualité (machine, plan, patient).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">FFF</div>
+            <div class="acronym-full">Flattening Filter Free</div>
+            <div class="acronym-def">Faisceau sans filtre égalisateur (débit de dose élevé).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">PDD</div>
+            <div class="acronym-full">Percent Depth Dose</div>
+            <div class="acronym-def">Rendement en profondeur (dose relative vs profondeur).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">TMR</div>
+            <div class="acronym-full">Tissue Maximum Ratio</div>
+            <div class="acronym-def">Ratio dose à profondeur vs dose au dmax, SAD.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">TPR</div>
+            <div class="acronym-full">Tissue Phantom Ratio</div>
+            <div class="acronym-def">Ratio dose à deux profondeurs, SAD.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">SBRT</div>
+            <div class="acronym-full">Stereotactic Body Radiation Therapy</div>
+            <div class="acronym-def">Stéréotaxie extracrânienne (forte dose, précision).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">SRS</div>
+            <div class="acronym-full">Stereotactic Radiosurgery</div>
+            <div class="acronym-def">Radiochirurgie stéréotaxique (souvent intracrânienne).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">3DCRT</div>
+            <div class="acronym-full">3D Conformal Radiation Therapy</div>
+            <div class="acronym-def">Radiothérapie conformationnelle 3D.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">DIBH</div>
+            <div class="acronym-full">Deep Inspiration Breath Hold</div>
+            <div class="acronym-def">Blocage inspiratoire (réduction dose cœur en sein gauche).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">HDR</div>
+            <div class="acronym-full">High Dose Rate</div>
+            <div class="acronym-def">Débit de dose élevé (curiethérapie HDR).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">LDR</div>
+            <div class="acronym-full">Low Dose Rate</div>
+            <div class="acronym-def">Débit de dose faible (curiethérapie LDR).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">ICRU</div>
+            <div class="acronym-full">International Commission on Radiation Units and Measurements</div>
+            <div class="acronym-def">Références/rapports pour prescription/volumes/dose.</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">RTOG</div>
+            <div class="acronym-full">Radiation Therapy Oncology Group</div>
+            <div class="acronym-def">Protocoles/contours de référence (guidelines).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">kV</div>
+            <div class="acronym-full">kilovolt</div>
+            <div class="acronym-def">Énergie kV (imagerie, faisceaux kV).</div>
+        </div>
+<div class="acronym-card">
+            <div class="acronym">MV</div>
+            <div class="acronym-full">megavolt</div>
+            <div class="acronym-def">Énergie MV (faisceaux thérapeutiques).</div>
+        </div>
+                    </div>
+                </div>
+
+                <div class="quiz-container" style="margin-top: 20px;">
+                    <h3>Quiz Acronymes</h3>
+                    <p style="color:#666; margin: 10px 0 20px; line-height:1.6;">
+                        Choisissez la bonne définition. Les questions sont tirées aléatoirement du glossaire.
+                    </p>
+                    <div id="acronymQuizContainer"></div>
+                    <div class="animation-controls" style="margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="startAcronymQuiz()">▶ Démarrer le quiz</button>
+                        <button class="btn btn-warning" onclick="resetAcronymQuiz()">↻ Recommencer</button>
+                    </div>
+                </div>
+                <!-- Modal Détails Acronyme -->
+                <div id="acronymModal" class="modal-overlay" style="display:none;">
+                    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="acronymModalTitle">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                            <h3 id="acronymModalTitle" style="margin:0; color:#667eea;">Acronyme</h3>
+                            <button class="btn btn-danger" style="padding:10px 14px; border-radius:10px;" onclick="closeAcronymModal()">✕</button>
+                        </div>
+                        <div id="acronymModalBody" style="margin-top:14px; color:#444; line-height:1.7;"></div>
+                        <div class="flip-hint" style="margin-top:14px;">Astuce : utilise aussi les flashcards “Acronymes” pour réviser.</div>
+                    </div>
+                </div>
+
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+    <script>
+        // ===== Canvas helpers (compatibility) =====
+        // roundRect() is not chainable (returns void) in standard Canvas API; some browsers may not support it.
+        // This wrapper makes it available and chainable so calls like ctx.roundRect(...).fill() work everywhere.
+        (function(){
+            const proto = (typeof CanvasRenderingContext2D !== 'undefined') ? CanvasRenderingContext2D.prototype : null;
+            if (!proto) return;
+            const native = proto.roundRect;
+            function fallbackRoundRect(x, y, w, h, r){
+                r = Math.max(0, Math.min(r || 0, Math.min(w, h) / 2));
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            }
+            if (typeof native !== 'function') {
+                proto.roundRect = fallbackRoundRect;
+            } else {
+                proto.roundRect = function(x, y, w, h, r){
+                    native.call(this, x, y, w, h, r);
+                    return this;
+                };
+            }
+        })();
+
+        // ============= GESTION DES ONGLETS =============
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const navTabs = document.querySelectorAll('.nav-tab');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            navTabs.forEach(nav => nav.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // ============= DONNÉES FLASHCARDS =============
+        const flashcardsData = [
+            {
+                question: "Qu'est-ce qu'un accélérateur linéaire (LINAC) ?",
+                answer: "Un accélérateur linéaire est un appareil médical qui utilise des ondes électromagnétiques à haute fréquence pour accélérer des électrons à des énergies très élevées. Ces électrons peuvent ensuite être utilisés directement pour traiter des tumeurs superficielles, ou peuvent percuter une cible pour produire des rayons X de haute énergie pour traiter des tumeurs plus profondes.",
+                status: 'new'
+            },
+            {
+                question: "Quels sont les principaux composants d'un accélérateur linéaire ?",
+                answer: "1. Générateur haute tension et klystron (production micro-ondes)\n2. Canon à électrons (source d'électrons)\n3. Guide d'onde et structure accélératrice\n4. Système de déviation magnétique (aimant de courbure)\n5. Tête d'irradiation (cible, filtres, collimateurs)\n6. Système de positionnement (bras isocentrique, table de traitement)",
+                status: 'new'
+            },
+            {
+                question: "Quel est le rôle du klystron dans un LINAC ?",
+                answer: "Le klystron est un tube à vide qui génère des micro-ondes de haute puissance (typiquement 2 à 3 GHz). Ces micro-ondes sont injectées dans le guide d'onde pour créer un champ électrique oscillant qui accélère les électrons dans la structure accélératrice.",
+                status: 'new'
+            },
+            {
+                question: "Comment fonctionne le canon à électrons ?",
+                answer: "Le canon à électrons produit un faisceau d'électrons par émission thermoélectronique. Une cathode chauffée émet des électrons qui sont ensuite accélérés par une différence de potentiel (25-50 kV) vers l'anode. Les électrons sont ensuite injectés dans la structure accélératrice.",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que la structure accélératrice et comment fonctionne-t-elle ?",
+                answer: "La structure accélératrice est un tube métallique constitué de cavités résonnantes espacées régulièrement. Les micro-ondes du klystron créent un champ électrique alternatif dans ces cavités. Les électrons 'surfent' sur l'onde électromagnétique et sont accélérés de cavité en cavité, atteignant des énergies de 4 à 25 MeV.",
+                status: 'new'
+            },
+            {
+                question: "Pourquoi utilise-t-on un aimant de déviation ?",
+                answer: "L'aimant de déviation (à 90° ou 270°) remplit plusieurs fonctions :\n1. Diriger le faisceau d'électrons vers la cible ou directement vers le patient\n2. Sélectionner l'énergie des électrons (dispersion énergétique)\n3. Focaliser le faisceau\n4. Permettre une conception compacte de l'appareil",
+                status: 'new'
+            },
+            {
+                question: "Quelle est la différence entre le mode électrons et le mode photons X ?",
+                answer: "Mode électrons : Les électrons accélérés sont utilisés directement pour traiter des tumeurs superficielles (0-5 cm de profondeur). Une feuille diffusante homogénéise le faisceau.\n\nMode photons X : Les électrons percutent une cible en tungstène, produisant des rayons X par rayonnement de freinage (Bremsstrahlung). Ces photons pénètrent plus profondément et traitent les tumeurs en profondeur.",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que la tête d'irradiation et quels sont ses composants ?",
+                answer: "La tête d'irradiation contient :\n1. La cible (tungstène) pour produire les rayons X\n2. Le filtre égalisateur (conique) pour homogénéiser le faisceau\n3. Les chambres d'ionisation de contrôle (dose, symétrie)\n4. Le collimateur primaire\n5. Les mâchoires (collimateurs secondaires, X et Y)\n6. Le collimateur multilames (MLC)\n7. Le réticule lumineux et télémètre",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que le collimateur multilames (MLC) ?",
+                answer: "Le MLC est constitué de 40 à 160 lames mobiles indépendantes en tungstène qui permettent de conformer précisément la forme du faisceau au volume tumoral. Il permet la réalisation de techniques avancées comme l'IMRT (radiothérapie conformationnelle avec modulation d'intensité) et l'arcthérapie dynamique.",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que l'isocentre en radiothérapie ?",
+                answer: "L'isocentre est le point fixe dans l'espace autour duquel le bras de l'accélérateur peut tourner. C'est le point de référence pour le positionnement du patient. La distance source-isocentre (DSI) est standardisée à 100 cm. Le volume tumoral est positionné à l'isocentre pour permettre l'irradiation sous différents angles.",
+                status: 'new'
+            },
+            {
+                question: "Quelles sont les énergies typiques utilisées en radiothérapie et leurs indications ?",
+                answer: "Électrons :\n- 4-6 MeV : tumeurs très superficielles (peau, <2cm)\n- 9-12 MeV : tumeurs superficielles (2-4 cm)\n- 15-20 MeV : tumeurs semi-profondes (4-6 cm)\n\nPhotons X :\n- 6 MV : tumeurs superficielles à moyennement profondes\n- 10-15 MV : tumeurs profondes\n- 18-25 MV : tumeurs très profondes (peu utilisé actuellement)",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que le rendement en profondeur ?",
+                answer: "Le rendement en profondeur représente le pourcentage de dose absorbée en fonction de la profondeur dans les tissus. Pour les photons X de haute énergie, il existe un effet de 'build-up' : la dose maximale n'est pas en surface mais à une certaine profondeur (1-3 cm selon l'énergie), ce qui épargne la peau. La dose diminue ensuite progressivement avec la profondeur.",
+                status: 'new'
+            },
+            {
+                question: "Quels sont les systèmes de contrôle de qualité intégrés au LINAC ?",
+                answer: "1. Chambres moniteurs : contrôle de la dose délivrée en temps réel\n2. Contrôle de symétrie et homogénéité du faisceau\n3. Contrôle de l'énergie\n4. Interrupteurs de sécurité (porte, etc.)\n5. Système d'arrêt d'urgence\n6. Systèmes de verrouillage des paramètres de traitement\n7. Système de vérification de position (EPID - imagerie portale)",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que l'IMRT ?",
+                answer: "L'IMRT (Intensity Modulated Radiation Therapy / Radiothérapie Conformationnelle avec Modulation d'Intensité) est une technique avancée qui permet de moduler l'intensité du faisceau au sein d'un même champ d'irradiation. Grâce au MLC, on peut créer des distributions de dose très complexes qui épousent parfaitement la forme de la tumeur tout en épargnant au maximum les organes à risque adjacents.",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que l'IGRT et pourquoi est-elle importante ?",
+                answer: "L'IGRT (Image Guided Radiation Therapy / Radiothérapie Guidée par l'Image) utilise des systèmes d'imagerie intégrés au LINAC (kV/MV, CBCT) pour vérifier le positionnement du patient avant chaque séance. C'est essentiel car : 1) Les organes internes bougent (respiration, péristaltisme), 2) La morphologie du patient change (amaigrissement, œdème), 3) La tumeur peut réduire en cours de traitement. L'IGRT permet des corrections quotidiennes pour une grande précision.",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que le CBCT (Cone Beam CT) ?",
+                answer: "Le CBCT est un système de tomodensitométrie à faisceau conique intégré au LINAC. Il permet d'acquérir une image 3D du patient en position de traitement en faisant tourner le bras de l'accélérateur. Cette image est comparée à l'image de référence (scanner de centrage) pour vérifier et corriger le positionnement. C'est un outil majeur de l'IGRT.",
+                status: 'new'
+            },
+            {
+                question: "Quels sont les principaux contrôles de qualité quotidiens du LINAC ?",
+                answer: "Contrôles quotidiens :\n- Vérification de l'isocentre mécanique\n- Contrôle de l'alignement du faisceau laser\n- Vérification de la dose délivrée (constance)\n- Contrôle de symétrie et homogénéité du faisceau\n- Test des systèmes de sécurité\n- Vérification du système d'imagerie (CBCT/MV)\nCes contrôles garantissent la sécurité et la qualité des traitements.",
+                status: 'new'
+            },
+            {
+                question: "Qu'est-ce que la dosimétrie en radiothérapie ?",
+                answer: "La dosimétrie est la science de la mesure et du calcul de la dose de rayonnement. En radiothérapie, elle comprend :\n- La dosimétrie physique : mesure des faisceaux (rendements, profils)\n- La dosimétrie clinique : calcul de la distribution de dose dans le patient\n- La dosimétrie in vivo : vérification de la dose reçue pendant le traitement\nLe physicien médical est responsable de la dosimétrie et de la validation des plans de traitement.",
+                status: 'new'
+            },
+            {
+                question: "Quelles sont les différentes techniques d'irradiation ?",
+                answer: "1. 2D : irradiation par champs simples (anciennes techniques)\n2. 3D conformationnelle : adaptation du volume aux limites de la tumeur\n3. IMRT : modulation d'intensité pour épargner les organes à risque\n4. VMAT/RapidArc : arcthérapie avec modulation d'intensité\n5. Stéréotaxie : très haute dose en 1 à 5 séances (tumeurs petites et bien définies)\n6. Radiothérapie asservie à la respiration : pour tumeurs mobiles (poumon, foie)",
+                status: 'new'
+            },
+            {
+                question: "Quel est le rôle du manipulateur en radiothérapie ?",
+                answer: "Le MER assure :\n1. L'accueil et l'installation du patient\n2. Le repérage et centrage (acquisition scanner, contourage avec l'oncologue)\n3. La mise en position quotidienne (avec contention si nécessaire)\n4. La réalisation de l'IGRT et corrections de positionnement\n5. La délivrance du traitement selon le plan validé\n6. La surveillance du patient (état cutané, tolérance)\n7. La participation aux contrôles de qualité\n8. La traçabilité et l'enregistrement des données",
+                status: 'new'
+            }
+        ];
+
+        // ============= DONNÉES ACRONYMES =============
+        const acronymsData = [{"acronym": "LINAC", "fr": "Accélérateur linéaire", "en": "Linear Accelerator", "simple": "Machine qui accélère des électrons pour produire un faisceau de rayons (électrons ou photons X) utilisé pour traiter une tumeur.", "tech": "Accélération d’électrons par champ RF micro-ondes dans une structure accélératrice; production de photons par Bremsstrahlung sur cible W en mode photons.", "example": "Traitement prostate en photons 6 MV; boost cutané en électrons."}, {"acronym": "MLC", "fr": "Collimateur multilames", "en": "Multi‑Leaf Collimator", "simple": "Un “rideau” de lames qui découpe le faisceau à la forme de la tumeur.", "tech": "Ensemble de lames en tungstène motorisées (40–160) pour conformation de champ et modulation d’intensité (IMRT/VMAT).", "example": "Conformation d’un volume ORL complexe en IMRT."}, {"acronym": "IMRT", "fr": "Radiothérapie conformationnelle avec modulation d’intensité", "en": "Intensity Modulated Radiation Therapy", "simple": "Technique qui fait varier l’intensité du faisceau pour mieux protéger les organes sensibles.", "tech": "Optimisation inverse; modulation via MLC (segments “step-and-shoot” ou dynamique) pour sculpter la dose.", "example": "Prostate avec protection rectum/vessie."}, {"acronym": "VMAT", "fr": "Arcthérapie modulée", "en": "Volumetric Modulated Arc Therapy", "simple": "IMRT pendant que la machine tourne autour du patient, souvent plus rapide.", "tech": "Rotation continue + modulation MLC + variation débit de dose/vitesse gantry; optimisation inverse.", "example": "Traitement tête et cou en arcs."}, {"acronym": "IGRT", "fr": "Radiothérapie guidée par l’image", "en": "Image Guided Radiation Therapy", "simple": "On vérifie l’alignement du patient avec des images juste avant (ou pendant) la séance.", "tech": "Imagerie embarquée (kV/MV, CBCT, EPID) + recalage sur repères anatomiques/markers; corrections couch 6D.", "example": "Prostate : CBCT quotidien et correction transl/rot."}, {"acronym": "CBCT", "fr": "Scanner conique embarqué", "en": "Cone Beam CT", "simple": "Mini-scanner fait sur la machine pour voir le patient en 3D au moment du traitement.", "tech": "Acquisition volumique par source kV + détecteur plan pendant rotation; reconstruction 3D pour recalage IGRT.", "example": "Vérification poumon avec tumeur mobile."}, {"acronym": "EPID", "fr": "Imagerie portale électronique", "en": "Electronic Portal Imaging Device", "simple": "Détecteur plat qui “photographie” le faisceau pour contrôler que tout est bien placé.", "tech": "Détecteur a‑Si placé en face du faisceau MV; imagerie portale, dosimétrie transit, QA dynamique.", "example": "Contrôle champ et MLC en IMRT."}, {"acronym": "TPS", "fr": "Système de planification", "en": "Treatment Planning System", "simple": "Logiciel qui calcule la dose et fabrique le plan de traitement.", "tech": "Calcul dose (algorithmes type convolution/superposition, Monte Carlo), optimisation inverse, DVH, export DICOM‑RT.", "example": "Optimisation VMAT avec contraintes OAR."}, {"acronym": "GTV", "fr": "Volume tumoral macroscopique", "en": "Gross Tumor Volume", "simple": "Ce qu’on voit comme tumeur sur l’imagerie/examen.", "tech": "Contourage basé sur imagerie (CT/MRI/PET) et clinique; peut inclure ganglions atteints.", "example": "GTV poumon visible au scanner."}, {"acronym": "CTV", "fr": "Volume cible clinique", "en": "Clinical Target Volume", "simple": "GTV + zone où des cellules microscopiques pourraient être présentes.", "tech": "Ajout d’extensions selon anatomie/histologie/guidelines (ICRU/RTOG).", "example": "CTV prostate inclut vésicules séminales selon risque."}, {"acronym": "PTV", "fr": "Volume cible de planification", "en": "Planning Target Volume", "simple": "CTV + marge de sécurité pour les petits décalages et mouvements.", "tech": "Marge liée aux incertitudes systématiques/aléatoires (setup, immobilisation, mouvements internes).", "example": "PTV prostate = CTV + 5–10 mm."}, {"acronym": "OAR", "fr": "Organe à risque", "en": "Organ At Risk", "simple": "Organe sensible qu’on veut protéger (moelle, cœur…).", "tech": "Structures contournées avec contraintes dose (Dmax, Dmean, Vx) et tolérances.", "example": "Moelle épinière en ORL."}, {"acronym": "DVH", "fr": "Histogramme dose-volume", "en": "Dose‑Volume Histogram", "simple": "Graphique qui montre combien de volume reçoit telle dose.", "tech": "Courbes cumulatives/ différentielles; analyse PTV (D95, V95) et OAR (V20 poumon, Dmean parotide…).", "example": "V20 poumon en radio thoracique."}, {"acronym": "MU", "fr": "Unités moniteur", "en": "Monitor Units", "simple": "“Compteur machine” lié au temps/intensité délivrée.", "tech": "Quantité commandée mesurée par chambres moniteurs; calibration selon protocole (TRS‑398/AAPM TG‑51).", "example": "Un champ peut nécessiter 200 MU."}, {"acronym": "SAD", "fr": "Distance source-axe", "en": "Source‑Axis Distance", "simple": "Distance entre la source et l’isocentre (souvent 100 cm).", "tech": "Géométrie isocentrique; utilisée dans le calcul de dose et le positionnement (technique SAD).", "example": "Traitement 3D conformationnelle SAD 100 cm."}, {"acronym": "SSD", "fr": "Distance source-peau", "en": "Source‑Skin Distance", "simple": "Distance entre la source et la peau.", "tech": "Technique SSD (en particulier électrons/photons historiques); correction inverse carré + PDD.", "example": "Champ électrons à SSD 100 cm."}, {"acronym": "QA", "fr": "Assurance qualité", "en": "Quality Assurance", "simple": "Ensemble des contrôles pour garantir sécurité et précision.", "tech": "QA machine (daily/weekly/monthly), QA patient (IMRT QA), vérifs MLC, imagerie, dosimétrie.", "example": "Test Winston‑Lutz pour isocentre."}, {"acronym": "FFF", "fr": "Sans filtre égalisateur", "en": "Flattening Filter Free", "simple": "Faisceau plus “puissant” et plus rapide car on enlève le filtre qui aplatit.", "tech": "Débits de dose élevés, profils non plats; souvent utilisé en stéréotaxie (SBRT/SRS).", "example": "SBRT poumon en FFF."}, {"acronym": "SBRT", "fr": "Stéréotaxie extracrânienne", "en": "Stereotactic Body Radiation Therapy", "simple": "Très fortes doses en peu de séances, très précis.", "tech": "Hypofractionnement, marges réduites, IGRT stricte, contrôle mouvements (gating, DIBH).", "example": "SBRT poumon 3–5 fractions."}, {"acronym": "SRS", "fr": "Radiochirurgie stéréotaxique", "en": "Stereotactic Radiosurgery", "simple": "Stéréotaxie surtout pour le cerveau, souvent en 1 séance.", "tech": "Haute précision (sub‑mm), arcs/IMRT, immobilisation rigide, QA renforcée.", "example": "Métastase cérébrale en SRS."}, {"acronym": "3DCRT", "fr": "Radiothérapie conformationnelle 3D", "en": "3D Conformal Radiation Therapy", "simple": "Plusieurs faisceaux conformés à la tumeur mais sans modulation fine comme l’IMRT.", "tech": "Champs fixes, conformation par MLC/mâchoires, planification forward.", "example": "Sein en tangentielles 3DCRT."}, {"acronym": "DIBH", "fr": "Blocage inspiratoire profond", "en": "Deep Inspiration Breath Hold", "simple": "Le patient inspire et bloque : le cœur s’éloigne, on l’irradie moins.", "tech": "Gestion respiratoire avec monitoring; reproductibilité inspiration; utilisé sein gauche.", "example": "Sein gauche : réduction dose cœur."}, {"acronym": "HDR", "fr": "Débit de dose élevé", "en": "High Dose Rate", "simple": "Curiethérapie avec source très active, séances courtes.", "tech": "Source Ir‑192 (souvent), afterloader, optimisation dwell times.", "example": "Curiethérapie col utérin HDR."}, {"acronym": "LDR", "fr": "Débit de dose faible", "en": "Low Dose Rate", "simple": "Curiethérapie lente (source peu active, plus long).", "tech": "Implants permanents (ex. I‑125 prostate) ou LDR historique; radioprotection spécifique.", "example": "Implants prostate I‑125 (assimilé LDR)."}, {"acronym": "ICRU", "fr": "Commission internationale des unités de radiation", "en": "International Commission on Radiation Units and Measurements", "simple": "Organisme qui standardise les définitions (volumes, doses, prescriptions).", "tech": "Rapports ICRU (ex. 50/62/83) définissant GTV/CTV/PTV, prescriptions et reporting.", "example": "ICRU 83 pour IMRT prostate."}, {"acronym": "RTOG", "fr": "Groupe de radio-oncologie", "en": "Radiation Therapy Oncology Group", "simple": "Références de contour/protocoles très utilisés.", "tech": "Guidelines de contourage et essais cliniques; souvent via atlas.", "example": "Atlas RTOG pour ganglions pelviens."}, {"acronym": "kV", "fr": "kilovolt", "en": "kilovolt", "simple": "Énergie “basse” surtout utilisée pour l’imagerie.", "tech": "Imagerie kV (radiographies, CBCT) avec bonne résolution; interaction photoélectrique plus marquée.", "example": "kV‑kV pour recalage osseux."}, {"acronym": "MV", "fr": "megavolt", "en": "megavolt", "simple": "Énergie “haute” utilisée pour traiter (photons/électrons).", "tech": "Faisceaux thérapeutiques MV; interactions Compton dominantes; effet build‑up.", "example": "Photons 6 MV pour de nombreuses localisations."}];
+
+        // Flashcards supplémentaires (Acronymes)
+        const acronymFlashcardsData = [
+            {
+                        "question": "Que signifie l’acronyme LINAC ?",
+                        "answer": "LINAC : Accélérateur linéaire\nAccélérateur de particules utilisé en radiothérapie externe.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme MLC ?",
+                        "answer": "MLC : Multi‑Leaf Collimator\nCollimateur multilames pour conformer le faisceau.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme IMRT ?",
+                        "answer": "IMRT : Intensity Modulated Radiation Therapy\nRadiothérapie conformationnelle avec modulation d’intensité.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme VMAT ?",
+                        "answer": "VMAT : Volumetric Modulated Arc Therapy\nIMRT en rotation (arcthérapie) avec modulation dynamique.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme IGRT ?",
+                        "answer": "IGRT : Image Guided Radiation Therapy\nRadiothérapie guidée par l’image (vérification/ajustement du positionnement).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme CBCT ?",
+                        "answer": "CBCT : Cone Beam CT\nScanner embarqué en cône pour imagerie 3D sur la machine.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme EPID ?",
+                        "answer": "EPID : Electronic Portal Imaging Device\nDétecteur plan (imagerie portale) pour contrôles et IGRT.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme TPS ?",
+                        "answer": "TPS : Treatment Planning System\nSystème informatique de planification (calcul dose, optimisation).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme CT ?",
+                        "answer": "CT : Computed Tomography\nScanner (imagerie de référence pour la dosimétrie).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme IRM / MRI ?",
+                        "answer": "IRM / MRI : Imagerie par Résonance Magnétique\nIRM, utile pour le contraste des tissus mous.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme PET ?",
+                        "answer": "PET : Positron Emission Tomography\nTEP, imagerie fonctionnelle (métabolisme).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme GTV ?",
+                        "answer": "GTV : Gross Tumor Volume\nVolume tumoral macroscopique visible.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme CTV ?",
+                        "answer": "CTV : Clinical Target Volume\nGTV + extension microscopique potentielle.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme PTV ?",
+                        "answer": "PTV : Planning Target Volume\nCTV + marges (incertitudes setup/mouvements).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme OAR ?",
+                        "answer": "OAR : Organ At Risk\nOrgane à risque à épargner (moelle, reins, etc.).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme DVH ?",
+                        "answer": "DVH : Dose Volume Histogram\nHistogramme dose‑volume (analyse plan).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme MU ?",
+                        "answer": "MU : Monitor Unit\nUnité machine corrélée à la dose délivrée.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme SAD ?",
+                        "answer": "SAD : Source‑Axis Distance\nDistance source‑isocentre (souvent 100 cm).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme SSD ?",
+                        "answer": "SSD : Source‑Skin Distance\nDistance source‑peau (technique SSD).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme QA ?",
+                        "answer": "QA : Quality Assurance\nContrôles qualité (machine, plan, patient).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme FFF ?",
+                        "answer": "FFF : Flattening Filter Free\nFaisceau sans filtre égalisateur (débit de dose élevé).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme PDD ?",
+                        "answer": "PDD : Percent Depth Dose\nRendement en profondeur (dose relative vs profondeur).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme TMR ?",
+                        "answer": "TMR : Tissue Maximum Ratio\nRatio dose à profondeur vs dose au dmax, SAD.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme TPR ?",
+                        "answer": "TPR : Tissue Phantom Ratio\nRatio dose à deux profondeurs, SAD.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme SBRT ?",
+                        "answer": "SBRT : Stereotactic Body Radiation Therapy\nStéréotaxie extracrânienne (forte dose, précision).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme SRS ?",
+                        "answer": "SRS : Stereotactic Radiosurgery\nRadiochirurgie stéréotaxique (souvent intracrânienne).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme 3DCRT ?",
+                        "answer": "3DCRT : 3D Conformal Radiation Therapy\nRadiothérapie conformationnelle 3D.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme DIBH ?",
+                        "answer": "DIBH : Deep Inspiration Breath Hold\nBlocage inspiratoire (réduction dose cœur en sein gauche).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme HDR ?",
+                        "answer": "HDR : High Dose Rate\nDébit de dose élevé (curiethérapie HDR).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme LDR ?",
+                        "answer": "LDR : Low Dose Rate\nDébit de dose faible (curiethérapie LDR).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme ICRU ?",
+                        "answer": "ICRU : International Commission on Radiation Units and Measurements\nRéférences/rapports pour prescription/volumes/dose.",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme RTOG ?",
+                        "answer": "RTOG : Radiation Therapy Oncology Group\nProtocoles/contours de référence (guidelines).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme kV ?",
+                        "answer": "kV : kilovolt\nÉnergie kV (imagerie, faisceaux kV).",
+                        "status": "new",
+                        "_tag": "acronym"
+            },
+            {
+                        "question": "Que signifie l’acronyme MV ?",
+                        "answer": "MV : megavolt\nÉnergie MV (faisceaux thérapeutiques).",
+                        "status": "new",
+                        "_tag": "acronym"
+            }
+];
+
+        function getStoredFlashcardsState() {
+            return JSON.parse(localStorage.getItem('flashcardsState')) || flashcardsData;
+        }
+
+        function setStoredFlashcardsState(state) {
+            localStorage.setItem('flashcardsState', JSON.stringify(state));
+        }
+
+        function toggleAcronymFlashcards() {
+            // Ajoute (une seule fois) les flashcards acronymes
+            let state = getStoredFlashcardsState();
+            const alreadyAdded = state.some(c => c._tag === 'acronym');
+            if (alreadyAdded) {
+                alert('ℹ️ Les flashcards Acronymes sont déjà ajoutées.');
+                return;
+            }
+            state = state.concat(acronymFlashcardsData);
+            setStoredFlashcardsState(state);
+            flashcardsState = state;
+            updateFlashcardStats();
+            renderFlashcards(currentFilter || 'all');
+            alert('✅ Flashcards Acronymes ajoutées !');
+        }
+
+        function removeAcronymFlashcards() {
+            let state = getStoredFlashcardsState();
+            const before = state.length;
+            state = state.filter(c => c._tag !== 'acronym');
+            if (state.length === before) {
+                alert('ℹ️ Aucune flashcard Acronyme à retirer.');
+                return;
+            }
+            setStoredFlashcardsState(state);
+            flashcardsState = state;
+            // sécuriser l'index courant
+            currentFlashcardIndex = 0;
+            updateFlashcardStats();
+            renderFlashcards(currentFilter || 'all');
+            alert('✅ Flashcards Acronymes retirées.');
+        }
+
+        // ============= ACRONYMES : RECHERCHE =============
+        function resetAcronymSearch() {
+            const input = document.getElementById('acronymSearch');
+            if (input) input.value = '';
+            renderAcronymGrid('');
+        }
+
+        
+        
+
+        function openAcronymModal(acr) {
+            const item = acronymsData.find(x => x.acronym === acr);
+            if (!item) return;
+            const modal = document.getElementById('acronymModal');
+            const title = document.getElementById('acronymModalTitle');
+            const body = document.getElementById('acronymModalBody');
+            if (!modal || !title || !body) return;
+
+            title.textContent = `${item.acronym} — ${item.fr} • ${item.en}`;
+
+            const esc = (s) => (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            body.innerHTML = `
+                <div style="margin-bottom:14px;">
+                    <div style="font-weight:800; color:#111; margin-bottom:6px;">Version vulgarisée</div>
+                    <div style="color:#444;">${esc(item.simple)}</div>
+                </div>
+                <div style="margin-bottom:14px;">
+                    <div style="font-weight:800; color:#111; margin-bottom:6px;">Version technique</div>
+                    <div style="color:#444;">${esc(item.tech)}</div>
+                </div>
+                ${item.example ? `
+                <div style="margin-bottom:6px;">
+                    <div style="font-weight:800; color:#111; margin-bottom:6px;">Exemple</div>
+                    <div style="color:#444;">${esc(item.example)}</div>
+                </div>` : ''}
+            `;
+
+            modal.style.display = 'flex';
+            modal.onclick = (e) => { if (e.target === modal) closeAcronymModal(); };
+            document.addEventListener('keydown', acronymEscClose);
+        }
+
+        function acronymEscClose(e){
+            if (e.key === 'Escape') closeAcronymModal();
+        }
+
+        function closeAcronymModal() {
+            const modal = document.getElementById('acronymModal');
+            if (modal) modal.style.display = 'none';
+            document.removeEventListener('keydown', acronymEscClose);
+        }
+
+function renderAcronymGrid(filterText) {
+            const grid = document.getElementById('acronymGrid');
+            if (!grid) return;
+
+            const q = (filterText || '').trim().toLowerCase();
+            const items = acronymsData.filter(item => {
+                const hay = (item.acronym + ' ' + item.fr + ' ' + item.en + ' ' + item.simple + ' ' + item.tech + ' ' + item.example).toLowerCase();
+                return hay.includes(q);
+            });
+
+            if (items.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; padding:30px; color:#666;">Aucun acronyme trouvé.</p>';
+                return;
+            }
+
+            grid.innerHTML = items.map(item => `
+                <div class="acronym-card">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                        <div>
+                            <div class="acronym">${item.acronym}</div>
+                            <div class="acronym-full">${item.fr} <span style="color:#666; font-weight:600;">•</span> <span style="color:#111;">${item.en}</span></div>
+                        </div>
+                        <button class="btn btn-secondary" style="padding:10px 14px; border-radius:10px; font-size:0.95em;"
+                                onclick="openAcronymModal('${item.acronym.replace(/'/g, "\'")}')">🔎 Détails</button>
+                    </div>
+
+                    <details style="margin-top:10px;">
+                        <summary style="cursor:pointer; color:#667eea; font-weight:700;">Voir l’explication</summary>
+                        <div style="margin-top:10px; color:#444; line-height:1.6;">
+                            <div style="margin-bottom:10px;">
+                                <strong>Version vulgarisée :</strong><br>${item.simple}
+                            </div>
+                            <div style="margin-bottom:10px;">
+                                <strong>Version technique :</strong><br>${item.tech}
+                            </div>
+                            ${item.example ? `<div><strong>Exemple :</strong><br>${item.example}</div>` : ''}
+                        </div>
+                    </details>
+                </div>
+            `).join('');
+        }
+
+
+        // ============= QUIZ ACRONYMES =============
+        let acronymQuizState = {
+            current: 0,
+            score: 0,
+            questions: [],
+            answered: false
+        };
+
+        function shuffleArray(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function buildAcronymQuizQuestions(count = 10) {
+            const pool = shuffleArray(acronymsData);
+            const picked = pool.slice(0, Math.min(count, pool.length));
+
+            return picked.map(item => {
+                // options = bonne définition + 3 autres
+                const distractors = shuffleArray(acronymsData.filter(x => x.acronym !== item.acronym)).slice(0, 3);
+                const options = shuffleArray([item.simple, ...distractors.map(d => d.simple)]);
+                return {
+                    acronym: item.acronym,
+                    full: item.fr + " • " + item.en,
+
+                    correctDef: item.simple,
+                    options,
+                    correctIndex: options.indexOf(item.simple)
+                };
+            });
+        }
+
+        function startAcronymQuiz() {
+            acronymQuizState = {
+                current: 0,
+                score: 0,
+                questions: buildAcronymQuizQuestions(12),
+                answered: false
+            };
+            renderAcronymQuiz();
+        }
+
+        function resetAcronymQuiz() {
+            startAcronymQuiz();
+        }
+
+        function renderAcronymQuiz() {
+            const container = document.getElementById('acronymQuizContainer');
+            if (!container) return;
+
+            const total = acronymQuizState.questions.length;
+            if (total === 0) {
+                container.innerHTML = '<p style="color:#666;">Aucune question disponible.</p>';
+                return;
+            }
+
+            if (acronymQuizState.current >= total) {
+                const pct = Math.round((acronymQuizState.score / total) * 100);
+                container.innerHTML = `
+                    <div class="quiz-results">
+                        <h2>Résultats Quiz Acronymes</h2>
+                        <div class="score-display">${pct}%</div>
+                        <p style="font-size:1.2em; margin: 20px 0;">
+                            ${acronymQuizState.score} bonnes réponses sur ${total} questions
+                        </p>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:${pct}%"></div>
+                        </div>
+                        <p style="margin-top: 16px; color:#666;">
+                            Astuce : ajoute les flashcards Acronymes pour les réviser en mode cartes 😉
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const q = acronymQuizState.questions[acronymQuizState.current];
+            const progress = (acronymQuizState.current / total) * 100;
+
+            const optionsHTML = q.options.map((opt, idx) => `
+                <div class="option" onclick="selectAcronymOption(${idx})">${opt ?? ''}</div>
+            `).join('');
+
+            container.innerHTML = `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${progress}%"></div>
+                </div>
+                <p style="text-align:center; margin:10px 0;">Question ${acronymQuizState.current + 1} sur ${total}</p>
+
+                <div class="question-card">
+                    <div class="question-header">
+                        <span class="question-number">Acronyme</span>
+                        <span class="question-type">Quiz</span>
+                    </div>
+                    <div class="question-text">
+                        <strong>${q.acronym}</strong> — ${q.full}<br><br>
+                        Quelle est la bonne définition ?
+                    </div>
+                    <div class="options-container">${optionsHTML}</div>
+                    <div id="acronymQuizExplain" class="example-answer"></div>
+                    <div style="display:flex; gap: 15px; margin-top: 20px;">
+                        <button class="btn btn-secondary" onclick="prevAcronymQuiz()" ${acronymQuizState.current===0?'disabled':''}>◄ Précédent</button>
+                        <button class="btn btn-primary" onclick="nextAcronymQuiz()">Suivant ►</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectAcronymOption(idx) {
+            const container = document.getElementById('acronymQuizContainer');
+            if (!container) return;
+
+            const q = acronymQuizState.questions[acronymQuizState.current];
+            const options = container.querySelectorAll('.option');
+            const explain = document.getElementById('acronymQuizExplain');
+
+            // lock: prevent double-answering
+            if (acronymQuizState.answered) return;
+            acronymQuizState.answered = true;
+
+            options.forEach((el, i) => {
+                el.classList.add('disabled');
+                if (i === q.correctIndex) el.classList.add('correct');
+                if (i === idx && idx !== q.correctIndex) el.classList.add('incorrect');
+            });
+
+            if (idx === q.correctIndex) acronymQuizState.score++;
+
+            if (explain) {
+                explain.classList.add('show');
+                explain.innerHTML = `<strong>Correction :</strong><br>${q.correctDef}`;
+            }
+
+            // auto-advance after short delay
+            setTimeout(() => {
+                acronymQuizState.current++;
+                acronymQuizState.answered = false;
+                renderAcronymQuiz();
+            }, 900);
+        }
+
+        function nextAcronymQuiz() {
+            acronymQuizState.current++;
+            acronymQuizState.answered = false;
+            renderAcronymQuiz();
+        }
+
+        function prevAcronymQuiz() {
+            if (acronymQuizState.current > 0) {
+                acronymQuizState.current--;
+                acronymQuizState.answered = false;
+                renderAcronymQuiz();
+            }
+        }
+
+        // ============= DONNÉES QCM =============
+        const qcmData = [
+            {
+                question: "Quelle est la source d'énergie initiale pour accélérer les électrons dans un LINAC ?",
+                options: [
+                    "Un générateur nucléaire",
+                    "Des micro-ondes produites par un klystron",
+                    "Un champ magnétique rotatif",
+                    "Une réaction chimique"
+                ],
+                correct: 1,
+                explanation: "Le klystron génère des micro-ondes de haute puissance (2-3 GHz) qui créent un champ électrique oscillant dans la structure accélératrice, permettant l'accélération des électrons."
+            },
+            {
+                question: "Quelle est la distance source-isocentre (DSI) standard en radiothérapie ?",
+                options: [
+                    "80 cm",
+                    "100 cm",
+                    "120 cm",
+                    "150 cm"
+                ],
+                correct: 1,
+                explanation: "La DSI standard est de 100 cm. C'est une distance normalisée qui permet la standardisation des calculs de dose et des protocoles de traitement."
+            },
+            {
+                question: "Quel composant produit les rayons X dans un accélérateur linéaire ?",
+                options: [
+                    "Le klystron",
+                    "Le canon à électrons",
+                    "La cible en tungstène",
+                    "Le collimateur multilames"
+                ],
+                correct: 2,
+                explanation: "Lorsque les électrons à haute énergie percutent la cible en tungstène, ils produisent des rayons X par rayonnement de freinage (Bremsstrahlung). En mode électrons, la cible est retirée."
+            },
+            {
+                question: "Combien d'angles de déviation sont couramment utilisés pour les aimants de courbure dans les LINAC ?",
+                options: [
+                    "45° uniquement",
+                    "90° uniquement",
+                    "90° ou 270°",
+                    "180° uniquement"
+                ],
+                correct: 2,
+                explanation: "Les aimants de déviation fonctionnent généralement à 90° (configuration compacte) ou 270° (meilleure focalisation et sélection énergétique). L'angle de 270° permet une meilleure dispersion énergétique."
+            },
+            {
+                question: "Quelle technique permet de moduler l'intensité du faisceau pour créer des distributions de dose complexes ?",
+                options: [
+                    "La radiothérapie 2D",
+                    "L'IMRT",
+                    "La curiethérapie",
+                    "La radiologie interventionnelle"
+                ],
+                correct: 1,
+                explanation: "L'IMRT (Intensity Modulated Radiation Therapy) utilise le collimateur multilames pour moduler l'intensité du faisceau, permettant de conformer la dose au volume tumoral tout en épargnant les organes à risque."
+            },
+            {
+                question: "Quel système d'imagerie permet d'obtenir une image 3D du patient en position de traitement ?",
+                options: [
+                    "La radiographie plane",
+                    "Le CBCT",
+                    "L'IRM",
+                    "L'échographie"
+                ],
+                correct: 1,
+                explanation: "Le CBCT (Cone Beam CT) est intégré au LINAC et permet d'acquérir une image 3D en faisant tourner le bras autour du patient. C'est l'outil principal de l'IGRT pour vérifier le positionnement."
+            },
+            {
+                question: "Quelle énergie d'électrons est appropriée pour traiter une tumeur à 3 cm de profondeur ?",
+                options: [
+                    "4 MeV",
+                    "9 MeV",
+                    "15 MeV",
+                    "25 MeV"
+                ],
+                correct: 1,
+                explanation: "Les électrons de 9 MeV sont adaptés aux tumeurs entre 2 et 4 cm de profondeur. Règle empirique : l'énergie en MeV divisée par 3 donne approximativement la profondeur de traitement en cm."
+            },
+            {
+                question: "Combien de lames peut contenir un collimateur multilames moderne ?",
+                options: [
+                    "10 à 20 lames",
+                    "40 à 160 lames",
+                    "200 à 300 lames",
+                    "Plus de 500 lames"
+                ],
+                correct: 1,
+                explanation: "Les MLC modernes contiennent entre 40 et 160 lames (typiquement 80 ou 120 lames). Plus le nombre de lames est élevé, plus la conformation du faisceau est précise, permettant des techniques IMRT sophistiquées."
+            },
+            {
+                question: "Quelle est la principale indication des photons X de 6 MV ?",
+                options: [
+                    "Tumeurs très superficielles uniquement",
+                    "Tumeurs superficielles à moyennement profondes",
+                    "Tumeurs très profondes uniquement",
+                    "Les photons de 6 MV ne sont plus utilisés"
+                ],
+                correct: 1,
+                explanation: "Les photons de 6 MV sont les plus utilisés car ils offrent un bon compromis : pénétration suffisante pour la plupart des localisations tout en limitant la dose aux tissus profonds et la dose de sortie."
+            },
+            {
+                question: "Quel phénomène permet aux photons X de haute énergie d'épargner la peau ?",
+                options: [
+                    "L'effet photoélectrique",
+                    "L'effet Compton",
+                    "L'effet de build-up",
+                    "La diffusion Rayleigh"
+                ],
+                correct: 2,
+                explanation: "L'effet de build-up fait que la dose maximale se situe à quelques centimètres sous la peau (1-3 cm selon l'énergie) et non en surface. Cela permet d'épargner la peau, réduisant les réactions cutanées."
+            }
+        ];
+
+        // ============= DONNÉES VRAI/FAUX =============
+        const vraiFauxData = [
+            {
+                question: "Le klystron est responsable de la production des électrons dans un LINAC.",
+                answer: false,
+                explanation: "FAUX. Le klystron produit les micro-ondes qui accélèrent les électrons. C'est le canon à électrons qui produit les électrons par émission thermoélectronique à partir d'une cathode chauffée."
+            },
+            {
+                question: "L'IMRT permet de moduler l'intensité du faisceau au sein d'un même champ d'irradiation.",
+                answer: true,
+                explanation: "VRAI. L'IMRT (Intensity Modulated Radiation Therapy) utilise le collimateur multilames pour créer des variations d'intensité complexes, permettant une conformation optimale de la dose au volume tumoral."
+            },
+            {
+                question: "En mode électrons, les particules percutent une cible en tungstène pour produire des rayons X.",
+                answer: false,
+                explanation: "FAUX. En mode électrons, la cible est retirée du faisceau et les électrons sont utilisés directement pour traiter des tumeurs superficielles. C'est uniquement en mode photons X que les électrons percutent la cible de tungstène."
+            },
+            {
+                question: "La distance source-isocentre standard est de 100 cm en radiothérapie externe.",
+                answer: true,
+                explanation: "VRAI. La DSI de 100 cm est une norme internationale qui permet la standardisation des calculs de dose, des protocoles et la comparabilité entre différents centres et appareils."
+            },
+            {
+                question: "Le CBCT permet de visualiser le patient en 3D en position de traitement.",
+                answer: true,
+                explanation: "VRAI. Le Cone Beam CT acquiert une image 3D en faisant tourner le bras de l'accélérateur autour du patient. Cette image est essentielle pour l'IGRT et la vérification du positionnement quotidien."
+            },
+            {
+                question: "L'aimant de déviation sert uniquement à diriger le faisceau d'électrons vers la cible.",
+                answer: false,
+                explanation: "FAUX. L'aimant de déviation remplit plusieurs fonctions : diriger le faisceau, sélectionner l'énergie par dispersion énergétique, focaliser le faisceau et permettre une conception compacte de l'appareil."
+            },
+            {
+                question: "Les électrons de 20 MeV peuvent traiter des tumeurs jusqu'à environ 6-7 cm de profondeur.",
+                answer: true,
+                explanation: "VRAI. La profondeur de traitement des électrons (en cm) est approximativement égale à l'énergie (en MeV) divisée par 3. Ainsi, 20 MeV ÷ 3 ≈ 6-7 cm de profondeur efficace."
+            },
+            {
+                question: "Le collimateur multilames (MLC) est constitué de lames en plomb.",
+                answer: false,
+                explanation: "FAUX. Les lames du MLC sont en tungstène, pas en plomb. Le tungstène a une densité plus élevée et de meilleures propriétés d'atténuation des rayonnements, permettant des lames plus fines pour une meilleure définition."
+            },
+            {
+                question: "L'effet de build-up signifie que la dose maximale des photons X se situe sous la peau.",
+                answer: true,
+                explanation: "VRAI. Pour les photons de haute énergie, la dose maximale se situe à 1-3 cm sous la surface cutanée selon l'énergie. Cet effet permet d'épargner la peau, réduisant les toxicités cutanées."
+            },
+            {
+                question: "L'IGRT n'est nécessaire que pour les premières séances de radiothérapie.",
+                answer: false,
+                explanation: "FAUX. L'IGRT doit être réalisée quotidiennement ou très régulièrement car la position des organes internes varie d'un jour à l'autre (respiration, remplissage vésical/rectal, perte de poids, etc.)."
+            },
+            {
+                question: "La structure accélératrice fonctionne grâce à des cavités résonnantes espacées régulièrement.",
+                answer: true,
+                explanation: "VRAI. Les cavités résonnantes sont espacées de manière à ce que les électrons 'surfent' sur l'onde électromagnétique. Chaque passage dans une cavité augmente l'énergie des électrons de manière synchronisée."
+            },
+            {
+                question: "Les photons de 25 MV sont les plus utilisés actuellement en radiothérapie.",
+                answer: false,
+                explanation: "FAUX. Les énergies de 6 MV et 10-15 MV sont les plus utilisées. Les très hautes énergies (18-25 MV) sont peu utilisées car elles augmentent la dose de neutrons et la dose de sortie sans bénéfice clinique majeur."
+            },
+            {
+                question: "Le manipulateur en radiothérapie participe aux contrôles de qualité quotidiens du LINAC.",
+                answer: true,
+                explanation: "VRAI. Le MER effectue ou participe aux contrôles de qualité quotidiens : vérification des lasers, de l'isocentre, des systèmes de sécurité, et des systèmes d'imagerie. C'est une responsabilité importante pour garantir la sécurité."
+            },
+            {
+                question: "La VMAT (Volumetric Modulated Arc Therapy) utilise plusieurs arcs fixes sans modulation d'intensité.",
+                answer: false,
+                explanation: "FAUX. La VMAT combine rotation continue du bras avec modulation d'intensité dynamique et variation du débit de dose. C'est une technique très sophistiquée qui permet des traitements rapides et conformés."
+            },
+            {
+                question: "Les chambres moniteurs dans la tête d'irradiation contrôlent la dose délivrée en temps réel.",
+                answer: true,
+                explanation: "VRAI. Les chambres moniteurs (souvent 2 chambres redondantes) mesurent en continu la dose, la symétrie et l'homogénéité du faisceau. Si les paramètres sortent des tolérances, le faisceau s'arrête automatiquement."
+            }
+        ];
+
+        // ============= DONNÉES QUESTIONS OUVERTES =============
+        const questionsOuvertesData = [
+            {
+                question: "Décrivez le parcours complet des électrons depuis leur production jusqu'à la délivrance du faisceau au patient en mode photons X.",
+                exampleAnswer: "1. **Production des électrons** : Le canon à électrons produit des électrons par émission thermoélectronique. Une cathode chauffée émet des électrons qui sont pré-accélérés par une différence de potentiel de 25-50 kV.\n\n2. **Injection dans l'accélérateur** : Les électrons sont injectés dans la structure accélératrice par « paquets » synchronisés avec l'onde électromagnétique.\n\n3. **Accélération** : Le klystron génère des micro-ondes (2-3 GHz) qui créent un champ électrique oscillant dans les cavités de la structure accélératrice. Les électrons « surfent » sur cette onde et gagnent de l'énergie à chaque cavité traversée, atteignant 4-25 MeV.\n\n4. **Déviation magnétique** : L'aimant de courbure (90° ou 270°) dévie les électrons vers la tête d'irradiation tout en sélectionnant leur énergie et en focalisant le faisceau.\n\n5. **Production des photons X** : Les électrons percutent la cible en tungstène. Le rayonnement de freinage (Bremsstrahlung) génère des photons X de différentes énergies (spectre continu).\n\n6. **Mise en forme du faisceau** : Le filtre égalisateur homogénéise le faisceau, les chambres moniteurs contrôlent la dose, et les collimateurs (mâchoires + MLC) définissent la forme du champ.\n\n7. **Délivrance au patient** : Le faisceau de photons X traverse les tissus, dépose l'énergie selon les interactions (effet Compton principalement) pour détruire les cellules tumorales."
+            },
+            {
+                question: "Expliquez pourquoi l'IGRT est devenue indispensable en radiothérapie moderne et quelles sont ses principales applications cliniques.",
+                exampleAnswer: "**Nécessité de l'IGRT :**\n\nL'IGRT (Radiothérapie Guidée par l'Image) est devenue indispensable car la radiothérapie moderne délivre des doses très élevées avec une grande précision (marges réduites). Or, plusieurs facteurs causent des variations de position :\n\n1. **Variations inter-fractions** : Entre les séances, la position des organes peut changer (remplissage vésical/rectal différent, péristaltisme intestinal)\n\n2. **Variations anatomiques** : Le patient peut perdre du poids, la tumeur peut régresser, des œdèmes peuvent apparaître\n\n3. **Variations intra-fraction** : Mouvements respiratoires, déglutition, mouvements involontaires pendant la séance\n\n4. **Erreurs de positionnement** : Malgré le soin apporté, de petites différences de positionnement sont inévitables\n\n**Applications cliniques principales :**\n\n- **Prostate** : Vérification quotidienne car la prostate peut bouger de plusieurs mm selon le remplissage rectal et vésical\n\n- **Poumon** : Suivi des tumeurs mobiles avec la respiration, asservissement respiratoire\n\n- **ORL** : Contrôle de l'amaigrissement et adaptation des contentions\n\n- **Stéréotaxie** : Précision millimétrique indispensable pour ces traitements hypo-fractionnés\n\n- **Foie** : Organe très mobile nécessitant un contrôle de position rigoureux\n\n**Bénéfices** : Réduction des marges de sécurité, escalade de dose possible, meilleure protection des organes à risque, et adaptation du traitement si nécessaire."
+            },
+            {
+                question: "Comparez les avantages et inconvénients du mode électrons versus le mode photons X en radiothérapie.",
+                exampleAnswer: "**MODE ÉLECTRONS :**\n\n*Avantages :*\n- Traitement des tumeurs superficielles avec épargne des tissus profonds (arrêt brusque en profondeur)\n- Dose maximale proche de la surface, idéale pour tumeurs cutanées\n- Pas de dose de sortie significative\n- Bon pour paupière, nez, oreille, paroi thoracique après mastectomie\n- Énergies modulables selon la profondeur tumorale\n\n*Inconvénients :*\n- Profondeur limitée (maximum 6-7 cm avec 20 MeV)\n- Sensibilité aux hétérogénéités (os, air)\n- Difficile à utiliser pour tumeurs profondes\n- Problèmes de pénombre et diffusion latérale\n- Non adapté aux traitements à travers le corps\n\n**MODE PHOTONS X :**\n\n*Avantages :*\n- Pénétration en profondeur illimitée théoriquement\n- Permet les traitements de tumeurs profondes\n- Effet de build-up épargnant la peau\n- Moins sensible aux hétérogénéités\n- Possibilité d'utiliser multiples faisceaux (plusieurs angles)\n- Idéal pour techniques complexes (IMRT, VMAT)\n\n*Inconvénients :*\n- Dose de sortie (irradiation des tissus au-delà de la tumeur)\n- Pour tumeurs superficielles, dose inutile en profondeur\n- Irradiation de plus grand volume de tissus sains\n\n**Conclusion** : Le choix dépend de la localisation et profondeur tumorale. Électrons pour superficiel, photons pour profond. Parfois, association des deux modes (boost électrons après photons)."
+            },
+            {
+                question: "Décrivez les principaux contrôles de qualité quotidiens et hebdomadaires d'un accélérateur linéaire et expliquez leur importance.",
+                exampleAnswer: "**CONTRÔLES QUOTIDIENS (avant la première séance) :**\n\n1. **Vérification des lasers de positionnement** :\n   - Alignement des lasers muraux et plafond avec l'isocentre\n   - Importance : erreur de positionnement si lasers décalés\n   - Tolérance : ±2 mm\n\n2. **Constance de la dose délivrée** :\n   - Mesure dans un fantôme de référence\n   - Importance : garantir que la dose prescrite est correctement délivrée\n   - Tolérance : ±3%\n\n3. **Symétrie et homogénéité du faisceau** :\n   - Vérification du profil du faisceau\n   - Importance : distribution de dose uniforme\n   - Tolérance : ±3%\n\n4. **Systèmes de sécurité** :\n   - Test des arrêts d'urgence, interrupteurs de porte\n   - Importance : sécurité du patient et du personnel\n\n5. **Systèmes d'imagerie (CBCT/MV)** :\n   - Qualité d'image, alignement avec l'isocentre\n   - Importance : fiabilité de l'IGRT\n\n**CONTRÔLES HEBDOMADAIRES :**\n\n1. **Vérification de l'isocentre mécanique** :\n   - Test du « star-shot » (rotation du bras)\n   - Tolérance : diamètre <2 mm\n\n2. **Étalonnage dosimétrique approfondi** :\n   - Mesures pour différentes énergies et tailles de champ\n   - Importance : précision dosimétrique\n\n3. **Contrôle du MLC** :\n   - Position des lames, fuites inter-lames\n   - Importance : qualité de l'IMRT\n\n4. **Concordance lumière/radiation** :\n   - Vérification que le champ lumineux correspond au champ d'irradiation\n   - Tolérance : ±2 mm\n\n**IMPORTANCE GLOBALE** :\nCes contrôles garantissent la sécurité, la précision et la reproductibilité des traitements. Toute dérive détectée doit entraîner une correction immédiate ou l'arrêt de l'appareil. Le MER joue un rôle crucial dans ces contrôles et doit être formé rigoureusement."
+            }
+        ];
+
+        // ============= GESTION FLASHCARDS =============
+        let flashcardsState = JSON.parse(localStorage.getItem('flashcardsState')) || flashcardsData;
+        let currentFlashcardIndex = 0;
+        let currentFilter = 'all';
+
+        function initFlashcards() {
+            updateFlashcardStats();
+            renderFlashcards('all');
+        }
+
+        function renderFlashcards(filter) {
+            currentFilter = filter;
+            currentFlashcardIndex = 0;
+            displayCurrentFlashcard();
+        }
+
+        function displayCurrentFlashcard() {
+            const container = document.getElementById('flashcardContainer');
+            container.innerHTML = '';
+            
+            let cardsToShow = flashcardsState;
+            if (currentFilter !== 'all') {
+                cardsToShow = flashcardsState.filter(card => card.status === currentFilter);
+            }
+
+            if (cardsToShow.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Aucune carte à afficher dans cette catégorie.</p>';
+                document.getElementById('totalCardsCount').textContent = '0';
+                document.getElementById('currentCardIndex').textContent = '0';
+                return;
+            }
+
+            // Limiter l'index
+            if (currentFlashcardIndex >= cardsToShow.length) {
+                currentFlashcardIndex = cardsToShow.length - 1;
+            }
+            if (currentFlashcardIndex < 0) {
+                currentFlashcardIndex = 0;
+            }
+
+            const card = cardsToShow[currentFlashcardIndex];
+            const actualIndex = flashcardsState.indexOf(card);
+            
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'flashcard-single';
+            cardDiv.innerHTML = `
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <h3>${card.question}</h3>
+                        <p style="margin-top: auto; font-size: 0.9em; opacity: 0.8;">Cliquez pour voir la réponse</p>
+                    </div>
+                    <div class="flashcard-back">
+                        <p>${card.answer.replace(/\n/g, '<br>')}</p>
+                        <div class="flashcard-status">
+                            <button class="status-btn" style="background: #28a745; color: white;" onclick="updateCardStatus(${actualIndex}, 'mastered')">✓ Maîtrisé</button>
+                            <button class="status-btn" style="background: #ffc107; color: #333;" onclick="updateCardStatus(${actualIndex}, 'review')">⟳ À revoir</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            cardDiv.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('status-btn')) {
+                    this.classList.toggle('flipped');
+                }
+            });
+            
+            container.appendChild(cardDiv);
+
+            // Mettre à jour le compteur et les boutons
+            document.getElementById('currentCardIndex').textContent = currentFlashcardIndex + 1;
+            document.getElementById('totalCardsCount').textContent = cardsToShow.length;
+            
+            document.getElementById('prevCard').disabled = currentFlashcardIndex === 0;
+            document.getElementById('nextCard').disabled = currentFlashcardIndex === cardsToShow.length - 1;
+        }
+
+        function nextFlashcard() {
+            let cardsToShow = flashcardsState;
+            if (currentFilter !== 'all') {
+                cardsToShow = flashcardsState.filter(card => card.status === currentFilter);
+            }
+            
+            if (currentFlashcardIndex < cardsToShow.length - 1) {
+                currentFlashcardIndex++;
+                displayCurrentFlashcard();
+            }
+        }
+
+        function previousFlashcard() {
+            if (currentFlashcardIndex > 0) {
+                currentFlashcardIndex--;
+                displayCurrentFlashcard();
+            }
+        }
+
+        function updateCardStatus(index, status) {
+            flashcardsState[index].status = status;
+            localStorage.setItem('flashcardsState', JSON.stringify(flashcardsState));
+            updateFlashcardStats();
+            
+            // Animation de feedback
+            const card = document.querySelector('.flashcard-single');
+            if (card) {
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    card.style.transform = 'scale(1)';
+                }, 200);
+            }
+            
+            // Passer à la carte suivante après une courte pause
+            setTimeout(() => {
+                nextFlashcard();
+            }, 500);
+        }
+
+        function updateFlashcardStats() {
+            const total = flashcardsState.length;
+            const mastered = flashcardsState.filter(c => c.status === 'mastered').length;
+            const review = flashcardsState.filter(c => c.status === 'review').length;
+            const newCards = flashcardsState.filter(c => c.status === 'new').length;
+            
+            document.getElementById('totalCards').textContent = total;
+            document.getElementById('masteredCards').textContent = mastered;
+            document.getElementById('reviewCards').textContent = review;
+            document.getElementById('newCards').textContent = newCards;
+        }
+
+        function filterFlashcards(filter) {
+            renderFlashcards(filter);
+        }
+
+        function resetAllFlashcards() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les flashcards ?')) {
+                flashcardsState = flashcardsData.map(card => ({...card, status: 'new'}));
+                localStorage.setItem('flashcardsState', JSON.stringify(flashcardsState));
+                updateFlashcardStats();
+                renderFlashcards('all');
+            }
+        }
+
+        function exportFlashcards() {
+            const dataStr = JSON.stringify({
+                flashcards: flashcardsState,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            }, null, 2);
+
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `flashcards-linac-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+
+            alert('✅ Flashcards exportées avec succès !');
+        }
+
+        function importFlashcards(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.flashcards || !Array.isArray(data.flashcards)) {
+                        throw new Error('Format de fichier invalide');
+                    }
+
+                    if (confirm(`Voulez-vous remplacer vos ${flashcardsState.length} cartes actuelles par les ${data.flashcards.length} cartes importées ?`)) {
+                        flashcardsState = data.flashcards;
+                        localStorage.setItem('flashcardsState', JSON.stringify(flashcardsState));
+                        updateFlashcardStats();
+                        renderFlashcards('all');
+                        alert(`✅ ${data.flashcards.length} cartes importées avec succès !`);
+                    }
+                } catch (error) {
+                    alert('❌ Erreur lors de l\'importation : ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+            
+            // Réinitialiser l'input file
+            event.target.value = '';
+        }
+
+        // ============= GESTION QCM =============
+        let qcmState = {
+            currentQuestion: 0,
+            answers: [],
+            showResults: false
+        };
+
+        function initQCM() {
+            renderQCM();
+        }
+
+        function renderQCM() {
+            const container = document.getElementById('qcmContainer');
+            
+            if (qcmState.showResults) {
+                showQCMResults(container);
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            // Progress bar
+            const progress = (qcmState.currentQuestion / qcmData.length) * 100;
+            const progressBar = `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+                <p style="text-align: center; margin: 10px 0;">Question ${qcmState.currentQuestion + 1} sur ${qcmData.length}</p>
+            `;
+            container.innerHTML = progressBar;
+            
+            if (qcmState.currentQuestion < qcmData.length) {
+                const q = qcmData[qcmState.currentQuestion];
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                
+                let optionsHTML = '';
+                q.options.forEach((option, idx) => {
+                    const isSelected = qcmState.answers[qcmState.currentQuestion] === idx;
+                    const isCorrect = idx === q.correct;
+                    const showAnswer = qcmState.answers[qcmState.currentQuestion] !== undefined;
+                    
+                    let optionClass = 'option';
+                    if (showAnswer) {
+                        if (isCorrect) optionClass += ' correct';
+                        else if (isSelected) optionClass += ' incorrect';
+                    } else if (isSelected) {
+                        optionClass += ' selected';
+                    }
+                    
+                    optionsHTML += `
+                        <div class="${optionClass}" onclick="selectQCMOption(${idx})">
+                            ${option}
+                        </div>
+                    `;
+                });
+                
+                questionCard.innerHTML = `
+                    <div class="question-header">
+                        <span class="question-number">Question ${qcmState.currentQuestion + 1}</span>
+                        <span class="question-type">QCM</span>
+                    </div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options-container">
+                        ${optionsHTML}
+                    </div>
+                    ${qcmState.answers[qcmState.currentQuestion] !== undefined ? `
+                        <div class="example-answer show">
+                            <strong>Explication :</strong><br>${q.explanation}
+                        </div>
+                    ` : ''}
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        ${qcmState.currentQuestion > 0 ? '<button class="btn btn-secondary" onclick="prevQCM()">◄ Précédent</button>' : ''}
+                        ${qcmState.answers[qcmState.currentQuestion] !== undefined ? 
+                            (qcmState.currentQuestion < qcmData.length - 1 ? 
+                                '<button class="btn btn-primary" onclick="nextQCM()">Suivant ►</button>' :
+                                '<button class="btn btn-success" onclick="finishQCM()">Voir les résultats</button>')
+                            : ''}
+                    </div>
+                `;
+                
+                container.appendChild(questionCard);
+            }
+        }
+
+        function selectQCMOption(idx) {
+            if (qcmState.answers[qcmState.currentQuestion] === undefined) {
+                qcmState.answers[qcmState.currentQuestion] = idx;
+                renderQCM();
+            }
+        }
+
+        function nextQCM() {
+            if (qcmState.currentQuestion < qcmData.length - 1) {
+                qcmState.currentQuestion++;
+                renderQCM();
+            }
+        }
+
+        function prevQCM() {
+            if (qcmState.currentQuestion > 0) {
+                qcmState.currentQuestion--;
+                renderQCM();
+            }
+        }
+
+        function finishQCM() {
+            qcmState.showResults = true;
+            renderQCM();
+        }
+
+        function showQCMResults(container) {
+            const correct = qcmState.answers.filter((ans, idx) => ans === qcmData[idx].correct).length;
+            const percentage = Math.round((correct / qcmData.length) * 100);
+            
+            container.innerHTML = `
+                <div class="quiz-results">
+                    <h2>Résultats du QCM</h2>
+                    <div class="score-display">${percentage}%</div>
+                    <p style="font-size: 1.2em; margin: 20px 0;">
+                        ${correct} bonnes réponses sur ${qcmData.length} questions
+                    </p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%; background: ${percentage >= 70 ? '#28a745' : percentage >= 50 ? '#ffc107' : '#dc3545'}"></div>
+                    </div>
+                    <p style="margin: 20px 0; font-size: 1.1em;">
+                        ${percentage >= 70 ? '🎉 Excellent travail !' : percentage >= 50 ? '👍 Pas mal, continuez !' : '📚 Révisez et réessayez !'}
+                    </p>
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="reviewQCM()">📝 Revoir les questions</button>
+                        <button class="btn btn-warning" onclick="resetQCM()">↻ Recommencer</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function reviewQCM() {
+            qcmState.currentQuestion = 0;
+            qcmState.showResults = false;
+            renderQCM();
+        }
+
+        function resetQCM() {
+            qcmState = {
+                currentQuestion: 0,
+                answers: [],
+                showResults: false
+            };
+            renderQCM();
+        }
+
+        // ============= GESTION VRAI/FAUX =============
+        let vraiFauxState = {
+            currentQuestion: 0,
+            answers: [],
+            showResults: false
+        };
+
+        function initVraiFaux() {
+            renderVraiFaux();
+        }
+
+        function renderVraiFaux() {
+            const container = document.getElementById('vraifauxContainer');
+            
+            if (vraiFauxState.showResults) {
+                showVraiFauxResults(container);
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            const progress = (vraiFauxState.currentQuestion / vraiFauxData.length) * 100;
+            const progressBar = `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+                <p style="text-align: center; margin: 10px 0;">Question ${vraiFauxState.currentQuestion + 1} sur ${vraiFauxData.length}</p>
+            `;
+            container.innerHTML = progressBar;
+            
+            if (vraiFauxState.currentQuestion < vraiFauxData.length) {
+                const q = vraiFauxData[vraiFauxState.currentQuestion];
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                
+                const answered = vraiFauxState.answers[vraiFauxState.currentQuestion] !== undefined;
+                const userAnswer = vraiFauxState.answers[vraiFauxState.currentQuestion];
+                
+                questionCard.innerHTML = `
+                    <div class="question-header">
+                        <span class="question-number">Question ${vraiFauxState.currentQuestion + 1}</span>
+                        <span class="question-type">Vrai/Faux</span>
+                    </div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="options-container">
+                        <div class="option ${answered ? (q.answer === true ? 'correct' : (userAnswer === true ? 'incorrect' : '')) : ''}" 
+                             onclick="selectVraiFaux(true)">
+                            ✓ VRAI
+                        </div>
+                        <div class="option ${answered ? (q.answer === false ? 'correct' : (userAnswer === false ? 'incorrect' : '')) : ''}" 
+                             onclick="selectVraiFaux(false)">
+                            ✗ FAUX
+                        </div>
+                    </div>
+                    ${answered ? `
+                        <div class="example-answer show">
+                            <strong>Explication :</strong><br>${q.explanation}
+                        </div>
+                    ` : ''}
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        ${vraiFauxState.currentQuestion > 0 ? '<button class="btn btn-secondary" onclick="prevVraiFaux()">◄ Précédent</button>' : ''}
+                        ${answered ? 
+                            (vraiFauxState.currentQuestion < vraiFauxData.length - 1 ? 
+                                '<button class="btn btn-primary" onclick="nextVraiFaux()">Suivant ►</button>' :
+                                '<button class="btn btn-success" onclick="finishVraiFaux()">Voir les résultats</button>')
+                            : ''}
+                    </div>
+                `;
+                
+                container.appendChild(questionCard);
+            }
+        }
+
+        function selectVraiFaux(answer) {
+            if (vraiFauxState.answers[vraiFauxState.currentQuestion] === undefined) {
+                vraiFauxState.answers[vraiFauxState.currentQuestion] = answer;
+                renderVraiFaux();
+            }
+        }
+
+        function nextVraiFaux() {
+            if (vraiFauxState.currentQuestion < vraiFauxData.length - 1) {
+                vraiFauxState.currentQuestion++;
+                renderVraiFaux();
+            }
+        }
+
+        function prevVraiFaux() {
+            if (vraiFauxState.currentQuestion > 0) {
+                vraiFauxState.currentQuestion--;
+                renderVraiFaux();
+            }
+        }
+
+        function finishVraiFaux() {
+            vraiFauxState.showResults = true;
+            renderVraiFaux();
+        }
+
+        function showVraiFauxResults(container) {
+            const correct = vraiFauxState.answers.filter((ans, idx) => ans === vraiFauxData[idx].answer).length;
+            const percentage = Math.round((correct / vraiFauxData.length) * 100);
+            
+            container.innerHTML = `
+                <div class="quiz-results">
+                    <h2>Résultats Vrai/Faux</h2>
+                    <div class="score-display">${percentage}%</div>
+                    <p style="font-size: 1.2em; margin: 20px 0;">
+                        ${correct} bonnes réponses sur ${vraiFauxData.length} questions
+                    </p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%; background: ${percentage >= 70 ? '#28a745' : percentage >= 50 ? '#ffc107' : '#dc3545'}"></div>
+                    </div>
+                    <p style="margin: 20px 0; font-size: 1.1em;">
+                        ${percentage >= 70 ? '🎉 Excellent travail !' : percentage >= 50 ? '👍 Pas mal, continuez !' : '📚 Révisez et réessayez !'}
+                    </p>
+                    <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+                        <button class="btn btn-primary" onclick="reviewVraiFaux()">📝 Revoir les questions</button>
+                        <button class="btn btn-warning" onclick="resetVraiFaux()">↻ Recommencer</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function reviewVraiFaux() {
+            vraiFauxState.currentQuestion = 0;
+            vraiFauxState.showResults = false;
+            renderVraiFaux();
+        }
+
+        function resetVraiFaux() {
+            vraiFauxState = {
+                currentQuestion: 0,
+                answers: [],
+                showResults: false
+            };
+            renderVraiFaux();
+        }
+
+        // ============= GESTION QUESTIONS OUVERTES =============
+        let openState = {
+            currentQuestion: 0,
+            showExample: []
+        };
+
+        function initOpen() {
+            renderOpen();
+        }
+
+        function renderOpen() {
+            const container = document.getElementById('ouvertContainer');
+            container.innerHTML = '';
+            
+            const progress = (openState.currentQuestion / questionsOuvertesData.length) * 100;
+            const progressBar = `
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+                <p style="text-align: center; margin: 10px 0;">Question ${openState.currentQuestion + 1} sur ${questionsOuvertesData.length}</p>
+            `;
+            container.innerHTML = progressBar;
+            
+            if (openState.currentQuestion < questionsOuvertesData.length) {
+                const q = questionsOuvertesData[openState.currentQuestion];
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                
+                questionCard.innerHTML = `
+                    <div class="question-header">
+                        <span class="question-number">Question ${openState.currentQuestion + 1}</span>
+                        <span class="question-type">Question Ouverte</span>
+                    </div>
+                    <div class="question-text">${q.question}</div>
+                    <textarea class="open-answer" id="openAnswer${openState.currentQuestion}" 
+                              placeholder="Rédigez votre réponse ici..."></textarea>
+                    <button class="btn btn-primary" style="margin-top: 15px;" onclick="toggleExample(${openState.currentQuestion})">
+                        ${openState.showExample[openState.currentQuestion] ? '🔼 Masquer' : '💡 Voir'} un exemple de réponse
+                    </button>
+                    <div class="example-answer ${openState.showExample[openState.currentQuestion] ? 'show' : ''}" id="example${openState.currentQuestion}">
+                        <strong>Exemple de réponse attendue :</strong><br>
+                        ${q.exampleAnswer.replace(/\n/g, '<br>')}
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        ${openState.currentQuestion > 0 ? '<button class="btn btn-secondary" onclick="prevOpen()">◄ Précédent</button>' : ''}
+                        ${openState.currentQuestion < questionsOuvertesData.length - 1 ? 
+                            '<button class="btn btn-primary" onclick="nextOpen()">Suivant ►</button>' :
+                            '<button class="btn btn-success" onclick="finishOpen()">Terminer</button>'}
+                    </div>
+                `;
+                
+                container.appendChild(questionCard);
+            } else {
+                container.innerHTML += `
+                    <div class="quiz-results">
+                        <h2>Questions Ouvertes Terminées</h2>
+                        <p style="font-size: 1.2em; margin: 20px 0;">
+                            Vous avez parcouru toutes les questions ouvertes !<br>
+                            Comparez vos réponses avec les exemples proposés.
+                        </p>
+                        <button class="btn btn-primary" onclick="reviewOpen()">📝 Revoir les questions</button>
+                        <button class="btn btn-warning" onclick="resetOpen()">↻ Recommencer</button>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleExample(idx) {
+            openState.showExample[idx] = !openState.showExample[idx];
+            renderOpen();
+        }
+
+        function nextOpen() {
+            if (openState.currentQuestion < questionsOuvertesData.length - 1) {
+                openState.currentQuestion++;
+                renderOpen();
+            }
+        }
+
+        function prevOpen() {
+            if (openState.currentQuestion > 0) {
+                openState.currentQuestion--;
+                renderOpen();
+            }
+        }
+
+        function finishOpen() {
+            openState.currentQuestion = questionsOuvertesData.length;
+            renderOpen();
+        }
+
+        function reviewOpen() {
+            openState.currentQuestion = 0;
+            renderOpen();
+        }
+
+        function resetOpen() {
+            openState = {
+                currentQuestion: 0,
+                showExample: []
+            };
+            renderOpen();
+        }
+
+        
+        // ============= ANIMATIONS =============
+        // Animations améliorées (fluidité + clarté pédagogique), inspirées de la logique de "accelerateur-lineaire-de-particule.html"
+        // NB: HTML/onglets/QCM/flashcards inchangés — seul le moteur d'animation a été revu.
+
+        let animations = {
+            main: null,
+            generator: null,
+            accelerator: null,
+            deviation: null,
+            head: null
+        };
+
+        let animationSpeed = 1;
+
+        function setAnimationSpeed(speed) {
+            animationSpeed = parseFloat(speed);
+            const el = document.getElementById('speedDisplay');
+            if (el) el.textContent = speed + 'x';
+        }
+
+        // ---------- Helpers ----------
+        function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+        function setupHiDPICanvas(canvas) {
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.max(1, Math.floor(rect.width));
+            const h = Math.max(1, Math.floor(rect.height));
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in CSS pixels
+            ctx.imageSmoothingEnabled = true;
+            return { ctx, w, h, dpr };
+        }
+
+        function makeLoop() {
+            let raf = null;
+            let running = false;
+            const api = {
+                start(fn) {
+                    if (running) return;
+                    running = true;
+                    let last = performance.now();
+                    const tick = (t) => {
+                        if (!running) return;
+                        const dt = Math.min(0.05, (t - last) / 1000); // seconds, clamp for tab switch
+                        last = t;
+                        fn(dt);
+                        raf = requestAnimationFrame(tick);
+                    };
+                    raf = requestAnimationFrame(tick);
+                },
+                stop() {
+                    running = false;
+                    if (raf) cancelAnimationFrame(raf);
+                    raf = null;
+                },
+                get running() { return running; }
+            };
+            return api;
+        }
+
+        function drawLabel(ctx, x, y, text, color = '#333') {
+            ctx.save();
+            ctx.font = '600 13px Segoe UI, Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            const pad = 6;
+            const w = ctx.measureText(text).width + pad * 2;
+            ctx.beginPath();
+            ctx.roundRect(x, y - 16, w, 20, 6);
+            ctx.fill();
+            ctx.fillStyle = color;
+            ctx.fillText(text, x + pad, y);
+            ctx.restore();
+        }
+
+        // Polyfill roundRect for older browsers
+        if (CanvasRenderingContext2D && !CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                r = Math.min(r, w / 2, h / 2);
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+
+        // ---------- Animation 0 : Vue d'ensemble ----------
+        function initMainAnimation() {
+            const canvas = document.getElementById('mainCanvas');
+            const loop = makeLoop();
+
+            let ctx, W, H;
+            let t = 0;
+            let electrons = [];
+            let photons = [];
+            let lastSpawn = 0;
+
+            function resize() {
+                ({ ctx, w: W, h: H } = setupHiDPICanvas(canvas));
+                drawStatic();
+            }
+            window.addEventListener('resize', resize);
+
+            function drawStatic() {
+                ctx.clearRect(0, 0, W, H);
+
+                // Fond doux
+                const g = ctx.createLinearGradient(0, 0, 0, H);
+                g.addColorStop(0, '#ffffff');
+                g.addColorStop(1, '#f7f8fc');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, W, H);
+
+                const midY = H * 0.45;
+
+                // Générateur / Klystron
+                ctx.fillStyle = '#ff6b6b';
+                ctx.roundRect(W * 0.06, midY - 50, W * 0.10, 100, 14).fill();
+                drawLabel(ctx, W * 0.06, midY - 60, 'Générateur / Klystron', '#c0392b');
+
+                // Guide d’onde / accélérateur
+                ctx.fillStyle = '#4ecdc4';
+                ctx.roundRect(W * 0.20, midY - 24, W * 0.40, 48, 12).fill();
+                drawLabel(ctx, W * 0.28, midY - 40, 'Structure accélératrice (RF)', '#0f766e');
+
+                // Aimant
+                ctx.fillStyle = '#95e1d3';
+                ctx.beginPath();
+                ctx.arc(W * 0.68, midY, 46, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(0,0,0,0.18)';
+                ctx.beginPath();
+                ctx.arc(W * 0.68, midY, 32, 0, Math.PI * 2);
+                ctx.fill();
+                drawLabel(ctx, W * 0.64, midY - 58, 'Aimant de déviation', '#1f7a74');
+
+                // Tête d'irradiation (bloc)
+                ctx.fillStyle = '#f38181';
+                ctx.roundRect(W * 0.60, H * 0.62, W * 0.18, H * 0.12, 16).fill();
+                drawLabel(ctx, W * 0.60, H * 0.60, "Tête d'irradiation", '#b91c1c');
+
+                // Patient / table
+                ctx.fillStyle = '#e5e7eb';
+                ctx.roundRect(W * 0.54, H * 0.83, W * 0.30, H * 0.08, 18).fill();
+                ctx.fillStyle = '#374151';
+                ctx.font = '600 13px Segoe UI, Arial';
+                ctx.fillText('Patient / Table', W * 0.64, H * 0.88);
+
+                // Trajets (guides)
+                ctx.strokeStyle = 'rgba(255,215,0,0.35)';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(W * 0.16, midY);
+                ctx.lineTo(W * 0.60, midY);
+                ctx.stroke();
+
+                ctx.strokeStyle = 'rgba(138,43,226,0.25)';
+                ctx.lineWidth = 10;
+                ctx.beginPath();
+                ctx.moveTo(W * 0.69, H * 0.74);
+                ctx.lineTo(W * 0.69, H * 0.83);
+                ctx.stroke();
+
+                // Mini onde RF (sine) sur la structure
+                const x0 = W * 0.205, x1 = W * 0.59;
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.22)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let x = x0; x <= x1; x += 6) {
+                    const u = (x - x0) / (x1 - x0) * Math.PI * 6;
+                    const y = midY + Math.sin(u + t * 2.3) * 10;
+                    if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            function spawn() {
+                const midY = H * 0.45;
+                electrons.push({
+                    x: W * 0.16,
+                    y: midY + (Math.random() - 0.5) * 10,
+                    vx: 220 + Math.random() * 40,
+                    phase: 'accel',
+                    ang: 0,
+                    energy: 1
+                });
+            }
+
+            function drawParticles() {
+                // Electrons
+                ctx.save();
+                electrons.forEach(p => {
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = '#ffd93d';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 4 + p.energy * 0.2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // trail
+                    ctx.fillStyle = 'rgba(255, 217, 61, 0.25)';
+                    ctx.beginPath();
+                    ctx.arc(p.x - 10, p.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+
+                // Photons (petites étincelles violettes)
+                ctx.save();
+                photons.forEach(p => {
+                    ctx.fillStyle = '#6c5ce7';
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = '#6c5ce7';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+                ctx.restore();
+            }
+
+            function step(dt) {
+                t += dt * animationSpeed;
+
+                // spawn régulier (bunches)
+                lastSpawn += dt * animationSpeed;
+                if (lastSpawn > 0.18) {
+                    lastSpawn = 0;
+                    spawn();
+                }
+
+                // Update electrons
+                const midY = H * 0.45;
+                const ax0 = W * 0.20;
+                const ax1 = W * 0.60;
+                const cx = W * 0.68, cy = midY;
+
+                electrons = electrons.filter(p => {
+                    if (p.phase === 'accel') {
+                        // accélération progressive dans la zone RF
+                        if (p.x >= ax0 && p.x <= ax1) {
+                            const u = (p.x - ax0) / (ax1 - ax0) * Math.PI * 6;
+                            const field = Math.sin(u + t * 2.3);
+                            if (field > 0) {
+                                p.vx += 90 * dt * animationSpeed;
+                                p.energy = clamp(p.energy + 1.4 * dt * animationSpeed, 1, 8);
+                            }
+                        }
+                        p.x += p.vx * dt * animationSpeed;
+
+                        // micro-focalisation vers l'axe
+                        p.y += (midY - p.y) * (2.0 * dt);
+
+                        if (p.x > W * 0.62) {
+                            p.phase = 'bend';
+                            p.ang = Math.PI;
+                            p.r = 46;
+                        }
+                    } else if (p.phase === 'bend') {
+                        p.ang -= (1.9 * dt) * animationSpeed;
+                        p.x = cx + Math.cos(p.ang) * p.r;
+                        p.y = cy + Math.sin(p.ang) * p.r;
+                        if (p.ang < Math.PI * 0.52) {
+                            p.phase = 'head';
+                            p.vy = 260;
+                        }
+                    } else if (p.phase === 'head') {
+                        // descente vers la tête puis conversion en photons
+                        p.y += p.vy * dt * animationSpeed;
+                        if (p.y > H * 0.62) {
+                            // conversion -> photons
+                            for (let k = 0; k < 4; k++) {
+                                photons.push({
+                                    x: W * 0.69 + (Math.random() - 0.5) * 18,
+                                    y: H * 0.62 + (Math.random() * 8),
+                                    vy: 260 + Math.random() * 120
+                                });
+                            }
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+
+                // Update photons
+                photons = photons.filter(p => {
+                    p.y += p.vy * dt * animationSpeed;
+                    return p.y < H * 0.92;
+                });
+
+                drawStatic();
+                drawParticles();
+            }
+
+            animations.main = {
+                start() { loop.start(step); },
+                pause() { loop.stop(); },
+                reset() {
+                    loop.stop();
+                    electrons = [];
+                    photons = [];
+                    t = 0;
+                    lastSpawn = 0;
+                    drawStatic();
+                }
+            };
+
+            resize();
+        }
+
+        // ---------- Animation 1 : Générateur / Canon à électrons ----------
+        function initGeneratorAnimation() {
+            const canvas = document.getElementById('generatorCanvas');
+            const loop = makeLoop();
+
+            let ctx, W, H;
+            let t = 0;
+            let electrons = [];
+            let spawnAcc = 0;
+
+            function resize() {
+                ({ ctx, w: W, h: H } = setupHiDPICanvas(canvas));
+                drawStatic();
+            }
+            window.addEventListener('resize', resize);
+
+            function drawStatic() {
+                ctx.clearRect(0, 0, W, H);
+                const bg = ctx.createLinearGradient(0, 0, 0, H);
+                bg.addColorStop(0, '#ffffff');
+                bg.addColorStop(1, '#f7f8fc');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, W, H);
+
+                const midY = H * 0.52;
+
+                // Tube (enveloppe)
+                ctx.strokeStyle = '#9ca3af';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(W * 0.18, midY - 90);
+                ctx.lineTo(W * 0.82, midY - 90);
+                ctx.moveTo(W * 0.18, midY + 90);
+                ctx.lineTo(W * 0.82, midY + 90);
+                ctx.stroke();
+
+                // Cathode
+                ctx.fillStyle = '#e74c3c';
+                ctx.roundRect(W * 0.20, midY - 55, W * 0.08, 110, 14).fill();
+                drawLabel(ctx, W * 0.18, midY - 78, 'Cathode chauffée (émission)', '#b91c1c');
+
+                // Glow chaleur
+                ctx.save();
+                ctx.globalAlpha = 0.35 + 0.25 * Math.sin(t * 3);
+                const glow = ctx.createRadialGradient(W * 0.24, midY, 10, W * 0.24, midY, 80);
+                glow.addColorStop(0, 'rgba(255, 100, 0, 0.7)');
+                glow.addColorStop(1, 'rgba(255, 100, 0, 0)');
+                ctx.fillStyle = glow;
+                ctx.beginPath();
+                ctx.arc(W * 0.24, midY, 80, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                // Anode
+                ctx.fillStyle = '#3498db';
+                ctx.roundRect(W * 0.62, midY - 40, W * 0.08, 80, 14).fill();
+                drawLabel(ctx, W * 0.60, midY - 78, 'Anode (+25–50 kV)', '#1d4ed8');
+
+                // Champ électrique (lignes animées)
+                const x0 = W * 0.30, x1 = W * 0.62;
+                for (let i = 0; i < 10; i++) {
+                    const y = midY - 70 + i * 15;
+                    const a = 0.18 + 0.12 * (0.5 + 0.5 * Math.sin(t * 2 + i));
+                    ctx.strokeStyle = `rgba(59, 130, 246, ${a})`;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x0, y);
+                    ctx.lineTo(x1, y);
+                    ctx.stroke();
+
+                    // flèches
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y);
+                    ctx.lineTo(x1 - 10, y - 5);
+                    ctx.moveTo(x1, y);
+                    ctx.lineTo(x1 - 10, y + 5);
+                    ctx.stroke();
+                }
+
+                // Sortie
+                ctx.fillStyle = '#ffd93d';
+                ctx.beginPath();
+                ctx.moveTo(W * 0.82, midY);
+                ctx.lineTo(W * 0.86, midY - 18);
+                ctx.lineTo(W * 0.86, midY + 18);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#374151';
+                ctx.font = '600 13px Segoe UI, Arial';
+                ctx.fillText('→ Vers structure accélératrice', W * 0.87, midY + 5);
+            }
+
+            function spawnElectron() {
+                const midY = H * 0.52;
+                electrons.push({
+                    x: W * 0.29,
+                    y: midY + (Math.random() - 0.5) * 90,
+                    vx: 260 + Math.random() * 60
+                });
+            }
+
+            function step(dt) {
+                t += dt * animationSpeed;
+                spawnAcc += dt * animationSpeed;
+                if (spawnAcc > 0.12) {
+                    spawnAcc = 0;
+                    spawnElectron();
+                }
+
+                // Update
+                const midY = H * 0.52;
+                electrons = electrons.filter(e => {
+                    // focalisation vers l'axe
+                    e.y += (midY - e.y) * (4.0 * dt);
+                    e.x += e.vx * dt * animationSpeed;
+                    return e.x < W * 0.88;
+                });
+
+                drawStatic();
+
+                // Draw electrons
+                ctx.save();
+                electrons.forEach(e => {
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = '#ffd93d';
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // trail
+                    ctx.fillStyle = 'rgba(255, 217, 61, 0.25)';
+                    ctx.beginPath();
+                    ctx.arc(e.x - 12, e.y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+            }
+
+            animations.generator = {
+                start() { loop.start(step); },
+                pause() { loop.stop(); },
+                reset() {
+                    loop.stop();
+                    t = 0;
+                    electrons = [];
+                    spawnAcc = 0;
+                    drawStatic();
+                }
+            };
+
+            resize();
+        }
+
+        // ---------- Animation 2 : Structure accélératrice (RF) ----------
+        function initAcceleratorAnimation() {
+            const canvas = document.getElementById('acceleratorCanvas');
+            const loop = makeLoop();
+
+            let ctx, W, H;
+            let t = 0;
+            let particles = [];
+            let spawnAcc = 0;
+
+            function resize() {
+                ({ ctx, w: W, h: H } = setupHiDPICanvas(canvas));
+                drawStatic();
+            }
+            window.addEventListener('resize', resize);
+
+            function drawCavity(ctx, x, y, w, h, phase) {
+                // corps
+                ctx.fillStyle = '#4ecdc4';
+                ctx.roundRect(x, y, w, h, 10).fill();
+
+                // champ (rouge/bleu oscillant)
+                const s = Math.sin(phase);
+                const a = 0.22 + 0.18 * Math.abs(s);
+                ctx.fillStyle = s > 0 ? `rgba(255, 0, 0, ${a})` : `rgba(0, 0, 255, ${a})`;
+                ctx.roundRect(x + 6, y + 8, w - 12, h - 16, 8).fill();
+
+                // lignes de champ
+                ctx.strokeStyle = s > 0 ? 'rgba(255,0,0,0.65)' : 'rgba(0,0,255,0.65)';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 4; i++) {
+                    const yy = y + 18 + i * (h - 36) / 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x + 10, yy);
+                    ctx.lineTo(x + w - 10, yy);
+                    ctx.stroke();
+                    // flèches
+                    const dir = s > 0 ? 1 : -1;
+                    ctx.beginPath();
+                    ctx.moveTo(x + w - 10, yy);
+                    ctx.lineTo(x + w - 16, yy - 4 * dir);
+                    ctx.moveTo(x + w - 10, yy);
+                    ctx.lineTo(x + w - 16, yy + 4 * dir);
+                    ctx.stroke();
+                }
+            }
+
+            function drawStatic() {
+                ctx.clearRect(0, 0, W, H);
+                const bg = ctx.createLinearGradient(0, 0, 0, H);
+                bg.addColorStop(0, '#ffffff');
+                bg.addColorStop(1, '#f7f8fc');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, W, H);
+
+                const midY = H * 0.52;
+
+                const cavities = 12;
+                const gap = 10;
+                const x0 = W * 0.08;
+                const totalW = W * 0.84;
+                const cavW = (totalW - gap * (cavities - 1)) / cavities;
+                const cavH = 90;
+
+                for (let i = 0; i < cavities; i++) {
+                    const x = x0 + i * (cavW + gap);
+                    const phase = (t * 6.0) + i * (Math.PI / 2);
+                    drawCavity(ctx, x, midY - cavH / 2, cavW, cavH, phase);
+
+                    ctx.fillStyle = 'rgba(17,24,39,0.65)';
+                    ctx.font = '700 10px Segoe UI, Arial';
+                    ctx.fillText(String(i + 1), x + cavW / 2 - 3, midY + cavH / 2 + 18);
+                }
+
+                // RF wave guide line
+                ctx.strokeStyle = 'rgba(255, 0, 0, 0.20)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                const yWave = midY - cavH / 2 - 30;
+                for (let x = x0; x <= x0 + totalW; x += 6) {
+                    const u = (x - x0) / totalW * Math.PI * 10;
+                    const y = yWave + Math.sin(u - t * 6.0) * 10;
+                    if (x === x0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                drawLabel(ctx, W * 0.08, 35, 'Micro-ondes RF (2–3 GHz) → champ E oscillant', '#b91c1c');
+                drawLabel(ctx, W * 0.08, H - 25, 'Les paquets d’électrons gagnent de l’énergie quand le champ est accélérant', '#0f766e');
+
+                // Energy gauge
+                ctx.save();
+                const gx = W * 0.08, gy = H * 0.15, gw = W * 0.30, gh = 10;
+                ctx.fillStyle = 'rgba(0,0,0,0.08)';
+                ctx.roundRect(gx, gy, gw, gh, 6).fill();
+                ctx.fillStyle = 'rgba(255, 140, 0, 0.65)';
+                const e = clamp((particles[0]?.energy || 0) / 25, 0, 1);
+                ctx.roundRect(gx, gy, gw * e, gh, 6).fill();
+                ctx.fillStyle = '#374151';
+                ctx.font = '600 12px Segoe UI, Arial';
+                ctx.fillText('Énergie (indicative)', gx, gy - 6);
+                ctx.restore();
+            }
+
+            function spawnParticle() {
+                const midY = H * 0.52;
+                particles.push({
+                    x: W * 0.08,
+                    y: midY,
+                    vx: 140,
+                    energy: 1
+                });
+            }
+
+            function step(dt) {
+                t += dt * animationSpeed;
+                spawnAcc += dt * animationSpeed;
+                if (spawnAcc > 0.18) {
+                    spawnAcc = 0;
+                    spawnParticle();
+                }
+
+                const cavities = 12;
+                const gap = 10;
+                const x0 = W * 0.08;
+                const totalW = W * 0.84;
+                const cavW = (totalW - gap * (cavities - 1)) / cavities;
+
+                particles = particles.filter(p => {
+                    p.x += p.vx * dt * animationSpeed;
+
+                    // Determine cavity index
+                    const idx = Math.floor((p.x - x0) / (cavW + gap));
+                    if (idx >= 0 && idx < cavities) {
+                        const phase = (t * 6.0) + idx * (Math.PI / 2);
+                        const field = Math.sin(phase);
+                        if (field > 0) {
+                            p.vx += 240 * dt * animationSpeed;
+                            p.energy = clamp(p.energy + 10 * dt * animationSpeed, 1, 25);
+                        }
+                    }
+
+                    return p.x < x0 + totalW + 40;
+                });
+
+                drawStatic();
+
+                // draw particles
+                const midY = H * 0.52;
+                ctx.save();
+                particles.forEach(p => {
+                    const size = 3 + p.energy * 0.06;
+                    const hot = clamp(p.energy / 25, 0, 1);
+                    ctx.fillStyle = `rgba(255, ${Math.floor(200 - 120 * hot)}, 0, 1)`;
+                    ctx.shadowBlur = 16;
+                    ctx.shadowColor = 'rgba(255, 140, 0, 0.9)';
+                    ctx.beginPath();
+                    ctx.arc(p.x, midY, size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // trail
+                    ctx.fillStyle = `rgba(255, 140, 0, 0.25)`;
+                    ctx.beginPath();
+                    ctx.arc(p.x - 14, midY, size * 0.75, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+            }
+
+            animations.accelerator = {
+                start() { loop.start(step); },
+                pause() { loop.stop(); },
+                reset() {
+                    loop.stop();
+                    t = 0;
+                    particles = [];
+                    spawnAcc = 0;
+                    drawStatic();
+                }
+            };
+
+            resize();
+        }
+
+        // ---------- Animation 3 : Aimant de déviation ----------
+        function initDeviationAnimation() {
+            const canvas = document.getElementById('deviationCanvas');
+            const loop = makeLoop();
+
+            let ctx, W, H;
+            let t = 0;
+            let bunches = [];
+            let spawnAcc = 0;
+
+            function resize() {
+                ({ ctx, w: W, h: H } = setupHiDPICanvas(canvas));
+                drawStatic();
+            }
+            window.addEventListener('resize', resize);
+
+            function drawStatic() {
+                ctx.clearRect(0, 0, W, H);
+                const bg = ctx.createLinearGradient(0, 0, 0, H);
+                bg.addColorStop(0, '#ffffff');
+                bg.addColorStop(1, '#f7f8fc');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, W, H);
+
+                const cx = W * 0.52, cy = H * 0.55;
+                const R1 = Math.min(W, H) * 0.30;
+                const R2 = R1 * 0.65;
+
+                // Aimant
+                ctx.fillStyle = '#95e1d3';
+                ctx.beginPath();
+                ctx.arc(cx, cy, R1, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'rgba(0,0,0,0.22)';
+                ctx.beginPath();
+                ctx.arc(cx, cy, R2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // N/S
+                ctx.font = '800 34px Segoe UI, Arial';
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillText('N', cx - 12, cy - R1 + 42);
+                ctx.fillStyle = '#3498db';
+                ctx.fillText('S', cx - 10, cy + R1 - 18);
+
+                // Lignes de champ (courbes)
+                ctx.save();
+                ctx.globalAlpha = 0.55;
+                for (let i = 0; i < 12; i++) {
+                    const a = (i / 12) * Math.PI * 2;
+                    ctx.strokeStyle = 'rgba(149, 225, 211, 0.85)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    const rA = R2 + 10;
+                    const rB = R1 - 10;
+                    const x1 = cx + Math.cos(a) * rA;
+                    const y1 = cy + Math.sin(a) * rA;
+                    const x2 = cx + Math.cos(a + 0.35) * rB;
+                    const y2 = cy + Math.sin(a + 0.35) * rB;
+                    ctx.moveTo(x1, y1);
+                    ctx.quadraticCurveTo(cx, cy, x2, y2);
+                    ctx.stroke();
+                }
+                ctx.restore();
+
+                // Trajectoire cible (90°)
+                ctx.strokeStyle = 'rgba(255,215,0,0.25)';
+                ctx.lineWidth = 4;
+                ctx.setLineDash([10, 7]);
+                ctx.beginPath();
+                const pathR = Math.min(W, H) * 0.38;
+                ctx.arc(cx, cy, pathR, Math.PI, Math.PI / 2, true);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                drawLabel(ctx, 20, 30, 'Force de Lorentz : déviation du faisceau (90° / 270°)', '#111827');
+                drawLabel(ctx, 20, 55, 'Sélection énergétique + focalisation', '#0f766e');
+
+                // Entrée / sortie
+                ctx.fillStyle = '#374151';
+                ctx.font = '600 12px Segoe UI, Arial';
+                ctx.fillText('Entrée', 20, cy);
+                ctx.fillText('Sortie', cx + pathR - 30, 70);
+            }
+
+            function spawnBunch() {
+                const cx = W * 0.52, cy = H * 0.55;
+                const pathR = Math.min(W, H) * 0.38;
+                bunches.push({
+                    ang: Math.PI,
+                    r: pathR,
+                    // légère dispersion énergétique -> rayon différent
+                    dr: (Math.random() - 0.5) * 10
+                });
+            }
+
+            function step(dt) {
+                t += dt * animationSpeed;
+                spawnAcc += dt * animationSpeed;
+                if (spawnAcc > 0.22) {
+                    spawnAcc = 0;
+                    spawnBunch();
+                }
+
+                bunches = bunches.filter(b => {
+                    b.ang -= (1.6 * dt) * animationSpeed;
+                    return b.ang > Math.PI / 2;
+                });
+
+                drawStatic();
+
+                const cx = W * 0.52, cy = H * 0.55;
+                ctx.save();
+                bunches.forEach(b => {
+                    const x = cx + Math.cos(b.ang) * (b.r + b.dr);
+                    const y = cy + Math.sin(b.ang) * (b.r + b.dr);
+
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.shadowBlur = 16;
+                    ctx.shadowColor = '#ffd93d';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // trail
+                    for (let i = 1; i <= 4; i++) {
+                        const a2 = b.ang + i * 0.05;
+                        const tx = cx + Math.cos(a2) * (b.r + b.dr);
+                        const ty = cy + Math.sin(a2) * (b.r + b.dr);
+                        ctx.fillStyle = `rgba(255, 217, 61, ${0.35 - i * 0.07})`;
+                        ctx.beginPath();
+                        ctx.arc(tx, ty, 6 - i, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+                ctx.restore();
+            }
+
+            animations.deviation = {
+                start() { loop.start(step); },
+                pause() { loop.stop(); },
+                reset() {
+                    loop.stop();
+                    t = 0;
+                    bunches = [];
+                    spawnAcc = 0;
+                    drawStatic();
+                }
+            };
+
+            resize();
+        }
+
+        // ---------- Animation 4 : Tête d'irradiation (photons + électrons) ----------
+        function initHeadAnimation() {
+            const canvas = document.getElementById('headCanvas');
+            const loop = makeLoop();
+
+            let ctx, W, H;
+            let t = 0;
+
+            // Mode alterne automatiquement (inspiré des scènes photons/électrons)
+            let mode = 'photons'; // 'photons' | 'electrons'
+            let modeTimer = 0;
+
+            let electrons = [];
+            let photons = [];
+            let eScatter = [];
+            let spawnAcc = 0;
+
+            function resize() {
+                ({ ctx, w: W, h: H } = setupHiDPICanvas(canvas));
+                drawStatic();
+            }
+            window.addEventListener('resize', resize);
+
+            function drawStatic() {
+                ctx.clearRect(0, 0, W, H);
+                const bg = ctx.createLinearGradient(0, 0, 0, H);
+                bg.addColorStop(0, '#ffffff');
+                bg.addColorStop(1, '#f7f8fc');
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, W, H);
+
+                // Titre mode
+                ctx.fillStyle = mode === 'photons' ? '#6c5ce7' : '#ffd93d';
+                ctx.font = '800 16px Segoe UI, Arial';
+                ctx.fillText(mode === 'photons' ? 'Mode PHOTONS (X)' : 'Mode ÉLECTRONS', 18, 32);
+
+                const cx = W * 0.50;
+
+                // Zone tête (carter)
+                ctx.fillStyle = 'rgba(243, 129, 129, 0.25)';
+                ctx.roundRect(W * 0.18, 60, W * 0.64, H * 0.72, 18).fill();
+
+                // Ligne axe
+                ctx.strokeStyle = 'rgba(0,0,0,0.10)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(cx, 60);
+                ctx.lineTo(cx, H * 0.86);
+                ctx.stroke();
+
+                // Cible / Feuille diffusante selon mode
+                if (mode === 'photons') {
+                    // cible tungstène
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.roundRect(cx - 35, 95, 70, 16, 6).fill();
+                    drawLabel(ctx, cx - 50, 88, 'Cible W (Bremsstrahlung)', '#374151');
+
+                    // filtre égalisateur
+                    ctx.fillStyle = '#d35400';
+                    ctx.beginPath();
+                    ctx.moveTo(cx, 118);
+                    ctx.lineTo(cx - 55, 170);
+                    ctx.lineTo(cx + 55, 170);
+                    ctx.closePath();
+                    ctx.fill();
+                    drawLabel(ctx, cx - 55, 188, 'Filtre égalisateur', '#92400e');
+                } else {
+                    // feuille diffusante + applicateur
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.roundRect(cx - 55, 110, 110, 10, 6).fill();
+                    drawLabel(ctx, cx - 70, 102, 'Feuille diffusante', '#92400e');
+
+                    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+                    ctx.roundRect(cx - 120, 150, 240, 40, 12).fill();
+                    drawLabel(ctx, cx - 65, 210, 'Applicateur électrons', '#111827');
+                }
+
+                // Chambres moniteurs
+                ctx.strokeStyle = '#22c55e';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(cx - 95, 235);
+                ctx.lineTo(cx + 95, 235);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(cx - 95, 258);
+                ctx.lineTo(cx + 95, 258);
+                ctx.stroke();
+                drawLabel(ctx, cx - 75, 282, 'Chambres moniteurs', '#166534');
+
+                // Collimateurs (mâchoires)
+                ctx.fillStyle = '#334155';
+                ctx.roundRect(cx - 140, 310, 60, 40, 10).fill();
+                ctx.roundRect(cx + 80, 310, 60, 40, 10).fill();
+                drawLabel(ctx, cx - 55, 332, 'Mâchoires X/Y', '#0f172a');
+
+                // MLC (simplifié)
+                const mlcY = 380;
+                for (let i = 0; i < 14; i++) {
+                    const x = cx - 126 + i * 18;
+                    const offset = Math.sin(i * 0.45 + t * 1.3) * 10;
+                    ctx.fillStyle = i % 2 === 0 ? '#1f2937' : '#334155';
+                    ctx.roundRect(x, mlcY, 16, 62 + offset, 6).fill();
+                }
+                drawLabel(ctx, cx - 90, mlcY + 82, 'Collimateur Multilames (MLC)', '#111827');
+
+                // Faisceau vers patient
+                if (mode === 'photons') {
+                    ctx.fillStyle = 'rgba(108, 92, 231, 0.20)';
+                } else {
+                    ctx.fillStyle = 'rgba(255, 217, 61, 0.18)';
+                }
+                ctx.roundRect(cx - 85, H * 0.78, 170, H * 0.08, 14).fill();
+
+                ctx.fillStyle = '#374151';
+                ctx.font = '700 12px Segoe UI, Arial';
+                ctx.fillText('↓ Patient ↓', cx - 30, H * 0.83);
+            }
+
+            function spawn() {
+                const cx = W * 0.50;
+                electrons.push({ x: cx + (Math.random() - 0.5) * 6, y: 70, vy: 280 });
+            }
+
+            function step(dt) {
+                t += dt * animationSpeed;
+
+                // Alternance mode
+                modeTimer += dt * animationSpeed;
+                if (modeTimer > 8.0) {
+                    modeTimer = 0;
+                    mode = mode === 'photons' ? 'electrons' : 'photons';
+                    electrons = [];
+                    photons = [];
+                    eScatter = [];
+                }
+
+                spawnAcc += dt * animationSpeed;
+                if (spawnAcc > 0.10) {
+                    spawnAcc = 0;
+                    spawn();
+                }
+
+                // Update electrons
+                const cx = W * 0.50;
+
+                electrons = electrons.filter(e => {
+                    e.y += e.vy * dt * animationSpeed;
+
+                    if (mode === 'photons') {
+                        // collision cible
+                        if (e.y >= 95 && e.y <= 115) {
+                            for (let k = 0; k < 5; k++) {
+                                photons.push({
+                                    x: e.x,
+                                    y: 115,
+                                    vx: (Math.random() - 0.5) * 70,
+                                    vy: 240 + Math.random() * 120
+                                });
+                            }
+                            return false;
+                        }
+                    } else {
+                        // feuille diffusante
+                        if (e.y >= 110 && e.y <= 125) {
+                            for (let k = 0; k < 7; k++) {
+                                eScatter.push({
+                                    x: e.x,
+                                    y: 125,
+                                    vx: (Math.random() - 0.5) * 120,
+                                    vy: 230 + Math.random() * 120
+                                });
+                            }
+                            return false;
+                        }
+                    }
+
+                    return e.y < H * 0.60;
+                });
+
+                // Update photons / electrons diffusés
+                photons = photons.filter(p => {
+                    p.x += p.vx * dt * animationSpeed;
+                    p.y += p.vy * dt * animationSpeed;
+
+                    // jaws window
+                    if (p.y > 310 && (p.x < cx - 80 || p.x > cx + 80)) return false;
+                    return p.y < H * 0.90;
+                });
+
+                eScatter = eScatter.filter(p => {
+                    p.x += p.vx * dt * animationSpeed;
+                    p.y += p.vy * dt * animationSpeed;
+
+                    // applicateur window (un peu plus large)
+                    if (p.y > 310 && (p.x < cx - 95 || p.x > cx + 95)) return false;
+                    return p.y < H * 0.90;
+                });
+
+                drawStatic();
+
+                // Draw primaires
+                ctx.save();
+                electrons.forEach(e => {
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.shadowBlur = 14;
+                    ctx.shadowColor = '#ffd93d';
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+                ctx.restore();
+
+                // Draw photons / diffusés
+                ctx.save();
+                photons.forEach(p => {
+                    ctx.fillStyle = '#6c5ce7';
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = '#6c5ce7';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+                eScatter.forEach(p => {
+                    ctx.fillStyle = '#ffd93d';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#ffd93d';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                });
+                ctx.restore();
+            }
+
+            animations.head = {
+                start() { loop.start(step); },
+                pause() { loop.stop(); },
+                reset() {
+                    loop.stop();
+                    t = 0;
+                    modeTimer = 0;
+                    mode = 'photons';
+                    electrons = [];
+                    photons = [];
+                    eScatter = [];
+                    spawnAcc = 0;
+                    drawStatic();
+                }
+            };
+
+            resize();
+        }
+
+        // ---------- Controls bridge (HTML inchangé) ----------
+        function startAnimation(type) {
+            if (animations[type]) animations[type].start();
+        }
+        function pauseAnimation(type) {
+            if (animations[type]) animations[type].pause();
+        }
+        function resetAnimation(type) {
+            if (animations[type]) animations[type].reset();
+        }
+
+
+    // ============= INITIALISATION =============
+    document.addEventListener('DOMContentLoaded', function() {
+        initFlashcards();
+        initQCM();
+        initVraiFaux();
+        initOpen();
+        initMainAnimation();
+        initGeneratorAnimation();
+        initAcceleratorAnimation();
+        initDeviationAnimation();
+        initHeadAnimation();
+        // Acronymes
+        renderAcronymGrid('');
+        const acInput = document.getElementById('acronymSearch');
+        if (acInput) {
+            acInput.addEventListener('input', (e) => renderAcronymGrid(e.target.value));
+        }
+        // Init quiz acronymes (on prépare un premier set)
+        startAcronymQuiz();
+
+
+    });
+</script>

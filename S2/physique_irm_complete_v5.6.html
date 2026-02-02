@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physique de l'IRM - Animations Interactives Complètes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1em;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            color: #495057;
+        }
+
+        .tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 30px;
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        canvas {
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: block;
+            background: #000;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            margin: 5px;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .data-card {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .data-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .data-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .equation {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .theory-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .theory-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .theory-section ul {
+            margin-left: 20px;
+        }
+
+        .theory-section li {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .explanation-levels {
+            margin: 20px 0;
+        }
+
+        .level-box {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .level-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .level-simple .level-badge {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .level-intermediate .level-badge {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .level-advanced .level-badge {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .answer-button {
+            background: #28a745;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+
+        .answer-button:hover {
+            background: #218838;
+        }
+
+        .answer-content {
+            display: none;
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            animation: slideDown 0.3s;
+        }
+
+        .answer-content.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .exercise-box {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .exercise-box h4 {
+            color: #e65100;
+            margin-bottom: 15px;
+        }
+
+        .animation-selector {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .animation-selector h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .animation-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .anim-btn {
+            background: #2196f3;
+            padding: 10px 20px;
+            font-size: 0.9em;
+        }
+
+        .anim-btn:hover {
+            background: #1976d2;
+        }
+
+        .anim-btn.active {
+            background: #0d47a1;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧲 Physique de l'IRM</h1>
+            <p class="subtitle">Imagerie par Résonance Magnétique - Animations Interactives Complètes</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('intro')">📚 Introduction</button>
+            <button class="tab" onclick="showTab('spin')">🌀 Spin Nucléaire</button>
+            <button class="tab" onclick="showTab('precession')">🔄 Précession</button>
+            <button class="tab" onclick="showTab('relaxation')">⏱️ Relaxation T1/T2</button>
+        </div>
+
+        <!-- INTRODUCTION -->
+        <div id="intro" class="content active">
+            <h2>Principes Fondamentaux de l'IRM</h2>
+
+            <div class="info-box">
+                <h3>🎯 Qu'est-ce que l'IRM ?</h3>
+                <p>L'IRM (Imagerie par Résonance Magnétique) est une technique d'imagerie médicale basée sur les propriétés magnétiques des <strong>noyaux atomiques</strong>, principalement les <strong>protons d'hydrogène (¹H)</strong> présents dans l'eau et les graisses du corps humain.</p>
+                <p><strong>Pourquoi l'IRM est révolutionnaire :</strong></p>
+                <ul>
+                    <li>✅ AUCUNE radiation ionisante (contrairement au scanner ou radio)</li>
+                    <li>✅ Excellent contraste des tissus mous (cerveau, moelle, ligaments)</li>
+                    <li>✅ Possibilité de faire des coupes dans tous les plans</li>
+                    <li>✅ Imagerie fonctionnelle possible (IRMf pour le cerveau)</li>
+                </ul>
+            </div>
+
+            <div class="theory-section">
+                <h3>🧠 Pourquoi l'IRM fonctionne avec les protons ?</h3>
+                <ul>
+                    <li><strong>Le corps humain contient ~60-70% d'eau</strong> → énorme concentration de protons H⁺</li>
+                    <li><strong>Les protons ont un spin</strong> (moment magnétique intrinsèque) → se comportent comme de minuscules aimants</li>
+                    <li><strong>En temps normal</strong> : les spins sont orientés aléatoirement → pas de magnétisation nette</li>
+                    <li><strong>Dans un champ magnétique B₀</strong> : les spins s'alignent → création d'une magnétisation nette M₀</li>
+                    <li><strong>Chaque tissu</strong> a des propriétés de relaxation différentes (T1, T2) → contraste naturel !</li>
+                </ul>
+            </div>
+
+            <div class="theory-section">
+                <h3>🔧 Les 3 étapes clés de l'IRM</h3>
+                <ul>
+                    <li><strong>1️⃣ Alignement (Polarisation)</strong> : Le patient est placé dans un champ magnétique intense B₀ (1,5 à 3 Tesla). Les protons s'alignent parallèlement ou antiparallèlement au champ. ⏱️ Temps : quelques secondes</li>
+                    <li><strong>2️⃣ Excitation (Impulsion RF)</strong> : Une onde radiofréquence à la fréquence de Larmor bascule la magnétisation. Les protons entrent en résonance et absorbent de l'énergie. ⏱️ Durée : millisecondes</li>
+                    <li><strong>3️⃣ Relaxation (Retour à l'équilibre)</strong> : Après l'impulsion RF, les protons retournent à leur état d'équilibre en émettant un signal RF. C'est CE signal qui est capté pour créer l'image ! ⏱️ Temps : dizaines à centaines de ms</li>
+                </ul>
+            </div>
+
+            <div class="equation">
+                Fréquence de Larmor : f₀ = γ × B₀ / (2π)
+            </div>
+
+            <div class="info-box">
+                <h3>📊 Valeurs typiques</h3>
+                <ul>
+                    <li><strong>Champ magnétique B₀</strong> : 1,5 T (IRM standard) ou 3 T (haute résolution)</li>
+                    <li><strong>Constante gyromagnétique γ</strong> : 42,58 MHz/T</li>
+                    <li><strong>Fréquence de Larmor à 1,5 T</strong> : ~64 MHz (bande FM radio)</li>
+                    <li><strong>Fréquence de Larmor à 3 T</strong> : ~128 MHz</li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <strong>⚠️ Sécurité IRM :</strong> Les champs magnétiques sont extrêmement puissants ! 1,5 T = 30 000 fois le champ magnétique terrestre.
+                <p><strong>Contre-indications absolues :</strong></p>
+                <ul>
+                    <li>❌ Pacemaker / défibrillateur (ancienne génération)</li>
+                    <li>❌ Clips vasculaires ferromagnétiques</li>
+                    <li>❌ Implants cochléaires</li>
+                    <li>❌ Corps étrangers métalliques intra-oculaires</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SPIN NUCLÉAIRE -->
+        <div id="spin" class="content">
+            <h2>🌀 Spin Nucléaire et Moment Magnétique</h2>
+
+            <div class="explanation-levels">
+                <div class="level-box level-simple">
+                    <h4>
+                        <span class="level-badge">🟢 NIVEAU SIMPLE</span>
+                        Version Vulgarisée
+                    </h4>
+                    <p><strong>Imaginez les atomes d'hydrogène comme de petits aimants qui tournent sur eux-mêmes.</strong></p>
+                    <p>Dans votre corps, il y a des millions de milliards de milliards d'atomes d'hydrogène (dans l'eau, la graisse, etc.). Chacun se comporte comme une minuscule toupie magnétique.</p>
+                    <p><strong>Sans champ magnétique :</strong> Ces petits aimants pointent dans tous les sens, comme des boussoles folles. La moitié vers le haut, la moitié vers le bas → ils s'annulent.</p>
+                    <p><strong>Avec l'IRM :</strong> Les petits aimants ne se mettent PAS tous droits ! Ils **continuent à tourner** (on appelle ça la "précession", comme une toupie qui vacille), mais :</p>
+                    <ul style="margin-left: 20px;">
+                        <li>Un tout petit peu plus tournent "penchés vers le haut" (état ↑)</li>
+                        <li>Qu'ils ne tournent "penchés vers le bas" (état ↓)</li>
+                    </ul>
+                    <p><strong>Important :</strong> Les spins ne sont jamais tous alignés parfaitement verticaux ! Ils sont inclinés à différents angles et tournent autour de l'axe de l'IRM.</p>
+                    
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p style="margin: 0;"><strong>⚡ La différence est MINUSCULE :</strong></p>
+                        <p style="margin: 10px 0 0 0;">Sur <strong>1 MILLION</strong> de petits aimants :</p>
+                        <ul style="margin: 10px 0 0 20px;">
+                            <li>À 1.5T : <strong>500 005 ↑</strong> vs <strong>499 995 ↓</strong> = seulement <strong>10 en plus</strong> !</li>
+                            <li>À 3T : <strong>500 010 ↑</strong> vs <strong>499 990 ↓</strong> = seulement <strong>20 en plus</strong> !</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>🤔 Mais alors, comment ça peut suffire pour faire une image ?</strong></p>
+                    <p>Parce que dans votre corps il n'y a pas 1 million de protons... il y en a <strong>100 000 000 000 000 000 000 000 000 000</strong> (10²⁸) !</p>
+                    <p>Même si la différence est minuscule en pourcentage, en nombre absolu ça fait des milliers de milliards de milliards de petits aimants en excès. Et ça, c'est largement suffisant pour créer un signal détectable ! 📡</p>
+                </div>
+
+                <div class="level-box level-intermediate">
+                    <h4>
+                        <span class="level-badge">🟡 NIVEAU INTERMÉDIAIRE</span>
+                        Version Semi-Technique
+                    </h4>
+                    <p><strong>Le spin nucléaire crée un moment magnétique μ.</strong></p>
+                    <p><strong>Sans B₀ :</strong> Distribution isotrope (aléatoire) → Magnétisation nette M = 0</p>
+                    <p><strong>Avec B₀ :</strong> Les spins **précessent** (tournent) autour de l'axe B₀ et se répartissent en deux états d'énergie :</p>
+                    <ul>
+                        <li><strong>État parallèle ↑</strong> (composante Mz positive) : énergie BASSE (-γℏB₀/2), plus stable</li>
+                        <li><strong>État antiparallèle ↓</strong> (composante Mz négative) : énergie HAUTE (+γℏB₀/2), moins stable</li>
+                    </ul>
+                    
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid #ffc107;">
+                        <p style="margin: 0; font-weight: bold; color: #f57c00;">⚠️ ATTENTION - Idée fausse courante :</p>
+                        <p style="margin: 10px 0 0 0;">Les spins ne sont PAS tous alignés verticalement ! ❌</p>
+                        <p style="margin: 5px 0 0 0;">Ils <strong>précessent</strong> (tournent comme des toupies) autour de B₀ à différents angles d'inclinaison. ✅</p>
+                        <p style="margin: 5px 0 0 0;">La différence : légèrement plus de spins dans l'état ↑ que ↓</p>
+                    </div>
+                    
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid #2196f3;">
+                        <p style="margin: 0; font-weight: bold; color: #1565c0;">📊 Distribution de Boltzmann - LA CLÉ DE L'IRM :</p>
+                        <p style="margin: 10px 0 0 0;">À l'équilibre thermique, il y a légèrement plus de spins ↑ que ↓</p>
+                        <p style="margin: 5px 0 0 0;"><strong>Différence = 3.3 ppm par Tesla à 37°C</strong></p>
+                        <ul style="margin: 10px 0 0 20px;">
+                            <li>À 1.5T : 50.00049% ↑ vs 49.99951% ↓ (5 ppm)</li>
+                            <li>À 3T : 50.00099% ↑ vs 49.99901% ↓ (10 ppm)</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Pourquoi cette infime différence suffit :</strong></p>
+                    <ul>
+                        <li>Dans 1 cm³ de tissu : ~10²² protons</li>
+                        <li>5 ppm de 10²² = 5 × 10¹⁶ protons en excès</li>
+                        <li>Ces 50 000 milliards de milliards de spins créent une magnétisation M₀ mesurable</li>
+                        <li>Signal amplifié électroniquement × 1 000 000</li>
+                    </ul>
+                    
+                    <p><strong>Plus B₀ est grand, plus la différence est importante !</strong> C'est pourquoi les IRM 3T donnent un meilleur rapport signal/bruit que les 1.5T.</p>
+                </div>
+
+                <div class="level-box level-advanced">
+                    <h4>
+                        <span class="level-badge">🔴 NIVEAU TECHNIQUE</span>
+                        Version Technique Complète
+                    </h4>
+                    <p><strong>Moment magnétique nucléaire :</strong> μ = γ × ℏ × I</p>
+                    <p>Pour ¹H : I = ½ → 2 états possibles (m = +½ et m = -½)</p>
+                    <p><strong>Énergie Zeeman :</strong> E = -μ·B₀ = -γℏB₀m</p>
+                    <p>ΔE = γℏB₀ (différence entre états)</p>
+                    <p><strong>Distribution de Boltzmann :</strong></p>
+                    <div class="equation" style="font-size: 0.9em;">
+                        N↑/N↓ = exp(γℏB₀/kT) ≈ 1 + γℏB₀/kT
+                    </div>
+                    <p>À 1.5T et 37°C : excès ≈ 5 ppm (5 spins sur 1 million !)</p>
+                    <p>À 3T : excès ≈ 10 ppm (DOUBLE)</p>
+                    <p><strong>Magnétisation macroscopique :</strong></p>
+                    <div class="equation" style="font-size: 0.9em;">
+                        M₀ = (N × γ² × ℏ² × B₀) / (3kT)
+                    </div>
+                    <p>M₀ est proportionnel à B₀ : doubler le champ double le signal !</p>
+                </div>
+            </div>
+
+            <div class="animation-selector">
+                <h4>🎬 Choisissez l'animation à visualiser :</h4>
+                <div class="animation-buttons">
+                    <button class="anim-btn active" onclick="setSpinAnimation(1)">1️⃣ Comparaison Sans/Avec B₀</button>
+                    <button class="anim-btn" onclick="setSpinAnimation(2)">2️⃣ IRM + Patient + Protons</button>
+                    <button class="anim-btn" onclick="setSpinAnimation(3)">3️⃣ Distribution des états d'énergie</button>
+                    <button class="anim-btn" onclick="setSpinAnimation(4)">4️⃣ Effet de la température</button>
+                    <button class="anim-btn" onclick="setSpinAnimation(5)">5️⃣ Pourquoi 5 ppm suffisent pour l'image</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Champ magnétique B₀ : <span id="b0Val">1.5</span> T</label>
+                    <input type="range" id="b0Slider" min="0" max="3" step="0.1" value="1.5">
+                </div>
+                <button id="btnApplyB0">🧲 Appliquer le champ B₀</button>
+                <button id="btnResetSpin">🔄 Réinitialiser (B₀ = 0)</button>
+            </div>
+
+            <canvas id="spinCanvas" width="1200" height="700"></canvas>
+
+            <div class="data-grid">
+                <div class="data-card">
+                    <div class="data-label">Fréquence de Larmor</div>
+                    <div class="data-value" id="larmorFreq">63.87 MHz</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">Vitesse angulaire</div>
+                    <div class="data-value" id="angularVel">401 Mrad/s</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">Énergie Zeeman</div>
+                    <div class="data-value" id="zeemanEnergy">4.2×10⁻²⁶ J</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">Spins parallèles ↑</div>
+                    <div class="data-value" id="parallelSpins">50.0%</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">Spins antiparallèles ↓</div>
+                    <div class="data-value" id="antiparallelSpins">50.0%</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">Magnétisation M₀</div>
+                    <div class="data-value" id="magnetizationVal">0</div>
+                </div>
+            </div>
+
+            <div class="exercise-box">
+                <h4>🧮 Exercices Pratiques</h4>
+                <p><strong>Exercice 1 :</strong> Calculer la fréquence de Larmor pour un IRM à 1,5 T</p>
+                <button class="answer-button" onclick="toggleAnswer('spinEx1')">💡 Afficher la réponse</button>
+                <div id="spinEx1" class="answer-content">
+                    <p><strong>Solution :</strong> f₀ = γ × B₀ / (2π) = 42,58 × 1,5 = <strong>63,87 MHz</strong></p>
+                    <p>Cette fréquence est dans la bande FM radio !</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 2 :</strong> Si on double B₀ (de 1,5 T à 3 T), que devient la fréquence de Larmor ?</p>
+                <button class="answer-button" onclick="toggleAnswer('spinEx2')">💡 Afficher la réponse</button>
+                <div id="spinEx2" class="answer-content">
+                    <p><strong>Solution :</strong> Elle double aussi ! f₀ = 42,58 × 3 = <strong>127,74 MHz</strong></p>
+                    <p>Relation linéaire : doubler B₀ double f₀</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 3 :</strong> Pourquoi est-il crucial d'émettre la RF exactement à f₀ ?</p>
+                <button class="answer-button" onclick="toggleAnswer('spinEx3')">💡 Afficher la réponse</button>
+                <div id="spinEx3" class="answer-content">
+                    <p><strong>Réponse :</strong> Hors résonance, les protons n'absorbent pas l'énergie → pas de signal détectable. C'est comme essayer de pousser une balançoire au mauvais moment : ça ne marche pas !</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 4 :</strong> À 3T, combien y a-t-il de spins en excès dans l'état parallèle ?</p>
+                <button class="answer-button" onclick="toggleAnswer('spinEx4')">💡 Afficher la réponse</button>
+                <div id="spinEx4" class="answer-content">
+                    <p><strong>Réponse :</strong> Environ 10 spins sur 1 million (10 ppm) grâce à la distribution de Boltzmann.</p>
+                    <p><strong>Calcul précis :</strong></p>
+                    <p>ΔN/N = γℏB₀/(2kT)</p>
+                    <p>À 3T et 37°C : ΔN/N ≈ 10 × 10⁻⁶ = 10 ppm</p>
+                    <p>Sur 1 million de spins : 500 005 ↑ vs 499 995 ↓</p>
+                    <p><strong>C'est incroyablement faible, mais suffisant pour l'IRM grâce au nombre énorme de protons dans le corps (~10²⁸) !</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRÉCESSION -->
+        <div id="precession" class="content">
+            <h2>🔄 Précession de Larmor</h2>
+
+            <div class="explanation-levels">
+                <div class="level-box level-simple">
+                    <h4>
+                        <span class="level-badge">🟢 NIVEAU SIMPLE</span>
+                        Version Vulgarisée
+                    </h4>
+                    <p><strong>La précession, c'est comme une toupie qui penche et tourne en vacillant.</strong></p>
+                    <p>Quand vous lancez une toupie, elle ne reste pas parfaitement droite : son axe de rotation "vacille" en décrivant un cône. C'est exactement ce que font les petits aimants dans le champ de l'IRM !</p>
+                    <p><strong>Plus le champ est fort, plus ils tournent vite.</strong> À 1.5T ils tournent 64 millions de fois par seconde, à 3T c'est 128 millions de fois !</p>
+                </div>
+
+                <div class="level-box level-intermediate">
+                    <h4>
+                        <span class="level-badge">🟡 NIVEAU INTERMÉDIAIRE</span>
+                        Version Semi-Technique
+                    </h4>
+                    <p><strong>La précession est le mouvement de rotation du vecteur M autour de B₀.</strong></p>
+                    <p>Le champ B₀ exerce un couple sur μ : <strong>τ = μ × B₀</strong></p>
+                    <p>Ce couple fait tourner le spin autour de B₀ à la fréquence de Larmor :</p>
+                    <div class="equation" style="font-size: 1em;">
+                        ω₀ = γ × B₀
+                    </div>
+                    <p>À 1.5 T : ω₀ ≈ 401 Mrad/s<br>À 3 T : ω₀ ≈ 802 Mrad/s</p>
+                </div>
+
+                <div class="level-box level-advanced">
+                    <h4>
+                        <span class="level-badge">🔴 NIVEAU TECHNIQUE</span>
+                        Version Technique Complète
+                    </h4>
+                    <p><strong>Équation du mouvement :</strong></p>
+                    <div class="equation" style="font-size: 1em;">
+                        dM/dt = γ(M × B₀)
+                    </div>
+                    <p>Solution : si M est incliné d'un angle θ, il précesse à ω₀ en décrivant un cône.</p>
+                    <p><strong>Composantes :</strong></p>
+                    <ul>
+                        <li>M<sub>z</sub> = M₀ cos(θ) : constante</li>
+                        <li>M<sub>xy</sub> = M₀ sin(θ) : tourne à ω₀</li>
+                    </ul>
+                    <p><strong>Référentiel tournant :</strong> À ω = ω₀, M apparaît stationnaire → B<sub>eff</sub> = 0</p>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Champ magnétique B₀ : <span id="b0PrecessionVal">1.5</span> T</label>
+                    <input type="range" id="b0PrecessionSlider" min="0.5" max="3" step="0.1" value="1.5">
+                </div>
+                <button id="btnStartPrecession">▶️ Démarrer la précession</button>
+                <button id="btnStopPrecession">⏸️ Arrêter</button>
+            </div>
+
+            <canvas id="precessionCanvas" width="1200" height="600"></canvas>
+
+            <div class="exercise-box">
+                <h4>🧮 Exercices Pratiques</h4>
+                <p><strong>Exercice 1 :</strong> Si le champ passe de 1.5 T à 3 T, que se passe-t-il pour la vitesse de précession ?</p>
+                <button class="answer-button" onclick="toggleAnswer('precEx1')">💡 Afficher la réponse</button>
+                <div id="precEx1" class="answer-content">
+                    <p><strong>Réponse :</strong> La vitesse de précession <strong>double</strong> exactement.</p>
+                    <p>À 1.5 T : ω₀ = 401 Mrad/s<br>À 3.0 T : ω₀ = 802 Mrad/s</p>
+                    <p>Relation linéaire directe : ω₀ ∝ B₀</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 2 :</strong> Pourquoi tous les spins ¹H précessent-ils à la même fréquence ?</p>
+                <button class="answer-button" onclick="toggleAnswer('precEx2')">💡 Afficher la réponse</button>
+                <div id="precEx2" class="answer-content">
+                    <p><strong>Réponse :</strong> Parce qu'ils ont tous le même γ (rapport gyromagnétique) et sont dans le même champ B₀ homogène.</p>
+                    <p>C'est cette propriété qui permet la résonance : tous répondent à la même fréquence RF !</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 3 :</strong> Dans un IRM 3T, quelle est la longueur d'onde de l'onde RF ?</p>
+                <button class="answer-button" onclick="toggleAnswer('precEx3')">💡 Afficher la réponse</button>
+                <div id="precEx3" class="answer-content">
+                    <p><strong>Solution :</strong> λ = c/f = 3×10⁸ / 127,74×10⁶ ≈ <strong>2,35 m</strong></p>
+                    <p>C'est une onde radio FM, d'où le nom "radiofréquence" !</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RELAXATION T1/T2 -->
+        <div id="relaxation" class="content">
+            <h2>⏱️ Relaxation T1 et T2</h2>
+
+            <div class="explanation-levels">
+                <div class="level-box level-simple">
+                    <h4>
+                        <span class="level-badge">🟢 NIVEAU SIMPLE</span>
+                        Version Vulgarisée
+                    </h4>
+                    <p><strong>Imaginez que vous poussez tous les petits aimants sur le côté avec une impulsion radio.</strong></p>
+                    <p>Après, deux choses se passent :</p>
+                    <p><strong>1) T1 - Ils se redressent progressivement</strong> (comme un ressort qui revient)<br>
+                    <strong>Mz</strong> = l'aimantation verticale (le long de l'IRM)<br>
+                    <strong>M₀</strong> = l'aimantation complète à 100%<br>
+                    <strong>63%</strong> = au bout d'un temps T1, on a récupéré 63% de la force magnétique</p>
+                    
+                    <p><strong>2) T2 - Ils se désynchronisent entre eux</strong> (comme des coureurs qui se dispersent)</p>
+                    
+                    <p><strong>Pourquoi c'est important ?</strong> Chaque tissu a ses propres T1 et T2. L'eau, la graisse, le cerveau : tous différents ! C'est comme ça qu'on les distingue sur une image IRM.</p>
+                </div>
+
+                <div class="level-box level-intermediate">
+                    <h4>
+                        <span class="level-badge">🟡 NIVEAU INTERMÉDIAIRE</span>
+                        Version Semi-Technique
+                    </h4>
+                    <p><strong>Après une impulsion RF de 90°, M bascule dans le plan transversal.</strong></p>
+                    
+                    <p><strong>Relaxation T1 (longitudinale) :</strong></p>
+                    <p><strong>Mz</strong> = composante verticale de l'aimantation (parallèle à B₀)</p>
+                    <p><strong>M₀</strong> = aimantation d'équilibre (valeur maximale)</p>
+                    <div class="equation" style="font-size: 1em;">
+                        M<sub>z</sub>(t) = M₀ × (1 - e<sup>-t/T1</sup>)
+                    </div>
+                    <p><strong>T1 = temps pour récupérer 63% de M₀</strong> (définition mathématique : 1 - e⁻¹ ≈ 0.63)</p>
+                    <p>Échange d'énergie spin-réseau.</p>
+                    
+                    <p><strong>Relaxation T2 (transversale) :</strong></p>
+                    <div class="equation" style="font-size: 1em;">
+                        M<sub>xy</sub>(t) = M<sub>xy</sub>(0) × e<sup>-t/T2</sup>
+                    </div>
+                    <p><strong>T2 = temps pour perdre 63% du signal</strong></p>
+                    <p>Déphasage par interactions spin-spin. Toujours T2 ≤ T1.</p>
+                </div>
+
+                <div class="level-box level-advanced">
+                    <h4>
+                        <span class="level-badge">🔴 NIVEAU TECHNIQUE</span>
+                        Version Technique Complète
+                    </h4>
+                    <p><strong>Équations de Bloch :</strong></p>
+                    <div class="equation" style="font-size: 0.85em;">
+                        dM<sub>x</sub>/dt = γ(M×B)<sub>x</sub> - M<sub>x</sub>/T2<br>
+                        dM<sub>y</sub>/dt = γ(M×B)<sub>y</sub> - M<sub>y</sub>/T2<br>
+                        dM<sub>z</sub>/dt = γ(M×B)<sub>z</sub> - (M<sub>z</sub>-M₀)/T1
+                    </div>
+                    
+                    <p><strong>Mécanismes T1 :</strong></p>
+                    <ul>
+                        <li>Interactions dipôle-dipôle à ω₀</li>
+                        <li>Efficacité max quand τ<sub>c</sub> ≈ 1/ω₀</li>
+                        <li>Graisse : T1 court (~260 ms), LCS : T1 long (~4000 ms)</li>
+                    </ul>
+                    
+                    <p><strong>Valeurs à 1.5T :</strong></p>
+                    <ul>
+                        <li>Substance blanche : T1=780ms, T2=90ms</li>
+                        <li>Substance grise : T1=920ms, T2=100ms</li>
+                        <li>LCS : T1=4000ms, T2=2000ms</li>
+                        <li>Graisse : T1=260ms, T2=80ms</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label>Temps T1 : <span id="t1Val">800</span> ms</label>
+                    <input type="range" id="t1Slider" min="200" max="2000" step="50" value="800">
+                </div>
+                <div class="control-group">
+                    <label>Temps T2 : <span id="t2Val">80</span> ms</label>
+                    <input type="range" id="t2Slider" min="20" max="200" step="10" value="80">
+                </div>
+                <button id="btnPulse90">⚡ Appliquer impulsion 90°</button>
+                <button id="btnResetRelax">🔄 Réinitialiser</button>
+            </div>
+
+            <canvas id="relaxationCanvas" width="1200" height="700"></canvas>
+
+            <div class="data-grid">
+                <div class="data-card">
+                    <div class="data-label">M<sub>z</sub> (longitudinale)</div>
+                    <div class="data-value" id="mzVal">100%</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">M<sub>xy</sub> (transversale)</div>
+                    <div class="data-value" id="mxyVal">0%</div>
+                </div>
+                <div class="data-card">
+                    <div class="data-label">Temps écoulé</div>
+                    <div class="data-value" id="timeElapsedVal">0 ms</div>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: #e8f5e9;">
+                <h3>🏥 Pondération T1 vs T2</h3>
+                <p><strong>Images pondérées T1</strong> (TR court ~500ms, TE court ~15ms) :</p>
+                <ul>
+                    <li>Graisse : HYPERINTENSE (blanc) - T1 court</li>
+                    <li>Eau/LCS : HYPOINTENSE (noir) - T1 long</li>
+                    <li><strong>Usage :</strong> Anatomie, gadolinium</li>
+                </ul>
+                <p><strong>Images pondérées T2</strong> (TR long ~3000ms, TE long ~100ms) :</p>
+                <ul>
+                    <li>Eau/LCS : HYPERINTENSE (blanc) - T2 long</li>
+                    <li>Tissus solides : HYPOINTENSE (gris) - T2 court</li>
+                    <li><strong>Usage :</strong> Œdème, inflammation, tumeurs</li>
+                </ul>
+            </div>
+
+            <div class="exercise-box">
+                <h4>🧮 Exercices Pratiques</h4>
+                <p><strong>Exercice 1 :</strong> La substance blanche a un T1 de 780 ms. Combien de temps pour que M<sub>z</sub> atteigne 63% de M₀ ?</p>
+                <button class="answer-button" onclick="toggleAnswer('relaxEx1')">💡 Afficher la réponse</button>
+                <div id="relaxEx1" class="answer-content">
+                    <p><strong>Réponse :</strong> Exactement <strong>T1 = 780 ms</strong></p>
+                    <p>C'est la définition de T1 ! Par définition, après un temps T1, on récupère 63% (1 - e⁻¹)</p>
+                    <p>Après 2×T1 : 86%, après 3×T1 : 95%, après 5×T1 : 99%</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 2 :</strong> Pourquoi T2 est-il toujours ≤ T1 ?</p>
+                <button class="answer-button" onclick="toggleAnswer('relaxEx2')">💡 Afficher la réponse</button>
+                <div id="relaxEx2" class="answer-content">
+                    <p><strong>Réponse :</strong> Le déphasage (T2) commence immédiatement après l'impulsion, tandis que la récupération (T1) prend plus de temps.</p>
+                    <p>Analogie : Il est plus facile de "désorganiser" des coureurs (déphasage) que de les faire revenir au point de départ (récupération énergétique).</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 3 :</strong> Une lésion apparaît noire en T1 et blanche en T2. Quelle est l'hypothèse ?</p>
+                <button class="answer-button" onclick="toggleAnswer('relaxEx3')">💡 Afficher la réponse</button>
+                <div id="relaxEx3" class="answer-content">
+                    <p><strong>Réponse :</strong> Lésion liquidienne (kyste, œdème, LCS)</p>
+                    <p>Les liquides ont T1 long (noir) et T2 long (blanc)</p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 4 :</strong> Calculer M<sub>z</sub> après 1500 ms si T1 = 800 ms</p>
+                <button class="answer-button" onclick="toggleAnswer('relaxEx4')">💡 Afficher la réponse</button>
+                <div id="relaxEx4" class="answer-content">
+                    <p><strong>Solution :</strong></p>
+                    <p>M<sub>z</sub> = M₀(1 - e<sup>-1500/800</sup>)</p>
+                    <p>= M₀(1 - e<sup>-1.875</sup>)</p>
+                    <p>= M₀(1 - 0.153)</p>
+                    <p>= <strong>0.85 M₀ (85% de récupération)</strong></p>
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Exercice 5 :</strong> Pour une pondération T1, faut-il un TR court ou long ? Pourquoi ?</p>
+                <button class="answer-button" onclick="toggleAnswer('relaxEx5')">💡 Afficher la réponse</button>
+                <div id="relaxEx5" class="answer-content">
+                    <p><strong>Réponse :</strong> TR court (~500ms)</p>
+                    <p>Si TR est court, les tissus avec T1 différents ont des magnétisations différentes → contraste T1</p>
+                    <p>Si TR est trop long, tous les tissus récupèrent complètement → pas de contraste T1</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== NAVIGATION ==========
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function toggleAnswer(answerId) {
+            const answerDiv = document.getElementById(answerId);
+            answerDiv.classList.toggle('show');
+        }
+
+        // ========== SPIN NUCLÉAIRE ==========
+        let currentSpinAnimation = 1;
+        let b0Applied = false;
+        let b0TransitionProgress = 0;
+        let spinAngles = [];
+        let spinRotationSpeeds = [];
+        const numSpins = 40;
+
+        for (let i = 0; i < numSpins; i++) {
+            spinAngles[i] = Math.random() * 2 * Math.PI;
+            spinRotationSpeeds[i] = (Math.random() - 0.5) * 0.3;
+        }
+
+        function setSpinAnimation(animNum) {
+            currentSpinAnimation = animNum;
+            document.querySelectorAll('.anim-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        const b0Slider = document.getElementById('b0Slider');
+        const b0Display = document.getElementById('b0Val');
+
+        b0Slider.oninput = updateSpinValues;
+
+        function updateSpinValues() {
+            const b0 = parseFloat(b0Slider.value);
+            b0Display.textContent = b0.toFixed(1);
+
+            const gamma = 42.58;
+            const freq = gamma * b0;
+            const omega = 2 * Math.PI * freq;
+            const energy = 1.055e-34 * gamma * 1e6 * b0;
+
+            document.getElementById('larmorFreq').textContent = freq.toFixed(2) + ' MHz';
+            document.getElementById('angularVel').textContent = omega.toFixed(0) + ' Mrad/s';
+            document.getElementById('zeemanEnergy').textContent = energy.toExponential(1) + ' J';
+
+            if (b0Applied) {
+                // Formule réelle de Boltzmann : ΔN/N = γℏB₀/(2kT)
+                // À 37°C (310K) : ΔN/N ≈ 3.3 × 10⁻⁶ par Tesla
+                const excessPpm = b0 * 3.3; // ppm
+                const excessFraction = excessPpm / 1000000; // Convertir ppm en fraction
+                const parallelRatio = 0.5 + (excessFraction / 2);
+                
+                document.getElementById('parallelSpins').textContent = (parallelRatio * 100).toFixed(5) + '%';
+                document.getElementById('antiparallelSpins').textContent = ((1 - parallelRatio) * 100).toFixed(5) + '%';
+                document.getElementById('magnetizationVal').textContent = excessPpm.toFixed(1) + ' ppm';
+            }
+        }
+
+        document.getElementById('btnApplyB0').addEventListener('click', () => {
+            b0Applied = true;
+            b0TransitionProgress = 0;
+            updateSpinValues();
+        });
+
+        document.getElementById('btnResetSpin').addEventListener('click', () => {
+            b0Applied = false;
+            b0TransitionProgress = 0;
+            document.getElementById('parallelSpins').textContent = '50.0%';
+            document.getElementById('antiparallelSpins').textContent = '50.0%';
+            document.getElementById('magnetizationVal').textContent = '0';
+        });
+
+        function drawSpin(ctx, x, y, angle, color, length) {
+            const endX = x + Math.cos(angle) * length;
+            const endY = y + Math.sin(angle) * length;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(endX - 8*Math.cos(angle - 0.3), endY - 8*Math.sin(angle - 0.3));
+            ctx.lineTo(endX - 8*Math.cos(angle + 0.3), endY - 8*Math.sin(angle + 0.3));
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function animateSpin() {
+            const canvas = document.getElementById('spinCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+
+            const b0 = parseFloat(b0Slider.value);
+
+            if (currentSpinAnimation === 1) {
+                // Animation 1: Comparaison Sans/Avec B0
+                const leftCenterX = w / 4;
+                const rightCenterX = 3 * w / 4;
+                const centerY = h / 2;
+
+                // GAUCHE: Sans B0
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 24px monospace';
+                ctx.fillText('SANS CHAMP B₀', leftCenterX - 100, 40);
+                ctx.font = '16px monospace';
+                ctx.fillText('Spins aléatoires → M = 0', leftCenterX - 90, 70);
+
+                for (let i = 0; i < 30; i++) {
+                    spinAngles[i] += spinRotationSpeeds[i];
+                    const x = leftCenterX - 150 + (i % 6) * 60;
+                    const y = 120 + Math.floor(i / 6) * 80;
+                    drawSpin(ctx, x, y, spinAngles[i], '#4facfe', 25);
+                }
+
+                // DROITE: Avec B0
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 24px monospace';
+                ctx.fillText('AVEC CHAMP B₀', rightCenterX - 100, 40);
+                ctx.font = '16px monospace';
+                ctx.fillText(`B₀ = ${b0} T`, rightCenterX - 40, 70);
+
+                // Axe B0
+                ctx.strokeStyle = '#ffe66d';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(rightCenterX, centerY + 220);
+                ctx.lineTo(rightCenterX, centerY - 220);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffe66d';
+                ctx.font = 'bold 28px monospace';
+                ctx.fillText('B₀', rightCenterX + 20, centerY - 230);
+
+                if (b0Applied) {
+                    if (b0TransitionProgress < 1) {
+                        b0TransitionProgress += 0.015;
+                    }
+
+                    // Formule réelle : excès = 3.3 ppm par Tesla
+                    const excessPpm = b0 * 3.3;
+                    const excessFraction = excessPpm / 1000000;
+                    const parallelRatio = 0.5 + (excessFraction / 2);
+                    const numParallel = Math.floor(30 * parallelRatio);
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '16px monospace';
+                    ctx.fillText('Spins en précession autour de B₀', rightCenterX - 140, 100);
+
+                    let parallelCount = 0;
+                    let antiparallelCount = 0;
+
+                    for (let i = 0; i < 30; i++) {
+                        const x = rightCenterX - 150 + (i % 6) * 60;
+                        const y = 120 + Math.floor(i / 6) * 80;
+
+                        const isParallel = i < numParallel;
+                        
+                        // Angle de précession (tourne avec le temps)
+                        const precessionAngle = (Date.now() / 500 + i) % (2 * Math.PI);
+                        
+                        // Angle d'inclinaison par rapport à B0
+                        // Parallèle: incliné vers le haut (angle entre -90° et -30°)
+                        // Antiparallèle: incliné vers le bas (angle entre 30° et 90°)
+                        let tiltAngle;
+                        if (isParallel) {
+                            // État ↑ : inclinaison entre -30° et -70° (vers le haut)
+                            tiltAngle = -Math.PI/6 - Math.random() * Math.PI/4.5;
+                            parallelCount++;
+                        } else {
+                            // État ↓ : inclinaison entre 30° et 70° (vers le bas)
+                            tiltAngle = Math.PI/6 + Math.random() * Math.PI/4.5;
+                            antiparallelCount++;
+                        }
+                        
+                        // Projection 3D simplifiée de la précession
+                        const spinLen = 25;
+                        const coneRadius = Math.sin(Math.abs(tiltAngle)) * spinLen * 0.5;
+                        const spinX = x + Math.cos(precessionAngle * b0TransitionProgress) * coneRadius;
+                        const spinY = y + Math.cos(tiltAngle) * spinLen;
+
+                        // Tracer le cône de précession (léger)
+                        if (b0TransitionProgress > 0.5) {
+                            ctx.strokeStyle = isParallel ? 'rgba(79, 172, 254, 0.2)' : 'rgba(255, 107, 107, 0.2)';
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.arc(x, y, coneRadius, 0, Math.PI * 2);
+                            ctx.stroke();
+                        }
+
+                        // Dessiner le spin en précession
+                        drawSpin(ctx, x, y, Math.atan2(spinY - y, spinX - x), 
+                                isParallel ? '#4facfe' : '#ff6b6b', spinLen);
+                    }
+
+                    // Vecteur magnétisation nette (somme vectorielle)
+                    const netLength = 150 * b0TransitionProgress * (b0 / 3);
+                    ctx.strokeStyle = '#00ff88';
+                    ctx.lineWidth = 8;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#00ff88';
+                    ctx.beginPath();
+                    ctx.moveTo(rightCenterX, centerY);
+                    ctx.lineTo(rightCenterX, centerY - netLength);
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = '#00ff88';
+                    ctx.beginPath();
+                    ctx.moveTo(rightCenterX, centerY - netLength);
+                    ctx.lineTo(rightCenterX - 12, centerY - netLength + 20);
+                    ctx.lineTo(rightCenterX + 12, centerY - netLength + 20);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#00ff88';
+                    ctx.font = 'bold 20px monospace';
+                    ctx.fillText('M₀', rightCenterX + 20, centerY - netLength - 10);
+                    
+                    ctx.font = '14px monospace';
+                    ctx.fillText('(magnétisation nette)', rightCenterX + 20, centerY - netLength + 10);
+
+                    ctx.fillStyle = '#4facfe';
+                    ctx.font = '16px monospace';
+                    ctx.fillText(`↑ ${parallelCount} spins (état ↑)`, rightCenterX - 250, h - 60);
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.fillText(`↓ ${antiparallelCount} spins (état ↓)`, rightCenterX - 250, h - 30);
+                    
+                    ctx.fillStyle = '#ffe66d';
+                    ctx.font = '14px monospace';
+                    ctx.fillText('* Les spins précessent autour de B₀', rightCenterX - 250, h - 5);
+                } else {
+                    ctx.fillStyle = '#888';
+                    ctx.font = '16px monospace';
+                    ctx.fillText('Cliquez "Appliquer B₀"', rightCenterX - 90, 100);
+                }
+
+            } else if (currentSpinAnimation === 2) {
+                // Animation 2: IRM + Patient + Protons
+                const centerX = w / 2;
+                const centerY = h / 2;
+
+                // Dessiner l'IRM (cylindre)
+                ctx.strokeStyle = '#666';
+                ctx.fillStyle = '#333';
+                ctx.lineWidth = 4;
+                
+                // IRM externe
+                ctx.fillRect(50, centerY - 200, 300, 400);
+                ctx.strokeRect(50, centerY - 200, 300, 400);
+                
+                // Tunnel IRM
+                ctx.fillStyle = '#000';
+                ctx.fillRect(80, centerY - 170, 240, 340);
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('IRM', 160, centerY - 220);
+                ctx.font = '16px monospace';
+                ctx.fillText(`${b0} Tesla`, 145, centerY + 220);
+
+                // Patient (forme humaine simplifiée)
+                ctx.fillStyle = '#ffa07a';
+                
+                // Tête
+                ctx.beginPath();
+                ctx.arc(200, centerY - 120, 40, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Corps
+                ctx.fillRect(170, centerY - 80, 60, 120);
+                
+                // Bras
+                ctx.fillRect(140, centerY - 60, 30, 80);
+                ctx.fillRect(230, centerY - 60, 30, 80);
+                
+                // Jambes
+                ctx.fillRect(175, centerY + 40, 20, 100);
+                ctx.fillRect(205, centerY + 40, 20, 100);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 18px monospace';
+                ctx.fillText('PATIENT', 155, centerY + 170);
+
+                // Champ magnétique B0 (lignes de champ)
+                if (b0Applied && b0 > 0) {
+                    ctx.strokeStyle = '#ffe66d';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([10, 5]);
+                    
+                    for (let i = 0; i < 8; i++) {
+                        const y = centerY - 160 + i * 40;
+                        ctx.beginPath();
+                        ctx.moveTo(80, y);
+                        ctx.lineTo(320, y);
+                        ctx.stroke();
+                        
+                        // Flèches
+                        ctx.setLineDash([]);
+                        ctx.fillStyle = '#ffe66d';
+                        ctx.beginPath();
+                        ctx.moveTo(310, y);
+                        ctx.lineTo(300, y - 5);
+                        ctx.lineTo(300, y + 5);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.setLineDash([10, 5]);
+                    }
+                    ctx.setLineDash([]);
+                    
+                    ctx.fillStyle = '#ffe66d';
+                    ctx.font = 'bold 24px monospace';
+                    ctx.fillText('B₀ →', 30, centerY);
+                }
+
+                // Zone de protons (dans le corps du patient)
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('Protons H⁺ dans le patient :', 450, 80);
+                ctx.font = '16px monospace';
+                ctx.fillText('(eau, graisse, tissus)', 480, 110);
+
+                // Afficher les protons
+                const protonStartX = 500;
+                const protonStartY = 150;
+
+                if (b0Applied && b0 > 0) {
+                    if (b0TransitionProgress < 1) {
+                        b0TransitionProgress += 0.01;
+                    }
+
+                    const excessPpm = b0 * 3.3;
+                    const excessFraction = excessPpm / 1000000;
+                    const parallelRatio = 0.5 + (excessFraction / 2);
+                    const numParallel = Math.floor(40 * parallelRatio);
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '16px monospace';
+                    ctx.fillText(`↑ Spins parallèles: ${numParallel}/40`, 450, 550);
+                    ctx.fillText(`↓ Spins antiparallèles: ${40 - numParallel}/40`, 450, 580);
+                    ctx.fillText(`Excès: ${(numParallel - 20)} spins`, 450, 610);
+                    ctx.fillText(`(${excessPpm.toFixed(1)} ppm = ${(excessFraction * 100).toFixed(5)}%)`, 450, 640);
+                    
+                    ctx.fillStyle = '#ffe66d';
+                    ctx.font = '14px monospace';
+                    ctx.fillText('Note: Les spins précessent autour de B₀', 450, 670);
+                    ctx.fillText('(ils tournent, pas tous verticaux !)', 450, 690);
+
+                    for (let i = 0; i < 40; i++) {
+                        const x = protonStartX + (i % 8) * 70;
+                        const y = protonStartY + Math.floor(i / 8) * 70;
+
+                        const isParallel = i < numParallel;
+                        
+                        // Angle de précession (animation)
+                        const precessionAngle = (Date.now() / 500 + i) % (2 * Math.PI);
+                        
+                        // Angle d'inclinaison
+                        let tiltAngle;
+                        if (isParallel) {
+                            tiltAngle = -Math.PI/6 - Math.random() * Math.PI/4.5;
+                        } else {
+                            tiltAngle = Math.PI/6 + Math.random() * Math.PI/4.5;
+                        }
+                        
+                        // Projection 3D de la précession
+                        const spinLen = 25;
+                        const coneRadius = Math.sin(Math.abs(tiltAngle)) * spinLen * 0.5;
+                        const spinX = x + Math.cos(precessionAngle * b0TransitionProgress) * coneRadius;
+                        const spinY = y + Math.cos(tiltAngle) * spinLen;
+
+                        drawSpin(ctx, x, y, Math.atan2(spinY - y, spinX - x), 
+                                isParallel ? '#4facfe' : '#ff6b6b', spinLen);
+                    }
+
+                    // Magnétisation résultante
+                    const netY = protonStartY + 250;
+                    ctx.strokeStyle = '#00ff88';
+                    ctx.lineWidth = 8;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#00ff88';
+                    ctx.beginPath();
+                    ctx.moveTo(650, netY);
+                    ctx.lineTo(650, netY - 80 * b0TransitionProgress * (b0 / 3));
+                    ctx.stroke();
+                    ctx.shadowBlur = 0;
+
+                    ctx.fillStyle = '#00ff88';
+                    ctx.font = 'bold 20px monospace';
+                    ctx.fillText('M₀ (magnétisation nette)', 550, netY + 30);
+
+                } else {
+                    // Spins aléatoires
+                    for (let i = 0; i < 40; i++) {
+                        spinAngles[i % numSpins] += spinRotationSpeeds[i % numSpins];
+                        const x = protonStartX + (i % 8) * 70;
+                        const y = protonStartY + Math.floor(i / 8) * 70;
+                        drawSpin(ctx, x, y, spinAngles[i % numSpins], '#4facfe', 25);
+                    }
+
+                    ctx.fillStyle = '#888';
+                    ctx.font = '18px monospace';
+                    ctx.fillText('Spins aléatoires', 550, 550);
+                    ctx.fillText('Aucune magnétisation nette', 500, 580);
+                }
+
+            } else if (currentSpinAnimation === 3) {
+                // Animation 3: Distribution états d'énergie
+                const centerX = w / 2;
+                const centerY = h / 2;
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 28px monospace';
+                ctx.fillText('ÉTATS D\'ÉNERGIE ET DISTRIBUTION DE BOLTZMANN', 150, 50);
+
+                // Diagramme d'énergie
+                const diagramX = 150;
+                const diagramY = 150;
+                const stateSpacing = 200;
+
+                // État antiparallèle (haute énergie)
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(diagramX, diagramY);
+                ctx.lineTo(diagramX + 200, diagramY);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ff6b6b';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('↓ Antiparallèle', diagramX + 220, diagramY + 10);
+                ctx.font = '16px monospace';
+                ctx.fillText('E = +γℏB₀/2', diagramX + 220, diagramY + 35);
+
+                // Flèche énergie
+                ctx.strokeStyle = '#ffc107';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(diagramX + 100, diagramY);
+                ctx.lineTo(diagramX + 100, diagramY + stateSpacing);
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffc107';
+                ctx.font = 'bold 18px monospace';
+                ctx.fillText('ΔE = γℏB₀', diagramX + 120, diagramY + stateSpacing / 2);
+
+                // État parallèle (basse énergie)
+                ctx.strokeStyle = '#4facfe';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(diagramX, diagramY + stateSpacing);
+                ctx.lineTo(diagramX + 200, diagramY + stateSpacing);
+                ctx.stroke();
+
+                ctx.fillStyle = '#4facfe';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('↑ Parallèle', diagramX + 220, diagramY + stateSpacing + 10);
+                ctx.font = '16px monospace';
+                ctx.fillText('E = -γℏB₀/2', diagramX + 220, diagramY + stateSpacing + 35);
+
+                // Populations
+                if (b0Applied && b0 > 0) {
+                    const excessPpm = b0 * 3.3;
+                    const excessFraction = excessPpm / 1000000;
+                    const parallelRatio = 0.5 + (excessFraction / 2);
+                    const numParallel = Math.floor(40 * parallelRatio);
+                    const numAntiparallel = 40 - numParallel;
+
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 24px monospace';
+                    ctx.fillText(`B₀ = ${b0} T`, 600, 130);
+
+                    // Barres de population
+                    const barX = 650;
+                    const barWidth = 80;
+                    const barMaxHeight = 300;
+
+                    // Barre antiparallèle
+                    const antiHeight = (numAntiparallel / 40) * barMaxHeight;
+                    ctx.fillStyle = 'rgba(255, 107, 107, 0.7)';
+                    ctx.fillRect(barX, diagramY + stateSpacing - antiHeight, barWidth, antiHeight);
+                    ctx.strokeStyle = '#ff6b6b';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(barX, diagramY + stateSpacing - antiHeight, barWidth, antiHeight);
+
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.font = 'bold 20px monospace';
+                    ctx.fillText(`${numAntiparallel}`, barX + 20, diagramY + stateSpacing - antiHeight - 10);
+                    ctx.font = '16px monospace';
+                    ctx.fillText(`${((1-parallelRatio) * 100).toFixed(3)}%`, barX, diagramY + stateSpacing - antiHeight - 35);
+
+                    // Barre parallèle
+                    const parHeight = (numParallel / 40) * barMaxHeight;
+                    ctx.fillStyle = 'rgba(79, 172, 254, 0.7)';
+                    ctx.fillRect(barX + 150, diagramY + stateSpacing - parHeight, barWidth, parHeight);
+                    ctx.strokeStyle = '#4facfe';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(barX + 150, diagramY + stateSpacing - parHeight, barWidth, parHeight);
+
+                    ctx.fillStyle = '#4facfe';
+                    ctx.font = 'bold 20px monospace';
+                    ctx.fillText(`${numParallel}`, barX + 170, diagramY + stateSpacing - parHeight - 10);
+                    ctx.font = '16px monospace';
+                    ctx.fillText(`${(parallelRatio * 100).toFixed(3)}%`, barX + 145, diagramY + stateSpacing - parHeight - 35);
+
+                    // Équation de Boltzmann
+                    ctx.fillStyle = '#ffe66d';
+                    ctx.font = 'bold 20px monospace';
+                    ctx.fillText('Distribution de Boltzmann:', 600, 480);
+                    ctx.font = '18px monospace';
+                    ctx.fillText('N↑/N↓ = exp(ΔE/kT)', 620, 510);
+                    ctx.fillText(`N↑/N↓ = exp(γℏB₀/kT)`, 620, 540);
+                    ctx.fillText(`Excès ≈ ${excessPpm.toFixed(1)} ppm`, 620, 570);
+                    ctx.fillText(`= ${numParallel - numAntiparallel} spins sur 40`, 620, 600);
+                    ctx.fillText(`(${(excessFraction * 100).toFixed(5)}%)`, 620, 630);
+
+                    ctx.fillStyle = '#00ff88';
+                    ctx.font = 'bold 22px monospace';
+                    ctx.fillText('→ Magnétisation nette M₀ ≠ 0', 580, 640);
+                } else {
+                    ctx.fillStyle = '#888';
+                    ctx.font = '18px monospace';
+                    ctx.fillText('Appliquez B₀ pour voir', 650, 300);
+                    ctx.fillText('la distribution de Boltzmann', 600, 330);
+                }
+
+            } else if (currentSpinAnimation === 4) {
+                // Animation 4: Effet de la température
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 26px monospace';
+                ctx.fillText('EFFET DE LA TEMPÉRATURE SUR LA DISTRIBUTION', 200, 50);
+
+                const temps = [
+                    {name: 'T = 0 K (zéro absolu)', ratio: 1.0, y: 150, desc: 'Tous ↑'},
+                    {name: 'T = 77 K (azote liquide)', ratio: 0.500064, y: 280, desc: '64 ppm'},
+                    {name: 'T = 310 K (37°C, corps humain)', ratio: 0.5000049, y: 410, desc: '4.9 ppm'},
+                    {name: 'T = 1000 K (très chaud)', ratio: 0.5000015, y: 540, desc: '1.5 ppm'}
+                ];
+
+                const b0 = parseFloat(b0Slider.value);
+
+                temps.forEach((temp, idx) => {
+                    const baseX = 150;
+                    const y = temp.y;
+
+                    // Nom et température
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 18px monospace';
+                    ctx.fillText(temp.name, baseX, y - 10);
+
+                    // Barres de population
+                    const numTotal = 50;
+                    const numParallel = Math.floor(numTotal * temp.ratio);
+                    const numAntiparallel = numTotal - numParallel;
+
+                    // Barre ↑
+                    const barWidth = 60;
+                    const barMaxHeight = 40;
+                    const parHeight = (numParallel / numTotal) * barMaxHeight;
+                    
+                    ctx.fillStyle = 'rgba(79, 172, 254, 0.7)';
+                    ctx.fillRect(baseX + 500, y - parHeight, barWidth, parHeight);
+                    ctx.strokeStyle = '#4facfe';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(baseX + 500, y - parHeight, barWidth, parHeight);
+
+                    // Barre ↓
+                    const antiHeight = (numAntiparallel / numTotal) * barMaxHeight;
+                    ctx.fillStyle = 'rgba(255, 107, 107, 0.7)';
+                    ctx.fillRect(baseX + 600, y - antiHeight, barWidth, antiHeight);
+                    ctx.strokeStyle = '#ff6b6b';
+                    ctx.strokeRect(baseX + 600, y - antiHeight, barWidth, antiHeight);
+
+                    // Labels
+                    ctx.fillStyle = '#4facfe';
+                    ctx.font = '16px monospace';
+                    ctx.fillText(`↑${numParallel}`, baseX + 510, y + 20);
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.fillText(`↓${numAntiparallel}`, baseX + 610, y + 20);
+
+                    // Excès
+                    ctx.fillStyle = '#00ff88';
+                    ctx.font = 'bold 16px monospace';
+                    const excess = numParallel - numAntiparallel;
+                    const excessPpm = (temp.ratio - 0.5) * 2000000;
+                    ctx.fillText(`Excès: ${excess}`, baseX + 730, y + 10);
+                    ctx.font = '14px monospace';
+                    ctx.fillText(temp.desc, baseX + 730, y + 30);
+                });
+
+                // Explications
+                ctx.fillStyle = '#ffe66d';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('À T = 0 K : TOUS les spins sont ↑', 200, 640);
+                ctx.fillText('À T élevée : Distribution quasi-égale', 200, 670);
+
+            } else if (currentSpinAnimation === 5) {
+                // Animation 5: Pourquoi 5 ppm suffisent pour créer une image
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 24px monospace';
+                ctx.fillText('POURQUOI 5 ppm SUFFISENT POUR CRÉER UNE IMAGE IRM', 150, 40);
+
+                const b0 = parseFloat(b0Slider.value);
+                const excessPpm = b0 * 3.3;
+
+                // Partie 1: La différence microscopique
+                ctx.fillStyle = '#ff9800';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('1️⃣ LA DIFFÉRENCE EST MINUSCULE', 50, 90);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px monospace';
+                ctx.fillText(`À ${b0} T et 37°C : ~${excessPpm.toFixed(1)} ppm d'excès`, 70, 120);
+
+                // Visualisation 1 million
+                const boxSize = 10;
+                const boxesPerRow = 100;
+                const startX = 70;
+                const startY = 150;
+
+                ctx.fillStyle = '#888';
+                ctx.font = '14px monospace';
+                ctx.fillText('Sur 1 000 000 de protons:', startX, startY - 10);
+
+                let drawnBoxes = 0;
+                const totalBoxes = 1000; // représente 1 million
+                const excessBoxes = Math.round(totalBoxes * excessPpm / 1000000);
+
+                for (let i = 0; i < totalBoxes && drawnBoxes < 500; i++) {
+                    const x = startX + (i % boxesPerRow) * (boxSize + 1);
+                    const y = startY + Math.floor(i / boxesPerRow) * (boxSize + 1);
+                    
+                    if (i < excessBoxes) {
+                        ctx.fillStyle = '#00ff88'; // Excès
+                    } else {
+                        ctx.fillStyle = '#333'; // Égalité
+                    }
+                    ctx.fillRect(x, y, boxSize, boxSize);
+                    drawnBoxes++;
+                }
+
+                ctx.fillStyle = '#00ff88';
+                ctx.font = 'bold 16px monospace';
+                ctx.fillText(`← Seulement ${excessPpm.toFixed(1)} points verts`, startX + boxesPerRow * (boxSize + 1) + 20, startY + 30);
+                ctx.fillText('sur 1 million !', startX + boxesPerRow * (boxSize + 1) + 20, startY + 55);
+
+                // Partie 2: Mais le nombre absolu est ÉNORME
+                ctx.fillStyle = '#2196f3';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('2️⃣ MAIS LE NOMBRE ABSOLU EST ÉNORME', 50, 300);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px monospace';
+                ctx.fillText('Dans le corps humain (~70 kg, 60% eau) :', 70, 330);
+
+                const bodyData = [
+                    {label: 'Nombre total de protons H⁺', value: '~3 × 10²⁸', color: '#64b5f6'},
+                    {label: `Excès de spins (${excessPpm.toFixed(1)} ppm)`, value: '~1 × 10²³', color: '#00ff88'},
+                    {label: 'Dans 1 cm³ de tissu', value: '~5 × 10¹⁶', color: '#ffa726'}
+                ];
+
+                bodyData.forEach((item, idx) => {
+                    const y = 365 + idx * 35;
+                    
+                    ctx.fillStyle = item.color;
+                    ctx.fillRect(90, y - 12, 15, 15);
+                    
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '16px monospace';
+                    ctx.fillText(item.label + ':', 115, y);
+                    
+                    ctx.fillStyle = item.color;
+                    ctx.font = 'bold 18px monospace';
+                    ctx.fillText(item.value, 500, y);
+                });
+
+                // Partie 3: Du signal au bruit
+                ctx.fillStyle = '#4caf50';
+                ctx.font = 'bold 20px monospace';
+                ctx.fillText('3️⃣ AMPLIFICATION ET DÉTECTION', 50, 490);
+
+                const ampData = [
+                    '50 000 000 000 000 000 spins en excès (dans 1 cm³)',
+                    '↓',
+                    'Chacun émet une onde RF infinitésimale',
+                    '↓', 
+                    'Addition cohérente des ondes → Signal µV',
+                    '↓',
+                    'Amplification électronique × 1 000 000',
+                    '↓',
+                    'Signal détectable → Image IRM ! 🎯'
+                ];
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '15px monospace';
+                ampData.forEach((line, idx) => {
+                    const y = 520 + idx * 22;
+                    if (line === '↓') {
+                        ctx.fillStyle = '#00ff88';
+                        ctx.font = 'bold 20px monospace';
+                        ctx.fillText(line, 350, y);
+                        ctx.font = '15px monospace';
+                        ctx.fillStyle = '#fff';
+                    } else {
+                        ctx.fillText(line, 90, y);
+                    }
+                });
+
+                // Encadré conclusion
+                ctx.strokeStyle = '#00ff88';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(700, 100, 450, 550);
+                
+                ctx.fillStyle = '#00ff88';
+                ctx.font = 'bold 22px monospace';
+                ctx.fillText('💡 CONCLUSION', 820, 140);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px monospace';
+                const conclusionLines = [
+                    'La différence de',
+                    `${excessPpm.toFixed(1)} ppm semble`,
+                    'ridicule...',
+                    '',
+                    'MAIS multiplié par',
+                    '10²⁸ protons,',
+                    'ça fait des',
+                    'TRILLIONS de',
+                    'trillions de spins',
+                    'en excès !',
+                    '',
+                    'C\'est comme avoir',
+                    'une piscine avec',
+                    '1 million de litres,',
+                    'et ajouter 5 litres.',
+                    '',
+                    'La différence est',
+                    'infime en %,',
+                    'mais ces 5 litres',
+                    'existent vraiment',
+                    'et peuvent être',
+                    'détectés ! 🌊'
+                ];
+
+                conclusionLines.forEach((line, idx) => {
+                    ctx.fillText(line, 730, 180 + idx * 22);
+                });
+            }
+
+            requestAnimationFrame(animateSpin);
+        }
+
+        // ========== PRÉCESSION ==========
+        let precessionActive = false;
+        let precessionPhase = 0;
+        let precessionTransitionProgress = 0;
+        let precessionSpins = [];
+
+        for (let i = 0; i < 60; i++) {
+            precessionSpins.push({
+                angle: Math.random() * Math.PI * 2,
+                speed: (Math.random() - 0.5) * 0.08
+            });
+        }
+
+        const b0PrecessionSlider = document.getElementById('b0PrecessionSlider');
+        const b0PrecessionDisplay = document.getElementById('b0PrecessionVal');
+
+        b0PrecessionSlider.oninput = () => {
+            b0PrecessionDisplay.textContent = b0PrecessionSlider.value;
+        };
+
+        document.getElementById('btnStartPrecession').addEventListener('click', () => {
+            precessionActive = true;
+            precessionTransitionProgress = 0;
+        });
+
+        document.getElementById('btnStopPrecession').addEventListener('click', () => {
+            precessionActive = false;
+        });
+
+        function animatePrecession() {
+            const canvas = document.getElementById('precessionCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+
+            const b0 = parseFloat(b0PrecessionSlider.value);
+            const leftCenterX = w / 4;
+            const rightCenterX = 3 * w / 4;
+            const centerY = h / 2;
+
+            // GAUCHE: Sans précession
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 22px monospace';
+            ctx.fillText('SANS PRÉCESSION', leftCenterX - 110, 40);
+            ctx.font = '16px monospace';
+            ctx.fillText('Spins aléatoires', leftCenterX - 70, 70);
+
+            const radius = 150;
+            for (let i = 0; i < precessionSpins.length; i++) {
+                precessionSpins[i].angle += precessionSpins[i].speed;
+
+                const anglePos = (i / precessionSpins.length) * Math.PI * 2;
+                const x = leftCenterX + Math.cos(anglePos) * radius;
+                const y = centerY + Math.sin(anglePos) * radius;
+
+                drawSpin(ctx, x, y, precessionSpins[i].angle, '#4facfe', 25);
+            }
+
+            // DROITE: Avec précession
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 22px monospace';
+            ctx.fillText('AVEC CHAMP B₀', rightCenterX - 100, 40);
+            ctx.font = '16px monospace';
+            ctx.fillText(`B₀ = ${b0} T`, rightCenterX - 50, 70);
+
+            // Axe B0
+            ctx.strokeStyle = '#ffe66d';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(rightCenterX, centerY + 200);
+            ctx.lineTo(rightCenterX, centerY - 200);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffe66d';
+            ctx.font = 'bold 20px monospace';
+            ctx.fillText('B₀', rightCenterX + 15, centerY - 210);
+
+            if (precessionActive) {
+                if (precessionTransitionProgress < 1) {
+                    precessionTransitionProgress += 0.015;
+                }
+
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px monospace';
+                ctx.fillText('Précession de Larmor', rightCenterX - 100, 100);
+
+                precessionPhase += 0.05 * (b0 / 1.5);
+
+                // Cône de précession
+                const tiltAngle = Math.PI / 4;
+                const coneRadius = 120 * Math.sin(tiltAngle);
+
+                ctx.strokeStyle = 'rgba(102,126,234,0.2)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.arc(rightCenterX, centerY, coneRadius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Vecteur en précession
+                const mX = coneRadius * Math.cos(precessionPhase);
+                const mY = coneRadius * Math.sin(precessionPhase);
+
+                ctx.strokeStyle = '#4facfe';
+                ctx.lineWidth = 5;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#4facfe';
+                ctx.beginPath();
+                ctx.moveTo(rightCenterX, centerY);
+                ctx.lineTo(rightCenterX + mX, centerY + mY);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#4facfe';
+                const arrowAngle = Math.atan2(mY, mX);
+                ctx.beginPath();
+                ctx.moveTo(rightCenterX + mX, centerY + mY);
+                ctx.lineTo(rightCenterX + mX - 15*Math.cos(arrowAngle - 0.3), centerY + mY - 15*Math.sin(arrowAngle - 0.3));
+                ctx.lineTo(rightCenterX + mX - 15*Math.cos(arrowAngle + 0.3), centerY + mY - 15*Math.sin(arrowAngle + 0.3));
+                ctx.closePath();
+                ctx.fill();
+
+                // Tracer le cercle
+                ctx.strokeStyle = 'rgba(79,172,254,0.3)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(rightCenterX, centerY, coneRadius, 0, precessionPhase);
+                ctx.stroke();
+            } else {
+                ctx.fillStyle = '#888';
+                ctx.font = '16px monospace';
+                ctx.fillText('Cliquez "Démarrer précession"', rightCenterX - 130, 100);
+            }
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 16px monospace';
+            ctx.fillText(`Fréquence Larmor: ${(42.58 * b0).toFixed(1)} MHz`, 50, h - 50);
+            ctx.fillText(`Vitesse: ${(2 * Math.PI * 42.58 * b0).toFixed(0)} Mrad/s`, 50, h - 25);
+
+            if (precessionActive) {
+                ctx.fillStyle = '#4facfe';
+                ctx.font = 'bold 16px monospace';
+                ctx.fillText('⚡ PRÉCESSION EN COURS', w - 300, h - 35);
+            }
+
+            requestAnimationFrame(animatePrecession);
+        }
+
+        // ========== RELAXATION T1/T2 ==========
+        let relaxationStartTime = 0;
+        let relaxationActive = false;
+        let mz = 1;
+        let mxy = 0;
+
+        const t1Slider = document.getElementById('t1Slider');
+        const t2Slider = document.getElementById('t2Slider');
+
+        t1Slider.oninput = () => document.getElementById('t1Val').textContent = t1Slider.value;
+        t2Slider.oninput = () => document.getElementById('t2Val').textContent = t2Slider.value;
+
+        document.getElementById('btnPulse90').addEventListener('click', () => {
+            mz = 0;
+            mxy = 1;
+            relaxationStartTime = Date.now();
+            relaxationActive = true;
+        });
+
+        document.getElementById('btnResetRelax').addEventListener('click', () => {
+            mz = 1;
+            mxy = 0;
+            relaxationActive = false;
+        });
+
+        function animateRelaxation() {
+            const canvas = document.getElementById('relaxationCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+
+            const t1 = parseFloat(t1Slider.value);
+            const t2 = parseFloat(t2Slider.value);
+
+            if (relaxationActive) {
+                const elapsed = Date.now() - relaxationStartTime;
+
+                mz = 1 - Math.exp(-elapsed / t1);
+                mxy = Math.exp(-elapsed / t2);
+
+                document.getElementById('mzVal').textContent = (mz * 100).toFixed(0) + '%';
+                document.getElementById('mxyVal').textContent = (mxy * 100).toFixed(0) + '%';
+                document.getElementById('timeElapsedVal').textContent = elapsed.toFixed(0) + ' ms';
+            }
+
+            const graphY = 80;
+            const graphH = 250;
+            const graphW = 500;
+
+            // Graphe T1
+            ctx.strokeStyle = 'rgba(102,126,234,0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(50, graphY, graphW, graphH);
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px monospace';
+            ctx.fillText('Relaxation T1 (Mz)', 50, graphY - 10);
+
+            ctx.strokeStyle = '#4facfe';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let i = 0; i <= graphW; i++) {
+                const t = (i / graphW) * (3 * t1);
+                const mzTheory = 1 - Math.exp(-t / t1);
+                const x = 50 + i;
+                const y = graphY + graphH - mzTheory * (graphH - 40);
+
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Marqueur T1
+            const t1MarkX = 50 + (t1 / (3 * t1)) * graphW;
+            const t1MarkY = graphY + graphH - 0.63 * (graphH - 40);
+            ctx.strokeStyle = '#ffe66d';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(t1MarkX, graphY);
+            ctx.lineTo(t1MarkX, graphY + graphH);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(50, t1MarkY);
+            ctx.lineTo(50 + graphW, t1MarkY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#ffe66d';
+            ctx.font = '14px monospace';
+            ctx.fillText('T1', t1MarkX - 15, graphY + graphH + 20);
+            ctx.fillText('63%', 10, t1MarkY + 5);
+
+            if (relaxationActive) {
+                const elapsed = Date.now() - relaxationStartTime;
+                const xPos = 50 + (elapsed / (3 * t1)) * graphW;
+                const yPos = graphY + graphH - mz * (graphH - 40);
+
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(Math.min(xPos, 50 + graphW), yPos, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Graphe T2
+            const graph2X = 650;
+            ctx.strokeStyle = 'rgba(102,126,234,0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(graph2X, graphY, graphW, graphH);
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px monospace';
+            ctx.fillText('Relaxation T2 (Mxy)', graph2X, graphY - 10);
+
+            ctx.strokeStyle = '#64ffda';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            for (let i = 0; i <= graphW; i++) {
+                const t = (i / graphW) * (3 * t2);
+                const mxyTheory = Math.exp(-t / t2);
+                const x = graph2X + i;
+                const y = graphY + graphH - mxyTheory * (graphH - 40);
+
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Marqueur T2
+            const t2MarkX = graph2X + (t2 / (3 * t2)) * graphW;
+            const t2MarkY = graphY + graphH - 0.37 * (graphH - 40);
+            ctx.strokeStyle = '#ffe66d';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(t2MarkX, graphY);
+            ctx.lineTo(t2MarkX, graphY + graphH);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(graph2X, t2MarkY);
+            ctx.lineTo(graph2X + graphW, t2MarkY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#ffe66d';
+            ctx.font = '14px monospace';
+            ctx.fillText('T2', t2MarkX - 15, graphY + graphH + 20);
+            ctx.fillText('37%', graph2X - 40, t2MarkY + 5);
+
+            if (relaxationActive) {
+                const elapsed = Date.now() - relaxationStartTime;
+                const xPos = graph2X + (elapsed / (3 * t2)) * graphW;
+                const yPos = graphY + graphH - mxy * (graphH - 40);
+
+                ctx.fillStyle = '#ff6b6b';
+                ctx.beginPath();
+                ctx.arc(Math.min(xPos, graph2X + graphW), yPos, 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Vecteurs 3D en bas
+            const vec3DY = graphY + graphH + 80;
+            const vec3DCenterX = w / 2;
+
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 18px monospace';
+            ctx.fillText('Visualisation 3D de M', vec3DCenterX - 120, vec3DY);
+
+            // Axes
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 2;
+            // Axe Z
+            ctx.beginPath();
+            ctx.moveTo(vec3DCenterX, vec3DY + 200);
+            ctx.lineTo(vec3DCenterX, vec3DY + 50);
+            ctx.stroke();
+            ctx.fillStyle = '#fff';
+            ctx.fillText('z (M_z)', vec3DCenterX + 10, vec3DY + 40);
+
+            // Plan xy
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(vec3DCenterX, vec3DY + 200, 100, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillText('xy (M_xy)', vec3DCenterX + 70, vec3DY + 220);
+
+            if (relaxationActive) {
+                // Vecteur Mz
+                const mzLength = mz * 140;
+                ctx.strokeStyle = '#4facfe';
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.moveTo(vec3DCenterX, vec3DY + 200);
+                ctx.lineTo(vec3DCenterX, vec3DY + 200 - mzLength);
+                ctx.stroke();
+
+                // Vecteur Mxy
+                const mxyLength = mxy * 100;
+                const mxyAngle = (Date.now() / 100) % (2 * Math.PI);
+                const mxyX = vec3DCenterX + Math.cos(mxyAngle) * mxyLength;
+                const mxyY = vec3DY + 200 + Math.sin(mxyAngle) * mxyLength * 0.3;
+
+                ctx.strokeStyle = '#64ffda';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(vec3DCenterX, vec3DY + 200);
+                ctx.lineTo(mxyX, mxyY);
+                ctx.stroke();
+            }
+
+            requestAnimationFrame(animateRelaxation);
+        }
+
+        // ========== INITIALISATION ==========
+        updateSpinValues();
+        animateSpin();
+        animatePrecession();
+        animateRelaxation();
+    </script>
+</body>
+</html>

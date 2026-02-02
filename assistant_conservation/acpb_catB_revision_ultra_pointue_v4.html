@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Concours ACPB Cat. B — Révision ultra‑pointue (offline)</title>
+<style>
+  :root {
+    --primary:#243b53;
+    --secondary:#3e7cb1;
+    --accent:#f4a261;
+    --dark:#102a43;
+    --light:#f7fafc;
+    --success:#1b998b;
+    --warning:#f59f00;
+    --danger:#d62828;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --shadow: 0 18px 60px rgba(0,0,0,.12);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+    background: linear-gradient(135deg, #eef2ff 0%, #e2e8f0 60%, #edf2f7 100%);
+    color:var(--dark);
+    line-height:1.55;
+  }
+  body.font-sm{font-size:14px;}
+  body.font-md{font-size:16px;}
+  body.font-lg{font-size:18px;}
+  body.font-xl{font-size:20px;}
+  body.high-contrast {
+    background: #ffffff;
+    color:#000;
+  }
+  a{color:var(--secondary);}
+  nav{
+    position:sticky; top:0; z-index:1000;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 1rem 1.1rem;
+    box-shadow:0 10px 24px rgba(0,0,0,.18);
+  }
+  .nav-inner{max-width:1100px; margin:0 auto; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  .brand{color:white; font-weight:900; letter-spacing:.2px;}
+  .nav-btns{display:flex; gap:8px; flex-wrap:wrap;}
+  .nav-btn{
+    border:1px solid rgba(255,255,255,.35);
+    background: rgba(255,255,255,.14);
+    color:white;
+    padding:.55rem .8rem;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:800;
+  }
+  .nav-btn.active{background:white; color:var(--primary); border-color:white;}
+  .display-controls{display:flex; gap:6px;}
+  .tiny-btn{
+    border:1px solid rgba(255,255,255,.35);
+    background: rgba(0,0,0,.12);
+    color:white;
+    padding:.42rem .6rem;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:800;
+  }
+
+  .container{max-width:1100px; margin: 1.2rem auto; padding:0 1rem 2.8rem;}
+  .section{display:none;}
+  .section.active{display:block;}
+  .card{
+    background:var(--card);
+    border-radius:18px;
+    padding:1.25rem 1.2rem;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(16,42,67,.10);
+    margin-bottom: 1rem;
+  }
+  .muted{color:var(--muted);}
+  .hr{height:1px; background:rgba(16,42,67,.10); margin: 1rem 0;}
+  .grid{display:grid; gap:14px;}
+  .grid-2{grid-template-columns: repeat(2, minmax(0, 1fr));}
+  @media(max-width:900px){ .grid-2{grid-template-columns:1fr;} }
+
+  .pill{
+    display:inline-block;
+    padding:.2rem .55rem;
+    border-radius:999px;
+    background: rgba(62,124,177,.12);
+    color:var(--secondary);
+    font-weight:800;
+    font-size:.86em;
+    margin-right:.35rem;
+  }
+  .kbd{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    padding:.06rem .35rem;
+    border:1px solid rgba(0,0,0,.18);
+    border-bottom-width:2px;
+    border-radius:6px;
+    background:#fff;
+    font-weight:700;
+  }
+
+  /* Controls */
+  .controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .field{
+    padding:.65rem .75rem;
+    border-radius:12px;
+    border:1px solid rgba(16,42,67,.18);
+    background:#fff;
+    min-width: 220px;
+    font-weight:650;
+  }
+  .btn{
+    background: var(--primary);
+    color:white;
+    border:1px solid rgba(0,0,0,.10);
+    padding:.65rem .9rem;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:900;
+  }
+  .btn.secondary{background: var(--secondary);}
+  .btn.ghost{background: transparent; color:var(--primary); border:1px solid rgba(16,42,67,.22);}
+  .btn.danger{background: var(--danger);}
+  .btn:disabled{opacity:.6; cursor:not-allowed;}
+
+  /* Stats */
+  .stats{display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:10px;}
+  @media(max-width:700px){ .stats{grid-template-columns: repeat(2, minmax(0, 1fr));} }
+  .stat{
+    background: linear-gradient(135deg, rgba(36,59,83,.08), rgba(62,124,177,.08));
+    border:1px solid rgba(16,42,67,.10);
+    border-radius:16px;
+    padding:.9rem .9rem;
+  }
+  .stat .n{font-weight:950; font-size:1.6em;}
+  .stat .l{color:var(--muted); font-weight:700;}
+
+  /* Flashcard */
+  .fc-wrap{display:grid; gap:12px;}
+  .flip-scene{perspective:1200px;}
+  .flip-card{
+    position:relative;
+    width:100%;
+    min-height: 300px;
+    border-radius:20px;
+    transform-style:preserve-3d;
+    transition: transform .6s cubic-bezier(.2,.8,.2,1);
+    cursor:pointer;
+    border:2px solid rgba(16,42,67,.10);
+    box-shadow: 0 18px 45px rgba(0,0,0,.12);
+    overflow:hidden;
+    background:#fff;
+  }
+  .flip-card.flipped{transform: rotateY(180deg);}
+  .side{
+    position:absolute; inset:0;
+    padding:1.1rem 1.1rem;
+    backface-visibility:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:.8rem;
+  }
+  .front{background: linear-gradient(135deg, rgba(36,59,83,.06), rgba(244,162,97,.10));}
+  .back{transform: rotateY(180deg); background: linear-gradient(135deg, rgba(36,59,83,.10), rgba(62,124,177,.08));}
+  .qtxt{font-size:1.25em; font-weight:950;}
+  .atxt{white-space:pre-wrap; font-weight:650;}
+  .meta{display:flex; gap:8px; flex-wrap:wrap;}
+  .tag{
+    padding:.18rem .55rem;
+    border-radius:999px;
+    background: rgba(27,153,139,.14);
+    color: var(--success);
+    font-weight:900;
+    font-size:.84em;
+  }
+  .tag.lvl{background: rgba(245,159,0,.14); color: var(--warning);}
+  .tag.spec{background: rgba(214,40,40,.10); color: var(--danger);}
+  .fc-actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:.2rem;}
+  .hint{font-size:.92em; color:var(--muted); text-align:center; margin-top:.6rem;}
+
+  /* QCM */
+  .qcm-item{border:1px solid rgba(16,42,67,.12); border-radius:16px; padding:1rem; margin:.8rem 0;}
+  .choice{display:block; margin:.35rem 0; padding:.55rem .65rem; border-radius:12px; border:1px solid rgba(16,42,67,.14); cursor:pointer;}
+  .choice input{margin-right:.45rem;}
+  .choice.good{border-color: rgba(27,153,139,.55); background: rgba(27,153,139,.12);}
+  .choice.bad{border-color: rgba(214,40,40,.55); background: rgba(214,40,40,.10);}
+  .exp{white-space:pre-wrap; margin-top:.6rem; color:var(--muted); font-weight:650;}
+
+  .footer-note{color:rgba(255,255,255,.86); font-size:.9em;}
+
+  /* Tables (fiches) */
+  table.mini{width:100%; border-collapse:collapse; margin:.7rem 0; font-size:.95em;}
+  table.mini th, table.mini td{border:1px solid rgba(16,42,67,.14); padding:.45rem .55rem; vertical-align:top;}
+  table.mini th{background: rgba(36,59,83,.06); text-align:left; font-weight:900;}
+
+</style>
+</head>
+<body class="font-md">
+
+<nav>
+  <div class="nav-inner">
+    <div>
+      <div class="brand">ACPB Cat. B — Patrimoine & Bibliothèques — Révision ultra‑pointue</div>
+      <div class="footer-note">offline • progression sauvegardée • génération : 2026-01-11</div>
+    </div>
+    <div class="nav-btns">
+      <button class="nav-btn active" onclick="showSection('start', this)">🏁 Démarrer</button>
+      <button class="nav-btn" onclick="showSection('flashcards', this)">🃏 Flashcards</button>
+      <button class="nav-btn" onclick="showSection('oral', this)">🎙️ Mode oral</button>
+      <button class="nav-btn" onclick="showSection('qcm', this)">✅ QCM</button>
+      <button class="nav-btn" onclick="showSection('fiches', this)">📌 Fiches express</button>
+      <button class="nav-btn" onclick="showSection('sources', this)">🔎 Sources</button>
+    </div>
+    <div class="display-controls" role="group" aria-label="Affichage">
+      <button class="tiny-btn" onclick="changeFont(-1)" title="Diminuer">A−</button>
+      <button class="tiny-btn" onclick="changeFont(1)" title="Augmenter">A+</button>
+      <button class="tiny-btn" onclick="toggleContrast()" title="Contraste">Contraste</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <section id="start" class="section active">
+    <div class="card">
+      <h2>Mode d’emploi (objectif : être « jury‑proof »)</h2>
+      <p class="muted">Chaque réponse est structurée pour tenir debout à l’oral : définitions, points pièges, et réflexes terrain. Si tu ne sais pas : dis ce que tu sais + la démarche de vérification + gestion du risque.</p>
+      <div class="hr"></div>
+      <div class="grid grid-2">
+        <div>
+          <p><span class="pill">Flashcards</span>Filtre par spécialité + niveau + recherche. Marque tes cartes : <strong>maîtrisé / hésitant / à apprendre</strong>.</p>
+          <p><span class="pill">Oral</span>Tire une question et lance un chrono 5 minutes (exposé). Puis enchaîne avec 15 minutes (questions).</p>
+        </div>
+        <div>
+          <p><span class="pill">Écrit</span>La note : uniquement à partir du dossier (pas de doc 1/doc 2, pas d’éléments extérieurs).</p>
+          <p><span class="pill">Sauvegarde</span>Progression (statuts) et réglages d’affichage sauvegardés en local (localStorage). Export/Import JSON dans la section Flashcards.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="flashcards" class="section">
+    <div class="card">
+      <h2>🃏 Flashcards</h2>
+
+      <div class="stats">
+        <div class="stat"><div class="n" id="totalCards">0</div><div class="l">Total</div></div>
+        <div class="stat"><div class="n" id="knowCards">0</div><div class="l">Maîtrisé</div></div>
+        <div class="stat"><div class="n" id="hesCards">0</div><div class="l">Hésitant</div></div>
+        <div class="stat"><div class="n" id="unkCards">0</div><div class="l">À apprendre</div></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="controls">
+        <select id="specFilter" class="field"></select>
+        <select id="levelFilter" class="field">
+          <option value="all">Niveau : tous</option>
+          <option value="1">1 (bases)</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4 (pointu)</option>
+          <option value="5">5 (pièges / réglementaire)</option>
+        </select>
+        <select id="statusFilter" class="field">
+          <option value="all">Statut : toutes</option>
+          <option value="maitrise">Maîtrisé</option>
+          <option value="hesitant">Hésitant</option>
+          <option value="apprendre">À apprendre</option>
+        </select>
+        <input id="searchFilter" class="field" placeholder="Recherche (mot, sigle, thème…)" />
+        <button class="btn" onclick="startSession()">▶️ Démarrer la session</button>
+        <button class="btn ghost" onclick="resetSessionUI()">↩️ Reset session</button>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="fc-wrap">
+        <div class="flip-scene">
+          <div class="flip-card" id="flashcard" onclick="flipCard()" aria-label="Flashcard">
+            <div class="side front">
+              <div class="meta" id="metaTags"></div>
+              <div class="qtxt" id="frontText">Clique sur « Démarrer la session ».</div>
+              <div class="hint">Astuce : <span class="kbd">Espace</span> retourner • <span class="kbd">1</span> maîtrisé • <span class="kbd">2</span> hésitant • <span class="kbd">3</span> à apprendre • <span class="kbd">→</span> suivant</div>
+            </div>
+            <div class="side back">
+              <div class="atxt" id="backText"></div>
+              <div class="hint">(Clique sur la carte pour revenir)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-actions">
+          <button class="btn secondary" onclick="markStatus('maitrise')">1 — Maîtrisé</button>
+          <button class="btn" style="background:var(--warning)" onclick="markStatus('hesitant')">2 — Hésitant</button>
+          <button class="btn danger" onclick="markStatus('apprendre')">3 — À apprendre</button>
+          <button class="btn ghost" onclick="nextCard()">→ Suivant</button>
+        </div>
+
+        <div class="muted" id="progressLine"></div>
+
+        <div class="hr"></div>
+
+        <div class="controls">
+          <button class="btn ghost" onclick="exportProgress()">⬇️ Export JSON</button>
+          <button class="btn ghost" onclick="document.getElementById('importFile').click()">⬆️ Import JSON</button>
+          <input type="file" id="importFile" style="display:none" accept="application/json" onchange="importProgress(event)" />
+          <button class="btn danger" onclick="wipeProgress()">🧨 Effacer progression</button>
+        </div>
+        <p class="muted">Export/Import : uniquement tes statuts et réglages, pas les contenus.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="oral" class="section">
+    <div class="card">
+      <h2>🎙️ Mode oral (tirage + chronos)</h2>
+      <p class="muted">Rappel cadrage : 20 minutes dont 5 minutes max d’exposé, sans document. Pas de préparation, réponses « en temps réel ».</p>
+
+      <div class="controls">
+        <select id="oralSpec" class="field"></select>
+        <select id="oralLevel" class="field">
+          <option value="all">Niveau : tous</option>
+          <option value="4">≥ 4 (dur)</option>
+          <option value="5">= 5 (pièges)</option>
+        </select>
+        <button class="btn" onclick="drawOral()">🎲 Tirer une question</button>
+        <button class="btn ghost" onclick="startTimer(5)">⏱️ 5 min</button>
+        <button class="btn ghost" onclick="startTimer(15)">⏱️ 15 min</button>
+        <button class="btn ghost" onclick="startTimer(20)">⏱️ 20 min</button>
+        <button class="btn danger" onclick="stopTimer()">⏹️ Stop</button>
+        <span class="pill" id="timerDisplay">00:00</span>
+      </div>
+
+      <div class="hr"></div>
+      <div class="card" style="border-left:6px solid var(--accent);">
+        <div class="qtxt" id="oralQuestion">Tire une question.</div>
+        <div class="muted" id="oralMeta" style="margin-top:.6rem;"></div>
+        <div class="controls" style="margin-top:1rem;">
+          <button class="btn secondary" onclick="revealOral()">👁️ Voir l’attendu</button>
+          <button class="btn ghost" onclick="copyOral()">📋 Copier</button>
+        </div>
+        <div id="oralAnswer" class="atxt" style="display:none; margin-top:1rem;"></div>
+      </div>
+
+      <div class="card">
+        <h3>Bloc‑notes (prépa mentale rapide)</h3>
+        <textarea id="oralNotes" class="field" style="width:100%; min-height:170px; font-weight:700;" placeholder="Structure ta réponse : diagnostic → options → arbitrage → plan d’action → risques → indicateurs…"></textarea>
+        <div class="controls" style="margin-top:.8rem;">
+          <button class="btn ghost" onclick="saveNotes()">💾 Sauver</button>
+          <button class="btn ghost" onclick="loadNotes()">↩️ Recharger</button>
+          <button class="btn danger" onclick="clearNotes()">🧹 Effacer</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="qcm" class="section">
+    <div class="card">
+      <h2>✅ QCM (auto‑correction)</h2>
+      <div class="controls">
+        <select id="qcmSpec" class="field"></select>
+        <button class="btn" onclick="renderQCM()">🔄 Recharger</button>
+        <button class="btn ghost" onclick="gradeQCM()">📊 Corriger</button>
+        <span class="pill" id="qcmScore">—</span>
+      </div>
+      <div class="hr"></div>
+      <div id="qcmRoot"></div>
+    </div>
+  </section>
+
+  <section id="fiches" class="section">
+    <div class="card">
+      <h2>📌 Fiches express (ultra condensées)</h2>
+
+      <details open>
+        <summary><strong>Oral (20 min) — 3 réflexes « jury‑proof »</strong></summary>
+        <ul>
+          <li>Répondre pro : <em>diagnostic → options → arbitrage → plan d’action → risques → indicateurs</em>.</li>
+          <li>Ne jamais inventer : « je n’ai pas la certitude, voici ce que je sais, et comment je vérifie ».</li>
+          <li>Encadrement cat. C : consignes claires, contrôle, feedback, traçabilité, sécurité.</li>
+        </ul>
+      </details>
+      <details>
+        <summary><strong>Épreuves (concours) — chiffres à réciter sans hésiter</strong></summary>
+        <ul>
+          <li><strong>Oral d’admission</strong> (toutes voies) : <strong>20 min</strong> dont <strong>5 min</strong> d’exposé max, <strong>coef. 3</strong> (pas de préparation, pas de documents).</li>
+          <li><strong>Écrit “questionnaire”</strong> (concours externe) : <strong>3 à 5 questions</strong> dans la spécialité, <strong>3 h</strong>, <strong>coef. 3</strong>.</li>
+          <li><strong>Écrit “note sur dossier”</strong> : <strong>3 h</strong>, <strong>coef. 3</strong> (attendu = note structurée ; uniquement à partir du dossier).</li>
+          <li><strong>Élimination</strong> : note &lt; 5/20 à une épreuve obligatoire ⇒ élimination ; moyenne &lt; 10/20 ⇒ pas d’admission.</li>
+        </ul>
+        <p class="muted">⚠️ Certains centres de gestion publient aussi des cadrages pour l’<em>examen pro</em> (avancement) : durées similaires mais coefficients pouvant varier. Pour ce fichier : focus concours.</p>
+      </details>
+
+
+      <details>
+        <summary><strong>Note sur dossier (3h) — règles de base</strong></summary>
+        <ul>
+          <li>Note = document autonome : pas de renvoi « doc 1 / doc 2 », pas de citation gratuite des sources.</li>
+          <li>Uniquement les infos du dossier (l’« extérieur » est pénalisable).</li>
+          <li>Plan lisible : titres informatifs, niveau hiérarchisé, phrases courtes, transitions.</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><strong>Musée — inventaire / dépôts / récolement (pièges réglementaires)</strong></summary>
+
+        <p><strong>Piège oral classique :</strong> « Combien de colonnes dans le fichier d’inventaire ? »<br/>
+        Si tu représentes le <em>registre réglementaire</em> sous forme de table, tu dois pouvoir citer les <strong>18 colonnes</strong> (répartition : 1–7 acquisition, 8–13 description, 14–18 rubriques complémentaires/observations).</p>
+
+        <div class="hr"></div>
+
+        <p><strong>Inventaire des acquisitions (18 colonnes)</strong></p>
+        <table class="mini" aria-label="Inventaire réglementaire - 18 colonnes">
+          <thead><tr><th>N°</th><th>Rubrique</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>N° d’inventaire</td></tr>
+            <tr><td>2</td><td>Mode d’acquisition</td></tr>
+            <tr><td>3</td><td>Nom du donateur / testateur / vendeur</td></tr>
+            <tr><td>4</td><td>Date de l’acte d’acquisition et d’affectation au musée</td></tr>
+            <tr><td>5</td><td>Avis des instances scientifiques compétentes</td></tr>
+            <tr><td>6</td><td>Prix d’achat (euros) + concours publics (AS / ANS)</td></tr>
+            <tr><td>7</td><td>Date d’inscription au registre d’inventaire</td></tr>
+            <tr><td>8</td><td>Désignation du bien</td></tr>
+            <tr><td>9</td><td>Marques et inscriptions</td></tr>
+            <tr><td>10</td><td>Matières ou matériaux</td></tr>
+            <tr><td>11</td><td>Techniques (réalisation / préparation / fabrication)</td></tr>
+            <tr><td>12</td><td>Mesures</td></tr>
+            <tr><td>13</td><td>Indications sur l’état au moment de l’acquisition (manques…)</td></tr>
+            <tr><td>14</td><td>Auteur / collecteur / fabricant / commanditaire…</td></tr>
+            <tr><td>15</td><td>Époque / datation / date de récolte (selon collections)</td></tr>
+            <tr><td>16</td><td>Fonction d’usage</td></tr>
+            <tr><td>17</td><td>Provenance géographique</td></tr>
+            <tr><td>18</td><td>Observations (anciens numéros, vol/disparition, radiation, sous‑inventaire…)</td></tr>
+          </tbody>
+        </table>
+
+        <p><strong>Registre des biens reçus en dépôt (registre distinct – 18 colonnes)</strong><br/>
+        Numérotation <strong>précédée de “D”</strong> (et le numéro de dépôt ne se marque pas directement sur le bien : étiquette/conditionnement).</p>
+
+        <table class="mini" aria-label="Registre des dépôts - 18 colonnes">
+          <thead><tr><th>N°</th><th>Rubrique</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>N° de dépôt (précédé de “D”)</td></tr>
+            <tr><td>2</td><td>N° d’inventaire du déposant</td></tr>
+            <tr><td>3</td><td>Date + références de l’acte autorisant le dépôt</td></tr>
+            <tr><td>4</td><td>Date de prise en charge / entrée matérielle</td></tr>
+            <tr><td>5</td><td>Nom du propriétaire (personne morale/physique) + institution le cas échéant</td></tr>
+            <tr><td>6</td><td>Date + références de l’acte mettant fin au dépôt</td></tr>
+            <tr><td>7</td><td>Date d’inscription au registre des dépôts</td></tr>
+            <tr><td>8</td><td>Désignation</td></tr>
+            <tr><td>9</td><td>Marques et inscriptions</td></tr>
+            <tr><td>10</td><td>Matières ou matériaux</td></tr>
+            <tr><td>11</td><td>Techniques (réalisation / préparation / fabrication)</td></tr>
+            <tr><td>12</td><td>Mesures</td></tr>
+            <tr><td>13</td><td>État au moment du dépôt</td></tr>
+            <tr><td>14</td><td>Auteur / collecteur / fabricant / commanditaire…</td></tr>
+            <tr><td>15</td><td>Époque / datation / date de récolte (selon collections)</td></tr>
+            <tr><td>16</td><td>Fonction d’usage</td></tr>
+            <tr><td>17</td><td>Provenance géographique</td></tr>
+            <tr><td>18</td><td>Observations (clauses particulières, assurance, valeur estimative…)</td></tr>
+          </tbody>
+        </table>
+
+        <ul>
+          <li><strong>Édition informatisée</strong> : impression papier au plus tard le <strong>31/12 N+1</strong> ; registre relié, titré, daté, paginé, <strong>paraphé</strong>.</li>
+          <li><strong>Copie</strong> : une copie (inventaire + dépôts) est déposée au <strong>service d’archives compétent</strong> et <strong>mise à jour 1 fois/an</strong>.</li>
+          <li><strong>Récolement</strong> : obligatoire <strong>au moins une fois tous les 10 ans</strong>, mené par campagnes planifiées (lieu, technique, corpus…).</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary><strong>Bibliothèque — 30 secondes « chaîne documentaire »</strong></summary>
+        <ul>
+          <li>Analyser besoins → sélectionner → acquérir → traiter → signaler → équiper → mettre à dispo → évaluer/désherber.</li>
+          <li>Réseau : carte unique + navette = harmonisation + logistique + pilotage.</li>
+          <li>Médiation numérique : inclusion, ateliers, accompagnement, partenariats, accessibilité, ressources en ligne.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+
+  <section id="sources" class="section">
+    <div class="card">
+      <h2>🔎 Sources (officielles/para-officielles, à ouvrir si besoin)</h2>
+
+      <ul>
+        <li><a href="https://www.agirhe-concours.fr/docs/73/brochures/Note_de_cadrage_epreuve_orale_entretien_ACPB.pdf" target="_blank" rel="noopener"><strong>Note de cadrage – entretien avec jury (oral) – ACPB</strong></a> (cadrage actualisé 01/07/2017) : durée 20 min dont 5 min d’exposé, pas de préparation, aucun document autorisé, règles d’élimination.</li>
+        <li><a href="https://www.agirhe-concours.fr/docs/34/brochures/Cadrage_epreuve_de_note_Ext-Int-3C_ACPBP2C.pdf" target="_blank" rel="noopener"><strong>Note de cadrage – note à partir d’un dossier sur la spécialité</strong></a> : durée 3h, coeff. 3, exigences de forme (en-tête), anonymat, « uniquement à l’aide des documents joints ».</li>
+
+        <li><a href="https://www.cig929394.fr/wp-content/uploads/2025/09/cadrage_assistant_de_conservation_20191007101013.pdf" target="_blank" rel="noopener"><strong>Note de cadrage – questionnaire (3 à 5 questions) – spécialité</strong></a> (cadrage actualisé 01/08/2019) : 3h, coeff. 3, règle d’élimination &lt; 5/20.</li>
+        <li><a href="https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000604037" target="_blank" rel="noopener"><strong>Arrêté du 25 mai 2004 (Légifrance)</strong></a> : normes techniques inventaire / registre des dépôts / récolement des musées de France.</li>
+        <li><a href="https://www.culture.gouv.fr/content/download/268274/pdf_file/specifications_mise_en_oeuvre_edition_inventaire_20200420_bis.pdf" target="_blank" rel="noopener"><strong>Spécifications – édition informatisée des registres</strong></a> (Ministère de la Culture, mise à jour 26/09/2019) : colonnes 1 à 18, impression N+1, reliure/paraphage, copie de sécurité aux archives.</li>
+        <li><a href="https://www.culture.gouv.fr/regions/drac-grand-est/services/patrimoines-architecture/patrimoines/musees/recolement" target="_blank" rel="noopener"><strong>Récolement décennal des musées de France</strong></a> (Ministère de la Culture / DRAC) : rappel du cadre et des campagnes (2016–2025).</li>
+        <li><a href="https://www.concours-territorial.fr/epreuves.aspx?id=91&spe=158" target="_blank" rel="noopener"><strong>Concours-territorial.fr – épreuves ACPB</strong></a> : récapitulatif des épreuves, durée/coefs.</li>
+      
+        <li><a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000048603495" target="_blank" rel="noopener"><strong>CPI – article L122-5 (exceptions au droit d’auteur)</strong></a> : point clé bibliothèques (8° conservation/consultation sur terminaux dédiés ; 7° accessibilité handicap).</li>
+        <li><a href="https://www.cnil.fr/fr/reglement-europeen-protection-donnees" target="_blank" rel="noopener"><strong>CNIL – RGPD</strong></a> : principes (art. 5), bases légales, accountability.</li>
+        <li><a href="https://www.abf.asso.fr/162/196/865/ABF/pnb-un-dispositif-ouvert-interprofessionnel-au-service-de-la-lecture-du-livre-numerique" target="_blank" rel="noopener"><strong>ABF – PNB</strong></a> : fonctionnement et enjeux du prêt numérique en bibliothèque.</li>
+
+</ul>
+
+      <p class="muted" style="margin-top:.6rem">⚠️ Les notes de cadrage sont indicatives (elles ne sont pas des textes réglementaires). Pour une formulation « au mot près », privilégie les textes officiels (Légifrance) et les documents du Ministère de la Culture.</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  // ==================== DATA ====================
+  const flashcardsData = [
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — cadrage (note de cadrage)",
+    "q": "Durée totale de l’entretien et durée de l’exposé ?",
+    "a": "Durée totale : 20 minutes.\nExposé : 5 minutes au plus, sans être interrompu.",
+    "tags": [
+      "note de cadrage",
+      "oral",
+      "durée"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — cadrage (note de cadrage)",
+    "q": "Sujet tiré au sort / temps de préparation ?",
+    "a": "Non : le libellé réglementaire ne prévoit ni sujet tiré au sort ni temps de préparation ; les réponses sont attendues « en temps réel ».",
+    "tags": [
+      "note de cadrage",
+      "oral"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — cadrage (note de cadrage)",
+    "q": "Documents autorisés pendant l’entretien ?",
+    "a": "Aucun document n’est autorisé (ni CV, ni notes). L’exposé doit donc être préparé en amont.",
+    "tags": [
+      "note de cadrage",
+      "oral",
+      "piège"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — jury (note de cadrage)",
+    "q": "Principe de composition du « jury plénier » ?",
+    "a": "Trois collèges en nombre égal : élus locaux, fonctionnaires territoriaux, personnalités qualifiées (le jury peut se scinder en groupes).",
+    "tags": [
+      "note de cadrage",
+      "jury"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — déroulement (note de cadrage)",
+    "q": "L’épreuve peut-elle être interrompue avant la fin ?",
+    "a": "Tout candidat dispose de la totalité du temps réglementaire (20 min) ; interruption seulement à la demande expresse du candidat.",
+    "tags": [
+      "note de cadrage",
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Notes — élimination (note de cadrage)",
+    "q": "Règle d’élimination à connaître (notes) ?",
+    "a": "Toute note < 5/20 à une épreuve obligatoire d’admissibilité ou d’admission entraîne l’élimination ; pas d’admission si moyenne < 10/20.",
+    "tags": [
+      "note de cadrage",
+      "piège"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — attentes (note de cadrage)",
+    "q": "Qu’est-ce que le jury cherche à évaluer (grille de temps) ?",
+    "a": "Repère de découpage :\n• 5 min : exposé.\n• ~15 min : aptitude à exercer les missions (dont spécialité) +, en 3e concours, capacité d’intégration.\n• Motivation / posture / potentiel : tout au long.",
+    "tags": [
+      "note de cadrage",
+      "oral"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — environnement pro",
+    "q": "3 thèmes « incontournables » à maîtriser en collectivité (oral).",
+    "a": "Décentralisation vs déconcentration ; organisation/compétences des collectivités ; notions de base de finances publiques locales (fonctionnement/investissement, BP/DM, équilibre).",
+    "tags": [
+      "collectivités",
+      "finances"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Cadre d’emplois — missions",
+    "q": "Missions du cadre d’emplois (formulation à placer à l’oral).",
+    "a": "Selon la spécialité (musée, bibliothèque, archives, documentation) :\n• contribuer aux actions culturelles et éducatives ;\n• participer, sous l’autorité d’un supérieur, au traitement, à la mise en valeur, à la conservation des collections et à la recherche documentaire ;\n• contrôler la bonne exécution des travaux confiés aux agents de catégorie C et encadrer leurs équipes ;\n• en bibliothèque : participer à la promotion de la lecture publique.",
+    "tags": [
+      "statut",
+      "missions"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — note (note de cadrage)",
+    "q": "Durée et coefficient de l’épreuve de note sur dossier ?",
+    "a": "Durée : 3 heures.\nCoefficient : 3.\nDossier sur la spécialité choisie à l’inscription.",
+    "tags": [
+      "note de cadrage",
+      "écrit"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — note (note de cadrage)",
+    "q": "Règle « en béton » : peut-on utiliser des infos hors dossier ?",
+    "a": "Non : la note est rédigée à l’aide des seuls éléments du dossier ; apporter des connaissances extérieures est risqué/pénalisable.",
+    "tags": [
+      "note de cadrage",
+      "piège"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — note (note de cadrage)",
+    "q": "Pourquoi éviter « doc 1, doc 2 » dans la note ?",
+    "a": "La note est destinée à un décideur qui n’a pas le dossier : elle doit être autonome, sans renvois aux pièces.",
+    "tags": [
+      "note de cadrage",
+      "méthode"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — anonymat (note de cadrage)",
+    "q": "2 erreurs qui peuvent faire annuler la copie (anonymat).",
+    "a": "1) Utiliser un nom de collectivité/service/lieu non indiqué dans le sujet.\n2) Signer, parapher ou ajouter une marque d’identification.",
+    "tags": [
+      "note de cadrage",
+      "piège",
+      "anonymat"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — en-tête (note de cadrage)",
+    "q": "En-tête type minimal d’une note administrative.",
+    "a": "Timbre (collectivité/service – uniquement ceux du sujet), date de l’épreuve, « NOTE », destinataire (« à l’attention de… »), objet, éventuellement références (textes juridiques principaux) – puis intro + plan.",
+    "tags": [
+      "méthode",
+      "écrit"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — dossier (note de cadrage)",
+    "q": "Ordre de grandeur du dossier (repère) et « document inutile » ?",
+    "a": "Repère : jusqu’à ~10 documents, de l’ordre d’une vingtaine de pages ; documents parfois redondants, mais aucun n’est totalement inutile.",
+    "tags": [
+      "note de cadrage"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — plan 5 minutes",
+    "q": "Plan ultra-simple (5 minutes) qui passe partout.",
+    "a": "1) 20–30s : qui je suis + spécialité + type d’établissement.\n2) 30–40s : fil rouge (enjeu public/service/collections).\n3) 3 exemples (≈45s chacun) : action → méthode → résultat/indicateur.\n4) 40–60s : projection sur le poste/territoire.\n5) 10s : transition.",
+    "tags": [
+      "oral",
+      "méthode"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Posture",
+    "q": "Réponse « je ne sais pas » (version jury-proof).",
+    "a": "1) Dire ce que tu sais avec certitude.\n2) Dire ce que tu dois vérifier (texte, procédure, personne ressource).\n3) Dire le réflexe de prudence immédiat (sécuriser, tracer, alerter).",
+    "tags": [
+      "oral",
+      "posture"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire (arrêté 25/05/2004)",
+    "q": "Inventaire d’un musée de France : combien de rubriques/colonnes ?",
+    "a": "18 rubriques (numérotées 1 à 18) dans l’annexe 1 :\n• 1–7 : statut juridique & acquisition\n• 8–13 : description\n• 14–18 : rubriques complémentaires/observations.",
+    "tags": [
+      "inventaire",
+      "texte officiel"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — rubriques 1–7",
+    "q": "Citer les rubriques 1 à 7 (statut/acquisition).",
+    "a": "1 N° inventaire\n2 Mode d’acquisition\n3 Donateur/testateur/vendeur\n4 Date de l’acte d’acquisition + date d’affectation\n5 Avis des instances scientifiques\n6 Prix d’achat / subvention publique\n7 Date d’inscription au registre d’inventaire",
+    "tags": [
+      "inventaire"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — rubriques 8–13",
+    "q": "Citer les rubriques 8 à 13 (description).",
+    "a": "8 Désignation\n9 Marques et inscriptions\n10 Matières/matériaux\n11 Techniques de réalisation\n12 Mesures\n13 Indications sur l’état au moment de l’acquisition",
+    "tags": [
+      "inventaire"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — rubriques 14–18",
+    "q": "Citer les rubriques 14 à 18 (compléments).",
+    "a": "14 Auteur/collecteur/fabricant/commanditaire…\n15 Époque/datation…\n16 Fonction d’usage\n17 Provenance géographique\n18 Observations (anciens numéros, mentions radiation, vol/disparition, sous-inventaires, etc.)",
+    "tags": [
+      "inventaire"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Registre des dépôts (spec pdf)",
+    "q": "Registre des biens déposés : rubriques 1 à 7 (acte de dépôt).",
+    "a": "1 N° de dépôt\n2 N° d’inventaire chez le déposant\n3 Date/références de l’acte autorisant le dépôt\n4 Date de prise en charge (entrée matérielle)\n5 Propriétaire\n6 Date/références de l’acte mettant fin au dépôt\n7 Date d’inscription au registre des dépôts",
+    "tags": [
+      "dépôt"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Édition informatisée (spec pdf)",
+    "q": "Définition courte de l’édition informatisée réglementaire (inventaire).",
+    "a": "Impression papier, dans l’ordre des numéros d’inventaire, des rubriques réglementaires extraites de la base, en faisant apparaître l’intitulé des rubriques (photos possibles).",
+    "tags": [
+      "inventaire",
+      "informatique"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Édition informatisée (spec pdf)",
+    "q": "Délai maximal d’impression (édition informatisée) après acquisition.",
+    "a": "Au plus tard le 31 décembre de l’année qui suit l’année d’acquisition (N+1).",
+    "tags": [
+      "inventaire",
+      "piège"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — sécurité (spec pdf)",
+    "q": "Copie de sécurité : où et à quelle fréquence ?",
+    "a": "Une copie de sécurité (édition/extraction) est déposée dans le service d’archives compétent et mise à jour une fois par an.",
+    "tags": [
+      "inventaire",
+      "archives"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Récolement (arrêté 25/05/2004)",
+    "q": "Récolement : fréquence minimale et logique d’organisation.",
+    "a": "Obligatoire au moins une fois tous les dix ans ; mené par campagnes planifiées (par lieu, technique, corpus ou campagne annuelle).",
+    "tags": [
+      "récolement"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Piège oral",
+    "q": "« Combien de colonnes dans un fichier d’inventaire ? » (réponse robuste).",
+    "a": "Réponse sûre :\n1) Un export de base/tableur n’a pas un nombre universel de colonnes.\n2) En musée de France, les rubriques réglementaires de l’inventaire sont 18 (annexe 1 de l’arrêté du 25/05/2004).\n3) Donc : on doit pouvoir retrouver au minimum ces 18 rubriques, même si la base contient des champs supplémentaires.",
+    "tags": [
+      "piège",
+      "inventaire"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Régie des œuvres",
+    "q": "Définir la « régie des collections » (1 phrase).",
+    "a": "Organisation de la traçabilité des biens et de leurs mouvements : entrées/sorties, prêts/dépôts, localisation, constats d’état, emballage/transport, assurances, sécurité, procédures et dossiers.",
+    "tags": [
+      "régie"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Mouvements",
+    "q": "Constat d’état : utilité + moments clés.",
+    "a": "Document de référence sur l’état matériel du bien : à l’entrée, avant/après transport, montage/démontage, restitution ; sert à la conservation et à la responsabilité/assurance.",
+    "tags": [
+      "constat d'état"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Prêt",
+    "q": "Assurance « clou à clou » : définir.",
+    "a": "Garantie du bien pendant toute la période de prêt, depuis le décrochage/emballage au départ jusqu’au réaccrochage au retour (incluant transport et exposition).",
+    "tags": [
+      "assurance"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Musée",
+    "cat": "Conservation préventive",
+    "q": "Les 10 « agents de détérioration » (liste à connaître).",
+    "a": "Forces physiques ; vol/vandalisme ; feu ; eau ; nuisibles ; contaminants ; lumière/UV/IR ; T° incorrecte ; HR incorrecte ; dissociation/perte d’information.",
+    "tags": [
+      "conservation"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Conservation préventive",
+    "q": "IPM : 4 actions concrètes.",
+    "a": "Surveillance (pièges/relevés) ; quarantaine ; propreté/gestion déchets ; traitement raisonné (aspiration, congélation, anoxie…) + traçabilité.",
+    "tags": [
+      "IPM"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Plan d’urgence",
+    "q": "PSBC/plan d’urgence collections : 5 briques opérationnelles.",
+    "a": "Analyse des risques ; priorisation/salvage list ; procédures (alerte, évacuation, tri) ; matériel & partenaires (pompiers, prestataires) ; exercices/retours d’expérience.",
+    "tags": [
+      "sinistre"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Politique documentaire",
+    "q": "3 livrables à citer quand on te demande « politique documentaire ».",
+    "a": "Charte documentaire ; plan de développement des collections (PDC) ; critères de désherbage + règles de remplacement/rotation.",
+    "tags": [
+      "PDC"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Acquisitions",
+    "q": "Chaîne d’acquisition (version SIGB) en 6 étapes.",
+    "a": "Sélection → commande → réception/pointage → catalogage/équipement → mise en rayon/communication → évaluation (statistiques, rotation, satisfaction).",
+    "tags": [
+      "SIGB"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Catalogage",
+    "q": "UNIMARC / RDA / ISBD : dire quoi en 1 phrase chacun ?",
+    "a": "UNIMARC : format d’échange de notices.\nRDA (RDA-FR) : norme de description/catalogage orientée entités-relations.\nISBD : zones de description bibliographique (présentation/ponctuation).",
+    "tags": [
+      "catalogage"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Indexation",
+    "q": "RAMEAU : à quoi ça sert ?",
+    "a": "Vocabulaire contrôlé (matières) pour indexation cohérente et recherche efficace (autorités).",
+    "tags": [
+      "indexation"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Classement",
+    "q": "Cote : 3 éléments à expliquer au public.",
+    "a": "Plan de classement (ex. Dewey) + lettres (auteur/titre) + particularités locales ; objectif : repérage rapide et cohérence du rangement.",
+    "tags": [
+      "Dewey"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Données personnelles",
+    "q": "RGPD en bibliothèque : 4 réflexes terrain.",
+    "a": "Minimiser les données d’inscription ; durée de conservation limitée ; confidentialité des prêts ; droits usagers (accès/suppression) + sécurité des comptes.",
+    "tags": [
+      "RGPD"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Action culturelle",
+    "q": "Une action culturelle « complète » = quels 5 items dans la fiche projet ?",
+    "a": "Objectifs (publics visés) ; partenaires ; budget/ressources ; communication ; évaluation (indicateurs : fréquentation, retours, réinscriptions…).",
+    "tags": [
+      "projet"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Numérique",
+    "q": "Médiation numérique : 4 formats d’actions.",
+    "a": "Ateliers (initiation/administratif) ; accompagnement individuel ; ressources en ligne (tutos, sélections) ; partenariats (France Services, associations).",
+    "tags": [
+      "inclusion"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Collections",
+    "q": "Désherbage : répondre sans citer une « méthode unique ».",
+    "a": "Dire : objectifs (actualité, place, pertinence), critères (état, obsolescence, usage, doublons, cohérence du fonds) + traçabilité (pilonnage/don) selon procédures de la collectivité.",
+    "tags": [
+      "désherbage"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Records management",
+    "q": "Tableau de gestion : définition opérationnelle.",
+    "a": "Outil qui fixe, pour chaque type de document, la durée d’utilité administrative, le sort final (élimination/versement), et les règles de tri/communication ; base du pilotage des versements.",
+    "tags": [
+      "records management"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Description",
+    "q": "ISAD(G) / ISAAR(CPF) : à quoi servent-elles ?",
+    "a": "ISAD(G) : norme de description archivistique (du fonds à la pièce).\nISAAR(CPF) : notices d’autorité (collectivités, personnes, familles) pour contextualiser les producteurs.",
+    "tags": [
+      "description"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Numérique",
+    "q": "SAE : 4 fonctions à citer.",
+    "a": "Versement/ingest ; conservation intègre (preuves, journalisation) ; accès/communication ; élimination conforme (traçabilité).",
+    "tags": [
+      "SAE"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Chaîne archivistique",
+    "q": "Chaîne archivistique territoriale en 6 verbes.",
+    "a": "Collecter (évaluer/sélectionner) → classer → conserver → communiquer → valoriser → éliminer (visa/traçabilité).",
+    "tags": [
+      "archives"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Veille",
+    "q": "DSI : définir en 1 phrase.",
+    "a": "Diffusion sélective de l’information : envois ciblés et réguliers selon profils/besoins (thèmes, décideurs, services).",
+    "tags": [
+      "veille"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Indexation",
+    "q": "Thésaurus vs mots-clés libres : différence.",
+    "a": "Thésaurus = vocabulaire contrôlé (relations hiérarchiques/associatives) ; mots-clés libres = souples mais hétérogènes.",
+    "tags": [
+      "documentation"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Service",
+    "q": "6 services cœur d’un centre de doc territorial.",
+    "a": "Veille/alertes ; revue de presse ; réponses aux demandes ; gestion du fonds ; DSI ; dossiers thématiques + formation interne.",
+    "tags": [
+      "documentation"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Droit",
+    "q": "Revue de presse : quel risque à citer au jury ?",
+    "a": "Risque de reproduction protégée : évoquer le respect du droit d’auteur, des licences et des usages (citations courtes, liens, accords).",
+    "tags": [
+      "droit"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Collectivités",
+    "q": "Décentralisation vs déconcentration (20 secondes).",
+    "a": "Décentralisation : transfert de compétences à des collectivités autonomes (élus).\nDéconcentration : organisation territoriale des services de l’État (préfet/services déconcentrés).",
+    "tags": [
+      "piège"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Commande publique",
+    "q": "Marchés publics : 3 réflexes à citer (cadre B).",
+    "a": "Besoin précisément défini ; mise en concurrence/procédure adaptée ; traçabilité (cahier des charges, critères, PV, notification) + respect seuils/règlementation.",
+    "tags": [
+      "commande publique"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Accessibilité",
+    "q": "Accessibilité d’un service culturel : 5 entrées de réponse.",
+    "a": "Bâti (cheminements) ; information/communication (FALC, signalétique) ; accueil (formation) ; offre (adaptation publics) ; numérique (RGAA).",
+    "tags": [
+      "accessibilité"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Management",
+    "q": "Encadrer une équipe cat. C : 5 outils concrets.",
+    "a": "Brief quotidien/hebdo ; planning + fiches procédures ; contrôle/traçabilité ; montée en compétences ; gestion des conflits (faits/règles/écrit).",
+    "tags": [
+      "management"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — statut (spec pdf)",
+    "q": "Inventaire d’un musée de France : 4 adjectifs à citer.",
+    "a": "Document unique, infalsifiable, titré, daté et paraphé ; répertorie les biens par ordre d’entrée.",
+    "tags": [
+      "inventaire",
+      "piège"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — conservation (spec pdf)",
+    "q": "Où est conservé l’inventaire ? Et sa copie ?",
+    "a": "Inventaire conservé dans les locaux du musée ; copie déposée au service d’archives compétent, mise à jour annuellement.",
+    "tags": [
+      "inventaire",
+      "archives"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — radiation (spec pdf)",
+    "q": "Radiation d’un bien : citer 3 cas admis (sans discuter la procédure).",
+    "a": "Exemples de cas : destruction totale ; inscription indue ; modification d’affectation entre deux musées de France de la même personne morale ; transfert de propriété prévu par la loi ; déclassement.",
+    "tags": [
+      "inventaire",
+      "radiation"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — marquage",
+    "q": "Marquage : 3 principes (sans technique).",
+    "a": "Identifiable ; stable et réversible autant que possible ; non altérant (choix selon matériau) + cohérence avec dossier/constat.",
+    "tags": [
+      "marquage"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Musée",
+    "cat": "Récolement",
+    "q": "Plan de récolement décennal : 5 rubriques de planification.",
+    "a": "Périmètre/corpus ; calendrier ; ressources (humains/temps) ; méthode (localisation, constat, photo) ; livrables (PV de campagne, mises à jour inventaire, actions post-récolement).",
+    "tags": [
+      "récolement"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Post-récolement",
+    "q": "Post-récolement : 4 actions après une campagne.",
+    "a": "Traitement des anomalies (localisation, erreurs) ; mise à jour inventaire/base ; signalements (vol/disparition) ; plan d’actions (restauration, reconditionnement, sécurité).",
+    "tags": [
+      "récolement"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Chaîne entrée d’œuvre",
+    "q": "Entrée d’un bien (don/achat) : 8 jalons à dérouler.",
+    "a": "Proposition → étude (provenance/état/coût) → avis instance scientifique si requis → décision/acte → affectation → attribution n° inventaire → marquage → inscription (rubriques) + conditionnement/localisation.",
+    "tags": [
+      "acquisition"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Provenance",
+    "q": "Provenance : 3 angles d’analyse à dire à l’oral.",
+    "a": "Historique de propriété ; contexte de sortie/entrée (vente, spoliation, fouilles…) ; cohérence documentaire (archives, bases) + zones d’ombre à tracer.",
+    "tags": [
+      "provenance"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Musée",
+    "cat": "Numérisation",
+    "q": "Numérisation vs inventaire : phrase pour éviter la confusion.",
+    "a": "Numériser/photographier = outil documentaire ; l’inventaire réglementaire reste un registre juridique (papier/édition) avec rubriques et procédures.",
+    "tags": [
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Conditionnement",
+    "q": "Conditionnement : 4 critères de choix d’un matériau.",
+    "a": "Neutralité/compatibilité chimique ; solidité ; adaptabilité (format) ; coût/maintenance + traçabilité du conditionnement.",
+    "tags": [
+      "conservation"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Service public",
+    "q": "4 obligations de base d’un accueil « service public ».",
+    "a": "Égalité de traitement ; continuité (organisation/horaires) ; neutralité/laïcité ; adaptabilité (accessibilité, médiation).",
+    "tags": [
+      "service public"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "SIGB",
+    "q": "SIGB : 6 modules à citer.",
+    "a": "Acquisitions ; catalogage ; circulation/prêt ; périodiques ; usagers ; portail/OPAC + statistiques.",
+    "tags": [
+      "SIGB"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Périodiques",
+    "q": "Périodiques : 3 particularités de traitement.",
+    "a": "Gestion des numéros (réception) ; bulletinage ; reliure/élimination selon politique ; signalement au catalogue.",
+    "tags": [
+      "périodiques"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Équipement",
+    "q": "Équipement documentaire : 5 opérations typiques.",
+    "a": "Cotation ; antivol/RFID ; couverture ; code-barres ; estampille + préparation (étiquettes).",
+    "tags": [
+      "équipement"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Réservation/retards",
+    "q": "Retards et pertes : réponse « procédure ».",
+    "a": "Rappels automatisés ; suspension temporaire ; facturation/remplacement selon règlement intérieur ; traçabilité et équité.",
+    "tags": [
+      "procédure"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Évaluation",
+    "q": "Indicateurs utiles (au-delà des « prêts »).",
+    "a": "Rotation des collections ; taux de remplissage ; fréquentation ; inscriptions actives ; usage des ressources numériques ; participation actions ; satisfaction.",
+    "tags": [
+      "évaluation"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Animation",
+    "q": "Heure du conte : 4 éléments logistiques à citer.",
+    "a": "Choix des albums ; jauge & sécurité ; installation (tapis/assise/son) ; médiation + partenariat (crèche/écoles) ; évaluation.",
+    "tags": [
+      "action culturelle"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Droit",
+    "q": "Droit d’auteur : phrase prudente pour un service de reproduction.",
+    "a": "On respecte les exceptions (copie privée, courte citation…) et les licences ; on privilégie l’orientation vers les ressources/licences plutôt que la reproduction intégrale.",
+    "tags": [
+      "droit"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Accessibilité",
+    "q": "FALC : l’utiliser pour quoi ?",
+    "a": "Documents d’accueil (inscription, règlement), signalétique, guides, supports d’animation – pour rendre l’info compréhensible.",
+    "tags": [
+      "accessibilité"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Versement",
+    "q": "Bordereau de versement : rôle.",
+    "a": "Liste descriptive qui matérialise le transfert de responsabilité, permet contrôle/traçabilité et sert d’instrument de recherche initial.",
+    "tags": [
+      "versement"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Éliminations",
+    "q": "Élimination : 3 mots-clés à dire au jury.",
+    "a": "Cadre réglementaire ; visa/validation ; traçabilité (bordereau, PV) + impossibilité de revenir en arrière.",
+    "tags": [
+      "tri"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Classement",
+    "q": "Principe de respect des fonds : 1 phrase.",
+    "a": "Conserver l’unité du fonds et son ordre d’origine (producteur) pour préserver le contexte de production et la valeur probante.",
+    "tags": [
+      "méthode"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Normes",
+    "q": "EAD : à quoi sert (1 phrase) ?",
+    "a": "Standard XML d’encodage des instruments de recherche (interopérabilité, diffusion en ligne).",
+    "tags": [
+      "EAD"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Numérique",
+    "q": "Archivage électronique sans SAE (réponse prudente).",
+    "a": "Mettre en place des règles minimales : plan de classement, nommage, droits d’accès, sauvegardes, formats pérennes, journal des actions – tout en cadrant un projet SAE (analyse besoins).",
+    "tags": [
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Préservation",
+    "q": "Acide vs neutre : pourquoi les boîtes neutres ?",
+    "a": "Limiter l’acidification et la dégradation (papier) ; améliorer conservation à long terme avec matériaux adaptés.",
+    "tags": [
+      "conservation"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Veille",
+    "q": "Veille stratégique : 4 sources à croiser.",
+    "a": "Sources institutionnelles ; presse ; publications scientifiques/techniques ; réseaux sociaux/experts + alertes/flux.",
+    "tags": [
+      "veille"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Outils",
+    "q": "Alertes/flux : 3 outils ou formats à citer.",
+    "a": "Flux RSS ; alertes mails (moteurs) ; agrégateurs/lecteurs + listes de diffusion.",
+    "tags": [
+      "veille"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Données",
+    "q": "Open data : angle « collectivité ».",
+    "a": "Données publiées en formats réutilisables ; intérêt : transparence, innovation, réutilisation ; exigence : qualité, anonymisation, licence.",
+    "tags": [
+      "open data"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Qualité",
+    "q": "Qualité d’info : 5 critères express.",
+    "a": "Autorité/source ; date ; recoupement ; biais/objectif ; traçabilité (lien, capture) + pertinence pour le destinataire.",
+    "tags": [
+      "méthode"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Déontologie",
+    "q": "Obligation de réserve vs devoir d’alerte : réponse équilibrée.",
+    "a": "Réserve : expression publique mesurée, surtout sur dossiers sensibles.\nAlerte : signaler une situation grave/illégale selon procédures internes, en traçant et en protégeant le service/usagers.",
+    "tags": [
+      "déontologie"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrits pro",
+    "q": "Règle d’or pour un mail à un élu/DGS (3 items).",
+    "a": "Clarté (objet/action attendue) ; concision (faits, options) ; traçabilité (références, pièces, délais).",
+    "tags": [
+      "communication"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Gestion de conflit",
+    "q": "Usager agressif : 5 étapes d’action.",
+    "a": "Se protéger/mettre à distance ; écouter et reformuler ; rappeler le cadre (règlement) ; proposer une solution ; tracer/alerter si besoin.",
+    "tags": [
+      "accueil"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Projet",
+    "q": "SMART : appliquer à un objectif culturel (exemple).",
+    "a": "Spécifique, Mesurable, Atteignable, Réaliste, Temporel (ex. +15% d’inscriptions jeunes en 6 mois via 3 actions ciblées).",
+    "tags": [
+      "projet"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — ensembles complexes (spec pdf)",
+    "q": "Ensemble complexe : qu’ajouter dans « Observations » (rubrique 18) ?",
+    "a": "Mention de l’existence d’un sous-inventaire + nombre de registres de sous-inventaire annexés et, pour chacun, le nombre de biens inscrits.",
+    "tags": [
+      "inventaire"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Édition informatisée (spec pdf)",
+    "q": "Édition informatisée : les photos sont-elles prévues ?",
+    "a": "Elles peuvent accompagner l’édition (photographies numériques de chaque bien possibles).",
+    "tags": [
+      "inventaire"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Édition informatisée (spec pdf)",
+    "q": "Changement de présentation d’une année sur l’autre : que faire ?",
+    "a": "Tout changement de mode de présentation doit être précisément décrit et justifié (constance exigée).",
+    "tags": [
+      "inventaire",
+      "piège"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Édition informatisée (spec pdf)",
+    "q": "Après édition : quelles exigences matérielles pour le registre ?",
+    "a": "Registre relié, titré, daté, paginé et paraphé ; complété chaque année par l’impression des acquisitions de l’année précédente ajoutée à la reliure.",
+    "tags": [
+      "inventaire"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Vol/disparition (spec pdf)",
+    "q": "En cas de vol d’un bien : 3 actions à citer.",
+    "a": "Porter plainte (police/gendarmerie) ; aviser sans délai l’OCBC et la direction/service des musées de France ; informer les ministres compétents le cas échéant.",
+    "tags": [
+      "sécurité"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Dépôt",
+    "q": "Dépôt : différence clé avec prêt (1 phrase).",
+    "a": "Dépôt = mise à disposition plus longue/contractualisée, propriété conservée par le déposant ; prêt = temporaire, souvent lié à exposition, avec assurance/transport encadrés.",
+    "tags": [
+      "dépôt",
+      "prêt"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Musée",
+    "cat": "Médiation",
+    "q": "Médiation inclusive : 4 leviers en musée.",
+    "a": "Co-construction avec publics ; accessibilité sensorielle/cognitive ; dispositifs multi-langues ; formation accueil + partenariats (associations).",
+    "tags": [
+      "publics"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Musée",
+    "cat": "PSC",
+    "q": "Projet scientifique et culturel : 5 chapitres à connaître.",
+    "a": "Diagnostic ; orientations scientifiques ; politique des publics ; stratégie de conservation/gestion ; programmation/plan d’action (moyens, calendrier, évaluation).",
+    "tags": [
+      "PSC"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Lecture publique",
+    "q": "Bibliothèque départementale : 4 missions typiques.",
+    "a": "Soutien aux bibliothèques du territoire (ingénierie/formation) ; desserte documentaire ; action culturelle en réseau ; accompagnement numérique/accès aux ressources.",
+    "tags": [
+      "réseau"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Règlement intérieur",
+    "q": "Règlement intérieur : 6 rubriques.",
+    "a": "Inscription ; prêt/retours ; comportements ; accès internet ; droits d’image/animations ; sanctions ; responsabilités (mineurs).",
+    "tags": [
+      "procédure"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Catalogage",
+    "q": "Autorités : pourquoi c’est critique ?",
+    "a": "Évite doublons et ambiguïtés (auteurs/sujets) ; améliore recherche et statistiques ; facilite échanges (BnF).",
+    "tags": [
+      "catalogage"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Inclusion",
+    "q": "Accessibilité numérique : citer 3 actions concrètes en médiathèque.",
+    "a": "Postes adaptés (logiciels, claviers) ; ateliers d’aide ; documents en grands caractères/DAISY ; partenariats handicap.",
+    "tags": [
+      "accessibilité"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Animation",
+    "q": "Partenariats scolaires : 4 points à cadrer.",
+    "a": "Objectifs pédagogiques ; calendrier ; modalités de prêt/visites ; rôles adultes ; évaluation.",
+    "tags": [
+      "partenariat"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Numérique",
+    "q": "Ressources numériques : 4 dimensions à gérer.",
+    "a": "Choix/licences ; accès (authentification) ; médiation (formation) ; statistiques/évaluation.",
+    "tags": [
+      "numérique"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Collection",
+    "q": "Conservation en bibliothèque : 4 gestes préventifs.",
+    "a": "Dépoussiérage ; rangement vertical/supports ; contrôle lumière/HR ; signalement/mise à l’écart des documents contaminés.",
+    "tags": [
+      "conservation"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Collecte",
+    "q": "Archives courantes/intermédiaires/définitives : définitions flash.",
+    "a": "Courantes : usage quotidien.\nIntermédiaires : usage occasionnel, encore en DUA.\nDéfinitives : conservation historique/probante à long terme.",
+    "tags": [
+      "cycle de vie"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Communication",
+    "q": "Communication : réponse prudente « au guichet ».",
+    "a": "Principe : communicabilité selon le Code du patrimoine et restrictions (vie privée, secrets protégés) ; on vérifie la catégorie, la date et on trace la décision.",
+    "tags": [
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Sécurité",
+    "q": "Plan de sauvegarde archives : 5 priorités.",
+    "a": "Repérage locaux ; priorisation fonds ; procédures sinistre ; matériel (bâches, bacs, gants) ; exercices + contacts (pompiers, prestataires).",
+    "tags": [
+      "sinistre"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Numérique",
+    "q": "Formats pérennes : 4 principes (sans lister des formats).",
+    "a": "Ouverts/documentés ; largement adoptés ; non propriétaires si possible ; stratégie de migration + checksums.",
+    "tags": [
+      "préservation"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Archives",
+    "cat": "Pilotage",
+    "q": "Série W en archives communales/départementales : à quoi sert ?",
+    "a": "Classement des archives contemporaines (post-révolutionnaires selon cadre) en versements successifs, facilitant gestion et repérage.",
+    "tags": [
+      "classement"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Produit doc",
+    "q": "Dossier thématique : structure type.",
+    "a": "Problématique ; synthèse ; sélection commentée de sources (hiérarchisée) ; annexes/liens ; date/mise à jour.",
+    "tags": [
+      "synthèse"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Recherche",
+    "q": "Opérateurs de recherche : 5 à utiliser (et dire au jury).",
+    "a": "Guillemets ; AND/OR ; - (exclusion) ; site: ; filetype: (ou équivalent dans outils).",
+    "tags": [
+      "méthode"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Veille",
+    "q": "Traçabilité : pourquoi capturer la source ?",
+    "a": "Lien peut changer/disparaître ; capture permet preuve, comparaison et relecture (utile en décision publique).",
+    "tags": [
+      "veille"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Finances locales",
+    "q": "Fonctionnement vs investissement : différence (exemple).",
+    "a": "Fonctionnement : charges récurrentes (personnel, fluides, achats).\nInvestissement : dépenses durables (travaux, équipements) + amortissement/capital.",
+    "tags": [
+      "finances"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Finances locales",
+    "q": "Budget : 3 moments à connaître.",
+    "a": "Budget primitif ; décisions modificatives ; compte administratif (exécution) – vocabulaire minimal à l’oral.",
+    "tags": [
+      "finances"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Communication",
+    "q": "Avec un élu : 3 règles de relation pro.",
+    "a": "Neutralité ; pédagogie (options + impacts) ; traçabilité (compte rendu, validation).",
+    "tags": [
+      "posture"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Musée",
+    "cat": "Régie",
+    "q": "Fiche mouvement : 8 champs indispensables.",
+    "a": "Identifiant (n° inventaire/dépôt) ; intitulé ; motif ; dates ; lieux (départ/arrivée) ; responsables ; conditions (transport, assurance) ; constat d’état + photos ; signatures/validation.",
+    "tags": [
+      "régie"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Conservation",
+    "q": "HR/T° : réponse prudente si on te demande des « valeurs ».",
+    "a": "Éviter de réciter un chiffre unique : rappeler que les consignes dépendent des matériaux et des normes de l’établissement ; l’essentiel est la stabilité, la limitation des variations et la surveillance (capteurs/registre).",
+    "tags": [
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Médiation",
+    "q": "Médiation : différence entre « animation » et « médiation ».",
+    "a": "Animation = événement/activité ponctuelle.\nMédiation = accompagnement à long terme des usages (collections, numérique, lecture), avant/pendant/après.",
+    "tags": [
+      "publics"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Collection",
+    "q": "Fonds patrimonial : 4 exigences spécifiques.",
+    "a": "Conservation renforcée ; communication encadrée ; description fine ; plan de numérisation/valorisation + sécurité.",
+    "tags": [
+      "patrimoine"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Archives",
+    "cat": "Écrit pro",
+    "q": "Instrument de recherche : 4 niveaux de description.",
+    "a": "Fonds → sous-fonds → série/sous-série → dossier/pièce (selon pratiques).",
+    "tags": [
+      "description"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Archives",
+    "cat": "Atelier",
+    "q": "Atelier de sensibilisation « bonnes pratiques de classement » : 4 messages.",
+    "a": "Nommer correctement ; classer dans plan ; éviter doublons ; appliquer durées (DUA) ; ne pas stocker sur supports personnels.",
+    "tags": [
+      "records management"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Documentation",
+    "cat": "Service",
+    "q": "Question « pourquoi un centre de doc ? » : 3 arguments.",
+    "a": "Gain de temps (accès) ; fiabilité (sources validées) ; capitalisation/partage des connaissances.",
+    "tags": [
+      "argumentaire"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Oral — questions",
+    "q": "« Question piège » : ‘vous feriez quoi dès votre arrivée ?’",
+    "a": "30 jours : diagnostic rapide (équipe, procédures, risques), prise en main outils (SIGB/GCO), points urgents (sécurité/inventaire/usagers), puis plan d’action priorisé avec indicateurs.",
+    "tags": [
+      "oral"
+    ],
+    "level": 3
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — plan",
+    "q": "Plan de note : 2 plans ‘universels’ acceptables.",
+    "a": "Plan thématique (enjeux → options → mise en œuvre) ou plan chronologique (diagnostic → propositions → calendrier/évaluation) — toujours annoncé et équilibré.",
+    "tags": [
+      "méthode"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Écrit — synthèse",
+    "q": "Intro de note : 3 fonctions.",
+    "a": "Rappeler la commande ; annoncer l’angle et le plan ; poser le contexte strictement issu du dossier (sans hors-sujet).",
+    "tags": [
+      "écrit"
+    ],
+    "level": 2
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Concours — épreuves (cadrage)",
+    "q": "Oral d’admission (toutes voies) : durée, exposé, coefficient ?",
+    "a": "Durée totale : 20 minutes.\nExposé : 5 minutes au plus.\nCoefficient : 3.\nPas de préparation, pas de documents (ni CV).",
+    "tags": [
+      "note de cadrage",
+      "oral",
+      "chiffres"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Concours — épreuves (cadrage)",
+    "q": "Concours externe : quelles épreuves écrites d’admissibilité (intitulés + chiffres) ?",
+    "a": "Deux écrits dotés au total d’un coefficient 6 :\n• Questionnaire (3 à 5 questions) dans la spécialité : 3 h, coeff. 3.\n• Note à partir d’un dossier sur la spécialité : 3 h, coeff. 3.",
+    "tags": [
+      "note de cadrage",
+      "écrit",
+      "chiffres"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Tronc commun",
+    "cat": "Concours — épreuves (cadrage)",
+    "q": "Concours interne & 3e concours : combien d’écrits d’admissibilité ?",
+    "a": "Une seule épreuve écrite d’admissibilité, affectée du même coefficient que l’oral (coef. 3).",
+    "tags": [
+      "note de cadrage",
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — rubriques (réglementaire)",
+    "q": "Inventaire musée de France : combien de colonnes (rubriques) et comment tu les répartis ?",
+    "a": "18 colonnes/rubriques (présentées comme colonnes 1→18 dans les spécifications d’édition) :\n• 1–7 : statut juridique + conditions d’acquisition.\n• 8–13 : description du bien.\n• 14–18 : rubriques complémentaires + observations.",
+    "tags": [
+      "arrêté 25 mai 2004",
+      "inventaire",
+      "piège",
+      "chiffres"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — rubriques (réglementaire)",
+    "q": "Inventaire : citer les colonnes 1 à 7 (acquisition).",
+    "a": "1 N° inventaire\n2 Mode d’acquisition\n3 Nom donateur/testateur/vendeur\n4 Date acte d’acquisition + affectation\n5 Avis instances scientifiques\n6 Prix d’achat + concours publics (AS/ANS)\n7 Date d’inscription au registre d’inventaire",
+    "tags": [
+      "inventaire",
+      "colonne"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — rubriques (réglementaire)",
+    "q": "Inventaire : citer les colonnes 8 à 13 (description).",
+    "a": "8 Désignation\n9 Marques/inscriptions\n10 Matières/matériaux\n11 Techniques (réalisation/préparation/fabrication)\n12 Mesures\n13 État au moment de l’acquisition (manques…)",
+    "tags": [
+      "inventaire",
+      "colonne"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Inventaire — rubriques (réglementaire)",
+    "q": "Inventaire : citer les colonnes 14 à 18 (compléments/observations).",
+    "a": "14 Auteur/collecteur/fabricant/commanditaire…\n15 Époque/datation/date de récolte…\n16 Fonction d’usage\n17 Provenance géographique\n18 Observations (anciens numéros, vol, radiation, sous-inventaire…)",
+    "tags": [
+      "inventaire",
+      "colonne"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Dépôts — registre (réglementaire)",
+    "q": "Dépôts : le registre est-il confondu avec l’inventaire ? Et comment se note le numéro ?",
+    "a": "Non : les dépôts sont répertoriés sur un registre distinct.\nLe numéro de dépôt est précédé de la lettre « D ».",
+    "tags": [
+      "dépôt",
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Musée",
+    "cat": "Édition informatisée — obligations",
+    "q": "Édition informatisée réglementaire : quelle échéance pour l’impression papier ?",
+    "a": "Au plus tard le 31 décembre de l’année qui suit l’année d’acquisition (N+1).",
+    "tags": [
+      "inventaire",
+      "édition",
+      "chiffres"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Traçabilité — copies et archives",
+    "q": "Copie des registres : où et à quelle fréquence ?",
+    "a": "Une copie (sécurité) de l’inventaire/registre est déposée au service d’archives compétent ; elle est mise à jour une fois par an.",
+    "tags": [
+      "archives",
+      "traçabilité"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Musée",
+    "cat": "Récolement — base",
+    "q": "Récolement décennal : périodicité minimale et finalité en une phrase.",
+    "a": "Au moins une fois tous les dix ans : vérifier sur pièces et sur place la présence, la localisation, l’état, le marquage et la conformité des inscriptions des biens (collections + dépôts).",
+    "tags": [
+      "récolement",
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Oral — chiffres (pièges)",
+    "q": "Question d’oral : « quelle spécialité avez-vous choisie et est-elle modifiable après inscription ? »",
+    "a": "Spécialité choisie à l’inscription parmi : Musée / Bibliothèque / Archives / Documentation. Le choix est définitif à la clôture des inscriptions.",
+    "tags": [
+      "note de cadrage",
+      "piège"
+    ],
+    "level": 4
+  }
+,
+  {
+    "spec": "Bibliothèque",
+    "cat": "Droit d’auteur — exceptions (CPI)",
+    "q": "CPI L122-5, 8° : que permet l’exception « conservation / consultation recherche » (conditions à citer) ?",
+    "a": "Permet reproduction + représentation d’une œuvre :\n• à des fins de conservation OU pour préserver les conditions de consultation à des fins de recherche/études privées,\n• dans les locaux de l’établissement,\n• sur des terminaux dédiés,\n• par des bibliothèques accessibles au public (ou musées/services d’archives),\n• sans recherche d’avantage économique/commercial.",
+    "tags": [
+      "CPI",
+      "L122-5",
+      "juridique",
+      "piège"
+    ],
+    "level": 5
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Droit d’auteur — accessibilité (CPI)",
+    "q": "CPI L122-5, 7° : de quoi s’agit-il (exception handicap) ?",
+    "a": "Exception permettant reproduction + représentation, par des personnes morales/établissements ouverts au public (dont bibliothèques, archives, centres de doc), pour consultation strictement personnelle par des personnes empêchées de lire du fait d’un handicap, dans les conditions fixées par L122-5-1 et L122-5-2.",
+    "tags": [
+      "CPI",
+      "accessibilité",
+      "handicap"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "RGPD — fondamentaux (oral)",
+    "q": "RGPD (art. 5) : citer les 6 principes + l’accountability.",
+    "a": "Licéité/loyauté/transparence ; limitation des finalités ; minimisation des données ; exactitude ; limitation de la conservation ; intégrité/confidentialité.\n+ Responsabilité (accountability) : le responsable doit pouvoir démontrer le respect de ces principes.",
+    "tags": [
+      "RGPD",
+      "CNIL",
+      "piège"
+    ],
+    "level": 4
+  },
+  {
+    "spec": "Bibliothèque",
+    "cat": "Numérique — PNB",
+    "q": "PNB : la bibliothèque achète-t-elle le livre numérique ?",
+    "a": "Non : la bibliothèque acquiert une licence de prêt (conditions fixées par l’éditeur : durée, nb de prêts, prêts simultanés…). Le dispositif s’appuie sur le Hub Dilicom pour les échanges.",
+    "tags": [
+      "PNB",
+      "licence",
+      "numérique"
+    ],
+    "level": 3
+  }
+
+];
+  const qcmData = [
+  {
+    "spec": "Tronc commun",
+    "q": "Durée totale de l’entretien d’admission (concours ACPB) ?",
+    "choices": [
+      "10 min",
+      "15 min",
+      "20 min",
+      "30 min"
+    ],
+    "answer": 2,
+    "exp": "Note de cadrage : 20 minutes au total, dont 5 minutes d’exposé au plus."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "Pendant l’entretien, le candidat peut-il consulter son CV ?",
+    "choices": [
+      "Oui, uniquement le CV",
+      "Oui, si le jury l’autorise",
+      "Non",
+      "Uniquement pendant l’exposé"
+    ],
+    "answer": 2,
+    "exp": "Aucun document n’est autorisé (ni CV ni autre)."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "Règle éliminatoire la plus fréquente citée dans les notes de cadrage ?",
+    "choices": [
+      "Note < 8/20",
+      "Note < 5/20 à une épreuve obligatoire",
+      "Absence à une épreuve facultative",
+      "Moyenne < 12/20"
+    ],
+    "answer": 1,
+    "exp": "Toute note < 5/20 à une épreuve obligatoire entraîne l’élimination."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "Épreuve de note sur dossier : durée réglementaire ?",
+    "choices": [
+      "2h",
+      "3h",
+      "4h",
+      "5h"
+    ],
+    "answer": 1,
+    "exp": "Note de cadrage : 3 heures."
+  },
+  {
+    "spec": "Musée",
+    "q": "Inventaire musée de France : nombre de rubriques (annexe 1) ?",
+    "choices": [
+      "12",
+      "15",
+      "18",
+      "20"
+    ],
+    "answer": 2,
+    "exp": "Arrêté du 25 mai 2004 : 18 rubriques (1 à 18)."
+  },
+  {
+    "spec": "Musée",
+    "q": "Édition informatisée : délai max d’impression après acquisition ?",
+    "choices": [
+      "Avant fin N",
+      "Avant fin N+1",
+      "Avant fin N+2",
+      "Pas de délai"
+    ],
+    "answer": 1,
+    "exp": "Au plus tard le 31 décembre de l’année qui suit l’année d’acquisition (N+1)."
+  },
+  {
+    "spec": "Musée",
+    "q": "Récolement : fréquence minimale ?",
+    "choices": [
+      "Tous les 5 ans",
+      "Tous les 10 ans",
+      "Tous les 15 ans",
+      "Uniquement sur demande"
+    ],
+    "answer": 1,
+    "exp": "Obligatoire au moins une fois tous les dix ans."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "RAMEAU est principalement un…",
+    "choices": [
+      "format de notice",
+      "vocabulaire contrôlé (matière)",
+      "logiciel de prêt",
+      "plan de classement"
+    ],
+    "answer": 1,
+    "exp": "RAMEAU = vocabulaire d’indexation matière."
+  },
+  {
+    "spec": "Archives",
+    "q": "EAD sert à…",
+    "choices": [
+      "encoder un instrument de recherche en XML",
+      "classer physiquement les boîtes",
+      "gérer les prêts en bibliothèque",
+      "décrire des objets muséaux"
+    ],
+    "answer": 0,
+    "exp": "EAD est un standard XML pour instruments de recherche."
+  },
+  {
+    "spec": "Documentation",
+    "q": "DSI signifie…",
+    "choices": [
+      "Droit de sortie interne",
+      "Diffusion sélective de l’information",
+      "Document de synthèse interne",
+      "Dossier de sécurité informatique"
+    ],
+    "answer": 1,
+    "exp": "DSI = Diffusion Sélective de l’Information."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "À l’écrit, citer un nom de collectivité non indiqué dans le sujet peut…",
+    "choices": [
+      "être recommandé",
+      "être neutre",
+      "entraîner une annulation/anonymat rompu",
+      "donner un bonus"
+    ],
+    "answer": 2,
+    "exp": "La note de cadrage rappelle la prudence : ne pas introduire de noms non indiqués."
+  },
+  {
+    "spec": "Musée",
+    "q": "Rubrique 7 de l’inventaire (annexe 1) :",
+    "choices": [
+      "Désignation",
+      "Date d’inscription au registre",
+      "Provenance géographique",
+      "Mesures"
+    ],
+    "answer": 1,
+    "exp": "La rubrique 7 est la date d’inscription au registre d’inventaire."
+  },
+  {
+    "spec": "Musée",
+    "q": "Rubrique 12 de l’inventaire :",
+    "choices": [
+      "Mesures",
+      "Techniques de réalisation",
+      "Marques et inscriptions",
+      "Prix d’achat"
+    ],
+    "answer": 0,
+    "exp": "La rubrique 12 correspond aux mesures."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "Dans un SIGB, l’OPAC est…",
+    "choices": [
+      "le module d’équipement",
+      "le catalogue public en ligne",
+      "le plan de classement",
+      "un antivol"
+    ],
+    "answer": 1,
+    "exp": "OPAC = Online Public Access Catalogue."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "À l’oral, « sujet tiré au sort » et « temps de préparation » :",
+    "choices": [
+      "Toujours prévus",
+      "Prévus seulement en externe",
+      "Non prévus par le libellé réglementaire",
+      "Prévus seulement en interne"
+    ],
+    "answer": 2,
+    "exp": "La note de cadrage indique qu’il n’y a ni sujet tiré au sort ni préparation."
+  },
+  {
+    "spec": "Musée",
+    "q": "En cas de vol d’un bien, on cite en priorité :",
+    "choices": [
+      "Le syndic",
+      "L’OCBC",
+      "Le Trésor public",
+      "La BnF"
+    ],
+    "answer": 1,
+    "exp": "La réglementation mentionne l’Office central de lutte contre le trafic des biens culturels (OCBC)."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "Dans l’exposé, dépasser 5 minutes est généralement…",
+    "choices": [
+      "un bonus",
+      "neutre",
+      "pénalisé",
+      "obligatoire"
+    ],
+    "answer": 2,
+    "exp": "La note de cadrage indique que le jury peut interrompre à 5 minutes, exposé inachevé pénalisé."
+  },
+  {
+    "spec": "Archives",
+    "q": "Respect des fonds = …",
+    "choices": [
+      "mélanger les producteurs pour thème",
+      "conserver l’unité et l’ordre d’origine",
+      "numériser tout",
+      "éliminer doublons"
+    ],
+    "answer": 1,
+    "exp": "Principe archivistique : préserver producteur et ordre d’origine."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "Un indicateur autre que les prêts :",
+    "choices": [
+      "Nombre de tables",
+      "Rotation des collections",
+      "Hauteur des rayons",
+      "Nombre de murs"
+    ],
+    "answer": 1,
+    "exp": "Rotation = usage rapporté au fonds, utile pour pilotage."
+  },
+  {
+    "spec": "Documentation",
+    "q": "Un bon critère de qualité d’info :",
+    "choices": [
+      "popularité seule",
+      "date/actualité",
+      "taille du document",
+      "couleur du logo"
+    ],
+    "answer": 1,
+    "exp": "La date est un critère parmi d’autres (autorité, recoupement…)."
+  },
+  {
+    "spec": "Musée",
+    "q": "Inventaire : rubrique 18 = …",
+    "choices": [
+      "Observations",
+      "Désignation",
+      "Mesures",
+      "Date d’inscription"
+    ],
+    "answer": 0,
+    "exp": "La rubrique 18 correspond aux observations (anciens numéros, vols, radiations, etc.)."
+  },
+  {
+    "spec": "Musée",
+    "q": "Édition informatisée : la base de données seule…",
+    "choices": [
+      "fait foi juridiquement",
+      "ne fait pas foi juridiquement",
+      "remplace l’inventaire papier automatiquement",
+      "est suffisante sans impression"
+    ],
+    "answer": 1,
+    "exp": "Les textes insistent : c’est l’impression/papier conforme qui fait foi."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "Désherbage : une bonne réponse en oral est…",
+    "choices": [
+      "réciter un seul acronyme",
+      "parler d’objectifs + critères + traçabilité",
+      "dire ‘on ne désherbe jamais’",
+      "faire au feeling"
+    ],
+    "answer": 1,
+    "exp": "On attend méthode, critères, et traçabilité."
+  },
+  {
+    "spec": "Archives",
+    "q": "Un tableau de gestion sert d’abord à…",
+    "choices": [
+      "décorer le bureau",
+      "fixer DUA et sort final",
+      "faire un plan de salle",
+      "gérer les prêts"
+    ],
+    "answer": 1,
+    "exp": "Il pilote tri, versement et élimination."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "Moyenne minimale pour être admis :",
+    "choices": [
+      "8/20",
+      "10/20",
+      "12/20",
+      "14/20"
+    ],
+    "answer": 1,
+    "exp": "La note de cadrage indique qu’un candidat ne peut être admis si la moyenne < 10/20."
+  },
+  {
+    "spec": "Documentation",
+    "q": "Thésaurus : caractéristique clé.",
+    "choices": [
+      "vocabulaire contrôlé avec relations",
+      "liste aléatoire",
+      "uniquement hashtags",
+      "format d’archivage"
+    ],
+    "answer": 0,
+    "exp": "Relations hiérarchiques/associatives et contrôle des termes."
+  },
+  {
+    "spec": "Musée",
+    "q": "Récolement : organisation possible.",
+    "choices": [
+      "Uniquement par artiste",
+      "Par campagnes (lieu/technique/corpus)",
+      "Uniquement en 1 fois",
+      "Uniquement après sinistre"
+    ],
+    "answer": 1,
+    "exp": "Le texte prévoit des campagnes planifiées (lieu, technique, corpus…)."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "RGPD : bonne pratique sur historique de prêts.",
+    "choices": [
+      "conserver indéfiniment",
+      "conserver le moins possible et informer",
+      "publier sur affichage",
+      "envoyer à des partenaires"
+    ],
+    "answer": 1,
+    "exp": "Minimisation, durée limitée, information des usagers."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "À l’écrit, faire référence « Doc 3 » est…",
+    "choices": [
+      "attendu",
+      "toléré mais inutile",
+      "à éviter pour autonomie de la note",
+      "obligatoire"
+    ],
+    "answer": 2,
+    "exp": "La note doit être autonome ; éviter les renvois aux documents."
+  },
+  {
+    "spec": "Archives",
+    "q": "Bordereau de versement : c’est…",
+    "choices": [
+      "une facture",
+      "un inventaire muséal",
+      "une liste descriptive de transfert",
+      "un plan de classement"
+    ],
+    "answer": 2,
+    "exp": "Outil de transfert/traçabilité et base d’accès aux fonds."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "Note de cadrage (oral) : un candidat peut-il être admis avec une moyenne générale de 9,5/20 ?",
+    "choices": [
+      "Oui, si l’oral est ≥ 10/20",
+      "Oui, si aucune note < 5/20",
+      "Non"
+    ],
+    "answer": 2,
+    "exp": "Règle rappelée en note de cadrage : pas d’admission si la moyenne des notes est < 10/20."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "Concours externe ACPB : combien d’épreuves écrites d’admissibilité ?",
+    "choices": [
+      "1",
+      "2",
+      "3"
+    ],
+    "answer": 1,
+    "exp": "Concours externe : deux écrits (questionnaire 3–5 questions + note sur dossier)."
+  },
+  {
+    "spec": "Musée",
+    "q": "Inventaire réglementaire (musée de France) : combien de colonnes dans le tableau-type des spécifications ?",
+    "choices": [
+      "13",
+      "18",
+      "21"
+    ],
+    "answer": 1,
+    "exp": "Les spécifications d’édition réglementaire présentent 18 colonnes (1–18)."
+  },
+  {
+    "spec": "Musée",
+    "q": "Parmi ces éléments, lequel appartient aux colonnes 1–7 de l’inventaire ?",
+    "choices": [
+      "Mesures",
+      "Mode d’acquisition",
+      "Provenance géographique",
+      "Fonction d’usage"
+    ],
+    "answer": 1,
+    "exp": "Mode d’acquisition est une rubrique ‘statut juridique / conditions d’acquisition’ (colonnes 1–7)."
+  },
+  {
+    "spec": "Musée",
+    "q": "Édition informatisée : l’impression papier de l’inventaire doit intervenir au plus tard…",
+    "choices": [
+      "le 31/12 de l’année d’acquisition (N)",
+      "le 31/12 de l’année suivante (N+1)",
+      "dans les 5 ans"
+    ],
+    "answer": 1,
+    "exp": "Obligation : au plus tard le 31 décembre de l’année qui suit l’année d’acquisition."
+  },
+  {
+    "spec": "Musée",
+    "q": "Le registre des dépôts : le numéro de dépôt est-il reporté directement sur le bien ?",
+    "choices": [
+      "Oui, toujours",
+      "Non, il est porté sur une étiquette rattachée/fixée au conditionnement",
+      "Seulement pour les dépôts de l’État"
+    ],
+    "answer": 1,
+    "exp": "Le numéro de dépôt n’est pas reporté sur le bien ; il figure sur une étiquette rattachée au bien ou au conditionnement."
+  },
+  {
+    "spec": "Tronc commun",
+    "q": "À l’oral : documents autorisés pendant l’entretien ?",
+    "choices": [
+      "CV uniquement",
+      "Notes personnelles uniquement",
+      "Aucun document"
+    ],
+    "answer": 2,
+    "exp": "Note de cadrage : aucun document autorisé (ni CV, ni notes)."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "La spécialité choisie à l’inscription (musée/bibliothèque/archives/documentation) est…",
+    "choices": [
+      "modifiable jusqu’au jour de l’écrit",
+      "modifiable jusqu’à l’oral",
+      "définitive à la clôture des inscriptions"
+    ],
+    "answer": 2,
+    "exp": "Note de cadrage : le choix de la spécialité est définitif à la clôture des inscriptions."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "CPI L122-5, 8° : l’exception « conservation/recherche » impose notamment…",
+    "choices": [
+      "une mise en ligne publique sur Internet",
+      "une consultation sur terminaux dédiés dans les locaux",
+      "un accord préalable de l’éditeur dans tous les cas"
+    ],
+    "answer": 1,
+    "exp": "L’exception vise la consultation sur terminaux dédiés, dans les locaux, sans avantage économique/commercial."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "RGPD : lequel est un principe de l’article 5 ?",
+    "choices": [
+      "Obligation de stocker 10 ans toutes les données",
+      "Minimisation des données",
+      "Interdiction totale de la vidéosurveillance"
+    ],
+    "answer": 1,
+    "exp": "Principe : minimisation des données (collecter ce qui est nécessaire)."
+  },
+  {
+    "spec": "Bibliothèque",
+    "q": "PNB : la bibliothèque…",
+    "choices": [
+      "devient propriétaire du fichier EPUB",
+      "acquiert une licence de prêt selon des conditions éditeur",
+      "ne peut prêter aucun livre numérique en France"
+    ],
+    "answer": 1,
+    "exp": "PNB = achat de licences ; conditions (durée, nb de prêts, simultanéité) fixées par l’éditeur."
+  }
+];
+
+  // ==================== NAV ====================
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    const el = document.getElementById(id);
+    if(el) el.classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    if(btn && btn.classList) btn.classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  // ==================== DISPLAY SETTINGS ====================
+  const fontSteps = ['font-sm','font-md','font-lg','font-xl'];
+  function applyDisplaySettings() {
+    try {
+      const font = localStorage.getItem('acpb_fontStep') || 'font-md';
+      const contrast = localStorage.getItem('acpb_highContrast') === '1';
+      document.body.classList.remove(...fontSteps);
+      document.body.classList.add(font);
+      document.body.classList.toggle('high-contrast', contrast);
+    } catch(e) {}
+  }
+  function changeFont(dir) {
+    try {
+      const cur = localStorage.getItem('acpb_fontStep') || 'font-md';
+      let idx = fontSteps.indexOf(cur);
+      idx = Math.min(fontSteps.length-1, Math.max(0, idx + dir));
+      localStorage.setItem('acpb_fontStep', fontSteps[idx]);
+      applyDisplaySettings();
+    } catch(e) {}
+  }
+  function toggleContrast() {
+    try {
+      const cur = localStorage.getItem('acpb_highContrast') === '1';
+      localStorage.setItem('acpb_highContrast', cur ? '0' : '1');
+      applyDisplaySettings();
+    } catch(e) {}
+  }
+
+  // ==================== FLASHCARDS ====================
+  const STORAGE_KEY = 'acpb_flashcardStatuses_v1';
+  let flashcardStatuses = {};
+  let session = [];
+  let idx = 0;
+  let flipped = false;
+
+  function escapeHtml(str) {
+    return (str||'')
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'","&#039;");
+  }
+
+  function buildSpecOptions() {
+    const specs = Array.from(new Set(flashcardsData.map(c=>c.spec))).sort((a,b)=>a.localeCompare(b,'fr'));
+    const specSel = document.getElementById('specFilter');
+    const oralSel = document.getElementById('oralSpec');
+    const qcmSel = document.getElementById('qcmSpec');
+    const optHtml = '<option value="all">Spécialité : toutes</option>' +
+      specs.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+    if(specSel) specSel.innerHTML = optHtml;
+    if(oralSel) oralSel.innerHTML = optHtml;
+    if(qcmSel) qcmSel.innerHTML = '<option value="all">QCM : toutes spécialités</option>' +
+      specs.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+  }
+
+  function loadProgress() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved) {
+      try { flashcardStatuses = JSON.parse(saved) || {}; }
+      catch(e) { flashcardStatuses = {}; }
+    }
+    flashcardsData.forEach((_, i)=>{ if(!flashcardStatuses[i]) flashcardStatuses[i] = 'apprendre'; });
+  }
+  function saveProgress() { localStorage.setItem(STORAGE_KEY, JSON.stringify(flashcardStatuses)); }
+
+  function updateStats() {
+    const total = flashcardsData.length;
+    let k=0,h=0,u=0;
+    Object.keys(flashcardStatuses).forEach(key=>{
+      const st = flashcardStatuses[key];
+      if(st==='maitrise') k++;
+      else if(st==='hesitant') h++;
+      else u++;
+    });
+    const $ = (id)=>document.getElementById(id);
+    if($('totalCards')) $('totalCards').textContent = total;
+    if($('knowCards')) $('knowCards').textContent = k;
+    if($('hesCards')) $('hesCards').textContent = h;
+    if($('unkCards')) $('unkCards').textContent = u;
+  }
+
+  function filtersMatch(card, index) {
+    const specVal = (document.getElementById('specFilter')||{value:'all'}).value;
+    const lvlVal = (document.getElementById('levelFilter')||{value:'all'}).value;
+    const stVal = (document.getElementById('statusFilter')||{value:'all'}).value;
+    const q = (document.getElementById('searchFilter')||{value:''}).value.trim().toLowerCase();
+
+    if(specVal !== 'all' && card.spec !== specVal) return false;
+    if(lvlVal !== 'all' && String(card.level) !== String(lvlVal)) return false;
+
+    const st = flashcardStatuses[index] || 'apprendre';
+    if(stVal !== 'all' && st !== stVal) return false;
+
+    if(q) {
+      const blob = (card.q + ' ' + card.a + ' ' + (card.tags||[]).join(' ') + ' ' + card.cat + ' ' + card.spec).toLowerCase();
+      if(!blob.includes(q)) return false;
+    }
+    return true;
+  }
+
+  function buildSession() {
+    session = [];
+    flashcardsData.forEach((card, i)=>{
+      if(filtersMatch(card, i)) session.push(i);
+    });
+    session.sort(()=>Math.random()-0.5);
+  }
+
+  function resetSessionUI() {
+    session = [];
+    idx = 0;
+    flipped = false;
+    const card = document.getElementById('flashcard');
+    if(card) card.classList.remove('flipped');
+    const ft = document.getElementById('frontText');
+    const bt = document.getElementById('backText');
+    const meta = document.getElementById('metaTags');
+    if(ft) ft.textContent = 'Clique sur « Démarrer la session ».';
+    if(bt) bt.textContent = '';
+    if(meta) meta.innerHTML = '';
+    updateProgressLine();
+  }
+
+  function startSession() {
+    buildSession();
+    idx = 0;
+    flipped = false;
+    if(session.length === 0) {
+      alert("Aucune carte ne correspond aux filtres.");
+      resetSessionUI();
+      return;
+    }
+    renderCard();
+  }
+
+  function updateProgressLine() {
+    const el = document.getElementById('progressLine');
+    if(!el) return;
+    if(session.length === 0) {
+      el.textContent = '';
+      return;
+    }
+    el.textContent = `Carte ${idx+1} / ${session.length}`;
+  }
+
+  function renderCard() {
+    const cardEl = document.getElementById('flashcard');
+    const ft = document.getElementById('frontText');
+    const bt = document.getElementById('backText');
+    const meta = document.getElementById('metaTags');
+    if(!cardEl || !ft || !bt || !meta) return;
+
+    const i = session[idx];
+    const c = flashcardsData[i];
+
+    cardEl.classList.remove('flipped');
+    flipped = false;
+
+    ft.textContent = c.q;
+    bt.textContent = c.a;
+
+    const st = flashcardStatuses[i] || 'apprendre';
+    const stLabel = st==='maitrise' ? 'maîtrisé' : (st==='hesitant' ? 'hésitant' : 'à apprendre');
+
+    meta.innerHTML = [
+      `<span class="tag spec">${escapeHtml(c.spec)}</span>`,
+      `<span class="tag lvl">niv. ${c.level}</span>`,
+      `<span class="tag">${escapeHtml(c.cat)}</span>`,
+      `<span class="tag">${escapeHtml(stLabel)}</span>`
+    ].join('');
+
+    updateProgressLine();
+    updateStats();
+  }
+
+  function flipCard() {
+    const cardEl = document.getElementById('flashcard');
+    if(!cardEl || session.length===0) return;
+    flipped = !flipped;
+    cardEl.classList.toggle('flipped', flipped);
+  }
+
+  function nextCard() {
+    if(session.length===0) return;
+    idx = (idx + 1) % session.length;
+    renderCard();
+  }
+
+  function markStatus(st) {
+    if(session.length===0) return;
+    const i = session[idx];
+    flashcardStatuses[i] = st;
+    saveProgress();
+    renderCard();
+  }
+
+  function exportProgress() {
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      fontStep: localStorage.getItem('acpb_fontStep') || 'font-md',
+      highContrast: localStorage.getItem('acpb_highContrast') || '0',
+      statuses: flashcardStatuses
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'acpb_progress.json';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importProgress(ev) {
+    const f = ev.target.files && ev.target.files[0];
+    if(!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(String(reader.result||'{}'));
+        if(payload && payload.statuses) {
+          flashcardStatuses = payload.statuses;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(flashcardStatuses));
+          if(payload.fontStep) localStorage.setItem('acpb_fontStep', payload.fontStep);
+          if(payload.highContrast) localStorage.setItem('acpb_highContrast', payload.highContrast);
+          applyDisplaySettings();
+          updateStats();
+          alert("Import OK.");
+        } else {
+          alert("Fichier invalide (statuses manquant).");
+        }
+      } catch(e) {
+        alert("Impossible de lire ce JSON.");
+      }
+    };
+    reader.readAsText(f, 'utf-8');
+    ev.target.value = '';
+  }
+
+  function wipeProgress() {
+    if(!confirm("Effacer toute la progression (local) ?")) return;
+    localStorage.removeItem(STORAGE_KEY);
+    flashcardStatuses = {};
+    loadProgress();
+    updateStats();
+    resetSessionUI();
+  }
+
+  // ==================== ORAL ====================
+  let oralCurrentIndex = null;
+  let tHandle = null;
+  let tRemaining = 0;
+
+  function oralFiltersMatch(card) {
+    const specVal = (document.getElementById('oralSpec')||{value:'all'}).value;
+    const lvlVal = (document.getElementById('oralLevel')||{value:'all'}).value;
+
+    if(specVal !== 'all' && card.spec !== specVal) return false;
+    if(lvlVal !== 'all' && Number(card.level) < Number(lvlVal)) return false;
+    return true;
+  }
+
+  function drawOral() {
+    const pool = [];
+    flashcardsData.forEach((c, i)=>{ if(oralFiltersMatch(c)) pool.push(i); });
+    if(pool.length===0) {
+      alert("Aucune question pour ces filtres.");
+      return;
+    }
+    oralCurrentIndex = pool[Math.floor(Math.random()*pool.length)];
+    const c = flashcardsData[oralCurrentIndex];
+
+    document.getElementById('oralQuestion').textContent = c.q;
+    document.getElementById('oralMeta').textContent = `${c.spec} • niv. ${c.level} • ${c.cat}`;
+    const ans = document.getElementById('oralAnswer');
+    ans.style.display = 'none';
+    ans.textContent = c.a;
+  }
+
+  function revealOral() {
+    const ans = document.getElementById('oralAnswer');
+    if(ans) ans.style.display = (ans.style.display==='none' ? 'block' : 'none');
+  }
+
+  function copyOral() {
+    const q = document.getElementById('oralQuestion')?.textContent || '';
+    const a = document.getElementById('oralAnswer')?.textContent || '';
+    const txt = q + "\n\n" + a;
+    navigator.clipboard?.writeText(txt).then(()=>alert("Copié."), ()=>alert("Copie impossible (navigateur)."));
+  }
+
+  function tick() {
+    if(tRemaining<=0) {
+      stopTimer();
+      alert("Temps écoulé.");
+      return;
+    }
+    tRemaining -= 1;
+    renderTimer();
+  }
+
+  function renderTimer() {
+    const m = Math.floor(tRemaining/60);
+    const s = tRemaining%60;
+    const el = document.getElementById('timerDisplay');
+    if(el) el.textContent = String(m).padStart(2,'0') + ":" + String(s).padStart(2,'0');
+  }
+
+  function startTimer(minutes) {
+    stopTimer();
+    tRemaining = Math.max(0, Math.floor(minutes*60));
+    renderTimer();
+    tHandle = setInterval(tick, 1000);
+  }
+
+  function stopTimer() {
+    if(tHandle) clearInterval(tHandle);
+    tHandle = null;
+    tRemaining = 0;
+    renderTimer();
+  }
+
+  function saveNotes() {
+    const v = document.getElementById('oralNotes')?.value || '';
+    localStorage.setItem('acpb_oralNotes', v);
+    alert("Notes sauvegardées.");
+  }
+  function loadNotes() {
+    const v = localStorage.getItem('acpb_oralNotes') || '';
+    const el = document.getElementById('oralNotes');
+    if(el) el.value = v;
+  }
+  function clearNotes() {
+    if(!confirm("Effacer les notes ?")) return;
+    localStorage.removeItem('acpb_oralNotes');
+    const el = document.getElementById('oralNotes');
+    if(el) el.value = '';
+  }
+
+  // ==================== QCM ====================
+  function qcmSpecMatch(item) {
+    const specVal = (document.getElementById('qcmSpec')||{value:'all'}).value;
+    if(specVal==='all') return true;
+    return item.spec === specVal;
+  }
+
+  function renderQCM() {
+    const root = document.getElementById('qcmRoot');
+    if(!root) return;
+    const items = qcmData.filter(qcmSpecMatch).sort(()=>Math.random()-0.5);
+    root.innerHTML = items.map((it, i)=>{
+      const choices = it.choices.map((c, j)=>`
+        <label class="choice">
+          <input type="radio" name="q_${i}" value="${j}" />
+          ${escapeHtml(c)}
+        </label>
+      `).join('');
+      return `
+        <div class="qcm-item" data-idx="${i}">
+          <div class="qtxt">${escapeHtml(it.q)}</div>
+          <div class="muted" style="margin-top:.2rem">${escapeHtml(it.spec)}</div>
+          <div style="margin-top:.7rem">${choices}</div>
+          <div class="exp" style="display:none"></div>
+        </div>
+      `;
+    }).join('');
+    root.dataset.items = JSON.stringify(items);
+    document.getElementById('qcmScore').textContent = '—';
+  }
+
+  function gradeQCM() {
+    const root = document.getElementById('qcmRoot');
+    if(!root) return;
+    let items = [];
+    try { items = JSON.parse(root.dataset.items || '[]'); } catch(e) {}
+    if(!items.length) return;
+
+    let score = 0;
+    const blocks = Array.from(root.querySelectorAll('.qcm-item'));
+    blocks.forEach((b, i)=>{
+      const it = items[i];
+      const checked = b.querySelector('input[type="radio"]:checked');
+      const chosen = checked ? Number(checked.value) : null;
+      const labels = Array.from(b.querySelectorAll('.choice'));
+      labels.forEach((lab, j)=>{
+        lab.classList.remove('good','bad');
+        if(j===it.answer) lab.classList.add('good');
+        if(chosen!==null && j===chosen && chosen!==it.answer) lab.classList.add('bad');
+      });
+      const exp = b.querySelector('.exp');
+      if(exp) {
+        exp.style.display = 'block';
+        exp.textContent = it.exp || '';
+      }
+      if(chosen===it.answer) score += 1;
+    });
+    document.getElementById('qcmScore').textContent = `${score} / ${items.length}`;
+  }
+
+  // ==================== KEYBOARD ====================
+  document.addEventListener('keydown', (ev)=>{
+    const active = document.getElementById('flashcards')?.classList.contains('active');
+    if(!active) return;
+    if(ev.code === 'Space') { ev.preventDefault(); flipCard(); }
+    if(ev.key === '1') { ev.preventDefault(); markStatus('maitrise'); }
+    if(ev.key === '2') { ev.preventDefault(); markStatus('hesitant'); }
+    if(ev.key === '3') { ev.preventDefault(); markStatus('apprendre'); }
+    if(ev.key === 'ArrowRight') { ev.preventDefault(); nextCard(); }
+  });
+
+  // ==================== INIT ====================
+  (function init() {
+    applyDisplaySettings();
+    buildSpecOptions();
+    loadProgress();
+    updateStats();
+    resetSessionUI();
+    loadNotes();
+    renderQCM();
+  })();
+</script>
+
+</body>
+</html>

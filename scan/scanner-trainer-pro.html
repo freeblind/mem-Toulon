@@ -1,0 +1,1838 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trainer Scanner Médical - Interface Professionnelle</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root{
+      --bg: #0a0e17;
+      --card: #151921;
+      --card-hover: #1a1f2e;
+      --border: #2a3142;
+      --text: #e4e6eb;
+      --text-muted: #8b92a7;
+      --primary: #00d4ff;
+      --primary-glow: rgba(0, 212, 255, 0.2);
+      --success: #00ff88;
+      --warning: #ffaa00;
+      --danger: #ff3366;
+      --timeline-line: #2a3142;
+      --timeline-node: #00d4ff;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+      --glow: 0 0 20px var(--primary-glow);
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body{ 
+      margin:0; padding:16px;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    h1{ 
+      margin:0 0 8px 0; 
+      font-size: 28px; 
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--success));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    h2{ 
+      margin:0 0 12px 0; 
+      font-size: 16px; 
+      font-weight: 600;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .subtitle { 
+      color: var(--text-muted); 
+      font-size: 14px; 
+      margin-bottom: 24px;
+    }
+    
+    .layout {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+    
+    @media (min-width: 1200px) {
+      .layout {
+        grid-template-columns: 350px 1fr;
+        grid-template-rows: auto 1fr;
+      }
+      .sidebar { grid-row: 1 / 3; }
+      .timeline-area { grid-column: 2; }
+      .screens-area { grid-column: 2; }
+    }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+      border-color: rgba(0, 212, 255, 0.3);
+      box-shadow: var(--shadow), var(--glow);
+    }
+    
+    button, select, input {
+      font-family: inherit;
+      font-size: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      background: var(--card);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+    
+    button:hover {
+      background: var(--card-hover);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    
+    button.primary {
+      background: var(--primary);
+      color: var(--bg);
+      border-color: var(--primary);
+      font-weight: 600;
+    }
+    
+    button.primary:hover {
+      background: #00bbee;
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+    
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge.info { background: rgba(0, 212, 255, 0.15); color: var(--primary); }
+    .badge.success { background: rgba(0, 255, 136, 0.15); color: var(--success); }
+    .badge.warning { background: rgba(255, 170, 0, 0.15); color: var(--warning); }
+    
+    .status-bar {
+      background: rgba(0, 212, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    
+    .status-bar.success { border-color: var(--success); background: rgba(0, 255, 136, 0.05); }
+    .status-bar.error { border-color: var(--danger); background: rgba(255, 51, 102, 0.05); }
+    
+    /* Timeline */
+    .timeline-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      overflow-x: auto;
+      min-height: 200px;
+    }
+    
+    .timeline {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      padding: 20px 0;
+      position: relative;
+      min-width: max-content;
+    }
+    
+    .timeline-node {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .timeline-node:hover {
+      transform: translateY(-4px);
+    }
+    
+    .timeline-node.active .node-circle {
+      background: var(--primary);
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+      border-color: var(--primary);
+    }
+    
+    .node-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      background: var(--card-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .node-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .node-circle .icon {
+      font-size: 32px;
+      color: var(--text-muted);
+    }
+    
+    .node-info {
+      text-align: center;
+      max-width: 120px;
+    }
+    
+    .node-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .node-screen {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .timeline-arrow {
+      color: var(--timeline-line);
+      font-size: 24px;
+      align-self: center;
+      margin-top: -50px;
+    }
+    
+    .add-node-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2px dashed var(--border);
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: var(--text-muted);
+      margin-top: -10px;
+      transition: all 0.3s ease;
+    }
+    
+    .add-node-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(0, 212, 255, 0.1);
+    }
+    
+    /* Image Library */
+    .lib-columns {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+    
+    .lib-column {
+      background: rgba(0, 212, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    
+    .lib-column h3 {
+      margin: 0 0 12px 0;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .lib-column.left h3 { color: #ff6b9d; }
+    .lib-column.center h3 { color: var(--primary); }
+    .lib-column.right h3 { color: #ffa500; }
+    
+    .lib-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 60px;
+    }
+    
+    .lib-item {
+      position: relative;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--card);
+      width: 100%;
+    }
+    
+    .lib-item:hover {
+      border-color: var(--primary);
+      transform: scale(1.02);
+      box-shadow: 0 4px 16px rgba(0, 212, 255, 0.3);
+    }
+    
+    .lib-item.editing {
+      border-color: var(--success);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    }
+    
+    .lib-item img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .lib-item-info {
+      padding: 8px;
+      font-size: 11px;
+      color: var(--text);
+      font-weight: 500;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .lib-item-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .lib-item-hotspots {
+      color: var(--text-muted);
+      font-size: 10px;
+    }
+    
+    /* Screens */
+    .screens-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+    
+    .screens-grid.show-left { grid-template-columns: 0.6fr 1fr; }
+    .screens-grid.show-right { grid-template-columns: 1fr 0.6fr; }
+    .screens-grid.show-left.show-right { grid-template-columns: 0.6fr 1fr 0.6fr; }
+    
+    .screen-card {
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    .screen-card.editing {
+      border-color: var(--success);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    }
+    
+    .screen-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .screen-title {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stage-wrap {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      min-height: 200px;
+    }
+    
+    .stage-wrap img {
+      display: block;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+    }
+    
+    .overlay {
+      position: absolute;
+      inset: 0;
+    }
+    
+    /* Items (hotspots, rectangles, text) */
+    .item {
+      position: absolute;
+      box-sizing: border-box;
+      transform: translate(var(--xpx,0px), var(--ypx,0px));
+      width: var(--wpx, 100px);
+      height: var(--hpx, 60px);
+      left: 0;
+      top: 0;
+    }
+    
+    .item .box {
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      border: 2px solid rgba(0, 212, 255, 0.6);
+      background: rgba(0, 212, 255, 0.1);
+      transition: all 0.2s ease;
+    }
+    
+    .item.hotspot .box {
+      border: 2px dashed rgba(0, 212, 255, 0.6);
+      background: rgba(0, 212, 255, 0.05);
+    }
+    
+    .item.hotspot.invisible .box {
+      border-color: transparent;
+      background: transparent;
+    }
+    
+    .mode-use .item.hotspot {
+      cursor: pointer;
+    }
+    
+    .mode-use .item.hotspot:hover .box {
+      background: rgba(0, 212, 255, 0.3);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+    }
+    
+    .item .label {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--bg);
+      background: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      pointer-events: none;
+      white-space: nowrap;
+      max-width: calc(100% - 16px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .item.text .box {
+      background: rgba(255, 255, 255, 0.9);
+      border-style: solid;
+    }
+    
+    .item.text textarea {
+      position: absolute;
+      inset: 8px;
+      resize: none;
+      border: 0;
+      outline: none;
+      background: transparent;
+      padding: 0;
+      font-size: 14px;
+      color: var(--bg);
+    }
+    
+    .handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid var(--bg);
+      z-index: 5;
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    }
+    
+    .h-nw { left: -6px; top: -6px; cursor: nwse-resize; }
+    .h-ne { right: -6px; top: -6px; cursor: nesw-resize; }
+    .h-sw { left: -6px; bottom: -6px; cursor: nesw-resize; }
+    .h-se { right: -6px; bottom: -6px; cursor: nwse-resize; }
+    
+    .selected .box {
+      outline: 3px solid var(--success);
+      outline-offset: 2px;
+    }
+    
+    .hidden { display: none !important; }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    
+    .item.clicked {
+      animation: pulse 0.3s ease-in-out;
+    }
+    
+    /* Drag placeholder */
+    .drag-placeholder {
+      border: 2px dashed var(--primary);
+      background: rgba(0, 212, 255, 0.1);
+      border-radius: 8px;
+    }
+    
+    input[type="file"] {
+      font-size: 12px;
+      padding: 8px;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      resize: vertical;
+    }
+    
+    .section {
+      margin-bottom: 24px;
+    }
+    
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h1>Scanner Trainer</h1>
+      <p class="subtitle">Interface d'entraînement pour navigations scanner</p>
+      
+      <div class="card">
+        <div class="section">
+          <div class="section-title">📁 Importer Images</div>
+          <input id="file" type="file" accept="image/*" multiple />
+          <div class="status-bar" style="margin-top: 12px;">
+            <span id="imgCount">0</span> images chargées
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">⚙️ Mode</div>
+          <select id="mode" style="width: 100%;">
+            <option value="edit">✏️ Édition</option>
+            <option value="use">▶️ Utilisation</option>
+          </select>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">👁️ Affichage Hotspots</div>
+          <select id="hotspotVis" style="width: 100%;">
+            <option value="invisible">Invisibles</option>
+            <option value="visible">Visibles</option>
+          </select>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">🖼️ Écrans</div>
+          <div class="btn-group">
+            <button id="btnToggleLeft">Gauche</button>
+            <button id="btnToggleRight">Droite</button>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">💾 Données</div>
+          <div class="btn-group" style="flex-direction: column;">
+            <button id="btnExport" class="primary">Exporter JSON</button>
+            <button id="btnImport">Importer JSON</button>
+            <button id="btnReset">Reset</button>
+          </div>
+          <textarea id="json" placeholder="JSON export/import..."></textarea>
+        </div>
+      </div>
+      
+      <div class="status-bar" style="margin-top: 16px;">
+        <div style="font-weight: 600; margin-bottom: 4px;">💡 Aide</div>
+        <div style="font-size: 12px; color: var(--text-muted);">
+          <div>• <strong>Clic gauche</strong> sur image → Éditer</div>
+          <div>• <strong>Clic droit</strong> sur image → Menu actions</div>
+          <div>• <strong>Glisser</strong> image → Changer colonne</div>
+          <div>• <strong>Survol</strong> image → Bouton ×</div>
+          <div>• Timeline → Navigation visuelle</div>
+          <div>• Hotspot → Zone cliquable</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Timeline Area -->
+    <div class="timeline-area">
+      <div class="card">
+        <h2>🔗 Timeline de Navigation</h2>
+        <div class="status-bar">
+          En édition: <span id="editingName" style="color: var(--success); font-weight: 600;">Aucune</span>
+        </div>
+        <div class="timeline-container">
+          <div id="timeline" class="timeline">
+            <div class="timeline-node add-node-btn" id="addTimelineNode">
+              <div>+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card" style="margin-top: 16px;">
+        <h2>📚 Bibliothèque d'Images</h2>
+        
+        <!-- Zone des images non assignées -->
+        <div style="margin-bottom: 16px;">
+          <div class="section-title">📦 Images Non Assignées</div>
+          <div class="status-bar">
+            Glisse les images vers les colonnes ci-dessous pour les organiser
+          </div>
+          <div id="libUnassigned" class="lib-items" style="display: flex; flex-wrap: wrap; gap: 8px; min-height: 120px; padding: 12px; background: rgba(0, 212, 255, 0.03); border: 1px dashed var(--border); border-radius: 12px;"></div>
+        </div>
+        
+        <div class="lib-columns">
+          <div class="lib-column left">
+            <h3>◀ Gauche (Injecteur)</h3>
+            <div id="libLeft" class="lib-items"></div>
+          </div>
+          <div class="lib-column center">
+            <h3>● Centre (Principal)</h3>
+            <div id="libCenter" class="lib-items"></div>
+          </div>
+          <div class="lib-column right">
+            <h3>▶ Droite (Secondaire)</h3>
+            <div id="libRight" class="lib-items"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Screens Area -->
+    <div class="screens-area">
+      <div class="card">
+        <h2>🖥️ Écrans de Simulation</h2>
+        <div id="feedback" class="status-bar"></div>
+        <div id="screens" class="screens-grid show-left show-right">
+          
+          <div id="leftCard" class="screen-card">
+            <div class="screen-header">
+              <div class="screen-title">
+                <span>◀</span>
+                <span>Gauche</span>
+              </div>
+              <div class="btn-group">
+                <button data-tool="hotspot" data-screen="left">Hotspot</button>
+                <button data-tool="rect" data-screen="left">Rect</button>
+                <button data-tool="text" data-screen="left">Texte</button>
+              </div>
+            </div>
+            <div class="badge info"><span id="leftName">—</span></div>
+            <div class="stage-wrap" data-screen="left">
+              <img id="leftImg" alt="" />
+              <div class="overlay" id="leftOverlay"></div>
+            </div>
+          </div>
+          
+          <div id="centerCard" class="screen-card">
+            <div class="screen-header">
+              <div class="screen-title">
+                <span>●</span>
+                <span>Centre</span>
+              </div>
+              <div class="btn-group">
+                <button data-tool="hotspot" data-screen="center">Hotspot</button>
+                <button data-tool="rect" data-screen="center">Rect</button>
+                <button data-tool="text" data-screen="center">Texte</button>
+              </div>
+            </div>
+            <div class="badge info"><span id="centerName">—</span></div>
+            <div class="stage-wrap" data-screen="center">
+              <img id="centerImg" alt="" />
+              <div class="overlay" id="centerOverlay"></div>
+            </div>
+          </div>
+          
+          <div id="rightCard" class="screen-card">
+            <div class="screen-header">
+              <div class="screen-title">
+                <span>▶</span>
+                <span>Droite</span>
+              </div>
+              <div class="btn-group">
+                <button data-tool="hotspot" data-screen="right">Hotspot</button>
+                <button data-tool="rect" data-screen="right">Rect</button>
+                <button data-tool="text" data-screen="right">Texte</button>
+              </div>
+            </div>
+            <div class="badge info"><span id="rightName">—</span></div>
+            <div class="stage-wrap" data-screen="right">
+              <img id="rightImg" alt="" />
+              <div class="overlay" id="rightOverlay"></div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(()=>{
+  "use strict";
+
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>document.querySelectorAll(s);
+
+  const file = $("#file");
+  const modeSel = $("#mode");
+  const hotspotVisSel = $("#hotspotVis");
+  const btnToggleLeft = $("#btnToggleLeft");
+  const btnToggleRight = $("#btnToggleRight");
+  const btnExport = $("#btnExport");
+  const btnImport = $("#btnImport");
+  const btnReset = $("#btnReset");
+  const jsonTA = $("#json");
+  const feedbackEl = $("#feedback");
+  const imgCountEl = $("#imgCount");
+  const editingNameEl = $("#editingName");
+  const timelineEl = $("#timeline");
+  const screens = $("#screens");
+
+  let images = [];
+  let screenState = { left: null, center: null, right: null };
+  let editingImageId = null;
+  let showLeft = true;
+  let showRight = true;
+  let hotspotVisibility = "invisible";
+  let currentTool = null;
+  let selected = null;
+  let drawing = null;
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+  function setFeedback(msg, type = ""){
+    feedbackEl.textContent = msg;
+    feedbackEl.className = "status-bar " + type;
+  }
+
+  function updateLayoutClasses(){
+    screens.classList.toggle("show-left", showLeft);
+    screens.classList.toggle("show-right", showRight);
+    $("#leftCard").classList.toggle("hidden", !showLeft);
+    $("#rightCard").classList.toggle("hidden", !showRight);
+  }
+
+  function getImageById(id){ return images.find(x=>x.id===id) || null; }
+
+  function setEditingImage(id){
+    editingImageId = id;
+    const im = getImageById(id);
+    editingNameEl.textContent = im ? im.name : "Aucune";
+    editingNameEl.style.color = im ? "var(--success)" : "var(--text-muted)";
+    renderLibrary();
+    renderScreens();
+    renderTimeline();
+  }
+
+  function assignImageToScreen(imageId, screen){
+    screenState[screen] = imageId;
+    renderLibrary();
+    renderScreens();
+    renderTimeline();
+  }
+
+  function renderLibrary(){
+    imgCountEl.textContent = images.length;
+    
+    // Render unassigned images
+    const unassignedContainer = $("#libUnassigned");
+    unassignedContainer.innerHTML = "";
+    
+    images.filter(im => !im.assignedScreen).forEach((im, idx) => {
+      const div = document.createElement("div");
+      div.className = "lib-item";
+      if (editingImageId === im.id) div.classList.add("editing");
+      div.style.width = "140px";
+      div.style.flexShrink = "0";
+      div.style.position = "relative";
+      
+      // Bouton supprimer
+      const deleteBtn = document.createElement("div");
+      deleteBtn.innerHTML = "×";
+      deleteBtn.style.cssText = `
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        background: var(--danger);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        font-weight: bold;
+        z-index: 10;
+        opacity: 0;
+        transition: opacity 0.2s;
+      `;
+      
+      div.addEventListener("mouseenter", ()=> deleteBtn.style.opacity = "1");
+      div.addEventListener("mouseleave", ()=> deleteBtn.style.opacity = "0");
+      
+      deleteBtn.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        if (confirm(`Supprimer "${im.name}" ?`)) {
+          images = images.filter(x => x.id !== im.id);
+          if (editingImageId === im.id) editingImageId = null;
+          if (screenState.left === im.id) screenState.left = null;
+          if (screenState.center === im.id) screenState.center = null;
+          if (screenState.right === im.id) screenState.right = null;
+          renderLibrary();
+          renderScreens();
+          renderTimeline();
+          setFeedback(`${im.name} supprimée`, "success");
+        }
+      });
+      
+      const img = document.createElement("img");
+      img.src = im.dataUrl;
+      
+      const info = document.createElement("div");
+      info.className = "lib-item-info";
+      
+      const badge = document.createElement("div");
+      badge.style.cssText = "background: var(--primary); color: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; margin-bottom: 4px;";
+      badge.textContent = `#${images.indexOf(im)}`;
+      
+      const name = document.createElement("div");
+      name.className = "lib-item-name";
+      name.textContent = im.name;
+      
+      const hotspots = document.createElement("div");
+      hotspots.className = "lib-item-hotspots";
+      hotspots.textContent = `${(im.items || []).filter(it => it.type === "hotspot").length} hotspots`;
+      
+      info.appendChild(badge);
+      info.appendChild(name);
+      info.appendChild(hotspots);
+      
+      div.appendChild(deleteBtn);
+      div.appendChild(img);
+      div.appendChild(info);
+      unassignedContainer.appendChild(div);
+      
+      div.draggable = true;
+      
+      div.addEventListener("click", ()=>{
+        setEditingImage(im.id);
+        setFeedback(`Édition: ${im.name}`, "success");
+      });
+      
+      // Menu contextuel
+      div.addEventListener("contextmenu", (e)=>{
+        e.preventDefault();
+        const action = prompt(
+          `"${im.name}"\n\n` +
+          `1 = Renommer\n` +
+          `2 = Déplacer vers Gauche\n` +
+          `3 = Déplacer vers Centre\n` +
+          `4 = Déplacer vers Droite\n` +
+          `5 = Retirer (Non assignée)\n` +
+          `6 = Supprimer\n\n` +
+          `Choix:`,
+          "3"
+        );
+        
+        if (action === "1") {
+          const newName = prompt("Nouveau nom:", im.name);
+          if (newName) {
+            im.name = newName;
+            renderLibrary();
+            renderTimeline();
+            setFeedback(`Renommée: ${newName}`, "success");
+          }
+        } else if (action === "2") {
+          im.assignedScreen = "left";
+          renderLibrary();
+          renderTimeline();
+          setFeedback(`${im.name} → Gauche`, "success");
+        } else if (action === "3") {
+          im.assignedScreen = "center";
+          renderLibrary();
+          renderTimeline();
+          setFeedback(`${im.name} → Centre`, "success");
+        } else if (action === "4") {
+          im.assignedScreen = "right";
+          renderLibrary();
+          renderTimeline();
+          setFeedback(`${im.name} → Droite`, "success");
+        } else if (action === "5") {
+          im.assignedScreen = null;
+          if (screenState.left === im.id) screenState.left = null;
+          if (screenState.center === im.id) screenState.center = null;
+          if (screenState.right === im.id) screenState.right = null;
+          renderLibrary();
+          renderScreens();
+          renderTimeline();
+          setFeedback(`${im.name} → Non assignée`, "success");
+        } else if (action === "6") {
+          if (confirm(`Vraiment supprimer "${im.name}" ?`)) {
+            images = images.filter(x => x.id !== im.id);
+            if (editingImageId === im.id) editingImageId = null;
+            if (screenState.left === im.id) screenState.left = null;
+            if (screenState.center === im.id) screenState.center = null;
+            if (screenState.right === im.id) screenState.right = null;
+            renderLibrary();
+            renderScreens();
+            renderTimeline();
+            setFeedback(`${im.name} supprimée`, "success");
+          }
+        }
+      });
+      
+      div.addEventListener("dragstart", (e)=>{
+        e.dataTransfer.setData("imageId", im.id);
+        e.dataTransfer.effectAllowed = "move";
+      });
+    });
+    
+    if (images.filter(im => !im.assignedScreen).length === 0) {
+      unassignedContainer.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 20px;">Toutes les images sont assignées</div>';
+    }
+    
+    // Render assigned images in columns
+    ["left","center","right"].forEach(screen=>{
+      const container = $(`#lib${screen.charAt(0).toUpperCase() + screen.slice(1)}`);
+      container.innerHTML = "";
+      
+      images.filter(im => im.assignedScreen === screen).forEach((im, idx) => {
+        const div = document.createElement("div");
+        div.className = "lib-item";
+        if (editingImageId === im.id) div.classList.add("editing");
+        div.style.position = "relative";
+        
+        // Bouton supprimer
+        const deleteBtn = document.createElement("div");
+        deleteBtn.innerHTML = "×";
+        deleteBtn.style.cssText = `
+          position: absolute;
+          top: 4px;
+          right: 4px;
+          width: 24px;
+          height: 24px;
+          background: var(--danger);
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 18px;
+          font-weight: bold;
+          z-index: 10;
+          opacity: 0;
+          transition: opacity 0.2s;
+        `;
+        
+        div.addEventListener("mouseenter", ()=> deleteBtn.style.opacity = "1");
+        div.addEventListener("mouseleave", ()=> deleteBtn.style.opacity = "0");
+        
+        deleteBtn.addEventListener("click", (e)=>{
+          e.stopPropagation();
+          if (confirm(`Supprimer "${im.name}" ?`)) {
+            images = images.filter(x => x.id !== im.id);
+            if (editingImageId === im.id) editingImageId = null;
+            if (screenState.left === im.id) screenState.left = null;
+            if (screenState.center === im.id) screenState.center = null;
+            if (screenState.right === im.id) screenState.right = null;
+            renderLibrary();
+            renderScreens();
+            renderTimeline();
+            setFeedback(`${im.name} supprimée`, "success");
+          }
+        });
+        
+        const img = document.createElement("img");
+        img.src = im.dataUrl;
+        
+        const info = document.createElement("div");
+        info.className = "lib-item-info";
+        
+        const badge = document.createElement("div");
+        badge.style.cssText = "background: var(--primary); color: var(--bg); padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; display: inline-block; margin-bottom: 4px;";
+        badge.textContent = `#${images.indexOf(im)}`;
+        
+        const name = document.createElement("div");
+        name.className = "lib-item-name";
+        name.textContent = im.name;
+        
+        const hotspots = document.createElement("div");
+        hotspots.className = "lib-item-hotspots";
+        hotspots.textContent = `${(im.items || []).filter(it => it.type === "hotspot").length} hotspots`;
+        
+        info.appendChild(badge);
+        info.appendChild(name);
+        info.appendChild(hotspots);
+        
+        div.appendChild(deleteBtn);
+        div.appendChild(img);
+        div.appendChild(info);
+        container.appendChild(div);
+        
+        div.draggable = true;
+        
+        div.addEventListener("click", ()=>{
+          setEditingImage(im.id);
+          setFeedback(`Édition: ${im.name}`, "success");
+        });
+        
+        // Menu contextuel
+        div.addEventListener("contextmenu", (e)=>{
+          e.preventDefault();
+          const action = prompt(
+            `"${im.name}"\n\n` +
+            `1 = Renommer\n` +
+            `2 = Déplacer vers Gauche\n` +
+            `3 = Déplacer vers Centre\n` +
+            `4 = Déplacer vers Droite\n` +
+            `5 = Retirer (Non assignée)\n` +
+            `6 = Supprimer\n\n` +
+            `Choix:`,
+            "3"
+          );
+          
+          if (action === "1") {
+            const newName = prompt("Nouveau nom:", im.name);
+            if (newName) {
+              im.name = newName;
+              renderLibrary();
+              renderTimeline();
+              setFeedback(`Renommée: ${newName}`, "success");
+            }
+          } else if (action === "2") {
+            im.assignedScreen = "left";
+            renderLibrary();
+            renderTimeline();
+            setFeedback(`${im.name} → Gauche`, "success");
+          } else if (action === "3") {
+            im.assignedScreen = "center";
+            renderLibrary();
+            renderTimeline();
+            setFeedback(`${im.name} → Centre`, "success");
+          } else if (action === "4") {
+            im.assignedScreen = "right";
+            renderLibrary();
+            renderTimeline();
+            setFeedback(`${im.name} → Droite`, "success");
+          } else if (action === "5") {
+            im.assignedScreen = null;
+            if (screenState.left === im.id) screenState.left = null;
+            if (screenState.center === im.id) screenState.center = null;
+            if (screenState.right === im.id) screenState.right = null;
+            renderLibrary();
+            renderScreens();
+            renderTimeline();
+            setFeedback(`${im.name} → Non assignée`, "success");
+          } else if (action === "6") {
+            if (confirm(`Vraiment supprimer "${im.name}" ?`)) {
+              images = images.filter(x => x.id !== im.id);
+              if (editingImageId === im.id) editingImageId = null;
+              if (screenState.left === im.id) screenState.left = null;
+              if (screenState.center === im.id) screenState.center = null;
+              if (screenState.right === im.id) screenState.right = null;
+              renderLibrary();
+              renderScreens();
+              renderTimeline();
+              setFeedback(`${im.name} supprimée`, "success");
+            }
+          }
+        });
+        
+        div.addEventListener("dragstart", (e)=>{
+          e.dataTransfer.setData("imageId", im.id);
+          e.dataTransfer.effectAllowed = "move";
+        });
+      });
+      
+      if (images.filter(im => im.assignedScreen === screen).length === 0) {
+        const empty = document.createElement("div");
+        empty.style.cssText = "color: var(--text-muted); font-size: 11px; padding: 12px; text-align: center;";
+        empty.textContent = "Glisse des images ici";
+        container.appendChild(empty);
+      }
+    });
+  }
+
+  function renderTimeline(){
+    const centerImages = images.filter(im => im.assignedScreen === "center");
+    
+    timelineEl.innerHTML = "";
+    
+    centerImages.forEach((im, idx) => {
+      const node = document.createElement("div");
+      node.className = "timeline-node";
+      if (editingImageId === im.id) node.classList.add("active");
+      
+      const circle = document.createElement("div");
+      circle.className = "node-circle";
+      
+      const img = document.createElement("img");
+      img.src = im.dataUrl;
+      circle.appendChild(img);
+      
+      const info = document.createElement("div");
+      info.className = "node-info";
+      
+      const title = document.createElement("div");
+      title.className = "node-title";
+      title.textContent = im.name;
+      
+      const screen = document.createElement("div");
+      screen.className = "node-screen";
+      const hotspotCount = (im.items || []).filter(it => it.type === "hotspot").length;
+      screen.textContent = `${hotspotCount} liens`;
+      
+      info.appendChild(title);
+      info.appendChild(screen);
+      
+      node.appendChild(circle);
+      node.appendChild(info);
+      
+      node.addEventListener("click", ()=>{
+        setEditingImage(im.id);
+        assignImageToScreen(im.id, "center");
+        setFeedback(`Timeline: ${im.name}`, "success");
+      });
+      
+      timelineEl.appendChild(node);
+      
+      if (idx < centerImages.length - 1) {
+        const arrow = document.createElement("div");
+        arrow.className = "timeline-arrow";
+        arrow.textContent = "→";
+        timelineEl.appendChild(arrow);
+      }
+    });
+    
+    const addBtn = document.createElement("div");
+    addBtn.className = "timeline-node add-node-btn";
+    addBtn.innerHTML = "+";
+    addBtn.addEventListener("click", ()=>{
+      if (!editingImageId) {
+        setFeedback("Sélectionne une image à ajouter à la timeline", "error");
+        return;
+      }
+      const im = getImageById(editingImageId);
+      if (im.assignedScreen === "center") {
+        setFeedback("Cette image est déjà dans la timeline", "error");
+        return;
+      }
+      assignImageToScreen(editingImageId, "center");
+      setFeedback(`${im.name} ajoutée à la timeline`, "success");
+    });
+    timelineEl.appendChild(addBtn);
+  }
+
+  function renderScreens(){
+    const isEdit = modeSel.value === "edit";
+    document.body.classList.toggle("mode-use", !isEdit);
+    
+    ["left","center","right"].forEach(screen=>{
+      const imgEl = $(`#${screen}Img`);
+      const nameEl = $(`#${screen}Name`);
+      const overlayEl = $(`#${screen}Overlay`);
+      const cardEl = $(`#${screen}Card`);
+
+      const imageId = screenState[screen];
+      const im = getImageById(imageId);
+      
+      cardEl.classList.toggle("editing", editingImageId && editingImageId === imageId && isEdit);
+      
+      if (!im){
+        imgEl.src = "";
+        imgEl.style.display = "none";
+        nameEl.textContent = "—";
+        overlayEl.innerHTML = "";
+        return;
+      }
+
+      imgEl.src = im.dataUrl;
+      imgEl.style.display = "block";
+      nameEl.textContent = im.name;
+
+      overlayEl.innerHTML = "";
+      (im.items || []).forEach(it=>{
+        const div = document.createElement("div");
+        div.className = "item";
+        div.classList.add(it.type);
+
+        if (it.type === "hotspot" && hotspotVisibility === "invisible") div.classList.add("invisible");
+        if (selected && selected.imageId === im.id && selected.itemId === it.id) div.classList.add("selected");
+
+        div.dataset.imageId = im.id;
+        div.dataset.itemId = it.id;
+
+        const box = document.createElement("div");
+        box.className = "box";
+
+        let lbl = "";
+        if (it.type === "hotspot" && it.target){
+          const tImg = getImageById(it.target.imageId);
+          lbl = tImg ? `→ ${tImg.name}` : `→ ${it.target.screen}`;
+        }
+        if (it.type === "rect") lbl = "rectangle";
+        if (it.type === "text") lbl = "texte";
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = lbl;
+
+        div.appendChild(box);
+        if (lbl) div.appendChild(label);
+
+        if (it.type === "text"){
+          const ta = document.createElement("textarea");
+          ta.value = it.text || "";
+          ta.readOnly = !isEdit;
+          ta.addEventListener("input", ()=>{ it.text = ta.value; });
+          div.appendChild(ta);
+        }
+
+        if (isEdit){
+          ["nw","ne","sw","se"].forEach(pos => {
+            const h = document.createElement("div");
+            h.className = `handle h-${pos}`;
+            div.appendChild(h);
+          });
+        }
+
+        overlayEl.appendChild(div);
+        updateItemGeometry(div, it, screen);
+      });
+    });
+
+    attachItemInteractions();
+  }
+
+  function screenSizePx(screen){
+    const imgEl = $(`#${screen}Img`);
+    return { w: imgEl.offsetWidth || 1, h: imgEl.offsetHeight || 1 };
+  }
+
+  function pctToPx(pct, dim){ return (pct / 100) * dim; }
+  function pxToPct(px, dim){ return (px / dim) * 100; }
+
+  function updateItemGeometry(div, it, screen){
+    const { w, h } = screenSizePx(screen);
+    const xpx = pctToPx(it.x, w);
+    const ypx = pctToPx(it.y, h);
+    const wpx = pctToPx(it.w, w);
+    const hpx = pctToPx(it.h, h);
+
+    div.style.setProperty("--xpx", xpx + "px");
+    div.style.setProperty("--ypx", ypx + "px");
+    div.style.setProperty("--wpx", wpx + "px");
+    div.style.setProperty("--hpx", hpx + "px");
+  }
+
+  function getItemRef(imageId, itemId){
+    const im = getImageById(imageId);
+    if (!im) return null;
+    const it = im.items.find(x=>x.id === itemId);
+    if (!it) return null;
+    return { im, it };
+  }
+
+  function clearSelection(){
+    selected = null;
+    renderScreens();
+  }
+
+  function addItemToEditingImage(item){
+    if (!editingImageId){
+      setFeedback("Sélectionne une image à éditer!", "error");
+      return;
+    }
+    const im = getImageById(editingImageId);
+    if (!im) return;
+    im.items.push(item);
+    renderScreens();
+    renderLibrary();
+    renderTimeline();
+    setFeedback(`${item.type} ajouté`, "success");
+  }
+
+  function promptTarget(){
+    const centerImages = images.filter(im => im.assignedScreen === "center");
+    const list = centerImages.map((x, i) => `${i}: ${x.name}`).join("\n");
+    const raw = prompt(`Choisir l'image cible:\n${list}\n\nNuméro:`, "");
+    const idx = parseInt(raw, 10);
+    const imageId = (idx >= 0 && centerImages[idx]) ? centerImages[idx].id : null;
+
+    return { screen: "center", imageId };
+  }
+
+  function attachItemInteractions(){
+    const isEdit = modeSel.value === "edit";
+    
+    $$(".item").forEach(div=>{
+      const imageId = div.dataset.imageId;
+      const itemId = div.dataset.itemId;
+      const ref = getItemRef(imageId, itemId);
+      if (!ref) return;
+      const { it } = ref;
+
+      if (it.type === "hotspot"){
+        div.style.cursor = isEdit ? "move" : "pointer";
+      }
+
+      if (!isEdit) return;
+
+      let dragState = null;
+
+      div.addEventListener("pointerdown", (e)=>{
+        if (e.target.closest("textarea")) return;
+        if (e.target.closest(".handle")) return;
+        e.stopPropagation();
+
+        selected = { imageId, itemId };
+        renderScreens();
+
+        const overlayEl = div.closest(".overlay");
+        const screen = overlayEl.closest("[data-screen]").dataset.screen;
+        const { w, h } = screenSizePx(screen);
+
+        dragState = {
+          mode: "move",
+          startX: e.clientX,
+          startY: e.clientY,
+          initX: it.x,
+          initY: it.y,
+          w, h, div
+        };
+
+        e.preventDefault();
+      });
+
+      $$(".handle", div).forEach(handle=>{
+        handle.addEventListener("pointerdown", (e)=>{
+          e.stopPropagation();
+          e.preventDefault();
+
+          const overlayEl = div.closest(".overlay");
+          const screen = overlayEl.closest("[data-screen]").dataset.screen;
+          const { w, h } = screenSizePx(screen);
+
+          let corner = "se";
+          if (handle.classList.contains("h-nw")) corner = "nw";
+          if (handle.classList.contains("h-ne")) corner = "ne";
+          if (handle.classList.contains("h-sw")) corner = "sw";
+
+          dragState = {
+            mode: "resize",
+            corner,
+            startX: e.clientX,
+            startY: e.clientY,
+            initX: it.x,
+            initY: it.y,
+            initW: it.w,
+            initH: it.h,
+            w, h, div
+          };
+        });
+      });
+
+      const moveHandler = (e)=>{
+        if (!dragState || dragState.div !== div) return;
+        const dx = e.clientX - dragState.startX;
+        const dy = e.clientY - dragState.startY;
+
+        if (dragState.mode === "move"){
+          it.x = dragState.initX + pxToPct(dx, dragState.w);
+          it.y = dragState.initY + pxToPct(dy, dragState.h);
+        } else {
+          const c = dragState.corner;
+          if (c === "se"){
+            it.w = Math.max(5, dragState.initW + pxToPct(dx, dragState.w));
+            it.h = Math.max(5, dragState.initH + pxToPct(dy, dragState.h));
+          } else if (c === "sw"){
+            const newW = Math.max(5, dragState.initW - pxToPct(dx, dragState.w));
+            it.x = dragState.initX + dragState.initW - newW;
+            it.w = newW;
+            it.h = Math.max(5, dragState.initH + pxToPct(dy, dragState.h));
+          } else if (c === "ne"){
+            it.w = Math.max(5, dragState.initW + pxToPct(dx, dragState.w));
+            const newH = Math.max(5, dragState.initH - pxToPct(dy, dragState.h));
+            it.y = dragState.initY + dragState.initH - newH;
+            it.h = newH;
+          } else if (c === "nw"){
+            const newW = Math.max(5, dragState.initW - pxToPct(dx, dragState.w));
+            const newH = Math.max(5, dragState.initH - pxToPct(dy, dragState.h));
+            it.x = dragState.initX + dragState.initW - newW;
+            it.y = dragState.initY + dragState.initH - newH;
+            it.w = newW;
+            it.h = newH;
+          }
+        }
+
+        const overlayEl = div.closest(".overlay");
+        const screen = overlayEl.closest("[data-screen]").dataset.screen;
+        updateItemGeometry(div, it, screen);
+      };
+
+      const upHandler = ()=>{
+        dragState = null;
+      };
+
+      window.addEventListener("pointermove", moveHandler);
+      window.addEventListener("pointerup", upHandler);
+    });
+  }
+
+  // Tool buttons
+  $$("[data-tool]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      if (!editingImageId){
+        setFeedback("Sélectionne une image à éditer!", "error");
+        return;
+      }
+      currentTool = btn.dataset.tool;
+      setFeedback(`Outil: ${currentTool}`, "");
+    });
+  });
+
+  function attachDrawingHandlers(screen){
+    const overlayEl = $(`#${screen}Overlay`);
+
+    overlayEl.addEventListener("pointerdown", (e)=>{
+      if (modeSel.value !== "edit") return;
+      if (!currentTool) return;
+      if (!editingImageId) return;
+      if (e.target.closest(".item")) return;
+      
+      if (screenState[screen] !== editingImageId){
+        setFeedback(`Cet écran n'affiche pas l'image en édition!`, "error");
+        return;
+      }
+
+      const rect = overlayEl.getBoundingClientRect();
+      const x0 = e.clientX - rect.left;
+      const y0 = e.clientY - rect.top;
+
+      const temp = document.createElement("div");
+      temp.className = "item " + currentTool + " drag-placeholder";
+      temp.style.setProperty("--xpx", x0 + "px");
+      temp.style.setProperty("--ypx", y0 + "px");
+      temp.style.setProperty("--wpx", "0px");
+      temp.style.setProperty("--hpx", "0px");
+
+      const box = document.createElement("div");
+      box.className = "box";
+      temp.appendChild(box);
+      overlayEl.appendChild(temp);
+
+      drawing = { temp, x0, y0, screen };
+      e.preventDefault();
+    });
+
+    const moveHandler = (e)=>{
+      if (!drawing || !drawing.temp || drawing.screen !== screen) return;
+      const rect = overlayEl.getBoundingClientRect();
+      const xNow = e.clientX - rect.left;
+      const yNow = e.clientY - rect.top;
+
+      const wpx = Math.abs(xNow - drawing.x0);
+      const hpx = Math.abs(yNow - drawing.y0);
+      const xpx = Math.min(drawing.x0, xNow);
+      const ypx = Math.min(drawing.y0, yNow);
+
+      drawing.temp.style.setProperty("--xpx", xpx + "px");
+      drawing.temp.style.setProperty("--ypx", ypx + "px");
+      drawing.temp.style.setProperty("--wpx", wpx + "px");
+      drawing.temp.style.setProperty("--hpx", hpx + "px");
+    };
+
+    const upHandler = ()=>{
+      if (!drawing || !drawing.temp || drawing.screen !== screen) return;
+
+      const wpx = parseFloat(drawing.temp.style.getPropertyValue("--wpx")) || 0;
+      const hpx = parseFloat(drawing.temp.style.getPropertyValue("--hpx")) || 0;
+
+      if (wpx < 5 || hpx < 5){
+        drawing.temp.remove();
+        drawing = null;
+        currentTool = null;
+        setFeedback("Zone trop petite", "error");
+        return;
+      }
+
+      const x0 = parseFloat(drawing.temp.style.getPropertyValue("--xpx")) || 0;
+      const y0 = parseFloat(drawing.temp.style.getPropertyValue("--ypx")) || 0;
+
+      drawing.temp.remove();
+
+      const { w, h } = screenSizePx(screen);
+      const item = {
+        id: uid(),
+        type: currentTool,
+        x: pxToPct(x0, w),
+        y: pxToPct(y0, h),
+        w: pxToPct(wpx, w),
+        h: pxToPct(hpx, h),
+      };
+
+      if (currentTool === "text") item.text = "Texte...";
+      if (currentTool === "hotspot") item.target = promptTarget();
+
+      addItemToEditingImage(item);
+      drawing = null;
+      currentTool = null;
+    };
+
+    window.addEventListener("pointermove", moveHandler);
+    window.addEventListener("pointerup", upHandler);
+  }
+
+  ["left","center","right"].forEach(attachDrawingHandlers);
+
+  // Hotspot clicks
+  $$(".overlay").forEach(ov=>{
+    ov.addEventListener("click", (e)=>{
+      if (modeSel.value !== "use") return;
+      
+      let itemEl = e.target.closest(".item.hotspot");
+      
+      if (!itemEl) {
+        const rect = ov.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        ov.querySelectorAll(".item.hotspot").forEach(hs => {
+          const hsRect = hs.getBoundingClientRect();
+          const overlayRect = ov.getBoundingClientRect();
+          const hsX = hsRect.left - overlayRect.left;
+          const hsY = hsRect.top - overlayRect.top;
+          const hsW = hsRect.width;
+          const hsH = hsRect.height;
+          
+          if (x >= hsX && x <= hsX + hsW && y >= hsY && y <= hsY + hsH) {
+            itemEl = hs;
+          }
+        });
+      }
+      
+      if (!itemEl) return;
+      
+      e.stopPropagation();
+      
+      const ref = getItemRef(itemEl.dataset.imageId, itemEl.dataset.itemId);
+      if (!ref || !ref.it.target) return;
+      
+      itemEl.classList.add("clicked");
+      setTimeout(()=>itemEl.classList.remove("clicked"), 300);
+      
+      const targetImageId = ref.it.target.imageId;
+      const targetImage = getImageById(targetImageId);
+      
+      if (targetImage){
+        screenState.center = targetImageId;
+        renderScreens();
+        setFeedback(`→ ${targetImage.name}`, "success");
+      }
+    });
+  });
+
+  // Drag & drop for column assignment
+  const unassignedContainer = $("#libUnassigned");
+  
+  unassignedContainer.addEventListener("dragover", (e)=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    unassignedContainer.style.background = "rgba(0, 212, 255, 0.15)";
+  });
+  
+  unassignedContainer.addEventListener("dragleave", ()=>{
+    unassignedContainer.style.background = "";
+  });
+  
+  unassignedContainer.addEventListener("drop", (e)=>{
+    e.preventDefault();
+    unassignedContainer.style.background = "";
+    const imageId = e.dataTransfer.getData("imageId");
+    const im = getImageById(imageId);
+    if (im) {
+      im.assignedScreen = null;
+      if (screenState.left === imageId) screenState.left = null;
+      if (screenState.center === imageId) screenState.center = null;
+      if (screenState.right === imageId) screenState.right = null;
+      renderLibrary();
+      renderScreens();
+      renderTimeline();
+      setFeedback(`${im.name} → Non assignée`, "success");
+    }
+  });
+  
+  ["Left","Center","Right"].forEach(col => {
+    const screen = col.toLowerCase();
+    const container = $(`#lib${col}`);
+    
+    container.addEventListener("dragover", (e)=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      container.style.background = "rgba(0, 212, 255, 0.1)";
+    });
+    
+    container.addEventListener("dragleave", ()=>{
+      container.style.background = "";
+    });
+    
+    container.addEventListener("drop", (e)=>{
+      e.preventDefault();
+      container.style.background = "";
+      const imageId = e.dataTransfer.getData("imageId");
+      const im = getImageById(imageId);
+      if (im) {
+        im.assignedScreen = screen;
+        if (screen === "center") {
+          assignImageToScreen(imageId, screen);
+        }
+        renderLibrary();
+        renderTimeline();
+        setFeedback(`${im.name} → ${col}`, "success");
+      }
+    });
+  });
+
+  // Keyboard shortcuts
+  window.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape"){
+      currentTool = null;
+      drawing = null;
+      setFeedback("Outil annulé", "");
+    }
+    if ((e.key === "Delete" || e.key === "Backspace") && modeSel.value==="edit"){
+      if (!selected) return;
+      const ref = getItemRef(selected.imageId, selected.itemId);
+      if (!ref) return;
+      ref.im.items = ref.im.items.filter(x=>x.id !== selected.itemId);
+      selected = null;
+      renderScreens();
+      renderLibrary();
+      renderTimeline();
+      setFeedback("Élément supprimé", "success");
+    }
+  });
+
+  // Window resize handler for responsive hotspots
+  let resizeTimeout;
+  window.addEventListener("resize", ()=>{
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(()=>{
+      renderScreens();
+    }, 100);
+  });
+
+  btnToggleLeft.addEventListener("click", ()=>{ showLeft = !showLeft; updateLayoutClasses(); });
+  btnToggleRight.addEventListener("click", ()=>{ showRight = !showRight; updateLayoutClasses(); });
+
+  modeSel.addEventListener("change", renderScreens);
+  hotspotVisSel.addEventListener("change", ()=>{
+    hotspotVisibility = hotspotVisSel.value;
+    renderScreens();
+  });
+
+  file.addEventListener("change", async ()=>{
+    const files = [...(file.files || [])];
+    if (!files.length) return;
+
+    for (const f of files){
+      const dataUrl = await new Promise((res, rej)=>{
+        const fr = new FileReader();
+        fr.onload = ()=>res(fr.result);
+        fr.onerror = ()=>rej(new Error("read"));
+        fr.readAsDataURL(f);
+      });
+      images.push({ 
+        id: uid(), 
+        name: f.name, 
+        dataUrl, 
+        items: [],
+        assignedScreen: null
+      });
+    }
+
+    if (!editingImageId && images.length > 0){
+      setEditingImage(images[0].id);
+    }
+
+    renderLibrary();
+    renderScreens();
+    renderTimeline();
+    setFeedback(`${files.length} images ajoutées`, "success");
+  });
+
+  btnExport.addEventListener("click", ()=>{
+    const payload = {
+      v: 2,
+      images,
+      screenState,
+      showLeft, showRight,
+      hotspotVisibility
+    };
+    jsonTA.value = JSON.stringify(payload, null, 2);
+    setFeedback("Exporté", "success");
+  });
+
+  btnImport.addEventListener("click", ()=>{
+    try{
+      const p = JSON.parse(jsonTA.value || "");
+      if (!p || !Array.isArray(p.images)) throw new Error("Invalid");
+
+      images = p.images;
+      screenState = p.screenState || {left:null, center:null, right:null};
+      showLeft = !!p.showLeft;
+      showRight = !!p.showRight;
+      hotspotVisibility = p.hotspotVisibility || "invisible";
+      hotspotVisSel.value = hotspotVisibility;
+
+      updateLayoutClasses();
+      renderLibrary();
+      renderScreens();
+      renderTimeline();
+      setFeedback("Importé", "success");
+    } catch(err){
+      setFeedback("Erreur d'import", "error");
+    }
+  });
+
+  btnReset.addEventListener("click", ()=>{
+    if (!confirm("Reset complet ?")) return;
+    images = [];
+    screenState = { left:null, center:null, right:null };
+    editingImageId = null;
+    selected = null;
+    renderLibrary();
+    renderScreens();
+    renderTimeline();
+    setFeedback("Reset effectué", "success");
+  });
+
+  window.addEventListener("contextmenu", (e)=>{
+    const itEl = e.target.closest(".item");
+    if (!itEl) return;
+    e.preventDefault();
+    if (modeSel.value !== "edit") return;
+
+    const ref = getItemRef(itEl.dataset.imageId, itEl.dataset.itemId);
+    if (!ref) return;
+
+    if (ref.it.type === "hotspot"){
+      const action = prompt("1=changer cible, 2=supprimer", "1");
+      if (action === "2"){
+        ref.im.items = ref.im.items.filter(x=>x.id !== ref.it.id);
+        renderScreens();
+        renderLibrary();
+        renderTimeline();
+      } else if (action === "1"){
+        ref.it.target = promptTarget();
+        renderScreens();
+        renderLibrary();
+        renderTimeline();
+      }
+    } else {
+      if (confirm("Supprimer cet élément ?")){
+        ref.im.items = ref.im.items.filter(x=>x.id !== ref.it.id);
+        renderScreens();
+        renderLibrary();
+        renderTimeline();
+      }
+    }
+  });
+
+  updateLayoutClasses();
+  renderLibrary();
+  renderScreens();
+  renderTimeline();
+  setFeedback("Prêt - Importe des images pour commencer", "");
+})();
+</script>
+</body>
+</html>
