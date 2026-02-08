@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acronymes de Radiothérapie - Guide Interactif</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            background: #f8f9fa;
+            padding: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .nav-btn {
+            padding: 12px 25px;
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Liste des acronymes */
+        .search-bar {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .alphabet-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .letter-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .letter-btn:hover, .letter-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .acronym-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .acronym-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .acronym-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .acronym-title {
+            font-size: 1.4em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .acronym-full {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .acronym-equiv {
+            font-size: 0.95em;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .acronym-description {
+            color: #555;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .vulgarized {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .technical {
+            background: #fff3e0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .context {
+            background: #f3e5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+
+        /* QCM */
+        .question-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+
+        .option {
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #4caf50;
+            color: white;
+            border-color: #4caf50;
+        }
+
+        .option.incorrect {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .qcm-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.5em;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        /* Quiz chronométré */
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timer {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .timer.warning {
+            color: #ff9800;
+            animation: pulse 1s infinite;
+        }
+
+        .timer.danger {
+            color: #f44336;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Flashcards */
+        .flashcard-container {
+            perspective: 1000px;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: white;
+            transform: rotateY(180deg);
+            border: 3px solid #667eea;
+        }
+
+        .flashcard-acronym {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .flashcard-full {
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .flashcard-description {
+            font-size: 1.1em;
+            text-align: center;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .flashcard-hint {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        .stats-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .flashcard-acronym {
+                font-size: 2.5em;
+            }
+
+            .flashcard-full {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📡 Acronymes de Radiothérapie</h1>
+            <p class="subtitle">Guide interactif pour l'apprentissage des acronymes en radiothérapie</p>
+        </header>
+
+        <nav>
+            <button class="nav-btn active" onclick="showSection('liste')">📚 Liste des Acronymes</button>
+            <button class="nav-btn" onclick="showSection('qcm')">✍️ QCM</button>
+            <button class="nav-btn" onclick="showSection('quiz')">⏱️ Quiz Chrono</button>
+            <button class="nav-btn" onclick="showSection('flashcards')">🎴 Flashcards</button>
+        </nav>
+
+        <div class="content">
+            <!-- Section Liste -->
+            <div id="liste" class="section active">
+                <input type="text" class="search-bar" id="searchBar" placeholder="🔍 Rechercher un acronyme...">
+                
+                <div class="alphabet-filter" id="alphabetFilter"></div>
+                
+                <div class="acronym-list" id="acronymList"></div>
+            </div>
+
+            <!-- Section QCM -->
+            <div id="qcm" class="section">
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">QCM - Testez vos connaissances</h2>
+                <div class="score-display" id="qcmScore">Score: 0/0</div>
+                <div id="qcmContainer"></div>
+                <div class="qcm-buttons">
+                    <button class="btn btn-primary" onclick="validateQCM()">Valider les réponses</button>
+                    <button class="btn btn-secondary" onclick="resetQCM()">Recommencer</button>
+                </div>
+            </div>
+
+            <!-- Section Quiz -->
+            <div id="quiz" class="section">
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 20px;">Quiz Chronométré</h2>
+                <div class="quiz-header">
+                    <div>
+                        <span style="color: #666;">Question: </span>
+                        <span id="quizProgress" style="font-weight: bold;">1/10</span>
+                    </div>
+                    <div class="timer" id="timer">30</div>
+                    <div>
+                        <span style="color: #666;">Score: </span>
+                        <span id="quizScore" style="font-weight: bold; color: #667eea;">0</span>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 10%">10%</div>
+                </div>
+                <div id="quizContainer"></div>
+                <div class="qcm-buttons" id="quizButtons">
+                    <button class="btn btn-primary" onclick="startQuiz()">Démarrer le Quiz</button>
+                </div>
+            </div>
+
+            <!-- Section Flashcards -->
+            <div id="flashcards" class="section">
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 30px;">Flashcards - Apprentissage Actif</h2>
+                <div class="flashcard-container">
+                    <div class="flashcard" id="flashcard" onclick="flipCard()">
+                        <div class="flashcard-face flashcard-front">
+                            <div class="flashcard-acronym" id="cardAcronym">OAR</div>
+                            <div style="font-size: 1.2em; opacity: 0.9;">Cliquez pour révéler</div>
+                        </div>
+                        <div class="flashcard-face flashcard-back">
+                            <div class="flashcard-full" id="cardFull"></div>
+                            <div class="flashcard-description" id="cardDescription"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flashcard-hint">💡 Cliquez sur la carte pour la retourner</div>
+                <div class="flashcard-controls">
+                    <button class="btn btn-secondary" onclick="previousCard()">⬅️ Précédent</button>
+                    <button class="btn btn-primary" onclick="nextCard()">Suivant ➡️</button>
+                    <button class="btn btn-secondary" onclick="shuffleCards()">🔀 Mélanger</button>
+                </div>
+                <div class="stats-card">
+                    <div class="stat-item">
+                        <div class="stat-value" id="cardNumber">1</div>
+                        <div class="stat-label">Carte actuelle</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalCards">0</div>
+                        <div class="stat-label">Total de cartes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cardsViewed">0</div>
+                        <div class="stat-label">Cartes vues</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Distracteurs pour les questions (réponses plausibles mais fausses)
+        const distractors = {
+            "3D-CRT": ["3D Corrective Radiation Treatment", "3D Calibrated Ray Targeting", "3D Computed Radiological Therapy"],
+            "ALARA": ["As Limited As Radiology Allows", "Always Lower And Reduced Amounts", "Automated Limiting And Regulated Application"],
+            "BED": ["Basic Exposure Dose", "Biological Energy Distribution", "Baseline Effective Dosage"],
+            "Bq": ["Bequerel", "Bioequivalent", "Beta quantity"],
+            "BT": ["Beam Therapy", "Biological Treatment", "Boost Technique"],
+            "CBCT": ["Computed Beam CT", "Calibrated Body CT", "Collimated Beam Computed Tomography"],
+            "Ci": ["Cesium intensity", "Calibration index", "Clinical intensity"],
+            "CTV": ["Computed Target Volume", "Corrected Tumor Volume", "Clinical Tissue Volume"],
+            "DFS": ["Dose-Free Survival", "Detection-Free Status", "Diagnostic Follow-up Study"],
+            "DIBH": ["Diagnostic Imaging Breath Hold", "Dynamic Inspiration Body Hold", "Dual Intensity Breathing Hold"],
+            "DVH": ["Dose-Volume Histogram", "Distribution-Volume Histogram", "Differential-Volumetric Histogram"],
+            "EBRT": ["Enhanced Beam Radiation Therapy", "Electronic Beam Radiological Treatment", "Extended Boost Radiation Technique"],
+            "EQD2": ["Extended Quality Dose 2", "Effective Quantified Distribution 2", "Evaluated Quarter Dose 2 Gy"],
+            "FDG": ["Fluorinated Diagnostic Glucose", "Functional Density Gradient", "Fluorine Diagnostic Glucose"],
+            "FLASH-RT": ["Fast Linear Accelerated SHock RT", "Functional LINAC Adaptive SHort RT", "Fractionated Low-time Ablative Short RT"],
+            "GBM": ["Glioma Brain Multifocal", "Grade-B Malignancy", "Generalized Brain Mass"],
+            "GTV": ["Guided Target Volume", "General Tumor Volume", "Geometric Treatment Volume"],
+            "Gy": ["Gradient y", "Grenz y", "Gamma yield"],
+            "HDR": ["High Density Radiation", "Hyper Dose Rate", "High Distribution Range"],
+            "HI": ["Histogram Index", "High Intensity", "Heterogeneity Indicator"],
+            "ICRU": ["International Commission on Radiotherapy Units", "International Committee for Radiation Use", "International Council on Radioactive Units"],
+            "IGRT": ["Integrated Guidance Radiation Therapy", "Imaging-Gated RT", "Internal Guided Radiological Treatment"],
+            "IMRT": ["Integrated Modulated Radiation Therapy", "Improved Modulation RT", "Intensity-Managed Radiological Treatment"],
+            "IRM": ["Imagerie Radiale Magnétique", "Imagerie par Rayonnement Magnétique", "Imagerie Rotationnelle Médicale"],
+            "Isocentre": ["Isometric center", "Isotope center", "Isolated center"],
+            "Isodose": ["Isometric dose", "Isotopic dose", "Isolated dose"],
+            "keV": ["Kinetic electron volt", "Kilo-energy volt", "Kinetique electron volume"],
+            "kV": ["Kinetic volt", "Kilo-variation", "Kinetique volume"],
+            "LAR": ["Lateral Abdominal Resection", "Large Anterior Removal", "Left Anal Region"],
+            "LDR": ["Limited Dose Rate", "Low Distribution Range", "Linear Dose Radiation"],
+            "LINAC": ["Linear Accelerated Collimator", "LINAC Atomic Collider", "Linear Automated Charge"],
+            "LQ model": ["Linear-Quantified model", "Low-Quality model", "Linear-Quotient model"],
+            "MeV": ["Mega-energy volt", "Medical electron volt", "Metric electron volume"],
+            "MLC": ["Multiple Layer Collimator", "Modulated LINAC Collimator", "Metallic Laminar Collimator"],
+            "MVCT": ["Megavolt Calibrated Tomography", "Multi-Voltage CT", "Megavoltage Calibration Technique"],
+            "OAR": ["Optimal Area Restriction", "Observed Anatomical Region", "Oncological At-Risk"],
+            "ORL": ["Organes Respiratoires et Laryngés", "Oncologie Régionale Locale", "Oreilles-Rhinopharynx-Larynx"],
+            "OS": ["Oncological Survival", "Observed Status", "Outcome Score"],
+            "PDR": ["Programmed Dose Rate", "Progressive Distribution Range", "Partial Dose Radiation"],
+            "PET-CT": ["Photon Emission Tomography CT", "Plasma Energy Transmission CT", "Positron Energy Transfer CT"],
+            "PRV": ["Planned Risk Volume", "Protection Regulation Volume", "Predictive Region Volume"],
+            "PTV": ["Prescribed Target Volume", "Projected Treatment Volume", "Protected Tumor Volume"],
+            "QA": ["Quality Assessment", "Quantified Analysis", "Qualified Assurance"],
+            "rad": ["Radiology absorbed dose", "Radiological activity dose", "Radioactive density"],
+            "RC3D": ["Radiothérapie Calculée 3D", "Radiographie Conformée 3D", "Radiothérapie Controlée 3D"],
+            "RCP": ["Réunion Clinique Pluriprofessionnelle", "Rassemblement Coordonné Pluridisciplinaire", "Rencontre de Consultation Pluriprofessionnelle"],
+            "RCT": ["Radiation-Chemotherapy Treatment", "Radiological Combined Therapy", "Radio-Clinical Treatment"],
+            "REM": ["Radiation Energy Measurement", "Radioactive Equivalent Measurement", "Relative Energy Man"],
+            "RMI": ["Radiothérapie Modulée par Intensité", "Radiographie Médicale par Intensité", "Radiothérapie Médicale Intégrée"],
+            "RTE": ["Radiothérapie Extracorporelle", "Radiothérapie à Émission", "Radiothérapie par Énergie"],
+            "RTOG": ["Radiation Treatment Oncology Guidelines", "Radiotherapy Therapy Oncological Group", "Radioactive Treatment Observation Group"],
+            "SABR": ["Stereotactic Ablation by Radiation", "Systematic Automated Beam Radiation", "Stereotactic Anatomical Boost Radiation"],
+            "SBRT": ["Stereotactic Boost Radiation Therapy", "Systematic Body Radiological Treatment", "Stereotactic Beam Radiological Technique"],
+            "SIB": ["Sequential Integrated Boost", "Systematic Internal Boost", "Selective Intensity Boost"],
+            "SRS": ["Stereotactic Radiation Surgery", "Systematic Radiosurgical System", "Stereotactic Radiological Surgery"],
+            "SSDE": ["Systematic Size-Dependent Estimate", "Standard Size Distribution Estimate", "Scan Size-Determined Exposure"],
+            "Sv": ["Siemens value", "Sievert", "System volt"],
+            "TBI": ["Targeted Body Irradiation", "Thoracic Body Irradiation", "Treatment Body Index"],
+            "TCP": ["Treatment Control Probability", "Targeted Cell Probability", "Therapeutic Control Percentage"],
+            "TDM": ["Tomodensité Médicale", "Tomographie Digitale Médicale", "Technique de Détection Médicale"],
+            "TEP": ["Tomographie à Émission Photonique", "Technique d'Exploration Positronique", "Tomographie par Émission Photonique"],
+            "TMI": ["Targeted Marrow Irradiation", "Thoracic Marrow Irradiation", "Treatment Marrow Index"],
+            "TPS": ["Therapeutic Planning Software", "Treatment Projection System", "Targeted Planning Software"],
+            "VMAT": ["Volumetric Modulated Arc Treatment", "Variable Modulation Arc Technique", "Vectorial Modulated Automated Therapy"],
+            "4D-CT": ["Four-Directional CT", "Four-Dimensional Calibrated Tomography", "Functional-Dynamic CT"]
+        };
+
+        // Base de données des acronymes
+        const acronyms = [
+            {
+                acronym: "3D-CRT",
+                full: "3D Conformal Radiation Therapy",
+                equiv: "Radiothérapie Conformationnelle 3D (RC3D)",
+                vulgarized: "Technique qui adapte précisément les rayons à la forme de la tumeur en 3 dimensions, comme un moule parfait.",
+                technical: "Technique utilisant l'imagerie CT pour planifier et délivrer des faisceaux de radiation conformés à la géométrie tridimensionnelle du volume cible. Utilise des collimateurs multilames (MLC) pour façonner les champs.",
+                context: "Utilisé pour traiter des tumeurs de forme irrégulière en minimisant l'exposition des tissus sains environnants."
+            },
+            {
+                acronym: "ALARA",
+                full: "As Low As Reasonably Achievable",
+                equiv: "Aussi Bas Que Raisonnablement Possible (ALARP en français)",
+                vulgarized: "Principe de sécurité : toujours utiliser le moins de radiation possible tout en restant efficace.",
+                technical: "Principe fondamental de radioprotection visant à minimiser l'exposition aux rayonnements ionisants en optimisant le rapport bénéfice/risque. Implique l'utilisation de protections, la réduction du temps d'exposition et l'augmentation de la distance."
+            },
+            {
+                acronym: "BED",
+                full: "Biologically Effective Dose",
+                equiv: "Dose Biologiquement Efficace (DBE)",
+                vulgarized: "Mesure qui prend en compte non seulement la dose totale de radiation, mais aussi comment elle est répartie dans le temps pour estimer l'effet réel sur les cellules.",
+                technical: "Modèle mathématique basé sur le modèle linéaire-quadratique (LQ) permettant de comparer différents schémas de fractionnement. Formule: BED = nd(1 + d/(α/β)) où n=nombre de fractions, d=dose par fraction."
+            },
+            {
+                acronym: "Bq",
+                full: "Becquerel",
+                equiv: "Becquerel (Bq) - unité identique en français",
+                vulgarized: "Unité qui mesure la radioactivité : 1 Bq = 1 désintégration radioactive par seconde.",
+                technical: "Unité SI d'activité radioactive. 1 Bq = 1 désintégration nucléaire par seconde. Remplace le Curie (1 Ci = 3,7 × 10¹⁰ Bq)."
+            },
+            {
+                acronym: "BT",
+                full: "Brachytherapy",
+                equiv: "Curiethérapie",
+                vulgarized: "Traitement où on place directement une source radioactive dans ou près de la tumeur, comme poser un patch médicamenteux.",
+                technical: "Modalité de radiothérapie utilisant des sources radioactives scellées placées en contact direct ou à proximité immédiate du volume cible. Débit de dose élevé (HDR), moyen (MDR) ou faible (LDR).",
+                context: "Utilisé notamment pour le cancer de la prostate (implants permanents d'iode-125) ou le cancer du col utérin (curiethérapie vaginale)."
+            },
+            {
+                acronym: "CBCT",
+                full: "Cone Beam Computed Tomography",
+                equiv: "Tomographie Volumique à Faisceau Conique (TVFC)",
+                vulgarized: "Scanner 3D intégré à l'appareil de radiothérapie pour vérifier la position du patient juste avant le traitement.",
+                technical: "Système d'imagerie embarqué sur l'accélérateur linéaire permettant l'acquisition d'images volumétriques pour l'IGRT. Utilise un faisceau conique de rayons X et un détecteur plan pour une rotation complète.",
+                context: "Effectué quotidiennement avant chaque séance pour corriger le positionnement du patient et adapter aux modifications anatomiques."
+            },
+            {
+                acronym: "Ci",
+                full: "Curie",
+                equiv: "Curie (Ci) - unité identique en français",
+                vulgarized: "Ancienne unité de mesure de la radioactivité, remplacée par le Becquerel. 1 Ci est une énorme quantité de radioactivité.",
+                technical: "Ancienne unité d'activité radioactive, basée sur l'activité de 1 gramme de radium-226. 1 Ci = 3,7 × 10¹⁰ Bq = 37 GBq. Encore utilisée en curiethérapie et médecine nucléaire."
+            },
+            {
+                acronym: "CTV",
+                full: "Clinical Target Volume",
+                equiv: "Volume Cible Clinique (VCC)",
+                description: "Volume contenant la tumeur visible (GTV) plus une marge de sécurité pour inclure l'extension microscopique invisible de la maladie."
+            },
+            {
+                acronym: "DFS",
+                full: "Disease-Free Survival",
+                equiv: "Survie Sans Maladie (SSM)",
+                vulgarized: "Pourcentage de patients qui n'ont pas eu de récidive de leur cancer après le traitement.",
+                technical: "Indicateur d'efficacité thérapeutique mesurant le temps entre la fin du traitement et la première récidive locale, régionale, métastatique ou un second cancer primaire."
+            },
+            {
+                acronym: "DIBH",
+                full: "Deep Inspiration Breath Hold",
+                equiv: "Blocage Respiratoire en Inspiration Profonde (BRIP)",
+                vulgarized: "Technique où le patient retient sa respiration en inspirant profondément pendant le traitement pour éloigner le cœur de la zone irradiée.",
+                technical: "Technique de gating respiratoire utilisée principalement pour les cancers du sein gauche et les lymphomes médiastinaux. L'inspiration profonde augmente la distance entre le cœur et la paroi thoracique de 1-2 cm, réduisant la dose cardiaque.",
+                context: "Le patient s'entraîne avec des lunettes vidéo avant chaque séance, maintenant son inspiration entre 15-20 secondes pendant l'irradiation."
+            },
+            {
+                acronym: "DME",
+                full: "Dossier Médical Électronique",
+                equiv: "Electronic Medical Record (EMR)",
+                description: "Système informatisé centralisant toutes les données médicales du patient, incluant les plans de traitement, images et comptes-rendus."
+            },
+            {
+                acronym: "DNR",
+                full: "Do Not Resuscitate",
+                equiv: "Ne Pas Réanimer (NPR)",
+                description: "Directive médicale indiquant qu'aucune réanimation cardio-pulmonaire ne doit être tentée en cas d'arrêt cardiaque."
+            },
+            {
+                acronym: "Dose max",
+                full: "Dose maximale",
+                equiv: "Maximum dose",
+                description: "Dose la plus élevée reçue en un point du volume, exprimée en Gy. Contrainte critique pour les OAR."
+            },
+            {
+                acronym: "Dose moyenne",
+                full: "Dose moyenne",
+                equiv: "Mean dose",
+                description: "Moyenne arithmétique des doses reçues dans l'ensemble d'un volume (PTV ou OAR), exprimée en Gy."
+            },
+            {
+                acronym: "DRR",
+                full: "Digitally Reconstructed Radiograph",
+                equiv: "Radiographie Reconstruite Numériquement (RRN)",
+                vulgarized: "Image radiographique créée à partir du scanner de planification, utilisée comme référence pour vérifier le positionnement du patient.",
+                technical: "Image 2D générée par projection des données CT de planification simulant une radiographie conventionnelle. Sert de référence pour le recalage avec les images portales ou CBCT lors de l'IGRT.",
+                context: "Comparées quotidiennement avec les images kV ou MV pour vérifier le positionnement et calculer les corrections nécessaires."
+            },
+            {
+                acronym: "DVH",
+                full: "Dose-Volume Histogram",
+                equiv: "Histogramme Dose-Volume (HDV)",
+                vulgarized: "Graphique qui montre quelle proportion d'un organe reçoit quelle dose de radiation, permettant d'évaluer la qualité du plan.",
+                technical: "Représentation graphique synthétisant la distribution de dose dans un volume. Le DVH cumulatif montre le pourcentage de volume recevant au moins une certaine dose. Utilisé pour évaluer la couverture du PTV et le respect des contraintes OAR.",
+                context: "En pratique : V20Gy pour le poumon signifie le volume de poumon recevant au moins 20 Gy. D95% pour le PTV signifie la dose reçue par 95% du volume."
+            },
+            {
+                acronym: "EBRT",
+                full: "External Beam Radiation Therapy",
+                equiv: "Radiothérapie par Faisceau Externe (RFE)",
+                description: "Radiothérapie délivrée par une source externe au patient, contrairement à la curiethérapie. Inclut toutes les techniques utilisant un accélérateur linéaire."
+            },
+            {
+                acronym: "EQD2",
+                full: "Equivalent Dose in 2 Gy fractions",
+                equiv: "Dose Équivalente en fractions de 2 Gy",
+                vulgarized: "Conversion mathématique permettant de comparer différents schémas de fractionnement en les ramenant à un standard de 2 Gy par séance.",
+                technical: "Formule dérivée du modèle LQ pour normaliser les schémas de fractionnement : EQD2 = D × [(d + α/β)/(2 + α/β)] où D=dose totale, d=dose par fraction. Permet la comparaison et l'addition de doses de différents traitements."
+            },
+            {
+                acronym: "FDG",
+                full: "Fluorodésoxyglucose",
+                equiv: "Fluorodeoxyglucose (FDG)",
+                vulgarized: "Traceur radioactif utilisé en TEP-scan, attiré par les cellules cancéreuses qui consomment beaucoup de sucre.",
+                technical: "Analogue radioactif du glucose marqué au fluor-18 (¹⁸F-FDG), utilisé en tomographie par émission de positons. Les cellules tumorales à métabolisme glucidique élevé captent préférentiellement ce traceur.",
+                context: "Le TEP-FDG permet la détection de métastases, la délimitation du GTV en radiothérapie et l'évaluation de la réponse thérapeutique."
+            },
+            {
+                acronym: "FLASH-RT",
+                full: "FLASH Radiation Therapy",
+                equiv: "Radiothérapie FLASH",
+                vulgarized: "Technique expérimentale délivrant une dose très élevée en quelques millisecondes, potentiellement moins toxique pour les tissus sains.",
+                technical: "Modalité émergente utilisant des débits de dose ultra-élevés (>40 Gy/s, vs 0,03 Gy/s en conventionnel). L'effet FLASH suggère une protection préférentielle des tissus sains via des mécanismes radiobiologiques impliquant l'hypoxie transitoire et le stress oxydatif.",
+                context: "En phase préclinique et premiers essais cliniques. Nécessite des modifications techniques majeures des accélérateurs linéaires."
+            },
+            {
+                acronym: "GBM",
+                full: "Glioblastoma Multiforme",
+                equiv: "Glioblastome Multiforme (GBM)",
+                vulgarized: "Type de cancer du cerveau le plus agressif, nécessitant souvent une radiothérapie après la chirurgie.",
+                technical: "Tumeur cérébrale primitive de grade IV (OMS) issue des cellules gliales. Traitement standard : résection chirurgicale maximale suivie de radiothérapie conformationnelle (60 Gy en 30 fractions sur le lit tumoral + 2cm) avec témozolomide concomitant."
+            },
+            {
+                acronym: "GTV",
+                full: "Gross Tumor Volume",
+                equiv: "Volume Tumoral Macroscopique (VTM)",
+                description: "Tumeur visible et palpable, délimitée sur les images (CT, IRM, TEP). Base de la délinéation des autres volumes cibles."
+            },
+            {
+                acronym: "Gy",
+                full: "Gray",
+                equiv: "Gray (Gy) - unité identique en français",
+                vulgarized: "Unité de mesure de la dose de radiation reçue. 1 Gy = 1 joule d'énergie absorbée par 1 kg de tissu.",
+                technical: "Unité SI de dose absorbée. 1 Gy = 1 J/kg = 100 rad. Dose typique en radiothérapie curative : 60-70 Gy. La dose est la grandeur physique fondamentale en radiothérapie, corrélée aux effets biologiques."
+            },
+            {
+                acronym: "HDR",
+                full: "High Dose Rate",
+                equiv: "Haut Débit de Dose (HDD)",
+                vulgarized: "Curiethérapie rapide où la source radioactive délivre une dose élevée en quelques minutes.",
+                technical: "Curiethérapie avec débit de dose >12 Gy/h, typiquement 200-300 Gy/h. Utilise généralement l'iridium-192 en source télécommandée (projecteur de sources). Durée de traitement: quelques minutes par fraction.",
+                context: "Curiethérapie HDR gynécologique (5 Gy × 4 fractions), ou boost prostatique (15 Gy en 1 fraction) en complément de la radiothérapie externe."
+            },
+            {
+                acronym: "HI",
+                full: "Homogeneity Index",
+                equiv: "Indice d'Homogénéité (IH)",
+                vulgarized: "Mesure de l'uniformité de la dose dans la tumeur. Plus il est proche de 0, meilleure est l'homogénéité.",
+                technical: "Index quantifiant l'homogénéité de dose dans le PTV. Formule ICRU: HI = (D2% - D98%)/D50%. Valeur idéale < 0,15. Un HI élevé indique des zones de surdosage ou sous-dosage significatives.",
+                context: "L'IMRT améliore la conformité mais peut dégrader l'homogénéité comparé à la RC3D. Le HI aide à équilibrer ces deux objectifs."
+            },
+            {
+                acronym: "ICRU",
+                full: "International Commission on Radiation Units and Measurements",
+                equiv: "Commission Internationale des Unités et Mesures de Radiation (CIRUM)",
+                description: "Organisation internationale définissant les standards, nomenclature et recommandations en radiothérapie (rapports 50, 62, 83, etc.)."
+            },
+            {
+                acronym: "IGRT",
+                full: "Image-Guided Radiation Therapy",
+                equiv: "Radiothérapie Guidée par l'Image (RTGI)",
+                vulgarized: "Utilisation d'images prises juste avant ou pendant le traitement pour ajuster précisément la position du patient.",
+                technical: "Ensemble de techniques d'imagerie embarquées (CBCT, kV/MV, échographie) permettant la vérification et correction quotidienne du positionnement du patient et des organes internes. Essentielle pour l'escalade de dose et les marges réduites.",
+                context: "CBCT quotidien avec recalage automatique 6D (translations + rotations), correction des décalages >3mm en prostate, >5mm en poumon."
+            },
+            {
+                acronym: "IMRT",
+                full: "Intensity-Modulated Radiation Therapy",
+                equiv: "Radiothérapie par Modulation d'Intensité (RMI)",
+                vulgarized: "Technique avancée où l'intensité du faisceau varie pendant le traitement pour épouser parfaitement la forme de la tumeur.",
+                technical: "Évolution de la RC3D permettant de moduler l'intensité des faisceaux au sein d'un même champ. Utilise l'optimisation inverse avec algorithmes itératifs pour atteindre les objectifs de dose. Nécessite un MLC dynamique et un TPS avancé.",
+                context: "Standard pour ORL (épargne parotides), prostate (escalade à 78-80 Gy), tumeurs paraspinales. Permet la peinture de dose (dose painting)."
+            },
+            {
+                acronym: "IRM",
+                full: "Imagerie par Résonance Magnétique",
+                equiv: "Magnetic Resonance Imaging (MRI)",
+                vulgarized: "Scanner utilisant des aimants puissants au lieu de rayons X, excellent pour voir les tissus mous comme le cerveau ou la prostate.",
+                technical: "Modalité d'imagerie basée sur la résonance magnétique nucléaire des protons. Contraste supérieur pour les tissus mous. Utilisée en fusion d'images pour la délinéation (cerveau, prostate, foie). IRM-Linac : guidage en temps réel.",
+                context: "IRM cérébrale T1 gadolinium + T2 FLAIR pour délinéation des gliomes. IRM prostatique multiparamétrique (T2, diffusion, DCE) pour boost focal."
+            },
+            {
+                acronym: "Isocentre",
+                full: "Isocentre",
+                equiv: "Isocenter",
+                vulgarized: "Point de référence fixe dans l'espace autour duquel tourne l'appareil de radiothérapie, généralement placé au centre de la tumeur.",
+                technical: "Point d'intersection des axes de rotation du bras, du collimateur et de la table de traitement. Précision mécanique requise: <1mm pour SRS/SBRT, <2mm pour traitements conventionnels. Vérifié par test de Winston-Lutz.",
+                context: "Défini en coordonnées 3D (x, y, z) lors de la simulation. Le patient est positionné pour faire coïncider l'isocentre mécanique avec l'isocentre de dose (centre du PTV)."
+            },
+            {
+                acronym: "Isodose",
+                full: "Isodose",
+                equiv: "Isodose curve",
+                vulgarized: "Ligne sur une carte qui relie tous les points recevant la même dose de radiation, comme les courbes de niveau sur une carte topographique.",
+                technical: "Courbe d'égale dose dans un plan de coupe, généralement normalisée à 100% à la dose de prescription. Les isodoses permettent la visualisation de la distribution de dose et l'évaluation de la couverture du volume cible et de l'exposition des OAR.",
+                context: "Isodoses typiques affichées: 105%, 100%, 95%, 50%, 20%. La ligne 95% doit couvrir >95% du PTV. Isodose 50% pour évaluer la dose intégrale."
+            },
+            {
+                acronym: "keV",
+                full: "Kiloélectronvolt",
+                equiv: "Kiloelectronvolt (keV)",
+                vulgarized: "Unité d'énergie des rayons X de diagnostic (50-150 keV), plus faible que les rayons de traitement (MeV).",
+                technical: "Unité d'énergie. 1 keV = 1,602 × 10⁻¹⁶ J. Gamme diagnostique: 20-150 keV (mammographie à CT). Curiethérapie: 30-400 keV. Plus l'énergie est basse, plus l'absorption est superficielle."
+            },
+            {
+                acronym: "kV",
+                full: "Kilovolt",
+                equiv: "Kilovolt (kV)",
+                vulgarized: "Tension électrique produisant les rayons X de diagnostic (80-140 kV) ou d'imagerie en radiothérapie (CBCT).",
+                technical: "Tension d'accélération des électrons dans le tube à rayons X, déterminant l'énergie maximale des photons. Imagerie kV embarquée (CBCT, radiographie planaire): meilleur contraste tissulaire que le MV mais dose supplémentaire."
+            },
+            {
+                acronym: "LAR",
+                full: "Low Anterior Resection",
+                equiv: "Résection Antérieure Basse",
+                description: "Chirurgie du cancer du rectum. Souvent précédée d'une radio-chimiothérapie néoadjuvante (45-50 Gy)."
+            },
+            {
+                acronym: "LDR",
+                full: "Low Dose Rate",
+                equiv: "Bas Débit de Dose (BDD)",
+                vulgarized: "Curiethérapie lente où les sources radioactives restent en place plusieurs jours, délivrant une dose continue.",
+                technical: "Curiethérapie avec débit de dose 0,4-2 Gy/h. Implants permanents (iode-125, palladium-103 pour prostate) ou temporaires (césium-137). Durée d'hospitalisation: 2-7 jours pour LDR temporaire.",
+                context: "Curiethérapie LDR prostatique: implantation de 80-120 grains d'iode-125 (dose 145 Gy). Indication: cancer prostatique localisé, faible risque."
+            },
+            {
+                acronym: "LINAC",
+                full: "Linear Accelerator",
+                equiv: "Accélérateur Linéaire (AL)",
+                vulgarized: "Machine principale de radiothérapie qui produit des rayons X de haute énergie pour traiter les cancers.",
+                technical: "Appareil produisant des rayons X (photons) ou électrons de haute énergie (4-25 MV) par accélération d'électrons dans un tube hyperfréquence puis collision sur une cible de tungstène. Composants: klystron/magnétron, guide d'onde, tête d'irradiation avec MLC.",
+                context: "LINAC modernes: rotation continue (VMAT), imagerie embarquée (CBCT), gating respiratoire, MLC haute définition (2,5-5mm). Entretien quotidien (QA matin) et mensuel (dosimétrie)."
+            },
+            {
+                acronym: "LQ model",
+                full: "Linear-Quadratic model",
+                equiv: "Modèle Linéaire-Quadratique (MLQ)",
+                vulgarized: "Formule mathématique permettant de prédire l'effet des radiations sur les cellules selon la dose et le fractionnement.",
+                technical: "Modèle radiobiologique décrivant la survie cellulaire: SF = exp(-αD - βD²). Le ratio α/β caractérise la radiosensibilité tissulaire (tumeurs: 10 Gy, tissus tardifs: 3 Gy, prostate: 1,5 Gy). Base des calculs de BED et EQD2.",
+                context: "Justifie l'hypofractionnement pour la prostate (α/β faible) et la norme de 2 Gy/fraction pour épargner les tissus sains (α/β faible)."
+            },
+            {
+                acronym: "MeV",
+                full: "Megaélectronvolt",
+                equiv: "Megaelectronvolt (MeV)",
+                vulgarized: "Unité d'énergie des rayons de traitement (4-25 MeV), beaucoup plus puissants que les rayons de diagnostic.",
+                technical: "1 MeV = 1000 keV = 1,602 × 10⁻¹³ J. Gamme thérapeutique: 4-25 MV pour photons, 4-22 MeV pour électrons. Plus l'énergie est élevée, plus la pénétration est profonde. 6 MV: localisations superficielles/moyennes, 18-25 MV: pelvis profond."
+            },
+            {
+                acronym: "MLC",
+                full: "Multi-Leaf Collimator",
+                equiv: "Collimateur Multilames (CML)",
+                vulgarized: "Ensemble de lames métalliques mobiles qui façonnent précisément le faisceau de radiation pour qu'il épouse la forme de la tumeur.",
+                technical: "Système de collimation composé de 40-160 lames de tungstène indépendantes (largeur 2,5-10mm au niveau isocentre). Permet la conformation 3D et la modulation d'intensité. Vitesse max: 2,5-3 cm/s. Transmission: <2%.",
+                context: "HD-MLC (2,5-5mm): IMRT tête-cou, stéréotaxie. Standard MLC (5-10mm): traitements conventionnels. Contrôle qualité: test picket fence mensuel."
+            },
+            {
+                acronym: "MVCT",
+                full: "Megavoltage Computed Tomography",
+                equiv: "Tomographie par Faisceau Mégavolt (TFM)",
+                vulgarized: "Scanner intégré utilisant le faisceau de traitement pour prendre des images, contraste plus faible que le CBCT mais sans dose supplémentaire.",
+                technical: "Modalité IGRT utilisant le faisceau de traitement (MV) pour acquérir des images tomodensitométriques. Contraste inférieur au CBCT mais même qualité dosimétrique. Spécifique aux tomothérapies.",
+                context: "MVCT quotidien en tomothérapie avec recalage automatique. Dose d'imagerie: 1-3 cGy par acquisition."
+            },
+            {
+                acronym: "OAR",
+                full: "Organs At Risk",
+                equiv: "Organes À Risque (OAR)",
+                description: "Organes sains proches de la tumeur qu'il faut protéger pendant la radiothérapie."
+            },
+            {
+                acronym: "OMS",
+                full: "Organisation Mondiale de la Santé",
+                equiv: "World Health Organization (WHO)",
+                description: "Organisation internationale de santé publique définissant notamment la classification des tumeurs cérébrales utilisée en radiothérapie."
+            },
+            {
+                acronym: "ORL",
+                full: "Oto-Rhino-Laryngologie",
+                equiv: "Ear, Nose and Throat (ENT)",
+                vulgarized: "Spécialité médicale traitant les cancers de la tête et du cou, région où la radiothérapie est très utilisée.",
+                technical: "Cancers des voies aéro-digestives supérieures (cavité orale, pharynx, larynx, sinus). Traitement par IMRT (70 Gy sur GTV, 60 Gy sur aires ganglionnaires) + chimiothérapie concomitante (cisplatine).",
+                context: "Défis en ORL: épargne des glandes salivaires (xérostomie), dysphagie, mucite. Immobilisation cruciale par masque thermoformé."
+            },
+            {
+                acronym: "OS",
+                full: "Overall Survival",
+                equiv: "Survie Globale (SG)",
+                description: "Pourcentage de patients encore en vie à un moment donné après le traitement, tous décès confondus."
+            },
+            {
+                acronym: "PDR",
+                full: "Pulsed Dose Rate",
+                equiv: "Débit de Dose Pulsé (DDP)",
+                vulgarized: "Curiethérapie intermédiaire délivrant la dose par impulsions horaires plutôt que en continu.",
+                technical: "Curiethérapie mimant le LDR par pulses horaires (débit instantané élevé ~200 Gy/h, 10-20 min/h). Combine avantages biologiques du LDR et avantages pratiques du HDR. Durée totale: 2-4 jours.",
+                context: "PDR gynécologique ou cervico-faciale. Source: iridium-192 miniaturisée. Hospitalisation nécessaire avec radioprotection renforcée."
+            },
+            {
+                acronym: "PET-CT / TEP-TDM",
+                full: "Positron Emission Tomography - Computed Tomography",
+                equiv: "Tomographie par Émission de Positons - Tomodensitométrie (TEP-TDM)",
+                vulgarized: "Scanner couplé à une imagerie métabolique montrant l'activité des cellules, très utile pour localiser précisément les cancers actifs.",
+                technical: "Imagerie hybride combinant l'information morphologique du CT et l'information fonctionnelle de la TEP (généralement au ¹⁸F-FDG). Essentielle pour la stadification, la délinéation du GTV (notamment poumon, ORL, lymphomes) et l'évaluation de réponse.",
+                context: "TEP de planification en position de traitement avec contention. SUVmax utilisé pour définir le GTV par seuillage (généralement 40-50% du SUVmax). Fusion rigide avec le CT de simulation."
+            },
+            {
+                acronym: "PRV",
+                full: "Planning organ at Risk Volume",
+                equiv: "Volume de Planification d'Organe à Risque (VPOR)",
+                vulgarized: "OAR + une marge de sécurité pour tenir compte des incertitudes de position pendant le traitement.",
+                technical: "Expansion géométrique d'un OAR pour tenir compte des incertitudes de repositionnement et mouvement interne. Marge typique: 3-5mm selon l'organe et l'IGRT. Concept analogue au PTV mais pour protection des organes sains.",
+                context: "PRV moelle: OAR moelle + 3mm. PRV chiasma: OAR chiasma + 2mm. Les contraintes de dose sont appliquées sur le PRV plutôt que l'OAR."
+            },
+            {
+                acronym: "PTV",
+                full: "Planning Target Volume",
+                equiv: "Volume Cible Prévisionnel (VCP)",
+                vulgarized: "Volume final à irradier = CTV + une marge de sécurité pour tenir compte des mouvements du patient et incertitudes techniques.",
+                technical: "Expansion géométrique du CTV intégrant les incertitudes de positionnement (erreur systématique Σ, erreur aléatoire σ) et les mouvements internes (ITV). Formule de van Herk: marge = 2,5Σ + 0,7σ. Typique: 5-10mm selon localisation et IGRT.",
+                context: "PTV prostate avec CBCT quotidien: CTV+5mm. PTV poumon sans gating: nécessite ITV puis PTV=ITV+5mm. La dose de prescription est définie sur le PTV."
+            },
+            {
+                acronym: "QA",
+                full: "Quality Assurance",
+                equiv: "Assurance Qualité (AQ)",
+                vulgarized: "Ensemble de vérifications régulières pour s'assurer que l'appareil de radiothérapie fonctionne parfaitement.",
+                technical: "Programme de contrôles systématiques vérifiant la conformité de l'équipement et des procédures. QA machine quotidienne (output, isocentre, lasers), mensuelle (MLC, imagerie) et annuelle (dosimétrie absolue). QA patient spécifique (IMRT/VMAT): vérification du plan avant traitement.",
+                context: "Normes: SFPM, ESTRO, AAPM TG-142. QA pré-traitement: mesure par fantôme avec chambre d'ionisation et détecteurs plans (écart <3% dose, >95% gamma index 3%/3mm)."
+            },
+            {
+                acronym: "rad",
+                full: "Radiation Absorbed Dose",
+                equiv: "Dose de Radiation Absorbée (rad)",
+                vulgarized: "Ancienne unité de dose de radiation. 1 rad = 0,01 Gy = 1 cGy. Encore utilisée aux États-Unis.",
+                technical: "Ancienne unité CGS de dose absorbée. 1 rad = 0,01 Gy = 1 cGy = 100 erg/g. Remplacée par le Gray dans le système SI mais encore utilisée en pratique nord-américaine."
+            },
+            {
+                acronym: "RC3D",
+                full: "Radiothérapie Conformationnelle 3D",
+                equiv: "3D Conformal Radiation Therapy (3D-CRT)",
+                description: "Voir 3D-CRT. Technique standard adaptant les faisceaux à la forme 3D de la tumeur."
+            },
+            {
+                acronym: "RCP",
+                full: "Réunion de Concertation Pluridisciplinaire",
+                equiv: "Multidisciplinary Team Meeting (MDT)",
+                vulgarized: "Réunion où chirurgiens, oncologues, radiologues et autres spécialistes décident ensemble du meilleur traitement pour chaque patient.",
+                technical: "Réunion obligatoire en cancérologie réunissant au minimum 3 spécialités médicales pour discuter la stratégie thérapeutique de chaque patient. En radiothérapie: décision d'indication, volumes, dose, étalement, association thérapeutique.",
+                context: "RCP hebdomadaire par organe. Trace écrite obligatoire au dossier. Décision de radiothérapie adjuvante, néoadjuvante, concomitante ou exclusive selon les référentiels."
+            },
+            {
+                acronym: "RCT",
+                full: "Radiochimothérapie / Radio-Chimiothérapie",
+                equiv: "Chemoradiotherapy (CRT)",
+                vulgarized: "Association simultanée de radiothérapie et de chimiothérapie pour potentialiser l'effet anti-tumoral.",
+                technical: "Administration concomitante de chimiothérapie (généralement radiosensibilisante: cisplatine, 5-FU, témozolomide) et de radiothérapie. Synergie anti-tumorale mais toxicité accrue. Nécessite surveillance rapprochée (NFS, créatinine).",
+                context: "RCT standard: ORL (cisplatine 100mg/m² J1-J22-J43), rectum (5-FU continu ou capécitabine), col utérin (cisplatine hebdomadaire), glioblastome (témozolomide quotidien)."
+            },
+            {
+                acronym: "REM",
+                full: "Roentgen Equivalent Man",
+                equiv: "Équivalent Roentgen pour l'Homme",
+                vulgarized: "Ancienne unité d'équivalent de dose tenant compte du type de rayonnement. Remplacée par le Sievert.",
+                technical: "Ancienne unité d'équivalent de dose. 1 rem = 0,01 Sv. Intègre la dangerosité relative des différents rayonnements (facteur de pondération). Remplacée par le Sievert dans le système SI."
+            },
+            {
+                acronym: "RMI",
+                full: "Radiothérapie par Modulation d'Intensité",
+                equiv: "Intensity-Modulated Radiation Therapy (IMRT)",
+                description: "Voir IMRT. Technique modulant l'intensité du faisceau pour optimiser la distribution de dose."
+            },
+            {
+                acronym: "RTE",
+                full: "Radiothérapie Externe",
+                equiv: "External Beam Radiation Therapy (EBRT)",
+                description: "Voir EBRT. Radiothérapie par source externe (accélérateur linéaire)."
+            },
+            {
+                acronym: "RTOG",
+                full: "Radiation Therapy Oncology Group",
+                equiv: "Groupe d'Oncologie de Radiothérapie",
+                description: "Organisation américaine ayant développé des échelles de toxicité et des protocoles de recherche clinique, maintenant intégrée au NRG Oncology."
+            },
+            {
+                acronym: "SABR",
+                full: "Stereotactic Ablative Radiotherapy",
+                equiv: "Radiothérapie Ablative Stéréotaxique",
+                description: "Synonyme de SBRT. Terme préféré en Europe pour souligner l'intention ablative (destruction complète) de la lésion."
+            },
+            {
+                acronym: "SBRT",
+                full: "Stereotactic Body Radiation Therapy",
+                equiv: "Radiothérapie Stéréotaxique Corporelle (RSC)",
+                vulgarized: "Technique de haute précision délivrant une dose très élevée en 1 à 5 séances sur des petites tumeurs du corps (poumon, foie, prostate).",
+                technical: "Radiothérapie hypofractionnée (1-5 fractions, 8-20 Gy/fraction) avec précision submillimétrique, délivrant une dose ablative biologique élevée (BED >100 Gy). Nécessite IGRT rigoureuse, immobilisation stéréotaxique, 4D-CT pour tumeurs mobiles.",
+                context: "Indications: tumeurs pulmonaires T1-T2 inopérables (54 Gy/3fx ou 48 Gy/4fx), métastases oligométastatiques, petites tumeurs hépatiques, boost prostatique. Contraintes strictes pour OAR (moelle, paroi digestive)."
+            },
+            {
+                acronym: "SIB",
+                full: "Simultaneous Integrated Boost",
+                equiv: "Boost Intégré Simultané (BIS)",
+                vulgarized: "Technique permettant de traiter simultanément la tumeur à haute dose et les zones à risque à dose plus faible, en une seule séance.",
+                technical: "Stratégie IMRT/VMAT délivrant simultanément des doses différentes à des volumes différents lors de chaque séance. Exemple: 70 Gy en 35fx sur GTV (2 Gy/fx) + 56 Gy en 35fx sur aires ganglionnaires (1,6 Gy/fx).",
+                context: "Avantages: raccourcissement du traitement, boost progressif (avantage radiobiologique), logistique simplifiée vs boost séquentiel. Standard en ORL et prostate."
+            },
+            {
+                acronym: "SRS",
+                full: "Stereotactic Radiosurgery",
+                equiv: "Radiochirurgie Stéréotaxique",
+                vulgarized: "Radiothérapie ultra-précise du cerveau délivrant une dose très élevée en une seule séance, sans chirurgie réelle.",
+                technical: "Irradiation intracrânienne en fraction unique (12-25 Gy selon taille) avec précision submillimétrique (<1mm). Nécessite cadre stéréotaxique invasif (Leksell) ou masque thermoplastique + CBCT. Gradient de dose très abrupt.",
+                context: "Indications: métastases cérébrales (20 Gy/1fx si <3cm), neurinome acoustique (12-13 Gy), MAV. Appareils dédiés: Gamma Knife, CyberKnife, ou LINAC avec MLC haute définition."
+            },
+            {
+                acronym: "SSDE",
+                full: "Size-Specific Dose Estimate",
+                equiv: "Estimation de Dose Spécifique à la Taille",
+                vulgarized: "Méthode pour estimer plus précisément la dose reçue lors d'un scanner en tenant compte de la corpulence du patient.",
+                technical: "Indice de dose patient personnalisé en tomodensitométrie, corrigeant le CTDIvol selon le diamètre effectif du patient. SSDE = CTDIvol × facteur de conversion (dépend de la taille du patient).",
+                context: "Important pour le CBCT en radiothérapie, particulièrement en pédiatrie. Permet d'optimiser les protocoles d'imagerie selon le principe ALARA."
+            },
+            {
+                acronym: "Sv",
+                full: "Sievert",
+                equiv: "Sievert (Sv) - unité identique en français",
+                vulgarized: "Unité de dose équivalente tenant compte de la dangerosité du type de rayonnement pour le corps humain.",
+                technical: "Unité SI d'équivalent de dose et de dose efficace. H = D × wR où wR est le facteur de pondération radiologique (photons/électrons: 1, neutrons: 5-20, alpha: 20). Limite réglementaire travailleurs: 20 mSv/an."
+            },
+            {
+                acronym: "TBI",
+                full: "Total Body Irradiation",
+                equiv: "Irradiation Corporelle Totale (ICT)",
+                vulgarized: "Irradiation de tout le corps, utilisée avant certaines greffes de moelle osseuse pour détruire les cellules malades.",
+                technical: "Conditionnement pré-greffe de moelle osseuse pour leucémies et lymphomes. Dose typique: 12 Gy en 6 fractions sur 3 jours (TBI myéloablatif) ou 2-4 Gy (TBI non myéloablatif). Nécessite technique spéciale (grande distance, chambre dédiée, écrans personnalisés).",
+                context: "Complications: VOD hépatique, pneumopathie interstitielle, cataracte. Protection des poumons (écrans de plomb) si dose >12 Gy."
+            },
+            {
+                acronym: "TCP",
+                full: "Tumor Control Probability",
+                equiv: "Probabilité de Contrôle Tumoral (PCT)",
+                vulgarized: "Pourcentage de chances estimées que la dose prévue détruise complètement la tumeur.",
+                technical: "Modèle mathématique prédisant la probabilité d'éradication tumorale en fonction de la dose (modèle de Poisson). Dépend de la radiosensibilité cellulaire, du nombre de clonogens, de la dose et du fractionnement. Augmente sigmoïdalement avec la dose.",
+                context: "Guider l'escalade de dose. Pour 50% de TCP: ~60 Gy en cancer du sein, 70 Gy en ORL, 78-80 Gy en prostate. Dose pour 90% TCP: environ 10-15 Gy supplémentaires."
+            },
+            {
+                acronym: "TDM",
+                full: "Tomodensitométrie",
+                equiv: "Computed Tomography (CT)",
+                vulgarized: "Scanner, examen d'imagerie créant des images en coupes du corps entier, base de la planification en radiothérapie.",
+                technical: "Modalité d'imagerie basée sur l'atténuation des rayons X. En radiothérapie: CT de simulation en position de traitement avec table plane, contention reproductible, coupes fines (2-3mm). Les nombres Hounsfield (HU) sont convertis en densités électroniques pour le calcul de dose.",
+                context: "CT de simulation: centrage par lasers, pose de repères cutanés, acquisition volumique du volume de planification. Injection de contraste si nécessaire (délimitation vasculaire)."
+            },
+            {
+                acronym: "TEP",
+                full: "Tomographie par Émission de Positons",
+                equiv: "Positron Emission Tomography (PET)",
+                description: "Voir PET-CT. Imagerie fonctionnelle détectant l'activité métabolique des tissus."
+            },
+            {
+                acronym: "TMI",
+                full: "Total Marrow Irradiation",
+                equiv: "Irradiation Médullaire Totale (IMT)",
+                vulgarized: "Technique ciblant spécifiquement toute la moelle osseuse du corps, plus précise que l'ICT pour les leucémies.",
+                technical: "Évolution de la TBI ciblant sélectivement les os contenant de la moelle active (crâne, vertèbres, sternum, côtes, bassin, fémurs proximaux). Utilise IMRT/VMAT helical (tomothérapie). Dose: 12-20 Gy. Épargne mieux les organes sains que TBI.",
+                context: "Indication: conditionnement pré-greffe, myélome multiple. Avantage vs TBI: moins de toxicité pulmonaire/hépatique/intestinale. Logistique complexe (2-3h de traitement/jour)."
+            },
+            {
+                acronym: "TPS",
+                full: "Treatment Planning System",
+                equiv: "Système de Planification de Traitement (SPT)",
+                vulgarized: "Logiciel informatique sophistiqué permettant de calculer et d'optimiser la distribution de dose avant chaque traitement.",
+                technical: "Système informatique effectuant la délinéation des volumes, le calcul de distribution de dose (algorithmes Monte Carlo, Collapsed Cone, AAA), l'optimisation inverse (gradient, simulated annealing), et le transfert au système de traitement.",
+                context: "TPS principaux: Eclipse (Varian), Pinnacle (Philips), Monaco (Elekta), RayStation (RaySearch). Nécessite commission complète avec validation dosimétrique avant utilisation clinique."
+            },
+            {
+                acronym: "VMAT",
+                full: "Volumetric Modulated Arc Therapy",
+                equiv: "Arcthérapie par Modulation Volumétrique (AMV)",
+                vulgarized: "Évolution de l'IMRT où l'appareil tourne en continu autour du patient en modulant l'intensité, plus rapide et confortable.",
+                technical: "Technique IMRT en rotation continue (un ou plusieurs arcs complets) avec modulation simultanée de la vitesse du bras, du débit de dose et de la position des lames du MLC. Optimisation complexe mais traitement rapide (2-4 min).",
+                context: "Avantages vs IMRT fixe: temps de traitement réduit (confort patient), moins d'unités moniteur (moins de dose hors-cible), résultats dosimétriques similaires ou supérieurs. Standard actuel pour la plupart des localisations."
+            },
+            {
+                acronym: "4D-CT",
+                full: "Four-Dimensional Computed Tomography",
+                equiv: "Tomodensitométrie Quadridimensionnelle",
+                vulgarized: "Scanner qui filme les mouvements respiratoires de la tumeur, permettant de créer un film 3D du mouvement.",
+                technical: "CT de simulation avec acquisition synchronisée au cycle respiratoire (gating), générant 8-10 phases couvrant inspiration/expiration. Permet la création de l'ITV (Internal Target Volume) incluant tout le mouvement tumoral. Essentiel pour poumon, foie, sein.",
+                context: "Protocole: spirale lente (0,1-0,2 cm/s) avec ceinture abdominale RPM (Real-time Position Management). Reconstruction en 10 phases (0-100% du cycle). GTV délinéé sur chaque phase → ITV."
+            }
+        ];
+
+        // État de l'application
+        let currentSection = 'liste';
+        let filteredAcronyms = [...acronyms];
+        let currentCardIndex = 0;
+        let flashcardOrder = [...Array(acronyms.length).keys()];
+        let cardsViewed = new Set();
+        let qcmAnswers = {};
+        let quizState = {
+            questions: [],
+            currentQuestion: 0,
+            score: 0,
+            timer: 30,
+            interval: null,
+            answers: []
+        };
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            displayAcronyms();
+            createAlphabetFilter();
+            generateQCM();
+            initializeFlashcards();
+            
+            // Recherche
+            document.getElementById('searchBar').addEventListener('input', (e) => {
+                filterAcronyms(e.target.value);
+            });
+        });
+
+        // Navigation entre sections
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(section).classList.add('active');
+            event.target.classList.add('active');
+            
+            currentSection = section;
+            
+            if (section === 'quiz' && !quizState.interval) {
+                // Réinitialiser le quiz
+                document.getElementById('quizButtons').innerHTML = 
+                    '<button class="btn btn-primary" onclick="startQuiz()">Démarrer le Quiz</button>';
+            }
+        }
+
+        // Affichage de la liste des acronymes
+        function displayAcronyms(acronymList = filteredAcronyms) {
+            const container = document.getElementById('acronymList');
+            container.innerHTML = '';
+            
+            acronymList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'acronym-card';
+                
+                let html = `
+                    <div class="acronym-title">${item.acronym}</div>
+                    <div class="acronym-full">${item.full}</div>
+                `;
+                
+                if (item.equiv) {
+                    html += `<div class="acronym-equiv">📌 Équivalence : ${item.equiv}</div>`;
+                }
+                
+                if (item.description) {
+                    html += `<div class="acronym-description">${item.description}</div>`;
+                }
+                
+                if (item.vulgarized) {
+                    html += `
+                        <div class="acronym-description">
+                            <div class="vulgarized">
+                                <strong>🎯 Explication simple :</strong><br>
+                                ${item.vulgarized}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (item.technical) {
+                    html += `
+                        <div class="acronym-description">
+                            <div class="technical">
+                                <strong>⚙️ Définition technique :</strong><br>
+                                ${item.technical}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (item.context) {
+                    html += `
+                        <div class="acronym-description">
+                            <div class="context">
+                                <strong>💡 Contexte d'utilisation :</strong><br>
+                                ${item.context}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+        }
+
+        // Filtrage alphabétique
+        function createAlphabetFilter() {
+            const container = document.getElementById('alphabetFilter');
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            
+            letters.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.className = 'letter-btn';
+                btn.textContent = letter;
+                btn.onclick = () => filterByLetter(letter, btn);
+                container.appendChild(btn);
+            });
+            
+            const allBtn = document.createElement('button');
+            allBtn.className = 'letter-btn active';
+            allBtn.textContent = 'Tous';
+            allBtn.onclick = () => {
+                document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+                allBtn.classList.add('active');
+                filteredAcronyms = [...acronyms];
+                displayAcronyms();
+            };
+            container.insertBefore(allBtn, container.firstChild);
+        }
+
+        function filterByLetter(letter, btn) {
+            document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            filteredAcronyms = acronyms.filter(a => a.acronym.startsWith(letter));
+            displayAcronyms();
+        }
+
+        function filterAcronyms(search) {
+            const searchLower = search.toLowerCase();
+            filteredAcronyms = acronyms.filter(a => 
+                a.acronym.toLowerCase().includes(searchLower) ||
+                a.full.toLowerCase().includes(searchLower) ||
+                (a.equiv && a.equiv.toLowerCase().includes(searchLower))
+            );
+            displayAcronyms();
+        }
+
+        // QCM
+        function generateQCM() {
+            const container = document.getElementById('qcmContainer');
+            const questions = generateQCMQuestions(15);
+            
+            questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <div class="question-text">Question ${index + 1} : ${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" onclick="selectQCMOption(${index}, ${i})" id="qcm-${index}-${i}">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            container.dataset.questions = JSON.stringify(questions);
+        }
+
+        function generateQCMQuestions(count) {
+            const questions = [];
+            const used = new Set();
+            const availableAcronyms = acronyms.filter(a => distractors[a.acronym]);
+            
+            // Limiter le nombre de questions au nombre d'acronymes ayant des distracteurs
+            const maxQuestions = Math.min(count, availableAcronyms.length);
+            
+            while (questions.length < maxQuestions) {
+                const randomIndex = Math.floor(Math.random() * availableAcronyms.length);
+                const item = availableAcronyms[randomIndex];
+                
+                if (used.has(item.acronym)) continue;
+                used.add(item.acronym);
+                
+                const question = `Que signifie l'acronyme "${item.acronym}" ?`;
+                const correctAnswer = item.full;
+                
+                // Récupérer les distracteurs pour cet acronyme
+                const wrongOptions = [...distractors[item.acronym]];
+                
+                // Mélanger et prendre 3 distracteurs
+                shuffleArray(wrongOptions);
+                const selectedWrong = wrongOptions.slice(0, 3);
+                
+                // Créer toutes les options et mélanger
+                const allOptions = [correctAnswer, ...selectedWrong];
+                shuffleArray(allOptions);
+                
+                questions.push({
+                    question: question,
+                    options: allOptions,
+                    correctIndex: allOptions.indexOf(correctAnswer)
+                });
+            }
+            
+            return questions;
+        }
+
+        function selectQCMOption(questionIndex, optionIndex) {
+            // Désélectionner les autres options
+            for (let i = 0; i < 4; i++) {
+                const opt = document.getElementById(`qcm-${questionIndex}-${i}`);
+                if (opt) opt.classList.remove('selected');
+            }
+            
+            // Sélectionner l'option choisie
+            const selected = document.getElementById(`qcm-${questionIndex}-${optionIndex}`);
+            if (selected) selected.classList.add('selected');
+            
+            qcmAnswers[questionIndex] = optionIndex;
+        }
+
+        function validateQCM() {
+            const questions = JSON.parse(document.getElementById('qcmContainer').dataset.questions);
+            let score = 0;
+            
+            questions.forEach((q, index) => {
+                const userAnswer = qcmAnswers[index];
+                const isCorrect = userAnswer === q.correctIndex;
+                
+                if (isCorrect) score++;
+                
+                // Colorier les réponses
+                for (let i = 0; i < 4; i++) {
+                    const opt = document.getElementById(`qcm-${index}-${i}`);
+                    if (!opt) continue;
+                    
+                    opt.onclick = null; // Désactiver les clics
+                    
+                    if (i === q.correctIndex) {
+                        opt.classList.add('correct');
+                    } else if (i === userAnswer && !isCorrect) {
+                        opt.classList.add('incorrect');
+                    }
+                }
+            });
+            
+            document.getElementById('qcmScore').textContent = `Score: ${score}/${questions.length} (${Math.round(score/questions.length*100)}%)`;
+        }
+
+        function resetQCM() {
+            qcmAnswers = {};
+            document.getElementById('qcmScore').textContent = 'Score: 0/0';
+            document.getElementById('qcmContainer').innerHTML = '';
+            generateQCM();
+        }
+
+        // Quiz chronométré
+        function startQuiz() {
+            quizState = {
+                questions: generateQCMQuestions(10),
+                currentQuestion: 0,
+                score: 0,
+                timer: 30,
+                answers: []
+            };
+            
+            displayQuizQuestion();
+            startTimer();
+        }
+
+        function displayQuizQuestion() {
+            const q = quizState.questions[quizState.currentQuestion];
+            const container = document.getElementById('quizContainer');
+            
+            container.innerHTML = `
+                <div class="question-card">
+                    <div class="question-text">${q.question}</div>
+                    <div class="options">
+                        ${q.options.map((opt, i) => `
+                            <div class="option" onclick="answerQuizQuestion(${i})" id="quiz-opt-${i}">
+                                ${opt}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            updateQuizProgress();
+        }
+
+        function answerQuizQuestion(optionIndex) {
+            clearInterval(quizState.interval);
+            
+            const q = quizState.questions[quizState.currentQuestion];
+            const isCorrect = optionIndex === q.correctIndex;
+            
+            if (isCorrect) {
+                quizState.score++;
+                document.getElementById(`quiz-opt-${optionIndex}`).classList.add('correct');
+            } else {
+                document.getElementById(`quiz-opt-${optionIndex}`).classList.add('incorrect');
+                document.getElementById(`quiz-opt-${q.correctIndex}`).classList.add('correct');
+            }
+            
+            // Désactiver tous les boutons
+            for (let i = 0; i < q.options.length; i++) {
+                const opt = document.getElementById(`quiz-opt-${i}`);
+                if (opt) opt.onclick = null;
+            }
+            
+            setTimeout(() => {
+                quizState.currentQuestion++;
+                if (quizState.currentQuestion < quizState.questions.length) {
+                    quizState.timer = 30;
+                    displayQuizQuestion();
+                    startTimer();
+                } else {
+                    endQuiz();
+                }
+            }, 2000);
+        }
+
+        function startTimer() {
+            const timerEl = document.getElementById('timer');
+            
+            quizState.interval = setInterval(() => {
+                quizState.timer--;
+                timerEl.textContent = quizState.timer;
+                
+                if (quizState.timer <= 10) {
+                    timerEl.classList.add('warning');
+                }
+                if (quizState.timer <= 5) {
+                    timerEl.classList.remove('warning');
+                    timerEl.classList.add('danger');
+                }
+                
+                if (quizState.timer === 0) {
+                    clearInterval(quizState.interval);
+                    answerQuizQuestion(-1); // Temps écoulé
+                }
+            }, 1000);
+        }
+
+        function updateQuizProgress() {
+            document.getElementById('quizProgress').textContent = 
+                `${quizState.currentQuestion + 1}/${quizState.questions.length}`;
+            document.getElementById('quizScore').textContent = quizState.score;
+            
+            const progress = ((quizState.currentQuestion + 1) / quizState.questions.length) * 100;
+            const fill = document.getElementById('progressFill');
+            fill.style.width = progress + '%';
+            fill.textContent = Math.round(progress) + '%';
+        }
+
+        function endQuiz() {
+            clearInterval(quizState.interval);
+            const percentage = Math.round((quizState.score / quizState.questions.length) * 100);
+            
+            document.getElementById('quizContainer').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h2 style="color: #667eea; font-size: 2.5em; margin-bottom: 20px;">
+                        Quiz terminé ! 🎉
+                    </h2>
+                    <div style="font-size: 3em; color: ${percentage >= 70 ? '#4caf50' : '#ff9800'}; font-weight: bold; margin: 30px 0;">
+                        ${quizState.score} / ${quizState.questions.length}
+                    </div>
+                    <div style="font-size: 1.5em; color: #666; margin-bottom: 30px;">
+                        ${percentage}% de réussite
+                    </div>
+                    <div style="font-size: 1.2em; color: #333;">
+                        ${percentage >= 90 ? '🏆 Excellent ! Expertise confirmée !' :
+                          percentage >= 70 ? '👍 Très bien ! Continue comme ça !' :
+                          percentage >= 50 ? '💪 Pas mal ! Encore un petit effort !' :
+                          '📚 Continue à réviser, tu vas y arriver !'}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('quizButtons').innerHTML = 
+                '<button class="btn btn-primary" onclick="startQuiz()">Recommencer</button>';
+        }
+
+        // Flashcards
+        function initializeFlashcards() {
+            updateFlashcard();
+            updateStats();
+        }
+
+        function updateFlashcard() {
+            const index = flashcardOrder[currentCardIndex];
+            const item = acronyms[index];
+            
+            document.getElementById('cardAcronym').textContent = item.acronym;
+            document.getElementById('cardFull').textContent = item.full;
+            
+            let description = '';
+            if (item.equiv) description += `📌 ${item.equiv}\n\n`;
+            if (item.description) description += item.description;
+            if (item.vulgarized) description += `\n\n🎯 ${item.vulgarized}`;
+            
+            document.getElementById('cardDescription').textContent = description || 'Pas de description supplémentaire';
+            
+            document.getElementById('flashcard').classList.remove('flipped');
+            
+            cardsViewed.add(currentCardIndex);
+            updateStats();
+        }
+
+        function flipCard() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        }
+
+        function nextCard() {
+            currentCardIndex = (currentCardIndex + 1) % flashcardOrder.length;
+            updateFlashcard();
+        }
+
+        function previousCard() {
+            currentCardIndex = (currentCardIndex - 1 + flashcardOrder.length) % flashcardOrder.length;
+            updateFlashcard();
+        }
+
+        function shuffleCards() {
+            shuffleArray(flashcardOrder);
+            currentCardIndex = 0;
+            cardsViewed.clear();
+            updateFlashcard();
+        }
+
+        function updateStats() {
+            document.getElementById('cardNumber').textContent = currentCardIndex + 1;
+            document.getElementById('totalCards').textContent = acronyms.length;
+            document.getElementById('cardsViewed').textContent = cardsViewed.size;
+        }
+
+        // Utilitaires
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
