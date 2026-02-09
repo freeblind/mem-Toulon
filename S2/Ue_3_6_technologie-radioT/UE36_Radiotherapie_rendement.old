@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UE 3.6 - Radiothérapie COMPLET V2</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e1a;--card:#111827;--accent:#6366f1;--accent2:#818cf8;--glow:rgba(99,102,241,.3);--ok:#10b981;--warn:#f59e0b;--err:#ef4444;--info:#06b6d4;--txt:#e2e8f0;--dim:#94a3b8;--bright:#f8fafc;--bdr:rgba(255,255,255,.08);--r:12px;--f:'DM Sans',sans-serif;--fd:'Outfit',sans-serif;--fm:'JetBrains Mono',monospace}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--bg);color:var(--txt);line-height:1.7;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(99,102,241,.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(16,185,129,.08) 0%,transparent 50%);pointer-events:none;z-index:0}
+.header{position:relative;background:linear-gradient(135deg,#0f172a,#1e1b4b 50%,#0f172a);padding:2.5rem 2rem 2rem;text-align:center;border-bottom:1px solid var(--bdr);overflow:hidden}
+.header h1{font-family:var(--fd);font-size:2.5rem;font-weight:800;color:var(--bright);letter-spacing:-.02em;position:relative}.header h1 span{color:var(--accent2)}
+.header p{color:var(--dim);margin-top:.4rem;position:relative;font-size:1rem}
+.header .badge{display:inline-block;background:var(--accent);color:#fff;padding:.2rem .7rem;border-radius:20px;font-size:.78rem;font-weight:600;margin-top:.6rem;position:relative}
+.container{max-width:1400px;margin:0 auto;padding:1.5rem;position:relative;z-index:1}
+.nav-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem;background:var(--card);padding:.6rem;border-radius:var(--r);border:1px solid var(--bdr);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+.nav-tab{padding:.55rem 1rem;border:1px solid transparent;background:0 0;cursor:pointer;border-radius:8px;font-weight:600;font-family:var(--f);font-size:.85rem;color:var(--dim);transition:.25s;flex:1;min-width:90px;white-space:nowrap}
+.nav-tab:hover{color:var(--txt);background:rgba(255,255,255,.04)}
+.nav-tab.active{background:var(--accent);color:#fff;border-color:var(--accent2);box-shadow:0 0 16px var(--glow)}
+.content-section{display:none;animation:fadeIn .4s ease-out}.content-section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--card);border-radius:var(--r);padding:2rem;margin-bottom:1.5rem;border:1px solid var(--bdr);transition:border-color .3s}.card:hover{border-color:rgba(99,102,241,.15)}
+.card h2{font-family:var(--fd);color:var(--bright);margin-bottom:1.5rem;font-size:1.6rem;font-weight:700;display:flex;align-items:center;gap:.7rem}
+.card h2::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,var(--accent),transparent)}
+.card h3{font-family:var(--fd);color:var(--accent2);margin-top:1.8rem;margin-bottom:.8rem;font-size:1.25rem;font-weight:600}
+.card h4{color:var(--bright);margin-top:1.1rem;margin-bottom:.6rem;font-size:1.05rem;font-weight:600}
+.card p{margin-bottom:.6rem}
+.hl{background:rgba(245,158,11,.08);border-left:3px solid var(--warn);padding:.9rem 1.1rem;margin:1rem 0;border-radius:0 var(--r) var(--r) 0}
+.imp{background:rgba(239,68,68,.08);border-left:3px solid var(--err);padding:.9rem 1.1rem;margin:1rem 0;border-radius:0 var(--r) var(--r) 0}
+.ok{background:rgba(16,185,129,.08);border-left:3px solid var(--ok);padding:.9rem 1.1rem;margin:1rem 0;border-radius:0 var(--r) var(--r) 0}
+.inf{background:rgba(6,182,212,.08);border-left:3px solid var(--info);padding:.9rem 1.1rem;margin:1rem 0;border-radius:0 var(--r) var(--r) 0}
+.formula{background:rgba(99,102,241,.1);padding:.4rem .9rem;border-radius:6px;font-family:var(--fm);font-size:.92rem;display:inline-block;margin:.4rem 0;border:1px solid rgba(99,102,241,.2);color:var(--accent2)}
+table{width:100%;border-collapse:collapse;margin:1.1rem 0}th,td{padding:.65rem .9rem;text-align:left;border-bottom:1px solid var(--bdr);font-size:.92rem}
+th{background:rgba(99,102,241,.12);color:var(--accent2);font-weight:600;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}tr:hover{background:rgba(255,255,255,.02)}
+ul,ol{margin-left:1.5rem;margin-bottom:.9rem}li{margin-bottom:.35rem}li::marker{color:var(--accent2)}
+.sub-nav{display:flex;gap:.4rem;flex-wrap:wrap;margin:1rem 0 1.3rem;padding:.6rem;background:rgba(0,0,0,.2);border-radius:var(--r);border:1px solid var(--bdr)}
+.sub-nav-btn{padding:.45rem .9rem;border:1px solid var(--bdr);background:0 0;color:var(--dim);border-radius:8px;font-family:var(--f);font-size:.82rem;font-weight:500;cursor:pointer;transition:.2s}
+.sub-nav-btn:hover{color:var(--txt);border-color:var(--accent)}.sub-nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.course-sub{display:none;animation:fadeIn .3s}.course-sub.active{display:block}
+.flashcard-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.1rem;margin-top:1.3rem}
+.flashcard{background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1));border:1px solid rgba(99,102,241,.15);border-radius:var(--r);height:230px;cursor:pointer;perspective:1000px}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;display:flex;align-items:center;justify-content:center;padding:1.3rem;border-radius:var(--r);color:#fff;text-align:center;font-weight:500;font-size:.92rem;line-height:1.4}
+.flashcard-front{background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.12))}
+.flashcard-back{background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(6,182,212,.12));transform:rotateY(180deg);flex-direction:column}
+.btn{padding:.55rem 1.1rem;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-family:var(--f);font-size:.87rem;transition:.25s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:var(--accent2);box-shadow:0 4px 12px var(--glow)}
+.btn-s{background:rgba(16,185,129,.12);color:var(--ok);border:1px solid rgba(16,185,129,.25)}.btn-s:hover{background:rgba(16,185,129,.22)}
+.btn-d{background:rgba(239,68,68,.12);color:var(--err);border:1px solid rgba(239,68,68,.25)}.btn-d:hover{background:rgba(239,68,68,.22)}
+.btn-o{background:0 0;color:var(--dim);border:1px solid var(--bdr)}.btn-o:hover{border-color:var(--accent);color:var(--accent2)}
+.question-card{background:var(--card);border-radius:var(--r);padding:1.6rem;margin-bottom:1.3rem;border:1px solid var(--bdr)}
+.question-title{font-size:1.1rem;font-weight:600;color:var(--bright);margin-bottom:1.1rem}
+.option{background:rgba(255,255,255,.03);padding:.75rem 1rem;margin:.45rem 0;border-radius:8px;cursor:pointer;border:1px solid var(--bdr);transition:.2s;color:var(--txt)}
+.option:hover{background:rgba(99,102,241,.08);border-color:var(--accent)}.option.selected{background:rgba(99,102,241,.12);border-color:var(--accent)}
+.option.correct{background:rgba(16,185,129,.1);border-color:var(--ok);color:var(--ok)}.option.incorrect{background:rgba(239,68,68,.1);border-color:var(--err);color:var(--err)}
+.explanation{background:rgba(6,182,212,.06);border-left:3px solid var(--info);padding:.9rem;margin-top:.6rem;border-radius:0 8px 8px 0;display:none;font-size:.92rem}.explanation.show{display:block}
+.textarea-input{width:100%;min-height:110px;padding:.9rem;border:1px solid var(--bdr);border-radius:8px;font-family:var(--f);font-size:.92rem;resize:vertical;background:rgba(0,0,0,.2);color:var(--txt)}
+.textarea-input:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.suggested-answer{background:rgba(6,182,212,.06);border-left:3px solid var(--info);padding:1.1rem;margin-top:.6rem;border-radius:0 8px 8px 0;display:none;white-space:pre-line;font-size:.92rem}.suggested-answer.show{display:block}
+canvas{width:100%;max-width:900px;height:500px;border:1px solid var(--bdr);border-radius:var(--r);display:block;margin:1.3rem auto;background:#070b14}
+.progress-bar{width:100%;height:26px;background:rgba(255,255,255,.04);border-radius:13px;overflow:hidden;margin:.8rem 0;border:1px solid var(--bdr)}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--ok));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:.82rem;transition:width .5s}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin:1.3rem 0}
+.stat-card{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.08));border:1px solid rgba(99,102,241,.15);padding:1.3rem;border-radius:var(--r);text-align:center}
+.stat-value{font-family:var(--fd);font-size:2.3rem;font-weight:700;color:var(--accent2);margin-bottom:.2rem}.stat-label{font-size:.87rem;color:var(--dim)}
+.search-box{width:100%;padding:.65rem 1rem .65rem 2.3rem;border:1px solid var(--bdr);border-radius:8px;background:rgba(0,0,0,.2);color:var(--txt);font-family:var(--f);font-size:.92rem;margin-bottom:.8rem}
+.search-box:focus{outline:0;border-color:var(--accent)}.search-wrap{position:relative}.search-wrap::before{content:'🔍';position:absolute;left:.7rem;top:50%;transform:translateY(-50%);font-size:.85rem}
+@media(max-width:768px){.header h1{font-size:1.7rem}.nav-tabs{flex-direction:column;position:static}.nav-tab{width:100%}.card{padding:1.2rem}.flashcard-container{grid-template-columns:1fr}.sub-nav{flex-direction:column}}
+
+/* ===== Glossaire / Définitions ===== */
+.def-term{color:var(--accent2);font-weight:700;border-bottom:1px dashed rgba(129,140,248,.7);cursor:pointer}
+.def-wrap{display:flex;gap:.6rem;flex-wrap:wrap;margin:.8rem 0}
+.def-card{background:linear-gradient(135deg,rgba(6,182,212,.10),rgba(99,102,241,.08));border:1px solid rgba(255,255,255,.10);border-radius:var(--r);padding:1.2rem}
+.def-title{display:flex;align-items:center;justify-content:space-between;gap:.8rem;margin-bottom:.55rem}
+.def-title h3{margin:0;color:var(--bright);font-size:1.15rem}
+.def-pill{font-family:var(--fm);font-size:.78rem;color:var(--accent2);background:rgba(99,102,241,.14);border:1px solid rgba(99,102,241,.25);padding:.18rem .55rem;border-radius:999px;white-space:nowrap}
+.def-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:1rem}
+.def-mini{color:var(--dim);font-size:.92rem;margin:.25rem 0}
+.def-section-title{color:var(--accent2);font-weight:700;margin-top:.75rem;margin-bottom:.25rem}
+.def-actions{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.8rem}
+.def-btn{padding:.35rem .7rem;border-radius:8px;border:1px solid var(--bdr);background:rgba(0,0,0,.2);color:var(--txt);cursor:pointer;font-weight:600;font-size:.82rem}
+.def-btn:hover{border-color:var(--accent);color:var(--accent2)}
+/* Modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(0,0,0,.55);z-index:9999}
+.modal.show{display:flex}
+.modal-card{width:min(920px,96vw);max-height:86vh;overflow:auto;background:var(--card);border:1px solid rgba(255,255,255,.10);border-radius:18px;box-shadow:0 18px 60px rgba(0,0,0,.55)}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:1.2rem 1.2rem .8rem;border-bottom:1px solid var(--bdr);position:sticky;top:0;background:linear-gradient(180deg,rgba(17,24,39,.98),rgba(17,24,39,.92));backdrop-filter:blur(12px)}
+.modal-head h3{margin:0;font-family:var(--fd);color:var(--bright);font-size:1.25rem}
+.modal-close{border:none;background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--bdr);border-radius:10px;padding:.35rem .65rem;cursor:pointer;font-weight:800}
+.modal-close:hover{border-color:var(--accent);color:var(--accent2)}
+.modal-body{padding:1.1rem 1.2rem 1.3rem}
+.kbd{font-family:var(--fm);font-size:.78rem;padding:.12rem .35rem;border-radius:6px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);color:var(--dim)}
+
+</style>
+</head>
+<body>
+<div class="header">
+<h1>⚛️ UE 3.6 — <span>Radiothérapie</span> Complète</h1>
+<p>Physique des Faisceaux • Cours Laura Bailly • Plateforme Interactive</p>
+<div class="badge">S2 — 1ère Année MEM — V2</div>
+</div>
+<div class="container">
+<nav class="nav-tabs">
+<button class="nav-tab active" onclick="showSection('cours',this)">📚 Photons</button>
+<button class="nav-tab" onclick="showSection('electrons',this)">⚡ Électrons</button>
+<button class="nav-tab" onclick="showSection('clinique',this)">🏥 Clinique</button>
+<button class="nav-tab" onclick="showSection('tps',this)">💻 TPS</button>
+<button class="nav-tab" onclick="showSection('definitions',this)">📖 Définitions</button>
+<button class="nav-tab" onclick="showSection('flashcards',this)">🎴 Flashcards</button>
+<button class="nav-tab" onclick="showSection('qcm',this)">✅ QCM</button>
+<button class="nav-tab" onclick="showSection('questions',this)">✍️ Questions</button>
+<button class="nav-tab" onclick="showSection('animation',this)">🎬 LINAC</button>
+<button class="nav-tab" onclick="showSection('progres',this)">📊 Progrès</button>
+</nav>
+<!-- ========== COURS PHOTONS ========== -->
+<div id="cours" class="content-section active">
+<div class="card">
+<h2>📚 Physique des Faisceaux — Photons</h2>
+<div class="sub-nav">
+<button class="sub-nav-btn active" onclick="showSub('sp1',this)">Vue d'ensemble</button>
+<button class="sub-nav-btn" onclick="showSub('sp2',this)"><span class="def-term" onclick="openDef('Build-up')">Build-Up</span></button>
+<button class="sub-nav-btn" onclick="showSub('sp3',this)">Rendement</button>
+<button class="sub-nav-btn" onclick="showSub('sp4',this)">Profils & FOC</button>
+<button class="sub-nav-btn" onclick="showSub('sp5',this)">DSP & Erreurs</button>
+<button class="sub-nav-btn" onclick="showSub('sp6',this)">Filtres en Coin</button>
+<button class="sub-nav-btn" onclick="showSub('sp7',this)"><span class="def-term" onclick="openDef('Bolus')">Bolus</span></button>
+<button class="sub-nav-btn" onclick="showSub('sp8',this)">Hétérogénéités</button>
+</div>
+
+<div id="sp1" class="course-sub active">
+<div class="imp"><strong>⚠️ Section essentielle :</strong> Fondamentale pour comprendre le comportement des faisceaux dans les tissus.</div>
+<h3>Vue d'ensemble</h3>
+<p>Production par <strong>Bremsstrahlung</strong> (freinage des e⁻ sur cible tungstène). Efficacité ≈ 5%.</p>
+<table>
+<tr><th>Énergie</th><th><span class="def-term" onclick="openDef('Dmax')">Dmax</span></th><th>Dose surface</th><th>Indications</th></tr>
+<tr><td>Co-60</td><td>0.5 cm</td><td>~55%</td><td>Historique</td></tr>
+<tr><td>4 MV</td><td>1.0 cm</td><td>~40%</td><td>Superficiel</td></tr>
+<tr><td>6 MV</td><td>1.5 cm</td><td>~30-35%</td><td>Polyvalent (sein, ORL, cerveau)</td></tr>
+<tr><td>10 MV</td><td>2.5 cm</td><td>~20-25%</td><td>Thorax, abdomen</td></tr>
+<tr><td>15 MV</td><td>3.0 cm</td><td>~15-20%</td><td>Pelvis profond</td></tr>
+<tr><td>18 MV</td><td>3.3 cm</td><td>~15%</td><td>Volumes très profonds</td></tr>
+</table>
+<div class="ok"><strong>✅</strong> ↑ énergie → <span class="def-term" onclick="openDef('Dmax')">Dmax</span> + profond → meilleure épargne cutanée → meilleure pénétration. Mais si E trop élevée pour une épaisseur donnée → surdosage entrée.</div>
+</div>
+
+<div id="sp2" class="course-sub">
+<h3><span class="def-term" onclick="openDef('Build-up')">Build-Up</span> (Zone d'Accumulation)</h3>
+<div class="hl"><strong>📌</strong> Zone sous la peau où la dose ↑ jusqu'au <span class="def-term" onclick="openDef('Dmax')">Dmax</span>. Dû aux e⁻ secondaires (effet Compton). Équilibre électronique atteint au <span class="def-term" onclick="openDef('Dmax')">Dmax</span>.</div>
+<div class="inf"><strong>En clair :</strong> la dose n’est pas maximale à la surface : elle <strong>monte sur quelques millimètres/centimètres</strong> (comme une rampe) puis atteint un pic (<span class="def-term" onclick="openDef('<span class="def-term" onclick="openDef('Dmax')">Dmax</span>')"><span class="def-term" onclick="openDef('Dmax')">Dmax</span></span>). Ça protège la peau… sauf si on ajoute un bolus, une table, ou un coin qui ramènent de la dose en surface.</div>
+<div class="def-actions">
+  <button class="def-btn" onclick="openDef('Build-up')">🔎 Voir la définition</button>
+  <button class="def-btn" onclick="openDef('<span class="def-term" onclick="openDef('Dmax')">Dmax</span>')">🔎 <span class="def-term" onclick="openDef('Dmax')">Dmax</span></button>
+</div>
+
+<ul>
+<li>Photons → Compton → e⁻ secondaires déposent énergie</li>
+<li>Au-delà <span class="def-term" onclick="openDef('Dmax')">Dmax</span> → décroissance par atténuation</li>
+</ul>
+<div class="ok"><strong>✅</strong> Épargne cutanée. Zone build-up <strong>↓</strong> quand E ↓ → traitement + en superficie.</div>
+<div class="imp"><strong>⚠️</strong> Bolus, table, filtre coin → créent e⁻ basse énergie → <strong>↑ dose peau</strong>.</div>
+</div>
+
+<div id="sp3" class="course-sub">
+<h3>Rendement en Profondeur (RDP)</h3>
+<div class="hl"><p class="formula">RDP(z) = [Dose(z) / Dose(<span class="def-term" onclick="openDef('Dmax')">Dmax</span>)] × 100%</p></div>
+<table>
+<tr><th>Profondeur</th><th>6 MV</th><th>10 MV</th><th>18 MV</th></tr>
+<tr><td>Surface</td><td>30-35%</td><td>20-25%</td><td>15%</td></tr>
+<tr><td><span class="def-term" onclick="openDef('Dmax')">Dmax</span></td><td>100%</td><td>100%</td><td>100%</td></tr>
+<tr><td>5 cm</td><td>~80%</td><td>~85%</td><td>~88%</td></tr>
+<tr><td>10 cm</td><td>~58%</td><td>~66%</td><td>~72%</td></tr>
+<tr><td>15 cm</td><td>~40%</td><td>~48%</td><td>~56%</td></tr>
+<tr><td>20 cm</td><td>~27%</td><td>~35%</td><td>~45%</td></tr>
+</table>
+<h4>Facteurs d'influence</h4>
+<ul><li><strong>Énergie :</strong> ↑ E → meilleure pénétration</li><li><strong>Taille champ :</strong> ↑ → + diffusé → rendement ↑</li><li><strong>DSP :</strong> loi inverse carré</li><li><strong>Densité :</strong> os > eau > poumon</li></ul>
+<div class="imp"><strong>⚠️</strong> 6 MV à 10 cm ≈ <strong>60%</strong> | 18 MV à 10 cm ≈ <strong>72%</strong></div>
+</div>
+
+<div id="sp4" class="course-sub">
+<h3>Profils de Dose & FOC</h3>
+<div class="hl"><strong>📊</strong> Distribution dose ⊥ axe faisceau à une profondeur donnée.</div>
+<table>
+<tr><th>Paramètre</th><th>Définition</th><th>Tolérance</th></tr>
+<tr><td>Planéité</td><td>Variation dose zone centrale</td><td>&lt; ±3%</td></tr>
+<tr><td>Symétrie</td><td>Comparaison G/D</td><td>&lt; ±2%</td></tr>
+<tr><td>Pénombre</td><td>80% → 20%</td><td>5-8 mm</td></tr>
+</table>
+<div class="ok"><strong>💡 Filtre égalisateur :</strong> cône métal → profil plat. <strong>FFF</strong> = sans filtre → débit ×3-4 (stéréotaxie).</div>
+<h4>FOC</h4>
+<p class="formula">FOC = Dose(champ) / Dose(réf. 10×10)</p>
+<table><tr><th>Champ</th><th>FOC</th></tr><tr><td>5×5</td><td>≈ 0.95</td></tr><tr><td>10×10</td><td>1.00</td></tr><tr><td>20×20</td><td>≈ 1.05</td></tr><tr><td>40×40</td><td>≈ 1.10</td></tr></table>
+</div>
+
+<div id="sp5" class="course-sub">
+<h3>DSP & Erreurs de Positionnement</h3>
+<p class="formula">I₂/I₁ = (d₁/d₂)²</p>
+<div class="hl"><strong>Ex:</strong> 1 Gy à 100 cm → à 80 cm = 1×(100/80)² = <strong>1.56 Gy</strong> (+56%!)</div>
+<div class="imp"><strong>⚠️ Erreur DSP</strong> (même nombre d'UM) :
+<ul><li>DSP + grande → <strong>sous-dosage</strong></li><li>DSP + petite → <strong>surdosage</strong></li></ul></div>
+<table><tr><th>Mode</th><th>DSP</th><th>SAD</th></tr><tr><td>Photons iso</td><td>Variable</td><td>100 cm</td></tr><tr><td>Photons DSP fixe</td><td>100 cm</td><td>—</td></tr><tr><td>Électrons</td><td>100-105 cm</td><td>Variable</td></tr></table>
+</div>
+
+<div id="sp6" class="course-sub">
+<h3>Filtres en Coin</h3>
+<div class="hl"><strong>📌 Rôle :</strong> Compenser obliquité surface → isodoses ⊥ axe. Applications : <strong>ORL, Sein</strong>.</div>
+<div class="inf"><strong>En clair :</strong> un “coin” sert à <strong>rééquilibrer</strong> la dose quand la zone traitée n’a pas la même épaisseur partout (ex : sein). Sans coin, un côté peut recevoir trop de dose et l’autre pas assez. Le coin “atténue” progressivement une partie du faisceau pour homogénéiser.</div>
+<div class="def-actions">
+  <button class="def-btn" onclick="openDef('Filtre en coin')">🔎 Voir la définition</button>
+  <button class="def-btn" onclick="openDef('Isodose')">🔎 Isodose</button>
+</div>
+
+<ul><li>Sans filtre → isodoses parallèles à la peau</li><li>Avec filtre → dose + homogène en profondeur</li></ul>
+<h4>Mécanique (physique)</h4>
+<div class="inf"><ul><li>Absorbe photons basse E → <strong>durcissement</strong> faisceau</li><li>Rendement ↑ (surtout basse E)</li><li>Crée e⁻ basse énergie → <strong>↑ dose peau</strong></li><li>Variation énergie moyenne → variation rendement</li></ul></div>
+<h4>Dynamique (virtuel)</h4>
+<div class="ok"><ul><li><strong>Quasi pas de variation rendement</strong></li><li>↑ nombre d'UM</li><li>Mouvement mâchoire pendant irradiation</li></ul></div>
+<p>Angle défini : intersection axe / isodose à <strong>10 cm</strong> (ICRU 24). Profils varient selon angle ET énergie.</p>
+<h4>Clinique</h4>
+<ul><li><strong>Sein :</strong> tangentiels → dose homogène malgré forme convexe</li><li><strong>ORL :</strong> compensation obliquité cou → meilleure couverture</li></ul>
+</div>
+
+<div id="sp7" class="course-sub">
+<h3>Bolus</h3>
+<div class="hl"><strong>📌</strong> Matériau équivalent tissu (polyuréthane/silicone, densité=1). Épaisseurs : <strong>3-10 mm</strong>.</div>
+<div class="inf"><strong>En clair :</strong> on met une “fausse peau” (un matériau qui imite le tissu) sur la zone pour que le faisceau <strong>donne plus de dose en surface</strong>. Sans bolus, les photons “démarrent” un peu plus en profondeur (build‑up) → la peau peut être trop épargnée alors qu’on veut parfois la traiter.</div>
+<div class="def-actions">
+  <button class="def-btn" onclick="openDef('Bolus')">🔎 Voir la définition</button>
+  <button class="def-btn" onclick="openDef('Build-up')">🔎 Build-up</button>
+</div>
+
+<h4>Rôle</h4>
+<ul><li>Ramener isodoses à la surface</li><li>Surtout avec <strong>électrons</strong></li><li>Compenser fine épaisseur tissus</li><li>Traiter peau envahie</li><li>Compenser irrégularités surface</li></ul>
+<h4>Paroi post-mastectomie</h4>
+<div class="inf">Faisceau direct e⁻ + bolus : compenser épaisseur, traiter peau, régulariser surface.</div>
+</div>
+
+<div id="sp8" class="course-sub">
+<h3>Hétérogénéités Tissulaires</h3>
+<div class="imp"><strong>⚠️ Peuvent fortement influencer la technique de traitement.</strong></div>
+<h4>Types</h4>
+<ul><li><strong>Peu dense :</strong> poumons, air</li><li><strong>Très dense :</strong> prothèse hanche, clou/ciment, sphincter</li><li><strong>Contentions</strong></li></ul>
+<p>Prise en compte via <strong>UH</strong> (Unités Hounsfield) → densités électroniques relatives.</p>
+<h4>Atténuation prothèses</h4>
+<table><tr><th>Matériau</th><th>4MV (A)</th><th>18MV (A)</th><th>4MV (B)</th><th>18MV (B)</th></tr>
+<tr><td>Ti</td><td>34%</td><td>30%</td><td>11.6%</td><td>9.2%</td></tr>
+<tr><td>Co-Cr-Mo</td><td>7%</td><td>6%</td><td>28%</td><td>22.2%</td></tr></table>
+<h4>Poumon</h4>
+<div class="inf"><ul><li>Densité 0.2-0.3 → dose distale <strong>↑ 10-20%</strong></li><li>Perte diffusion interfaces</li><li>Critique pour tumeurs pulmonaires</li></ul></div>
+<div class="imp"><strong>⚠️ Mauvaise prise en compte = ERREUR SUR LA DOSE !</strong></div>
+<div class="ok"><strong>📌 Le patient ne devient pas radioactif !</strong></div>
+</div>
+
+</div></div>
+<!-- ========== ELECTRONS ========== -->
+<div id="electrons" class="content-section">
+<div class="card">
+<h2>⚡ Faisceaux d'Électrons</h2>
+<div class="sub-nav">
+<button class="sub-nav-btn active" onclick="showSub('e1',this)">Caractéristiques</button>
+<button class="sub-nav-btn" onclick="showSub('e2',this)">Courbe Dose</button>
+<button class="sub-nav-btn" onclick="showSub('e3',this)">Énergie</button>
+<button class="sub-nav-btn" onclick="showSub('e4',this)">Taille Champ</button>
+<button class="sub-nav-btn" onclick="showSub('e5',this)">Isodoses & Obliquité</button>
+<button class="sub-nav-btn" onclick="showSub('e6',this)">Forme Faisceaux</button>
+</div>
+
+<div id="e1" class="course-sub active">
+<h3>Caractéristiques Fondamentales</h3>
+<div class="hl"><strong>⚡</strong> Parcours e⁻ dans la matière <strong>beaucoup moins important</strong> que photons.</div>
+<h4>Interactions</h4>
+<ul><li><strong>Collision e⁻–e⁻ :</strong> excitation / ionisation</li><li><strong>Freinage noyau :</strong> Bremsstrahlung</li><li><strong>Interaction EM :</strong> modification trajectoire</li></ul>
+<h4>Conséquences</h4>
+<ul><li>Dose peau <strong>+ élevée</strong> (pas de vrai build-up)</li><li><strong>Fort gradient</strong> après <span class="def-term" onclick="openDef('Dmax')">Dmax</span></li><li>Trajectoire modifiée → ralentissement → ionisation</li></ul>
+<div class="ok"><strong>✅</strong> Très complémentaires des photons. Adaptés aux <strong>tumeurs superficielles</strong>.</div>
+<div class="imp"><strong>⚠️</strong> Pénombre <strong>large</strong>. Très sensibles <strong>obliquité</strong> et <strong>hétérogénéités</strong>.</div>
+</div>
+
+<div id="e2" class="course-sub">
+<h3>Rendement en Profondeur</h3>
+<h4>Phases de la courbe</h4>
+<ol><li><strong>Accroissement initial :</strong> e⁻ secondaires + diffusion e⁻ primaires</li><li><strong>Maximum (<span class="def-term" onclick="openDef('Dmax')">Dmax</span>)</strong></li><li><strong>Décroissance rapide</strong></li><li><strong>Décroissance lente :</strong> queue Bremsstrahlung (~3-5%)</li></ol>
+<h4>Points caractéristiques</h4>
+<table>
+<tr><th>Point</th><th>Signification</th><th>Formule</th></tr>
+<tr><td><strong>Dose surface</strong></td><td>E des e⁻ + contamination e⁻ secondaires</td><td>70-90%</td></tr>
+<tr><td><strong><span class="def-term" onclick="openDef('Dmax')">Dmax</span></strong></td><td>Équilibre électronique, ↑ avec E</td><td>—</td></tr>
+<tr><td style="color:var(--ok)"><strong>R90 (thérapeutique)</strong></td><td>Volume cible doit être dedans</td><td class="formula">R90 ≈ E/3 cm</td></tr>
+<tr><td style="color:var(--err)"><strong>Rp (pratique)</strong></td><td>Au-delà = dose négligeable</td><td class="formula">Rp ≈ E/2 cm</td></tr>
+</table>
+<div class="ok"><strong>✅ Prescription :</strong> Volume cible dans R90. Prescription sur cette isodose.</div>
+<h4>Tableau complet</h4>
+<table>
+<tr><th>E (MeV)</th><th>R90</th><th>R50</th><th>Rp</th><th>Dose surf.</th></tr>
+<tr><td>4</td><td>1.0</td><td>1.3</td><td>2.0</td><td>85-90%</td></tr>
+<tr><td>6</td><td>1.5</td><td>2.0</td><td>3.0</td><td>80-85%</td></tr>
+<tr><td>9</td><td>2.2</td><td>3.0</td><td>4.5</td><td>75-80%</td></tr>
+<tr><td>12</td><td>3.0</td><td>4.0</td><td>6.0</td><td>70-75%</td></tr>
+<tr><td>15</td><td>3.8</td><td>5.0</td><td>7.5</td><td>70%</td></tr>
+<tr><td>18</td><td>4.5</td><td>6.0</td><td>9.0</td><td>65-70%</td></tr>
+<tr><td>22</td><td>5.5</td><td>7.3</td><td>11.0</td><td>60-65%</td></tr>
+</table>
+</div>
+
+<div id="e3" class="course-sub">
+<h3>Influence de l'Énergie</h3>
+<p>Quand E <strong>augmente</strong> :</p>
+<ul><li>Profondeur <span class="def-term" onclick="openDef('Dmax')">Dmax</span> <strong>↑</strong></li><li>Dose peau <strong>↑</strong></li><li>Gradient <strong>↓</strong> (décroissance - abrupte)</li><li>Dose résiduelle Bremsstrahlung <strong>↑</strong></li></ul>
+<div class="inf"><strong>💡</strong> Accélérateurs : 4-25 MeV pour volumes peu à moyennement profonds.</div>
+</div>
+
+<div id="e4" class="course-sub">
+<h3>Influence Taille de Champ</h3>
+<ul><li>Dose entrée <strong>↓</strong> quand taille ↑</li><li>e⁻ diffusés à l'axe <strong>↓</strong> quand taille ↓</li><li>Effet saturé quand champ > parcours moyen e⁻</li></ul>
+<div class="imp"><strong>⚠️ Le choix de E peut dépendre de la taille du faisceau !</strong></div>
+<table><tr><th>E (MeV)</th><th>Champ</th><th>Rt (cm)</th></tr>
+<tr><td>22</td><td>20×20</td><td>8.0</td></tr>
+<tr><td>22</td><td>5×20</td><td>7.0</td></tr>
+<tr><td>28</td><td>5×20</td><td>8.3</td></tr></table>
+<div class="inf"><strong>→</strong> Petit champ → ↑ énergie nécessaire pour même Rt.</div>
+</div>
+
+<div id="e5" class="course-sub">
+<h3>Isodoses 2D & Obliquité</h3>
+<h4>Isodoses</h4>
+<ul><li>Forte diffusion → pénombre <strong>large</strong> + évasement courbes</li><li>Diffusion latérale → irradiation <strong>hors limites</strong> en profondeur</li><li>↑ distance source-patient → ↑ pénombre</li><li>Pénombre ↑ avec profondeur</li></ul>
+<h4>Obliquité de surface</h4>
+<div class="imp"><strong>⚠️ CRITIQUE :</strong> Rendement <strong>fortement modifié</strong> → risque <strong>sous-dosage important</strong> !</div>
+<p>Positionnement soigné. Bolus pour régulariser. TPS doit prendre en compte géométrie réelle.</p>
+</div>
+
+<div id="e6" class="course-sub">
+<h3>Forme des Faisceaux</h3>
+<h4>2 étapes</h4>
+<ol><li><strong>Localisateur :</strong> 6×6 à 25×25 cm²</li><li><strong>Insert alliage :</strong> forme personnalisée</li></ol>
+<table><tr><th>Applicateur</th><th>Usage</th></tr>
+<tr><td>6×6</td><td>Petits (lèvres, nez)</td></tr><tr><td>10×10</td><td>Moyens</td></tr>
+<tr><td>15×15</td><td>Paroi partielle</td></tr><tr><td>20×20</td><td>Grands</td></tr><tr><td>25×25</td><td>Très grands (scalp)</td></tr></table>
+</div>
+
+</div></div>
+<!-- ========== CLINIQUE ========== -->
+<div id="clinique" class="content-section">
+<div class="card">
+<h2>🏥 Applications Cliniques</h2>
+<div class="hl"><strong>📌</strong> Choix type/énergie selon <strong>profondeur</strong> volume cible et proximité <strong>OARs</strong>.</div>
+<h3>Superficiels</h3>
+<ul><li>RX 50-300 kV ou e⁻ 4-6 MeV ± bolus</li></ul>
+<h3>Semi-profonds</h3>
+<ul><li>Co-60 ou RX 4-6 MV</li><li>e⁻ haute énergie</li><li>Combinaison RX + e⁻</li></ul>
+<div class="inf"><strong>Ex. choix e⁻ :</strong>
+<table><tr><th>E</th><th>Résultat</th><th></th></tr>
+<tr><td>6 MeV</td><td>Mauvaise couverture isodose 95%</td><td style="color:var(--err)">❌</td></tr>
+<tr><td style="color:var(--ok);font-weight:600">9 MeV</td><td>Bonne couverture</td><td style="color:var(--ok)">✅</td></tr>
+<tr><td>12 MeV</td><td>Cible OK mais poumon + irradié</td><td style="color:var(--warn)">⚠️</td></tr></table></div>
+<h3>Profonds</h3>
+<ul><li>RX 4-25 MV. Faisceaux opposés pondérés.</li></ul>
+<h3>Tableau Récapitulatif</h3>
+<table>
+<tr><th>Localisation</th><th>Prof.</th><th>Type / E</th><th>Justification</th></tr>
+<tr><td>Cutanées</td><td>0-1</td><td>e⁻ 4-6 MeV ± bolus</td><td>Dose max surface</td></tr>
+<tr><td>Mastectomie</td><td>1-3</td><td>e⁻ 6-12 + bolus</td><td>Peau + paroi</td></tr>
+<tr><td>Ganglions sup.</td><td>2-4</td><td>e⁻ 9-12 MeV</td><td>Protéger poumon</td></tr>
+<tr><td>Sein</td><td>3-6</td><td>Photons 6 MV + coin</td><td>Poumon/cœur</td></tr>
+<tr><td>ORL / Cerveau</td><td>5-10</td><td>Photons 6 MV</td><td>Compromis</td></tr>
+<tr><td>Thorax</td><td>8-15</td><td>Photons 6-10 MV</td><td>Correction densité</td></tr>
+<tr><td>Pelvis</td><td>10-20</td><td>Photons 15-18 MV</td><td>Pénétration max</td></tr>
+</table>
+</div></div>
+
+<!-- ========== TPS ========== -->
+<div id="tps" class="content-section">
+<div class="card">
+<h2>💻 TPS & <span class="def-term" onclick="openDef('UM')">Unités Moniteur</span></h2>
+<h3>Workflow</h3>
+<div class="hl"><ol><li>Scanner dosimétrique → données anatomiques</li><li>Contourage volumes + OARs</li><li>Calcul dose (dosimétrie)</li><li>Transfert plan → machine</li></ol></div>
+<h3>TPS</h3>
+<p>Modélise : rendements, profils, champs, DSP, filtres, bolus → calcule les <strong>UM</strong>.</p>
+<h3><span class="def-term" onclick="openDef('UM')">Unités Moniteur</span></h3>
+<div class="imp"><strong>Objectif :</strong> Gy → UM (unités machine)</div>
+<div class="hl">
+<p class="formula">1 UM = 1 cGy &nbsp;⟹&nbsp; 1 Gy = 100 UM</p>
+<p><strong>/!\ CONDITIONS DE RÉFÉRENCE UNIQUEMENT : champ 10×10, DSP 100 cm, prof <span class="def-term" onclick="openDef('Dmax')">Dmax</span></strong></p>
+</div>
+<div class="inf"><strong>En clair :</strong> les <span class="def-term" onclick="openDef('UM')">UM</span> sont le “compteur” de la machine : on ne demande pas “2 Gy”, on demande un certain nombre d’UM qui, dans des conditions standard, donnent 1 cGy par UM. Dès qu’on change (taille de champ, distance, profondeur, bolus, coin…), le TPS recalcule les UM pour garder la <strong>bonne dose</strong>.</div>
+<div class="def-actions">
+  <button class="def-btn" onclick="openDef('UM')">🔎 UM</button>
+  <button class="def-btn" onclick="openDef('TPS')">🔎 TPS</button>
+  <button class="def-btn" onclick="openDef('DSP')">🔎 DSP</button>
+</div>
+
+<h4>UM varient selon :</h4>
+<ul><li>Taille champ</li><li>DSP</li><li>Filtre en coin</li><li>Bolus</li><li>Profondeur</li><li>Hétérogénéités</li></ul>
+<h3>Algorithmes de Calcul</h3>
+<table><tr><th>Algo</th><th>Type</th><th>Précision</th><th>Vitesse</th></tr>
+<tr><td>Pencil Beam</td><td>Analytique</td><td>Moyenne</td><td>Rapide</td></tr>
+<tr><td>AAA</td><td>Analytique</td><td>Bonne</td><td>Rapide</td></tr>
+<tr><td>Collapsed Cone</td><td>Semi-analytique</td><td>Bonne</td><td>Moyen</td></tr>
+<tr><td>Acuros XB</td><td>EBT</td><td>Excellente</td><td>Moyen</td></tr>
+<tr><td style="color:var(--ok);font-weight:700">Monte Carlo</td><td>Simulation</td><td>Gold Standard</td><td>Lent</td></tr>
+</table>
+</div></div>
+
+<!-- ========== DEFINITIONS / GLOSSAIRE ========== -->
+<div id="definitions" class="content-section">
+  <div class="card">
+    <h2>📖 Définitions (vulgarisées)</h2>
+    <p style="color:var(--dim)">Un mini-glossaire pour comprendre vite les termes (ex : <span class="def-term" onclick="openDef('Bolus')">bolus</span>). Cliquez sur un terme pour ouvrir sa fiche.</p>
+    <div class="search-wrap">
+      <input type="text" class="search-box" id="defSearch" placeholder="Rechercher un terme (ex: bolus, <span class="def-term" onclick="openDef('Dmax')">Dmax</span>, UM, IGRT...)"
+        oninput="filterDefs(this.value)">
+    </div>
+    <div class="def-grid" id="defContainer"></div>
+    <div class="inf" style="margin-top:1rem">
+      <strong>Astuce :</strong> dans le cours, certains mots sont cliquables. Vous pouvez aussi utiliser <span class="kbd">Ctrl</span>+<span class="kbd">F</span> pour retrouver un terme.
+    </div>
+  </div>
+</div>
+
+<!-- ========== FLASHCARDS ========== -->
+<div id="flashcards" class="content-section">
+<div class="card">
+<h2>🎴 Flashcards</h2>
+<p style="color:var(--dim)">Cliquez pour révéler. Marquez vos acquis.</p>
+<div style="margin:.8rem 0;display:flex;gap:.6rem;flex-wrap:wrap">
+<button class="btn btn-p" onclick="resetFlashcards()">🔄 Reset</button>
+<button class="btn btn-s" onclick="exportCards()">💾 Export</button>
+<button class="btn btn-d" onclick="showUnknown()">❌ Non sues</button>
+<button class="btn btn-o" onclick="showAllCards()">👁️ Tout</button>
+</div>
+<div class="search-wrap"><input type="text" class="search-box" id="flashSearch" placeholder="Rechercher..." oninput="filterFlash(this.value)"></div>
+<div class="progress-bar"><div class="progress-fill" id="flashcard-progress" style="width:0%">0%</div></div>
+<p style="text-align:center;color:var(--dim);font-size:.87rem"><span id="flash-known">0</span> / <span id="flash-total">0</span></p>
+<div class="flashcard-container" id="flashcardContainer"></div>
+</div></div>
+
+<!-- ========== QCM ========== -->
+<div id="qcm" class="content-section">
+  <div class="card">
+    <h2>✅ QCM</h2>
+
+    <div style="margin:.8rem 0;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center">
+      <span style="color:var(--dim);font-size:.95rem">Mode :</span>
+      <button id="qcmModeTrain" class="btn btn-p" onclick="setQcmMode('train')">⚡ Entraînement (correction immédiate)</button>
+      <button id="qcmModeExam" class="btn btn-s" onclick="setQcmMode('exam')">🧪 Partiel (score à la fin)</button>
+    </div>
+
+    <div style="margin:.6rem 0 1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <button id="qcmFinishBtn" class="btn btn-p" onclick="finishQCM()" style="display:none">🏁 Terminer & voir le score</button>
+      <button class="btn btn-s" onclick="resetQCM()">🔄 Reset</button>
+      <button class="btn btn-o" onclick="newQcmSession()">🎲 Nouvelle série (ordre aléatoire)</button>
+    </div>
+
+    <div id="qcmContainer"></div>
+
+    <div id="qcm-results" style="margin-top:1.5rem;display:none">
+      <h3>📊 Résultats</h3>
+      <div id="qcm-score" style="margin-bottom:1rem"></div>
+      <div id="qcm-errors"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== QUESTIONS ========== -->
+<div id="questions" class="content-section">
+<div class="card">
+<h2>✍️ Questions Ouvertes</h2>
+<p style="color:var(--dim)">Rédigez puis comparez.</p>
+<div id="openQuestionsContainer"></div>
+</div></div>
+
+<!-- ========== ANIMATION ========== -->
+<div id="animation" class="content-section">
+<div class="card">
+<h2>🎬 Animation LINAC</h2>
+<canvas id="linacCanvas"></canvas>
+<div style="text-align:center;margin-top:1rem;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
+<button class="btn btn-p" onclick="startAnim()">▶️</button>
+<button class="btn btn-o" onclick="pauseAnim()">⏸️</button>
+<button class="btn btn-d" onclick="resetAnim()">🔄</button>
+<button class="btn btn-s" onclick="toggleMode()">🔀 <span id="mode-text">Photons</span></button>
+</div>
+<div style="margin-top:1rem;padding:.8rem;background:rgba(0,0,0,.2);border-radius:var(--r);border:1px solid var(--bdr)">
+<ul><li>🔵 Électrons</li><li>⚡ Onde HF</li><li>🔴 Photons X</li><li>🟢 Électrons directs</li></ul>
+</div>
+</div></div>
+
+<!-- ========== PROGRESSION ========== -->
+<div id="progres" class="content-section">
+<div class="card">
+<h2>📊 Progression</h2>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-value" id="stat-flashcards">0</div><div class="stat-label">Flashcards</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-qcm">0%</div><div class="stat-label">Score QCM</div></div>
+<div class="stat-card"><div class="stat-value" id="stat-time">0h</div><div class="stat-label">Temps</div></div>
+</div>
+<div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
+<button class="btn btn-p" onclick="exportProgress()">💾 Export</button>
+<button class="btn btn-s" onclick="document.getElementById('importFile').click()">📂 Import</button>
+<button class="btn btn-d" onclick="resetAll()">🗑️ Reset</button>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="importProgress(event)">
+</div>
+<div style="margin-top:1.3rem">
+<h3>📝 Notes</h3>
+<textarea id="notes" class="textarea-input" placeholder="Observations, difficultés..."></textarea>
+<button class="btn btn-p" onclick="saveNotes()" style="margin-top:.6rem">💾 Sauvegarder</button>
+</div>
+</div></div>
+
+</div><!-- container -->
+
+<!-- ========== MODAL DEFINITIONS ========== -->
+<div class="modal" id="defModal" role="dialog" aria-modal="true" aria-labelledby="defModalTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h3 id="defModalTitle">Définition</h3>
+        <div id="defModalPill" class="def-pill" style="display:inline-block;margin-top:.35rem"></div>
+      </div>
+      <button class="modal-close" onclick="closeDef()" aria-label="Fermer">✕</button>
+    </div>
+    <div class="modal-body" id="defModalBody"></div>
+  </div>
+</div>
+
+<script>
+const flashcards=[
+{q:"Fréquence onde EM LINAC?",a:"3 GHz (3000 MHz), λ = 10 cm"},
+{q:"Canon à électrons?",a:"Effet thermoionique (W ~2500°C), E ~50 keV"},
+{q:"Magnétron vs Klystron?",a:"Magnétron = oscillateur. Klystron = amplificateur (LINAC modernes)"},
+{q:"Production RX?",a:"e⁻ → cible W → Bremsstrahlung, efficacité ~5%"},
+{q:"Rôle MLC?",a:"Conformer faisceau + modulation IMRT, 60-120 paires"},
+{q:"PTV =",a:"Planning Target Volume = CTV + marges techniques (5-10mm)"},
+{q:"CTV =",a:"Clinical Target Volume = GTV + extension micro (5-20mm)"},
+{q:"GTV =",a:"Gross Tumor Volume = tumeur visible imagerie"},
+{q:"OAR =",a:"Organ At Risk = organe sain à protéger"},
+{q:"Dose limite moelle?",a:"45-50 Gy max (myélite radique)"},
+{q:"Dose limite cristallin?",a:"10 Gy (cataracte)"},
+{q:"V20 poumon?",a:"Volume ≥20 Gy, doit être <30%"},
+{q:"IMRT =",a:"Intensity Modulated RT, 5-9 faisceaux"},
+{q:"VMAT =",a:"Volumetric Modulated Arc, 2-4 min"},
+{q:"IGRT =",a:"Image Guided RT (CBCT, EPID)"},
+{q:"SBRT =",a:"Stereotactic Body RT, 8-20 Gy/séance"},
+{q:"R&V =",a:"Record & Verify - gestion paramètres"},
+{q:"1 Gy = ? UM",a:"100 UM (cond. de référence)"},
+{q:"Fractionnement std?",a:"2 Gy/j, 5j/sem, 60-70 Gy total"},
+{q:"Contrôle output?",a:"Quotidien, ±3%"},
+{q:"DIV =",a:"Dosimétrie In Vivo, 1ère séance, ±5%"},
+{q:"Build-up =",a:"Zone dose ↑ jusqu'au Dmax. Épargne cutanée."},
+{q:"Dmax 6 MV?",a:"1.5 cm, surface 30-35%"},
+{q:"Dmax 18 MV?",a:"3.3 cm, surface ~15%"},
+{q:"Rendement 10cm 6MV?",a:"~58-60%"},
+{q:"Rendement 10cm 18MV?",a:"~72%"},
+{q:"Planéité?",a:"Variation dose zone centrale, < ±3%"},
+{q:"Symétrie?",a:"G/D, < ±2%"},
+{q:"Pénombre?",a:"80%→20%, 5-8mm"},
+{q:"Filtre égalisateur?",a:"Cône métal → profil plat. FFF = sans → débit ×3-4"},
+{q:"FOC =",a:"Facteur Ouverture Collimateur, réf 10×10 = 1.00"},
+{q:"Loi inverse carré?",a:"I₂/I₁ = (d₁/d₂)²"},
+{q:"Impact poumon?",a:"d=0.2-0.3 → dose distale ↑ 10-20%"},
+{q:"R90 électrons?",a:"Parcours thérapeutique. R90 ≈ E/3 cm"},
+{q:"Rp électrons?",a:"Parcours pratique. Rp ≈ E/2 cm. Au-delà = négligeable"},
+{q:"Dose surface e⁻?",a:"70-90%. Pas de vrai build-up."},
+{q:"Queue Bremsstrahlung?",a:"Dose résiduelle ~3-5% au-delà Rp"},
+{q:"Interaction e⁻?",a:"Collision e⁻-e⁻ + freinage noyau + interaction EM"},
+{q:"R90 de 12 MeV?",a:"12/3 = 4 cm. Rp = 12/2 = 6 cm"},
+{q:"R90 de 9 MeV?",a:"9/3 = 3 cm. Rp = 9/2 = 4.5 cm"},
+{q:"↑ E sur e⁻?",a:"Dmax ↑, dose peau ↑, gradient ↓, résiduelle ↑"},
+{q:"Champ et e⁻?",a:"Petit champ = moins diffusé → peut nécessiter ↑ E"},
+{q:"Obliquité et e⁻?",a:"Rendement modifié → sous-dosage possible !"},
+{q:"Applicateur e⁻?",a:"Localisateur (6×6→25×25) + insert alliage"},
+{q:"Filtre coin: rôle?",a:"Compenser obliquité → isodoses ⊥ axe. Sein, ORL."},
+{q:"Méca vs dyn?",a:"Méca: durcit, ↑ dose peau. Dyn: pas variation rendement, ↑ UM."},
+{q:"Angle filtre?",a:"Intersection axe/isodose à 10 cm (ICRU 24)"},
+{q:"Bolus?",a:"Équiv. tissu (polyuréthane, d=1), 3-10mm"},
+{q:"Bolus: rôle?",a:"Isodoses → surface, irrégularités, peau envahie"},
+{q:"1 UM = 1 cGy quand?",a:"Conditions réf: 10×10, DSP 100, Dmax"},
+{q:"UM varient selon?",a:"Champ, DSP, coin, bolus, profondeur, hétérogénéités"},
+{q:"TPS modélise?",a:"Rendements, profils, champs, DSP, filtres → UM"},
+{q:"Hétérogénéités?",a:"Peu dense (poumon), très dense (prothèse), contentions"},
+{q:"UH =",a:"Unités Hounsfield → densités électroniques"},
+{q:"Erreur DSP?",a:"+ grande = sous-dosage. + petite = surdosage."},
+{q:"E tumeur profonde?",a:"15-18 MV photons"},
+{q:"E tumeur superficielle?",a:"e⁻ 4-12 MeV ± bolus"},
+];
+
+const qcm=[
+{q:"Fonction principale LINAC?",opts:["Images diagnostiques","Accélérer électrons","Mesurer dose","Calculer plans"],correct:1,exp:"LINAC accélère e⁻ 4-25 MeV"},
+{q:"Ordre volumes ICRU?",opts:["PTV→CTV→GTV","GTV→CTV→PTV","CTV→GTV→PTV","GTV→PTV→CTV"],correct:1,exp:"GTV → CTV → PTV"},
+{q:"Dose limite moelle?",opts:["30-35 Gy","45-50 Gy","60-65 Gy","75-80 Gy"],correct:1,exp:"45-50 Gy (myélite)"},
+{q:"Dmax 6 MV?",opts:["0.5 cm","1.5 cm","3.0 cm","5.0 cm"],correct:1,exp:"6 MV → 1.5 cm"},
+{q:"Dose surface 18 MV?",opts:["50%","35%","15%","5%"],correct:2,exp:"18 MV → ~15%"},
+{q:"Rendement 10cm 6MV?",opts:["~80%","~60%","~40%","~20%"],correct:1,exp:"6 MV → ~58-60%"},
+{q:"Rp e⁻ 12 MeV?",opts:["3 cm","6 cm","12 cm","24 cm"],correct:1,exp:"Rp ≈ E/2 = 6 cm"},
+{q:"R90 e⁻ 9 MeV?",opts:["~1 cm","~3 cm","~4.5 cm","~9 cm"],correct:1,exp:"R90 ≈ E/3 = 3 cm"},
+{q:"FOC champ 20×20?",opts:["0.90","0.95","1.05","1.15"],correct:2,exp:"≈ 1.05"},
+{q:"Dose à 80cm si 1Gy à 100cm?",opts:["0.64 Gy","1.0 Gy","1.25 Gy","1.56 Gy"],correct:3,exp:"(100/80)² = 1.56 Gy"},
+{q:"Avantage e⁻?",opts:["Meilleure pénétration","Protection struct. profondes","Build-up important","Pénombre étroite"],correct:1,exp:"Chute rapide → protège profondeur"},
+{q:"Ganglions sus-clav: faisceau?",opts:["Photons 18MV","Photons 6MV opposés","e⁻ 9-12 MeV","RX basse E"],correct:2,exp:"Superficiel + protéger poumon → e⁻"},
+{q:"DIV mesure?",opts:["Dose prescrite","Dose calculée","Dose réelle patient","Dose max"],correct:2,exp:"Dose réellement reçue, 1ère séance"},
+{q:"Tolérance output?",opts:["±1%","±3%","±5%","±10%"],correct:1,exp:"±3% output, ±2mm lasers"},
+{q:"R90 formule?",opts:["E/2","E/3","E/4","E×2"],correct:1,exp:"R90 ≈ E/3 cm"},
+{q:"Filtre coin méca: effet?",opts:["Durcissement + ↑ dose peau","Ramollissement","Aucun","↑ pénétration seule"],correct:0,exp:"Absorbe basse E → durcissement + e⁻ basse E → ↑ peau"},
+{q:"Filtre coin dyn: avantage?",opts:["↓ UM","Quasi pas variation rendement","Meilleure épargne","↑ débit"],correct:1,exp:"Dyn → pas variation rendement, mais ↑ UM"},
+{q:"Bolus?",opts:["Plomb d=11","W d=19","Polyuréthane d=1","Alu d=2.7"],correct:2,exp:"Équiv. tissu, d=1, 3-10mm"},
+{q:"1 UM = 1 cGy valable?",opts:["Toujours","Conditions réf.","e⁻ seuls","Stéréo seule"],correct:1,exp:"Réf: 10×10, DSP 100, Dmax"},
+{q:"Erreur DSP + grande?",opts:["Surdosage","Sous-dosage","Aucun","Meilleure couverture"],correct:1,exp:"DSP ↑ → dose ↓"},
+{q:"Obliquité + e⁻?",opts:["Surdosage","Sous-dosage volume","Dose peau nulle","Aucun"],correct:1,exp:"e⁻ très sensibles → sous-dosage possible"},
+{q:"UH servent à?",opts:["Radioactivité","Densités électroniques","Dose patient","DSP"],correct:1,exp:"UH → densités électroniques pour dosimétrie"},
+];
+
+const openQ=[
+{q:"Expliquer le build-up et son intérêt clinique.",
+a:"Build-up = zone sous peau, dose ↑ jusqu'au Dmax.\n\nMécanisme : Photons → Compton → e⁻ secondaires. Équilibre électronique au Dmax.\n\nDmax : 6 MV → 1.5 cm (surface 30-35%), 18 MV → 3.3 cm (surface 15%).\n\nIntérêt : ÉPARGNE CUTANÉE. ↑ E → ↑ protection peau.\n\nAttention : bolus, table, filtre coin → ↑ dose peau."},
+{q:"Comparer photons et électrons.",
+a:"PHOTONS X :\n- Bremsstrahlung (e⁻ → W)\n- Build-up OUI (Dmax 1.5-3 cm)\n- Pénétration profonde, exponentielle\n- Rendement 10cm: 60% (6MV) à 72% (18MV)\n- Tumeurs PROFONDES\n\nÉLECTRONS :\n- Directement LINAC\n- Build-up quasi-absent (surface 70-90%)\n- Pénétration LIMITÉE, chute rapide\n- Rp ≈ E/2, R90 ≈ E/3\n- Tumeurs SUPERFICIELLES\n- Inconvénients: pénombre large, sensibles obliquité"},
+{q:"Rôle des filtres en coin (méca vs dyn).",
+a:"RÔLE: Compenser obliquité → isodoses ⊥ axe.\nSans filtre → isodoses // peau. Avec → dose homogène.\nApplications: sein, ORL.\n\nMÉCANIQUE:\n- Durcissement faisceau\n- ↑ rendement (basse E)\n- ↑ dose peau\n\nDYNAMIQUE:\n- Quasi pas variation rendement\n- ↑ UM\n- Mouvement mâchoire\n\nAngle: axe/isodose à 10 cm (ICRU 24)"},
+{q:"TPS et Unités Moniteur.",
+a:"TPS: logiciel dosimétrique.\nModélise TOUTES caractéristiques faisceaux.\nWorkflow: scanner → contourage → calcul → transfert.\n\nUM: transformer Gy → unités machine.\n1 UM = 1 cGy (CONDITIONS RÉF UNIQUEMENT).\nRéf: 10×10, DSP 100, Dmax.\n\nVarient selon: champ, DSP, coin, bolus, profondeur, hétérogénéités.\n\nAlgos: Pencil Beam, AAA, Collapsed Cone, Acuros XB, Monte Carlo (gold std)."},
+{q:"Impact des hétérogénéités.",
+a:"TYPES: peu dense (poumon d=0.2), très dense (prothèses), contentions.\n\nPoumon: ↓ atténuation → dose distale ↑ 10-20%.\nOs/prothèse: ↑ atténuation → dose distale ↓.\nAir: perte équilibre électronique.\n\nPrise en compte: UH → densités électroniques.\nAlgos modernes corrigent.\nMauvaise prise en compte = ERREUR DOSE.\n\nProthèses: Ti 9-34%, Co-Cr-Mo 6-42% selon position/énergie."}
+];
+
+
+// ===== Glossaire / Définitions (vulgarisées) =====
+const defs=[
+  {term:"Bolus", tag:"matériel", def:"Matériau équivalent tissu (densité ~1) placé sur la peau, généralement 3–10 mm.", plain:"Imagine une “fausse peau” : elle ramène la zone de dose élevée vers la surface.", why:"Utile quand on veut traiter la peau (paroi post‑mastectomie, lésions cutanées) ou lisser des irrégularités.", watch:"Un bolus augmente la dose cutanée (attention aux réactions cutanées). Bien appliquer sans bulles d’air."},
+  {term:"Build-up", tag:"dose", def:"Zone de montée de dose sous la peau jusqu’au maximum (Dmax) pour les photons.", plain:"La dose “démarre” après la surface : elle monte comme une rampe puis fait un pic.", why:"Explique l’épargne cutanée en photons.", watch:"Bolus/table/coin peuvent augmenter la dose en surface (contamination e−)."},
+  {term:"Dmax", tag:"dose", def:"Profondeur à laquelle la dose est maximale sur l’axe du faisceau.", plain:"Le “pic” de dose. Plus l’énergie est élevée, plus ce pic est profond.", why:"Permet de choisir l’énergie selon la profondeur cible.", watch:"Ne pas confondre Dmax (pic) et profondeur de prescription."},
+  {term:"RDP / RDP(z)", tag:"dose", def:"Rendement en profondeur : Dose(z)/Dose(Dmax) × 100%.", plain:"Pour savoir combien de dose il reste à une profondeur donnée par rapport au maximum.", why:"Aide à comparer les énergies et les tailles de champ.", watch:"Dépend de l’énergie, du champ, de la DSP et des hétérogénéités."},
+  {term:"DSP", tag:"géométrie", def:"Distance Source‑Peau (SSD) : distance entre la source (focale) et la peau.", plain:"Plus on s’éloigne de la source, plus l’intensité baisse (loi en 1/d²).", why:"Impact direct sur la dose si on garde le même nombre d’UM.", watch:"Erreur de DSP = sous/surdosage important."},
+  {term:"SAD", tag:"géométrie", def:"Source‑Axis Distance : distance source‑isocentre (souvent 100 cm).", plain:"En isocentrique, on tourne autour d’un point fixe (isocentre).", why:"Standard en photons isocentriques.", watch:"Ne pas confondre SAD (source‑isocentre) et DSP (source‑peau)."},
+  {term:"UM", tag:"machine", def:"Unité Moniteur : unité de “temps/quantité” délivrée par l’accélérateur (calibrée).", plain:"Le compteur de la machine : 100 UM ≈ 1 Gy uniquement en conditions de référence.", why:"Le TPS convertit la dose prescrite en UM selon la géométrie et les accessoires.", watch:"Ne jamais appliquer 1 UM = 1 cGy hors conditions de référence."},
+  {term:"TPS", tag:"logiciel", def:"Treatment Planning System : logiciel qui calcule la distribution de dose et les UM.", plain:"Le GPS du traitement : il connaît l’anatomie (scanner) + la machine + les faisceaux.", why:"Optimise couverture de la cible et protection des organes à risque.", watch:"Qualité dépend de l’algorithme (pencil beam < AAA/CC < Acuros/Monte Carlo)."},
+  {term:"Filtre en coin", tag:"accessoire", def:"Accessoire (mécanique ou dynamique) qui crée un gradient d’intensité dans le champ.", plain:"Il “assombrit” progressivement un côté du faisceau pour homogénéiser la dose.", why:"Sein, ORL, surfaces obliques.", watch:"Mécanique : peut ↑ dose peau et modifier le rendement. Dynamique : ↑ UM."},
+  {term:"Isodose", tag:"dose", def:"Ligne/surface reliant des points recevant la même dose.", plain:"Une “courbe de niveau” mais pour la dose.", why:"Visualiser homogénéité et couverture.", watch:"Attention aux variations avec énergie/coin/hétérogénéités."},
+  {term:"Bremsstrahlung", tag:"physique", def:"Rayonnement X émis lors du freinage d’électrons sur une cible (souvent tungstène).", plain:"Un électrons qui freine “perd” de l’énergie sous forme de photons X.", why:"Mode de production des photons dans le LINAC.", watch:"Efficacité faible (~5%)."},
+  {term:"Compton", tag:"physique", def:"Interaction dominante des photons MV avec la matière : diffusion avec éjection d’un électron.", plain:"Le photon tape un électron et le met en mouvement → c’est lui qui dépose la dose.", why:"Explique les e− secondaires et le build‑up.", watch:"Dépend de la densité électronique."},
+  {term:"MLC", tag:"machine", def:"Multileaf Collimator : lames mobiles qui façonnent le champ et modulent (IMRT/VMAT).", plain:"Des “volets” très fins qui sculptent le faisceau.", why:"Conformation et modulation de dose.", watch:"Tolérances mécaniques et QA essentiels."},
+  {term:"GTV", tag:"volumes", def:"Gross Tumor Volume : tumeur visible (imagerie/examen).", plain:"Ce qu’on voit clairement.", why:"Point de départ des volumes ICRU.", watch:"Ne pas oublier incertitudes d’imagerie."},
+  {term:"CTV", tag:"volumes", def:"Clinical Target Volume : GTV + extension micro‑invisible.", plain:"Ce qu’on ne voit pas mais qu’on doit traiter.", why:"Couverture de la maladie microscopique.", watch:"Dépend de la pathologie et des marges cliniques."},
+  {term:"PTV", tag:"volumes", def:"Planning Target Volume : CTV + marges (mouvements, mise en place).", plain:"Une “bulle de sécurité” pour être sûr d’irradier la cible malgré les incertitudes.", why:"Robustesse du plan.", watch:"Plus PTV grand → plus risque dose OAR."},
+  {term:"OAR", tag:"clinique", def:"Organ At Risk : organe sain à protéger (cœur, moelle…).", plain:"Les zones qu’on veut épargner.", why:"Contraintes dose/volume.", watch:"Toujours vérifier les DVH/contraintes."},
+  {term:"IGRT", tag:"clinique", def:"Image Guided Radiotherapy : imagerie avant/pendant séance (CBCT, EPID…).", plain:"On vérifie l’alignement avec des images juste avant de tirer.", why:"Réduit marges et sécurise.", watch:"Dose d’imagerie et temps de séance."},
+  {term:"IMRT", tag:"clinique", def:"Intensity Modulated Radiotherapy : modulation d’intensité par segments/MLC.", plain:"On fait varier la “luminosité” du faisceau pour mieux épouser la cible.", why:"Meilleure conformation, épargne OAR.", watch:"Plus complexe → QA plus exigeante."},
+  {term:"VMAT", tag:"clinique", def:"Volumetric Modulated Arc Therapy : IMRT en rotation (arc).", plain:"La machine tourne en délivrant en continu.", why:"Rapide et très conformé.", watch:"Dépend du contrôle mouvement/MLC/débit."},
+  {term:"SBRT", tag:"clinique", def:"Stereotactic Body RT : fortes doses par fraction sur petites cibles avec grande précision.", plain:"Traitement “chirurgical” par rayons.", why:"Petites lésions, peu de séances.", watch:"Tolérances strictes, mouvements respiratoires."},
+  {term:"DIV", tag:"contrôle", def:"Dosimétrie In Vivo : mesure de la dose réellement reçue par le patient (souvent 1ère séance).", plain:"On vérifie sur le patient que la dose délivrée correspond au plan.", why:"Sécurité/qualité.", watch:"Tolérance typique ±5% (selon protocole)."},
+  {term:"UH", tag:"scanner", def:"Unités Hounsfield : valeurs CT reliées à la densité électronique.", plain:"Une échelle qui dit si c’est air, poumon, eau, os…", why:"Permet les corrections d’hétérogénéité dans le TPS.", watch:"Calibrations CT‑densité indispensables."},
+  {term:"R90", tag:"électrons", def:"Profondeur où la dose est 90% du maximum (référence “thérapeutique” en e−).", plain:"La profondeur utile où on est encore haut en dose.", why:"On veut la cible dans R90.", watch:"Approx : R90 ≈ E/3 (cm) selon cours."},
+  {term:"Rp", tag:"électrons", def:"Parcours pratique : au‑delà, la dose des électrons devient négligeable.", plain:"La “fin” des électrons (hors petite queue Bremsstrahlung).", why:"Protège les structures profondes.", watch:"Approx : Rp ≈ E/2 (cm) selon cours."},
+  {term:"FFF", tag:"machine", def:"Flattening Filter Free : faisceau sans filtre égalisateur, débit plus élevé.", plain:"On enlève le filtre qui aplatisse le profil → plus de dose par minute.", why:"Stéréotaxie, séances plus courtes.", watch:"Profil non plat → planification adaptée."},
+  {term:"CBCT", tag:"imagerie", def:"Cone Beam CT : scanner embarqué sur le LINAC pour l’IGRT.", plain:"Un mini‑scanner pour vérifier la position sur la machine.", why:"Repositionnement précis.", watch:"Dose d’imagerie et artefacts."},
+  {term:"EPID", tag:"imagerie", def:"Electronic Portal Imaging Device : détecteur pour imagerie portale/contrôle.", plain:"Une “radio” de vérification avec le faisceau.", why:"Contrôle position/champs.", watch:"Qualité image dépend énergie/géométrie."}
+];
+
+function renderDefinitions(){
+  const c=document.getElementById('defContainer'); if(!c) return;
+  c.innerHTML='';
+  defs.forEach(d=>{
+    const el=document.createElement('div');
+    el.className='def-card';
+    el.dataset.term=(d.term||'').toLowerCase();
+    el.dataset.body=(JSON.stringify(d).toLowerCase());
+    el.innerHTML=`
+      <div class="def-title">
+        <h3>${d.term}</h3>
+        <span class="def-pill">${d.tag||'terme'}</span>
+      </div>
+      <div class="def-mini"><span class="def-section-title">Définition :</span> ${d.def}</div>
+      <div class="def-mini"><span class="def-section-title">En clair :</span> ${d.plain}</div>
+      ${d.why?`<div class="def-mini"><span class="def-section-title">Pourquoi on s’en sert :</span> ${d.why}</div>`:''}
+      ${d.watch?`<div class="def-mini"><span class="def-section-title">Attention :</span> ${d.watch}</div>`:''}
+      <div class="def-actions">
+        <button class="def-btn" onclick="openDef('${d.term.replace("'","\\'")}')">Ouvrir</button>
+      </div>
+    `;
+    el.onclick=(e)=>{ if(e.target.tagName!=='BUTTON') openDef(d.term); };
+    c.appendChild(el);
+  });
+}
+
+function filterDefs(v){
+  v=(v||'').toLowerCase().trim();
+  document.querySelectorAll('#defContainer .def-card').forEach(card=>{
+    card.style.display = (!v || card.dataset.term.includes(v) || card.dataset.body.includes(v)) ? 'block' : 'none';
+  });
+}
+
+function openDef(term){
+  const d=defs.find(x=>x.term.toLowerCase()===String(term).toLowerCase());
+  if(!d){ alert('Terme non trouvé : '+term); return; }
+  document.getElementById('defModalTitle').textContent=d.term;
+  document.getElementById('defModalPill').textContent=d.tag||'terme';
+  const b=document.getElementById('defModalBody');
+  b.innerHTML = `
+    <div class="inf"><strong>Définition :</strong> ${d.def}</div>
+    <div class="ok"><strong>En clair :</strong> ${d.plain}</div>
+    ${d.why?`<div class="hl"><strong>Pourquoi on s’en sert :</strong> ${d.why}</div>`:''}
+    ${d.watch?`<div class="imp"><strong>Attention :</strong> ${d.watch}</div>`:''}
+  `;
+  document.getElementById('defModal').classList.add('show');
+}
+
+function closeDef(){ document.getElementById('defModal').classList.remove('show'); }
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') closeDef(); });
+document.getElementById('defModal')?.addEventListener('click',(e)=>{ if(e.target.id==='defModal') closeDef(); });
+
+
+let state={flash:{},qcm:{},notes:'',start:Date.now()};
+let animRunning=false,animFrame=0,animMode='photons';
+
+document.addEventListener('DOMContentLoaded',()=>{loadState();renderDefinitions();initFlashcards();initQCM();initQuestions();initCanvas();updateStats();});
+
+function showSection(id,btn){
+    document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if(btn)btn.classList.add('active');
+}
+function showSub(id,btn){
+    const p=btn.closest('.card');
+    p.querySelectorAll('.course-sub').forEach(s=>s.classList.remove('active'));
+    p.querySelectorAll('.sub-nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+
+function initFlashcards(){
+    const c=document.getElementById('flashcardContainer');c.innerHTML='';
+    flashcards.forEach((card,i)=>{
+        const d=document.createElement('div');d.className='flashcard'+(state.flash[i]?.flipped?' flipped':'');
+        d.dataset.q=card.q.toLowerCase();d.dataset.a=card.a.toLowerCase();
+        d.innerHTML='<div class="flashcard-inner"><div class="flashcard-front">'+card.q+'</div><div class="flashcard-back">'+card.a+'<div style="margin-top:.7rem;display:flex;gap:.4rem;justify-content:center"><button class="btn btn-s" onclick="markKnown('+i+',true)" style="padding:.3rem .7rem;font-size:.8rem">✅</button><button class="btn btn-d" onclick="markKnown('+i+',false)" style="padding:.3rem .7rem;font-size:.8rem">❌</button></div></div></div>';
+        d.onclick=e=>{if(!e.target.classList.contains('btn'))flipCard(i)};
+        c.appendChild(d);
+    });
+    updateFlashProgress();
+}
+function flipCard(i){document.querySelectorAll('.flashcard')[i].classList.toggle('flipped');if(!state.flash[i])state.flash[i]={};state.flash[i].flipped=!state.flash[i].flipped;}
+function markKnown(i,k){if(!state.flash[i])state.flash[i]={};state.flash[i].known=k;updateFlashProgress();saveState();}
+function updateFlashProgress(){
+    const k=Object.values(state.flash).filter(s=>s.known).length;
+    const p=Math.round((k/flashcards.length)*100);
+    document.getElementById('flashcard-progress').style.width=p+'%';
+    document.getElementById('flashcard-progress').textContent=p+'%';
+    document.getElementById('flash-known').textContent=k;
+    document.getElementById('flash-total').textContent=flashcards.length;
+}
+function resetFlashcards(){if(confirm('Réinitialiser?')){state.flash={};initFlashcards();saveState();}}
+function exportCards(){const u=flashcards.filter((c,i)=>!state.flash[i]?.known);dl(JSON.stringify(u,null,2),'flashcards_revoir.json');alert(u.length+' cartes');}
+function showUnknown(){document.querySelectorAll('.flashcard').forEach((c,i)=>{c.style.display=state.flash[i]?.known?'none':'block';});}
+function showAllCards(){document.querySelectorAll('.flashcard').forEach(c=>{c.style.display='block';});}
+function filterFlash(v){v=v.toLowerCase();document.querySelectorAll('.flashcard').forEach(c=>{c.style.display=(c.dataset.q.includes(v)||c.dataset.a.includes(v))?'block':'none';});}
+
+
+function shuffleArray(a){
+    const arr=a.slice();
+    for(let i=arr.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1));
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+}
+function ensureQcmMeta(newSession=false){
+    if(!state.qcmMeta) state.qcmMeta={mode:'train',order:[],optOrder:{},finished:false};
+    if(!state.qcmMeta.mode) state.qcmMeta.mode='train';
+    if(!Array.isArray(state.qcmMeta.order)) state.qcmMeta.order=[];
+    if(!state.qcmMeta.optOrder) state.qcmMeta.optOrder={};
+
+    if(newSession || state.qcmMeta.order.length!==qcm.length){
+        state.qcmMeta.order = shuffleArray([...Array(qcm.length).keys()]);
+        state.qcmMeta.optOrder = {};
+        state.qcmMeta.order.forEach(qi=>{
+            state.qcmMeta.optOrder[qi]=shuffleArray([...Array(qcm[qi].opts.length).keys()]);
+        });
+        state.qcmMeta.finished=false;
+        state.qcm={};
+    }else{
+        // ensure option orders exist and have the right size
+        state.qcmMeta.order.forEach(qi=>{
+            const need = qcm[qi].opts.length;
+            if(!Array.isArray(state.qcmMeta.optOrder[qi]) || state.qcmMeta.optOrder[qi].length!==need){
+                state.qcmMeta.optOrder[qi]=shuffleArray([...Array(need).keys()]);
+            }
+        });
+    }
+    saveState();
+}
+function updateQcmModeUI(){
+    const mode=state.qcmMeta?.mode||'train';
+    const bt=document.getElementById('qcmModeTrain');
+    const be=document.getElementById('qcmModeExam');
+    if(bt&&be){
+        bt.className='btn '+(mode==='train'?'btn-p':'btn-s');
+        be.className='btn '+(mode==='exam'?'btn-p':'btn-s');
+    }
+    const finish=document.getElementById('qcmFinishBtn');
+    if(finish) finish.style.display = (mode==='exam') ? 'inline-flex' : 'none';
+}
+function setQcmMode(mode){
+    ensureQcmMeta(false);
+    state.qcmMeta.mode=mode;
+    state.qcmMeta.finished=false;
+    // on change de mode => on repart propre (évite les fuites de correction)
+    state.qcm={};
+    saveState();
+    initQCM();
+}
+
+function initQCM(){
+    ensureQcmMeta(false);
+    updateQcmModeUI();
+    const mode=state.qcmMeta.mode;
+    const c=document.getElementById('qcmContainer');c.innerHTML='';
+    const order=state.qcmMeta.order;
+
+    order.forEach((qIndex,pos)=>{
+        const q=qcm[qIndex];
+        const d=document.createElement('div');d.className='question-card';d.id='qcm-'+qIndex;
+
+        let h='<div class="question-title">'+(pos+1)+'. '+q.q+'</div>';
+        const optOrder=state.qcmMeta.optOrder[qIndex] || [...Array(q.opts.length).keys()];
+        optOrder.forEach((oi)=>{
+            const sel=(state.qcm[qIndex]===oi)?' selected':'';
+            h+='<div class="option'+sel+'" data-oi="'+oi+'" onclick="selectOpt('+qIndex+','+oi+')">'+q.opts[oi]+'</div>';
+        });
+        h+='<div class="explanation" id="exp-'+qIndex+'">'+q.exp+'</div>';
+        d.innerHTML=h;
+        c.appendChild(d);
+
+        if(mode==='train' && state.qcm[qIndex]!==undefined){
+            revealOne(qIndex);
+        }
+    });
+
+    document.getElementById('qcm-results').style.display='none';
+    document.getElementById('qcm-errors').innerHTML='';
+}
+
+function selectOpt(qi,oi){
+    ensureQcmMeta(false);
+    const card=document.getElementById('qcm-'+qi);
+    if(!card) return;
+
+    card.querySelectorAll('.option').forEach((o)=>{
+        const idx=parseInt(o.dataset.oi,10);
+        o.classList.toggle('selected',idx===oi);
+        o.classList.remove('correct','incorrect');
+    });
+
+    state.qcm[qi]=oi;
+    state.qcmMeta.finished=false;
+    saveState();
+
+    if(state.qcmMeta.mode==='train'){
+        revealOne(qi);
+    }
+}
+
+function revealOne(qi){
+    const q=qcm[qi];
+    const card=document.getElementById('qcm-'+qi);
+    if(!card) return;
+    const chosen=state.qcm[qi];
+
+    card.querySelectorAll('.option').forEach((o)=>{
+        const idx=parseInt(o.dataset.oi,10);
+        o.classList.remove('correct','incorrect');
+        if(idx===q.correct) o.classList.add('correct');
+        else if(idx===chosen && chosen!==q.correct) o.classList.add('incorrect');
+    });
+
+    const exp=document.getElementById('exp-'+qi);
+    if(exp) exp.classList.add('show');
+}
+
+function finishQCM(){
+    ensureQcmMeta(false);
+    state.qcmMeta.finished=true;
+
+    let cor=0,answered=0;
+    const errors=[];
+    qcm.forEach((q,qi)=>{
+        const ans=state.qcm[qi];
+        if(ans===undefined) return;
+        answered++;
+        if(ans===q.correct) cor++;
+        else errors.push({qi,ans,correct:q.correct,q:q.q,exp:q.exp});
+    });
+
+    // Révélation (uniquement à la fin)
+    qcm.forEach((q,qi)=>{
+        if(state.qcm[qi]===undefined) return;
+        const card=document.getElementById('qcm-'+qi);
+        if(!card) return;
+        card.querySelectorAll('.option').forEach((o)=>{
+            const idx=parseInt(o.dataset.oi,10);
+            o.classList.remove('selected');
+            if(idx===q.correct) o.classList.add('correct');
+            else if(idx===state.qcm[qi]) o.classList.add('incorrect');
+        });
+        document.getElementById('exp-'+qi)?.classList.add('show');
+    });
+
+    const r=document.getElementById('qcm-results');r.style.display='block';
+    document.getElementById('qcm-score').innerHTML=
+        '<div class="stat-card" style="display:inline-block">'+
+        '<div class="stat-value">'+(answered>0?Math.round(cor/answered*100):0)+'%</div>'+
+        '<div class="stat-label">'+cor+'/'+answered+'</div></div>';
+
+    const errDiv=document.getElementById('qcm-errors');
+    if(errors.length===0){
+        errDiv.innerHTML='<div class="note-card" style="border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.06)"><strong>✅ Aucune erreur</strong> sur les questions répondues.</div>';
+    }else{
+        let h='<h4 style="margin:.6rem 0;color:var(--txt)">❌ Vos erreurs</h4>';
+        errors.forEach((e,k)=>{
+            h+='<div class="note-card" style="margin:.6rem 0">'+
+               '<div style="font-weight:700;margin-bottom:.25rem">'+(k+1)+'. '+e.q+'</div>'+
+               '<div style="color:var(--err);margin:.2rem 0"><strong>Votre réponse :</strong> '+qcm[e.qi].opts[e.ans]+'</div>'+
+               '<div style="color:var(--ok);margin:.2rem 0"><strong>Bonne réponse :</strong> '+qcm[e.qi].opts[e.correct]+'</div>'+
+               (e.exp?('<div style="margin-top:.35rem;color:var(--dim)">'+e.exp+'</div>'):'')+
+               '</div>';
+        });
+        errDiv.innerHTML=h;
+    }
+
+    saveState();updateStats();
+}
+
+// compat : si un ancien bouton appelle checkAnswers()
+function checkAnswers(){
+    ensureQcmMeta(false);
+    if(state.qcmMeta.mode==='exam') return finishQCM();
+    // entraînement : révéler toutes les explications des questions répondues
+    qcm.forEach((q,qi)=>{ if(state.qcm[qi]!==undefined) revealOne(qi); });
+}
+
+function resetQCM(){
+    ensureQcmMeta(false);
+    state.qcm={};
+    state.qcmMeta.finished=false;
+    saveState();
+    initQCM();
+    document.getElementById('qcm-results').style.display='none';
+}
+
+function newQcmSession(){
+    ensureQcmMeta(true);
+    initQCM();
+}
+
+
+function initQuestions(){
+    const c=document.getElementById('openQuestionsContainer');c.innerHTML='';
+    openQ.forEach((q,i)=>{
+        const d=document.createElement('div');d.className='question-card';
+        d.innerHTML='<div class="question-title">'+(i+1)+'. '+q.q+'</div><textarea class="textarea-input" placeholder="Votre réponse..."></textarea><button class="btn btn-p" onclick="this.nextElementSibling.classList.toggle(\'show\')" style="margin-top:.5rem">💡 Réponse</button><div class="suggested-answer">'+q.a+'</div>';
+        c.appendChild(d);
+    });
+}
+
+function initCanvas(){
+    const cv=document.getElementById('linacCanvas');if(!cv)return;
+    cv.width=900;cv.height=500;drawLinac(cv.getContext('2d'));
+}
+function drawLinac(ctx){
+    ctx.clearRect(0,0,900,500);ctx.textAlign='center';
+    ctx.fillStyle='#070b14';ctx.fillRect(0,0,900,500);
+    ctx.fillStyle='#1e293b';ctx.fillRect(80,235,380,30);
+    ctx.strokeStyle='#334155';ctx.lineWidth=2;ctx.strokeRect(80,235,380,30);
+    ctx.fillStyle='#94a3b8';ctx.font='13px DM Sans,sans-serif';
+    ctx.fillText('Canon e⁻',100,225);ctx.fillText('Section Accélératrice',270,225);ctx.fillText('Cible/Fenêtre',490,225);
+    ctx.fillStyle='#6366f1';ctx.beginPath();ctx.arc(80,250,18,0,2*Math.PI);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 11px sans-serif';ctx.fillText('e⁻',80,254);
+    ctx.fillStyle='#ef4444';ctx.fillRect(465,230,10,40);
+    ctx.fillStyle='#1e293b';ctx.fillRect(490,230,120,50);ctx.strokeStyle='#334155';ctx.strokeRect(490,230,120,50);
+    ctx.fillStyle='#94a3b8';ctx.font='12px sans-serif';ctx.fillText('Tête (MLC)',550,260);
+    if(animMode==='photons'){
+        ctx.strokeStyle='#ef4444';ctx.lineWidth=2;
+        for(let i=0;i<9;i++){ctx.beginPath();ctx.moveTo(550,285);ctx.lineTo(550+(i-4)*18,450);ctx.stroke();}
+        ctx.fillStyle='#ef4444';ctx.font='bold 14px sans-serif';ctx.fillText('Photons X',550,390);
+    }else{
+        ctx.strokeStyle='#10b981';ctx.lineWidth=2;
+        for(let i=0;i<7;i++){ctx.beginPath();ctx.moveTo(550,285);ctx.lineTo(550+(i-3)*18,450);ctx.stroke();}
+        ctx.fillStyle='#10b981';ctx.font='bold 14px sans-serif';ctx.fillText('Électrons',550,390);
+    }
+    ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.ellipse(550,455,55,22,0,0,2*Math.PI);ctx.fill();
+    ctx.fillStyle='#000';ctx.font='13px sans-serif';ctx.fillText('Patient',550,459);
+    ctx.fillStyle='#94a3b8';ctx.font='bold 15px sans-serif';ctx.textAlign='left';
+    ctx.fillText('Mode: '+animMode.toUpperCase(),660,120);
+    if(animRunning){
+        const ex=110+(animFrame%340);
+        ctx.fillStyle='#818cf8';ctx.beginPath();ctx.arc(ex,250,5,0,2*Math.PI);ctx.fill();
+        for(let i=0;i<8;i++){
+            const wy=242+Math.sin((animFrame+i*30)*.1)*10;
+            ctx.strokeStyle='#fbbf24';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(130+i*38,wy);ctx.lineTo(155+i*38,wy);ctx.stroke();
+        }
+        animFrame+=2;requestAnimationFrame(()=>drawLinac(ctx));
+    }
+}
+function startAnim(){animRunning=true;drawLinac(document.getElementById('linacCanvas').getContext('2d'));}
+function pauseAnim(){animRunning=false;}
+function resetAnim(){animRunning=false;animFrame=0;initCanvas();}
+function toggleMode(){animMode=animMode==='photons'?'electrons':'photons';document.getElementById('mode-text').textContent=animMode==='photons'?'Photons':'Électrons';initCanvas();}
+
+function updateStats(){
+    const k=Object.values(state.flash).filter(s=>s.known).length;
+    document.getElementById('stat-flashcards').textContent=k;
+    let c=0,a=0;qcm.forEach((q,i)=>{if(state.qcm[i]!==undefined){a++;if(state.qcm[i]===q.correct)c++;}});
+    document.getElementById('stat-qcm').textContent=(a>0?Math.round(c/a*100):0)+'%';
+    document.getElementById('stat-time').textContent=Math.floor((Date.now()-state.start)/3600000)+'h';
+    if(document.getElementById('notes'))document.getElementById('notes').value=state.notes;
+}
+function saveState(){localStorage.setItem('ue36v2',JSON.stringify(state));}
+function loadState(){
+    const s=localStorage.getItem('ue36v2');
+    if(s){
+        try{ state=JSON.parse(s)||state; }catch(e){}
+    }
+    if(!state.flash) state.flash={};
+    if(!state.qcm) state.qcm={};
+    if(!state.qcmMeta) state.qcmMeta={mode:'train',order:[],optOrder:{},finished:false};
+    if(!state.qcmMeta.mode) state.qcmMeta.mode='train';
+    if(!Array.isArray(state.qcmMeta.order)) state.qcmMeta.order=[];
+    if(!state.qcmMeta.optOrder) state.qcmMeta.optOrder={};
+    if(state.notes===undefined) state.notes='';
+    if(!state.start) state.start=Date.now();
+    updateStats();
+}
+function saveNotes(){state.notes=document.getElementById('notes').value;saveState();alert('✅ Sauvegardé!');}
+function exportProgress(){
+    const d={...state,stats:{fk:Object.values(state.flash).filter(s=>s.known).length,ft:flashcards.length,qa:Object.keys(state.qcm).length,qt:qcm.length}};
+    dl(JSON.stringify(d,null,2),'UE36_Prog_'+new Date().toISOString().split('T')[0]+'.json');
+}
+function importProgress(e){
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=ev=>{try{if(confirm('Importer? Écrase données actuelles.')){state=JSON.parse(ev.target.result);saveState();initFlashcards();updateStats();alert('✅ Importé');}}catch(err){alert('❌ '+err.message);}};r.readAsText(f);
+}
+function resetAll(){if(confirm('Supprimer TOUTE la progression?')){if(confirm('Confirmer?')){localStorage.removeItem('ue36v2');state={flash:{},qcm:{},notes:'',start:Date.now()};initFlashcards();resetQCM();document.getElementById('notes').value='';updateStats();alert('✅ Reset');}}}
+function dl(data,name){const b=new Blob([data],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+
+setInterval(saveState,300000);
+window.addEventListener('beforeunload',saveState);
+</script>
+</body>
+</html>
