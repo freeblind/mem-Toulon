@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anatomie Interactive V8 - MEM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        /* Sélecteur de catégorie */
+        .category-selector {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+        }
+
+        .category-btn {
+            padding: 12px 30px;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        /* Storage indicator */
+        .storage-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+        }
+
+        .storage-bar-container {
+            width: 100%;
+            height: 25px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 8px;
+        }
+
+        .storage-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #26de81 0%, #20bf6b 50%, #fed330 75%, #fc5c65 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .storage-text {
+            color: white;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .storage-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .storage-btn {
+            padding: 8px 16px;
+            border: 1px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .storage-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content {
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            max-height: calc(100vh - 400px);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .sidebar h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .schema-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .schema-item {
+            padding: 12px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .schema-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .schema-item.active {
+            border-color: #667eea;
+            background: #e8eaf6;
+        }
+
+        .schema-item.from-json {
+            border-left: 4px solid #26de81;
+        }
+
+        .schema-item-name {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .schema-item-badge {
+            font-size: 0.75em;
+            padding: 2px 8px;
+            background: #26de81;
+            color: white;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+
+        .schema-item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .schema-item-btn {
+            padding: 4px 8px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .schema-item-btn:hover {
+            background: #ee5a6f;
+        }
+
+        .schema-item-btn.export {
+            background: #26de81;
+        }
+
+        .schema-item-btn.export:hover {
+            background: #20bf6b;
+        }
+
+        .main-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .new-schema-btn {
+            width: 100%;
+            padding: 10px;
+            background: #26de81;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .new-schema-btn:hover {
+            background: #20bf6b;
+        }
+
+        .load-json-btn {
+            width: 100%;
+            padding: 10px;
+            background: #5f27cd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .load-json-btn:hover {
+            background: #341f97;
+        }
+
+        .mode-content {
+            display: none;
+        }
+
+        .mode-content.active {
+            display: block;
+        }
+
+        /* Mode Édition */
+        .edit-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .edit-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .file-input-wrapper {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-wrapper:hover {
+            background: #5568d3;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .image-container {
+            position: relative;
+            margin-top: 15px;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .image-container.has-image {
+            border-style: solid;
+            border-color: #667eea;
+        }
+
+        #anatomyImage {
+            width: 100%;
+            display: block;
+        }
+
+        #imageWrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .marker {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: move;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 10;
+            user-select: none;
+        }
+
+        .arrow-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            overflow: visible;
+        }
+
+        .arrow-target-zone {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            cursor: move;
+            z-index: 15;
+        }
+
+        .arrow-delete-btn {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+        }
+
+        .marker-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .control-group {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #26de81;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #20bf6b;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ee5a6f;
+        }
+
+        .btn-warning {
+            background: #ffa502;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #ff7f00;
+        }
+
+        /* Mode Examen - À remplir */
+        .exam-container {
+            position: relative;
+        }
+
+        .exam-image-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .exam-image {
+            width: 100%;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .exam-input-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .exam-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .exam-input-group {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            transition: all 0.3s;
+        }
+
+        .exam-input-group.correct {
+            border-color: #26de81;
+            background: #f0fdf4;
+        }
+
+        .exam-input-group.incorrect {
+            border-color: #ff4757;
+            background: #fef2f2;
+        }
+
+        .exam-input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .exam-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .exam-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .exam-input.correct {
+            border-color: #26de81;
+            background: #f0fdf4;
+        }
+
+        .exam-input.incorrect {
+            border-color: #ff4757;
+            background: #fef2f2;
+        }
+
+        .user-answer-display {
+            margin-top: 5px;
+            padding: 6px 10px;
+            background: #fee;
+            border-left: 4px solid #ff4757;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #c0392b;
+            font-weight: 600;
+        }
+
+        .correct-answer {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            color: #1565c0;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.95em;
+            animation: slideIn 0.3s ease;
+        }
+
+        .correct-answer strong {
+            color: #0d47a1;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .score-display {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Mode Examen - Cliquer */
+        .exam-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .exam-marker:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        .exam-marker.correct {
+            animation: correctPulse 0.5s;
+            background: #26de81 !important;
+        }
+
+        .exam-marker.incorrect {
+            animation: shake 0.5s;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) rotate(-10deg); }
+            75% { transform: translate(-50%, -50%) rotate(10deg); }
+        }
+
+        .current-term {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* Category switch during exam */
+        .exam-category-switch {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .exam-category-btn {
+            padding: 8px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .exam-category-btn:hover {
+            background: #f0f0ff;
+        }
+
+        .exam-category-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .instructions {
+            background: #e8eaf6;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .instructions h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 400px;
+            }
+
+            .marker-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .exam-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .category-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Anatomie Interactive V8 - MEM</h1>
+            
+            <!-- Sélecteur de catégorie -->
+            <div class="category-selector">
+                <button class="category-btn active" onclick="switchCategory('anatomie')" id="cat-anatomie">
+                    📚 Anatomie
+                </button>
+                <button class="category-btn" onclick="switchCategory('radio')" id="cat-radio">
+                    🔬 Radio-Anatomie
+                </button>
+            </div>
+
+            <!-- Indicateur de stockage -->
+            <div class="storage-info">
+                <div class="storage-text" id="storageText">Calcul en cours...</div>
+                <div class="storage-bar-container">
+                    <div class="storage-bar" id="storageBar"></div>
+                </div>
+                <div class="storage-actions">
+                    <button class="storage-btn" onclick="showStorageDetails()">📊 Détails</button>
+                    <button class="storage-btn" onclick="clearLocalStorage()">🗑️ Tout supprimer</button>
+                    <button class="storage-btn" onclick="exportAllToJSON()">💾 Export JSON complet</button>
+                    <button class="storage-btn" onclick="exportCompleteHTML()">📦 Export HTML complet</button>
+                </div>
+            </div>
+
+            <!-- Sélecteur de mode -->
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="switchMode('edit')">✏️ Création</button>
+                <button class="mode-btn" onclick="switchMode('exam-fill')">📝 Test: À remplir</button>
+                <button class="mode-btn" onclick="switchMode('exam-click')">🎯 Test: Cliquer</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <h3>
+                    <span id="sidebarTitle">Mes Schémas</span>
+                </h3>
+                <button class="new-schema-btn" onclick="createNewSchema()">➕ Nouveau schéma</button>
+                
+                <!-- Sélecteur pour charger JSON -->
+                <div style="background: #e8eaf6; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+                    <label style="display: block; font-size: 0.9em; font-weight: 600; color: #667eea; margin-bottom: 8px;">
+                        📂 Charger JSON dans:
+                    </label>
+                    <div style="display: flex; gap: 5px; margin-bottom: 8px;">
+                        <button class="category-select-btn active" onclick="selectJSONCategory('anatomie')" id="json-cat-anatomie" style="flex: 1; padding: 8px; border: 2px solid #667eea; background: #667eea; color: white; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600;">
+                            📚 Anatomie
+                        </button>
+                        <button class="category-select-btn" onclick="selectJSONCategory('radio')" id="json-cat-radio" style="flex: 1; padding: 8px; border: 2px solid #667eea; background: white; color: #667eea; border-radius: 6px; cursor: pointer; font-size: 0.85em; font-weight: 600;">
+                            🔬 Radio
+                        </button>
+                    </div>
+                    <button class="load-json-btn" onclick="loadFromJSON()" style="margin-bottom: 0;">📂 Charger JSON</button>
+                </div>
+                
+                <div class="schema-list" id="schemaList"></div>
+            </div>
+
+            <!-- MAIN CONTENT -->
+            <div class="main-content">
+                <!-- MODE ÉDITION -->
+                <div id="edit-mode" class="mode-content active">
+                    <div class="edit-section">
+                        <h3>📸 Image anatomique</h3>
+                        <label class="file-input-wrapper">
+                            Choisir une image
+                            <input type="file" id="imageInput" accept="image/*" onchange="loadImage(event)">
+                        </label>
+                        
+                        <div class="image-container" id="imageContainer">
+                            <img id="anatomyImage" style="display:none;">
+                            <div id="imageWrapper"></div>
+                        </div>
+                    </div>
+
+                    <div class="edit-section">
+                        <h3>🎯 Gestion des marqueurs</h3>
+                        <div class="marker-controls">
+                            <div class="control-group">
+                                <label>Numéro du marqueur</label>
+                                <input type="number" id="markerNumber" min="1" value="1">
+                            </div>
+                            <div class="control-group">
+                                <label>Terme anatomique</label>
+                                <input type="text" id="markerLabel" placeholder="Ex: Ventricule gauche">
+                                <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                                    💡 Multiples réponses: séparez par /
+                                </div>
+                            </div>
+                            <div class="control-group">
+                                <label>Couleur</label>
+                                <input type="color" id="markerColor" value="#ff4757">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-success" onclick="addMarker()">➕ Ajouter le marqueur</button>
+                        <button class="btn btn-primary" onclick="addArrowToSelected()">➕ Ajouter une flèche</button>
+                        <button class="btn btn-warning" onclick="updateSelectedMarker()">✏️ Modifier</button>
+                        <button class="btn btn-danger" onclick="deleteSelectedMarker()">🗑️ Supprimer</button>
+                        <button class="btn btn-primary" onclick="saveCurrentSchema()">💾 Enregistrer</button>
+                        <button class="btn btn-success" onclick="exportSchemaToJSON()">📤 Exporter JSON</button>
+                    </div>
+                </div>
+
+                <!-- MODE TEST: À REMPLIR -->
+                <div id="exam-fill-mode" class="mode-content">
+                    <div class="exam-category-switch">
+                        <button class="exam-category-btn active" onclick="switchExamCategory('fill', 'anatomie')">📚 Anatomie</button>
+                        <button class="exam-category-btn" onclick="switchExamCategory('fill', 'radio')">🔬 Radio-Anatomie</button>
+                    </div>
+
+                    <div style="margin: 10px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <label style="font-weight: 600; color: #667eea;">📋 Schéma :</label>
+                        <select id="examFillSchemaSelect" onchange="onExamFillSchemaChange()" style="flex: 1; min-width: 200px; padding: 10px; border: 2px solid #667eea; border-radius: 8px; font-size: 1em; background: white;">
+                            <option value="">-- Choisir un schéma --</option>
+                        </select>
+                    </div>
+
+                    <div class="instructions">
+                        <h4>📖 Instructions :</h4>
+                        <ul>
+                            <li>Les numéros sont mélangés aléatoirement</li>
+                            <li>Remplissez les cases avec les termes correspondants</li>
+                            <li>✨ Matching intelligent: accents/espaces/tirets tolérés</li>
+                            <li>✨ Singulier/pluriel acceptés, articles ignorés</li>
+                            <li>✨ Multiple réponses possibles (séparées par / en mode création)</li>
+                            <li>Cliquez sur "✅ Corriger" pour voir vos résultats</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="scoreFill" class="score-display"></div>
+                    
+                    <div class="exam-container">
+                        <div class="exam-image-wrapper">
+                            <img id="examImageFill" class="exam-image" style="display:none;">
+                            <div id="examMarkersFill"></div>
+                        </div>
+                        
+                        <div class="exam-input-container">
+                            <div class="exam-inputs" id="examInputs"></div>
+                            
+                            <div class="exam-actions">
+                                <button class="btn btn-primary" onclick="checkAnswersFill()">✅ Corriger</button>
+                                <button class="btn btn-warning" onclick="resetExamFill()">🔄 Recommencer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODE TEST: CLIQUER -->
+                <div id="exam-click-mode" class="mode-content">
+                    <div class="exam-category-switch">
+                        <button class="exam-category-btn active" onclick="switchExamCategory('click', 'anatomie')">📚 Anatomie</button>
+                        <button class="exam-category-btn" onclick="switchExamCategory('click', 'radio')">🔬 Radio-Anatomie</button>
+                    </div>
+
+                    <div style="margin: 10px 0; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <label style="font-weight: 600; color: #667eea;">📋 Schéma :</label>
+                        <select id="examClickSchemaSelect" onchange="onExamClickSchemaChange()" style="flex: 1; min-width: 200px; padding: 10px; border: 2px solid #667eea; border-radius: 8px; font-size: 1em; background: white;">
+                            <option value="">-- Choisir un schéma --</option>
+                        </select>
+                    </div>
+
+                    <div class="instructions">
+                        <h4>📖 Instructions :</h4>
+                        <ul>
+                            <li>Un terme s'affiche en haut</li>
+                            <li>Cliquez sur le numéro correspondant sur l'image</li>
+                            <li>Le système vous indique si c'est correct</li>
+                            <li>Continuez jusqu'à terminer tous les termes</li>
+                        </ul>
+                    </div>
+                    
+                    <div id="currentTermPrompt" class="current-term"></div>
+                    <div id="scoreClick" class="score-display"></div>
+                    
+                    <div class="exam-container">
+                        <div class="exam-image-wrapper">
+                            <img id="examImageClick" class="exam-image" style="display:none;">
+                            <div id="examMarkersClick"></div>
+                        </div>
+                        
+                        <div class="exam-actions">
+                            <button class="btn btn-warning" onclick="resetExamClick()">🔄 Recommencer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentImage = null;
+        let markers = [];
+        let schemas = [];
+        let jsonSchemas = []; // Schémas chargés depuis JSON
+        let currentSchemaId = null;
+        let selectedMarkerId = null;
+        let currentCategory = 'anatomie'; // 'anatomie' ou 'radio'
+        let jsonLoadCategory = 'anatomie'; // Catégorie pour charger les JSON
+        let examCategory = { fill: 'anatomie', click: 'anatomie' };
+        let examState = {
+            fill: { shuffledMarkers: [], answers: {}, corrected: false },
+            click: { remaining: [], current: null, score: 0, total: 0, answered: [], currentSchema: null }
+        };
+        let imageNaturalDimensions = { width: 0, height: 0 };
+
+        // Drag state
+        let draggedMarker = null;
+        let draggedArrow = null;
+
+        // ============= GESTION DES CATÉGORIES =============
+        function selectJSONCategory(category) {
+            jsonLoadCategory = category;
+            
+            // Mise à jour visuelle des boutons
+            document.querySelectorAll('.category-select-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.background = 'white';
+                btn.style.color = '#667eea';
+            });
+            
+            const btn = document.getElementById(`json-cat-${category}`);
+            btn.classList.add('active');
+            btn.style.background = '#667eea';
+            btn.style.color = 'white';
+        }
+
+        function switchCategory(category) {
+            // Sauvegarder le schéma en cours avant de basculer
+            autoSave();
+            
+            currentCategory = category;
+            
+            // Mise à jour visuelle des boutons
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`cat-${category}`).classList.add('active');
+            
+            // Mise à jour du titre sidebar
+            document.getElementById('sidebarTitle').textContent = 
+                category === 'anatomie' ? '📚 Schémas Anatomie' : '🔬 Schémas Radio-Anatomie';
+            
+            // Recharger les schémas depuis localStorage pour la nouvelle catégorie
+            loadSchemas();
+            
+            // Décharger le schéma actuel
+            currentSchemaId = null;
+            currentImage = null;
+            markers = [];
+            renderMarkers();
+        }
+
+        function switchExamCategory(examType, category) {
+            examCategory[examType] = category;
+            
+            // Mise à jour visuelle
+            const container = examType === 'fill' ? 
+                document.getElementById('exam-fill-mode') : 
+                document.getElementById('exam-click-mode');
+            
+            container.querySelectorAll('.exam-category-btn').forEach(btn => btn.classList.remove('active'));
+            container.querySelectorAll('.exam-category-btn').forEach(btn => {
+                if (btn.textContent.includes(category === 'anatomie' ? 'Anatomie' : 'Radio')) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Recharger les schémas de la catégorie
+            if (examType === 'fill') {
+                loadExamFill();
+            } else {
+                loadExamClick();
+            }
+        }
+
+        // ============= STOCKAGE ET INDICATEURS =============
+        function updateStorageIndicator() {
+            try {
+                const allData = JSON.stringify(localStorage);
+                const used = new Blob([allData]).size;
+                const maxStorage = 5 * 1024 * 1024; // 5 MB (estimation conservatrice)
+                const percentage = Math.min(100, (used / maxStorage) * 100);
+                
+                const bar = document.getElementById('storageBar');
+                const text = document.getElementById('storageText');
+                
+                bar.style.width = percentage + '%';
+                bar.textContent = percentage.toFixed(1) + '%';
+                
+                const usedMB = (used / 1024 / 1024).toFixed(2);
+                const maxMB = (maxStorage / 1024 / 1024).toFixed(0);
+                text.textContent = `Utilisation: ${usedMB} MB / ${maxMB} MB`;
+                
+                if (percentage > 90) {
+                    text.style.color = '#fc5c65';
+                } else if (percentage > 70) {
+                    text.style.color = '#fed330';
+                } else {
+                    text.style.color = 'white';
+                }
+            } catch (e) {
+                console.error('Erreur calcul stockage:', e);
+            }
+        }
+
+        function showStorageDetails() {
+            const allData = JSON.stringify(localStorage);
+            const used = new Blob([allData]).size;
+            const usedMB = (used / 1024 / 1024).toFixed(2);
+            
+            const anatomieSchemas = schemas.filter(s => s.category === 'anatomie' || !s.category);
+            const radioSchemas = schemas.filter(s => s.category === 'radio');
+            const jsonCount = jsonSchemas.length;
+            
+            alert(`📊 DÉTAILS DU STOCKAGE\n\n` +
+                  `💾 Espace utilisé: ${usedMB} MB\n` +
+                  `📁 Schémas Anatomie: ${anatomieSchemas.length}\n` +
+                  `📁 Schémas Radio: ${radioSchemas.length}\n` +
+                  `🔗 Schémas JSON chargés: ${jsonCount}\n\n` +
+                  `ℹ️ Le localStorage peut stocker environ 5-10 MB.\n` +
+                  `Les schémas JSON ne comptent pas dans cette limite !`);
+        }
+
+        function clearLocalStorage() {
+            if (!confirm('⚠️ SUPPRESSION TOTALE\n\n' +
+                        'Cette action va SUPPRIMER TOUS vos schémas\n' +
+                        '(images, marqueurs, tout) du stockage local.\n\n' +
+                        '💡 Pensez à faire un Export JSON AVANT si vous\n' +
+                        'voulez conserver vos schémas !\n\n' +
+                        'Continuer ?')) {
+                return;
+            }
+            
+            // Double confirmation pour éviter les accidents
+            if (!confirm('🔴 DERNIÈRE CONFIRMATION\n\n' +
+                        'Tous les schémas locaux seront perdus.\n' +
+                        'Cette action est irréversible.\n\n' +
+                        'Supprimer définitivement ?')) {
+                return;
+            }
+            
+            // Tout supprimer
+            localStorage.clear();
+            
+            // Réinitialiser les variables en mémoire
+            schemas = [];
+            jsonSchemas = [];
+            currentSchemaId = null;
+            currentImage = null;
+            markers = [];
+            selectedMarkerId = null;
+            
+            // Rafraîchir l'interface
+            renderSchemaList();
+            renderMarkers();
+            updateStorageIndicator();
+            
+            // Réinitialiser l'image affichée
+            document.getElementById('anatomyImage').style.display = 'none';
+            document.getElementById('imageContainer').classList.remove('has-image');
+            
+            alert('✅ Tout a été supprimé !\n\nVous pouvez recommencer avec de nouvelles planches.');
+        }
+
+        function exportAllToJSON() {
+            // Sauvegarder le schéma en cours avant d'exporter
+            autoSave();
+            
+            const allAnatomie = JSON.parse(localStorage.getItem('anatomie_schemas') || '[]');
+            const allRadio = JSON.parse(localStorage.getItem('radio_schemas') || '[]');
+            
+            const exportData = {
+                version: '8.0',
+                exportDate: new Date().toISOString(),
+                anatomie: allAnatomie,
+                radio: allRadio
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `anatomie_complete_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Export JSON complet réalisé !\n\nLe fichier contient tous vos schémas.');
+        }
+
+        function exportCompleteHTML() {
+            autoSave();
+            
+            const allAnatomie = JSON.parse(localStorage.getItem('anatomie_schemas') || '[]');
+            const allRadio = JSON.parse(localStorage.getItem('radio_schemas') || '[]');
+            const allSchemas = [...allAnatomie, ...allRadio];
+            
+            if (allSchemas.length === 0) {
+                alert('⚠️ Aucun schéma à exporter.');
+                return;
+            }
+            
+            // Créer une copie du document
+            const clonedHTML = document.documentElement.cloneNode(true);
+            
+            // Nettoyer les contenus dynamiques
+            const dynamicSelectors = [
+                '#schemaList',
+                '#examMarkersFill',
+                '#examMarkersClick',
+                '#examInputs',
+                '#imageWrapper'
+            ];
+            
+            dynamicSelectors.forEach(selector => {
+                const el = clonedHTML.querySelector(selector);
+                if (el) el.innerHTML = '';
+            });
+            
+            // Réinitialiser les images
+            const images = clonedHTML.querySelectorAll('#examImageFill, #examImageClick, #anatomyImage');
+            images.forEach(img => img.src = '');
+            
+            // Convertir en string
+            let htmlContent = '<!DOCTYPE html>\n' + clonedHTML.outerHTML;
+            
+            // Embarquer les schémas dans un bloc JSON
+            const schemasJSON = JSON.stringify({ anatomie: allAnatomie, radio: allRadio });
+            const schemasJSONSafe = schemasJSON.replace(/<\/script>/gi, '<\\/script>');
+            
+            htmlContent = htmlContent.replace(
+                '<script>',
+                `<script type="application/json" id="embeddedSchemas">${schemasJSONSafe}</scr` + `ipt>\n<script>`
+            );
+            
+            // Remplacer les déclarations pour injecter le chargement embarqué
+            // On utilise une regex pour matcher les deux lignes même avec commentaires
+            htmlContent = htmlContent.replace(
+                /let schemas = \[\];\s*\n\s*let jsonSchemas = \[\];[^\n]*/,
+                `let schemas = [];
+        let jsonSchemas = [];
+                
+        // Charger les schémas embarqués au démarrage
+        (function loadEmbedded() {
+            const el = document.getElementById('embeddedSchemas');
+            if (!el) return;
+            try {
+                const data = JSON.parse(el.textContent || '{}');
+                if (data.anatomie) {
+                    localStorage.setItem('anatomie_schemas', JSON.stringify(data.anatomie));
+                }
+                if (data.radio) {
+                    localStorage.setItem('radio_schemas', JSON.stringify(data.radio));
+                }
+            } catch (e) {
+                console.error('Embedded schemas JSON parse failed:', e);
+            }
+        })();`
+            );
+            
+            // Créer le blob et télécharger
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `anatomie_complete_${new Date().toISOString().slice(0,10)}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`✅ Fichier HTML complet exporté avec ${allSchemas.length} schéma(s) !\n\nLe fichier contient toutes les images en base64 et fonctionne de manière autonome.`);
+        }
+
+        // ============= GESTION DES SCHÉMAS =============
+        function loadSchemas() {
+            const categoryKey = currentCategory === 'anatomie' ? 'anatomie_schemas' : 'radio_schemas';
+            const saved = localStorage.getItem(categoryKey);
+            
+            if (saved) {
+                try {
+                    schemas = JSON.parse(saved);
+                    // Ajouter la catégorie si elle n'existe pas
+                    schemas = schemas.map(s => ({
+                        ...s,
+                        category: s.category || currentCategory,
+                        markers: s.markers.map(m => ({
+                            ...m,
+                            arrows: m.arrows || []
+                        }))
+                    }));
+                } catch (e) {
+                    schemas = [];
+                }
+            } else {
+                schemas = [];
+            }
+            
+            renderSchemaList();
+        }
+
+        function saveSchemas() {
+            const categoryKey = currentCategory === 'anatomie' ? 'anatomie_schemas' : 'radio_schemas';
+            localStorage.setItem(categoryKey, JSON.stringify(schemas));
+            updateStorageIndicator();
+        }
+
+        // Auto-save: persiste les modifications en cours dans localStorage
+        function autoSave() {
+            if (!currentSchemaId) return;
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (schema) {
+                schema.image = currentImage;
+                schema.markers = JSON.parse(JSON.stringify(markers));
+                saveSchemas();
+            }
+        }
+
+        function renderSchemaList() {
+            const list = document.getElementById('schemaList');
+            list.innerHTML = '';
+            
+            // Schémas locaux de la catégorie actuelle
+            const localSchemas = schemas.filter(s => (s.category || 'anatomie') === currentCategory);
+            
+            localSchemas.forEach(schema => {
+                const item = document.createElement('div');
+                item.className = 'schema-item' + (schema.id === currentSchemaId ? ' active' : '');
+                
+                const name = document.createElement('div');
+                name.className = 'schema-item-name';
+                name.textContent = schema.name;
+                
+                const actions = document.createElement('div');
+                actions.className = 'schema-item-actions';
+                
+                const exportBtn = document.createElement('button');
+                exportBtn.className = 'schema-item-btn export';
+                exportBtn.textContent = '💾';
+                exportBtn.title = 'Exporter en JSON';
+                exportBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    exportSingleSchemaToJSON(schema.id);
+                };
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'schema-item-btn';
+                deleteBtn.textContent = '🗑️';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteSchema(schema.id);
+                };
+                
+                actions.appendChild(exportBtn);
+                actions.appendChild(deleteBtn);
+                
+                item.appendChild(name);
+                item.appendChild(actions);
+                item.onclick = () => loadSchema(schema.id);
+                
+                list.appendChild(item);
+            });
+            
+            // Schémas JSON de la catégorie actuelle
+            const jsonSchemasFiltered = jsonSchemas.filter(s => 
+                (s.category || 'anatomie') === currentCategory
+            );
+            
+            jsonSchemasFiltered.forEach(schema => {
+                const item = document.createElement('div');
+                item.className = 'schema-item from-json';
+                
+                const name = document.createElement('div');
+                name.className = 'schema-item-name';
+                name.textContent = schema.name;
+                
+                const badge = document.createElement('span');
+                badge.className = 'schema-item-badge';
+                badge.textContent = 'JSON';
+                
+                name.appendChild(badge);
+                item.appendChild(name);
+                item.onclick = () => loadSchemaFromJSON(schema);
+                
+                list.appendChild(item);
+            });
+        }
+
+        function createNewSchema() {
+            const name = prompt('Nom du nouveau schéma:', `Schéma ${schemas.length + 1}`);
+            if (!name) return;
+            
+            const newSchema = {
+                id: Date.now(),
+                name: name,
+                category: currentCategory,
+                image: null,
+                markers: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            schemas.push(newSchema);
+            saveSchemas();
+            renderSchemaList();
+            loadSchema(newSchema.id);
+        }
+
+        function loadSchema(schemaId) {
+            const schema = schemas.find(s => s.id === schemaId);
+            if (!schema) return;
+            
+            currentSchemaId = schemaId;
+            currentImage = schema.image;
+            markers = JSON.parse(JSON.stringify(schema.markers)); // Deep copy
+            
+            if (currentImage) {
+                const img = document.getElementById('anatomyImage');
+                img.src = currentImage;
+                img.style.display = 'block';
+                document.getElementById('imageContainer').classList.add('has-image');
+                
+                img.onload = function() {
+                    imageNaturalDimensions.width = this.naturalWidth;
+                    imageNaturalDimensions.height = this.naturalHeight;
+                    renderMarkers();
+                };
+            } else {
+                document.getElementById('anatomyImage').style.display = 'none';
+                document.getElementById('imageContainer').classList.remove('has-image');
+            }
+            
+            renderSchemaList();
+            renderMarkers();
+        }
+
+        function deleteSchema(schemaId) {
+            if (!confirm('Supprimer ce schéma ?')) return;
+            
+            schemas = schemas.filter(s => s.id !== schemaId);
+            saveSchemas();
+            
+            if (currentSchemaId === schemaId) {
+                currentSchemaId = null;
+                currentImage = null;
+                markers = [];
+                renderMarkers();
+            }
+            
+            renderSchemaList();
+        }
+
+        function saveCurrentSchema() {
+            if (!currentSchemaId) {
+                alert('Aucun schéma sélectionné !');
+                return;
+            }
+            
+            const schema = schemas.find(s => s.id === currentSchemaId);
+            if (schema) {
+                schema.image = currentImage;
+                schema.markers = JSON.parse(JSON.stringify(markers));
+                saveSchemas();
+                alert('✅ Schéma enregistré !');
+            }
+        }
+
+        // ============= GESTION JSON =============
+        function loadFromJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                try {
+                    const text = await file.text();
+                    const data = JSON.parse(text);
+                    
+                    // Vérifier le format
+                    if (data.version && data.anatomie && data.radio) {
+                        // Format export complet - utiliser la catégorie sélectionnée
+                        const schemasToLoad = jsonLoadCategory === 'anatomie' ? data.anatomie : data.radio;
+                        
+                        schemasToLoad.forEach(schema => {
+                            schema.category = jsonLoadCategory;
+                            schema.fromJSON = true;
+                        });
+                        
+                        jsonSchemas.push(...schemasToLoad);
+                        
+                        alert(`✅ ${schemasToLoad.length} schéma(s) chargé(s) dans la catégorie "${jsonLoadCategory === 'anatomie' ? 'Anatomie' : 'Radio-Anatomie'}" !`);
+                    } else if (Array.isArray(data.markers)) {
+                        // Format schéma unique - utiliser la catégorie sélectionnée
+                        data.category = jsonLoadCategory;
+                        data.fromJSON = true;
+                        jsonSchemas.push(data);
+                        
+                        alert(`✅ Schéma chargé dans la catégorie "${jsonLoadCategory === 'anatomie' ? 'Anatomie' : 'Radio-Anatomie'}" !`);
+                    } else {
+                        alert('❌ Format JSON non reconnu !');
+                        return;
+                    }
+                    
+                    // Si on est dans la bonne catégorie, rafraîchir l'affichage
+                    if (currentCategory === jsonLoadCategory) {
+                        renderSchemaList();
+                    } else {
+                        // Proposer de basculer vers la catégorie chargée
+                        if (confirm(`Les schémas ont été chargés dans "${jsonLoadCategory === 'anatomie' ? 'Anatomie' : 'Radio-Anatomie'}".\n\nVoulez-vous basculer vers cette catégorie ?`)) {
+                            switchCategory(jsonLoadCategory);
+                        }
+                    }
+                } catch (err) {
+                    alert('❌ Erreur de lecture du fichier JSON :\n' + err.message);
+                }
+            };
+            input.click();
+        }
+
+        function loadSchemaFromJSON(schema) {
+            currentSchemaId = null; // Pas d'ID pour les schémas JSON
+            currentImage = schema.image;
+            markers = JSON.parse(JSON.stringify(schema.markers));
+            
+            if (currentImage) {
+                const img = document.getElementById('anatomyImage');
+                img.src = currentImage;
+                img.style.display = 'block';
+                document.getElementById('imageContainer').classList.add('has-image');
+                
+                img.onload = function() {
+                    imageNaturalDimensions.width = this.naturalWidth;
+                    imageNaturalDimensions.height = this.naturalHeight;
+                    renderMarkers();
+                };
+            }
+            
+            renderMarkers();
+            alert('📂 Schéma JSON chargé !\n\nVous pouvez le modifier et l\'enregistrer comme nouveau schéma local.');
+        }
+
+        function exportSchemaToJSON() {
+            if (!currentSchemaId) {
+                alert('Aucun schéma sélectionné !');
+                return;
+            }
+            autoSave();
+            exportSingleSchemaToJSON(currentSchemaId);
+        }
+
+        function exportSingleSchemaToJSON(schemaId) {
+            const schema = schemas.find(s => s.id === schemaId);
+            if (!schema) return;
+            
+            const exportData = {
+                name: schema.name,
+                category: schema.category || 'anatomie',
+                image: schema.image,
+                markers: schema.markers,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${schema.name.replace(/\s+/g, '_')}_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Schéma exporté en JSON !');
+        }
+
+        // ============= GESTION DE L'IMAGE =============
+        function loadImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentImage = e.target.result;
+                const img = document.getElementById('anatomyImage');
+                img.src = currentImage;
+                img.style.display = 'block';
+                document.getElementById('imageContainer').classList.add('has-image');
+                
+                img.onload = function() {
+                    imageNaturalDimensions.width = this.naturalWidth;
+                    imageNaturalDimensions.height = this.naturalHeight;
+                    renderMarkers();
+                    autoSave();
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ============= GESTION DES MARQUEURS =============
+        function addMarker() {
+            const number = parseInt(document.getElementById('markerNumber').value);
+            const label = document.getElementById('markerLabel').value.trim();
+            const color = document.getElementById('markerColor').value;
+            
+            if (!label) {
+                alert('Veuillez entrer un terme anatomique !');
+                return;
+            }
+            
+            if (markers.find(m => m.number === number)) {
+                alert('Ce numéro existe déjà !');
+                return;
+            }
+            
+            const marker = {
+                id: Date.now(),
+                number: number,
+                label: label,
+                x: 50,
+                y: 50,
+                color: color,
+                arrows: []
+            };
+            
+            markers.push(marker);
+            renderMarkers();
+            autoSave();
+            
+            document.getElementById('markerNumber').value = number + 1;
+            document.getElementById('markerLabel').value = '';
+        }
+
+        function addArrowToSelected() {
+            if (!selectedMarkerId) {
+                alert('Sélectionnez d\'abord un marqueur !');
+                return;
+            }
+            
+            const marker = markers.find(m => m.id === selectedMarkerId);
+            if (!marker) return;
+            
+            // Ajouter une flèche à côté du marqueur
+            marker.arrows.push({
+                targetX: marker.x + 10,
+                targetY: marker.y + 10
+            });
+            
+            renderMarkers();
+            autoSave();
+            alert('✅ Flèche ajoutée ! Déplacez la pointe blanche pour l\'ajuster.');
+        }
+
+        function updateSelectedMarker() {
+            if (!selectedMarkerId) {
+                alert('Sélectionnez d\'abord un marqueur !');
+                return;
+            }
+            
+            const marker = markers.find(m => m.id === selectedMarkerId);
+            if (!marker) return;
+            
+            const newLabel = document.getElementById('markerLabel').value.trim();
+            const newColor = document.getElementById('markerColor').value;
+            
+            if (newLabel) marker.label = newLabel;
+            marker.color = newColor;
+            
+            renderMarkers();
+            autoSave();
+            alert('✅ Marqueur modifié !');
+        }
+
+        function deleteSelectedMarker() {
+            if (!selectedMarkerId) {
+                alert('Sélectionnez d\'abord un marqueur à supprimer !');
+                return;
+            }
+            
+            if (!confirm('Supprimer ce marqueur ?')) return;
+            
+            markers = markers.filter(m => m.id !== selectedMarkerId);
+            selectedMarkerId = null;
+            renderMarkers();
+            autoSave();
+        }
+
+        function renderMarkers() {
+            const wrapper = document.getElementById('imageWrapper');
+            
+            // Nettoyer TOUT le contenu précédent
+            wrapper.innerHTML = '';
+            
+            if (!currentImage) return;
+            
+            // Créer le SVG pour les flèches
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'arrow-svg');
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            
+            // Créer les définitions de flèches pour TOUS les marqueurs
+            markers.forEach(marker => {
+                if (marker.arrows && marker.arrows.length > 0) {
+                    marker.arrows.forEach((arrow, arrowIndex) => {
+                        const markerDef = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                        markerDef.setAttribute('id', `arrowhead-${marker.id}-${arrowIndex}`);
+                        markerDef.setAttribute('markerWidth', '10');
+                        markerDef.setAttribute('markerHeight', '10');
+                        markerDef.setAttribute('refX', '9');
+                        markerDef.setAttribute('refY', '3');
+                        markerDef.setAttribute('orient', 'auto');
+                        
+                        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        polygon.setAttribute('points', '0 0, 10 3, 0 6');
+                        polygon.setAttribute('fill', marker.color);
+                        
+                        markerDef.appendChild(polygon);
+                        defs.appendChild(markerDef);
+                    });
+                }
+            });
+            
+            svg.appendChild(defs);
+            
+            // Dessiner les lignes de flèches pour TOUS les marqueurs
+            markers.forEach(marker => {
+                if (marker.arrows && marker.arrows.length > 0) {
+                    marker.arrows.forEach((arrow, arrowIndex) => {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', marker.x + '%');
+                        line.setAttribute('y1', marker.y + '%');
+                        line.setAttribute('x2', arrow.targetX + '%');
+                        line.setAttribute('y2', arrow.targetY + '%');
+                        line.setAttribute('stroke', marker.color);
+                        line.setAttribute('stroke-width', '3');
+                        line.setAttribute('marker-end', `url(#arrowhead-${marker.id}-${arrowIndex})`);
+                        svg.appendChild(line);
+                    });
+                }
+            });
+            
+            wrapper.appendChild(svg);
+            
+            // Zones pour déplacer les pointes de flèches
+            markers.forEach(marker => {
+                if (marker.arrows && marker.arrows.length > 0) {
+                    marker.arrows.forEach((arrow, arrowIndex) => {
+                        const zone = document.createElement('div');
+                        zone.className = 'arrow-target-zone';
+                        zone.style.left = arrow.targetX + '%';
+                        zone.style.top = arrow.targetY + '%';
+                        zone.dataset.markerId = marker.id;
+                        zone.dataset.arrowIndex = arrowIndex;
+                        
+                        zone.addEventListener('mousedown', startDragArrowTarget);
+                        zone.addEventListener('touchstart', startDragArrowTarget);
+                        
+                        wrapper.appendChild(zone);
+                        
+                        // Bouton de suppression de flèche
+                        if (marker.arrows.length > 1) {
+                            const deleteBtn = document.createElement('div');
+                            deleteBtn.className = 'arrow-delete-btn';
+                            deleteBtn.innerHTML = '×';
+                            deleteBtn.style.left = arrow.targetX + '%';
+                            deleteBtn.style.top = (arrow.targetY - 5) + '%';
+                            deleteBtn.onclick = () => removeArrow(marker.id, arrowIndex);
+                            wrapper.appendChild(deleteBtn);
+                        }
+                    });
+                }
+            });
+            
+            // Créer TOUS les marqueurs
+            markers.forEach(marker => {
+                const markerEl = document.createElement('div');
+                markerEl.className = 'marker';
+                markerEl.textContent = marker.number;
+                markerEl.style.left = marker.x + '%';
+                markerEl.style.top = marker.y + '%';
+                markerEl.style.background = marker.color;
+                markerEl.dataset.markerId = marker.id;
+                
+                markerEl.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    startDragMarker(e);
+                    selectMarker(marker.id);
+                });
+                
+                markerEl.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    startDragMarker(e);
+                    selectMarker(marker.id);
+                });
+                
+                wrapper.appendChild(markerEl);
+            });
+        }
+
+        function selectMarker(markerId) {
+            selectedMarkerId = markerId;
+            const marker = markers.find(m => m.id === markerId);
+            if (marker) {
+                document.getElementById('markerNumber').value = marker.number;
+                document.getElementById('markerLabel').value = marker.label;
+                document.getElementById('markerColor').value = marker.color;
+            }
+        }
+
+        function removeArrow(markerId, arrowIndex) {
+            const marker = markers.find(m => m.id === markerId);
+            if (marker && marker.arrows) {
+                marker.arrows.splice(arrowIndex, 1);
+                renderMarkers();
+                autoSave();
+            }
+        }
+
+        function startDragMarker(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const markerId = parseInt(e.target.dataset.markerId);
+            draggedMarker = markers.find(m => m.id === markerId);
+            
+            document.addEventListener('mousemove', dragMarker);
+            document.addEventListener('mouseup', stopDragMarker);
+            document.addEventListener('touchmove', dragMarker);
+            document.addEventListener('touchend', stopDragMarker);
+        }
+
+        function dragMarker(e) {
+            if (!draggedMarker) return;
+            
+            const wrapper = document.getElementById('imageWrapper');
+            const rect = wrapper.getBoundingClientRect();
+            
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            
+            const x = ((clientX - rect.left) / rect.width) * 100;
+            const y = ((clientY - rect.top) / rect.height) * 100;
+            
+            // Calculer le déplacement
+            const deltaX = x - draggedMarker.x;
+            const deltaY = y - draggedMarker.y;
+            
+            // Déplacer le numéro
+            draggedMarker.x = Math.max(-50, Math.min(150, x));
+            draggedMarker.y = Math.max(-50, Math.min(150, y));
+            
+            // Déplacer aussi toutes les pointes de flèches
+            if (draggedMarker.arrows) {
+                draggedMarker.arrows.forEach(arrow => {
+                    arrow.targetX = Math.max(-50, Math.min(150, arrow.targetX + deltaX));
+                    arrow.targetY = Math.max(-50, Math.min(150, arrow.targetY + deltaY));
+                });
+            }
+            
+            renderMarkers();
+        }
+
+        function stopDragMarker() {
+            if (draggedMarker) autoSave();
+            draggedMarker = null;
+            document.removeEventListener('mousemove', dragMarker);
+            document.removeEventListener('mouseup', stopDragMarker);
+            document.removeEventListener('touchmove', dragMarker);
+            document.removeEventListener('touchend', stopDragMarker);
+        }
+
+        function startDragArrowTarget(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const markerId = parseInt(e.target.dataset.markerId);
+            const arrowIndex = parseInt(e.target.dataset.arrowIndex);
+            
+            draggedArrow = {
+                marker: markers.find(m => m.id === markerId),
+                arrowIndex: arrowIndex
+            };
+            
+            document.addEventListener('mousemove', dragArrowTarget);
+            document.addEventListener('mouseup', stopDragArrowTarget);
+            document.addEventListener('touchmove', dragArrowTarget);
+            document.addEventListener('touchend', stopDragArrowTarget);
+        }
+
+        function dragArrowTarget(e) {
+            if (!draggedArrow) return;
+            
+            const wrapper = document.getElementById('imageWrapper');
+            const rect = wrapper.getBoundingClientRect();
+            
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+            
+            const x = ((clientX - rect.left) / rect.width) * 100;
+            const y = ((clientY - rect.top) / rect.height) * 100;
+            
+            draggedArrow.marker.arrows[draggedArrow.arrowIndex].targetX = Math.max(-50, Math.min(150, x));
+            draggedArrow.marker.arrows[draggedArrow.arrowIndex].targetY = Math.max(-50, Math.min(150, y));
+            
+            renderMarkers();
+        }
+
+        function stopDragArrowTarget() {
+            if (draggedArrow) autoSave();
+            draggedArrow = null;
+            document.removeEventListener('mousemove', dragArrowTarget);
+            document.removeEventListener('mouseup', stopDragArrowTarget);
+            document.removeEventListener('touchmove', dragArrowTarget);
+            document.removeEventListener('touchend', stopDragArrowTarget);
+        }
+
+        // ============= SYSTÈME DE MATCHING INTELLIGENT (de V12) =============
+        function normalizeString(str) {
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Supprimer accents
+                .replace(/['\-]/g, ' ') // Remplacer apostrophes et tirets par espaces
+                .replace(/\s+/g, ' ') // Normaliser espaces multiples
+                .trim();
+        }
+
+        // Articles et mots à ignorer pour la comparaison
+        const IGNORE_WORDS = new Set([
+            'le', 'la', 'les', 'un', 'une', 'des', 'du', 'de', 'l', 'd',
+            'au', 'aux', 'ce', 'cet', 'cette', 'ces', 'mon', 'ma', 'mes',
+            'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre', 'nos', 'votre', 'vos', 'leur', 'leurs'
+        ]);
+
+        function extractKeywords(str) {
+            const normalized = normalizeString(str);
+            const words = normalized.split(' ').filter(w => w.length > 0);
+            
+            const keywords = words.filter(word => 
+                !IGNORE_WORDS.has(word) && word.length > 1
+            );
+            
+            return keywords;
+        }
+
+        function matchAnswer(userAnswer, correctAnswers) {
+            // correctAnswers peut être une string avec plusieurs réponses séparées par /
+            const possibleAnswers = correctAnswers.split('/').map(a => a.trim());
+            
+            const userNorm = normalizeString(userAnswer);
+            const userKeywords = extractKeywords(userAnswer);
+            
+            for (let correctAnswer of possibleAnswers) {
+                const correctNorm = normalizeString(correctAnswer);
+                const correctKeywords = extractKeywords(correctAnswer);
+                
+                // 1. Correspondance exacte (normalisée)
+                if (userNorm === correctNorm) {
+                    return { match: true, type: 'exact' };
+                }
+                
+                // 2. Vérifier si tous les mots-clés de la réponse correcte sont présents
+                if (correctKeywords.length > 0) {
+                    const allKeywordsMatch = correctKeywords.every(keyword => {
+                        const keywordNoS = keyword.endsWith('s') ? keyword.slice(0, -1) : keyword;
+                        return userKeywords.some(uk => {
+                            const ukNoS = uk.endsWith('s') ? uk.slice(0, -1) : uk;
+                            return uk === keyword || uk === keywordNoS || 
+                                   ukNoS === keyword || ukNoS === keywordNoS;
+                        });
+                    });
+                    
+                    if (allKeywordsMatch && userKeywords.length > 0) {
+                        return { match: true, type: 'keywords' };
+                    }
+                }
+                
+                // 3. Vérifier inclusion simple
+                if (userNorm.includes(correctNorm) || correctNorm.includes(userNorm)) {
+                    return { match: true, type: 'partial' };
+                }
+            }
+            
+            return { match: false, type: 'none' };
+        }
+
+        // ============= MODE EXAMEN: À REMPLIR =============
+        function loadExamFill() {
+            const category = examCategory.fill;
+            
+            const availableSchemas = [
+                ...schemas.filter(s => (s.category || 'anatomie') === category && s.image && s.markers.length > 0),
+                ...jsonSchemas.filter(s => (s.category || 'anatomie') === category && s.image && s.markers.length > 0)
+            ];
+            
+            // Peupler le sélecteur
+            const select = document.getElementById('examFillSchemaSelect');
+            select.innerHTML = '<option value="">-- Choisir un schéma --</option>';
+            availableSchemas.forEach((schema, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = schema.name + (schema.fromJSON ? ' (JSON)' : '') + ` — ${schema.markers.length} marqueurs`;
+                select.appendChild(option);
+            });
+            
+            // Stocker les schémas disponibles pour référence
+            examState.fill.availableSchemas = availableSchemas;
+            
+            if (availableSchemas.length === 0) {
+                // Pas d'alerte bloquante, juste afficher un message dans le sélecteur
+                select.innerHTML = '<option value="">⚠️ Aucun schéma disponible</option>';
+                return;
+            }
+            
+            // Sélectionner le premier et le lancer
+            select.value = '0';
+            startExamFill(availableSchemas[0]);
+        }
+
+        function onExamFillSchemaChange() {
+            const select = document.getElementById('examFillSchemaSelect');
+            const index = parseInt(select.value);
+            if (isNaN(index) || !examState.fill.availableSchemas) return;
+            const schema = examState.fill.availableSchemas[index];
+            if (schema) startExamFill(schema);
+        }
+
+        function startExamFill(schema) {
+            examState.fill.corrected = false;
+            document.getElementById('scoreFill').style.display = 'none';
+            
+            const img = document.getElementById('examImageFill');
+            img.src = schema.image;
+            img.style.display = 'block';
+            
+            img.onload = function() {
+                const shuffled = [...schema.markers].sort(() => Math.random() - 0.5);
+                examState.fill.shuffledMarkers = shuffled;
+                examState.fill.answers = {};
+                
+                renderExamMarkersFill(schema);
+                renderExamInputs();
+            };
+        }
+
+        function renderExamMarkersFill(schema) {
+            const container = document.getElementById('examMarkersFill');
+            container.innerHTML = '';
+            
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'arrow-svg');
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            
+            schema.markers.forEach(marker => {
+                if (marker.arrows && marker.arrows.length > 0) {
+                    marker.arrows.forEach((arrow, index) => {
+                        const markerDef = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                        markerDef.setAttribute('id', `exam-arrowhead-${marker.id}-${index}`);
+                        markerDef.setAttribute('markerWidth', '10');
+                        markerDef.setAttribute('markerHeight', '10');
+                        markerDef.setAttribute('refX', '9');
+                        markerDef.setAttribute('refY', '3');
+                        markerDef.setAttribute('orient', 'auto');
+                        
+                        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        polygon.setAttribute('points', '0 0, 10 3, 0 6');
+                        polygon.setAttribute('fill', marker.color);
+                        
+                        markerDef.appendChild(polygon);
+                        defs.appendChild(markerDef);
+                    });
+                }
+            });
+            
+            svg.appendChild(defs);
+            
+            schema.markers.forEach(marker => {
+                if (marker.arrows && marker.arrows.length > 0) {
+                    marker.arrows.forEach((arrow, index) => {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', marker.x + '%');
+                        line.setAttribute('y1', marker.y + '%');
+                        line.setAttribute('x2', arrow.targetX + '%');
+                        line.setAttribute('y2', arrow.targetY + '%');
+                        line.setAttribute('stroke', marker.color);
+                        line.setAttribute('stroke-width', '3');
+                        line.setAttribute('marker-end', `url(#exam-arrowhead-${marker.id}-${index})`);
+                        svg.appendChild(line);
+                    });
+                }
+            });
+            
+            container.appendChild(svg);
+            
+            schema.markers.forEach(marker => {
+                const markerEl = document.createElement('div');
+                markerEl.className = 'marker';
+                markerEl.textContent = marker.number;
+                markerEl.style.left = marker.x + '%';
+                markerEl.style.top = marker.y + '%';
+                markerEl.style.background = marker.color;
+                markerEl.style.cursor = 'default';
+                container.appendChild(markerEl);
+            });
+        }
+
+        function renderExamInputs() {
+            const container = document.getElementById('examInputs');
+            container.innerHTML = '';
+            
+            examState.fill.shuffledMarkers.forEach(marker => {
+                const group = document.createElement('div');
+                group.className = 'exam-input-group';
+                group.id = `input-group-${marker.id}`;
+                
+                const label = document.createElement('label');
+                label.className = 'exam-input-label';
+                label.textContent = `N° ${marker.number}`;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'exam-input';
+                input.placeholder = 'Votre réponse...';
+                input.dataset.markerId = marker.id;
+                input.oninput = (e) => {
+                    examState.fill.answers[marker.id] = e.target.value.trim();
+                };
+                
+                group.appendChild(label);
+                group.appendChild(input);
+                container.appendChild(group);
+            });
+        }
+
+        function checkAnswersFill() {
+            if (examState.fill.corrected) {
+                alert('Déjà corrigé ! Cliquez sur "Recommencer" pour un nouveau test.');
+                return;
+            }
+            
+            examState.fill.corrected = true;
+            let correct = 0;
+            const total = examState.fill.shuffledMarkers.length;
+            
+            examState.fill.shuffledMarkers.forEach(marker => {
+                const group = document.getElementById(`input-group-${marker.id}`);
+                const input = group.querySelector('.exam-input');
+                const userAnswer = examState.fill.answers[marker.id] || '';
+                const correctAnswer = marker.label;
+                
+                const result = matchAnswer(userAnswer, correctAnswer);
+                
+                if (result.match) {
+                    correct++;
+                    group.classList.add('correct');
+                    input.classList.add('correct');
+                } else {
+                    group.classList.add('incorrect');
+                    input.classList.add('incorrect');
+                    
+                    // AMÉLIORATION V8: Afficher la bonne réponse sous la case
+                    if (userAnswer) {
+                        const userAnswerDiv = document.createElement('div');
+                        userAnswerDiv.className = 'user-answer-display';
+                        userAnswerDiv.textContent = `❌ Votre réponse : ${userAnswer}`;
+                        group.appendChild(userAnswerDiv);
+                    }
+                    
+                    const correctAnswerDiv = document.createElement('div');
+                    correctAnswerDiv.className = 'correct-answer';
+                    correctAnswerDiv.innerHTML = `💡 Réponse attendue : <strong>${marker.label}</strong>`;
+                    group.appendChild(correctAnswerDiv);
+                }
+                
+                input.disabled = true;
+            });
+            
+            const percentage = ((correct / total) * 100).toFixed(0);
+            const scoreDiv = document.getElementById('scoreFill');
+            scoreDiv.innerHTML = `
+                <div style="font-size: 1.5em; margin-bottom: 10px;">
+                    ${correct === total ? '🎉 Parfait !' : correct >= total * 0.7 ? '👍 Bien joué !' : '💪 Continue !'}
+                </div>
+                <div style="font-size: 1.8em; margin-bottom: 10px;">
+                    ${correct} / ${total}
+                </div>
+                <div style="font-size: 1.2em;">
+                    ${percentage}% de réussite
+                </div>
+            `;
+            scoreDiv.style.display = 'block';
+            
+            // Scroll vers le score
+            scoreDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function resetExamFill() {
+            examState.fill.corrected = false;
+            examState.fill.answers = {};
+            document.getElementById('scoreFill').style.display = 'none';
+            
+            const inputs = document.querySelectorAll('.exam-input');
+            inputs.forEach(input => {
+                input.value = '';
+                input.disabled = false;
+                input.classList.remove('correct', 'incorrect');
+            });
+            
+            const groups = document.querySelectorAll('.exam-input-group');
+            groups.forEach(group => {
+                group.classList.remove('correct', 'incorrect');
+                const correctAnswerDiv = group.querySelector('.correct-answer');
+                if (correctAnswerDiv) correctAnswerDiv.remove();
+                const userAnswerDiv = group.querySelector('.user-answer-display');
+                if (userAnswerDiv) userAnswerDiv.remove();
+            });
+        }
+
+        // ============= MODE EXAMEN: CLIQUER =============
+        function loadExamClick() {
+            const category = examCategory.click;
+            
+            const availableSchemas = [
+                ...schemas.filter(s => (s.category || 'anatomie') === category && s.image && s.markers.length > 0),
+                ...jsonSchemas.filter(s => (s.category || 'anatomie') === category && s.image && s.markers.length > 0)
+            ];
+            
+            // Peupler le sélecteur
+            const select = document.getElementById('examClickSchemaSelect');
+            select.innerHTML = '<option value="">-- Choisir un schéma --</option>';
+            availableSchemas.forEach((schema, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = schema.name + (schema.fromJSON ? ' (JSON)' : '') + ` — ${schema.markers.length} marqueurs`;
+                select.appendChild(option);
+            });
+            
+            // Stocker les schémas disponibles pour référence
+            examState.click.availableSchemas = availableSchemas;
+            
+            if (availableSchemas.length === 0) {
+                select.innerHTML = '<option value="">⚠️ Aucun schéma disponible</option>';
+                return;
+            }
+            
+            // Sélectionner le premier et le lancer
+            select.value = '0';
+            startExamClick(availableSchemas[0]);
+        }
+
+        function onExamClickSchemaChange() {
+            const select = document.getElementById('examClickSchemaSelect');
+            const index = parseInt(select.value);
+            if (isNaN(index) || !examState.click.availableSchemas) return;
+            const schema = examState.click.availableSchemas[index];
+            if (schema) startExamClick(schema);
+        }
+
+        function startExamClick(schema) {
+            examState.click.currentSchema = schema;
+            examState.click.remaining = [...schema.markers].sort(() => Math.random() - 0.5);
+            examState.click.score = 0;
+            examState.click.total = schema.markers.length;
+            examState.click.answered = [];
+            
+            document.getElementById('scoreClick').style.display = 'none';
+            document.getElementById('currentTermPrompt').style.display = 'block';
+            
+            const img = document.getElementById('examImageClick');
+            img.src = schema.image;
+            img.style.display = 'block';
+            
+            img.onload = function() {
+                nextTermClick();
+            };
+        }
+
+        function nextTermClick() {
+            if (examState.click.remaining.length === 0) {
+                finishExamClick();
+                return;
+            }
+            
+            examState.click.current = examState.click.remaining[0];
+            
+            document.getElementById('currentTermPrompt').innerHTML = `
+                <div style="font-size: 1.4em; margin-bottom: 10px;">
+                    🎯 Cliquez sur :
+                </div>
+                <div style="font-size: 1.6em; font-weight: 700;">
+                    ${examState.click.current.label}
+                </div>
+                <div style="margin-top: 15px; font-size: 1em; opacity: 0.9;">
+                    ${examState.click.score} / ${examState.click.answered.length + examState.click.remaining.length}
+                </div>
+            `;
+            
+            renderExamMarkersClick();
+        }
+
+        function renderExamMarkersClick() {
+            const container = document.getElementById('examMarkersClick');
+            container.innerHTML = '';
+            
+            const schema = examState.click.currentSchema;
+            if (!schema) return;
+            
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'arrow-svg');
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            
+            schema.markers.forEach(marker => {
+                if (marker.arrows && marker.arrows.length > 0) {
+                    marker.arrows.forEach((arrow, arrowIndex) => {
+                        const markerDef = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                        markerDef.setAttribute('id', `click-arrowhead-${marker.id}-${arrowIndex}`);
+                        markerDef.setAttribute('markerWidth', '10');
+                        markerDef.setAttribute('markerHeight', '10');
+                        markerDef.setAttribute('refX', '9');
+                        markerDef.setAttribute('refY', '3');
+                        markerDef.setAttribute('orient', 'auto');
+                        
+                        const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        polygon.setAttribute('points', '0 0, 10 3, 0 6');
+                        polygon.setAttribute('fill', marker.color);
+                        
+                        markerDef.appendChild(polygon);
+                        defs.appendChild(markerDef);
+                    });
+                }
+            });
+            
+            svg.appendChild(defs);
+            
+            schema.markers.forEach(marker => {
+                if (marker.arrows && marker.arrows.length > 0) {
+                    marker.arrows.forEach((arrow, arrowIndex) => {
+                        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                        line.setAttribute('x1', marker.x + '%');
+                        line.setAttribute('y1', marker.y + '%');
+                        line.setAttribute('x2', arrow.targetX + '%');
+                        line.setAttribute('y2', arrow.targetY + '%');
+                        line.setAttribute('stroke', marker.color);
+                        line.setAttribute('stroke-width', '3');
+                        line.setAttribute('marker-end', `url(#click-arrowhead-${marker.id}-${arrowIndex})`);
+                        svg.appendChild(line);
+                    });
+                }
+            });
+            
+            container.appendChild(svg);
+            
+            schema.markers.forEach(marker => {
+                const markerEl = document.createElement('div');
+                markerEl.className = 'exam-marker';
+                markerEl.textContent = marker.number;
+                markerEl.style.left = marker.x + '%';
+                markerEl.style.top = marker.y + '%';
+                markerEl.style.background = marker.color;
+                
+                if (examState.click.answered.includes(marker.id)) {
+                    markerEl.classList.add('correct');
+                    markerEl.style.cursor = 'default';
+                } else {
+                    markerEl.onclick = () => checkClickAnswer(marker);
+                }
+                
+                container.appendChild(markerEl);
+            });
+        }
+
+        function checkClickAnswer(clickedMarker) {
+            const currentMarker = examState.click.current;
+            
+            if (clickedMarker.id === currentMarker.id) {
+                examState.click.score++;
+                examState.click.answered.push(clickedMarker.id);
+                examState.click.remaining.shift();
+                
+                const markerEls = document.querySelectorAll('#examMarkersClick .exam-marker');
+                markerEls.forEach(el => {
+                    if (parseInt(el.textContent) === clickedMarker.number) {
+                        el.classList.add('correct');
+                    }
+                });
+                
+                const prompt = document.getElementById('currentTermPrompt');
+                const originalHTML = prompt.innerHTML;
+                prompt.innerHTML = `
+                    <div style="color: #4caf50; font-size: 1.5em; animation: pulse 0.5s;">
+                        ✅ Correct ! <strong>${currentMarker.label}</strong>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    prompt.innerHTML = originalHTML;
+                    nextTermClick();
+                }, 800);
+                
+            } else {
+                const markerEls = document.querySelectorAll('#examMarkersClick .exam-marker');
+                markerEls.forEach(el => {
+                    const markerNum = parseInt(el.textContent);
+                    
+                    if (markerNum === clickedMarker.number) {
+                        el.classList.add('incorrect');
+                        setTimeout(() => {
+                            el.classList.remove('incorrect');
+                        }, 800);
+                    }
+                    
+                    if (markerNum === currentMarker.number) {
+                        setTimeout(() => {
+                            el.classList.add('correct');
+                            setTimeout(() => {
+                                el.classList.remove('correct');
+                            }, 800);
+                        }, 300);
+                    }
+                });
+                
+                const prompt = document.getElementById('currentTermPrompt');
+                const originalHTML = prompt.innerHTML;
+                prompt.innerHTML = `
+                    <div style="animation: shake 0.5s;">
+                        <div style="color: #f44336; font-size: 1.2em; margin-bottom: 10px;">
+                            ❌ Incorrect
+                        </div>
+                        <div style="color: #4caf50; font-size: 1.1em;">
+                            La bonne réponse est : <strong>${currentMarker.label}</strong> (n°${currentMarker.number})
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    prompt.innerHTML = originalHTML;
+                }, 2500);
+            }
+        }
+
+        function finishExamClick() {
+            document.getElementById('currentTermPrompt').style.display = 'none';
+            
+            const percentage = ((examState.click.score / examState.click.total) * 100).toFixed(0);
+            const scoreDiv = document.getElementById('scoreClick');
+            scoreDiv.innerHTML = `
+                <div style="font-size: 1.5em; margin-bottom: 10px;">
+                    ${examState.click.score === examState.click.total ? '🎉 Parfait !' : 
+                      examState.click.score >= examState.click.total * 0.7 ? '👍 Bien joué !' : '💪 Continue !'}
+                </div>
+                <div style="font-size: 1.8em; margin-bottom: 10px;">
+                    ${examState.click.score} / ${examState.click.total}
+                </div>
+                <div style="font-size: 1.2em;">
+                    ${percentage}% de réussite
+                </div>
+            `;
+            scoreDiv.style.display = 'block';
+            
+            renderExamMarkersClick();
+        }
+
+        function resetExamClick() {
+            if (examState.click.currentSchema) {
+                startExamClick(examState.click.currentSchema);
+            }
+        }
+
+        // ============= GESTION DES MODES =============
+        function switchMode(mode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            
+            if (mode === 'edit') {
+                document.getElementById('edit-mode').classList.add('active');
+            } else if (mode === 'exam-fill') {
+                document.getElementById('exam-fill-mode').classList.add('active');
+                loadExamFill();
+            } else if (mode === 'exam-click') {
+                document.getElementById('exam-click-mode').classList.add('active');
+                loadExamClick();
+            }
+        }
+
+        // ============= INITIALISATION =============
+        window.onload = function() {
+            loadSchemas();
+            updateStorageIndicator();
+            
+            // Mettre à jour l'indicateur toutes les 5 secondes
+            setInterval(updateStorageIndicator, 5000);
+        };
+    </script>
+</body>
+</html>

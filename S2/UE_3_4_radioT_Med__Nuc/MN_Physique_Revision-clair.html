@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MN Physique — Révisions</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #f5f7ff;
+  --white: #ffffff;
+  --surface2: #f0f4ff;
+  --border: #e2e8f0;
+  --blue: #4f6ef7;
+  --blue-light: #eef2ff;
+  --blue-mid: #818cf8;
+  --teal: #0ea5e9;
+  --teal-light: #e0f2fe;
+  --orange: #f97316;
+  --orange-light: #fff7ed;
+  --violet: #8b5cf6;
+  --violet-light: #f5f3ff;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --red: #dc2626;
+  --red-light: #fee2e2;
+  --yellow: #d97706;
+  --yellow-light: #fef3c7;
+  --text: #1e293b;
+  --text-mid: #475569;
+  --muted: #94a3b8;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 16px rgba(79,110,247,0.08),0 1px 4px rgba(0,0,0,0.06);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;}
+
+/* NAV */
+nav{background:var(--white);border-bottom:1.5px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:4px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(79,110,247,0.07);flex-wrap:wrap;min-height:60px;}
+.logo{font-size:1rem;font-weight:800;color:var(--blue);margin-right:16px;display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--violet));border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-size:0.85rem;}
+.nav-btn{background:transparent;border:none;color:var(--text-mid);padding:8px 14px;border-radius:var(--radius-sm);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.82rem;font-weight:600;transition:all 0.18s;white-space:nowrap;}
+.nav-btn:hover{background:var(--blue-light);color:var(--blue);}
+.nav-btn.active{background:var(--blue);color:white;box-shadow:0 2px 8px rgba(79,110,247,0.35);}
+
+/* SCORE BAR */
+.sbar{background:white;border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:16px;font-size:0.8rem;flex-wrap:wrap;}
+.spill{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-weight:600;font-size:0.78rem;}
+.spill.ok{background:var(--green-light);color:var(--green);}
+.spill.nok{background:var(--red-light);color:var(--red);}
+.pwrap{flex:1;max-width:160px;background:var(--border);border-radius:10px;height:6px;overflow:hidden;}
+.pfill{height:100%;background:linear-gradient(90deg,var(--blue),var(--violet));border-radius:10px;transition:width .5s ease;}
+.btn-reset{margin-left:auto;background:transparent;border:1.5px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.75rem;font-weight:600;transition:all .2s;}
+.btn-reset:hover{border-color:var(--red);color:var(--red);}
+
+/* SECTIONS */
+.section{display:none;padding:28px 24px;max-width:900px;margin:0 auto;}
+.section.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+h2{font-size:1.55rem;font-weight:800;color:var(--text);margin-bottom:5px;letter-spacing:-.02em;}
+.psub{color:var(--muted);font-size:0.875rem;margin-bottom:24px;}
+h3{font-size:0.85rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;}
+
+/* BUTTONS */
+.btn{background:var(--white);border:1.5px solid var(--border);color:var(--text);padding:9px 18px;border-radius:var(--radius-sm);cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:0.83rem;font-weight:600;transition:all .18s;box-shadow:var(--shadow-sm);display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light);}
+.btn.primary{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 2px 8px rgba(79,110,247,.3);}
+.btn.primary:hover{background:#3b5bdb;border-color:#3b5bdb;}
+.btn.success{background:var(--green-light);color:var(--green);border-color:#86efac;}
+.btn.danger{background:var(--red-light);color:var(--red);border-color:#fca5a5;}
+
+/* FILTER CHIPS */
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.chip-btn{background:var(--white);border:1.5px solid var(--border);color:var(--text-mid);padding:6px 14px;border-radius:20px;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;font-size:.78rem;font-weight:600;transition:all .18s;}
+.chip-btn:hover{border-color:var(--blue-mid);color:var(--blue);}
+.chip-btn.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 2px 6px rgba(79,110,247,.3);}
+.chip-todo{border-color:#fca5a5;color:var(--red);}
+.chip-todo.active{background:var(--red);color:white;border-color:var(--red);}
+
+/* FLASHCARD */
+.fc-nav{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.fc-ctr{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);font-weight:600;background:var(--surface2);padding:5px 12px;border-radius:20px;}
+.fcwrap{perspective:1200px;margin-bottom:18px;}
+.flashcard{width:100%;min-height:200px;position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,0,.2,1);cursor:pointer;}
+.flashcard.flipped{transform:rotateY(180deg);}
+.fc-face{position:absolute;width:100%;min-height:200px;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--radius);padding:32px 28px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1.5px solid var(--border);box-shadow:var(--shadow);}
+.fc-front{background:var(--white);}
+.fc-back{background:linear-gradient(135deg,var(--blue) 0%,var(--violet) 100%);border-color:transparent;transform:rotateY(180deg);color:white;}
+.fc-badge{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:14px;}
+.bdg-diag{background:var(--teal-light);color:var(--teal);}
+.bdg-ther{background:var(--orange-light);color:var(--orange);}
+.bdg-cq{background:var(--violet-light);color:var(--violet);}
+.bdg-phys{background:var(--blue-light);color:var(--blue);}
+.fc-q{font-size:1.15rem;font-weight:700;color:var(--text);line-height:1.5;margin-bottom:12px;}
+.fc-hint{font-size:.75rem;color:var(--muted);}
+.fc-a{font-size:1.1rem;font-weight:700;color:white;line-height:1.6;margin-bottom:10px;}
+.fc-sub{font-size:.8rem;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,.7);}
+.mastery-row{display:flex;gap:12px;justify-content:center;margin-top:10px;}
+.fc-stat{text-align:center;font-size:.78rem;font-weight:600;margin-top:10px;min-height:20px;}
+
+/* TABLE FILL */
+.sblock{background:white;border:1.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:24px;box-shadow:var(--shadow);}
+.bhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.btitle{font-size:.95rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px;}
+.bdot{width:10px;height:10px;border-radius:50%;}
+.tacts{display:flex;gap:8px;flex-wrap:wrap;}
+.ftable{width:100%;border-collapse:collapse;font-size:.82rem;}
+.ftable th{background:var(--surface2);padding:9px 12px;text-align:left;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);border-bottom:2px solid var(--border);}
+.ftable td{padding:9px 12px;border-bottom:1px solid #f1f5f9;vertical-align:middle;color:var(--text-mid);}
+.ftable tr:last-child td{border-bottom:none;}
+.ftable tr:hover td{background:var(--bg);}
+.finp{background:var(--bg);border:1.5px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:.78rem;width:100%;min-width:80px;transition:all .2s;}
+.finp:focus{outline:none;border-color:var(--blue);background:var(--blue-light);}
+.finp.correct{border-color:#86efac;background:var(--green-light);color:var(--green);}
+.finp.wrong{border-color:#fca5a5;background:var(--red-light);color:var(--red);}
+.finp.revealed{border-color:#c4b5fd;background:var(--violet-light);color:var(--violet);}
+.alert-box{background:var(--yellow-light);border:1.5px solid #fde68a;border-radius:var(--radius-sm);padding:11px 15px;font-size:.83rem;color:#92400e;margin-bottom:20px;}
+
+/* QCM */
+.qcard{background:white;border:1.5px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:16px;box-shadow:var(--shadow-sm);transition:box-shadow .2s;}
+.qcard:hover{box-shadow:var(--shadow);}
+.qnum{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--orange);margin-bottom:10px;}
+.qq{font-size:.97rem;font-weight:700;line-height:1.5;margin-bottom:16px;color:var(--text);}
+.qopts{display:flex;flex-direction:column;gap:8px;}
+.qopt{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 14px;cursor:pointer;font-size:.875rem;transition:all .18s;display:flex;align-items:center;gap:12px;color:var(--text-mid);font-weight:500;}
+.qopt:hover:not(.locked){border-color:var(--blue-mid);background:var(--blue-light);color:var(--blue);}
+.qopt.correct{border-color:#86efac;background:var(--green-light);color:var(--green);font-weight:700;}
+.qopt.wrong{border-color:#fca5a5;background:var(--red-light);color:var(--red);}
+.qltr{width:26px;height:26px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;transition:all .18s;}
+.qopt:hover:not(.locked) .qltr{background:var(--blue);color:white;}
+.qopt.correct .qltr{background:var(--green);color:white;}
+.qopt.wrong .qltr{background:var(--red);color:white;}
+.qexp{display:none;margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);font-size:.83rem;line-height:1.6;}
+.qexp.show{display:block;}
+.qexp.good{background:var(--green-light);border-left:3px solid var(--green);color:#14532d;}
+.qexp.bad{background:var(--red-light);border-left:3px solid var(--red);color:#7f1d1d;}
+.scrtag{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);background:var(--surface2);padding:5px 14px;border-radius:20px;margin-bottom:16px;display:inline-block;}
+
+/* VF */
+.vcard{background:white;border:1.5px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
+.vstmt{font-size:.97rem;font-weight:600;line-height:1.55;margin-bottom:16px;color:var(--text);}
+.vrow{display:flex;gap:10px;}
+.vbtn{flex:1;padding:11px;border-radius:var(--radius-sm);border:2px solid var(--border);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:.875rem;cursor:pointer;transition:all .18s;background:var(--bg);color:var(--text-mid);}
+.vbtn.vrai:hover:not(.locked){border-color:var(--green);color:var(--green);background:var(--green-light);}
+.vbtn.faux:hover:not(.locked){border-color:var(--red);color:var(--red);background:var(--red-light);}
+.vbtn.cans{background:var(--green-light);color:var(--green);border-color:#86efac;}
+.vbtn.wans{background:var(--red-light);color:var(--red);border-color:#fca5a5;}
+.vfb{display:none;margin-top:12px;padding:11px 14px;border-radius:var(--radius-sm);font-size:.83rem;line-height:1.6;}
+.vfb.show{display:block;}
+.vfb.ok{background:var(--green-light);border-left:3px solid var(--green);color:#14532d;}
+.vfb.ko{background:var(--red-light);border-left:3px solid var(--red);color:#7f1d1d;}
+
+/* CALCUL */
+.ccard{background:white;border:1.5px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.cformbox{background:var(--blue-light);border:1.5px solid #c7d2fe;border-radius:var(--radius-sm);padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--blue);text-align:center;margin-bottom:18px;font-weight:600;}
+.cenonce{font-size:.93rem;font-weight:600;color:var(--text);line-height:1.6;margin-bottom:16px;}
+.crow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;}
+.cinp{background:var(--bg);border:2px solid var(--border);color:var(--text);padding:10px 14px;border-radius:var(--radius-sm);font-family:'JetBrains Mono',monospace;font-size:.88rem;width:150px;transition:all .2s;font-weight:600;}
+.cinp:focus{outline:none;border-color:var(--blue);background:var(--blue-light);}
+.cunit{color:var(--muted);font-size:.85rem;font-weight:600;}
+.cres{display:none;margin-top:14px;padding:14px;border-radius:var(--radius-sm);font-size:.83rem;line-height:1.8;font-family:'JetBrains Mono',monospace;white-space:pre-wrap;}
+.cres.show{display:block;}
+.cres.ok{background:var(--green-light);border-left:3px solid var(--green);color:#14532d;}
+.cres.bad{background:var(--red-light);border-left:3px solid var(--red);color:#7f1d1d;}
+
+/* STATS */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;margin-bottom:28px;}
+.scard{background:white;border:1.5px solid var(--border);border-radius:var(--radius);padding:22px;text-align:center;box-shadow:var(--shadow-sm);transition:box-shadow .2s;}
+.scard:hover{box-shadow:var(--shadow);}
+.snum{font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-.02em;}
+.slbl{font-size:.75rem;color:var(--muted);margin-top:5px;font-weight:600;}
+.tag{display:inline-block;padding:4px 9px;border-radius:6px;font-size:.7rem;font-weight:700;font-family:'JetBrains Mono',monospace;cursor:default;}
+.tag-u{background:var(--surface2);color:var(--muted);border:1.5px solid var(--border);}
+.tag-ok{background:var(--green-light);color:var(--green);border:1.5px solid #86efac;}
+.tag-nok{background:var(--red-light);color:var(--red);border:1.5px solid #fca5a5;}
+
+hr.div{border:none;border-top:1.5px solid var(--border);margin:28px 0;}
+
+@media(max-width:600px){
+  nav{padding:8px 14px;}.section{padding:18px 14px;}h2{font-size:1.3rem;}.fc-q{font-size:1rem;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-icon">☢</div>MN Physique
+  </div>
+  <button class="nav-btn active" onclick="showSec('flashcards',this)">🃏 Flashcards</button>
+  <button class="nav-btn" onclick="showSec('tableaux',this)">📋 Tableaux</button>
+  <button class="nav-btn" onclick="showSec('qcm',this)">🎯 QCM</button>
+  <button class="nav-btn" onclick="showSec('vraifaux',this)">⚖️ Vrai / Faux</button>
+  <button class="nav-btn" onclick="showSec('calculs',this)">🔢 Calculs</button>
+  <button class="nav-btn" onclick="showSec('stats',this)">📊 Stats</button>
+</nav>
+
+<div class="sbar">
+  <span style="font-weight:700;font-size:.8rem;">Flashcards :</span>
+  <span class="spill ok">✓ <span id="g-ok">0</span> maîtrisées</span>
+  <span class="spill nok">✗ <span id="g-nok">0</span> à revoir</span>
+  <div class="pwrap"><div class="pfill" id="g-bar" style="width:0%"></div></div>
+  <span id="g-pct" style="font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);font-weight:600;">0%</span>
+  <button class="btn-reset" onclick="resetAll()">⟳ Réinitialiser</button>
+</div>
+
+<!-- ═══ FLASHCARDS ═══ -->
+<div id="section-flashcards" class="section active">
+  <h2>Flashcards</h2>
+  <p class="psub">Clique sur la carte pour révéler la réponse, puis évalue ta maîtrise.</p>
+  <div class="filter-row">
+    <button class="chip-btn active" onclick="setFilter('all',this)">Tous (<span id="cnt-all">0</span>)</button>
+    <button class="chip-btn" onclick="setFilter('diag',this)" style="color:var(--teal);border-color:#bae6fd;">🔵 Diagnostique</button>
+    <button class="chip-btn" onclick="setFilter('ther',this)" style="color:var(--orange);border-color:#fed7aa;">🟠 Thérapeutique</button>
+    <button class="chip-btn" onclick="setFilter('cq',this)"   style="color:var(--violet);border-color:#ddd6fe;">🟣 Sources CQ</button>
+    <button class="chip-btn" onclick="setFilter('phys',this)" style="color:var(--blue);border-color:#c7d2fe;">⚙️ Physique</button>
+    <button class="chip-btn chip-todo" onclick="setFilter('todo',this)">⚠ À revoir</button>
+  </div>
+  <div class="fc-nav">
+    <button class="btn" onclick="prevCard()">← Préc.</button>
+    <span class="fc-ctr" id="fc-prog">1 / 1</span>
+    <button class="btn" onclick="nextCard()">Suiv. →</button>
+    <button class="btn" onclick="shuffleCards()" style="margin-left:auto;">🔀 Mélanger</button>
+  </div>
+  <div class="fcwrap">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="fc-face fc-front">
+        <div class="fc-badge bdg-diag" id="fc-badge">CATÉGORIE</div>
+        <div class="fc-q" id="fc-q">Question</div>
+        <div class="fc-hint">👆 Cliquer pour retourner</div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-a" id="fc-a">Réponse</div>
+        <div class="fc-sub" id="fc-sub"></div>
+      </div>
+    </div>
+  </div>
+  <div class="mastery-row">
+    <button class="btn danger" onclick="markMastery(false)">✗ À revoir</button>
+    <button class="btn success" onclick="markMastery(true)">✓ Maîtrisé</button>
+  </div>
+  <div class="fc-stat" id="fc-stat"></div>
+</div>
+
+<!-- ═══ TABLEAUX ═══ -->
+<div id="section-tableaux" class="section">
+  <h2>Compléter les tableaux</h2>
+  <p class="psub">Remplis les cases vides de mémoire, puis clique Vérifier.</p>
+  <div class="alert-box">⚡ Les abréviations sont acceptées. Tolérance sur les fautes mineures.</div>
+
+  <div class="sblock">
+    <div class="bhead">
+      <div class="btitle"><div class="bdot" style="background:var(--teal)"></div>Isotopes diagnostiques</div>
+      <div class="tacts">
+        <button class="btn" onclick="chkT('t1')">✓ Vérifier</button>
+        <button class="btn" onclick="revT('t1')">👁 Révéler</button>
+        <button class="btn" onclick="rstT('t1')">⟳ Reset</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="ftable" id="t1">
+      <thead><tr><th>Nom</th><th>Symbole</th><th>Demi-vie</th><th>Énergie principale</th><th>Utilisation</th></tr></thead>
+      <tbody>
+        <tr><td>Fluor 18</td><td><input class="finp" data-a="18F" placeholder="…"></td><td><input class="finp" data-a="110 min" placeholder="…" style="width:90px"></td><td><input class="finp" data-a="511 keV" placeholder="…" style="width:90px"></td><td><input class="finp" data-a="TEP" placeholder="…" style="width:70px"></td></tr>
+        <tr><td>Krypton 81m</td><td><input class="finp" data-a="81mKr" placeholder="…"></td><td><input class="finp" data-a="13 sec" placeholder="…" style="width:90px"></td><td>193 keV (γ)</td><td><input class="finp" data-a="Scinti pulmonaire" placeholder="…"></td></tr>
+        <tr><td><input class="finp" data-a="Technetium 99m" placeholder="Nom…"></td><td>⁹⁹ᵐTc</td><td><input class="finp" data-a="6h" placeholder="…" style="width:90px"></td><td><input class="finp" data-a="140 keV" placeholder="…" style="width:90px"></td><td><input class="finp" data-a="Scintigraphie" placeholder="…"></td></tr>
+        <tr><td>Iode 123</td><td><input class="finp" data-a="123I" placeholder="…"></td><td>13,2 h</td><td><input class="finp" data-a="159 keV" placeholder="…" style="width:90px"></td><td><input class="finp" data-a="Scinti thyroïdienne" placeholder="…"></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="sblock">
+    <div class="bhead">
+      <div class="btitle"><div class="bdot" style="background:var(--orange)"></div>Isotopes thérapeutiques</div>
+      <div class="tacts">
+        <button class="btn" onclick="chkT('t2')">✓ Vérifier</button>
+        <button class="btn" onclick="revT('t2')">👁 Révéler</button>
+        <button class="btn" onclick="rstT('t2')">⟳ Reset</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="ftable" id="t2">
+      <thead><tr><th>Nom</th><th>Symbole</th><th>Demi-vie</th><th>Émission</th><th>Énergie</th><th>Cible</th></tr></thead>
+      <tbody>
+        <tr><td>Yttrium 90</td><td><input class="finp" data-a="90Y" placeholder="…" style="width:70px"></td><td><input class="finp" data-a="2.67 j" placeholder="…" style="width:80px"></td><td><input class="finp" data-a="Béta-" placeholder="…" style="width:80px"></td><td>2280 keV</td><td><input class="finp" data-a="Foie" placeholder="…" style="width:70px"></td></tr>
+        <tr><td>Samarium 153</td><td><input class="finp" data-a="153Sm" placeholder="…" style="width:70px"></td><td>1,95 j</td><td><input class="finp" data-a="Béta- + gamma" placeholder="…" style="width:110px"></td><td><input class="finp" data-a="634-807 keV" placeholder="…"></td><td><input class="finp" data-a="Prostate" placeholder="…" style="width:80px"></td></tr>
+        <tr><td><input class="finp" data-a="Lutétium 177" placeholder="Nom…"></td><td>¹⁷⁷Lu</td><td><input class="finp" data-a="6.65 j" placeholder="…" style="width:80px"></td><td>Béta- + gamma</td><td>498 et 130 keV</td><td><input class="finp" data-a="Prostate" placeholder="…" style="width:80px"></td></tr>
+        <tr><td>Iode 131</td><td><input class="finp" data-a="131I" placeholder="…" style="width:70px"></td><td><input class="finp" data-a="8 j" placeholder="…" style="width:80px"></td><td>Béta- + gamma</td><td><input class="finp" data-a="606 keV" placeholder="…" style="width:80px"></td><td><input class="finp" data-a="Thyroïde" placeholder="…" style="width:80px"></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="sblock">
+    <div class="bhead">
+      <div class="btitle"><div class="bdot" style="background:var(--violet)"></div>Sources scellées — Contrôle qualité</div>
+      <div class="tacts">
+        <button class="btn" onclick="chkT('t3')">✓ Vérifier</button>
+        <button class="btn" onclick="revT('t3')">👁 Révéler</button>
+        <button class="btn" onclick="rstT('t3')">⟳ Reset</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="ftable" id="t3">
+      <thead><tr><th>Nom</th><th>Symbole</th><th>Demi-vie</th><th>Énergie</th><th>Usage CQ</th></tr></thead>
+      <tbody>
+        <tr><td>Cobalt 57</td><td><input class="finp" data-a="57Co" placeholder="…" style="width:70px"></td><td><input class="finp" data-a="271 j" placeholder="…" style="width:80px"></td><td>122 keV (γ)</td><td><input class="finp" data-a="CQ gamma caméra" placeholder="…"></td></tr>
+        <tr><td>Germanium 68</td><td><input class="finp" data-a="68Ge" placeholder="…" style="width:70px"></td><td>288 j</td><td><input class="finp" data-a="511 keV" placeholder="…" style="width:80px"></td><td><input class="finp" data-a="CQ TEP" placeholder="…"></td></tr>
+        <tr><td><input class="finp" data-a="Baryum 133" placeholder="Nom…"></td><td><input class="finp" data-a="133Ba" placeholder="…" style="width:70px"></td><td>10,5 ans</td><td>31, 81, 356 keV</td><td><input class="finp" data-a="CQ activimètres" placeholder="…"></td></tr>
+        <tr><td>Césium 137</td><td><input class="finp" data-a="137Cs" placeholder="…" style="width:70px"></td><td><input class="finp" data-a="30 ans" placeholder="…" style="width:80px"></td><td><input class="finp" data-a="662 keV" placeholder="…" style="width:80px"></td><td><input class="finp" data-a="CQ activimètres" placeholder="…"></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ QCM ═══ -->
+<div id="section-qcm" class="section">
+  <h2>QCM</h2>
+  <p class="psub">10 questions aléatoires — distracteurs issus de valeurs réelles proches.</p>
+  <div class="scrtag">Score : <span id="q-ok">0</span> / <span id="q-tot">0</span></div>
+  <div id="qcm-cont"></div>
+  <button class="btn primary" onclick="newQCM()">🔀 Nouvelle session</button>
+</div>
+
+<!-- ═══ VRAI/FAUX ═══ -->
+<div id="section-vraifaux" class="section">
+  <h2>Vrai / Faux</h2>
+  <p class="psub">Pièges classiques avec explications. Attention aux confusions fréquentes !</p>
+  <div class="scrtag">Score : <span id="v-ok">0</span> / <span id="v-tot">0</span></div>
+  <div id="vf-cont"></div>
+  <button class="btn primary" onclick="newVF()">🔀 Nouvelle session</button>
+</div>
+
+<!-- ═══ CALCULS ═══ -->
+<div id="section-calculs" class="section">
+  <h2>Calculs de décroissance</h2>
+  <p class="psub">Applique la formule. Tolérance ±10% acceptée.</p>
+  <div class="cformbox">A(t) = A₀ × (½)^(t / T½) &nbsp;|&nbsp; n = t / T½ = nombre de périodes</div>
+  <div id="calc-cont"></div>
+  <button class="btn primary" onclick="randCalc()" style="margin-top:4px;">🎲 Exercice aléatoire</button>
+</div>
+
+<!-- ═══ STATS ═══ -->
+<div id="section-stats" class="section">
+  <h2>Statistiques</h2>
+  <p class="psub">Suivi de ta progression sur toutes les activités.</p>
+  <div class="sgrid">
+    <div class="scard"><div class="snum" id="s-fc" style="color:var(--blue)">0</div><div class="slbl">Flashcards maîtrisées</div></div>
+    <div class="scard"><div class="snum" id="s-qcm" style="color:var(--orange)">0</div><div class="slbl">QCM réussis</div></div>
+    <div class="scard"><div class="snum" id="s-vf" style="color:var(--violet)">0</div><div class="slbl">Vrai/Faux corrects</div></div>
+    <div class="scard"><div class="snum" id="s-calc" style="color:var(--green)">0</div><div class="slbl">Calculs réussis</div></div>
+  </div>
+  <h3>À revoir</h3>
+  <div id="st-todo" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px;"></div>
+  <h3>Toutes les flashcards</h3>
+  <div id="st-all" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
+</div>
+
+<script>
+const FC=[
+  {id:'f18-sym',cat:'diag',q:'Symbole du Fluor 18 ?',a:'¹⁸F',sub:'F18 — émetteur β+'},
+  {id:'f18-t12',cat:'diag',q:'Demi-vie du Fluor 18 ?',a:'110 minutes',sub:'≈ 1h50 — proximité cyclotron obligatoire'},
+  {id:'f18-e',cat:'diag',q:'Énergies associées au F18 ?',a:'β+ : 634 keV\nPhoton annihilation : 511 keV',sub:'2 photons émis à 180°'},
+  {id:'f18-use',cat:'diag',q:'Utilisation du F18 ?',a:'TEP (Tomographie par Émission de Positons)',sub:'Oncologie, neurologie…'},
+  {id:'f18-prod',cat:'phys',q:'Comment est produit le F18 ?',a:'Cyclotron — bombardement protonique de O18',sub:'T½ courte → proximité cyclotron'},
+  {id:'f18-ann',cat:'phys',q:"Réaction d'annihilation du F18 ?",a:'e⁺ + e⁻ → 2 photons γ de 511 keV à 180°',sub:'Principe fondamental du TEP'},
+  {id:'f18-par',cat:'phys',q:'Parcours moyen du positon du F18 dans l\'eau ?',a:'0,6 mm',sub:'Courte portée → bonne résolution spatiale'},
+  {id:'kr81-t12',cat:'diag',q:'Demi-vie du Krypton 81m ?',a:'13 secondes',sub:'Très courte → inhalation continue'},
+  {id:'kr81-e',cat:'diag',q:'Énergie du Krypton 81m ?',a:'193 keV (gamma)',sub:'Émetteur γ pur'},
+  {id:'kr81-use',cat:'diag',q:'Utilisation du Krypton 81m ?',a:'Scintigraphie pulmonaire\n(ventilation)',sub:'Gaz radioactif inhalé'},
+  {id:'tc99-sym',cat:'diag',q:'Symbole du Technétium 99m ?',a:'⁹⁹ᵐTc',sub:'Le "m" = état métastable'},
+  {id:'tc99-t12',cat:'diag',q:'Demi-vie du Tc99m ?',a:'6,02 heures',sub:'Idéal pour les examens d\'une journée'},
+  {id:'tc99-e',cat:'diag',q:'Énergie gamma du Tc99m ?',a:'140 keV',sub:'Optimale pour les collimateurs standard'},
+  {id:'tc99-use',cat:'diag',q:'Utilisations du Tc99m ?',a:'Scintigraphie osseuse, cardiaque, rénale…',sub:'Isotope le plus utilisé en MN'},
+  {id:'i123-t12',cat:'diag',q:'Demi-vie de l\'Iode 123 ?',a:'13,2 heures',sub:'Adapté aux examens thyroïdiens'},
+  {id:'i123-e',cat:'diag',q:'Énergies de l\'Iode 123 ?',a:'27 keV et 159 keV (gamma) + e⁻',sub:'159 keV principalement utilisé'},
+  {id:'i123-use',cat:'diag',q:'Utilisation de l\'Iode 123 ?',a:'Scintigraphie thyroïdienne',sub:'Fixation sur la thyroïde'},
+  {id:'y90-t12',cat:'ther',q:'Demi-vie de l\'Yttrium 90 ?',a:'2,668 jours',sub:'≈ 2 j 16 h'},
+  {id:'y90-e',cat:'ther',q:'Émission de l\'Yttrium 90 ?',a:'Béta- PUR : 2280 keV',sub:'Pas d\'émission gamma → difficile à imager'},
+  {id:'y90-use',cat:'ther',q:'Indication de l\'Yttrium 90 ?',a:'RIV Foie (Radioembolisation)',sub:'Microsphères'},
+  {id:'sm153-t12',cat:'ther',q:'Demi-vie du Samarium 153 ?',a:'1,95 jours',sub:'≈ 2 jours'},
+  {id:'sm153-e',cat:'ther',q:'Émissions du Samarium 153 ?',a:'Béta- : 634, 703, 807 keV\nGamma : 103 keV',sub:'Émetteur MIXTE β- + γ'},
+  {id:'sm153-use',cat:'ther',q:'Indication du Samarium 153 ?',a:'RIV Prostate',sub:'Traitements osseux palliatifs'},
+  {id:'lu177-t12',cat:'ther',q:'Demi-vie du Lutétium 177 ?',a:'6,647 jours',sub:'≈ 1 semaine'},
+  {id:'lu177-use',cat:'ther',q:'Indication du Lutétium 177 ?',a:'RIV Prostate (PSMA)\nNeuroendocrine — LUTATHERA®',sub:'Traitement de référence'},
+  {id:'i131-t12',cat:'ther',q:'Demi-vie de l\'Iode 131 ?',a:'8,023 jours',sub:'≈ 8 jours'},
+  {id:'i131-e',cat:'ther',q:'Émissions de l\'Iode 131 ?',a:'Gamma : 363 keV\nBéta- : 606 keV',sub:'Émetteur mixte'},
+  {id:'i131-use',cat:'ther',q:'Indication de l\'Iode 131 ?',a:'RIV Thyroïde\n(hyperthyroïdie, cancer)',sub:'Curiethérapie métabolique'},
+  {id:'co57-t12',cat:'cq',q:'Demi-vie du Cobalt 57 ?',a:'271,8 jours',sub:'≈ 9 mois → source stable'},
+  {id:'co57-e',cat:'cq',q:'Énergie du Cobalt 57 ?',a:'122 keV (gamma)',sub:'Proche du Tc99m → idéal pour CQ gamma-caméra'},
+  {id:'co57-use',cat:'cq',q:'Utilisation du Cobalt 57 ?',a:'CQ gamma-caméra\n(source plane / crayon)',sub:'Contrôle quotidien par les MERM'},
+  {id:'ge68-t12',cat:'cq',q:'Demi-vie du Germanium 68 ?',a:'288 jours',sub:'≈ 10 mois'},
+  {id:'ge68-e',cat:'cq',q:'Énergie du Germanium 68 ?',a:'511 keV (annihilation via Ga68)',sub:'Imite le F18 → source CQ TEP'},
+  {id:'ge68-use',cat:'cq',q:'Utilisation du Germanium 68 ?',a:'CQ des TEP',sub:'Source de constance'},
+  {id:'ba133-t12',cat:'cq',q:'Demi-vie du Baryum 133 ?',a:'10,5 ans',sub:'Source très longue durée'},
+  {id:'ba133-e',cat:'cq',q:'Énergies du Baryum 133 ?',a:'31 keV, 81 keV, 356 keV (gamma)',sub:'Spectre multi-énergies'},
+  {id:'ba133-use',cat:'cq',q:'Utilisation du Baryum 133 ?',a:'CQ des activimètres',sub:'Étalonnage multi-gammes'},
+  {id:'cs137-t12',cat:'cq',q:'Demi-vie du Césium 137 ?',a:'30,05 ans',sub:'Source quasi-permanente'},
+  {id:'cs137-e',cat:'cq',q:'Émissions du Césium 137 ?',a:'Gamma : 662 keV\nBéta- : 512 keV',sub:'Émetteur mixte'},
+  {id:'cs137-use',cat:'cq',q:'Utilisation du Césium 137 ?',a:'CQ des activimètres',sub:'Haute énergie → test large gamme'},
+  {id:'cq-def',cat:'phys',q:'Définition du contrôle qualité (Art. R5211-5 CSP) ?',a:'Opérations pour évaluer le maintien des performances revendiquées par le fabricant',sub:'CQI (exploitant) + CQE (OCQE accrédité)'},
+  {id:'cq-int',cat:'phys',q:"Qu'est-ce qu'un CQI ?",a:"Contrôle Interne\nréalisé par l'exploitant ou sous sa responsabilité",sub:'Quotidien, mensuel, semestriel, annuel'},
+  {id:'cq-ext',cat:'phys',q:"Qu'est-ce qu'un CQE ?",a:'Contrôle Externe\nréalisé par un OCQE accrédité (ex: APAVE)',sub:'Annuel — septembre'},
+  {id:'cq-gc',cat:'phys',q:'CQ quotidien gamma-caméra : qui et avec quoi ?',a:'MERM (avant 1re injection)\navec galette de Cobalt 57',sub:'Uniformité + spectrométrie + absence contamination'},
+  {id:'cq-activ',cat:'phys',q:"Qui fait le CQI quotidien de l'activimètre ?",a:'PPH (Préparateur en Pharmacie Hospitalière)',sub:'Enregistré dans les fichiers de suivi'},
+  {id:'cq-tep',cat:'phys',q:'Qui fait le CQ quotidien du TEP scanner ?',a:'MERM',sub:'Enregistré sur Vénus'},
+  {id:'cq-nr',cat:'phys',q:'Équipements MN NON soumis à réglementation CQ ?',a:'TEP + scanners associés\nCaméras CZT\nInjecteurs (Posijet, Trasis)',sub:'Recommandations sociétés savantes'},
+  {id:'sfpm37',cat:'phys',q:'Rapport SFPM n°37 ?',a:'Recommandations caméras CZT',sub:'Pas réglementaire'},
+  {id:'sfpm43',cat:'phys',q:'Rapport SFPM n°43 ?',a:'Recommandations TEP',sub:'Pas réglementaire'},
+];
+
+const QCM=[
+  {q:"Demi-vie du Technétium 99m ?",c:"6 heures",o:["30 minutes","6 heures","13,2 heures","24 heures"],e:"Tc99m : 6,02h — idéale pour la journée d'examen. I123 = 13,2h, Kr81m = 13 secondes."},
+  {q:"Énergie du photon d'annihilation du F18 ?",c:"511 keV",o:["140 keV","511 keV","634 keV","1274 keV"],e:"e⁺ + e⁻ → toujours 2 photons de 511 keV à 180°. L'énergie du β+ émis est 634 keV (différent !)."},
+  {q:"Source de constance pour la gamma-caméra ?",c:"Cobalt 57",o:["Cobalt 57","Germanium 68","Baryum 133","Césium 137"],e:"Co57 (122 keV, T½=271j) → CQ quotidien gamma-caméras par les MERM. Ge68 → TEP."},
+  {q:"Énergie gamma du Tc99m ?",c:"140 keV",o:["80 keV","122 keV","140 keV","193 keV"],e:"140 keV est optimale pour les collimateurs standard. 122 keV = Co57, 193 keV = Kr81m."},
+  {q:"Le F18 est produit par :",c:"Cyclotron — bombardement protonique de O18",o:["Réacteur nucléaire","Générateur de Germanium","Cyclotron — bombardement protonique de O18","Accélérateur linéaire"],e:"Cyclotron obligatoire. T½ = 110 min → proximité géographique indispensable."},
+  {q:"Indication de l'Iode 131 en thérapie ?",c:"Thyroïde",o:["Foie","Prostate","Thyroïde","Poumons"],e:"I131 → thyroïde (hyperthyroïdie, cancer). Y90 → foie. Lu177/Sm153 → prostate."},
+  {q:"Qui réalise le CQI quotidien gamma-caméra ?",c:"Le MERM",o:["Le physicien médical","Le PPH","Le MERM","L'APAVE"],e:"Le MERM effectue ce CQ avant la 1re injection, avec la galette de Co57."},
+  {q:"Demi-vie du Lutétium 177 ?",c:"6,6 jours",o:["1,95 jours","2,67 jours","6,6 jours","8 jours"],e:"Lu177 : 6,647 j. I131 = 8 j, Y90 = 2,67 j, Sm153 = 1,95 j. À mémoriser !"},
+  {q:"Source de constance pour les TEP ?",c:"Germanium 68",o:["Cobalt 57","Germanium 68","Baryum 133","Césium 137"],e:"Ge68 (T½=288j, 511 keV) imite le F18 → source idéale pour les TEP."},
+  {q:"Demi-vie du Krypton 81m ?",c:"13 secondes",o:["1,3 secondes","13 secondes","1,3 minutes","13 minutes"],e:"13 SECONDES — très courte, inhalation continue. Ne pas confondre avec I123 (13,2 heures)."},
+  {q:"Type d'émission de l'Yttrium 90 ?",c:"Béta- pur",o:["Béta+ pur","Gamma pur","Béta- pur","Béta- + gamma"],e:"Y90 = β- PUR (2280 keV). Pas de γ → imagerie directe impossible. Sm153, Lu177, I131 sont mixtes."},
+  {q:"Périodicité du CQE ?",c:"Annuel par un OCQE accrédité",o:["Quotidien par le MERM","Mensuel par le PPH","Annuel par un OCQE accrédité","Tous les 3 mois"],e:"L'APAVE réalise le CQE annuel en septembre pour tous les équipements réglementés."},
+  {q:"Demi-vie du Baryum 133 ?",c:"10,5 ans",o:["271 jours","288 jours","10,5 ans","30,05 ans"],e:"Ba133 : 10,5 ans. Cs137 : 30,05 ans. Co57 : 271 j. Ge68 : 288 j."},
+  {q:"Parcours moyen du positon du F18 dans l'eau ?",c:"0,6 mm",o:["0,06 mm","0,6 mm","6 mm","60 mm"],e:"0,6 mm → bonne résolution spatiale en TEP."},
+  {q:"Le TEP scanner est réglementé pour le CQ ?",c:"Non — recommandations SFPM n°43",o:["Oui — CQ quotidien obligatoire","Non — recommandations SFPM n°43","Oui — CQ annuel obligatoire","Non — aucune recommandation"],e:"TEP non réglementé, mais suivi du rapport SFPM n°43. Gamma-caméra, activimètre, sonde per-op sont réglementés."},
+  {q:"Énergies gamma du Baryum 133 ?",c:"31, 81 et 356 keV",o:["122 keV uniquement","356 keV uniquement","31, 81 et 356 keV","511 keV"],e:"Ba133 = spectre multi-énergies → idéal pour étalonner les activimètres sur plusieurs gammes."},
+  {q:"CQI quotidien activimètre : réalisé par ?",c:"Le PPH",o:["Le MERM","Le PPH","L'aide-physicien","Le radiologue"],e:"PPH = Préparateur en Pharmacie Hospitalière → responsable du CQI quotidien activimètre."},
+  {q:"Énergie β+ du Fluor 18 ?",c:"634 keV",o:["511 keV","634 keV","1274 keV","2280 keV"],e:"β+ émis = 634 keV. Le photon d'annihilation = 511 keV. Deux valeurs différentes à ne pas confondre !"},
+];
+
+const VF=[
+  {s:"Le Technétium 99m émet des photons gamma à 511 keV.",a:false,f:"FAUX — Tc99m émet à 140 keV. Les 511 keV proviennent des émetteurs β+ (F18) par annihilation."},
+  {s:"Le F18 est produit par un réacteur nucléaire.",a:false,f:"FAUX — Cyclotron uniquement (bombardement protonique de O18). La T½ courte (110 min) impose la proximité."},
+  {s:"Le CQ quotidien de la gamma-caméra est réalisé par le MERM avec une galette de Co57.",a:true,f:"VRAI — MERM avant la 1re injection : uniformité, spectrométrie, absence contamination."},
+  {s:"L'Yttrium 90 est un émetteur gamma pur.",a:false,f:"FAUX — Y90 = β- PUR (2280 keV). Absence de γ → imagerie directe impossible."},
+  {s:"Le TEP scanner est soumis à la réglementation de CQ obligatoire.",a:false,f:"FAUX — TEP non réglementé, mais recommandations via rapport SFPM n°43."},
+  {s:"Le Germanium 68 émet des photons de 511 keV.",a:true,f:"VRAI — Ge68 → Ga68 (β+) → annihilation → 511 keV. Source de constance idéale pour TEP."},
+  {s:"La demi-vie de l'Iode 131 est supérieure à celle du Lutétium 177.",a:true,f:"VRAI — I131 : 8,02 j > Lu177 : 6,65 j. Les deux sont des émetteurs β- thérapeutiques."},
+  {s:"Le Cobalt 57 est utilisé pour le CQ des activimètres.",a:false,f:"FAUX — Co57 → gamma-caméras. Activimètres → Ba133 et Cs137."},
+  {s:"Les deux photons d'annihilation sont émis exactement à 180° l'un de l'autre.",a:true,f:"VRAI — Conservation de la quantité de mouvement impose 180°. Principe de la détection en coïncidence."},
+  {s:"Le Krypton 81m a une demi-vie de 13 minutes.",a:false,f:"FAUX — 13 SECONDES ! Très courte → inhalation continue. Ne pas confondre avec 13 heures (I123)."},
+  {s:"Le CQE est réalisé tous les 3 mois.",a:false,f:"FAUX — CQE = ANNUEL (septembre), par un organisme accrédité comme l'APAVE."},
+  {s:"L'Iode 123 est utilisé pour la scintigraphie thyroïdienne diagnostique.",a:true,f:"VRAI — I123 (13,2h, 159 keV) = diagnostic thyroïdien. I131 = thérapie thyroïdienne."},
+  {s:"Le Samarium 153 est un émetteur β- pur.",a:false,f:"FAUX — Sm153 est MIXTE : β- (634, 703, 807 keV) + γ (103 keV). Le γ permet l'imagerie post-traitement."},
+  {s:"Le Baryum 133 a une demi-vie d'environ 10,5 ans.",a:true,f:"VRAI — T½(Ba133) = 10,5 ans → source quasi-permanente pour étalonnage long terme des activimètres."},
+  {s:"Le rapport SFPM n°37 concerne les recommandations pour les TEP.",a:false,f:"FAUX — SFPM n°37 = caméras CZT. SFPM n°43 = TEP. À ne pas confondre !"},
+];
+
+const CALC=[
+  {iso:"F18",  t12:110,  a0:300, dt:120, t0:"10h00",t1:"12h00",unit:"MBq",enonce:"On injecte 300 MBq de F18 à 10h00. Quelle activité reste-t-il à 12h00 ?",step:"Δt=120 min | n=120/110≈1,09 | A=300×(0,5)^1,09 ≈ 140 MBq"},
+  {iso:"Tc99m",t12:362, a0:800, dt:360, t0:"10h00",t1:"16h00",unit:"MBq",enonce:"On injecte 800 MBq de Tc99m à 10h00. Quelle activité à 16h00 ?",step:"Δt=6h=360 min ≈ 1 période | A=800×0,5 = 400 MBq"},
+  {iso:"Tc99m",t12:362, a0:1200,dt:720, t0:"08h00",t1:"20h00",unit:"MBq",enonce:"1200 MBq de Tc99m à 08h00. Quelle activité à 20h00 (12h plus tard) ?",step:"Δt=12h=2×T½ | A=1200×(0,5)²=1200×0,25 = 300 MBq"},
+  {iso:"F18",  t12:110, a0:500, dt:220, t0:"08h00",t1:"11h40",unit:"MBq",enonce:"500 MBq de F18 à 08h00. Quelle activité à 11h40 (220 min plus tard) ?",step:"Δt=220 min=2×T½(110 min) | A=500×(0,5)²=500×0,25 = 125 MBq"},
+  {iso:"I131", t12:11551,a0:4000,dt:11551,t0:"J0",t1:"J8",    unit:"MBq",enonce:"4000 MBq d'Iode 131 à J0. Quelle activité reste-t-il à J8 ?",step:"T½(I131)≈8j≈Δt → 1 période | A=4000×0,5 = 2000 MBq"},
+  {iso:"Lu177",t12:9572, a0:7400,dt:9572, t0:"J0",t1:"J6.6",  unit:"MBq",enonce:"7400 MBq de Lu177 à J0. Quelle activité après 6,65 jours ?",step:"T½(Lu177)=6,647j≈Δt → 1 période | A=7400×0,5 = 3700 MBq"},
+];
+
+// STATE
+let S={m:{},qcm:{ok:0,tot:0},vf:{ok:0,tot:0},calc:{ok:0,tot:0}};
+function loadS(){try{const s=localStorage.getItem('mn3');if(s)S=JSON.parse(s);}catch(e){}}
+function saveS(){try{localStorage.setItem('mn3',JSON.stringify(S));}catch(e){}updateBar();}
+function resetAll(){if(!confirm('Réinitialiser ?'))return;localStorage.removeItem('mn3');location.reload();}
+function updateBar(){
+  const t=FC.length,ok=Object.values(S.m).filter(v=>v===true).length,nok=Object.values(S.m).filter(v=>v===false).length,p=Math.round(ok/t*100);
+  document.getElementById('g-ok').textContent=ok;
+  document.getElementById('g-nok').textContent=nok;
+  document.getElementById('g-bar').style.width=p+'%';
+  document.getElementById('g-pct').textContent=p+'%';
+}
+
+// NAV
+function showSec(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='stats')renderStats();
+}
+
+// FLASHCARDS
+const BADGECLS={diag:'bdg-diag',ther:'bdg-ther',cq:'bdg-cq',phys:'bdg-phys'};
+const CATLBL={diag:'🔵 Diagnostique',ther:'🟠 Thérapeutique',cq:'🟣 Source CQ',phys:'⚙️ Physique'};
+let cards=[...FC],fcI=0;
+function setFilter(f,el){
+  document.querySelectorAll('.chip-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const todo=FC.filter(c=>S.m[c.id]===false);
+  cards=f==='all'?[...FC]:f==='todo'?(todo.length?todo:[...FC]):FC.filter(c=>c.cat===f);
+  fcI=0;renderCard();
+}
+function renderCard(){
+  if(!cards.length)return;
+  const c=cards[fcI];
+  const b=document.getElementById('fc-badge');
+  b.textContent=CATLBL[c.cat]||c.cat;
+  b.className='fc-badge '+(BADGECLS[c.cat]||'bdg-phys');
+  document.getElementById('fc-q').textContent=c.q;
+  document.getElementById('fc-a').innerHTML=c.a.replace(/\n/g,'<br>');
+  document.getElementById('fc-sub').textContent=c.sub||'';
+  document.getElementById('fc-prog').textContent=(fcI+1)+' / '+cards.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+  const m=S.m[c.id];
+  const st=document.getElementById('fc-stat');
+  st.textContent=m===true?'✓ Maîtrisé':m===false?'✗ À revoir':'';
+  st.style.color=m===true?'var(--green)':m===false?'var(--red)':'var(--muted)';
+}
+function flipCard(){document.getElementById('flashcard').classList.toggle('flipped');}
+function prevCard(){fcI=(fcI-1+cards.length)%cards.length;renderCard();}
+function nextCard(){fcI=(fcI+1)%cards.length;renderCard();}
+function shuffleCards(){cards=cards.sort(()=>Math.random()-.5);fcI=0;renderCard();}
+function markMastery(v){S.m[cards[fcI].id]=v;saveS();renderCard();setTimeout(nextCard,280);}
+
+// TABLE FILL
+function norm(s){return s.toLowerCase().replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e').replace(/[îï]/g,'i').replace(/[ôö]/g,'o').replace(/[ùûü]/g,'u').replace(/ç/g,'c').replace(/\s+/g,' ').trim();}
+function lev(a,b){const m=a.length,n=b.length,d=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i||j));for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)d[i][j]=a[i-1]===b[j-1]?d[i-1][j-1]:1+Math.min(d[i-1][j],d[i][j-1],d[i-1][j-1]);return d[m][n];}
+function chkT(id){document.getElementById(id).querySelectorAll('.finp').forEach(i=>{if(i.classList.contains('revealed'))return;const v=norm(i.value),a=norm(i.dataset.a);const ok=v.length>1&&(a.includes(v)||v.includes(a)||lev(v,a)<=2);i.classList.remove('correct','wrong');i.classList.add(ok?'correct':'wrong');});}
+function revT(id){document.getElementById(id).querySelectorAll('.finp').forEach(i=>{i.value=i.dataset.a;i.classList.remove('correct','wrong');i.classList.add('revealed');});}
+function rstT(id){document.getElementById(id).querySelectorAll('.finp').forEach(i=>{i.value='';i.classList.remove('correct','wrong','revealed');});}
+
+// QCM
+let qS=[];
+function newQCM(){
+  qS=[...QCM].sort(()=>Math.random()-.5).slice(0,10);
+  S.qcm={ok:0,tot:0};
+  document.getElementById('q-ok').textContent=0;
+  document.getElementById('q-tot').textContent=qS.length;
+  const c=document.getElementById('qcm-cont');c.innerHTML='';
+  const L=['A','B','C','D'];
+  qS.forEach((q,qi)=>{
+    const opts=[...q.o].sort(()=>Math.random()-.5);
+    const d=document.createElement('div');d.className='qcard';
+    d.innerHTML=`<div class="qnum">Question ${qi+1} / ${qS.length}</div>
+    <div class="qq">${q.q}</div>
+    <div class="qopts" id="qo-${qi}">${opts.map((o,i)=>`<div class="qopt" onclick="ansQ(${qi},'${o.replace(/'/g,"\\'")}',this)"><span class="qltr">${L[i]}</span>${o}</div>`).join('')}</div>
+    <div class="qexp" id="qe-${qi}">${q.e}</div>`;
+    c.appendChild(d);
+  });
+}
+function ansQ(qi,ch,el){
+  const q=qS[qi];
+  const od=document.getElementById(`qo-${qi}`);
+  if(od.querySelector('.locked'))return;
+  od.querySelectorAll('.qopt').forEach(o=>{o.classList.add('locked');const t=o.textContent.trim().slice(1).trim();if(t===q.c)o.classList.add('correct');else if(o===el)o.classList.add('wrong');});
+  const ok=ch===q.c;
+  const exp=document.getElementById(`qe-${qi}`);exp.classList.add('show',ok?'good':'bad');
+  if(ok)S.qcm.ok++;S.qcm.tot++;
+  document.getElementById('q-ok').textContent=S.qcm.ok;
+  document.getElementById('q-tot').textContent=S.qcm.tot;
+  saveS();
+}
+
+// VRAI/FAUX
+let vS=[];
+function newVF(){
+  vS=[...VF].sort(()=>Math.random()-.5);
+  S.vf={ok:0,tot:0};
+  document.getElementById('v-ok').textContent=0;
+  document.getElementById('v-tot').textContent=vS.length;
+  const c=document.getElementById('vf-cont');c.innerHTML='';
+  vS.forEach((item,i)=>{
+    const d=document.createElement('div');d.className='vcard';
+    d.innerHTML=`<div class="qnum">Affirmation ${i+1} / ${vS.length}</div>
+    <div class="vstmt">${item.s}</div>
+    <div class="vrow"><button class="vbtn vrai" onclick="ansV(${i},true,this)">✓ VRAI</button><button class="vbtn faux" onclick="ansV(${i},false,this)">✗ FAUX</button></div>
+    <div class="vfb ${item.a?'ok':'ko'}" id="vb-${i}">${item.f}</div>`;
+    c.appendChild(d);
+  });
+}
+function ansV(i,ans,el){
+  const item=vS[i];const card=el.closest('.vcard');
+  if(card.querySelector('.locked'))return;
+  card.querySelectorAll('.vbtn').forEach(b=>b.classList.add('locked'));
+  const ok=ans===item.a;
+  el.classList.add(ok?'cans':'wans');
+  if(!ok)card.querySelector(item.a?'.vrai':'.faux').classList.add('cans');
+  document.getElementById(`vb-${i}`).classList.add('show');
+  if(ok)S.vf.ok++;S.vf.tot++;
+  document.getElementById('v-ok').textContent=S.vf.ok;
+  document.getElementById('v-tot').textContent=S.vf.tot;
+  saveS();
+}
+
+// CALCULS
+function renderCalcs(){
+  const c=document.getElementById('calc-cont');c.innerHTML='';
+  CALC.forEach((exo,i)=>{
+    const d=document.createElement('div');d.className='ccard';
+    d.innerHTML=`<div class="qnum">Exercice ${i+1} — ${exo.iso} &nbsp;|&nbsp; ${exo.t0} → ${exo.t1}</div>
+    <div class="cenonce">${exo.enonce}</div>
+    <div class="crow">
+      <input type="number" class="cinp" id="ci-${i}" placeholder="Votre réponse…">
+      <span class="cunit">${exo.unit}</span>
+      <button class="btn primary" onclick="chkC(${i})">Vérifier</button>
+    </div>
+    <div class="cres" id="cr-${i}"></div>`;
+    c.appendChild(d);
+  });
+}
+function chkC(i){
+  const exo=CALC[i];
+  const inp=document.getElementById(`ci-${i}`),res=document.getElementById(`cr-${i}`);
+  const v=parseFloat(inp.value),ta=exo.a0*Math.pow(0.5,exo.dt/exo.t12);
+  const ok=!isNaN(v)&&Math.abs(v-ta)<=ta*.1;
+  res.classList.add('show');res.classList.remove('ok','bad');res.classList.add(ok?'ok':'bad');
+  res.textContent=`${ok?'✓ Correct !':'✗ Incorrect.'}\nRéponse exacte : ${ta.toFixed(0)} ${exo.unit}\n\n${exo.step}`;
+  if(!inp.dataset.done){inp.dataset.done='1';if(ok)S.calc.ok++;S.calc.tot++;saveS();}
+}
+function randCalc(){
+  const exo=CALC[Math.floor(Math.random()*CALC.length)];
+  const c=document.getElementById('calc-cont');
+  const id='r'+Date.now();
+  const d=document.createElement('div');d.className='ccard';
+  d.style.borderColor='var(--blue)';d.style.background='var(--blue-light)';
+  d.innerHTML=`<div class="qnum" style="color:var(--blue)">🎲 Exercice aléatoire — ${exo.iso}</div>
+  <div class="cenonce">${exo.enonce}</div>
+  <div class="crow">
+    <input type="number" class="cinp" id="${id}" placeholder="Votre réponse…">
+    <span class="cunit">${exo.unit}</span>
+    <button class="btn primary" onclick="chkRand('${id}',${exo.a0},${exo.dt},${exo.t12},'${exo.step}','${exo.unit}')">Vérifier</button>
+    <button class="btn" onclick="this.closest('.ccard').remove()">✕</button>
+  </div>
+  <div class="cres" id="cr-${id}"></div>`;
+  c.insertBefore(d,c.firstChild);
+}
+function chkRand(id,a0,dt,t12,step,unit){
+  const inp=document.getElementById(id),res=document.getElementById('cr-'+id);
+  const v=parseFloat(inp.value),ta=a0*Math.pow(0.5,dt/t12);
+  const ok=!isNaN(v)&&Math.abs(v-ta)<=ta*.1;
+  res.classList.add('show');res.classList.remove('ok','bad');res.classList.add(ok?'ok':'bad');
+  res.textContent=`${ok?'✓ Correct !':'✗ Incorrect.'}\nRéponse exacte : ${ta.toFixed(0)} ${unit}\n\n${step}`;
+  if(!inp.dataset.done){inp.dataset.done='1';if(ok)S.calc.ok++;S.calc.tot++;saveS();}
+}
+
+// STATS
+function renderStats(){
+  const t=FC.length,ok=Object.values(S.m).filter(v=>v===true).length;
+  document.getElementById('s-fc').textContent=ok+'/'+t;
+  document.getElementById('s-qcm').textContent=S.qcm.ok+'/'+S.qcm.tot;
+  document.getElementById('s-vf').textContent=S.vf.ok+'/'+S.vf.tot;
+  document.getElementById('s-calc').textContent=S.calc.ok+'/'+S.calc.tot;
+  const todo=document.getElementById('st-todo');todo.innerHTML='';
+  const noks=FC.filter(c=>S.m[c.id]===false);
+  if(!noks.length)todo.innerHTML='<span style="color:var(--green);font-weight:700;">🎉 Aucune carte à revoir !</span>';
+  else noks.forEach(c=>{const t=document.createElement('span');t.className='tag tag-nok';t.title=c.q;t.textContent=c.id;todo.appendChild(t);});
+  const all=document.getElementById('st-all');all.innerHTML='';
+  FC.forEach(c=>{const m=S.m[c.id];const t=document.createElement('span');t.title=c.q;t.textContent=c.id;t.className='tag '+(m===true?'tag-ok':m===false?'tag-nok':'tag-u');all.appendChild(t);});
+}
+
+// INIT
+loadS();updateBar();
+document.getElementById('cnt-all').textContent=FC.length;
+renderCard();newQCM();newVF();renderCalcs();
+</script>
+</body>
+</html>

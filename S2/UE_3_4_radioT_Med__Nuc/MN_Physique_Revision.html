@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MN Physique — Révisions Interactives</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap');
+
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: #2a3a55;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #a78bfa;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    background: rgba(10,14,26,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    flex-wrap: wrap;
+    min-height: 56px;
+  }
+
+  nav .logo {
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-right: 12px;
+    white-space: nowrap;
+  }
+
+  .nav-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  /* SCORE BAR */
+  .score-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .score-item { display: flex; align-items: center; gap: 6px; }
+  .score-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .score-dot.green { background: var(--green); }
+  .score-dot.red { background: var(--red); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 24px 20px; max-width: 900px; margin: 0 auto; }
+  .section.active { display: block; }
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  h3 { font-size: 1rem; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+
+  /* FLASHCARD */
+  .flashcard-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .fc-filter-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .fc-filter-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  .flashcard-area {
+    perspective: 1200px;
+    margin-bottom: 20px;
+  }
+  .flashcard {
+    width: 100%;
+    min-height: 220px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .fc-face {
+    position: absolute;
+    width: 100%;
+    min-height: 220px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .fc-front {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+  }
+  .fc-back {
+    background: linear-gradient(135deg, #0f2027, #1a3a4a);
+    border: 2px solid var(--accent);
+    transform: rotateY(180deg);
+  }
+  .fc-category {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .fc-question {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .fc-answer {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.6;
+  }
+  .fc-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 10px;
+    font-family: 'Space Mono', monospace;
+  }
+  .fc-hint { font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
+
+  .fc-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .btn.success { background: var(--green); color: white; border-color: var(--green); }
+  .btn.fail { background: var(--red); color: white; border-color: var(--red); }
+  .btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+  .fc-progress {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .mastery-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    justify-content: center;
+  }
+
+  /* TABLE FILL */
+  .table-fill {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.82rem;
+  }
+  .table-fill th {
+    background: var(--surface2);
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border-bottom: 2px solid var(--border);
+  }
+  .table-fill td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .table-fill tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .fill-input {
+    background: rgba(0,229,255,0.05);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.8rem;
+    width: 100%;
+    min-width: 80px;
+    transition: all 0.2s;
+  }
+  .fill-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(0,229,255,0.08);
+  }
+  .fill-input.correct { border-color: var(--green); background: rgba(16,185,129,0.12); color: var(--green); }
+  .fill-input.wrong { border-color: var(--red); background: rgba(239,68,68,0.12); color: var(--red); }
+  .fill-input.revealed { border-color: var(--accent3); background: rgba(167,139,250,0.12); color: var(--accent3); }
+
+  .table-actions { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+
+  /* QCM */
+  .qcm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .qcm-num {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 10px;
+  }
+  .qcm-question {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .qcm-options { display: flex; flex-direction: column; gap: 10px; }
+  .qcm-option {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .qcm-option:hover:not(.locked) { border-color: var(--accent); background: rgba(0,229,255,0.05); }
+  .qcm-option.selected { border-color: var(--accent); background: rgba(0,229,255,0.1); }
+  .qcm-option.correct { border-color: var(--green); background: rgba(16,185,129,0.15); }
+  .qcm-option.wrong { border-color: var(--red); background: rgba(239,68,68,0.12); }
+  .qcm-option-letter {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .qcm-explanation {
+    display: none;
+    margin-top: 16px;
+    padding: 14px;
+    background: rgba(16,185,129,0.08);
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #a7f3d0;
+  }
+  .qcm-explanation.show { display: block; }
+  .qcm-explanation.wrong-exp {
+    background: rgba(239,68,68,0.08);
+    border-left-color: var(--red);
+    color: #fca5a5;
+  }
+
+  /* VRAI / FAUX */
+  .vf-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .vf-statement { font-size: 0.95rem; font-weight: 600; margin-bottom: 16px; line-height: 1.5; }
+  .vf-buttons { display: flex; gap: 10px; }
+  .vf-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .vf-btn.vrai:hover:not(.locked) { border-color: var(--green); color: var(--green); }
+  .vf-btn.faux:hover:not(.locked) { border-color: var(--red); color: var(--red); }
+  .vf-btn.correct-answer { background: var(--green); color: white; border-color: var(--green); }
+  .vf-btn.wrong-answer { background: var(--red); color: white; border-color: var(--red); }
+  .vf-feedback {
+    display: none;
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .vf-feedback.show { display: block; }
+  .vf-feedback.ok { background: rgba(16,185,129,0.1); color: #a7f3d0; border-left: 3px solid var(--green); }
+  .vf-feedback.ko { background: rgba(239,68,68,0.1); color: #fca5a5; border-left: 3px solid var(--red); }
+
+  /* CALCUL */
+  .calc-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .calc-formula {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .calc-enonce {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .calc-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .calc-input {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.9rem;
+    width: 160px;
+    transition: all 0.2s;
+  }
+  .calc-input:focus { outline: none; border-color: var(--accent); }
+  .calc-unit { color: var(--muted); font-size: 0.85rem; font-family: 'Space Mono', monospace; }
+  .calc-result {
+    display: none;
+    margin-top: 14px;
+    padding: 14px;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+  }
+  .calc-result.show { display: block; }
+  .calc-result.correct { background: rgba(16,185,129,0.1); border-left: 3px solid var(--green); color: #a7f3d0; }
+  .calc-result.wrong { background: rgba(239,68,68,0.1); border-left: 3px solid var(--red); color: #fca5a5; }
+
+  /* STATS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    font-family: 'Space Mono', monospace;
+  }
+  .stat-label { font-size: 0.75rem; color: var(--muted); margin-top: 4px; letter-spacing: 0.06em; }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 20px;
+    transition: width 0.5s ease;
+  }
+
+  .chip {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    font-family: 'Space Mono', monospace;
+  }
+  .chip-diag { background: rgba(0,229,255,0.15); color: var(--accent); border: 1px solid rgba(0,229,255,0.3); }
+  .chip-ther { background: rgba(255,107,53,0.15); color: var(--accent2); border: 1px solid rgba(255,107,53,0.3); }
+  .chip-cq   { background: rgba(167,139,250,0.15); color: var(--accent3); border: 1px solid rgba(167,139,250,0.3); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 28px 0;
+  }
+
+  .alert {
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: #fcd34d;
+    margin-bottom: 16px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .section-dot {
+    width: 4px;
+    height: 28px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .fc-question { font-size: 1rem; }
+    .fc-answer { font-size: 0.95rem; }
+    nav { padding: 8px 12px; }
+    .section { padding: 16px 12px; }
+    h2 { font-size: 1.3rem; }
+  }
+
+  /* Animations */
+  @keyframes fadeIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .section.active { animation: fadeIn 0.3s ease; }
+
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+  .pulsing { animation: pulse 1s infinite; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">☢ MN PHYSIQUE</span>
+  <button class="nav-btn active" onclick="showSection('flashcards')">🃏 Flashcards</button>
+  <button class="nav-btn" onclick="showSection('table-fill')">📋 Tableau</button>
+  <button class="nav-btn" onclick="showSection('qcm')">🎯 QCM</button>
+  <button class="nav-btn" onclick="showSection('vrai-faux')">⚖️ Vrai/Faux</button>
+  <button class="nav-btn" onclick="showSection('calcul')">🔢 Calculs</button>
+  <button class="nav-btn" onclick="showSection('stats')">📊 Statistiques</button>
+</nav>
+
+<div class="score-bar">
+  <span style="font-weight:700; color:var(--text);">Score global :</span>
+  <span class="score-item"><span class="score-dot green"></span><span id="global-ok">0</span> maîtrisés</span>
+  <span class="score-item"><span class="score-dot red"></span><span id="global-nok">0</span> à revoir</span>
+  <div style="flex:1; max-width:200px;">
+    <div class="progress-bar-wrap" style="margin:0;">
+      <div class="progress-bar-fill" id="global-bar" style="width:0%"></div>
+    </div>
+  </div>
+  <span id="global-pct" style="font-family:'Space Mono',monospace; font-size:0.8rem; color:var(--muted);">0%</span>
+  <button class="btn" onclick="resetAll()" style="margin-left:auto; font-size:0.7rem; padding:5px 10px;">⟳ Reset tout</button>
+</div>
+
+<!-- ================================ FLASHCARDS ================================ -->
+<div id="section-flashcards" class="section active">
+  <h2>Flashcards — Isotopes & CQ</h2>
+
+  <div class="flashcard-controls">
+    <button class="fc-filter-btn active" onclick="setFilter('all', this)">Tous</button>
+    <button class="fc-filter-btn" onclick="setFilter('diag', this)">Diagnostique</button>
+    <button class="fc-filter-btn" onclick="setFilter('ther', this)">Thérapeutique</button>
+    <button class="fc-filter-btn" onclick="setFilter('cq', this)">Sources CQ</button>
+    <button class="fc-filter-btn" onclick="setFilter('phys', this)">Physique</button>
+    <button class="fc-filter-btn" onclick="setFilter('todo', this)" style="border-color:var(--red); color:var(--red);">À revoir</button>
+  </div>
+
+  <div class="fc-nav">
+    <button class="btn" onclick="prevCard()">← Préc.</button>
+    <span class="fc-progress" id="fc-progress">1 / 1</span>
+    <button class="btn" onclick="nextCard()">Suiv. →</button>
+    <button class="btn" onclick="shuffleCards()" style="margin-left:auto;">🔀 Mélanger</button>
+  </div>
+
+  <div class="flashcard-area">
+    <div class="flashcard" id="flashcard" onclick="flipCard()">
+      <div class="fc-face fc-front">
+        <div class="fc-category" id="fc-cat">CATÉGORIE</div>
+        <div class="fc-question" id="fc-q">Question</div>
+        <div class="fc-hint">Cliquer pour retourner</div>
+      </div>
+      <div class="fc-face fc-back">
+        <div class="fc-answer" id="fc-a">Réponse</div>
+        <div class="fc-sub" id="fc-sub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mastery-buttons">
+    <button class="btn fail" onclick="markMastery(false)">✗ À revoir</button>
+    <button class="btn success" onclick="markMastery(true)">✓ Maîtrisé</button>
+  </div>
+
+  <div id="fc-mastery-status" style="text-align:center; margin-top:10px; font-size:0.8rem; color:var(--muted); font-family:'Space Mono',monospace;"></div>
+</div>
+
+<!-- ================================ TABLE FILL ================================ -->
+<div id="section-table-fill" class="section">
+  <h2>Compléter les tableaux</h2>
+
+  <div class="alert">⚡ Remplis les cases vides puis clique "Vérifier". Les valeurs exactes sont attendues (abréviations tolérées).</div>
+
+  <!-- TABLE 1 -->
+  <div class="section-header"><div class="section-dot"></div><h3>Isotopes diagnostiques</h3></div>
+  <div class="table-actions">
+    <button class="btn" onclick="checkTable('t1')">✓ Vérifier</button>
+    <button class="btn" onclick="revealTable('t1')">👁 Révéler</button>
+    <button class="btn" onclick="resetTable('t1')">⟳ Reset</button>
+  </div>
+  <div style="overflow-x:auto;">
+  <table class="table-fill" id="t1">
+    <thead><tr>
+      <th>Nom</th><th>Symbole</th><th>Demi-vie</th><th>Énergie principale</th><th>Utilisation</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td>Fluor 18</td>
+        <td><input class="fill-input" data-answer="18F" placeholder="…"></td>
+        <td><input class="fill-input" data-answer="110 min" placeholder="…" style="width:90px"></td>
+        <td><input class="fill-input" data-answer="511 keV" placeholder="…" style="width:100px"></td>
+        <td><input class="fill-input" data-answer="TEP" placeholder="…" style="width:80px"></td>
+      </tr>
+      <tr>
+        <td>Krypton 81m</td>
+        <td><input class="fill-input" data-answer="81mKr" placeholder="…"></td>
+        <td><input class="fill-input" data-answer="13 sec" placeholder="…" style="width:90px"></td>
+        <td>193 keV (γ)</td>
+        <td><input class="fill-input" data-answer="Scinti pulmonaire" placeholder="…"></td>
+      </tr>
+      <tr>
+        <td><input class="fill-input" data-answer="Technetium 99m" placeholder="Nom…"></td>
+        <td>99mTc</td>
+        <td><input class="fill-input" data-answer="6h" placeholder="…" style="width:90px"></td>
+        <td><input class="fill-input" data-answer="140 keV" placeholder="…" style="width:100px"></td>
+        <td><input class="fill-input" data-answer="Scintigraphie" placeholder="…"></td>
+      </tr>
+      <tr>
+        <td>Iode 123</td>
+        <td><input class="fill-input" data-answer="123I" placeholder="…"></td>
+        <td>13,2 h</td>
+        <td><input class="fill-input" data-answer="159 keV" placeholder="…" style="width:100px"></td>
+        <td><input class="fill-input" data-answer="Scinti thyroïdienne" placeholder="…"></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- TABLE 2 -->
+  <div class="section-header"><div class="section-dot" style="background:var(--accent2)"></div><h3>Isotopes thérapeutiques</h3></div>
+  <div class="table-actions">
+    <button class="btn" onclick="checkTable('t2')">✓ Vérifier</button>
+    <button class="btn" onclick="revealTable('t2')">👁 Révéler</button>
+    <button class="btn" onclick="resetTable('t2')">⟳ Reset</button>
+  </div>
+  <div style="overflow-x:auto;">
+  <table class="table-fill" id="t2">
+    <thead><tr>
+      <th>Nom</th><th>Symbole</th><th>Demi-vie</th><th>Type émission</th><th>Énergie</th><th>Cible</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td>Yttrium 90</td>
+        <td><input class="fill-input" data-answer="90Y" placeholder="…" style="width:70px"></td>
+        <td><input class="fill-input" data-answer="2.67 j" placeholder="…" style="width:80px"></td>
+        <td><input class="fill-input" data-answer="Béta-" placeholder="…" style="width:80px"></td>
+        <td>2280 keV</td>
+        <td><input class="fill-input" data-answer="Foie" placeholder="…" style="width:70px"></td>
+      </tr>
+      <tr>
+        <td>Samarium 153</td>
+        <td><input class="fill-input" data-answer="153Sm" placeholder="…" style="width:70px"></td>
+        <td>1,95 j</td>
+        <td><input class="fill-input" data-answer="Béta- + gamma" placeholder="…" style="width:100px"></td>
+        <td><input class="fill-input" data-answer="634,703,807 keV" placeholder="…"></td>
+        <td><input class="fill-input" data-answer="Prostate" placeholder="…" style="width:80px"></td>
+      </tr>
+      <tr>
+        <td><input class="fill-input" data-answer="Lutétium 177" placeholder="Nom…"></td>
+        <td>177Lu</td>
+        <td><input class="fill-input" data-answer="6.65 j" placeholder="…" style="width:80px"></td>
+        <td>Béta- + gamma</td>
+        <td>498 et 130 keV (β)</td>
+        <td><input class="fill-input" data-answer="Prostate" placeholder="…" style="width:80px"></td>
+      </tr>
+      <tr>
+        <td>Iode 131</td>
+        <td><input class="fill-input" data-answer="131I" placeholder="…" style="width:70px"></td>
+        <td><input class="fill-input" data-answer="8 j" placeholder="…" style="width:80px"></td>
+        <td>Béta- + gamma</td>
+        <td><input class="fill-input" data-answer="606 keV" placeholder="…" style="width:80px"></td>
+        <td><input class="fill-input" data-answer="Thyroïde" placeholder="…" style="width:80px"></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- TABLE 3 -->
+  <div class="section-header"><div class="section-dot" style="background:var(--accent3)"></div><h3>Sources scellées — Contrôle qualité</h3></div>
+  <div class="table-actions">
+    <button class="btn" onclick="checkTable('t3')">✓ Vérifier</button>
+    <button class="btn" onclick="revealTable('t3')">👁 Révéler</button>
+    <button class="btn" onclick="resetTable('t3')">⟳ Reset</button>
+  </div>
+  <div style="overflow-x:auto;">
+  <table class="table-fill" id="t3">
+    <thead><tr>
+      <th>Nom</th><th>Symbole</th><th>Demi-vie</th><th>Énergie</th><th>Usage CQ</th>
+    </tr></thead>
+    <tbody>
+      <tr>
+        <td>Cobalt 57</td>
+        <td><input class="fill-input" data-answer="57Co" placeholder="…" style="width:70px"></td>
+        <td><input class="fill-input" data-answer="271 j" placeholder="…" style="width:80px"></td>
+        <td>122 keV (γ)</td>
+        <td><input class="fill-input" data-answer="CQ gamma caméra" placeholder="…"></td>
+      </tr>
+      <tr>
+        <td>Germanium 68</td>
+        <td><input class="fill-input" data-answer="68Ge" placeholder="…" style="width:70px"></td>
+        <td>288 j</td>
+        <td><input class="fill-input" data-answer="511 keV" placeholder="…" style="width:80px"></td>
+        <td><input class="fill-input" data-answer="CQ TEP" placeholder="…"></td>
+      </tr>
+      <tr>
+        <td><input class="fill-input" data-answer="Baryum 133" placeholder="Nom…"></td>
+        <td><input class="fill-input" data-answer="133Ba" placeholder="…" style="width:70px"></td>
+        <td>10,5 ans</td>
+        <td>31, 81, 356 keV</td>
+        <td><input class="fill-input" data-answer="CQ activimètres" placeholder="…"></td>
+      </tr>
+      <tr>
+        <td>Césium 137</td>
+        <td><input class="fill-input" data-answer="137Cs" placeholder="…" style="width:70px"></td>
+        <td><input class="fill-input" data-answer="30 ans" placeholder="…" style="width:80px"></td>
+        <td><input class="fill-input" data-answer="662 keV" placeholder="…" style="width:80px"></td>
+        <td><input class="fill-input" data-answer="CQ activimètres" placeholder="…"></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ================================ QCM ================================ -->
+<div id="section-qcm" class="section">
+  <h2>QCM — Questions à choix multiples</h2>
+  <div id="qcm-score" style="text-align:right; font-family:'Space Mono',monospace; font-size:0.85rem; color:var(--muted); margin-bottom:16px;">Score : <span id="qcm-ok">0</span> / <span id="qcm-total">0</span></div>
+  <div id="qcm-container"></div>
+  <button class="btn primary" onclick="newQCMSession()" style="margin-top:10px;">🔀 Nouvelle session (10 questions aléatoires)</button>
+</div>
+
+<!-- ================================ VRAI / FAUX ================================ -->
+<div id="section-vrai-faux" class="section">
+  <h2>Vrai / Faux</h2>
+  <div id="vf-score" style="text-align:right; font-family:'Space Mono',monospace; font-size:0.85rem; color:var(--muted); margin-bottom:16px;">Score : <span id="vf-ok">0</span> / <span id="vf-total">0</span></div>
+  <div id="vf-container"></div>
+  <button class="btn primary" onclick="newVFSession()" style="margin-top:10px;">🔀 Nouvelle session</button>
+</div>
+
+<!-- ================================ CALCULS ================================ -->
+<div id="section-calcul" class="section">
+  <h2>Calculs de décroissance radioactive</h2>
+
+  <div class="calc-formula">A(t) = A₀ × (½)^(t / T½)&nbsp;&nbsp;|&nbsp;&nbsp;T½ = période radioactive</div>
+
+  <div id="calc-container"></div>
+
+  <button class="btn primary" onclick="genCalcExo()" style="margin-top:10px;">🎲 Nouvel exercice aléatoire</button>
+</div>
+
+<!-- ================================ STATS ================================ -->
+<div id="section-stats" class="section">
+  <h2>Statistiques & Progression</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num" id="s-flashcards" style="color:var(--accent)">0</div>
+      <div class="stat-label">Flashcards maîtrisées</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-qcm" style="color:var(--accent2)">0</div>
+      <div class="stat-label">QCM réussis</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-vf" style="color:var(--accent3)">0</div>
+      <div class="stat-label">Vrai/Faux corrects</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="s-calc" style="color:var(--yellow)">0</div>
+      <div class="stat-label">Calculs réussis</div>
+    </div>
+  </div>
+
+  <h3>Flashcards à revoir :</h3>
+  <div id="stats-todo" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;"></div>
+
+  <h3>Toutes les flashcards :</h3>
+  <div id="stats-all" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const FLASHCARDS = [
+  // ISOTOPES DIAGNOSTIQUES
+  { id:'f18-sym', cat:'diag', q:'Quel est le symbole du Fluor 18 ?', a:'¹⁸F', sub:'F18 — émetteur β+' },
+  { id:'f18-t12', cat:'diag', q:'Quelle est la demi-vie du Fluor 18 ?', a:'110 minutes', sub:'≈ 1h50' },
+  { id:'f18-e', cat:'diag', q:'Quelles énergies sont associées au F18 ?', a:'Béta+ : 634 keV\nPhoton d\'annihilation : 511 keV', sub:'Émis à 180°' },
+  { id:'f18-use', cat:'diag', q:'Quelle est l\'utilisation du F18 en MN ?', a:'TEP (Tomographie par Émission de Positons)', sub:'Oncologie, neurologie…' },
+  { id:'f18-prod', cat:'phys', q:'Comment est produit le F18 ?', a:'Cyclotron — bombardement protonique de l\'oxygène 18 (O18)', sub:'Nécessite proximité cyclotron' },
+  { id:'f18-ann', cat:'phys', q:'Qu\'est-ce que la réaction d\'annihilation du F18 ?', a:'Le positon e⁺ s\'annihile avec un électron e⁻ → 2 photons γ de 511 keV émis à 180°', sub:'Principe du TEP' },
+  { id:'f18-par', cat:'phys', q:'Quel est le parcours moyen du positon du F18 dans l\'eau ?', a:'0,6 mm', sub:'Courte portée → bonne résolution spatiale' },
+  { id:'kr81-t12', cat:'diag', q:'Quelle est la demi-vie du Krypton 81m ?', a:'13 secondes', sub:'Très courte → inhalation continue' },
+  { id:'kr81-e', cat:'diag', q:'Quelle énergie émet le Krypton 81m ?', a:'193 keV (gamma)', sub:'Émetteur γ pur' },
+  { id:'kr81-use', cat:'diag', q:'À quoi sert le Krypton 81m ?', a:'Scintigraphie pulmonaire (ventilation)', sub:'Gaz radioactif inhalé' },
+  { id:'tc99-sym', cat:'diag', q:'Symbole du Technétium 99m ?', a:'⁹⁹ᵐTc', sub:'Le "m" = métastable' },
+  { id:'tc99-t12', cat:'diag', q:'Demi-vie du Tc99m ?', a:'6,02 heures', sub:'≈ 6h — idéal pour examens d\'une journée' },
+  { id:'tc99-e', cat:'diag', q:'Énergie du Tc99m ?', a:'140 keV (gamma)', sub:'Énergie optimale pour la gamma-caméra' },
+  { id:'tc99-use', cat:'diag', q:'Utilisations du Tc99m ?', a:'Scintigraphie osseuse, cardiaque, rénale…', sub:'Isotope le plus utilisé en MN' },
+  { id:'i123-t12', cat:'diag', q:'Demi-vie de l\'Iode 123 ?', a:'13,2 heures', sub:'Adapté aux examens thyroïdiens' },
+  { id:'i123-e', cat:'diag', q:'Énergies de l\'Iode 123 ?', a:'27 keV et 159 keV (gamma) + électrons', sub:'Principalement 159 keV utilisé' },
+  { id:'i123-use', cat:'diag', q:'Utilisation de l\'Iode 123 ?', a:'Scintigraphie thyroïdienne', sub:'Fixation sur la thyroïde' },
+  // ISOTOPES THERAPEUTIQUES
+  { id:'y90-t12', cat:'ther', q:'Demi-vie de l\'Yttrium 90 ?', a:'2,668 jours', sub:'≈ 2 j 16 h' },
+  { id:'y90-e', cat:'ther', q:'Énergie et type d\'émission de l\'Yttrium 90 ?', a:'Béta- : 2280 keV (émetteur β- pur)', sub:'Pas d\'émission gamma → difficile à imager' },
+  { id:'y90-use', cat:'ther', q:'Indication de l\'Yttrium 90 ?', a:'RIV Foie (Radioembolisation intra-vasculaire)', sub:'Microsphères' },
+  { id:'sm153-t12', cat:'ther', q:'Demi-vie du Samarium 153 ?', a:'1,95 jours', sub:'≈ 2 jours' },
+  { id:'sm153-e', cat:'ther', q:'Émissions du Samarium 153 ?', a:'Gamma : 103 keV\nBéta- : 634, 703 et 807 keV', sub:'Émetteur mixte β- + γ' },
+  { id:'sm153-use', cat:'ther', q:'Indication du Samarium 153 ?', a:'RIV Prostate', sub:'Traitements osseux palliatifs' },
+  { id:'lu177-t12', cat:'ther', q:'Demi-vie du Lutétium 177 ?', a:'6,647 jours', sub:'≈ 1 semaine' },
+  { id:'lu177-use', cat:'ther', q:'Indication du Lutétium 177 ?', a:'RIV Prostate (PSMA) / Neuroendocrine', sub:'LUTATHERA® — traitement de référence' },
+  { id:'i131-t12', cat:'ther', q:'Demi-vie de l\'Iode 131 ?', a:'8,023 jours', sub:'≈ 8 jours' },
+  { id:'i131-e', cat:'ther', q:'Émissions de l\'Iode 131 ?', a:'Gamma : 363 keV\nBéta- : 606 keV', sub:'Emetteur mixte' },
+  { id:'i131-use', cat:'ther', q:'Indication de l\'Iode 131 ?', a:'RIV Thyroïde (hyperthyroïdie, cancer)', sub:'Curiethérapie métabolique' },
+  // SOURCES CQ
+  { id:'co57-t12', cat:'cq', q:'Demi-vie du Cobalt 57 ?', a:'271,8 jours', sub:'≈ 9 mois → source stable' },
+  { id:'co57-e', cat:'cq', q:'Énergie du Cobalt 57 ?', a:'122 keV (gamma)', sub:'Proche du Tc99m (140 keV) → idéal pour CQ' },
+  { id:'co57-use', cat:'cq', q:'Utilisation du Cobalt 57 ?', a:'CQ de la gamma-caméra — source plane / crayon', sub:'Réalisé quotidiennement par les MERM' },
+  { id:'ge68-t12', cat:'cq', q:'Demi-vie du Germanium 68 ?', a:'288 jours', sub:'≈ 10 mois' },
+  { id:'ge68-e', cat:'cq', q:'Énergie du Germanium 68 ?', a:'Photon 511 keV (annihilation via Ga68)', sub:'Imite le F18' },
+  { id:'ge68-use', cat:'cq', q:'Utilisation du Germanium 68 ?', a:'CQ des TEP', sub:'Source de constance' },
+  { id:'ba133-t12', cat:'cq', q:'Demi-vie du Baryum 133 ?', a:'10,5 ans', sub:'Source très longue durée' },
+  { id:'ba133-e', cat:'cq', q:'Énergies du Baryum 133 ?', a:'31 keV, 81 keV et 356 keV (gamma)', sub:'Spectre multi-énergies' },
+  { id:'ba133-use', cat:'cq', q:'Utilisation du Baryum 133 ?', a:'CQ des activimètres', sub:'Étalonnage multi-gammes' },
+  { id:'cs137-t12', cat:'cq', q:'Demi-vie du Césium 137 ?', a:'30,05 ans', sub:'Source quasi-permanente' },
+  { id:'cs137-e', cat:'cq', q:'Émissions du Césium 137 ?', a:'Gamma : 662 keV\nBéta- : 512 keV', sub:'Émetteur mixte' },
+  { id:'cs137-use', cat:'cq', q:'Utilisation du Césium 137 ?', a:'CQ des activimètres', sub:'Haute énergie → test large gamme' },
+  // PHYSIQUE / CQ
+  { id:'cq-def', cat:'phys', q:'Définition d\'un contrôle de qualité (Art. R5211-5 CSP) ?', a:'Ensemble des opérations destinées à évaluer le maintien des performances revendiquées par le fabricant', sub:'CQI (exploitant) + CQE (OCQE accrédité)' },
+  { id:'cq-int', cat:'phys', q:'Qu\'est-ce qu\'un CQI ?', a:'Contrôle de Qualité Interne — réalisé par l\'exploitant ou sous sa responsabilité', sub:'Quotidien, mensuel, semestriel, annuel' },
+  { id:'cq-ext', cat:'phys', q:'Qu\'est-ce qu\'un CQE ?', a:'Contrôle de Qualité Externe — réalisé par un organisme accrédité (ex : APAVE)', sub:'Annuel (septembre)' },
+  { id:'cq-gc-quo', cat:'phys', q:'CQ quotidien gamma-caméra : qui le fait et avec quoi ?', a:'MERM (avant première injection) avec galette de Cobalt 57', sub:'Uniformité + spectrométrie + absence contamination' },
+  { id:'cq-activ', cat:'phys', q:'Qui réalise le CQI quotidien de l\'activimètre ?', a:'PPH (Préparateur en Pharmacie Hospitalière)', sub:'Enregistré dans les fichiers de suivi' },
+  { id:'cq-tep-quo', cat:'phys', q:'Qui réalise le CQ quotidien du TEP scanner ?', a:'MERM', sub:'Enregistré sur Vénus' },
+  { id:'cq-non-regl', cat:'phys', q:'Quels équipements de MN ne sont PAS soumis à réglementation de CQ ?', a:'TEP + scanners associés, Caméras CZT, Injecteurs automatiques (Posijet, Trasis)', sub:'Mais soumis aux recommandations des sociétés savantes' },
+  { id:'sfpm37', cat:'phys', q:'Quel rapport SFPM concerne les caméras CZT ?', a:'Rapport SFPM n°37', sub:'Recommandations — pas réglementaire' },
+  { id:'sfpm43', cat:'phys', q:'Quel rapport SFPM concerne les TEP ?', a:'Rapport SFPM n°43', sub:'Recommandations — pas réglementaire' },
+];
+
+const QCM_BANK = [
+  { q:"Quelle est la demi-vie du Technétium 99m ?", correct:"6 heures", opts:["30 minutes","6 heures","13 heures","24 heures"], exp:"Le Tc99m a une demi-vie de 6,02h — idéale pour la journée d'examen." },
+  { q:"L'énergie du photon d'annihilation du F18 est :", correct:"511 keV", opts:["140 keV","511 keV","634 keV","1274 keV"], exp:"La réaction d'annihilation e⁺ + e⁻ produit toujours 2 photons de 511 keV à 180°." },
+  { q:"Le Cobalt 57 est utilisé comme source de constance pour :", correct:"La gamma-caméra", opts:["La gamma-caméra","Le TEP scanner","L'activimètre","L'IRM"], exp:"Le Co57 (122 keV, T½=271j) est utilisé pour le CQ quotidien des gamma-caméras — réalisé par les MERM." },
+  { q:"Quelle est l'énergie gamma du Tc99m ?", correct:"140 keV", opts:["80 keV","140 keV","200 keV","511 keV"], exp:"140 keV est l'énergie optimale pour les collimateurs standard des gamma-caméras." },
+  { q:"Le F18 est produit par :", correct:"Un cyclotron via O18 + protons", opts:["Un réacteur nucléaire","Un cyclotron via O18 + protons","Une source de générateur","Un accélérateur linéaire"], exp:"Le F18 est produit par bombardement protonique de l'O18 dans un cyclotron. La demi-vie courte (110 min) impose une proximité géographique." },
+  { q:"L'Iode 131 est utilisé en thérapie pour :", correct:"La thyroïde", opts:["Le foie","La prostate","La thyroïde","Les os"], exp:"L'I131 est fixé par la thyroïde — utilisé pour traiter l'hyperthyroïdie et les cancers thyroïdiens." },
+  { q:"Qui réalise le CQI quotidien de la gamma-caméra ?", correct:"Le MERM", opts:["Le physicien médical","Le PPH","Le MERM","L'APAVE"], exp:"Le MERM réalise le CQ quotidien avant la première injection, avec la galette de Co57." },
+  { q:"La demi-vie du Lutétium 177 est d'environ :", correct:"6,6 jours", opts:["1,9 jours","2,7 jours","6,6 jours","13 jours"], exp:"Lu177 : T½ = 6,647 jours. Adapté aux traitements PSMA (prostate) et neuroendocrines." },
+  { q:"Quelle source de constance est utilisée pour le CQ des TEP ?", correct:"Germanium 68", opts:["Cobalt 57","Germanium 68","Baryum 133","Césium 137"], exp:"Le Ge68 (T½=288j, 511 keV) imite le F18 → source de constance idéale pour les TEP." },
+  { q:"Le Krypton 81m a une demi-vie de :", correct:"13 secondes", opts:["13 minutes","13 secondes","1,3 heures","13 heures"], exp:"13 secondes : très courte → inhalation continue pour scintigraphie de ventilation pulmonaire." },
+  { q:"L'Yttrium 90 est un émetteur :", correct:"Béta- pur", opts:["Béta+ pur","Gamma pur","Béta- pur","Alpha pur"], exp:"L'Y90 est un émetteur β- pur (2280 keV) — pas d'émission γ donc difficile à imager directement." },
+  { q:"Le CQE (contrôle externe) est réalisé :", correct:"Annuellement par un OCQE accrédité", opts:["Quotidiennement par le MERM","Mensuellement par le PPH","Annuellement par un OCQE accrédité","Tous les 3 mois par le constructeur"], exp:"L'organisme APAVE réalise le CQE annuel (en septembre) pour tous les équipements réglementés." },
+  { q:"Quelle est la demi-vie du Baryum 133 ?", correct:"10,5 ans", opts:["271 jours","288 jours","10,5 ans","30 ans"], exp:"Ba133 : T½ = 10,5 ans → source quasi-permanente pour CQ des activimètres." },
+  { q:"Le parcours moyen du positon du F18 dans l'eau est :", correct:"0,6 mm", opts:["0,06 mm","0,6 mm","6 mm","60 mm"], exp:"0,6 mm : courte portée → bonne résolution spatiale en TEP." },
+  { q:"Le TEP scanner est soumis à la réglementation CQ ?", correct:"Non — recommandations sociétés savantes", opts:["Oui — CQ quotidien réglementaire","Non — recommandations sociétés savantes","Oui — mais seulement annuel","Non — aucune recommandation n'existe"], exp:"Le TEP (et scanners associés) n'est PAS soumis à réglementation, mais suit le rapport SFPM n°43." },
+  { q:"Quelle énergie gamma est associée au Baryum 133 ?", correct:"31, 81 et 356 keV", opts:["122 keV uniquement","356 keV uniquement","31, 81 et 356 keV","511 keV"], exp:"Le Ba133 émet un spectre multi-énergies : 31, 81 et 356 keV — utile pour étalonner les activimètres sur plusieurs gammes." },
+  { q:"L'isotope utilisé pour le CQ de l'activimètre en quotidien est manipulé par :", correct:"Le PPH", opts:["Le MERM","Le PPH","Le physicien médical","L'infirmière"], exp:"Le PPH réalise le CQI quotidien de l'activimètre, enregistré dans les fichiers de suivi." },
+  { q:"L'énergie β+ du Fluor 18 vaut :", correct:"634 keV", opts:["511 keV","634 keV","1274 keV","2280 keV"], exp:"L'énergie du positon émis par le F18 est de 634 keV. Le photon d'annihilation est de 511 keV." },
+];
+
+const VF_BANK = [
+  { stmt:"Le Technétium 99m émet des photons gamma à 511 keV.", ans:false, fb:"FAUX — Le Tc99m émet à 140 keV. Ce sont les émetteurs β+ (comme le F18) qui produisent des photons de 511 keV par annihilation." },
+  { stmt:"Le F18 est produit par un réacteur nucléaire.", ans:false, fb:"FAUX — Le F18 est produit par un cyclotron, par bombardement protonique de l'O18. Sa courte demi-vie (110 min) impose une proximité avec le centre de production." },
+  { stmt:"Le CQ quotidien de la gamma-caméra est réalisé par le MERM avec une galette de Cobalt 57.", ans:true, fb:"VRAI — Le MERM réalise ce contrôle avant la première injection du matin. Il vérifie l'uniformité, la spectrométrie et l'absence de contamination." },
+  { stmt:"L'Yttrium 90 est un émetteur gamma pur.", ans:false, fb:"FAUX — L'Y90 est un émetteur β- pur (2280 keV). L'absence d'émission γ rend l'imagerie directe difficile." },
+  { stmt:"Le TEP scanner est soumis à la réglementation de contrôle qualité obligatoire.", ans:false, fb:"FAUX — Le TEP n'est PAS soumis à réglementation, mais les sociétés savantes (rapport SFPM n°43) ont établi des recommandations." },
+  { stmt:"Le Germanium 68 a une énergie de photon de 511 keV.", ans:true, fb:"VRAI — Le Ge68 se désintègre en Ga68, émetteur β+, qui produit par annihilation des photons de 511 keV. Il est utilisé comme source de constance pour les TEP." },
+  { stmt:"La demi-vie de l'Iode 131 est supérieure à celle du Lutétium 177.", ans:true, fb:"VRAI — I131 : 8,02 j > Lu177 : 6,65 j. Les deux sont des émetteurs β- utilisés en thérapie." },
+  { stmt:"Le Cobalt 57 est utilisé pour le contrôle qualité des activimètres.", ans:false, fb:"FAUX — Le Co57 est utilisé pour le CQ des gamma-caméras. Pour les activimètres, on utilise le Ba133 et le Cs137." },
+  { stmt:"Deux photons d'annihilation sont émis exactement à 180° l'un de l'autre.", ans:true, fb:"VRAI — La conservation de la quantité de mouvement impose que les deux photons de 511 keV soient émis en coïncidence à 180°. C'est le principe de base du TEP." },
+  { stmt:"Le Krypton 81m a une demi-vie de 13 minutes.", ans:false, fb:"FAUX — La demi-vie du Kr81m est de 13 SECONDES (et non minutes). Cette demi-vie extrêmement courte nécessite une administration par inhalation continue." },
+  { stmt:"Le CQE (contrôle externe) est réalisé tous les 3 mois.", ans:false, fb:"FAUX — Le CQE est annuel (réalisé en septembre par un organisme accrédité comme l'APAVE)." },
+  { stmt:"L'Iode 123 est utilisé pour la scintigraphie thyroïdienne diagnostique.", ans:true, fb:"VRAI — L'I123 (T½=13,2h, 159 keV) est l'isotope de référence pour la scintigraphie thyroïdienne diagnostique, à ne pas confondre avec l'I131 utilisé en thérapie." },
+  { stmt:"Le Samarium 153 est un émetteur β- pur.", ans:false, fb:"FAUX — Le Sm153 est un émetteur MIXTE : béta- (634, 703, 807 keV) ET gamma (103 keV). L'émission gamma permet une imagerie post-traitement." },
+  { stmt:"Le Baryum 133 a une demi-vie d'environ 10,5 ans.", ans:true, fb:"VRAI — T½(Ba133) = 10,5 ans → source quasi-permanente, idéale pour l'étalonnage de long terme des activimètres." },
+  { stmt:"Le rapport SFPM n°37 concerne les recommandations pour les TEP.", ans:false, fb:"FAUX — Le rapport SFPM n°37 concerne les caméras CZT. Le rapport SFPM n°43 concerne les TEP." },
+];
+
+const CALC_EXOS = [
+  { iso:"F18", t12_min:110, a0:300, t0:"10h00", dt_h:2, dt_min:120, t1:"12h00", ans:75, unit:"MBq",
+    enonce:"On injecte à 10h00 300 MBq de F18. Quelle activité reste-t-il à 12h00 ?",
+    step:"Δt = 2h = 120 min | n = 120/110 ≈ 1,09 périodes | A = 300 × (0,5)^(120/110) = 300 × 0,467 ≈ 140 MBq" },
+  { iso:"Tc99m", t12_min:362, a0:800, t0:"10h00", dt_h:6, dt_min:360, t1:"16h00", ans:401, unit:"MBq",
+    enonce:"On injecte à 10h00 800 MBq de Tc99m. Quelle activité reste-t-il à 16h00 ?",
+    step:"Δt = 6h = 360 min = 1 période (T½≈362 min) | A = 800 × (0,5)^1 = 400 MBq" },
+  { iso:"F18", t12_min:110, a0:500, t0:"08h00", dt_h:1, dt_min:55, t1:"09h05", ans:250, unit:"MBq",
+    enonce:"Activité de F18 à 08h00 : 500 MBq. Quelle activité à 09h05 (après 1h05 = 65 min) ?",
+    step:"Δt = 65 min | n = 65/110 = 0,59 | A = 500 × (0,5)^0.59 = 500 × 0,664 ≈ 332 MBq" },
+  { iso:"Tc99m", t12_min:362, a0:1200, t0:"08h00", dt_h:12, dt_min:720, t1:"20h00", ans:300, unit:"MBq",
+    enonce:"1200 MBq de Tc99m à 08h00. Quelle activité reste-t-il à 20h00 (12h plus tard) ?",
+    step:"Δt = 12h = 720 min | n = 720/362 ≈ 2 périodes | A = 1200 × (0,5)^2 = 1200 × 0,25 = 300 MBq" },
+  { iso:"I131", t12_min:11553, a0:4000, t0:"J0", dt_h:192, dt_min:11520, t1:"J8", ans:2000, unit:"MBq",
+    enonce:"4000 MBq d'Iode 131 administrés. Quelle activité reste-t-il 8 jours plus tard ?",
+    step:"T½(I131) = 8,02 j ≈ 8 j | Δt = 8j ≈ 1 période | A = 4000 × 0,5 = 2000 MBq" },
+  { iso:"Lu177", t12_min:9572, a0:7400, t0:"J0", dt_h:159, dt_min:9540, t1:"J6.6", ans:3700, unit:"MBq",
+    enonce:"7400 MBq de Lu177 à J0. Quelle activité reste-t-il après 6,6 jours ?",
+    step:"T½(Lu177) = 6,65 j | Δt ≈ T½ ≈ 1 période | A = 7400 × 0,5 = 3700 MBq" },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  mastery: {}, // id -> true/false
+  qcm_score: { ok:0, total:0 },
+  vf_score: { ok:0, total:0 },
+  calc_score: { ok:0, total:0 },
+};
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('mn_phys_state');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('mn_phys_state', JSON.stringify(state)); } catch(e) {}
+  updateGlobalBar();
+}
+
+function resetAll() {
+  if (!confirm('Réinitialiser toutes les statistiques ?')) return;
+  state = { mastery:{}, qcm_score:{ok:0,total:0}, vf_score:{ok:0,total:0}, calc_score:{ok:0,total:0} };
+  saveState();
+  location.reload();
+}
+
+function updateGlobalBar() {
+  const total = FLASHCARDS.length;
+  const ok = Object.values(state.mastery).filter(v=>v===true).length;
+  const nok = Object.values(state.mastery).filter(v=>v===false).length;
+  const pct = Math.round(ok/total*100);
+  document.getElementById('global-ok').textContent = ok;
+  document.getElementById('global-nok').textContent = nok;
+  document.getElementById('global-bar').style.width = pct + '%';
+  document.getElementById('global-pct').textContent = pct + '%';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'stats') renderStats();
+}
+
+// ============================================================
+// FLASHCARDS
+// ============================================================
+let currentFilter = 'all';
+let filteredCards = [];
+let fcIndex = 0;
+
+function getFilteredCards(filter) {
+  const todo = FLASHCARDS.filter(c => state.mastery[c.id] === false);
+  if (filter === 'all') return [...FLASHCARDS];
+  if (filter === 'todo') return todo.length ? todo : FLASHCARDS;
+  return FLASHCARDS.filter(c => c.cat === filter);
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.fc-filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  filteredCards = getFilteredCards(f);
+  fcIndex = 0;
+  renderCard();
+}
+
+function renderCard() {
+  if (!filteredCards.length) return;
+  const c = filteredCards[fcIndex];
+  document.getElementById('fc-cat').textContent = catLabel(c.cat);
+  document.getElementById('fc-q').textContent = c.q;
+  document.getElementById('fc-a').innerHTML = c.a.replace(/\n/g,'<br>');
+  document.getElementById('fc-sub').textContent = c.sub || '';
+  document.getElementById('fc-progress').textContent = (fcIndex+1) + ' / ' + filteredCards.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+
+  const m = state.mastery[c.id];
+  let ms = '';
+  if (m === true) ms = '✓ Maîtrisé';
+  else if (m === false) ms = '✗ À revoir';
+  document.getElementById('fc-mastery-status').textContent = ms;
+}
+
+function catLabel(cat) {
+  const labels = { diag:'🔵 Diagnostique', ther:'🟠 Thérapeutique', cq:'🟣 Sources CQ', phys:'⚙️ Physique / CQ' };
+  return labels[cat] || cat;
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function prevCard() {
+  fcIndex = (fcIndex - 1 + filteredCards.length) % filteredCards.length;
+  renderCard();
+}
+
+function nextCard() {
+  fcIndex = (fcIndex + 1) % filteredCards.length;
+  renderCard();
+}
+
+function shuffleCards() {
+  filteredCards = filteredCards.sort(() => Math.random() - 0.5);
+  fcIndex = 0;
+  renderCard();
+}
+
+function markMastery(val) {
+  const c = filteredCards[fcIndex];
+  state.mastery[c.id] = val;
+  saveState();
+  document.getElementById('fc-mastery-status').textContent = val ? '✓ Maîtrisé' : '✗ À revoir';
+  setTimeout(nextCard, 300);
+}
+
+// ============================================================
+// TABLE FILL
+// ============================================================
+function normalize(s) {
+  return s.toLowerCase()
+    .replace(/[àâä]/g,'a').replace(/[éèêë]/g,'e').replace(/[îï]/g,'i')
+    .replace(/[ôö]/g,'o').replace(/[ùûü]/g,'u').replace(/ç/g,'c')
+    .replace(/\s+/g,' ').trim();
+}
+
+function checkTable(id) {
+  const tbl = document.getElementById(id);
+  tbl.querySelectorAll('.fill-input').forEach(inp => {
+    if (inp.classList.contains('revealed')) return;
+    const val = normalize(inp.value);
+    const ans = normalize(inp.dataset.answer);
+    // Accept partial match for long answers
+    const correct = val.length > 2 && (ans.includes(val) || val.includes(ans) || ans === val ||
+      levenshtein(val, ans) <= 2);
+    inp.classList.remove('correct','wrong');
+    inp.classList.add(correct ? 'correct' : 'wrong');
+  });
+}
+
+function revealTable(id) {
+  const tbl = document.getElementById(id);
+  tbl.querySelectorAll('.fill-input').forEach(inp => {
+    inp.value = inp.dataset.answer;
+    inp.classList.remove('correct','wrong');
+    inp.classList.add('revealed');
+  });
+}
+
+function resetTable(id) {
+  const tbl = document.getElementById(id);
+  tbl.querySelectorAll('.fill-input').forEach(inp => {
+    inp.value = '';
+    inp.classList.remove('correct','wrong','revealed');
+  });
+}
+
+function levenshtein(a, b) {
+  const m=a.length, n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i||j));
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) {
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  }
+  return dp[m][n];
+}
+
+// ============================================================
+// QCM
+// ============================================================
+let qcmSession = [];
+
+function newQCMSession() {
+  const shuffled = [...QCM_BANK].sort(() => Math.random()-0.5).slice(0,10);
+  qcmSession = shuffled;
+  state.qcm_score = {ok:0, total:0};
+  renderQCM();
+}
+
+function renderQCM() {
+  const container = document.getElementById('qcm-container');
+  container.innerHTML = '';
+  document.getElementById('qcm-total').textContent = qcmSession.length;
+  document.getElementById('qcm-ok').textContent = 0;
+
+  qcmSession.forEach((q, qi) => {
+    const opts = [...q.opts].sort(() => Math.random()-0.5);
+    const letters = ['A','B','C','D','E'];
+    const card = document.createElement('div');
+    card.className = 'qcm-card';
+    card.id = `qcm-${qi}`;
+    card.innerHTML = `
+      <div class="qcm-num">Question ${qi+1} / ${qcmSession.length}</div>
+      <div class="qcm-question">${q.q}</div>
+      <div class="qcm-options" id="qcm-opts-${qi}">
+        ${opts.map((o,i) => `
+          <div class="qcm-option" onclick="selectQCM(${qi},'${o.replace(/'/g,"\\'")}',this)">
+            <span class="qcm-option-letter">${letters[i]}</span>${o}
+          </div>
+        `).join('')}
+      </div>
+      <div class="qcm-explanation" id="qcm-exp-${qi}">${q.exp}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectQCM(qi, chosen, el) {
+  const q = qcmSession[qi];
+  const optsDiv = document.getElementById(`qcm-opts-${qi}`);
+  if (optsDiv.querySelector('.locked')) return; // already answered
+
+  optsDiv.querySelectorAll('.qcm-option').forEach(opt => {
+    opt.classList.add('locked');
+    const text = opt.textContent.trim().slice(1).trim();
+    if (text === q.correct) opt.classList.add('correct');
+    else if (opt === el && text !== q.correct) opt.classList.add('wrong');
+  });
+
+  const expDiv = document.getElementById(`qcm-exp-${qi}`);
+  expDiv.classList.add('show');
+
+  const isCorrect = chosen === q.correct;
+  if (!isCorrect) expDiv.classList.add('wrong-exp');
+
+  if (isCorrect) {
+    state.qcm_score.ok++;
+    state.qcm_score.total++;
+  } else {
+    state.qcm_score.total++;
+  }
+  document.getElementById('qcm-ok').textContent = state.qcm_score.ok;
+  document.getElementById('qcm-total').textContent = state.qcm_score.total;
+  saveState();
+}
+
+// ============================================================
+// VRAI / FAUX
+// ============================================================
+let vfSession = [];
+
+function newVFSession() {
+  vfSession = [...VF_BANK].sort(() => Math.random()-0.5);
+  state.vf_score = {ok:0, total:0};
+  renderVF();
+}
+
+function renderVF() {
+  const container = document.getElementById('vf-container');
+  container.innerHTML = '';
+  document.getElementById('vf-total').textContent = vfSession.length;
+  document.getElementById('vf-ok').textContent = 0;
+
+  vfSession.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'vf-card';
+    card.innerHTML = `
+      <div class="qcm-num">Affirmation ${i+1} / ${vfSession.length}</div>
+      <div class="vf-statement">${item.stmt}</div>
+      <div class="vf-buttons">
+        <button class="vf-btn vrai" onclick="answerVF(${i}, true, this)">✓ VRAI</button>
+        <button class="vf-btn faux" onclick="answerVF(${i}, false, this)">✗ FAUX</button>
+      </div>
+      <div class="vf-feedback ${item.ans ? 'ok':'ko'}" id="vf-fb-${i}">${item.fb}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function answerVF(i, ans, el) {
+  const item = vfSession[i];
+  const card = el.closest('.vf-card');
+  if (card.querySelector('.locked')) return;
+
+  card.querySelectorAll('.vf-btn').forEach(b => b.classList.add('locked'));
+  const isCorrect = (ans === item.ans);
+  el.classList.add(isCorrect ? 'correct-answer' : 'wrong-answer');
+
+  // Highlight correct button if wrong
+  if (!isCorrect) {
+    const correctBtn = card.querySelector(item.ans ? '.vrai' : '.faux');
+    correctBtn.classList.add('correct-answer');
+  }
+
+  document.getElementById(`vf-fb-${i}`).classList.add('show');
+
+  if (isCorrect) state.vf_score.ok++;
+  state.vf_score.total++;
+  document.getElementById('vf-ok').textContent = state.vf_score.ok;
+  document.getElementById('vf-total').textContent = state.vf_score.total;
+  saveState();
+}
+
+// ============================================================
+// CALCULS
+// ============================================================
+let calcCurrent = null;
+
+function genCalcExo() {
+  const exo = CALC_EXOS[Math.floor(Math.random() * CALC_EXOS.length)];
+  calcCurrent = exo;
+  renderCalcExo(exo);
+}
+
+function renderAllCalcExos() {
+  const container = document.getElementById('calc-container');
+  container.innerHTML = '';
+  CALC_EXOS.forEach((exo, i) => {
+    const card = document.createElement('div');
+    card.className = 'calc-card';
+    card.innerHTML = `
+      <div class="qcm-num">Exercice ${i+1} — ${exo.iso}</div>
+      <div class="calc-enonce">${exo.enonce}</div>
+      <div class="calc-input-row">
+        <input type="number" class="calc-input" id="calc-inp-${i}" placeholder="Votre réponse…">
+        <span class="calc-unit">${exo.unit}</span>
+        <button class="btn" onclick="checkCalc(${i}, ${exo.ans}, ${exo.t12_min}, ${exo.a0}, ${exo.dt_min})">Vérifier</button>
+      </div>
+      <div class="calc-result" id="calc-res-${i}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function checkCalc(i, ans, t12, a0, dt) {
+  const inp = document.getElementById(`calc-inp-${i}`);
+  const res = document.getElementById(`calc-res-${i}`);
+  const val = parseFloat(inp.value);
+  const trueAns = a0 * Math.pow(0.5, dt/t12);
+  const tolerance = trueAns * 0.1; // 10% tolerance
+  const isOk = !isNaN(val) && Math.abs(val - trueAns) <= tolerance;
+
+  res.classList.add('show');
+  res.classList.remove('correct','wrong');
+  res.classList.add(isOk ? 'correct' : 'wrong');
+
+  const exo = CALC_EXOS.find((_,j)=>j===i);
+  res.innerHTML = `
+    ${isOk ? '✓ Correct !' : '✗ Incorrect.'}<br>
+    Réponse exacte : <strong>${trueAns.toFixed(0)} ${CALC_EXOS[i].unit}</strong><br>
+    <br>Détail : ${exo.step}
+  `;
+
+  if (!document.getElementById(`calc-inp-${i}`).dataset.counted) {
+    document.getElementById(`calc-inp-${i}`).dataset.counted = '1';
+    if (isOk) state.calc_score.ok++;
+    state.calc_score.total++;
+    saveState();
+  }
+}
+
+function renderCalcExo(exo) {
+  const container = document.getElementById('calc-container');
+  const i = CALC_EXOS.indexOf(exo);
+  container.innerHTML = `
+    <div class="calc-card">
+      <div class="qcm-num">Exercice — ${exo.iso}</div>
+      <div class="calc-enonce">${exo.enonce}</div>
+      <div class="calc-input-row">
+        <input type="number" class="calc-input" id="calc-inp-rand" placeholder="Votre réponse…">
+        <span class="calc-unit">${exo.unit}</span>
+        <button class="btn" onclick="checkCalcRand(${exo.ans}, ${exo.t12_min}, ${exo.a0}, ${exo.dt_min}, '${exo.step.replace(/'/g,"\\'")}', '${exo.unit}')">Vérifier</button>
+      </div>
+      <div class="calc-result" id="calc-res-rand"></div>
+    </div>
+    <hr class="divider">
+    <h3>Tous les exercices de décroissance :</h3>
+  `;
+  CALC_EXOS.forEach((e, i) => {
+    const div = document.createElement('div');
+    div.className = 'calc-card';
+    div.innerHTML = `
+      <div class="qcm-num">Exercice ${i+1} — ${e.iso}</div>
+      <div class="calc-enonce">${e.enonce}</div>
+      <div class="calc-input-row">
+        <input type="number" class="calc-input" id="calc-inp-${i}" placeholder="Votre réponse…">
+        <span class="calc-unit">${e.unit}</span>
+        <button class="btn" onclick="checkCalcFixed(${i})">Vérifier</button>
+      </div>
+      <div class="calc-result" id="calc-res-${i}"></div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function checkCalcRand(ans, t12, a0, dt, step, unit) {
+  const inp = document.getElementById('calc-inp-rand');
+  const res = document.getElementById('calc-res-rand');
+  const val = parseFloat(inp.value);
+  const trueAns = a0 * Math.pow(0.5, dt/t12);
+  const tolerance = trueAns * 0.1;
+  const isOk = !isNaN(val) && Math.abs(val - trueAns) <= tolerance;
+  res.classList.add('show');
+  res.classList.remove('correct','wrong');
+  res.classList.add(isOk ? 'correct' : 'wrong');
+  res.innerHTML = `${isOk ? '✓ Correct !' : '✗ Incorrect.'}<br>Réponse exacte : <strong>${trueAns.toFixed(0)} ${unit}</strong><br><br>Détail : ${step}`;
+  if (!inp.dataset.counted) {
+    inp.dataset.counted = '1';
+    if (isOk) state.calc_score.ok++;
+    state.calc_score.total++;
+    saveState();
+  }
+}
+
+function checkCalcFixed(i) {
+  const exo = CALC_EXOS[i];
+  const inp = document.getElementById(`calc-inp-${i}`);
+  const res = document.getElementById(`calc-res-${i}`);
+  const val = parseFloat(inp.value);
+  const trueAns = exo.a0 * Math.pow(0.5, exo.dt_min/exo.t12_min);
+  const tolerance = trueAns * 0.1;
+  const isOk = !isNaN(val) && Math.abs(val - trueAns) <= tolerance;
+  res.classList.add('show');
+  res.classList.remove('correct','wrong');
+  res.classList.add(isOk ? 'correct' : 'wrong');
+  res.innerHTML = `${isOk ? '✓ Correct !' : '✗ Incorrect.'}<br>Réponse exacte : <strong>${trueAns.toFixed(0)} ${exo.unit}</strong><br><br>Détail : ${exo.step}`;
+  if (!inp.dataset.counted) {
+    inp.dataset.counted = '1';
+    if (isOk) state.calc_score.ok++;
+    state.calc_score.total++;
+    saveState();
+  }
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function renderStats() {
+  const total = FLASHCARDS.length;
+  const ok = Object.values(state.mastery).filter(v=>v===true).length;
+  document.getElementById('s-flashcards').textContent = ok + '/' + total;
+  document.getElementById('s-qcm').textContent = state.qcm_score.ok + '/' + state.qcm_score.total;
+  document.getElementById('s-vf').textContent = state.vf_score.ok + '/' + state.vf_score.total;
+  document.getElementById('s-calc').textContent = state.calc_score.ok + '/' + state.calc_score.total;
+
+  const todo = document.getElementById('stats-todo');
+  todo.innerHTML = '';
+  FLASHCARDS.filter(c => state.mastery[c.id] === false).forEach(c => {
+    const chip = document.createElement('span');
+    chip.className = 'chip chip-' + c.cat;
+    chip.textContent = c.id;
+    chip.style.background = 'rgba(239,68,68,0.15)';
+    chip.style.borderColor = 'rgba(239,68,68,0.4)';
+    chip.style.color = '#fca5a5';
+    todo.appendChild(chip);
+  });
+  if (!todo.children.length) todo.innerHTML = '<span style="color:var(--green)">🎉 Aucune flashcard à revoir !</span>';
+
+  const all = document.getElementById('stats-all');
+  all.innerHTML = '';
+  FLASHCARDS.forEach(c => {
+    const m = state.mastery[c.id];
+    const chip = document.createElement('span');
+    chip.className = 'chip chip-' + c.cat;
+    chip.title = c.q;
+    chip.textContent = c.id;
+    if (m === true) { chip.style.background='rgba(16,185,129,0.15)'; chip.style.color='#a7f3d0'; chip.style.borderColor='rgba(16,185,129,0.3)'; }
+    else if (m === false) { chip.style.background='rgba(239,68,68,0.15)'; chip.style.color='#fca5a5'; chip.style.borderColor='rgba(239,68,68,0.3)'; }
+    all.appendChild(chip);
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+updateGlobalBar();
+filteredCards = [...FLASHCARDS];
+renderCard();
+newQCMSession();
+newVFSession();
+renderCalcExo(CALC_EXOS[0]);
+</script>
+</body>
+</html>
