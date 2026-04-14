@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>UE 1.2.S2 — Révision Santé Publique</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F7F4EF;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: #E2DDD6;
+  --text: #1C1A17;
+  --text-soft: #6B6560;
+  --accent: #3B6E8C;
+  --accent-light: #EAF2F7;
+  --accent2: #7C4F2A;
+  --accent2-light: #F7EEE5;
+  --green: #2D6A4F;
+  --green-light: #E8F5EF;
+  --red: #C0392B;
+  --red-light: #FDECEC;
+  --orange: #D4730A;
+  --orange-light: #FEF3E2;
+  --purple: #5B4B8A;
+  --purple-light: #F0EDFB;
+  --gold: #C4961A;
+  --gold-light: #FEF7E0;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+/* ── PREVENTION CLASSIFY ── */
+.prev-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+.prev-tag {
+  padding:9px 16px; border-radius:9px; border:1.5px solid var(--border);
+  background:var(--surface); font-size:0.84rem; font-weight:500; cursor:pointer;
+  transition:all 0.15s; user-select:none; color:var(--text);
+}
+.prev-tag:hover { border-color:var(--accent); background:var(--accent-light); }
+.prev-tag.selected { border-color:var(--accent); background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(59,110,140,0.25); }
+.prev-tag.placed { opacity:0.35; pointer-events:none; }
+.prev-tag.correct-tag { border-color:var(--green)!important; background:var(--green-light)!important; color:var(--green)!important; }
+.prev-tag.wrong-tag { border-color:var(--red)!important; background:var(--red-light)!important; color:var(--red)!important; text-decoration:line-through; }
+.prev-cols { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+@media(min-width:700px) { .prev-cols { grid-template-columns:repeat(4,1fr); } }
+.prev-col {
+  background:var(--surface); border:2px dashed var(--border); border-radius:var(--radius);
+  min-height:120px; display:flex; flex-direction:column; transition:all 0.15s; cursor:pointer;
+}
+.prev-col-hover, .prev-col.selected-col { border-color:var(--accent)!important; background:var(--accent-light); border-style:solid; }
+.prev-col-head { color:#fff; font-weight:700; font-size:0.78rem; text-align:center; padding:8px 6px; border-radius:10px 10px 0 0; text-transform:uppercase; letter-spacing:0.05em; }
+.prev-col-sub { font-size:0.72rem; color:var(--text-soft); text-align:center; padding:4px 6px 8px; font-style:italic; }
+.prev-col-items { flex:1; padding:6px; display:flex; flex-direction:column; gap:5px; }
+.prev-placed-item {
+  font-size:0.78rem; padding:6px 10px; background:var(--surface2); border-radius:7px;
+  border:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:4px;
+}
+.prev-placed-item .prev-remove { cursor:pointer; color:var(--text-soft); font-size:0.9rem; border:none; background:none; padding:0 2px; }
+.prev-placed-item .prev-remove:hover { color:var(--red); }
+.prev-placed-item.correct-placed { border-color:var(--green); background:var(--green-light); }
+.prev-placed-item.wrong-placed { border-color:var(--red); background:var(--red-light); }
+
+/* ── ANKI ACCORDION ── */
+.anki-acc-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; padding: 18px 20px; border: none; background: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; text-align: left; transition: background 0.15s;
+}
+.anki-acc-header:hover { background: var(--surface2); }
+.anki-chevron {
+  color: var(--text-soft); flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.anki-accordion:not(.open) .anki-chevron { transform: rotate(0deg); }
+.anki-accordion.open .anki-chevron { transform: rotate(180deg); }
+.anki-acc-body {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.anki-accordion.open .anki-acc-body { max-height: 600px; }
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* HEADER */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+}
+.header-title { font-family:'DM Serif Display',serif; font-size:1.15rem; color:var(--accent); }
+.header-sub { font-size:0.72rem; color:var(--text-soft); }
+.score-badge {
+  background: var(--gold-light);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab-btn {
+  padding: 11px 13px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--accent); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* MAIN */
+main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+.section { display: none; }
+.section.active { display: block; }
+
+/* SECTION HEADINGS */
+.section-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.section-heading h2 { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: var(--text); }
+.section-heading p { font-size: 0.85rem; color: var(--text-soft); margin-top: 2px; }
+
+/* BADGES */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.badge-blue { background: var(--accent-light); color: var(--accent); }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-orange { background: var(--orange-light); color: var(--orange); }
+.badge-purple { background: var(--purple-light); color: var(--purple); }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-brown { background: var(--accent2-light); color: var(--accent2); }
+.chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.chip-blue { background: var(--accent-light); color: var(--accent); }
+.chip-orange { background: var(--orange-light); color: var(--orange); }
+.chip-green { background: var(--green-light); color: var(--green); }
+.chip-purple { background: var(--purple-light); color: var(--purple); }
+
+/* FILTER TAGS */
+.filter-wrap { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.filter-tag { padding: 6px 16px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--surface); font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.15s; color: var(--text-soft); }
+.filter-tag.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.filter-tag:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+/* ── FLASHCARDS ── */
+.fc-scene {
+  width: 100%; max-width: 560px; margin: 0 auto;
+  height: 240px; perspective: 1200px; cursor: pointer;
+}
+.fc-card-inner {
+  width: 100%; height: 100%;
+  position: relative; transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+  border-radius: var(--radius);
+}
+.fc-scene.flipped .fc-card-inner { transform: rotateY(180deg); }
+.fc-front, .fc-back {
+  position: absolute; inset: 0; border-radius: var(--radius);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 28px; backface-visibility: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.fc-front { background: var(--accent); color: white; }
+.fc-back { background: var(--surface); border: 2px solid var(--border); transform: rotateY(180deg); overflow-y: auto; }
+.fc-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 12px; }
+.fc-q { font-family: 'DM Serif Display', serif; font-size: 1.15rem; text-align: center; line-height: 1.4; }
+.fc-a { font-size: 0.88rem; line-height: 1.7; text-align: left; width: 100%; }
+.fc-a strong { color: var(--accent); }
+.fc-actions { display: flex; gap: 10px; margin-top: 16px; max-width: 560px; margin-left: auto; margin-right: auto; }
+.fc-btn { flex: 1; padding: 11px; border: none; border-radius: 9px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.88rem; transition: all 0.15s; min-height: 44px; }
+.fc-btn-know { background: var(--green); color: white; }
+.fc-btn-unknown { background: var(--red); color: white; }
+.fc-btn-skip { background: var(--surface2); color: var(--text-soft); border: 1px solid var(--border); }
+.fc-meta { text-align: center; font-size: 0.78rem; color: var(--text-soft); margin-top: 8px; height: 20px; }
+.progress-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 12px 0 4px; }
+.progress-bar { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.4s; }
+.progress-label { font-size: 0.78rem; color: var(--text-soft); text-align: center; margin-bottom: 16px; }
+.scorecard { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+.scorecard-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
+.scorecard-num { font-family: 'DM Serif Display', serif; font-size: 1.8rem; }
+.scorecard-label { font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }
+.nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.nav-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500; transition: all 0.15s; min-height: 40px; }
+.nav-btn:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+.nav-btn:disabled { opacity: 0.35; cursor: default; }
+.hint-flip { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.78rem; opacity: 0.7; margin-top: 12px; }
+.unknown-pile { background: var(--red-light); border: 1px solid var(--red); border-radius: var(--radius); padding: 18px; margin-top: 24px; }
+.unknown-pile h3 { font-size: 0.95rem; color: var(--red); margin-bottom: 10px; }
+.unknown-list { padding-left: 18px; font-size: 0.84rem; color: var(--text); line-height: 1.8; }
+.btn-retry { margin-top: 12px; padding: 9px 20px; background: var(--red); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; min-height: 40px; }
+
+/* ── QCM ── */
+.qcm-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; box-shadow: var(--shadow); }
+.qcm-q { font-weight: 600; font-size: 0.97rem; margin-bottom: 6px; }
+.qcm-info { font-size: 0.78rem; color: var(--text-soft); margin-bottom: 14px; font-style: italic; }
+.qcm-options { display: grid; gap: 8px; }
+.qcm-option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.15s; background: var(--surface); font-size: 0.88rem; user-select: none; }
+.qcm-option:hover:not(.locked) { border-color: var(--accent); background: var(--accent-light); }
+.qcm-option input { accent-color: var(--accent); margin-top: 2px; flex-shrink: 0; }
+.qcm-option.correct { background: var(--green-light) !important; border-color: var(--green) !important; color: var(--green); }
+.qcm-option.incorrect { background: var(--red-light) !important; border-color: var(--red) !important; color: var(--red); }
+.qcm-option.missed { border-color: var(--green); background: #f0fff4 !important; }
+.qcm-option.locked { cursor: default; }
+.btn-valider { margin-top: 14px; padding: 10px 22px; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.88rem; transition: all 0.15s; min-height: 44px; }
+.btn-valider:hover:not(:disabled) { background: #2d5670; }
+.btn-valider:disabled { opacity: 0.5; cursor: default; }
+.qcm-explication { margin-top: 14px; padding: 14px 16px; background: var(--accent-light); border-radius: 10px; font-size: 0.88rem; color: var(--text); line-height: 1.6; border-left: 3px solid var(--accent); display: none; }
+.qcm-explication.show { display: block; }
+.qcm-explication strong { color: var(--accent); }
+
+/* ── VRAI/FAUX (original) ── */
+.vf-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.vf-q { font-weight: 600; font-size: 0.95rem; margin-bottom: 14px; }
+.vf-buttons { display: flex; gap: 10px; }
+.vf-btn { padding: 10px 22px; border-radius: 8px; border: 1.5px solid var(--border); cursor: pointer; font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.88rem; transition: all 0.15s; background: var(--surface); min-height: 44px; }
+.vf-btn.sel-v { background: var(--green); color: #fff; border-color: var(--green); }
+.vf-btn.sel-f { background: var(--red); color: #fff; border-color: var(--red); }
+.vf-btn.wrong { background: var(--red-light); color: var(--red); border-color: var(--red); }
+.vf-explication { margin-top: 12px; padding: 12px 14px; border-radius: 8px; font-size: 0.87rem; line-height: 1.6; display: none; }
+.vf-explication.show { display: block; }
+.vf-explication.ok { background: var(--green-light); color: var(--green); }
+.vf-explication.ko { background: var(--red-light); color: var(--red); }
+
+/* ── QUESTIONS OUVERTES ── */
+.qo-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 18px; box-shadow: var(--shadow); }
+.qo-q { font-family: 'DM Serif Display', serif; font-size: 1.05rem; margin-bottom: 14px; }
+.qo-textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; line-height: 1.6; resize: vertical; min-height: 90px; background: var(--surface); color: var(--text); transition: border-color 0.15s; }
+.qo-textarea:focus { outline: none; border-color: var(--accent); }
+.btn-show-reponse { margin-top: 10px; padding: 9px 20px; background: var(--accent2-light); color: var(--accent2); border: 1px solid var(--accent2); border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; min-height: 40px; }
+.qo-reponse { margin-top: 14px; padding: 16px; background: var(--orange-light); border-left: 3px solid var(--orange); border-radius: 0 8px 8px 0; font-size: 0.88rem; line-height: 1.7; display: none; }
+.qo-reponse.show { display: block; }
+.qo-reponse .tag { font-size: 0.72rem; font-weight: 700; color: var(--orange); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+
+/* ── DEVINE LE MOT ── */
+.devine-wrap { max-width: 640px; margin: 0 auto; }
+.devine-def-box {
+  background: linear-gradient(135deg, var(--accent) 0%, #2a5070 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 28px 26px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+.devine-def-box::before {
+  content: '?';
+  position: absolute;
+  right: 16px;
+  top: -10px;
+  font-size: 8rem;
+  opacity: 0.08;
+  font-family: 'DM Serif Display', serif;
+  line-height: 1;
+  pointer-events: none;
+}
+.devine-source { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.75; margin-bottom: 10px; }
+.devine-def-text { font-family: 'DM Serif Display', serif; font-size: 1.1rem; line-height: 1.55; }
+.devine-words-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); margin-bottom: 14px; }
+.devine-words-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.devine-word-btn {
+  padding: 10px 18px;
+  border: 2px solid var(--border);
+  border-radius: 99px;
+  background: var(--surface);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  transition: all 0.18s;
+  min-height: 42px;
+}
+.devine-word-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59,110,140,0.18);
+}
+.devine-word-btn.correct-choice {
+  border-color: var(--green) !important;
+  background: var(--green) !important;
+  color: white !important;
+  transform: scale(1.05);
+}
+.devine-word-btn.wrong-choice {
+  border-color: var(--red) !important;
+  background: var(--red-light) !important;
+  color: var(--red) !important;
+  animation: devine-shake 0.35s ease;
+}
+.devine-word-btn.show-correct {
+  border-color: var(--green) !important;
+  background: var(--green-light) !important;
+  color: var(--green) !important;
+  font-weight: 700;
+}
+.devine-word-btn:disabled { cursor: default; }
+@keyframes devine-shake {
+  0%,100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.devine-feedback {
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  display: none;
+  margin-bottom: 14px;
+}
+.devine-feedback.ok { background: var(--green-light); color: var(--green); border-left: 4px solid var(--green); }
+.devine-feedback.ko { background: var(--red-light); color: var(--red); border-left: 4px solid var(--red); }
+.devine-stats {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.devine-progress-text { font-size: 0.82rem; color: var(--text-soft); }
+.devine-cat-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.devine-cat-btn {
+  padding: 5px 14px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-soft);
+}
+.devine-cat-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.devine-score-ring {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--gold-light);
+  border: 1px solid var(--gold);
+  border-radius: 99px;
+  padding: 4px 14px;
+}
+.devine-end {
+  text-align: center;
+  padding: 30px 20px;
+  background: var(--surface);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+.devine-end-emoji { font-size: 3.5rem; margin-bottom: 12px; }
+.devine-end-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin-bottom: 8px; }
+.devine-end-score { font-size: 2.2rem; font-weight: 700; color: var(--accent); margin: 12px 0 20px; }
+
+
+.def-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 600px) { .def-grid { grid-template-columns: 1fr; } }
+.def-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
+.def-term { font-weight: 700; font-size: 0.92rem; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.def-source { font-size: 0.72rem; background: var(--accent-light); color: var(--accent); padding: 2px 8px; border-radius: 99px; }
+.def-body { font-size: 0.86rem; color: var(--text); line-height: 1.6; }
+
+/* ═══ MINI-JEUX ═══ */
+
+/* VRAI/FAUX gamifié */
+.tf-question { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; transition: all 0.3s; }
+.tf-question.correct { border-color: var(--green); background: var(--green-light); }
+.tf-question.incorrect { border-color: var(--red); background: var(--red-light); }
+.tf-text { font-size: 0.92rem; margin-bottom: 12px; line-height: 1.5; font-weight: 500; }
+.tf-btns { display: flex; gap: 8px; }
+.tf-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; transition: all 0.15s; min-height: 44px; }
+.tf-btn:active { transform: scale(0.97); }
+.tf-btn.vrai { border-color: var(--green); color: var(--green); }
+.tf-btn.faux { border-color: var(--red); color: var(--red); }
+.tf-btn.selected-correct { background: var(--green); color: white; border-color: var(--green); }
+.tf-btn.selected-wrong { background: var(--red); color: white; border-color: var(--red); }
+.tf-explication { display: none; margin-top: 10px; padding: 10px 12px; background: rgba(0,0,0,0.04); border-radius: 8px; font-size: 0.82rem; color: var(--text-soft); line-height: 1.5; }
+.tf-explication.show { display: block; }
+
+/* ORDER */
+.order-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.order-desc { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 14px; }
+.order-list { list-style: none; }
+.order-item { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 2px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; cursor: grab; user-select: none; touch-action: none; transition: all 0.2s; }
+.order-item:active { cursor: grabbing; }
+.order-item.dragging { opacity: 0.4; border-style: dashed; }
+.order-item.drag-over { border-color: var(--accent); background: var(--accent-light); transform: scale(1.01); }
+.order-item.correct-pos { border-color: var(--green); background: var(--green-light); }
+.order-item.wrong-pos { border-color: var(--red); background: var(--red-light); }
+.order-handle { color: var(--text-soft); font-size: 1.2rem; flex-shrink: 0; }
+.order-num { width: 26px; height: 26px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; flex-shrink: 0; }
+.order-text { font-size: 0.88rem; flex: 1; }
+.order-arrows { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+.arrow-btn { width: 30px; height: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: var(--text-soft); }
+.arrow-btn:active { background: var(--accent); color: white; transform: scale(0.95); }
+.order-check-btn { margin-top: 12px; width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 44px; }
+.order-shuffle-btn { margin-top: 8px; width: 100%; padding: 10px; background: var(--surface); color: var(--text-soft); border: 1px solid var(--border); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; cursor: pointer; min-height: 44px; }
+.order-result { display: none; margin-top: 10px; padding: 12px; border-radius: 8px; text-align: center; font-weight: 600; }
+.order-result.show { display: block; }
+.order-result.perfect { background: var(--green-light); color: var(--green); }
+.order-result.partial { background: var(--orange-light); color: var(--orange); }
+.order-result.bad { background: var(--red-light); color: var(--red); }
+
+/* FLASH QUIZ */
+.timer-bar-wrap { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+.timer-bar { height: 100%; background: var(--green); border-radius: 4px; transition: width 0.1s linear, background 0.3s; }
+.timer-bar.warning { background: var(--orange); }
+.timer-bar.danger { background: var(--red); }
+.flash-question { font-size: 1rem; font-weight: 500; text-align: center; margin-bottom: 20px; min-height: 60px; display: flex; align-items: center; justify-content: center; line-height: 1.4; padding: 0 8px; }
+.flash-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.flash-opt { padding: 14px 10px; border: 2px solid var(--border); border-radius: 10px; background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; text-align: center; transition: all 0.15s; min-height: 52px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
+.flash-opt:active { transform: scale(0.97); }
+.flash-opt.correct-ans { background: var(--green); border-color: var(--green); color: white; }
+.flash-opt.wrong-ans { background: var(--red); border-color: var(--red); color: white; }
+.flash-opt.missed { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.flash-opt:disabled { cursor: default; }
+.flash-counter { font-size: 1.5rem; font-weight: 700; color: var(--orange); font-variant-numeric: tabular-nums; }
+
+/* LIVES */
+.lives-display { display: flex; gap: 6px; align-items: center; font-size: 1.4rem; }
+.life { transition: all 0.3s; }
+.life.lost { filter: grayscale(1); opacity: 0.3; transform: scale(0.8); }
+.lives-selector { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; justify-content: center; }
+.life-sel-btn { padding: 8px 16px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; transition: all 0.15s; min-height: 40px; }
+.life-sel-btn.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); font-weight: 600; }
+
+/* GAME OVER */
+.game-over-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: flex; align-items: center; justify-content: center; z-index: 500; backdrop-filter: blur(4px); }
+.game-over-box { background: var(--surface); border-radius: 20px; padding: 32px 24px; text-align: center; max-width: 320px; width: 90%; animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes popIn { from { opacity:0; transform: scale(0.7); } to { opacity:1; transform: scale(1); } }
+.game-over-emoji { font-size: 4rem; margin-bottom: 12px; }
+.game-over-title { font-family: 'DM Serif Display', serif; font-size: 1.8rem; margin-bottom: 8px; }
+.game-over-sub { color: var(--text-soft); font-size: 0.9rem; margin-bottom: 20px; }
+.game-over-score { font-size: 1.2rem; font-weight: 700; color: var(--accent); margin-bottom: 20px; }
+.restart-btn { padding: 12px 28px; background: var(--accent); color: white; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; min-height: 48px; }
+
+/* MEMORY */
+.memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+.mem-card { aspect-ratio: 1; border-radius: 10px; cursor: pointer; perspective: 600px; min-height: 70px; }
+.mem-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); border-radius: 10px; }
+.mem-card.flipped .mem-card-inner { transform: rotateY(180deg); }
+.mem-front, .mem-back { position: absolute; inset: 0; border-radius: 10px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; padding: 6px; }
+.mem-front { background: var(--accent); color: white; font-size: 1.6rem; }
+.mem-back { background: var(--surface); border: 2px solid var(--border); font-size: 0.62rem; text-align: center; transform: rotateY(180deg); line-height: 1.3; color: var(--text); font-weight: 500; }
+.mem-card.matched .mem-front { background: var(--green); }
+.mem-card.matched .mem-back { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.mem-card.error-flash { animation: errFlash 0.5s; }
+@keyframes errFlash { 0%,100%{} 50%{ filter: brightness(0.5) sepia(1) hue-rotate(340deg); } }
+
+/* SCRAMBLE */
+.scramble-word { font-size: 2rem; font-weight: 700; letter-spacing: 6px; text-align: center; color: var(--accent); font-family: 'DM Serif Display', serif; margin: 16px 0; word-break: break-all; }
+.scramble-hint { text-align: center; color: var(--text-soft); font-size: 0.82rem; margin-bottom: 12px; }
+.scramble-letters { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; }
+.letter-tile { width: 36px; height: 36px; background: var(--accent); color: white; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.15s; border: none; font-family: 'DM Sans', sans-serif; touch-action: manipulation; }
+.letter-tile:active { transform: scale(0.9); }
+.letter-tile.used { background: var(--border); color: var(--text-soft); cursor: default; }
+.answer-tiles { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; min-height: 44px; background: var(--surface2); border-radius: 8px; padding: 8px; margin-bottom: 12px; }
+.answer-tile { width: 36px; height: 36px; background: var(--surface); border: 2px solid var(--accent); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.15s; color: var(--accent); }
+.answer-tile:active { transform: scale(0.9); }
+.answer-tile.wrong-red { border-color: var(--red); color: var(--red); background: var(--red-light); }
+
+/* ASSOCIATIONS */
+.assoc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.assoc-col-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); margin-bottom: 8px; }
+.assoc-item { padding: 12px 10px; border: 2px solid var(--border); border-radius: 8px; font-size: 0.82rem; cursor: pointer; transition: all 0.2s; text-align: center; min-height: 48px; display: flex; align-items: center; justify-content: center; line-height: 1.3; user-select: none; }
+.assoc-item:active { transform: scale(0.97); }
+.assoc-item.selected { border-color: var(--accent); background: var(--accent-light); color: var(--accent); font-weight: 600; }
+.assoc-item.matched-ok { border-color: var(--green); background: var(--green-light); color: var(--green); cursor: default; }
+.assoc-item.matched-fail { border-color: var(--red); background: var(--red-light); color: var(--red); animation: shake 0.4s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+/* MYSTERY */
+.mystery-box { background: var(--purple-light); border: 2px solid var(--purple); border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 16px; }
+.mystery-def { font-size: 0.92rem; line-height: 1.6; color: var(--text); margin-bottom: 12px; }
+.mystery-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mystery-opt { padding: 12px 8px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.83rem; transition: all 0.15s; min-height: 48px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.3; }
+.mystery-opt:active { transform: scale(0.97); }
+.mystery-opt.correct-ans { background: var(--green); border-color: var(--green); color: white; }
+.mystery-opt.wrong-ans { background: var(--red); border-color: var(--red); color: white; }
+.mystery-opt.missed { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.mystery-opt:disabled { cursor: default; }
+
+/* GAME WRAP */
+.game-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.game-start-screen { text-align: center; padding: 20px 0; }
+.game-start-icon { font-size: 3.5rem; margin-bottom: 12px; }
+.game-start-title { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: 8px; }
+.game-start-desc { color: var(--text-soft); font-size: 0.85rem; margin-bottom: 20px; line-height: 1.5; }
+
+/* BUTTONS */
+.btn { padding: 12px 20px; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: white; }
+.btn-secondary { background: var(--surface); border: 1px solid var(--border); color: var(--text-soft); }
+.btn-full { width: 100%; justify-content: center; }
+.btn-red { background: var(--red); color: white; }
+
+/* FEEDBACK ANIMATION */
+.feedback-anim { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; pointer-events: none; z-index: 1000; animation: feedbackPop 0.8s forwards; }
+@keyframes feedbackPop { 0%{opacity:1;transform:translate(-50%,-50%) scale(0.5)} 50%{opacity:1;transform:translate(-50%,-80%) scale(1.3)} 100%{opacity:0;transform:translate(-50%,-120%) scale(1)} }
+
+/* SECTION TITLE for games */
+.section-title { font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--text); margin-bottom: 6px; }
+.section-sub { color: var(--text-soft); font-size: 0.85rem; margin-bottom: 20px; }
+
+@media (max-width: 480px) {
+  .flash-options { grid-template-columns: 1fr 1fr; }
+  .memory-grid { grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  .mem-card { min-height: 58px; }
+  .mem-back { font-size: 0.52rem; }
+  .assoc-grid { gap: 8px; }
+  .scorecard { grid-template-columns: repeat(3,1fr); gap: 8px; }
+  .scorecard-num { font-size: 1.4rem; }
+  main { padding: 16px 12px 80px; }
+  .scramble-word { font-size: 1.5rem; letter-spacing: 4px; }
+  .fc-scene { height: 210px; }
+  .fc-q { font-size: 1rem; }
+  .def-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-title">🩺 Santé Publique — UE 1.2.S2</div>
+    <div class="header-sub">Révision interactive · MERM 2025-2026</div>
+  </div>
+  <div class="score-badge" id="global-score">⭐ 0 pts</div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="flashcards">🃏 Flashcards</button>
+  <button class="tab-btn" data-tab="qcm">☑️ QCM</button>
+  <button class="tab-btn" data-tab="vraifaux-classic">✔️ Vrai/Faux</button>
+  <button class="tab-btn" data-tab="ouvertes">✍️ Questions</button>
+  <button class="tab-btn" data-tab="definitions">📖 Définitions</button>
+  <button class="tab-btn" data-tab="order">🔀 Ordre</button>
+  <button class="tab-btn" data-tab="flash">⚡ Flash Quiz</button>
+  <button class="tab-btn" data-tab="lives">❤️ Survie</button>
+  <button class="tab-btn" data-tab="memory">🧠 Memory</button>
+  <button class="tab-btn" data-tab="scramble">🔤 Lettres</button>
+  <button class="tab-btn" data-tab="assoc">🔗 Assoc.</button>
+  <button class="tab-btn" data-tab="mystery">🔮 Mystère</button>
+  <button class="tab-btn" data-tab="devine">🎯 Devine le mot</button>
+  <button class="tab-btn" data-tab="anki">📦 Anki</button>
+</nav>
+
+<main>
+
+<!-- ══════════ FLASHCARDS ══════════ -->
+<section id="flashcards" class="section active">
+  <div class="section-heading"><div><h2>Flashcards</h2><p>Cliquez sur la carte pour la retourner · Marquez ce que vous savez ou non</p></div></div>
+  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+    <select id="fc-theme" onchange="filterFlashcards()" style="padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--text)">
+      <option value="all">Tous les thèmes</option>
+      <option value="definitions">Définitions clés</option>
+      <option value="determinants">Déterminants</option>
+      <option value="prevention">Prévention</option>
+      <option value="promotion">Promotion de la santé</option>
+      <option value="probantes">Données probantes</option>
+      <option value="politique">Politique de santé</option>
+      <option value="modeles">Modèles en santé</option>
+    </select>
+    <button onclick="shuffleCards()" style="padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-height:40px">🔀 Mélanger</button>
+    <button onclick="retryUnknown()" id="btn-retry-fc" style="padding:9px 16px;border-radius:8px;border:1px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;display:none;min-height:40px">🔁 Revoir les non sus</button>
+  </div>
+  <div class="scorecard">
+    <div class="scorecard-item"><div class="scorecard-num" id="fc-total" style="color:var(--text)">0</div><div class="scorecard-label">cartes totales</div></div>
+    <div class="scorecard-item"><div class="scorecard-num" id="fc-known" style="color:var(--green)">0</div><div class="scorecard-label">✅ sues</div></div>
+    <div class="scorecard-item"><div class="scorecard-num" id="fc-unknown" style="color:var(--red)">0</div><div class="scorecard-label">❌ non sues</div></div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="fc-progress" style="width:0%"></div></div>
+  <div class="progress-label" id="fc-progress-label">0 / 0</div>
+  <div style="height:16px"></div>
+  <div class="nav-row">
+    <button class="nav-btn" id="fc-prev" onclick="fcNav(-1)">← Préc.</button>
+    <span id="fc-counter" style="font-size:0.85rem;color:var(--text-soft)">1 / 1</span>
+    <button class="nav-btn" id="fc-next" onclick="fcNav(1)">Suiv. →</button>
+  </div>
+  <div class="fc-scene" id="fc-scene" onclick="flipCard()">
+    <div class="fc-card-inner" id="fc-card-inner">
+      <div class="fc-front">
+        <div class="fc-label" id="fc-theme-badge">Définitions</div>
+        <div class="fc-q" id="fc-question">Chargement…</div>
+        <div class="hint-flip">↑ Cliquez pour retourner</div>
+      </div>
+      <div class="fc-back"><div class="fc-a" id="fc-answer">Réponse ici</div></div>
+    </div>
+  </div>
+  <div class="fc-actions" id="fc-actions" style="display:none">
+    <button class="fc-btn fc-btn-know" onclick="markCard(true)">✅ Je sais</button>
+    <button class="fc-btn fc-btn-unknown" onclick="markCard(false)">❌ Pas su</button>
+    <button class="fc-btn fc-btn-skip" onclick="fcNav(1)">→ Suivant</button>
+  </div>
+  <div class="fc-meta" id="fc-meta"></div>
+  <div class="unknown-pile" id="unknown-pile" style="display:none">
+    <h3>❌ Cartes non sues (<span id="unknown-count">0</span>)</h3>
+    <ul class="unknown-list" id="unknown-list"></ul>
+    <button class="btn-retry" onclick="retryUnknown()">🔁 Retravailler ces cartes</button>
+  </div>
+</section>
+
+<!-- ══════════ QCM ══════════ -->
+<section id="qcm" class="section">
+  <div class="section-heading"><div><h2>QCM</h2><p>Plusieurs questions peuvent avoir plusieurs bonnes réponses</p></div></div>
+  <div class="filter-wrap" id="qcm-filters">
+    <button class="filter-tag active" onclick="filterQCM('all',this)">Tout</button>
+    <button class="filter-tag" onclick="filterQCM('definitions',this)">Définitions</button>
+    <button class="filter-tag" onclick="filterQCM('determinants',this)">Déterminants</button>
+    <button class="filter-tag" onclick="filterQCM('prevention',this)">Prévention</button>
+    <button class="filter-tag" onclick="filterQCM('promotion',this)">Promotion</button>
+    <button class="filter-tag" onclick="filterQCM('probantes',this)">Données probantes</button>
+  </div>
+  <div id="qcm-container"></div>
+</section>
+
+<!-- ══════════ VRAI / FAUX CLASSIQUE ══════════ -->
+<section id="vraifaux-classic" class="section">
+  <div class="section-heading"><div><h2>Vrai / Faux</h2><p>Répondez puis découvrez l'explication</p></div></div>
+  <div id="vf-container"></div>
+</section>
+
+<!-- ══════════ QUESTIONS OUVERTES ══════════ -->
+<section id="ouvertes" class="section">
+  <div class="section-heading"><div><h2>Questions ouvertes</h2><p>Rédigez votre réponse puis comparez avec la réponse attendue</p></div></div>
+  <div id="qo-container"></div>
+</section>
+
+<!-- ══════════ DÉFINITIONS ══════════ -->
+<section id="definitions" class="section">
+  <div class="section-heading"><div><h2>Glossaire &amp; Définitions</h2><p>Toutes les définitions clés de l'UE 1.2.S2</p></div></div>
+  <div class="filter-wrap">
+    <button class="filter-tag active" onclick="filterDefs('all',this)">Tout</button>
+    <button class="filter-tag" onclick="filterDefs('santé',this)">Santé</button>
+    <button class="filter-tag" onclick="filterDefs('prévention',this)">Prévention</button>
+    <button class="filter-tag" onclick="filterDefs('promotion',this)">Promotion</button>
+    <button class="filter-tag" onclick="filterDefs('probantes',this)">Données probantes</button>
+    <button class="filter-tag" onclick="filterDefs('épidémio',this)">Épidémiologie</button>
+    <button class="filter-tag" onclick="filterDefs('politique',this)">Politique</button>
+  </div>
+  <div class="def-grid" id="def-grid"></div>
+</section>
+
+<!-- ══════════ ORDRE ══════════ -->
+<section id="order" class="section">
+  <div class="section-title">🔀 Remettre en ordre</div>
+  <div class="section-sub">Glissez-déposez les étapes ou utilisez les flèches ↑↓ pour les réordonner.</div>
+  <div id="order-exercises"></div>
+
+  <!-- CLASSEMENT PRÉVENTION -->
+  <div class="order-container" id="prev-classify">
+    <div class="card-title" style="font-family:'DM Serif Display',serif;font-size:1rem;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+      <span class="chip chip-orange">Prévention</span> Classez chaque élément dans le bon niveau de prévention
+    </div>
+    <div class="order-desc">Cliquez sur une étiquette puis sur la bonne colonne. Ou glissez-déposez.</div>
+
+    <div class="prev-tags" id="prev-tags"></div>
+
+    <div class="prev-cols">
+      <div class="prev-col" data-col="primaire" ondrop="prevDrop(event,'primaire')" ondragover="event.preventDefault();this.classList.add('prev-col-hover')" ondragleave="this.classList.remove('prev-col-hover')">
+        <div class="prev-col-head" style="background:var(--green);">Primaire</div>
+        <div class="prev-col-sub">Éviter l'apparition</div>
+        <div class="prev-col-items" id="prev-col-primaire"></div>
+      </div>
+      <div class="prev-col" data-col="secondaire" ondrop="prevDrop(event,'secondaire')" ondragover="event.preventDefault();this.classList.add('prev-col-hover')" ondragleave="this.classList.remove('prev-col-hover')">
+        <div class="prev-col-head" style="background:var(--accent);">Secondaire</div>
+        <div class="prev-col-sub">Dépistage précoce</div>
+        <div class="prev-col-items" id="prev-col-secondaire"></div>
+      </div>
+      <div class="prev-col" data-col="tertiaire" ondrop="prevDrop(event,'tertiaire')" ondragover="event.preventDefault();this.classList.add('prev-col-hover')" ondragleave="this.classList.remove('prev-col-hover')">
+        <div class="prev-col-head" style="background:var(--orange);">Tertiaire</div>
+        <div class="prev-col-sub">Réadaptation</div>
+        <div class="prev-col-items" id="prev-col-tertiaire"></div>
+      </div>
+      <div class="prev-col" data-col="quaternaire" ondrop="prevDrop(event,'quaternaire')" ondragover="event.preventDefault();this.classList.add('prev-col-hover')" ondragleave="this.classList.remove('prev-col-hover')">
+        <div class="prev-col-head" style="background:var(--purple);">Quaternaire</div>
+        <div class="prev-col-sub">Éviter la surmédicalisation</div>
+        <div class="prev-col-items" id="prev-col-quaternaire"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+      <button class="order-check-btn" onclick="checkPrevClassify()">✔ Vérifier</button>
+      <button class="order-shuffle-btn" onclick="resetPrevClassify()">🔄 Recommencer</button>
+    </div>
+    <div class="order-result" id="prev-classify-result"></div>
+  </div>
+</section>
+
+<!-- ══════════ FLASH QUIZ ══════════ -->
+<section id="flash" class="section">
+  <div class="section-title">⚡ Flash Quiz</div>
+  <div class="section-sub">Répondez avant la fin du temps ! Plus vite = plus de points.</div>
+  <div class="game-wrap">
+    <div id="flash-start" class="game-start-screen">
+      <div class="game-start-icon">⚡</div>
+      <div class="game-start-title">Flash Quiz</div>
+      <div class="game-start-desc">10 questions, 8 secondes par question.<br>Chaque réponse rapide rapporte plus de points !</div>
+      <button class="btn btn-primary btn-full" onclick="startFlash()">▶ Commencer</button>
+    </div>
+    <div id="flash-play" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <span class="chip chip-blue" id="flash-q-num">Q 1/10</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:0.82rem;color:var(--text-soft)">Score</span>
+          <span class="flash-counter" id="flash-score-disp">0</span>
+          <span style="font-size:0.82rem;color:var(--orange)" id="flash-combo"></span>
+        </div>
+      </div>
+      <div class="timer-bar-wrap"><div class="timer-bar" id="flash-timer-bar" style="width:100%"></div></div>
+      <div class="flash-question" id="flash-q-text"></div>
+      <div class="flash-options" id="flash-opts"></div>
+    </div>
+    <div id="flash-end" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:3rem;margin-bottom:12px;" id="flash-end-emoji">🏆</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:8px;">Terminé !</div>
+      <div style="color:var(--text-soft);margin-bottom:16px;" id="flash-end-msg"></div>
+      <div style="font-size:2rem;font-weight:700;color:var(--accent);margin-bottom:20px;" id="flash-end-score"></div>
+      <button class="btn btn-primary btn-full" onclick="startFlash()">🔄 Rejouer</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SURVIE ══════════ -->
+<section id="lives" class="section">
+  <div class="section-title">❤️ Mode Survie</div>
+  <div class="section-sub">Choisissez vos vies. Une mauvaise réponse = une vie perdue. Zéro vie = Game Over !</div>
+  <div class="game-wrap">
+    <div id="lives-start" class="game-start-screen">
+      <div class="game-start-icon">💀</div>
+      <div class="game-start-title">Mode Survie</div>
+      <div class="game-start-desc">Combien de vies voulez-vous ?</div>
+      <div class="lives-selector">
+        <button class="life-sel-btn" data-lives="1" onclick="selectLives(1)">1 ❤️</button>
+        <button class="life-sel-btn active" data-lives="3" onclick="selectLives(3)">3 ❤️</button>
+        <button class="life-sel-btn" data-lives="5" onclick="selectLives(5)">5 ❤️</button>
+      </div>
+      <button class="btn btn-red btn-full" onclick="startLives()">💀 Commencer</button>
+    </div>
+    <div id="lives-play" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <div class="lives-display" id="lives-hearts"></div>
+        <div style="display:flex;gap:12px;font-size:0.85rem;">
+          <span>✅ <strong id="lives-correct">0</strong></span>
+          <span>❌ <strong id="lives-wrong">0</strong></span>
+          <span>Q<strong id="lives-qnum">1</strong></span>
+        </div>
+      </div>
+      <div class="mystery-box" style="border-color:var(--accent);background:var(--accent-light);">
+        <div class="mystery-def" id="lives-q-text" style="font-weight:500;"></div>
+      </div>
+      <div class="mystery-options" id="lives-opts"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ MEMORY ══════════ -->
+<section id="memory" class="section">
+  <div class="section-title">🧠 Jeu de Memory</div>
+  <div class="section-sub">Associez chaque terme à sa définition. Retournez 2 cartes à la fois !</div>
+  <div class="game-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;gap:12px;font-size:0.85rem;">
+        <span>🔄 <strong id="mem-tries">0</strong> essais</span>
+        <span>✅ <strong id="mem-found">0</strong>/<span id="mem-total">8</span></span>
+      </div>
+      <button class="btn btn-secondary" onclick="initMemory()" style="padding:6px 12px;font-size:0.8rem;">🔀 Mélanger</button>
+    </div>
+    <div class="memory-grid" id="mem-grid"></div>
+    <div id="mem-win" style="display:none;text-align:center;padding:10px;background:var(--green-light);border-radius:8px;color:var(--green);font-weight:600;">🎉 Bravo ! Toutes les paires trouvées !</div>
+  </div>
+</section>
+
+<!-- ══════════ SCRAMBLE ══════════ -->
+<section id="scramble" class="section">
+  <div class="section-title">🔤 Mots Mélangés</div>
+  <div class="section-sub">Reconstituez le terme de santé publique à partir des lettres mélangées.</div>
+  <div class="game-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <span class="chip chip-blue" id="scr-counter">1 / 10</span>
+      <span style="font-size:0.85rem;color:var(--text-soft)">⭐ <strong id="scr-score">0</strong> pts</span>
+    </div>
+    <div class="scramble-hint" id="scr-hint"></div>
+    <div class="scramble-word" id="scr-scrambled"></div>
+    <div class="answer-tiles" id="scr-answer"></div>
+    <div class="scramble-letters" id="scr-letters"></div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-secondary" style="flex:1" onclick="scrambleClear()">🗑️ Effacer</button>
+      <button class="btn btn-primary" style="flex:1" onclick="scrambleCheck()">✔ Vérifier</button>
+    </div>
+    <button class="btn btn-secondary btn-full" style="margin-top:8px;font-size:0.82rem;" onclick="scrambleSkip()">⏭ Passer (−2 pts)</button>
+    <div id="scr-feedback" style="display:none;margin-top:10px;padding:10px;border-radius:8px;text-align:center;font-weight:600;"></div>
+  </div>
+</section>
+
+<!-- ══════════ ASSOCIATIONS ══════════ -->
+<section id="assoc" class="section">
+  <div class="section-title">🔗 Associations</div>
+  <div class="section-sub">Associez chaque terme de gauche à sa définition à droite.</div>
+  <div class="game-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <span class="chip chip-purple" id="assoc-round">Série 1/4</span>
+      <span style="font-size:0.85rem;color:var(--text-soft)">⭐ <strong id="assoc-score">0</strong> pts</span>
+    </div>
+    <div class="assoc-grid">
+      <div><div class="assoc-col-title">Terme</div><div id="assoc-left"></div></div>
+      <div><div class="assoc-col-title">Définition / Correspondance</div><div id="assoc-right"></div></div>
+    </div>
+    <button class="btn btn-primary btn-full" id="assoc-next-btn" style="display:none;" onclick="nextAssocRound()">➡ Série suivante</button>
+  </div>
+</section>
+
+<!-- ══════════ MYSTÈRE ══════════ -->
+<section id="mystery" class="section">
+  <div class="section-title">🔮 Définition Mystère</div>
+  <div class="section-sub">Lisez la définition et trouvez le terme correct parmi les 4 propositions.</div>
+  <div class="game-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <span class="chip chip-purple" id="myst-counter">1 / 12</span>
+      <span style="font-size:0.85rem;color:var(--text-soft)">⭐ <strong id="myst-score">0</strong> pts</span>
+    </div>
+    <div class="mystery-box" id="myst-box"><div class="mystery-def" id="myst-def"></div></div>
+    <div class="mystery-options" id="myst-opts"></div>
+    <div id="myst-feedback" style="display:none;margin-top:10px;padding:10px;border-radius:8px;font-size:0.85rem;"></div>
+    <button class="btn btn-primary btn-full" style="margin-top:10px;display:none;" id="myst-next-btn" onclick="nextMystery()">➡ Suivant</button>
+  </div>
+</section>
+<!-- ══════════ DEVINE LE MOT ══════════ -->
+<section id="devine" class="section">
+  <div class="section-heading"><div><h2>🎯 Devine le mot</h2><p>Une définition du glossaire s'affiche — cliquez sur le bon terme !</p></div></div>
+  <div class="devine-wrap">
+    <!-- Filtres catégorie -->
+    <div class="devine-cat-filter" id="devine-cats">
+      <button class="devine-cat-btn active" onclick="devineSetCat('all',this)">Tout</button>
+      <button class="devine-cat-btn" onclick="devineSetCat('santé',this)">Santé</button>
+      <button class="devine-cat-btn" onclick="devineSetCat('prévention',this)">Prévention</button>
+      <button class="devine-cat-btn" onclick="devineSetCat('promotion',this)">Promotion</button>
+      <button class="devine-cat-btn" onclick="devineSetCat('probantes',this)">Données probantes</button>
+      <button class="devine-cat-btn" onclick="devineSetCat('politique',this)">Politique</button>
+      <button class="devine-cat-btn" onclick="devineSetCat('épidémio',this)">Épidémio</button>
+    </div>
+    <!-- Stats -->
+    <div class="devine-stats">
+      <div class="devine-score-ring">⭐ <span id="dev-score">0</span> pts</div>
+      <div class="devine-progress-text">Question <span id="dev-idx">1</span> / <span id="dev-total">29</span> &nbsp;·&nbsp; ✅ <span id="dev-ok">0</span> &nbsp;·&nbsp; ❌ <span id="dev-err">0</span></div>
+    </div>
+    <!-- Zone de jeu -->
+    <div id="dev-play">
+      <div class="devine-def-box">
+        <div class="devine-source" id="dev-source">Source</div>
+        <div class="devine-def-text" id="dev-def">Chargement…</div>
+      </div>
+      <div class="devine-words-title">📚 Cliquez sur le bon terme</div>
+      <div class="devine-words-grid" id="dev-words"></div>
+      <div class="devine-feedback" id="dev-feedback"></div>
+      <button class="btn btn-primary btn-full" id="dev-next-btn" style="display:none;margin-top:4px;" onclick="devineNext()">➡ Définition suivante</button>
+    </div>
+    <!-- Fin de partie -->
+    <div id="dev-end" style="display:none;">
+      <div class="devine-end">
+        <div class="devine-end-emoji" id="dev-end-emoji">🎉</div>
+        <div class="devine-end-title">Terminé !</div>
+        <div style="color:var(--text-soft);margin-bottom:8px;" id="dev-end-msg"></div>
+        <div class="devine-end-score" id="dev-end-score">0 pts</div>
+        <button class="btn btn-primary btn-full" onclick="devineRestart()">🔄 Rejouer</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ ANKI ══════════ -->
+<section id="anki" class="section">
+  <div class="section-heading"><div><h2>📦 Anki — Révision espacée</h2><p>Importez vos cartes dans Anki pour réviser efficacement sur le long terme</p></div></div>
+
+  <!-- ACCORDION: Qu'est-ce qu'Anki -->
+  <div class="anki-accordion" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden;">
+    <button class="anki-acc-header" onclick="toggleAnkiAcc(this)">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        <div style="width:42px;height:42px;background:var(--accent-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">🧠</div>
+        <div style="min-width:0;">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--text);">Qu'est-ce qu'Anki ?</div>
+          <div style="font-size:0.74rem;color:var(--text-soft);">L'outil de référence pour la mémorisation à long terme</div>
+        </div>
+      </div>
+      <svg class="anki-chevron" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="anki-acc-body">
+      <div style="padding:0 22px 22px;">
+        <p style="font-size:0.9rem;line-height:1.7;color:var(--text);margin-bottom:14px;">
+          <strong>Anki</strong> est un logiciel <strong>gratuit et open-source</strong> de cartes mémoire (flashcards) basé sur le principe de la <strong>répétition espacée</strong> (SRS — <em>Spaced Repetition System</em>).
+        </p>
+        <p style="font-size:0.9rem;line-height:1.7;color:var(--text);margin-bottom:14px;">
+          Le principe est simple : Anki vous montre une carte, vous indiquez si vous la connaissez, et l'algorithme <strong>adapte automatiquement la fréquence</strong> à laquelle chaque carte revient. Les cartes difficiles reviennent plus souvent, les cartes maîtrisées sont espacées de plus en plus.
+        </p>
+        <p style="font-size:0.9rem;line-height:1.7;color:var(--text);margin-bottom:0;">
+          C'est l'outil utilisé par une grande partie des étudiants en santé dans le monde pour retenir durablement de grandes quantités d'informations.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCORDION: Télécharger (ouvert par défaut) -->
+  <div class="anki-accordion open" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden;">
+    <button class="anki-acc-header" onclick="toggleAnkiAcc(this)">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        <div style="width:42px;height:42px;background:var(--green-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">⬇️</div>
+        <div style="min-width:0;">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--text);">Télécharger le paquet Anki</div>
+          <div style="font-size:0.74rem;color:var(--text-soft);">Toutes les cartes de l'UE 1.2.S2 prêtes à importer</div>
+        </div>
+      </div>
+      <svg class="anki-chevron" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="anki-acc-body">
+      <div style="padding:0 22px 22px;">
+        <p style="font-size:0.9rem;line-height:1.7;color:var(--text);margin-bottom:18px;">
+          Le fichier <code style="background:var(--surface2);padding:2px 7px;border-radius:5px;font-size:0.85rem;">ue-1-2-sante.apkg</code> contient toutes les cartes de révision de ce module au format Anki. Il vous suffit de le télécharger puis de l'importer dans l'application.
+        </p>
+        <a href="ue-1-2-sante.apkg" download style="display:inline-flex;align-items:center;gap:10px;padding:14px 28px;background:var(--green);color:#fff;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.95rem;text-decoration:none;transition:all 0.15s;box-shadow:0 2px 8px rgba(45,106,79,0.25);">
+          ⬇️ Télécharger ue-1-2-sante.apkg
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCORDION: Comment utiliser -->
+  <div class="anki-accordion" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden;">
+    <button class="anki-acc-header" onclick="toggleAnkiAcc(this)">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        <div style="width:42px;height:42px;background:var(--purple-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">📲</div>
+        <div style="min-width:0;">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--text);">Comment utiliser ?</div>
+          <div style="font-size:0.74rem;color:var(--text-soft);">3 étapes pour commencer</div>
+        </div>
+      </div>
+      <svg class="anki-chevron" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="anki-acc-body">
+      <div style="padding:0 22px 22px;">
+        <div style="display:grid;gap:14px;">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">1</div>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;margin-bottom:2px;">Installer Anki</div>
+              <div style="font-size:0.85rem;color:var(--text-soft);line-height:1.6;">Téléchargez Anki gratuitement depuis le site officiel. Disponible <strong>gratuitement</strong> sur Windows, Mac, Linux et Android. Seule la version iPhone/iPad (<em>AnkiMobile</em>) est payante (~24,99 $) — les ventes financent le développement du projet.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">2</div>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;margin-bottom:2px;">Importer le paquet</div>
+              <div style="font-size:0.85rem;color:var(--text-soft);line-height:1.6;">Ouvrez Anki → Fichier → Importer → sélectionnez le fichier <code style="background:var(--surface2);padding:1px 5px;border-radius:4px;font-size:0.82rem;">ue-1-2-sante.apkg</code>. Les cartes seront ajoutées automatiquement.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:32px;height:32px;background:var(--accent);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;">3</div>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;margin-bottom:2px;">Réviser chaque jour</div>
+              <div style="font-size:0.85rem;color:var(--text-soft);line-height:1.6;">Anki calcule le meilleur moment pour revoir chaque carte. Il suffit de lancer l'application et de faire ses révisions quotidiennes — même 10 à 15 minutes par jour suffisent.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACCORDION: Liens utiles -->
+  <div class="anki-accordion" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden;">
+    <button class="anki-acc-header" onclick="toggleAnkiAcc(this)">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;">
+        <div style="width:42px;height:42px;background:var(--accent-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">🔗</div>
+        <div style="min-width:0;">
+          <div style="font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--text);">Liens utiles</div>
+          <div style="font-size:0.74rem;color:var(--text-soft);">Site officiel &amp; documentation</div>
+        </div>
+      </div>
+      <svg class="anki-chevron" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="anki-acc-body">
+      <div style="padding:0 22px 22px;">
+        <div style="display:grid;gap:10px;">
+          <a href="https://apps.ankiweb.net/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface2);border-radius:10px;text-decoration:none;color:var(--text);transition:all 0.15s;border:1px solid transparent;">
+            <span style="font-size:1.3rem;">🌐</span>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;">Site officiel Anki</div>
+              <div style="font-size:0.78rem;color:var(--text-soft);">apps.ankiweb.net — Téléchargement &amp; documentation</div>
+            </div>
+            <span style="margin-left:auto;color:var(--text-soft);font-size:1.1rem;">→</span>
+          </a>
+          <a href="https://docs.ankiweb.net/" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--surface2);border-radius:10px;text-decoration:none;color:var(--text);transition:all 0.15s;border:1px solid transparent;">
+            <span style="font-size:1.3rem;">📚</span>
+            <div>
+              <div style="font-weight:600;font-size:0.9rem;">Manuel d'utilisation</div>
+              <div style="font-size:0.78rem;color:var(--text-soft);">docs.ankiweb.net — Guide complet en ligne</div>
+            </div>
+            <span style="margin-left:auto;color:var(--text-soft);font-size:1.1rem;">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- GAME OVER OVERLAY -->
+<div class="game-over-overlay" id="game-over-overlay" style="display:none;">
+  <div class="game-over-box">
+    <div class="game-over-emoji" id="go-emoji">💀</div>
+    <div class="game-over-title" id="go-title">Game Over</div>
+    <div class="game-over-sub" id="go-sub">Toutes vos vies ont été perdues.</div>
+    <div class="game-over-score" id="go-score"></div>
+    <button class="restart-btn" onclick="restartLives()">🔄 Réessayer</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  GLOBAL SCORE
+// ═══════════════════════════════════════════════════════════
+let globalPoints = 0;
+function addPoints(n) {
+  globalPoints += n;
+  document.getElementById('global-score').textContent = `⭐ ${globalPoints} pts`;
+  if (n > 0) showFeedback('✨');
+}
+// kept for compatibility with original code
+function addScore(pts) { addPoints(pts); }
+
+function showFeedback(emoji) {
+  const el = document.createElement('div');
+  el.className = 'feedback-anim';
+  el.textContent = emoji;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ANKI ACCORDION
+// ═══════════════════════════════════════════════════════════
+function toggleAnkiAcc(btn) {
+  const acc = btn.closest('.anki-accordion');
+  acc.classList.toggle('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+//  DATA — FLASHCARDS
+// ═══════════════════════════════════════════════════════════
+const FLASHCARDS = [
+  { theme:'definitions', q:'Quelle est la définition OMS (1946) de la santé ?', a:'<strong>« La santé est un état de complet bien-être physique, mental et social, et ne consiste pas seulement en une absence de maladie ou d\'invalidité. »</strong><br><br>C\'est une ressource de la vie quotidienne, pas un but en soi.' },
+  { theme:'definitions', q:'Comment a évolué la définition de la santé de 1937 à 2001 ?', a:'<strong>1937</strong> : absence de maladie (vision négative)<br><strong>1946 (OMS)</strong> : état de complet bien-être physique, mental, social (vision positive)<br><strong>2001</strong> : ressource pour vivre, capacité d\'adaptation (vision dynamique)' },
+  { theme:'definitions', q:'Définition OMS de la Santé Publique', a:'<strong>« Science et art de favoriser la santé, de prévenir la maladie et de prolonger la vie grâce aux efforts organisés de la société. »</strong><br>(adapté Acheson 1988, adopté OMS 1999)' },
+  { theme:'definitions', q:'Qu\'est-ce qu\'un indicateur de santé ?', a:'Caractéristique d\'un individu, d\'une population ou d\'un environnement qui se prête à des <strong>mesures (directement ou indirectement)</strong> et peut être utilisée pour décrire un ou plusieurs aspects de la santé (qualité, quantité et temps).' },
+  { theme:'definitions', q:'Quelle est la différence entre la santé et la santé publique ?', a:'<strong>Santé</strong> = état individuel de bien-être.<br><strong>Santé publique</strong> = approche collective. Ce sont les efforts organisés de la société pour protéger et améliorer la santé de tous. Elle est liée à l\'économie et à la politique.' },
+  { theme:'definitions', q:'Définition de l\'Épidémiologie', a:'Étude de la <strong>distribution et des déterminants</strong> des états ou des événements de santé dans des populations déterminées, et application de cette étude à la <strong>lutte contre les problèmes de santé</strong>.' },
+  { theme:'definitions', q:'Définition d\'un Facteur de risque', a:'Situation sociale/économique, état biologique, comportement ou environnement lié à une <strong>vulnérabilité accrue</strong> à une maladie, à des problèmes de santé ou à des traumatismes.' },
+  { theme:'determinants', q:'Citez les 4 grands niveaux de déterminants du modèle de Dahlgren & Whitehead', a:'<strong>1.</strong> Facteurs biologiques/génétiques non modifiables (âge, sexe, hérédité)<br><strong>2.</strong> Comportements et modes de vie individuels<br><strong>3.</strong> Réseaux sociaux et communautaires<br><strong>4.</strong> Conditions socio-économiques, culturelles et environnementales générales' },
+  { theme:'determinants', q:'Qu\'est-ce que les Inégalités Sociales de Santé (ISS) ?', a:'Différences <strong>évitables</strong> et importantes dans le domaine de la santé observées entre des groupes sociaux, basées sur les <strong>déterminants sociaux</strong>. Liées au genre, revenu, éducation, pays de naissance.' },
+  { theme:'determinants', q:'Citez 4 facteurs d\'inégalités sociales de santé', a:'• <strong>Genre</strong><br>• <strong>Pays de naissance</strong><br>• <strong>Revenu</strong><br>• <strong>Niveau de scolarité</strong><br>• Composition familiale' },
+  { theme:'prevention', q:'Définition de la prévention primaire + objectif + exemple', a:'<strong>Objectif :</strong> éviter l\'apparition de la maladie<br><strong>Actions :</strong> lutte contre les facteurs de risque avant que la maladie n\'apparaisse<br><strong>Ex :</strong> Vaccination, campagnes anti-tabac, éducation à la santé' },
+  { theme:'prevention', q:'Définition de la prévention secondaire + objectif + exemple', a:'<strong>Objectif :</strong> dépistage précoce pour des soins plus efficaces<br><strong>Actions :</strong> stopper ou retarder la progression d\'une maladie<br><strong>Ex :</strong> Mammographie, dépistage cancer colorectal' },
+  { theme:'prevention', q:'Définition de la prévention tertiaire + objectif + exemple', a:'<strong>Objectif :</strong> réadaptation et réinsertion, réduire le risque de rechute<br><strong>Actions :</strong> réduire les conséquences d\'une maladie installée<br><strong>Ex :</strong> Rééducation post-AVC, soutien psychologique post-cancer' },
+  { theme:'prevention', q:'Définition de la prévention quaternaire + objectif + exemple', a:'<strong>Objectif :</strong> éviter la surmédicalisation et les soins inutiles ou iatrogènes<br><strong>Ex :</strong> soins relationnels, éviter les bilans non justifiés' },
+  { theme:'prevention', q:'Quelles sont les 3 approches de la prévention ?', a:'<strong>Universelle :</strong> toute la population (ex: vaccination nationale)<br><strong>Sélective :</strong> un sous-groupe à risque (ex: dépistage sein 50-74 ans)<br><strong>Ciblée (indiquée) :</strong> individus à haut risque ou avec signes précurseurs' },
+  { theme:'promotion', q:'Définition de la Promotion de la santé (Charte Ottawa, 1986)', a:'<strong>« Processus qui confère aux populations les moyens d\'assurer un plus grand contrôle sur leur propre santé, et d\'améliorer celle-ci. »</strong><br>C\'est un processus social et politique global.' },
+  { theme:'promotion', q:'Citez les 5 axes d\'action de la Charte d\'Ottawa (1986)', a:'1. Élaborer une <strong>politique publique saine</strong><br>2. Créer des <strong>milieux favorables</strong> à la santé<br>3. Renforcer l\'<strong>action communautaire</strong><br>4. Acquérir des <strong>aptitudes individuelles</strong><br>5. <strong>Réorienter les services</strong> de santé' },
+  { theme:'promotion', q:'Différence Prévention ≠ Promotion', a:'<strong>Prévention :</strong> stratégie de protection (éviter la maladie, agir sur les facteurs de risque)<br><strong>Promotion :</strong> stratégie de développement (renforcer les capacités, améliorer l\'environnement, vision positive de la santé)' },
+  { theme:'promotion', q:'Qu\'est-ce que l\'Empowerment en santé ?', a:'Processus par lequel les individus <strong>maîtrisent mieux les décisions et actions qui influent sur leur santé</strong>. Peut être social, culturel, psychologique ou politique. Principe fondamental de la promotion de la santé.' },
+  { theme:'probantes', q:'Définition d\'une donnée probante (OMS, 2004)', a:'<strong>« Conclusions tirées de recherches et autres connaissances qui peuvent servir de base utile à la prise de décision dans le domaine de la santé publique et des soins de santé. »</strong>' },
+  { theme:'probantes', q:'Citez les 3 types de données probantes (trépied décisionnel)', a:'<strong>1. Données scientifiques</strong> : issues de la recherche et littérature scientifique (PubMed, Cochrane)<br><strong>2. Données expérientielles</strong> : savoir-faire, expertise, valeurs des professionnels<br><strong>3. Données contextuelles</strong> : littérature grise, données locales (qui, quoi, où, combien)' },
+  { theme:'probantes', q:'Citez les 5 enjeux des données probantes', a:'1. Être plus <strong>efficace</strong><br>2. <strong>Améliorer les pratiques</strong><br>3. <strong>Légitimiser</strong> l\'action<br>4. <strong>Crédibiliser</strong> la prise de parole<br>5. <strong>Faire reconnaître</strong> un secteur d\'intervention' },
+  { theme:'probantes', q:'Citez les 7 étapes de la démarche probante', a:'1. <strong>Définir</strong> le problème<br>2. <strong>Rechercher</strong> les données probantes<br>3. <strong>Évaluer</strong> la qualité des données<br>4. <strong>Interpréter</strong> les résultats<br>5. <strong>Adapter</strong> au contexte<br>6. <strong>Mettre en œuvre</strong><br>7. <strong>Évaluer</strong> l\'action' },
+  { theme:'probantes', q:'Qu\'est-ce que l\'Evidence-Based Medicine (EBM) ?', a:'Démarche qui consiste à <strong>croiser le jugement médical aux travaux de recherche scientifique</strong> pour prendre des décisions cliniques éclairées. Finalité : qualité des soins, prévention des maladies, évitement des accidents iatrogènes.' },
+  { theme:'probantes', q:'Citez 3 sites officiels pour trouver des données probantes', a:'• <strong>PubMed / Cochrane</strong> (données scientifiques internationales)<br>• <strong>Santé Publique France</strong> (données nationales)<br>• <strong>Oscars / Bib-bop</strong> (données expérientielles)<br>• <strong>INSERM / HAS / ARS / ORS</strong>' },
+  { theme:'politique', q:'Classez du plus général au plus particulier : action, plan, programme de santé', a:'<strong>1. Plan de santé publique</strong> → fixe des priorités générales (ex : Plan cancer)<br><strong>2. Programme de santé</strong> → ensemble cohérent d\'actions (ex : PNNS)<br><strong>3. Action de santé</strong> → composante opérationnelle (ex : campagne 5 fruits et légumes)' },
+  { theme:'politique', q:'À quoi servent les indicateurs de santé ? (4 fonctions)', a:'• Définir les <strong>problèmes de santé publique</strong> à un moment donné<br>• Mettre en évidence une <strong>évolution dans le temps</strong><br>• Définir des <strong>différences entre populations</strong><br>• <strong>Évaluer l\'atteinte des objectifs</strong> d\'un programme' },
+  { theme:'modeles', q:'Caractéristiques du Modèle Biomédical', a:'• Depuis le <strong>19e siècle</strong><br>• Recherche de l\'<strong>agent pathogène</strong> (corps-machine de Descartes)<br>• Vision : réparer l\'organe malade<br>• Centré sur la <strong>biologie</strong>' },
+  { theme:'modeles', q:'Comment fonctionne le modèle de Dahlgren et Whitehead ?', a:'Modèle en couches concentriques :<br>🔵 Centre : facteurs <strong>biologiques non modifiables</strong> (âge, sexe, gènes)<br>🟠 Comportements individuels<br>🟡 Réseaux sociaux<br>🟢 Conditions de vie et travail<br>⚫ Contexte socio-économique et environnemental' },
+];
+
+const QCM_DATA = [
+  { theme:'definitions', q:'Quelle est la définition officielle de la santé selon l\'OMS (1946) ?', multi:false, options:[{t:'L\'absence de toute maladie ou infirmité',correct:false},{t:'Un état de complet bien-être physique, mental et social',correct:true},{t:'La capacité à travailler et à être productif',correct:false},{t:'L\'absence de souffrance physique uniquement',correct:false}], explication:'La définition OMS de 1946 : \"La santé est un état de complet bien-être physique, mental et social, et ne consiste pas seulement en une absence de maladie ou d\'invalidité.\" Elle intègre les 3 dimensions.' },
+  { theme:'definitions', q:'Quelle est la définition de la Santé Publique ?', multi:false, options:[{t:'L\'ensemble des soins dispensés dans les hôpitaux publics',correct:false},{t:'Science et art de favoriser la santé, prévenir la maladie et prolonger la vie par les efforts organisés de la société',correct:true},{t:'La médecine pratiquée gratuitement pour tous les citoyens',correct:false},{t:'L\'étude des maladies infectieuses dans les populations',correct:false}], explication:'La définition OMS (1999, adapté Acheson 1988). La santé publique est collective, pas seulement curative.' },
+  { theme:'determinants', q:'Parmi les éléments suivants, lesquels sont des déterminants de la santé ? (plusieurs réponses)', multi:true, options:[{t:'L\'âge et le patrimoine génétique',correct:true},{t:'Le niveau d\'éducation',correct:true},{t:'La couleur des cheveux',correct:false},{t:'Les habitudes alimentaires',correct:true},{t:'La qualité du logement',correct:true},{t:'La pointure de chaussures',correct:false}], explication:'Les déterminants sont : facteurs biologiques (âge, génétique), comportements (alimentation), conditions sociales (éducation, logement). La couleur de cheveux et la pointure ne sont pas des déterminants de santé.' },
+  { theme:'prevention', q:'Quel niveau de prévention correspond au dépistage du cancer du sein par mammographie ?', multi:false, options:[{t:'Prévention primaire',correct:false},{t:'Prévention secondaire',correct:true},{t:'Prévention tertiaire',correct:false},{t:'Prévention quaternaire',correct:false}], explication:'La mammographie est une prévention secondaire : dépistage précoce d\'une maladie déjà présente mais asymptomatique.' },
+  { theme:'prevention', q:'Quelle est l\'objectif de la prévention quaternaire ?', multi:false, options:[{t:'Éviter l\'apparition de la maladie par la vaccination',correct:false},{t:'Réduire les handicaps et réinsérer le patient',correct:false},{t:'Éviter les soins inutiles et la surmédicalisation',correct:true},{t:'Dépister précocement les maladies',correct:false}], explication:'La prévention quaternaire protège le patient contre des interventions médicales inutiles ou iatrogènes.' },
+  { theme:'prevention', q:'Lesquels sont des exemples de prévention primaire ? (plusieurs réponses)', multi:true, options:[{t:'Campagne de vaccination anti-grippe',correct:true},{t:'Dépistage néonatal de la phénylcétonurie',correct:false},{t:'Éducation à la nutrition dans les écoles',correct:true},{t:'Rééducation après un AVC',correct:false},{t:'Port obligatoire de la ceinture de sécurité',correct:true}], explication:'La prévention primaire agit avant l\'apparition de la maladie. Le dépistage néonatal = prévention secondaire. La rééducation = prévention tertiaire.' },
+  { theme:'promotion', q:'Quel texte fondateur définit les 5 axes d\'action de la promotion de la santé ?', multi:false, options:[{t:'La Déclaration d\'Alma-Ata (1978)',correct:false},{t:'La Charte d\'Ottawa (1986)',correct:true},{t:'La Déclaration de Jakarta (1997)',correct:false},{t:'La Déclaration universelle des droits de l\'homme (1948)',correct:false}], explication:'La Charte d\'Ottawa de 1986 est le texte fondateur de la promotion de la santé avec ses 5 domaines d\'action.' },
+  { theme:'promotion', q:'Lesquels sont des axes d\'action de la Charte d\'Ottawa ? (plusieurs réponses)', multi:true, options:[{t:'Élaborer une politique publique saine',correct:true},{t:'Créer des milieux favorables à la santé',correct:true},{t:'Multiplier les prescriptions médicales préventives',correct:false},{t:'Renforcer l\'action communautaire pour la santé',correct:true},{t:'Acquérir des aptitudes individuelles',correct:true},{t:'Réorienter les services de santé',correct:true}], explication:'Les 5 axes d\'Ottawa (sans \"multiplier les prescriptions\"). La promotion est basée sur l\'empowerment, pas sur la prescription seule.' },
+  { theme:'probantes', q:'Les 3 types de données probantes selon l\'OMS sont :', multi:true, options:[{t:'Données scientifiques (littérature de recherche)',correct:true},{t:'Données expérientielles (savoir-faire des professionnels)',correct:true},{t:'Données contextuelles (littérature grise, données locales)',correct:true},{t:'Données intuitives (impressions du praticien)',correct:false},{t:'Données financières (coût des interventions)',correct:false}], explication:'Le \"trépied décisionnel\" : scientifiques (recherche), expérientielles (expertise terrain) et contextuelles (données locales). L\'intuition seule ne suffit pas.' },
+  { theme:'probantes', q:'Quelle est la bonne ordre des 7 étapes de la démarche probante ?', multi:false, options:[{t:'Rechercher → Évaluer → Définir → Adapter → Interpréter → Mettre en oeuvre → Évaluer',correct:false},{t:'Définir → Rechercher → Évaluer qualité → Interpréter → Adapter → Mettre en œuvre → Évaluer',correct:true},{t:'Évaluer → Définir → Adapter → Mettre en œuvre → Interpréter → Rechercher → Évaluer',correct:false},{t:'Définir → Adapter → Rechercher → Évaluer qualité → Interpréter → Mettre en œuvre → Évaluer',correct:false}], explication:'L\'ordre logique : 1. Définir → 2. Rechercher → 3. Évaluer qualité → 4. Interpréter → 5. Adapter → 6. Mettre en œuvre → 7. Évaluer l\'impact.' },
+  { theme:'probantes', q:'Quels sont les enjeux des données probantes en santé publique ? (plusieurs réponses)', multi:true, options:[{t:'Être plus efficace dans les interventions',correct:true},{t:'Légitimiser l\'action professionnelle',correct:true},{t:'Remplacer le jugement clinique par des algorithmes',correct:false},{t:'Crédibiliser la prise de parole auprès des politiques',correct:true},{t:'Faire reconnaître le secteur de la promotion de la santé',correct:true}], explication:'Les 5 enjeux : efficacité, amélioration des pratiques, légitimité, crédibilité, reconnaissance du secteur. Les données ne remplacent pas le jugement clinique.' },
+  { theme:'definitions', q:'Quelles affirmations sur la structure d\'une politique de santé publique sont correctes ?', multi:true, options:[{t:'Le plan de santé est plus général que le programme',correct:true},{t:'L\'action de santé est la composante opérationnelle d\'un programme',correct:true},{t:'Le programme de santé est plus général que le plan',correct:false},{t:'Un plan de santé fixe des priorités générales (ex: Plan cancer)',correct:true}], explication:'Du plus général au plus particulier : PLAN → PROGRAMME → ACTION.' },
+];
+
+const VF_DATA = [
+  { q:'La santé est définie par l\'OMS comme l\'absence de toute maladie.', correct:false, explication:'FAUX. La définition OMS de 1946 : \"état de complet bien-être physique, mental et social, et ne consiste pas seulement en une absence de maladie ou d\'invalidité.\" La santé est positive et globale.' },
+  { q:'La prévention primaire vise à détecter une maladie à un stade précoce pour la traiter plus efficacement.', correct:false, explication:'FAUX. C\'est la prévention secondaire qui vise le dépistage précoce. La prévention primaire agit en amont, avant l\'apparition de la maladie (vaccination, éducation à la santé).' },
+  { q:'Le modèle de Dahlgren et Whitehead est centré sur les facteurs modifiables uniquement.', correct:false, explication:'FAUX. Au centre du modèle se trouvent les facteurs NON modifiables : l\'âge, le sexe, les prédispositions génétiques. Les couches extérieures concernent des facteurs sur lesquels on peut agir.' },
+  { q:'La Charte d\'Ottawa (1986) est le texte fondateur de la promotion de la santé.', correct:true, explication:'VRAI. La Charte d\'Ottawa (1986) est bien le texte fondateur de la promotion de la santé. Elle définit la promotion et ses 5 domaines d\'action.' },
+  { q:'Les données probantes en santé publique ne reposent que sur des études scientifiques publiées.', correct:false, explication:'FAUX. Les données probantes reposent sur 3 types : scientifiques, expérientielles ET contextuelles. Ignorer les 2 autres types appauvrit la décision en santé publique.' },
+  { q:'La prévention quaternaire vise à éviter les soins inutiles ou iatrogènes.', correct:true, explication:'VRAI. La prévention quaternaire protège le patient contre des interventions médicales qui pourraient lui causer du tort (surmédicalisation, effets secondaires, soins non justifiés).' },
+  { q:'Un programme de santé est plus général qu\'un plan de santé publique.', correct:false, explication:'FAUX. C\'est l\'inverse. Du plus général au plus particulier : PLAN > PROGRAMME > ACTION.' },
+  { q:'L\'épidémiologie étudie uniquement les maladies infectieuses.', correct:false, explication:'FAUX. L\'épidémiologie s\'applique à toutes les maladies : infectieuses, chroniques, traumatismes, et même aux facteurs positifs de santé.' },
+  { q:'L\'EBM (Evidence-Based Medicine) vise à fonder les décisions médicales sur des preuves scientifiques plutôt que sur la seule tradition.', correct:true, explication:'VRAI. L\'EBM cherche à croiser le jugement médical et l\'expertise clinique avec les meilleures données de la recherche.' },
+  { q:'La taille d\'un échantillon représentatif doit être proportionnelle à la taille de la population étudiée.', correct:false, explication:'FAUX. Au-delà d\'un certain seuil, la taille de l\'échantillon se stabilise (environ 384 personnes pour une marge de 5%), qu\'on étudie une ville ou un pays de 60 millions.' },
+  { q:'La promotion de la santé et la prévention de la maladie sont deux approches strictement opposées et incompatibles.', correct:false, explication:'FAUX. Ces deux approches sont complémentaires. La prévention protège contre les risques identifiés, la promotion renforce les capacités et améliore l\'environnement.' },
+  { q:'L\'indicateur de santé peut être utilisé pour évaluer l\'atteinte des objectifs d\'un programme de santé.', correct:true, explication:'VRAI. Les indicateurs permettent de définir des problèmes, suivre leur évolution, comparer des populations ET évaluer si les objectifs d\'un programme ont été atteints.' },
+  { q:'Hippocrate avait une vision mécaniste de la maladie similaire à celle de Descartes.', correct:false, explication:'FAUX. Hippocrate avait une vision globale et environnementale (air, eaux, lieux). C\'est Descartes qui a introduit la vision dualiste corps-esprit et mécaniste.' },
+  { q:'La Déclaration d\'Alma-Ata (1978) a défini les soins de santé primaires.', correct:true, explication:'VRAI. La Déclaration d\'Alma-Ata (1978) est le texte fondateur des soins de santé primaires avec les principes d\'équité, participation communautaire et intersectorialité.' },
+];
+
+const QO_DATA = [
+  { q:'Proposez une définition de la santé publique.', reponse:'<div class="tag">Réponse attendue</div><strong>Définition OMS (1999, adapté Acheson 1988) :</strong> \"Science et art de favoriser la santé, de prévenir la maladie et de prolonger la vie grâce aux efforts organisés de la société.\"<br><br>La santé publique désigne à la fois l\'état sanitaire d\'une population et les actions en vue de l\'améliorer. Elle repose sur l\'analyse des données, l\'identification des besoins, la définition de priorités, la mise en œuvre d\'actions et leur évaluation.' },
+  { q:'Classez les 3 éléments suivants du plus général au plus particulier : Action de santé publique / Plan de santé publique / Programme de santé publique', reponse:'<div class="tag">Réponse attendue</div><strong>1. Plan de santé publique</strong> → fixe les grandes priorités, les orientations. Ex : Plan Cancer<br><strong>2. Programme de santé</strong> → ensemble cohérent d\'actions pour atteindre des objectifs précis. Ex : PNNS<br><strong>3. Action de santé</strong> → composante opérationnelle d\'un programme. Ex : Campagne \"5 fruits et légumes par jour\"' },
+  { q:'Citez les 4 grands déterminants en santé (modèle Dahlgren & Whitehead) et pour chacun citez 2 exemples.', reponse:'<div class="tag">Réponse attendue</div><strong>1. Facteurs biologiques et génétiques :</strong> âge, sexe, prédispositions génétiques<br><strong>2. Comportements et modes de vie individuels :</strong> tabagisme, alimentation, sédentarité<br><strong>3. Conditions de vie et de travail :</strong> logement, niveau d\'éducation, accès aux soins, emploi<br><strong>4. Conditions socio-économiques, culturelles et environnementales :</strong> qualité de l\'air/eau, politiques publiques' },
+  { q:'Proposez une définition d\'un indicateur en santé.', reponse:'<div class="tag">Réponse attendue</div>Caractéristique d\'un individu, d\'une population ou d\'un environnement qui se prête à des <strong>mesures (directement ou indirectement)</strong> et peut être utilisée pour décrire un ou plusieurs aspects de la santé (<strong>qualité, quantité et temps</strong>).<br><br>Les indicateurs permettent de : définir des problèmes, suivre leur évolution, comparer des populations, évaluer les programmes.' },
+  { q:'Citez les 4 niveaux de prévention en santé publique, avec pour chacun l\'objectif et un exemple.', reponse:'<div class="tag">Réponse attendue</div><strong>Prévention primaire :</strong> éviter l\'apparition de la maladie → Vaccination, éducation à la santé<br><strong>Prévention secondaire :</strong> dépistage précoce pour soins plus efficaces → Mammographie<br><strong>Prévention tertiaire :</strong> réadaptation, limiter les conséquences → Rééducation post-AVC<br><strong>Prévention quaternaire :</strong> éviter soins inutiles/iatrogènes → Soins relationnels' },
+  { q:'Pour chacun des 2 termes, proposez une définition et un objectif : Prévention de la santé / Promotion de la santé', reponse:'<div class="tag">Réponse attendue</div><strong>Prévention de la santé :</strong><br>Définition : mesures visant à empêcher l\'apparition de la maladie, en arrêter les progrès et réduire ses conséquences.<br>Objectif : agir sur les facteurs de risque, vision \"absence de maladie\"<br><br><strong>Promotion de la santé :</strong><br>Définition (Ottawa 1986) : processus qui confère aux populations les moyens d\'assurer un plus grand contrôle sur leur santé.<br>Objectif : renforcer les capacités, améliorer l\'environnement, vision positive de la santé (empowerment)' },
+  { q:'Définissez une donnée probante en santé publique.', reponse:'<div class="tag">Réponse attendue</div><strong>OMS (2004) :</strong> \"Conclusions tirées de recherches et autres connaissances qui peuvent servir de base utile à la prise de décision dans le domaine de la santé publique et des soins de santé.\"<br><br>Une donnée probante est validée par un processus scientifique. Elle repose sur 3 types : scientifiques, expérientielles, contextuelles.' },
+  { q:'Citez les 5 étapes d\'une démarche de promotion de la santé.', reponse:'<div class="tag">Réponse attendue</div>1. <strong>Analyse des besoins</strong> (état des lieux avec données épidémiologiques)<br>2. <strong>Priorisation</strong> (choisir selon fréquence, gravité, ressources)<br>3. <strong>Planification</strong> (définir objectifs mesurables, choisir les interventions)<br>4. <strong>Mise en œuvre</strong> (déployer les actions sur le terrain)<br>5. <strong>Évaluation</strong> (mesurer les résultats et ajuster)' },
+  { q:'Citez les 3 savoirs participant à l\'élaboration d\'une donnée probante.', reponse:'<div class="tag">Réponse attendue</div>1. <strong>Données scientifiques</strong> : issues de la recherche et de la littérature scientifique (études randomisées, revues systématiques, méta-analyses)<br>2. <strong>Données expérientielles</strong> : savoir-faire des professionnels de santé, leur jugement, valeurs et expérience terrain<br>3. <strong>Données contextuelles</strong> : littérature grise, données locales, préférences des usagers/populations' },
+  { q:'Citez les 7 étapes mises en place dans la réalisation d\'une démarche probante en santé publique.', reponse:'<div class="tag">Réponse attendue</div>1. <strong>Définir le problème</strong> : qui est mon groupe cible ? quel problème ?<br>2. <strong>Rechercher les données probantes</strong> : où chercher les meilleures données ?<br>3. <strong>Évaluer la qualité</strong> : les méthodes sont-elles fiables ?<br>4. <strong>Interpréter les résultats</strong> : que révèlent les données ?<br>5. <strong>Adapter au contexte</strong> : est-ce applicable à mon terrain ?<br>6. <strong>Mettre en œuvre</strong> : comment utiliser les données ?<br>7. <strong>Évaluer</strong> : avons-nous obtenu le résultat prévu ?' },
+  { q:'Expliquez l\'évolution des définitions de la santé entre 1937 et 2001. Que constatez-vous ?', reponse:'<div class="tag">Réponse attendue</div><strong>1937 :</strong> La santé = absence de maladie (vision négative et purement biologique)<br><strong>1946 (OMS) :</strong> état de complet bien-être physique, mental et social (vision positive et tripartite)<br><strong>2001 :</strong> ressource pour la vie quotidienne, capacité d\'adaptation dynamique<br><br><strong>Constat :</strong> On passe d\'une vision purement biologique et curative à une vision globale, positive et dynamique.' },
+  { q:'Citez les 5 enjeux/objectifs de travailler à partir de données probantes en santé publique.', reponse:'<div class="tag">Réponse attendue</div>1. <strong>Être plus efficace</strong> : faire ce qui est efficace, meilleure utilisation des fonds publics<br>2. <strong>Améliorer ses pratiques</strong> : confronter sa pratique aux bonnes pratiques, partager les expériences<br>3. <strong>Légitimiser son action</strong> : valoriser l\'activité, objectiver la validité, justifier les financements<br>4. <strong>Crédibiliser la prise de parole</strong> : s\'appuyer sur des faits, faire du plaidoyer auprès des politiques<br>5. <strong>Faire reconnaître un secteur d\'intervention</strong> : donner de la crédibilité à la promotion de la santé' },
+];
+
+const DEFINITIONS = [
+  { term:'Santé', source:'OMS 1946', cat:'santé', body:'État de complet bien-être physique, mental et social. Ne consiste pas seulement en une absence de maladie ou d\'invalidité. C\'est une ressource de la vie quotidienne, pas un but en soi.' },
+  { term:'Santé publique', source:'OMS/Acheson 1999', cat:'santé', body:'Science et art de favoriser la santé, de prévenir la maladie et de prolonger la vie grâce aux efforts organisés de la société. Approche collective et organisée.' },
+  { term:'Promotion de la santé', source:'Charte Ottawa 1986', cat:'promotion', body:'Processus qui confère aux populations les moyens d\'assurer un plus grand contrôle sur leur propre santé, et d\'améliorer celle-ci. Processus social et politique global.' },
+  { term:'Prévention de la maladie', source:'OMS', cat:'prévention', body:'Mesures qui visent non seulement à empêcher l\'apparition de la maladie (lutte contre les facteurs de risque), mais également à en arrêter les progrès et à en réduire les conséquences.' },
+  { term:'Éducation pour la santé', source:'OMS', cat:'promotion', body:'Création délibérée de possibilités d\'apprendre grâce à une forme de communication visant à améliorer les compétences en matière de santé, les connaissances et les aptitudes utiles dans la vie.' },
+  { term:'Déterminants de la santé', source:'OMS', cat:'santé', body:'Facteurs personnels, sociaux, économiques et environnementaux qui déterminent l\'état de santé des individus ou des populations.' },
+  { term:'Indicateur de santé', source:'OMS', cat:'santé', body:'Caractéristique d\'un individu, d\'une population ou d\'un environnement qui se prête à des mesures et peut être utilisée pour décrire un ou plusieurs aspects de la santé (qualité, quantité et temps).' },
+  { term:'Épidémiologie', source:'Last 1988', cat:'épidémio', body:'Étude de la distribution et des déterminants des états ou des événements de santé dans des populations déterminées, et application de cette étude à la lutte contre les problèmes de santé.' },
+  { term:'Données probantes', source:'OMS 2004', cat:'probantes', body:'Conclusions tirées de recherches et autres connaissances qui peuvent servir de base utile à la prise de décision dans le domaine de la santé publique et des soins de santé.' },
+  { term:'Politique sanitaire', source:'OMS', cat:'politique', body:'Énoncé ou processus relevant d\'institutions (en particulier le gouvernement), qui définit des priorités et les paramètres d\'action compte tenu des besoins sanitaires et des ressources disponibles.' },
+  { term:'Plan de santé publique', source:'UE 1.2.S2', cat:'politique', body:'Ensemble de dispositions arrêtées pour l\'exécution d\'un projet. Fixe des priorités. Niveau le plus général de la politique de santé. Ex : Plan cancer.' },
+  { term:'Programme de santé', source:'UE 1.2.S2', cat:'politique', body:'Ensemble cohérent d\'actions pour atteindre des objectifs précis. Niveau intermédiaire. Ex : Programme National Nutrition Santé (PNNS).' },
+  { term:'Action de santé', source:'UE 1.2.S2', cat:'politique', body:'Composante opérationnelle d\'un programme définissant un mode d\'intervention. Niveau le plus particulier. Ex : Campagne \"5 fruits et légumes par jour\".' },
+  { term:'Prévention primaire', source:'UE 1.2.S2', cat:'prévention', body:'Vise à éviter l\'apparition de la maladie en agissant sur les facteurs de risque AVANT la maladie. Ex : vaccination, éducation à la santé, port de la ceinture.' },
+  { term:'Prévention secondaire', source:'UE 1.2.S2', cat:'prévention', body:'Vise le dépistage précoce d\'une maladie pour la traiter plus efficacement. Ex : mammographie, dépistage cancer colorectal.' },
+  { term:'Prévention tertiaire', source:'UE 1.2.S2', cat:'prévention', body:'Vise la réadaptation et la réinsertion, à réduire les conséquences d\'une maladie installée et éviter les rechutes. Ex : rééducation post-AVC.' },
+  { term:'Prévention quaternaire', source:'UE 1.2.S2', cat:'prévention', body:'Vise à éviter les soins inutiles, iatrogènes ou la surmédicalisation. Ex : soins relationnels, éviter les bilans non justifiés.' },
+  { term:'Empowerment', source:'OMS', cat:'promotion', body:'En santé, processus par lequel les individus maîtrisent mieux les décisions et les actions qui influent sur leur santé. Pilier de la promotion de la santé.' },
+  { term:'Inégalités sociales de santé', source:'UE 1.2.S2', cat:'santé', body:'Différences évitables et importantes dans le domaine de la santé observées entre des groupes sociaux, basées sur les déterminants sociaux. Liées au genre, revenu, éducation, pays de naissance.' },
+  { term:'Evidence-Based Medicine (EBM)', source:'UE 1.2.S2', cat:'probantes', body:'Démarche qui consiste à croiser le jugement médical aux travaux de recherche scientifique pour prendre des décisions cliniques éclairées. Objectif : qualité des soins, évitement des accidents iatrogènes.' },
+  { term:'Comportement à risque', source:'OMS', cat:'santé', body:'Comportement spécifique ou exposition à des facteurs qui augmentent la probabilité de survenue d\'une maladie ou de traumatismes. Ex : tabagisme, sédentarité, alcool.' },
+  { term:'Charte d\'Ottawa (1986)', source:'OMS', cat:'promotion', body:'Texte fondateur de la promotion de la santé. Définit 5 axes d\'action : politique publique saine, milieux favorables, action communautaire, aptitudes individuelles, réorientation des services de santé.' },
+  { term:'Prévention universelle', source:'UE 1.2.S2', cat:'prévention', body:'Approche de prévention destinée à l\'ensemble de la population sans distinction (ex : campagne de vaccination nationale, accès à l\'eau potable).' },
+  { term:'Prévention sélective', source:'UE 1.2.S2', cat:'prévention', body:'Approche de prévention ciblant des sous-groupes présentant un risque plus élevé que la moyenne (ex : dépistage du cancer du sein pour les 50-74 ans).' },
+  { term:'Modèle biomédical', source:'19e siècle', cat:'santé', body:'Approche de la santé centrée sur la biologie et la recherche de l\'agent pathogène. Le corps est vu comme une machine à réparer (vision mécaniste de Descartes). Base de la médecine courante.' },
+  { term:'Modèle biopsychosocial', source:'Années 1970', cat:'santé', body:'Élargit le modèle biomédical en intégrant les facteurs psychologiques et sociaux dans la compréhension de la maladie. Utilisé en soins infirmiers.' },
+  { term:'Modèle écologique', source:'Années 1980', cat:'santé', body:'Reconnaît l\'origine multifactorielle de la santé : facteurs culturels, sociaux, politiques et environnementaux interagissent. Base de la santé publique moderne.' },
+  { term:'Développement durable', source:'OMS/ONU', cat:'politique', body:'Mode de développement répondant aux besoins du présent sans compromettre la capacité des générations futures à répondre aux leurs. Lien fort avec la santé publique écologique.' },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  DATA — MINI-JEUX
+// ═══════════════════════════════════════════════════════════
+const ORDER_EXERCISES = [
+  { title:"7 étapes de la démarche probante en santé publique", chip:"Données probantes", chipClass:"chip-blue", steps:["Définir le problème — identifier le groupe cible","Rechercher les données probantes","Évaluer la qualité des preuves","Interpréter les résultats","Adapter au contexte local","Mettre en œuvre l'intervention","Évaluer les résultats obtenus"] },
+  { title:"5 axes d'action de la Charte d'Ottawa (1986)", chip:"Promotion santé", chipClass:"chip-green", steps:["Élaborer une politique publique saine","Créer des milieux favorables à la santé","Renforcer l'action communautaire","Acquérir des aptitudes individuelles","Réorienter les services de santé"] },
+  { title:"Hiérarchie des structures de santé publique (du général au particulier)", chip:"Organisation", chipClass:"chip-purple", steps:["Plan de santé publique (cadre général)","Programme de santé publique (ensemble d'actions)","Action de santé publique (intervention spécifique)"] },
+];
+
+const FLASH_QUESTIONS = [
+  { q:"Qu'est-ce que la prévention primaire ?", opts:["Éviter l'apparition de la maladie","Dépistage précoce","Réadaptation post-maladie","Éviter la surmédicalisation"], ans:0 },
+  { q:"Quelle organisation a défini les données probantes en 2004 ?", opts:["HAS","INSERM","OMS","ARS"], ans:2 },
+  { q:"Combien d'étapes compte la démarche probante en santé publique ?", opts:["5","6","7","8"], ans:2 },
+  { q:"La prévention quaternaire vise à…", opts:["Dépistage","Vaccination","Réinsertion","Éviter soins inutiles"], ans:3 },
+  { q:"Quelle étape suit 'Évaluer la qualité' dans la démarche probante ?", opts:["Adapter","Interpréter","Mettre en œuvre","Rechercher"], ans:1 },
+  { q:"Quel type de données vient de PubMed et Cochrane ?", opts:["Contextuelles","Expérientielles","Scientifiques","Mixtes"], ans:2 },
+  { q:"La Charte d'Ottawa date de…", opts:["1978","1986","1994","2000"], ans:1 },
+  { q:"La prévention secondaire correspond à…", opts:["Vaccination","Mammographie (dépistage)","Rééducation","Soins relationnels"], ans:1 },
+  { q:"L'EBM signifie…", opts:["Evidence-Based Medicine","Evaluation Based Monitoring","Extended Biomedical Model","Epidemiology & Biomedicine"], ans:0 },
+  { q:"Quel site fournit des données expérientielles en France ?", opts:["PubMed","Cochrane","Oscars / Bib-bop","ANSES"], ans:2 },
+  { q:"La 1ère étape de la démarche probante est…", opts:["Rechercher","Évaluer","Définir le problème","Adapter"], ans:2 },
+  { q:"Quel principe est central dans la promotion de la santé ?", opts:["Dépistage","Empowerment","Vaccination","Iatrogénèse"], ans:1 },
+];
+
+const MEMORY_PAIRS = [
+  { term:"Prévention primaire", def:"Éviter l'apparition (ex: vaccination)" },
+  { term:"Prévention secondaire", def:"Dépistage précoce (ex: mammographie)" },
+  { term:"Prévention tertiaire", def:"Réadaptation (ex: rééducation AVC)" },
+  { term:"Prévention quaternaire", def:"Éviter soins inutiles / iatrogènes" },
+  { term:"Données scientifiques", def:"Issues de la recherche et littérature" },
+  { term:"Données expérientielles", def:"Savoir-faire des professionnels de terrain" },
+  { term:"Données contextuelles", def:"Littérature grise : qui, quoi, où ?" },
+  { term:"Promotion de la santé", def:"Conception positive, facteurs de protection" },
+];
+
+const SCRAMBLE_WORDS = [
+  { word:"EPIDEMIOLOGIE", hint:"Étude de la distribution des maladies dans les populations" },
+  { word:"DETERMINANT", hint:"Facteur qui influence l'état de santé d'une population" },
+  { word:"PROBANTE", hint:"Qualifie une donnée validée par un processus scientifique" },
+  { word:"PREVENTION", hint:"Mesures visant à éviter l'apparition ou le développement d'une maladie" },
+  { word:"PROMOTION", hint:"Processus permettant aux populations d'améliorer leur santé" },
+  { word:"EMPOWERMENT", hint:"Renforcement du pouvoir d'agir des individus et communautés" },
+  { word:"VACCINATION", hint:"Exemple de prévention primaire contre les maladies infectieuses" },
+  { word:"COCHRANE", hint:"Base de données de revues systématiques en santé" },
+  { word:"DEPISTAGE", hint:"Détection précoce : prévention secondaire" },
+  { word:"IATROGENE", hint:"Se dit d'un effet indésirable causé par un acte médical" },
+];
+
+const ASSOC_ROUNDS = [
+  { pairs:[ {term:"EBM",def:"Evidence-Based Medicine"}, {term:"OMS",def:"Organisation Mondiale de la Santé"}, {term:"HAS",def:"Haute Autorité de Santé"}, {term:"ARS",def:"Agence Régionale de Santé"} ] },
+  { pairs:[ {term:"Prévention universelle",def:"Pour l'ensemble de la population"}, {term:"Prévention sélective",def:"Pour un sous-groupe à risque"}, {term:"Prévention ciblée",def:"Pour les personnes à haut risque"}, {term:"Prévention quaternaire",def:"Éviter la surmédicalisation"} ] },
+  { pairs:[ {term:"PubMed",def:"Données scientifiques internationales"}, {term:"Oscars/Bib-bop",def:"Données expérientielles France"}, {term:"Santé publique France",def:"Données mixtes nationales"}, {term:"INSERM",def:"Données contextuelles / nationales"} ] },
+  { pairs:[ {term:"Inégalités Sociales de Santé",def:"Différences évitables entre groupes sociaux"}, {term:"Facteur de risque",def:"Augmente la probabilité d'une maladie"}, {term:"Indicateur de santé",def:"Permet de définir et suivre un problème de santé"}, {term:"Épidémiologie",def:"Étude de la distribution des maladies en population"} ] },
+];
+
+const MYSTERY_QUESTIONS = [
+  { def:"Conclusions tirées de recherches qui peuvent servir de base utile à la prise de décision dans le domaine de la santé publique (OMS, 2004).", ans:"Données probantes", opts:["Indicateurs de santé","Données probantes","Protocoles cliniques","Données épidémiologiques"], expl:"Définition exacte des données probantes selon l'OMS (2004)." },
+  { def:"Processus permettant aux populations d'améliorer leur santé en leur donnant les moyens d'assurer un plus grand contrôle sur celle-ci.", ans:"Promotion de la santé", opts:["Prévention primaire","Éducation thérapeutique","Promotion de la santé","Santé publique"], expl:"Définition de la promotion de la santé (Charte Ottawa, 1986)." },
+  { def:"Ensemble des mesures visant à éviter ou réduire le nombre et la gravité des maladies, accidents et handicaps.", ans:"Prévention de la santé", opts:["Promotion de la santé","Prévention de la santé","Éducation pour la santé","Réadaptation"], expl:"Définition de la prévention de la santé — conception centrée sur l'absence de maladie." },
+  { def:"Étude de la distribution et des déterminants des états ou des événements de santé dans des populations déterminées.", ans:"Épidémiologie", opts:["Biostatistique","Médecine sociale","Épidémiologie","Sémiologie"], expl:"Définition de l'épidémiologie — base des activités de prévention." },
+  { def:"Différences évitables et importantes dans le domaine de la santé observées entre des groupes sociaux basés sur les déterminants sociaux.", ans:"Inégalités Sociales de Santé", opts:["Iniquités de soin","Inégalités Sociales de Santé","Déterminants environnementaux","Disparités géographiques"], expl:"Les ISS sont ÉVITABLES — c'est ce qui les distingue des simples différences biologiques." },
+  { def:"Attribut ou exposition d'un individu qui augmente la probabilité de développer une maladie ou un traumatisme.", ans:"Facteur de risque", opts:["Déterminant de santé","Comportement à risque","Facteur de risque","Indicateur de vulnérabilité"], expl:"Le facteur de risque peut être biologique, comportemental ou environnemental." },
+  { def:"Savoir-faire des professionnels incluant l'expérience, le jugement, les valeurs et les préférences dans l'exercice.", ans:"Données expérientielles", opts:["Données contextuelles","Données scientifiques","Données expérientielles","Données empiriques"], expl:"Les données expérientielles correspondent au 2ème type des 3 savoirs de la démarche probante." },
+  { def:"Mode de développement répondant aux besoins du présent sans compromettre la capacité des générations futures à répondre aux leurs.", ans:"Développement durable", opts:["Transition écologique","Développement durable","Santé planétaire","Santé environnementale"], expl:"Le développement durable croise les enjeux santé-environnement en santé publique." },
+  { def:"Action favorisant le bien-être physique, social ou psychologique (ex : sport, sommeil suffisant, alimentation équilibrée).", ans:"Comportement en santé", opts:["Style de vie sain","Facteur de protection","Comportement en santé","Indicateur positif"], expl:"Le comportement en santé s'oppose au comportement à risque qui augmente la probabilité de maladie." },
+  { def:"Renforcement du pouvoir d'agir des individus et des communautés sur leur propre santé — principe central de la promotion de la santé.", ans:"Empowerment", opts:["Participation communautaire","Empowerment","Autonomie patient","Self-management"], expl:"L'empowerment est l'un des principes clés de la promotion de la santé." },
+  { def:"Littérature grise comprenant des informations de type qui, quoi, où, comment, combien — sur le contexte d'une population donnée.", ans:"Données contextuelles", opts:["Données expérientielles","Données scientifiques","Données quantitatives","Données contextuelles"], expl:"Les données contextuelles constituent le 3ème type de savoirs (ARS, ORS, INSEE...)." },
+  { def:"Démarche qui consiste à croiser le jugement médical aux travaux de recherche scientifique pour prendre des décisions cliniques éclairées.", ans:"Evidence-Based Medicine", opts:["Health Technology Assessment","Evidence-Based Medicine","Médecine préventive","Pharmacovigilance"], expl:"L'EBM vise à réduire l'écart entre les connaissances scientifiques disponibles et la pratique clinique réelle." },
+];
+
+// ═══════════════════════════════════════════════════════════
+//  FLASHCARDS
+// ═══════════════════════════════════════════════════════════
+let fcCards = [...FLASHCARDS], fcIndex = 0, fcKnown = new Set(), fcUnknown = new Set(), fcIsFlipped = false;
+
+function themeLabel(t) {
+  const map = { definitions:'Définitions', determinants:'Déterminants', prevention:'Prévention', promotion:'Promotion de la santé', probantes:'Données probantes', politique:'Politique de santé', modeles:'Modèles en santé' };
+  return map[t] || t;
+}
+
+function renderFlashcard() {
+  if (!fcCards.length) { document.getElementById('fc-question').textContent = 'Aucune carte dans cette catégorie.'; return; }
+  const card = fcCards[fcIndex];
+  document.getElementById('fc-question').textContent = card.q;
+  document.getElementById('fc-answer').innerHTML = card.a;
+  document.getElementById('fc-theme-badge').textContent = themeLabel(card.theme);
+  document.getElementById('fc-counter').textContent = (fcIndex+1) + ' / ' + fcCards.length;
+  document.getElementById('fc-prev').disabled = fcIndex === 0;
+  document.getElementById('fc-next').disabled = fcIndex === fcCards.length - 1;
+  fcIsFlipped = false;
+  document.getElementById('fc-scene').classList.remove('flipped');
+  document.getElementById('fc-actions').style.display = 'none';
+  document.getElementById('fc-meta').textContent = '';
+  updateFCProgress();
+}
+
+function flipCard() {
+  fcIsFlipped = !fcIsFlipped;
+  document.getElementById('fc-scene').classList.toggle('flipped', fcIsFlipped);
+  if (fcIsFlipped) document.getElementById('fc-actions').style.display = 'flex';
+}
+
+function markCard(known) {
+  const card = fcCards[fcIndex];
+  if (known) { fcKnown.add(card.q); fcUnknown.delete(card.q); addPoints(2); }
+  else { fcUnknown.add(card.q); fcKnown.delete(card.q); }
+  updateUnknownPile(); updateFCProgress();
+  if (fcIndex < fcCards.length - 1) setTimeout(() => { fcIndex++; renderFlashcard(); }, 200);
+}
+
+function fcNav(dir) { fcIndex = Math.max(0, Math.min(fcCards.length-1, fcIndex+dir)); renderFlashcard(); }
+
+function updateFCProgress() {
+  const total = FLASHCARDS.length, reviewed = fcKnown.size + fcUnknown.size, pct = total > 0 ? Math.round(reviewed/total*100) : 0;
+  document.getElementById('fc-progress').style.width = pct+'%';
+  document.getElementById('fc-progress-label').textContent = reviewed + ' / ' + total + ' cartes révisées';
+  document.getElementById('fc-total').textContent = fcCards.length;
+  document.getElementById('fc-known').textContent = fcKnown.size;
+  document.getElementById('fc-unknown').textContent = fcUnknown.size;
+}
+
+function updateUnknownPile() {
+  const pile = document.getElementById('unknown-pile'), list = document.getElementById('unknown-list'), btn = document.getElementById('btn-retry-fc');
+  if (fcUnknown.size === 0) { pile.style.display='none'; btn.style.display='none'; return; }
+  pile.style.display='block'; btn.style.display='inline-block';
+  document.getElementById('unknown-count').textContent = fcUnknown.size;
+  list.innerHTML = '';
+  [...fcUnknown].forEach(q => { const li = document.createElement('li'); li.textContent = q; list.appendChild(li); });
+}
+
+function filterFlashcards() {
+  const theme = document.getElementById('fc-theme').value;
+  fcCards = theme === 'all' ? [...FLASHCARDS] : FLASHCARDS.filter(c => c.theme === theme);
+  fcIndex = 0; renderFlashcard();
+}
+
+function shuffleCards() {
+  for (let i = fcCards.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [fcCards[i],fcCards[j]]=[fcCards[j],fcCards[i]]; }
+  fcIndex = 0; renderFlashcard();
+}
+
+function retryUnknown() {
+  const unknownCards = FLASHCARDS.filter(c => fcUnknown.has(c.q));
+  if (!unknownCards.length) return;
+  fcCards = unknownCards; fcIndex = 0; fcUnknown.clear(); updateUnknownPile(); renderFlashcard();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  QCM
+// ═══════════════════════════════════════════════════════════
+let qcmFilter = 'all';
+
+function buildQCM(data) {
+  const container = document.getElementById('qcm-container');
+  container.innerHTML = '';
+  const filtered = qcmFilter === 'all' ? data : data.filter(q => q.theme === qcmFilter);
+  filtered.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'qcm-item';
+    div.innerHTML = `
+      <div class="badge badge-blue">${themeLabel(item.theme)}</div>
+      <div class="qcm-q">Q${idx+1}. ${item.q}</div>
+      <div class="qcm-info">${item.multi ? '⚠️ Plusieurs réponses possibles' : '☝️ Une seule bonne réponse'}</div>
+      <div class="qcm-options">${item.options.map((o,i)=>`<label class="qcm-option" data-correct="${o.correct}" data-qi="${idx}" data-oi="${i}"><input type="${item.multi?'checkbox':'radio'}" name="qcm-${idx}"> ${o.t}</label>`).join('')}</div>
+      <button class="btn-valider" onclick="validateQCM(${idx})">Valider</button>
+      <div class="qcm-explication" id="qcm-exp-${idx}">${item.explication}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function validateQCM(idx) {
+  const filtered = qcmFilter === 'all' ? QCM_DATA : QCM_DATA.filter(q => q.theme === qcmFilter);
+  const item = filtered[idx];
+  const options = document.querySelectorAll(`[data-qi="${idx}"]`);
+  let correct = true;
+  options.forEach((opt, i) => {
+    const inp = opt.querySelector('input');
+    opt.classList.add('locked');
+    const isCorrect = item.options[i].correct;
+    if (inp.checked && isCorrect) opt.classList.add('correct');
+    else if (inp.checked && !isCorrect) { opt.classList.add('incorrect'); correct = false; }
+    else if (!inp.checked && isCorrect) { opt.classList.add('missed'); correct = false; }
+  });
+  document.getElementById('qcm-exp-'+idx).classList.add('show');
+  const btn = document.getElementById('qcm-exp-'+idx).previousElementSibling;
+  btn.disabled = true;
+  if (correct) addPoints(3);
+}
+
+function filterQCM(theme, el) {
+  document.querySelectorAll('#qcm-filters .filter-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active'); qcmFilter = theme; buildQCM(QCM_DATA);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VRAI / FAUX CLASSIQUE
+// ═══════════════════════════════════════════════════════════
+function buildVF() {
+  const container = document.getElementById('vf-container');
+  VF_DATA.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'vf-item';
+    div.innerHTML = `
+      <div class="vf-q">Q${idx+1}. ${item.q}</div>
+      <div class="vf-buttons">
+        <button class="vf-btn" id="vf-v-${idx}" onclick="answerVF(${idx},true)">✅ Vrai</button>
+        <button class="vf-btn" id="vf-f-${idx}" onclick="answerVF(${idx},false)">❌ Faux</button>
+      </div>
+      <div class="vf-explication" id="vf-exp-${idx}">${item.explication}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function answerVF(idx, answer) {
+  const item = VF_DATA[idx];
+  const btnV = document.getElementById('vf-v-'+idx), btnF = document.getElementById('vf-f-'+idx);
+  const exp = document.getElementById('vf-exp-'+idx);
+  btnV.onclick = null; btnF.onclick = null;
+  const correct = (answer === item.correct);
+  if (answer) btnV.classList.add(correct ? 'sel-v' : 'wrong');
+  else btnF.classList.add(correct ? 'sel-f' : 'wrong');
+  exp.classList.add('show', correct ? 'ok' : 'ko');
+  if (correct) addPoints(2);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  QUESTIONS OUVERTES
+// ═══════════════════════════════════════════════════════════
+function buildQO() {
+  const container = document.getElementById('qo-container');
+  QO_DATA.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'qo-item';
+    div.innerHTML = `
+      <div class="badge badge-brown">Question ouverte</div>
+      <div class="qo-q">Q${idx+1}. ${item.q}</div>
+      <textarea class="qo-textarea" placeholder="Écrivez votre réponse ici…" id="qo-textarea-${idx}"></textarea>
+      <button class="btn-show-reponse" onclick="showQO(${idx})">👁 Voir la réponse attendue</button>
+      <div class="qo-reponse" id="qo-rep-${idx}">${item.reponse}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function showQO(idx) { document.getElementById('qo-rep-'+idx).classList.add('show'); }
+
+// ═══════════════════════════════════════════════════════════
+//  DÉFINITIONS
+// ═══════════════════════════════════════════════════════════
+let defFilter = 'all';
+
+function buildDefs(data) {
+  const grid = document.getElementById('def-grid');
+  grid.innerHTML = '';
+  const filtered = defFilter === 'all' ? data : data.filter(d => d.cat === defFilter || d.cat.includes(defFilter.replace('é','e')));
+  filtered.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'def-card';
+    div.innerHTML = `<div class="def-term">${item.term}<span class="def-source">${item.source}</span></div><div class="def-body">${item.body}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+function filterDefs(cat, el) {
+  document.querySelectorAll('.filter-wrap .filter-tag').forEach(t => t.classList.remove('active'));
+  el.classList.add('active'); defFilter = cat; buildDefs(DEFINITIONS);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ORDER / DRAG & DROP
+// ═══════════════════════════════════════════════════════════
+function buildOrderExercises() {
+  const container = document.getElementById('order-exercises');
+  ORDER_EXERCISES.forEach((ex, exIdx) => {
+    const shuffled = [...ex.steps].sort(() => Math.random() - 0.5);
+    const div = document.createElement('div');
+    div.className = 'order-container';
+    div.innerHTML = `
+      <div class="card-title" style="font-family:'DM Serif Display',serif;font-size:1rem;margin-bottom:8px;display:flex;align-items:center;gap:8px;"><span class="chip ${ex.chipClass}">${ex.chip}</span> ${ex.title}</div>
+      <div class="order-desc">Glissez-déposez ou utilisez ↑↓ pour réordonner.</div>
+      <ul class="order-list" id="order-list-${exIdx}">
+        ${shuffled.map((step, si) => `<li class="order-item" data-idx="${exIdx}" data-step="${si}" draggable="true"><span class="order-handle">⠿</span><span class="order-num">${si+1}</span><span class="order-text">${step}</span><div class="order-arrows"><button class="arrow-btn" onclick="moveItem(${exIdx},${si},-1)">▲</button><button class="arrow-btn" onclick="moveItem(${exIdx},${si},+1)">▼</button></div></li>`).join('')}
+      </ul>
+      <button class="order-check-btn" onclick="checkOrder(${exIdx})">✔ Vérifier l'ordre</button>
+      <button class="order-shuffle-btn" onclick="shuffleOrder(${exIdx})">🔀 Mélanger à nouveau</button>
+      <div class="order-result" id="order-result-${exIdx}"></div>
+    `;
+    container.appendChild(div);
+    initDrag(exIdx);
+  });
+}
+
+function getListItems(exIdx) { return Array.from(document.getElementById(`order-list-${exIdx}`).querySelectorAll('.order-item')); }
+
+function updateNums(exIdx) {
+  getListItems(exIdx).forEach((item, i) => {
+    item.querySelector('.order-num').textContent = i + 1;
+    item.dataset.step = i;
+    const btns = item.querySelectorAll('.arrow-btn');
+    btns[0].onclick = () => moveItem(exIdx, i, -1);
+    btns[1].onclick = () => moveItem(exIdx, i, +1);
+  });
+}
+
+function moveItem(exIdx, pos, dir) {
+  const list = document.getElementById(`order-list-${exIdx}`), items = getListItems(exIdx), newPos = pos + dir;
+  if (newPos < 0 || newPos >= items.length) return;
+  if (dir === -1) list.insertBefore(items[pos], items[newPos]); else list.insertBefore(items[newPos], items[pos]);
+  updateNums(exIdx);
+  items[pos].classList.remove('correct-pos','wrong-pos');
+}
+
+function checkOrder(exIdx) {
+  const ex = ORDER_EXERCISES[exIdx], items = getListItems(exIdx);
+  let correct = 0;
+  items.forEach((item, i) => {
+    const text = item.querySelector('.order-text').textContent, isRight = text === ex.steps[i];
+    item.classList.remove('correct-pos','wrong-pos');
+    item.classList.add(isRight ? 'correct-pos' : 'wrong-pos');
+    if (isRight) correct++;
+  });
+  const resultEl = document.getElementById(`order-result-${exIdx}`);
+  resultEl.classList.remove('perfect','partial','bad','show');
+  if (correct === ex.steps.length) { resultEl.className='order-result show perfect'; resultEl.textContent=`🎉 Parfait ! ${correct}/${ex.steps.length} dans le bon ordre !`; addPoints(15); }
+  else if (correct >= Math.floor(ex.steps.length/2)) { resultEl.className='order-result show partial'; resultEl.textContent=`👍 Presque ! ${correct}/${ex.steps.length} dans le bon ordre.`; addPoints(5); }
+  else { resultEl.className='order-result show bad'; resultEl.textContent=`❌ ${correct}/${ex.steps.length} — Réessayez !`; }
+}
+
+function shuffleOrder(exIdx) {
+  const list = document.getElementById(`order-list-${exIdx}`), items = getListItems(exIdx);
+  [...items].sort(() => Math.random() - 0.5).forEach(item => { item.classList.remove('correct-pos','wrong-pos'); list.appendChild(item); });
+  updateNums(exIdx);
+  const r = document.getElementById(`order-result-${exIdx}`); r.className='order-result'; r.textContent='';
+}
+
+let dragSrc = null;
+function initDrag(exIdx) {
+  const list = document.getElementById(`order-list-${exIdx}`);
+  list.addEventListener('dragstart', e => { dragSrc = e.target.closest('.order-item'); dragSrc.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+  list.addEventListener('dragend', () => { getListItems(exIdx).forEach(i => i.classList.remove('dragging','drag-over')); updateNums(exIdx); });
+  list.addEventListener('dragover', e => { e.preventDefault(); const target = e.target.closest('.order-item'); if (target && target !== dragSrc) { getListItems(exIdx).forEach(i => i.classList.remove('drag-over')); target.classList.add('drag-over'); } });
+  list.addEventListener('drop', e => { e.preventDefault(); const target = e.target.closest('.order-item'); if (target && target !== dragSrc) { const items = getListItems(exIdx), srcIdx = items.indexOf(dragSrc), tgtIdx = items.indexOf(target); if (srcIdx < tgtIdx) list.insertBefore(dragSrc, target.nextSibling); else list.insertBefore(dragSrc, target); updateNums(exIdx); } });
+  let touchItem = null;
+  list.addEventListener('touchstart', e => { touchItem = e.target.closest('.order-item'); if (touchItem) touchItem.classList.add('dragging'); }, {passive:true});
+  list.addEventListener('touchmove', e => { if (!touchItem) return; e.preventDefault(); const y = e.touches[0].clientY; const items = getListItems(exIdx); items.forEach(i => i.classList.remove('drag-over')); items.forEach(item => { const rect = item.getBoundingClientRect(); if (y >= rect.top && y <= rect.bottom && item !== touchItem) item.classList.add('drag-over'); }); }, {passive:false});
+  list.addEventListener('touchend', e => { if (!touchItem) return; const y = e.changedTouches[0].clientY; const items = getListItems(exIdx); let target = null; items.forEach(item => { const rect = item.getBoundingClientRect(); if (y >= rect.top && y <= rect.bottom && item !== touchItem) target = item; }); if (target) { const srcIdx = items.indexOf(touchItem), tgtIdx = items.indexOf(target); if (srcIdx < tgtIdx) list.insertBefore(touchItem, target.nextSibling); else list.insertBefore(touchItem, target); } items.forEach(i => i.classList.remove('dragging','drag-over')); updateNums(exIdx); touchItem = null; }, {passive:true});
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PREVENTION CLASSIFY GAME
+// ═══════════════════════════════════════════════════════════
+const PREV_ITEMS = [
+  { text:"Vaccination", col:"primaire" },
+  { text:"Éducation à la santé", col:"primaire" },
+  { text:"Port de la ceinture de sécurité", col:"primaire" },
+  { text:"Lutte contre les facteurs de risque", col:"primaire" },
+  { text:"Campagnes anti-tabac", col:"primaire" },
+  { text:"Promotion de l'activité physique", col:"primaire" },
+  { text:"Mammographie (dépistage cancer du sein)", col:"secondaire" },
+  { text:"Dépistage précoce", col:"secondaire" },
+  { text:"Test de glycémie (diabète)", col:"secondaire" },
+  { text:"Frottis cervico-utérin", col:"secondaire" },
+  { text:"Traitement précoce d'une maladie asymptomatique", col:"secondaire" },
+  { text:"Rééducation post-AVC", col:"tertiaire" },
+  { text:"Réinsertion sociale du patient", col:"tertiaire" },
+  { text:"Réadaptation fonctionnelle", col:"tertiaire" },
+  { text:"Prévention des rechutes", col:"tertiaire" },
+  { text:"Éducation thérapeutique du patient", col:"tertiaire" },
+  { text:"Éviter les soins inutiles / iatrogènes", col:"quaternaire" },
+  { text:"Soins relationnels et esthétiques", col:"quaternaire" },
+  { text:"Lutte contre la surmédicalisation", col:"quaternaire" },
+  { text:"Accompagnement palliatif", col:"quaternaire" },
+];
+
+let prevSelected = null;
+let prevPlacements = {}; // { tagIdx: colName }
+
+function buildPrevClassify() {
+  const tagsEl = document.getElementById('prev-tags');
+  if (!tagsEl) return;
+  const shuffled = PREV_ITEMS.map((item, i) => ({...item, idx:i})).sort(() => Math.random() - 0.5);
+  tagsEl.innerHTML = shuffled.map(item =>
+    `<div class="prev-tag" data-idx="${item.idx}" draggable="true" onclick="prevSelectTag(this)" ondragstart="prevDragStart(event,${item.idx})">${item.text}</div>`
+  ).join('');
+  ['primaire','secondaire','tertiaire','quaternaire'].forEach(col => {
+    document.getElementById('prev-col-'+col).innerHTML = '';
+    const colEl = document.querySelector(`.prev-col[data-col="${col}"]`);
+    colEl.classList.remove('selected-col');
+    colEl.onclick = function() { prevClickCol(col); };
+  });
+  prevSelected = null;
+  prevPlacements = {};
+  const r = document.getElementById('prev-classify-result');
+  r.className = 'order-result'; r.textContent = '';
+}
+
+function prevSelectTag(el) {
+  if (el.classList.contains('placed')) return;
+  document.querySelectorAll('.prev-tag.selected').forEach(t => t.classList.remove('selected'));
+  document.querySelectorAll('.prev-col.selected-col').forEach(c => c.classList.remove('selected-col'));
+  el.classList.add('selected');
+  prevSelected = parseInt(el.dataset.idx);
+}
+
+function prevClickCol(col) {
+  if (prevSelected === null) return;
+  placeTag(prevSelected, col);
+  prevSelected = null;
+}
+
+function prevDragStart(e, idx) { e.dataTransfer.setData('text/plain', idx); }
+function prevDrop(e, col) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('prev-col-hover');
+  const idx = parseInt(e.dataTransfer.getData('text/plain'));
+  placeTag(idx, col);
+}
+
+function placeTag(idx, col) {
+  // Remove from old col if already placed
+  if (prevPlacements[idx] !== undefined) {
+    removePlaced(idx);
+  }
+  prevPlacements[idx] = col;
+  const tag = document.querySelector(`.prev-tag[data-idx="${idx}"]`);
+  tag.classList.remove('selected');
+  tag.classList.add('placed');
+  document.querySelectorAll('.prev-col.selected-col').forEach(c => c.classList.remove('selected-col'));
+  const colItems = document.getElementById('prev-col-'+col);
+  const el = document.createElement('div');
+  el.className = 'prev-placed-item';
+  el.dataset.idx = idx;
+  el.innerHTML = `<span>${PREV_ITEMS[idx].text}</span><button class="prev-remove" onclick="removePlaced(${idx})">✕</button>`;
+  colItems.appendChild(el);
+}
+
+function removePlaced(idx) {
+  delete prevPlacements[idx];
+  const tag = document.querySelector(`.prev-tag[data-idx="${idx}"]`);
+  if (tag) { tag.classList.remove('placed','correct-tag','wrong-tag'); }
+  document.querySelectorAll(`.prev-placed-item[data-idx="${idx}"]`).forEach(el => el.remove());
+}
+
+function checkPrevClassify() {
+  let correct = 0, total = PREV_ITEMS.length;
+  // Reset visual
+  document.querySelectorAll('.prev-tag').forEach(t => t.classList.remove('correct-tag','wrong-tag'));
+  document.querySelectorAll('.prev-placed-item').forEach(p => p.classList.remove('correct-placed','wrong-placed'));
+
+  PREV_ITEMS.forEach((item, idx) => {
+    const tag = document.querySelector(`.prev-tag[data-idx="${idx}"]`);
+    const placed = document.querySelector(`.prev-placed-item[data-idx="${idx}"]`);
+    if (prevPlacements[idx] === item.col) {
+      correct++;
+      if (tag) tag.classList.add('correct-tag');
+      if (placed) placed.classList.add('correct-placed');
+    } else if (prevPlacements[idx] !== undefined) {
+      if (tag) tag.classList.add('wrong-tag');
+      if (placed) placed.classList.add('wrong-placed');
+    }
+  });
+
+  const placed = Object.keys(prevPlacements).length;
+  const r = document.getElementById('prev-classify-result');
+  r.classList.remove('perfect','partial','bad','show');
+  if (placed < total) {
+    r.className = 'order-result show bad';
+    r.textContent = `⚠️ Il reste ${total - placed} étiquette(s) à placer !`;
+  } else if (correct === total) {
+    r.className = 'order-result show perfect';
+    r.textContent = `🎉 Parfait ! ${correct}/${total} bien classés !`;
+    addPoints(20);
+  } else if (correct >= total * 0.6) {
+    r.className = 'order-result show partial';
+    r.textContent = `👍 Pas mal ! ${correct}/${total} bien classés.`;
+    addPoints(8);
+  } else {
+    r.className = 'order-result show bad';
+    r.textContent = `❌ ${correct}/${total} — Réessayez !`;
+  }
+}
+
+function resetPrevClassify() {
+  buildPrevClassify();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FLASH QUIZ
+// ═══════════════════════════════════════════════════════════
+let flashIdx = 0, flashScore = 0, flashTimer = null, flashCombo = 0;
+const FLASH_TIME = 8000;
+
+function startFlash() {
+  flashIdx = 0; flashScore = 0; flashCombo = 0;
+  document.getElementById('flash-start').style.display='none';
+  document.getElementById('flash-end').style.display='none';
+  document.getElementById('flash-play').style.display='block';
+  window._flashQs = [...FLASH_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 10);
+  showFlashQ();
+}
+
+function showFlashQ() {
+  if (flashIdx >= window._flashQs.length) { endFlash(); return; }
+  const q = window._flashQs[flashIdx];
+  document.getElementById('flash-q-num').textContent = `Q ${flashIdx+1}/${window._flashQs.length}`;
+  document.getElementById('flash-score-disp').textContent = flashScore;
+  document.getElementById('flash-combo').textContent = flashCombo >= 2 ? `🔥×${flashCombo}` : '';
+  document.getElementById('flash-q-text').textContent = q.q;
+  const optsEl = document.getElementById('flash-opts');
+  optsEl.innerHTML = '';
+  q.opts.forEach((opt, i) => { const btn = document.createElement('button'); btn.className='flash-opt'; btn.textContent=opt; btn.onclick=()=>answerFlash(i,q.ans,btn,optsEl); optsEl.appendChild(btn); });
+  const bar = document.getElementById('flash-timer-bar');
+  bar.style.width='100%'; bar.className='timer-bar';
+  if (flashTimer) clearInterval(flashTimer);
+  const startTime = Date.now();
+  flashTimer = setInterval(() => {
+    const pct = Math.max(0, 100-(Date.now()-startTime)/FLASH_TIME*100);
+    bar.style.width = pct+'%';
+    if (pct < 33) bar.className='timer-bar danger'; else if (pct < 66) bar.className='timer-bar warning';
+    if (pct <= 0) { clearInterval(flashTimer); showFlashTimeout(q.ans, optsEl); }
+  }, 80);
+}
+
+function answerFlash(chosen, correct, btn, optsEl) {
+  clearInterval(flashTimer);
+  const btns = optsEl.querySelectorAll('.flash-opt');
+  btns.forEach(b => b.disabled=true);
+  if (chosen === correct) { btn.classList.add('correct-ans'); flashCombo++; const pts=10+Math.min(flashCombo*2,10); flashScore+=pts; addPoints(pts); showFeedback(flashCombo>=3?'🔥':'✅'); }
+  else { btn.classList.add('wrong-ans'); btns[correct].classList.add('missed'); flashCombo=0; showFeedback('❌'); }
+  document.getElementById('flash-score-disp').textContent = flashScore;
+  setTimeout(() => { flashIdx++; showFlashQ(); }, 1200);
+}
+
+function showFlashTimeout(correct, optsEl) {
+  const btns = optsEl.querySelectorAll('.flash-opt');
+  btns.forEach((b,i) => { b.disabled=true; if(i===correct) b.classList.add('missed'); });
+  flashCombo=0; showFeedback('⏰');
+  setTimeout(() => { flashIdx++; showFlashQ(); }, 1000);
+}
+
+function endFlash() {
+  document.getElementById('flash-play').style.display='none';
+  document.getElementById('flash-end').style.display='block';
+  const max = window._flashQs.length * 20, pct = Math.round(flashScore/max*100);
+  document.getElementById('flash-end-emoji').textContent = pct>=80?'🏆':pct>=50?'👍':'📚';
+  document.getElementById('flash-end-msg').textContent = pct>=80?'Excellent ! Vous maîtrisez le sujet.':pct>=50?'Bien ! Quelques révisions à faire.':'Continuez à réviser !';
+  document.getElementById('flash-end-score').textContent = `${flashScore} pts (${pct}%)`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SURVIE (VIES)
+// ═══════════════════════════════════════════════════════════
+let livesMax=3, livesLeft=3, livesQIdx=0, livesCorrectCount=0, livesWrongCount=0, _livesQs=[];
+
+function selectLives(n) {
+  livesMax=n;
+  document.querySelectorAll('.life-sel-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.lives)===n));
+}
+
+function startLives() {
+  livesLeft=livesMax; livesQIdx=0; livesCorrectCount=0; livesWrongCount=0;
+  _livesQs = [...MYSTERY_QUESTIONS].sort(() => Math.random() - 0.5);
+  document.getElementById('lives-start').style.display='none';
+  document.getElementById('lives-play').style.display='block';
+  renderLivesHearts(); showLivesQ();
+}
+
+function renderLivesHearts() {
+  const el = document.getElementById('lives-hearts'); el.innerHTML='';
+  for (let i=0; i<livesMax; i++) { const s=document.createElement('span'); s.className='life'+(i>=livesLeft?' lost':''); s.textContent='❤️'; el.appendChild(s); }
+}
+
+function showLivesQ() {
+  if (livesQIdx >= _livesQs.length) { showGameOver(true); return; }
+  const q = _livesQs[livesQIdx];
+  document.getElementById('lives-qnum').textContent = livesQIdx+1;
+  document.getElementById('lives-q-text').textContent = q.def;
+  const optsEl = document.getElementById('lives-opts'); optsEl.innerHTML='';
+  [...q.opts].sort(() => Math.random()-0.5).forEach(opt => {
+    const btn = document.createElement('button'); btn.className='mystery-opt'; btn.textContent=opt;
+    btn.onclick=()=>answerLives(opt,q.ans,btn,optsEl); optsEl.appendChild(btn);
+  });
+}
+
+function answerLives(chosen, correct, btn, optsEl) {
+  const btns = optsEl.querySelectorAll('.mystery-opt'); btns.forEach(b=>b.disabled=true);
+  if (chosen===correct) { btn.classList.add('correct-ans'); livesCorrectCount++; addPoints(10); showFeedback('✅'); document.getElementById('lives-correct').textContent=livesCorrectCount; }
+  else { btn.classList.add('wrong-ans'); btns.forEach(b=>{if(b.textContent===correct)b.classList.add('missed');}); livesLeft--; livesWrongCount++; document.getElementById('lives-wrong').textContent=livesWrongCount; renderLivesHearts(); showFeedback('💔'); if(livesLeft<=0){setTimeout(()=>showGameOver(false),1000);return;} }
+  setTimeout(()=>{livesQIdx++;showLivesQ();},1000);
+}
+
+function showGameOver(won) {
+  const overlay = document.getElementById('game-over-overlay'); overlay.style.display='flex';
+  document.getElementById('go-emoji').textContent = won?'🎊':'💀';
+  document.getElementById('go-title').textContent = won?'Victoire !':'Game Over';
+  document.getElementById('go-sub').textContent = won?'Vous avez répondu à toutes les questions !':'Toutes vos vies ont été perdues.';
+  document.getElementById('go-score').textContent = `✅ ${livesCorrectCount} bonnes réponses`;
+}
+
+function restartLives() {
+  document.getElementById('game-over-overlay').style.display='none';
+  document.getElementById('lives-play').style.display='none';
+  document.getElementById('lives-start').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MEMORY
+// ═══════════════════════════════════════════════════════════
+let memFlipped=[], memMatched=0, memTries=0, memLocked=false;
+
+function initMemory() {
+  const pairs = [...MEMORY_PAIRS].sort(() => Math.random()-0.5).slice(0,8);
+  const cards = [];
+  pairs.forEach((p,i) => { cards.push({pairId:i,type:'term',text:p.term}); cards.push({pairId:i,type:'def',text:p.def}); });
+  cards.sort(() => Math.random()-0.5);
+  memFlipped=[]; memMatched=0; memTries=0; memLocked=false;
+  document.getElementById('mem-tries').textContent=0;
+  document.getElementById('mem-found').textContent=0;
+  document.getElementById('mem-total').textContent=pairs.length;
+  document.getElementById('mem-win').style.display='none';
+  const grid = document.getElementById('mem-grid'); grid.innerHTML='';
+  cards.forEach(card => {
+    const div = document.createElement('div'); div.className='mem-card';
+    div.dataset.pairId=card.pairId; div.dataset.type=card.type;
+    div.innerHTML=`<div class="mem-card-inner"><div class="mem-front">🩺</div><div class="mem-back">${card.text}</div></div>`;
+    div.addEventListener('click', ()=>flipMemCard(div));
+    grid.appendChild(div);
+  });
+}
+
+function flipMemCard(card) {
+  if (memLocked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+  card.classList.add('flipped'); memFlipped.push(card);
+  if (memFlipped.length===2) { memTries++; document.getElementById('mem-tries').textContent=memTries; memLocked=true; setTimeout(checkMemMatch,900); }
+}
+
+function checkMemMatch() {
+  const [a,b] = memFlipped;
+  const match = a.dataset.pairId===b.dataset.pairId && a.dataset.type!==b.dataset.type;
+  if (match) {
+    a.classList.add('matched'); b.classList.add('matched'); memMatched++;
+    document.getElementById('mem-found').textContent=memMatched;
+    addPoints(8); showFeedback('🃏');
+    if (memMatched===8) setTimeout(()=>{document.getElementById('mem-win').style.display='block';addPoints(20);},300);
+  } else {
+    a.classList.add('error-flash'); b.classList.add('error-flash');
+    setTimeout(()=>{a.classList.remove('flipped','error-flash');b.classList.remove('flipped','error-flash');},500);
+  }
+  memFlipped=[]; memLocked=false;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SCRAMBLE
+// ═══════════════════════════════════════════════════════════
+let scrIdx=0, scrScore=0, scrAnswer=[], scrWord='', scrLetterMap=[];
+
+function initScramble() {
+  window._scrWords = [...SCRAMBLE_WORDS].sort(() => Math.random()-0.5);
+  scrIdx=0; scrScore=0; loadScrambleWord();
+}
+
+function loadScrambleWord() {
+  const w = window._scrWords[scrIdx]; scrWord=w.word; scrAnswer=[];
+  document.getElementById('scr-counter').textContent=`${scrIdx+1} / ${window._scrWords.length}`;
+  document.getElementById('scr-score').textContent=scrScore;
+  document.getElementById('scr-hint').textContent=`💡 ${w.hint}`;
+  document.getElementById('scr-feedback').style.display='none';
+  const letters = scrWord.split('').sort(() => Math.random()-0.5);
+  document.getElementById('scr-scrambled').textContent=letters.join(' ');
+  scrLetterMap = letters.map((l,i)=>({letter:l,used:false,idx:i}));
+  renderScrambleTiles(); renderAnswerTiles();
+}
+
+function renderScrambleTiles() {
+  const el = document.getElementById('scr-letters'); el.innerHTML='';
+  scrLetterMap.forEach((lt,i) => {
+    const btn = document.createElement('button'); btn.className='letter-tile'+(lt.used?' used':''); btn.textContent=lt.letter; btn.disabled=lt.used;
+    if (!lt.used) btn.onclick=()=>pickLetter(i); el.appendChild(btn);
+  });
+}
+
+function renderAnswerTiles() {
+  const el = document.getElementById('scr-answer'); el.innerHTML='';
+  scrAnswer.forEach((entry,i) => { const div=document.createElement('div'); div.className='answer-tile'; div.textContent=entry.letter; div.onclick=()=>unpickLetter(i); el.appendChild(div); });
+}
+
+function pickLetter(idx) { scrLetterMap[idx].used=true; scrAnswer.push({letter:scrLetterMap[idx].letter,srcIdx:idx}); renderScrambleTiles(); renderAnswerTiles(); }
+function unpickLetter(ansIdx) { scrLetterMap[scrAnswer[ansIdx].srcIdx].used=false; scrAnswer.splice(ansIdx,1); renderScrambleTiles(); renderAnswerTiles(); }
+function scrambleClear() { scrAnswer.forEach(e=>{scrLetterMap[e.srcIdx].used=false;}); scrAnswer=[]; renderScrambleTiles(); renderAnswerTiles(); }
+
+function scrambleCheck() {
+  const ans = scrAnswer.map(e=>e.letter).join(''), fb = document.getElementById('scr-feedback');
+  fb.style.display='block';
+  if (ans===scrWord) { fb.style.background='var(--green-light)'; fb.style.color='var(--green)'; fb.textContent=`✅ Bravo ! "${scrWord}" est correct !`; scrScore+=10; addPoints(10); showFeedback('🎉'); setTimeout(()=>nextScramble(),1500); }
+  else { fb.style.background='var(--red-light)'; fb.style.color='var(--red)'; fb.textContent='❌ Pas tout à fait ! Réessayez.'; document.getElementById('scr-answer').querySelectorAll('.answer-tile').forEach(t=>t.classList.add('wrong-red')); setTimeout(()=>{document.getElementById('scr-answer').querySelectorAll('.answer-tile').forEach(t=>t.classList.remove('wrong-red'));fb.style.display='none';},800); }
+}
+
+function scrambleSkip() { scrScore=Math.max(0,scrScore-2); const fb=document.getElementById('scr-feedback'); fb.style.display='block'; fb.style.background='var(--orange-light)'; fb.style.color='var(--orange)'; fb.textContent=`⏭ Le mot était : "${scrWord}"`; setTimeout(()=>nextScramble(),1500); }
+
+function nextScramble() { scrIdx++; if(scrIdx>=window._scrWords.length){const fb=document.getElementById('scr-feedback');fb.style.display='block';fb.style.background='var(--gold-light)';fb.style.color='var(--gold)';fb.textContent=`🏆 Terminé ! Score : ${scrScore} pts`;return;}loadScrambleWord(); }
+
+// ═══════════════════════════════════════════════════════════
+//  ASSOCIATIONS
+// ═══════════════════════════════════════════════════════════
+let assocRound=0, assocScore=0, assocSelectedLeft=null, assocSelectedRight=null, assocMatched=0;
+
+function initAssoc() { assocRound=0; assocScore=0; document.getElementById('assoc-score').textContent=0; loadAssocRound(); }
+
+function loadAssocRound() {
+  const round = ASSOC_ROUNDS[assocRound];
+  document.getElementById('assoc-round').textContent=`Série ${assocRound+1}/${ASSOC_ROUNDS.length}`;
+  assocSelectedLeft=null; assocSelectedRight=null; assocMatched=0;
+  const leftEl=document.getElementById('assoc-left'), rightEl=document.getElementById('assoc-right');
+  leftEl.innerHTML=''; rightEl.innerHTML='';
+  const shuffledRight = [...round.pairs].sort(()=>Math.random()-0.5);
+  round.pairs.forEach(pair => { const lt=document.createElement('div'); lt.className='assoc-item'; lt.textContent=pair.term; lt.dataset.id=pair.term; lt.onclick=()=>selectAssocLeft(lt,pair.term); leftEl.appendChild(lt); });
+  shuffledRight.forEach(pair => { const rt=document.createElement('div'); rt.className='assoc-item'; rt.textContent=pair.def; rt.dataset.id=pair.term; rt.onclick=()=>selectAssocRight(rt,pair.term); rightEl.appendChild(rt); });
+  document.getElementById('assoc-next-btn').style.display='none';
+}
+
+function selectAssocLeft(el, id) { if(el.classList.contains('matched-ok'))return; document.querySelectorAll('#assoc-left .assoc-item').forEach(i=>i.classList.remove('selected')); assocSelectedLeft={el,id}; el.classList.add('selected'); tryAssocMatch(); }
+function selectAssocRight(el, id) { if(el.classList.contains('matched-ok'))return; document.querySelectorAll('#assoc-right .assoc-item').forEach(i=>i.classList.remove('selected')); assocSelectedRight={el,id}; el.classList.add('selected'); tryAssocMatch(); }
+
+function tryAssocMatch() {
+  if(!assocSelectedLeft||!assocSelectedRight)return;
+  const correct = assocSelectedLeft.id===assocSelectedRight.id;
+  if (correct) {
+    assocSelectedLeft.el.classList.remove('selected'); assocSelectedRight.el.classList.remove('selected');
+    assocSelectedLeft.el.classList.add('matched-ok'); assocSelectedRight.el.classList.add('matched-ok');
+    assocMatched++; assocScore+=5; document.getElementById('assoc-score').textContent=assocScore; addPoints(5); showFeedback('🔗');
+    if (assocMatched===ASSOC_ROUNDS[assocRound].pairs.length) setTimeout(()=>{document.getElementById('assoc-next-btn').style.display='flex';},400);
+  } else {
+    assocSelectedLeft.el.classList.add('matched-fail'); assocSelectedRight.el.classList.add('matched-fail');
+    setTimeout(()=>{assocSelectedLeft.el.classList.remove('selected','matched-fail');assocSelectedRight.el.classList.remove('selected','matched-fail');},600);
+    showFeedback('❌');
+  }
+  assocSelectedLeft=null; assocSelectedRight=null;
+}
+
+function nextAssocRound() { assocRound++; if(assocRound>=ASSOC_ROUNDS.length)return; loadAssocRound(); }
+
+// ═══════════════════════════════════════════════════════════
+//  MYSTÈRE
+// ═══════════════════════════════════════════════════════════
+let mystIdx=0, mystScore=0, mystQs=[];
+
+function initMystery() { mystQs=[...MYSTERY_QUESTIONS].sort(()=>Math.random()-0.5); mystIdx=0; mystScore=0; document.getElementById('myst-score').textContent=0; loadMysteryQ(); }
+
+function loadMysteryQ() {
+  if(mystIdx>=mystQs.length){document.getElementById('myst-def').textContent=`🏆 Terminé ! Score final : ${mystScore} pts`;document.getElementById('myst-opts').innerHTML='';document.getElementById('myst-next-btn').style.display='none';return;}
+  const q=mystQs[mystIdx];
+  document.getElementById('myst-counter').textContent=`${mystIdx+1} / ${mystQs.length}`;
+  document.getElementById('myst-def').textContent=q.def;
+  document.getElementById('myst-feedback').style.display='none';
+  document.getElementById('myst-next-btn').style.display='none';
+  const optsEl=document.getElementById('myst-opts'); optsEl.innerHTML='';
+  [...q.opts].sort(()=>Math.random()-0.5).forEach(opt=>{const btn=document.createElement('button');btn.className='mystery-opt';btn.textContent=opt;btn.onclick=()=>answerMystery(opt,q,btn,optsEl);optsEl.appendChild(btn);});
+}
+
+function answerMystery(chosen, q, btn, optsEl) {
+  const btns=optsEl.querySelectorAll('.mystery-opt'); btns.forEach(b=>b.disabled=true);
+  const correct=chosen===q.ans, fb=document.getElementById('myst-feedback'); fb.style.display='block';
+  if(correct){btn.classList.add('correct-ans');mystScore+=8;document.getElementById('myst-score').textContent=mystScore;fb.style.background='var(--green-light)';fb.style.color='var(--green)';fb.textContent=`✅ ${q.expl}`;addPoints(8);showFeedback('✅');}
+  else{btn.classList.add('wrong-ans');btns.forEach(b=>{if(b.textContent===q.ans)b.classList.add('missed');});fb.style.background='var(--red-light)';fb.style.color='var(--red)';fb.textContent=`❌ La bonne réponse était : "${q.ans}". ${q.expl}`;showFeedback('❌');}
+  document.getElementById('myst-next-btn').style.display='flex';
+}
+
+function nextMystery() { mystIdx++; loadMysteryQ(); }
+
+// ═══════════════════════════════════════════════════════════
+//  DEVINE LE MOT
+// ═══════════════════════════════════════════════════════════
+let devineQueue = [], devineIdx = 0, devineScore = 0, devineOk = 0, devineErr = 0;
+let devineCat = 'all';
+
+// Tous les termes du glossaire pour les distracteurs
+const ALL_TERMS = DEFINITIONS.map(d => d.term);
+
+function devineSetCat(cat, el) {
+  devineCat = cat;
+  document.querySelectorAll('.devine-cat-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  devineRestart();
+}
+
+function devineRestart() {
+  const pool = devineCat === 'all' ? [...DEFINITIONS] : DEFINITIONS.filter(d => d.cat === devineCat);
+  devineQueue = pool.sort(() => Math.random() - 0.5);
+  devineIdx = 0; devineScore = 0; devineOk = 0; devineErr = 0;
+  document.getElementById('dev-score').textContent = 0;
+  document.getElementById('dev-ok').textContent = 0;
+  document.getElementById('dev-err').textContent = 0;
+  document.getElementById('dev-total').textContent = devineQueue.length;
+  document.getElementById('dev-end').style.display = 'none';
+  document.getElementById('dev-play').style.display = 'block';
+  devineLoad();
+}
+
+function devineLoad() {
+  if (devineIdx >= devineQueue.length) { devineShowEnd(); return; }
+  const item = devineQueue[devineIdx];
+  document.getElementById('dev-idx').textContent = devineIdx + 1;
+  document.getElementById('dev-source').textContent = item.source;
+  document.getElementById('dev-def').textContent = item.body;
+  document.getElementById('dev-feedback').style.display = 'none';
+  document.getElementById('dev-next-btn').style.display = 'none';
+
+  // Tous les termes du glossaire mélangés
+  const choices = [...ALL_TERMS].sort(() => Math.random() - 0.5);
+
+  const grid = document.getElementById('dev-words');
+  grid.innerHTML = '';
+  choices.forEach(term => {
+    const btn = document.createElement('button');
+    btn.className = 'devine-word-btn';
+    btn.textContent = term;
+    btn.onclick = () => devineAnswer(term, item, btn);
+    grid.appendChild(btn);
+  });
+}
+
+function devineAnswer(chosen, item, btn) {
+  // Désactiver tous les boutons
+  document.querySelectorAll('.devine-word-btn').forEach(b => b.disabled = true);
+  const fb = document.getElementById('dev-feedback');
+  fb.style.display = 'block';
+  if (chosen === item.term) {
+    btn.classList.add('correct-choice');
+    fb.className = 'devine-feedback ok';
+    fb.innerHTML = `✅ <strong>Bravo !</strong> C'est bien « ${item.term} » (${item.source}).`;
+    devineScore += 10; devineOk++;
+    document.getElementById('dev-score').textContent = devineScore;
+    document.getElementById('dev-ok').textContent = devineOk;
+    addPoints(10); showFeedback('🎯');
+  } else {
+    btn.classList.add('wrong-choice');
+    // Montrer la bonne réponse
+    document.querySelectorAll('.devine-word-btn').forEach(b => {
+      if (b.textContent === item.term) b.classList.add('show-correct');
+    });
+    fb.className = 'devine-feedback ko';
+    fb.innerHTML = `❌ La bonne réponse était <strong>« ${item.term} »</strong>. ${item.source}`;
+    devineErr++;
+    document.getElementById('dev-err').textContent = devineErr;
+    showFeedback('❌');
+  }
+  document.getElementById('dev-next-btn').style.display = 'flex';
+}
+
+function devineNext() {
+  devineIdx++;
+  devineLoad();
+}
+
+function devineShowEnd() {
+  document.getElementById('dev-play').style.display = 'none';
+  document.getElementById('dev-end').style.display = 'block';
+  const pct = devineQueue.length > 0 ? Math.round(devineOk / devineQueue.length * 100) : 0;
+  let emoji = pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '💪';
+  document.getElementById('dev-end-emoji').textContent = emoji;
+  document.getElementById('dev-end-msg').textContent = `${devineOk} / ${devineQueue.length} bonnes réponses (${pct}%)`;
+  document.getElementById('dev-end-score').textContent = `${devineScore} pts`;
+}
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  renderFlashcard();
+  buildQCM(QCM_DATA);
+  buildVF();
+  buildQO();
+  buildDefs(DEFINITIONS);
+  buildOrderExercises();
+  buildPrevClassify();
+  initMemory();
+  initScramble();
+  initAssoc();
+  initMystery();
+  devineRestart();
+  updateFCProgress();
+});
+</script>
+</body>
+</html>
