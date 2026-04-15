@@ -2483,7 +2483,7 @@ select.input-field {
 <div id="modalContainer"></div>
 
 <script>
-// ==================== DATA STORE ====================
+// ==================== STOCKAGE DES DONNÉES ====================
 let cards = [];
 let synthesis = [];
 let EMBEDDED_DATA = null;
@@ -2499,7 +2499,7 @@ let currentFilter = 'all';
 let currentFlashIndex = 0;
 let filteredCards = [];
 
-// Load from localStorage
+// Chargement depuis le stockage local (localStorage)
 function loadData() {
   try {
     const VERSION = 'V8';
@@ -2587,7 +2587,7 @@ function showPage(pageId) {
   if (pageId === 'editor') renderCardList();
 }
 
-// ==================== CARD MANAGEMENT ====================
+// ==================== GESTION DES CARTES ====================
 function addCard() {
   const q = document.getElementById('newQuestion').value.trim();
   const a = document.getElementById('newAnswer').value.trim();
@@ -2692,9 +2692,9 @@ function bulkAdd() {
 }
 
 function normalizeImportedPayload(payload) {
-  // Accepts:
-  // 1) Array of cards: [{question, answer, category?, type?, explanation?, options?, correctOptions?}, ...]
-  // 2) Object: {cards:[...], synthesis:[...]}
+  // Formats acceptés :
+  // 1) Tableau de cartes : [{question, answer, category?, type?, explanation?, options?, correctOptions?}, ...]
+  // 2) Objet : {cards:[...], synthesis:[...]}
   if (Array.isArray(payload)) {
     return { cards: payload, synthesis: [] };
   }
@@ -2712,7 +2712,7 @@ function sanitizeCard(item, i, baseId) {
   const options = Array.isArray(item.options) ? item.options.filter(Boolean) : [];
   const correct = Array.isArray(item.correctOptions) ? item.correctOptions.filter(Boolean) : [];
 
-  // If a card is marked as qcm but missing options, downgrade to flashcard/open.
+  // Si une carte QCM n'a pas d'options, on la rétrograde en flashcard.
   const isQcm = typeof t === 'string' && t.startsWith('qcm');
   const safeType = (isQcm && options.length === 0) ? 'flashcard' : t;
 
@@ -2754,7 +2754,7 @@ function importPayload(payload, replaceAll = false) {
     synthesis = [...synthesis, ...importedSynth];
   }
 
-  // Basic de-dup (same Q+A) to avoid accidental double-import
+  // Déduplication de base (même question et réponse) pour éviter les doublons
   const seen = new Set();
   cards = cards.filter(c => {
     const key = (c.question + '||' + c.answer).toLowerCase().trim();
@@ -2771,7 +2771,7 @@ function importPayload(payload, replaceAll = false) {
 }
 
 function importJSON() {
-  // Import JSON pasted in textarea
+  // Importer le JSON collé dans la zone de texte
   try {
     const raw = document.getElementById('importJSON').value.trim();
     if (!raw) return alert('Collez un JSON ou chargez un fichier.');
@@ -2922,7 +2922,7 @@ function prevCard() {
 let quizQuestions = [];
 let quizIndex = 0;
 let quizScore = 0;
-let quizErrors = []; // Track errors for export
+let quizErrors = []; // Suivre les erreurs pour pouvoir les exporter
 
 function startQuiz() {
   // QCM uniquement : pas de questions ouvertes ici
@@ -2930,7 +2930,7 @@ function startQuiz() {
   if (qcmPool.length < 2) return alert('Ajoutez au moins 2 cartes QCM (avec des options) !');
 
   const count = parseInt(document.getElementById('quizCount').value);
-  // Deep copy + double shuffle for strong randomization
+  // Copie et double mélange pour une randomisation optimale
   let pool = qcmPool.map(c => ({ ...c, _rand: Math.random() }));
   pool.sort((a, b) => a._rand - b._rand);
   shuffleArray(pool);
@@ -2977,11 +2977,11 @@ function showQuizQuestion() {
     </div>
     ${isMulti ? '<p style="color:var(--text3);font-size:0.8rem;margin-top:8px">Plusieurs réponses possibles</p>' : ''}`;
   } else {
-    // For open/flashcard type: show as open question in quiz mode
+    // Pour le type flashcard : afficher comme question ouverte en mode quiz
     optionsHtml = `<div class="open-answer-area">
       <textarea class="input-field" id="quizOpenInput" placeholder="Tapez votre réponse..." rows="3"></textarea>
     </div>`;
-    // Change validate button behavior
+    // Modifier le comportement du bouton de validation
     isOpenInQuiz = true;
   }
   
@@ -3019,10 +3019,10 @@ function validateQuiz() {
   const isQCM = card.type && card.type.startsWith('qcm') && card.options && card.options.length > 0;
   const options = document.querySelectorAll('#quizOptions .quiz-option');
   
-  // Handle open questions in quiz mode
+  // Gérer les questions ouvertes dans le mode quiz
   const openInput = document.getElementById('quizOpenInput');
   if (openInput) {
-    // Show the answer for self-evaluation
+    // Afficher la réponse pour l'auto-évaluation
     document.getElementById('quizFeedback').innerHTML = `
       <div class="quiz-explanation">
         <strong>Réponse attendue :</strong><br>
@@ -3075,7 +3075,7 @@ function validateQuiz() {
     });
   }
   
-  // Update card status
+  // Mise à jour du statut de la carte
   const original = cards.find(c => c.id === card.id);
   if (original) original.status = isCorrect ? 'known' : 'unknown';
   saveData();
@@ -3154,7 +3154,7 @@ function quizGiveUp() {
 // ==================== OPEN QUESTIONS ====================
 let openQuestions = [];
 let openIndex = 0;
-let openErrors = []; // Track errors for export
+let openErrors = []; // Suivre les erreurs pour pouvoir les exporter
 
 function startOpen() {
   // Questions ouvertes uniquement (on exclut les QCM)
@@ -3242,7 +3242,7 @@ function renderSynthesis() {
     return;
   }
 
-  // ── Acronym dictionary for first-use expansion ──
+  // ── Dictionnaire d'acronymes pour développement à la première apparition ──
   const ACRONYMS = {
     'ADME': 'Absorption, Distribution, Métabolisme, Élimination',
     'AMM': 'Autorisation de Mise sur le Marché',
@@ -3284,10 +3284,10 @@ function renderSynthesis() {
 
   function expandAcronymsInContent(html) {
     const seen = new Set();
-    // Process text outside of HTML tags
+    // Traiter le texte en dehors des balises HTML
     return html.replace(/(<[^>]+>)|(\b(?:IRSNa|ISRS|IRSN|ADME|ANSM|ASMR|IMAO|PTSD|AMM|ASC|AUC|BZD|CPP|DCI|DL50|EEN|HTA|PMF|PMO|PUI|RHD|SMR|SNC|TOC|AVK|R&D|AG|PA|CI|EI|SA|IV|IH|IR|Vd|T1\/2)\b)/g,
       (match, tag, acronym) => {
-        if (tag) return tag; // Don't touch HTML tags
+        if (tag) return tag; // Ne pas altérer les balises HTML
         if (!acronym || !ACRONYMS[acronym]) return match;
         if (seen.has(acronym)) return `<strong>${acronym}</strong>`;
         seen.add(acronym);
@@ -3296,25 +3296,25 @@ function renderSynthesis() {
     );
   }
 
-  // ── Visual enhancement: colorize key patterns ──
+  // ── Amélioration visuelle : coloration des éléments clés ──
   function enhanceContent(html) {
-    // First expand acronyms
+    // Développer d'abord les acronymes
     html = expandAcronymsInContent(html);
 
-    // Arrows → make them colored
+    // Flèches → mise en couleur
     html = html.replace(/→/g, '<span style="color:var(--accent2);font-weight:700"> → </span>');
 
-    // ↑ and ↓ arrows
+    // Flèches ↑ et ↓
     html = html.replace(/↑/g, '<span style="color:var(--green);font-weight:700">↑</span>');
     html = html.replace(/↓/g, '<span style="color:var(--red);font-weight:700">↓</span>');
 
-    // Percentage values get colored
+    // Coloration des pourcentages
     html = html.replace(/(\d+%)/g, '<span class="synth-kw">$1</span>');
 
-    // ≠ symbol
+    // Symbole ≠
     html = html.replace(/≠/g, '<span style="color:var(--red);font-weight:700">≠</span>');
 
-    // +++ emphasis
+    // Mise en évidence avec +++
     html = html.replace(/\+\+\+/g, '<span style="color:var(--green);font-weight:900">+++</span>');
 
     return html;
@@ -3422,9 +3422,9 @@ function generateCrossword() {
   shuffleArray(wordPool);
   const candidates = wordPool.slice(0, Math.max(targetCount + 10, wordPool.length));
 
-  // ── Core crossword engine ──
-  // RULE: each ACROSS word has its own row, each DOWN word has its own column.
-  // Words connect via single-letter intersections only. No parallel adjacency.
+  // ── Moteur principal des mots croisés ──
+  // RÈGLE : chaque mot HORIZONTAL a sa propre ligne, VERTICAL a sa colonne.
+  // Les mots se croisent sur une seule lettre. Pas de parallélisme.
   const SIZE = 40;
 
   function tryBuild(words) {
@@ -3432,12 +3432,12 @@ function generateCrossword() {
     const placed = [];
     const usedRows = new Set(); // rows claimed by ACROSS words
     const usedCols = new Set(); // cols claimed by DOWN words
-    // Track ownership per cell
+    // Suivi de l'occupation de chaque case
     const cellOwner = Array.from({ length: SIZE }, () =>
       Array.from({ length: SIZE }, () => ({ across: null, down: null }))
     );
 
-    // Place first word horizontally near center
+    // Placer le premier mot horizontalement près du centre
     const first = words[0];
     const startRow = Math.floor(SIZE / 2);
     const startCol = Math.floor((SIZE - first.word.length) / 2);
@@ -3471,7 +3471,7 @@ function generateCrossword() {
             const endC = newDir === 'across' ? newCol + item.word.length - 1 : newCol;
             if (endR >= SIZE - 1 || endC >= SIZE - 1) continue;
 
-            // 1 word per row (across) / 1 word per col (down)
+            // 1 mot par ligne (horiz) / 1 mot par colonne (vert)
             if (newDir === 'across' && usedRows.has(newRow)) continue;
             if (newDir === 'down' && usedCols.has(newCol)) continue;
 
@@ -3489,7 +3489,7 @@ function generateCrossword() {
                 if (newDir === 'down' && cellOwner[r][c].down !== null) { valid = false; break; }
                 intersections++;
               } else {
-                // No parallel adjacency on empty cells
+                // Pas de mots adjacents sur les cases vides
                 if (newDir === 'across') {
                   if (r > 0 && grid[r-1][c] !== null) { valid = false; break; }
                   if (r < SIZE-1 && grid[r+1][c] !== null) { valid = false; break; }
@@ -3501,7 +3501,7 @@ function generateCrossword() {
             }
             if (!valid || intersections < 1) continue;
 
-            // Before/after word must be empty
+            // Les cases avant et après le mot doivent être vides
             if (newDir === 'across') {
               if (newCol > 0 && grid[newRow][newCol-1] !== null) continue;
               if (endC < SIZE-1 && grid[newRow][endC+1] !== null) continue;
@@ -3535,7 +3535,7 @@ function generateCrossword() {
     return { grid, placed };
   }
 
-  // Try multiple random orderings and pick the best
+  // Essayer plusieurs ordres et garder le meilleur
   let bestResult = null;
   let bestCount = 0;
   for (let attempt = 0; attempt < 12; attempt++) {
@@ -3555,7 +3555,7 @@ function generateCrossword() {
     return alert('Impossible de construire une grille. Essayez "Toutes" les catégories.');
   }
 
-  // Assign numbers in reading order
+  // Assigner les numéros dans le sens de la lecture
   const sorted = [...bestResult.placed].sort((a, b) => a.row - b.row || a.col - b.col);
   const numMap = new Map();
   let num = 1;
@@ -3574,7 +3574,7 @@ function generateCrossword() {
 
 
 function renderCrossword(grid, placed, gridSize) {
-  // Find bounding box
+  // Trouver la zone délimitant la grille
   let minR = gridSize, maxR = 0, minC = gridSize, maxC = 0;
   for (let r = 0; r < gridSize; r++) {
     for (let c = 0; c < gridSize; c++) {
@@ -3656,7 +3656,7 @@ function renderCrossword(grid, placed, gridSize) {
     </div>`;
 }
 
-// ── Crossword navigation ──
+// ── Navigation dans les mots croisés ──
 window._cwDir = 'across';
 
 function cwHighlight(r, c) {
@@ -3761,7 +3761,7 @@ const hangmanMaxErrors = 8;
 function startHangman() {
   if (cards.length < 1) return alert('Ajoutez des cartes !');
 
-  // Build a pool of approachable KEY TERMS from the course
+  // Créer un ensemble de MOTS-CLÉS pertinents issus du cours
   let pool = buildKeyTermPool({ minLen: 4, maxLen: 14, onlyCore: true });
 
   if (pool.length < 12) {
@@ -3770,10 +3770,10 @@ function startHangman() {
 
   if (pool.length < 3) return alert('Pas assez de mots exploitables pour le pendu !');
 
-  // Avoid always picking the same first word: track used words in-session
+  // Éviter de toujours choisir le même mot de départ : mémoriser les mots utilisés
   if (!window._hangmanUsedWords) window._hangmanUsedWords = new Set();
 
-  // Try to pick a not-yet-used word
+  // Essayer de prendre un mot non encore utilisé
   const available = pool.filter(x => !window._hangmanUsedWords.has(x.word));
   const pickFrom = available.length ? available : pool;
 
@@ -3789,13 +3789,13 @@ function startHangman() {
 }
 
 function hangmanGiveUp() {
-  // Reveal all letters
+  // Révéler toutes les lettres
   hangmanWord.split('').forEach(ch => {
     if (/[A-Z]/.test(ch) && !hangmanGuessed.includes(ch)) {
       hangmanGuessed.push(ch);
     }
   });
-  hangmanErrors = hangmanMaxErrors; // Mark as lost
+  hangmanErrors = hangmanMaxErrors; // Marquer comme perdu
   renderHangman();
 }
 
@@ -3948,7 +3948,7 @@ let speedStreak = 0;
 let speedBestStreak = 0;
 let speedQuestions = [];
 let speedSettings = { count: 15, seconds: 10, mode: 'smart' };
-let speedErrors = []; // Track errors for export
+let speedErrors = []; // Suivre les erreurs pour pouvoir les exporter
 
 function getSpeedPool(revisionOnly, mode) {
   let pool = revisionOnly ? cards.filter(c => c.status !== 'known') : [...cards];
@@ -3956,12 +3956,12 @@ function getSpeedPool(revisionOnly, mode) {
   if (mode === 'qcmOnly') {
     pool = pool.filter(c => c.type === 'qcm-single' && Array.isArray(c.options) && c.options.length >= 3 && Array.isArray(c.correctOptions) && c.correctOptions.length === 1);
   } else {
-    // Exclude qcm-multi (multi-answer doesn't work as speed quiz single-choice)
-    // Exclude flashcard/open with very long answers (unreadable as options)
+    // Exclure les QCM à choix multiples (incompatibles avec ce mode)
+    // Exclure les réponses très longues (illisibles comme options)
     pool = pool.filter(c => {
       if (c.type === 'qcm-multi') return false;
       if (c.type === 'qcm-single') return Array.isArray(c.options) && c.options.length >= 2 && Array.isArray(c.correctOptions) && c.correctOptions.length === 1;
-      // For flashcard/open: only keep if answer is reasonably short
+      // Pour les questions ouvertes : ne garder que si la réponse est courte
       const ans = String(c.answer || '').trim();
       if (ans.length > 80) return false;
       if (ans.includes('\n') || ans.includes('•') || ans.includes('→')) return false;
@@ -3986,7 +3986,7 @@ function smartDistractorsFor(card, needed = 3, correctOverride = null) {
   const cat = (card.category || '').trim().toLowerCase();
   const target = answerShape(correct);
 
-  // Build a richer candidate pool: answers + QCM options (excluding the correct)
+  // Créer un choix plus riche : réponses + options des QCM (sans la bonne réponse)
   const pool = [];
   for (const c of cards) {
     if (!c || c.id === card.id) continue;
@@ -4006,7 +4006,7 @@ function smartDistractorsFor(card, needed = 3, correctOverride = null) {
     }
   }
 
-  // Helper: score candidates by (a) type similarity + (b) token overlap
+  // Fonction d'aide : évaluer les candidats par type et mots en commun
   const normTokens = (s) => {
     return String(s || '')
       .toLowerCase()
@@ -4063,10 +4063,10 @@ function smartDistractorsFor(card, needed = 3, correctOverride = null) {
 }
 
 function buildSpeedQuestion(card) {
-  // Returns {question, options, correctIdx, skip}
-  // skip=true means this question should be skipped (no good distractors)
+  // Retourne {question, options, correctIdx, skip}
+  // skip=true signifie que la question est ignorée (manque de distracteurs)
 
-  // Priority: qcm-single with explicit options — use them directly
+  // Priorité : utiliser directement les options des QCM classiques
   if (card.type === 'qcm-single' && Array.isArray(card.options) && card.options.length >= 2 && Array.isArray(card.correctOptions) && card.correctOptions.length === 1) {
     const correct = String(card.correctOptions[0]).trim();
     let opts = [...card.options].map(o => String(o).trim()).filter(Boolean);
@@ -4078,7 +4078,7 @@ function buildSpeedQuestion(card) {
 
   // For flashcard/open: generate distractors from other cards
   const correct = String(card.answer || '').trim();
-  // Skip if answer is too long or contains list formatting
+  // Ignorer si la réponse est trop longue ou sous forme de liste
   if (!correct || correct.length > 80 || /[\n\u2022\u2192]/.test(correct)) {
     return { question: card.question, options: [correct], correctIdx: 0, skip: true };
   }
@@ -4187,7 +4187,7 @@ function showSpeedQuestion() {
     }
     if (speedTimeLeft <= 0) {
       clearInterval(speedTimer);
-      // Track timeout as error
+      // Compter le dépassement de temps comme une erreur
       const timeoutCard = speedQuestions[speedIndex];
       const timeoutOpts = window._speedOpts || [];
       const timeoutCorrectIdx = window._speedCorrectIdx;
@@ -4271,7 +4271,7 @@ function exportErrors(errors, mode) {
   txt += `  ❌ ${errors.length} erreur${errors.length > 1 ? 's' : ''}\n`;
   txt += '═══════════════════════════════════════════════════════\n\n';
 
-  // Group by category
+  // Grouper par catégorie
   const byCategory = {};
   errors.forEach(e => {
     const cat = e.category || 'Sans catégorie';
@@ -4300,7 +4300,7 @@ function exportErrors(errors, mode) {
   txt += '  puis relancez un quiz pour vérifier vos progrès !\n';
   txt += '═══════════════════════════════════════════════════════\n';
 
-  // Generate download
+  // Générer le fichier à télécharger
   const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -4362,7 +4362,7 @@ function extractKeyTermFromQuestion(q) {
   if (!q) return '';
   let s = q.toString().trim();
 
-  // Common patterns
+  // Formulations courantes
   let m =
     s.match(/Qu['’]est-ce qu['’]un[e]?\s+(.+?)\s*\?/i) ||
     s.match(/Qu['’]est-ce que\s+(.+?)\s*\?/i) ||
@@ -4371,13 +4371,13 @@ function extractKeyTermFromQuestion(q) {
 
   let term = m ? m[1] : '';
 
-  // If no match, try to extract an acronym/term in the question (e.g., AMM, DCI, DL50)
+  // Si pas de correspondance, extraire un acronyme de la question (ex: AMM, DCI)
   if (!term) {
     const acr = s.match(/\b([A-Z]{2,6}|DL\s?50|T\s?MAX|C\s?MAX|ASC|AMM|SMR|ASMR|DCI)\b/i);
     if (acr) term = acr[1];
   }
 
-  // If still empty and question is short, use it as a term
+  // Si toujours vide et question courte, utiliser la question comme terme
   if (!term && s.length <= 22 && !s.includes('?')) term = s;
 
   term = stripLeadingArticles(term)
@@ -4391,15 +4391,15 @@ function extractKeyTermFromQuestion(q) {
 function shortClueFromAnswer(a) {
   if (!a) return '';
   let s = a.toString().trim();
-  // Keep first sentence-ish
+  // Garder environ la première phrase
   s = s.split(/(?<=[.!?])\s+/)[0];
   if (s.length > 120) s = s.slice(0, 117) + '…';
   return s;
 }
 
 function buildKeyTermPool({ minLen = 3, maxLen = 14, onlyCore = true, categories = null } = {}) {
-  // ── Curated pharmacology key terms with RIDDLE-STYLE crossword clues ──
-  // Each clue is short, evocative, like a real crossword definition
+  // ── Termes de pharmacologie avec indices style MOTS CROISÉS ──
+  // Chaque indice est court et évocateur, comme une vraie définition
   const PHARMA_KEY_TERMS = [
     // ─── Développement du médicament & AMM ───
     { word: 'AMM', clue: "Sésame administratif pour commercialiser un médicament", cat: 'Développement du médicament & AMM' },
@@ -4500,7 +4500,7 @@ function buildKeyTermPool({ minLen = 3, maxLen = 14, onlyCore = true, categories
     { word: 'LIBIDO', clue: "Désir souvent diminué comme EI des ISRS", cat: 'Antidépresseurs' },
   ];
 
-  // ── Stopwords: never include as crossword answers ──
+  // ── Mots vides : à ne jamais inclure dans les réponses ──
   const STOPWORDS = new Set([
     'PHASE','ETAPE','ETAPES','ETUDES','PROPOSITION','REPONSE','GRANDES','DEVELOPPEMENT',
     'MEDICAMENT','MEDICAMENTS','QUELLE','QUELLES','QUELS','QUEL','CORRECT','CORRECTE',
@@ -4520,8 +4520,8 @@ function buildKeyTermPool({ minLen = 3, maxLen = 14, onlyCore = true, categories
   const seen = new Set();
   const catFilter = categories && Array.isArray(categories) && categories.length ? categories : null;
 
-  // Use ONLY curated terms — guarantees high-quality crossword clues
-  // NO fallback to raw card questions (avoids "quelle proposition est correcte ?")
+  // Utiliser UNIQUEMENT les termes validés — garantit des indices de qualité
+  // PAS de rabattement sur les questions brutes (évite les phrases à rallonge)
   PHARMA_KEY_TERMS.forEach(term => {
     if (catFilter) {
       const termCatNorm = term.cat.toLowerCase();
@@ -4565,7 +4565,7 @@ function showToast(msg) {
   setTimeout(() => toast.remove(), 2500);
 }
 
-// Keyboard shortcuts
+// Raccourcis clavier
 document.addEventListener('keydown', e => {
   const page = document.querySelector('.page.active');
   if (!page) return;
@@ -4584,15 +4584,15 @@ function populateCrosswordControls() {
   const sel = document.getElementById('crosswordCategory');
   if (!sel) return;
 
-  // If already populated, don't duplicate
+  // Si la liste est déjà remplie, ne pas dupliquer
   if (sel.options && sel.options.length > 0) return;
 
   const cats = new Set();
-  // From cards
+  // À partir des cartes existantes
   cards.forEach(c => {
     cats.add((c.category || 'Général').trim());
   });
-  // Ensure curated categories show up
+  // S'assurer que les catégories pré-sélectionnées s'affichent
   ['Développement du médicament & AMM','Pharmacologie générale','Pharmacocinétique','Pharmacodynamie','Anxiolytiques','Hypnotiques','Antidépresseurs'].forEach(c => cats.add(c));
 
   const list = Array.from(cats).filter(Boolean).sort((a,b) => a.localeCompare(b, 'fr'));
@@ -4828,8 +4828,8 @@ populateCrosswordControls();
   const existingSynth = JSON.parse(localStorage.getItem('masterlearn_synthesis_v8') || '[]');
 
 
-  // Prefer external JSON (course_data.json) when the app is served via http(s)
-  // (Opening the HTML with file:// may block fetch; in that case use the Import tab)
+  // Préférer le JSON externe (course_data.json) si l'app est sur un serveur web
+  // (L'ouverture via file:// peut bloquer le chargement ; utiliser l'onglet Importer)
   if (existingCards.length === 0 && existingSynth.length === 0) {
     try {
       const res = await fetch('course_data.json', { cache: 'no-store' });
@@ -4840,11 +4840,11 @@ populateCrosswordControls();
         return;
       }
     } catch (e) {
-      // ignore and fall back to embedded starter data
+      // ignorer et utiliser les données de base intégrées
     }
   }
   
-  // Only inject if no data exists yet (avoid duplicates on reload)
+  // Injecter seulement s'il n'y a aucune donnée (évite les doublons au rechargement)
   if (existingCards.length === 0) {
     const courseCards = [{"question": "Quelles sont les grandes étapes du développement d’un médicament ?", "answer": "Exploratoire → Préclinique → Clinique (phases I–III) → AMM → Phase IV (pharmacovigilance).", "category": "Développement du médicament & AMM", "type": "open", "explanation": "Carte mémo : retiens l’ordre global avant de détailler chaque phase."}, {"question": "Quel est l’objectif principal de la phase I des essais cliniques ?", "answer": "Évaluer la tolérance et la sécurité (dose, effets indésirables) chez un petit nombre de sujets.", "category": "Développement du médicament & AMM", "type": "qcm-single", "options": ["Évaluer la tolérance et la sécurité", "Confirmer l’efficacité sur large population (comparatif)", "Surveiller le médicament après commercialisation", "Évaluer l’efficacité et la dose chez patients"], "correctOptions": ["Évaluer la tolérance et la sécurité"], "explanation": "Phase I : sécurité/tolérance. Phase II : efficacité + dose. Phase III : confirmation large. Phase IV : post-AMM."}, {"question": "À quoi correspond la phase IV du développement d’un médicament ?", "answer": "La pharmacovigilance et les études post-AMM en conditions réelles.", "category": "Développement du médicament & AMM", "type": "qcm-single", "options": ["Essais sur animaux", "Pharmacovigilance post-AMM", "Détermination de la dose efficace chez patients", "Tolérance chez volontaires sains"], "correctOptions": ["Pharmacovigilance post-AMM"], "explanation": "Phase IV : surveillance après commercialisation (signalement EI, études en vie réelle)."}, {"question": "Combien d'années dure la durée de protection d'un brevet pour un médicament ?", "answer": "20 ans", "category": "QCM Cours 1", "type": "qcm-single", "explanation": "Le brevet est déposé dès la phase exploratoire et dure 20 ans (+5 ans max de CCP).", "options": ["5 ans", "10 ans", "15 ans", "20 ans", "25 ans"], "correctOptions": ["20 ans"]}, {"question": "Quel est le but principal des études précliniques ?", "answer": "Évaluer la toxicité du candidat médicament", "category": "QCM Cours 1", "type": "qcm-single", "explanation": "Tests in vitro (pharmacologie expérimentale) et in vivo (toxicologie). Définir la limite d'innocuité.", "options": ["Évaluer l'efficacité du candidat médicament", "Évaluer la toxicité du candidat médicament", "Tester des milliers de molécules", "Comparer le traitement de référence au placebo"], "correctOptions": ["Évaluer la toxicité du candidat médicament"]}, {"question": "La commission d'AMM... (cochez les réponses vraies)", "answer": "Évalue la balance bénéfice/risque et s'assure des garanties de sécurité et qualité", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "C'est la Commission de Transparence qui décide du remboursement et donne un avis sur le SMR. L'AMM n'est PAS définitive (5 ans renouvelables).", "options": ["Décide du taux de remboursement du médicament", "Évalue la balance bénéfice/risque du médicament", "S'assure qu'il présente les garanties de sécurité et de qualité", "Attribue une AMM de manière définitive", "Donne un avis sur le SMR (service médical rendu)"], "correctOptions": ["Évalue la balance bénéfice/risque du médicament", "S'assure qu'il présente les garanties de sécurité et de qualité"]}, {"question": "Quelles sont les origines possibles d'un PA (principe actif) ?", "answer": "Minérale, synthétique, biotechnologique, animale, végétale", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "Toutes ces origines sont correctes. Il existe aussi l'origine microbiologique.", "options": ["Minérale", "Synthétique", "Biotechnologique", "Animale", "Végétale"], "correctOptions": ["Minérale", "Synthétique", "Biotechnologique", "Animale", "Végétale"]}, {"question": "Choisissez les médicaments désignés par leur DCI", "answer": "Ibuprofène et Paracétamol", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "Doliprane, Advil et Nurofen sont des noms commerciaux (marques). La DCI est le nom international du principe actif.", "options": ["Doliprane", "Ibuprofène", "Paracétamol", "Advil", "Nurofen"], "correctOptions": ["Ibuprofène", "Paracétamol"]}, {"question": "À propos des excipients, cochez les réponses vraies", "answer": "Conservation, masquer le goût, inerte vis-à-vis du PA, lactose = EEN", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "L'excipient n'a PAS d'action pharmacologique. Il n'est PAS forcément inerte vis-à-vis de l'organisme (cas des EEN).", "options": ["A une action pharmacologique", "Peut permettre la conservation du médicament", "Peut permettre de masquer le goût", "Est inerte vis-à-vis du PA", "Est inerte vis-à-vis de l'organisme", "Le lactose est un excipient à effet notoire"], "correctOptions": ["Peut permettre la conservation du médicament", "Peut permettre de masquer le goût", "Est inerte vis-à-vis du PA", "Le lactose est un excipient à effet notoire"]}, {"question": "Concernant les usages externes et internes, cochez les réponses vraies", "answer": "L'usage interne est aussi appelé action systémique", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "Usage interne = systémique (via circulation générale). Usage externe = local (pas de diffusion sanguine). C'est l'usage EXTERNE qui est appliqué directement sur le lieu d'action.", "options": ["Le médicament en usage interne est appliqué directement sur son lieu d'action", "Le médicament en usage externe diffuse dans le sang", "L'usage interne est aussi appelé action systémique", "Le médicament en usage externe emprunte la circulation générale"], "correctOptions": ["L'usage interne est aussi appelé action systémique"]}, {"question": "Posologie, dose, dosage — cochez les réponses vraies", "answer": "La posologie est la quantité et le rythme d'administration ; la dose/24h est la quantité administrée en 24h ; la dose/prise est la quantité en une fois", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "Le DOSAGE est la quantité de PA par unité de médicament (pas la dose). La dose/prise est bien la quantité administrée en une fois.", "options": ["La posologie est la quantité et le rythme d'administration d'un médicament", "La dose est la quantité de principe actif par unité de médicament", "La dose par 24H est la quantité de médicament administrée au patient en 24H", "La dose par prise est la quantité de médicament administrée en une fois, exprimée en poids ou en mesure"], "correctOptions": ["La posologie est la quantité et le rythme d'administration d'un médicament", "La dose par 24H est la quantité de médicament administrée au patient en 24H", "La dose par prise est la quantité de médicament administrée en une fois, exprimée en poids ou en mesure"]}, {"question": "Les 4 étapes de la pharmacocinétique dans l'ordre correct sont :", "answer": "Absorption – Distribution – Métabolisme – Élimination", "category": "QCM Cours 1", "type": "qcm-single", "explanation": "ADME : Absorption → Distribution → Métabolisme → Élimination.", "options": ["Distribution – Absorption – Élimination – Métabolisme", "Absorption – Métabolisme – Distribution – Élimination", "Distribution – Métabolisme – Absorption – Élimination", "Absorption – Distribution – Métabolisme – Élimination"], "correctOptions": ["Absorption – Distribution – Métabolisme – Élimination"]}, {"question": "À propos de la pharmacocinétique, cochez les réponses vraies", "answer": "Étude du devenir du médicament ; marge thérapeutique = intervalle efficace non toxique", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "La pharmacocinétique = devenir (pas action). Biodisponibilité orale ≠ 100% (seule la voie IV = 100%).", "options": ["C'est l'étude du devenir du médicament dans l'organisme", "C'est l'étude de l'action du médicament dans l'organisme", "La biodisponibilité par voie orale est de 100%", "La marge thérapeutique est l'intervalle des concentrations plasmatiques efficaces (actives mais non toxiques)"], "correctOptions": ["C'est l'étude du devenir du médicament dans l'organisme", "La marge thérapeutique est l'intervalle des concentrations plasmatiques efficaces (actives mais non toxiques)"]}, {"question": "Concernant le métabolisme, cochez les réponses vraies", "answer": "Biotransformation par réactions enzymatiques", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "Le métabolisme est la 3ème étape (pas 4ème). Se produit dans le FOIE (pas l'estomac). Rend la molécule plus HYDROSOLUBLE (pas insoluble).", "options": ["Est la 4ème étape de la pharmacocinétique", "Se produit principalement dans l'estomac", "Rend la molécule insoluble", "La molécule est biotransformée par réactions enzymatiques"], "correctOptions": ["La molécule est biotransformée par réactions enzymatiques"]}, {"question": "Concernant l'élimination, cochez les réponses vraies", "answer": "Principalement rénale, possible par voie pulmonaire, demi-vie = temps pour éliminer la moitié", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "La clairance = volume de sang débarrassé par unité de TEMPS (ml/min), pas de surface.", "options": ["L'élimination est principalement rénale", "L'élimination est possible via la voie pulmonaire", "La clairance est le volume de sang débarrassé du médicament par unité de surface", "La demi-vie d'élimination est le temps nécessaire à l'élimination de la moitié du médicament dans le sang"], "correctOptions": ["L'élimination est principalement rénale", "L'élimination est possible via la voie pulmonaire", "La demi-vie d'élimination est le temps nécessaire à l'élimination de la moitié du médicament dans le sang"]}, {"question": "La pharmacodynamie... cochez les réponses vraies", "answer": "Comprendre la survenue d'EI et l'efficacité d'un traitement", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "La pharmacodynamie = action du médicament sur l'organisme. Le devenir et le métabolisme relèvent de la pharmacoCINÉTIQUE.", "options": ["Permet de comprendre la survenue d'effets indésirables", "Permet de comprendre le devenir du médicament dans l'organisme", "Permet de comprendre l'efficacité d'un traitement dans les populations", "Permet d'étudier le métabolisme du médicament"], "correctOptions": ["Permet de comprendre la survenue d'effets indésirables", "Permet de comprendre l'efficacité d'un traitement dans les populations"]}, {"question": "Les récepteurs des médicaments — cochez les réponses vraies", "answer": "Le récepteur est une macromolécule protéique", "category": "QCM Cours 1", "type": "qcm-multi", "explanation": "Le RÉCEPTEUR est la cible (pas le ligand). Le LIGAND est la substance qui se lie (pas le site actif). Les médicaments sont des ligands EXOGÈNES (pas endogènes).", "options": ["Le récepteur est une macromolécule protéique", "Le ligand est la cible du médicament", "Le site actif est la substance qui se lie à son récepteur", "Les médicaments sont des ligands endogènes"], "correctOptions": ["Le récepteur est une macromolécule protéique"]}, {"question": "Quelles sont les 3 grandes étapes du développement d'un médicament ?", "answer": "Recherche et développement, Phase administrative, Pharmacovigilance", "category": "Mise sur le marché", "type": "qcm-multi", "explanation": "R&D comprend phase exploratoire, études précliniques et cliniques.", "options": ["Recherche et développement", "Phase administrative", "Pharmacovigilance", "Phase de marketing", "Phase de distribution"], "correctOptions": ["Recherche et développement", "Phase administrative", "Pharmacovigilance"]}, {"question": "Combien de temps dure la mise au point d'un nouveau médicament ?", "answer": "10 à 12 ans", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Environ 800 millions d'euros d'investissement.", "options": ["2 à 4 ans", "5 à 7 ans", "10 à 12 ans", "20 à 25 ans"], "correctOptions": ["10 à 12 ans"]}, {"question": "Combien de molécules sont criblées au départ pour aboutir à 1 médicament ?", "answer": "10 000 molécules", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "10 000 criblées → 100 testées → 10 candidats → 1 médicament.", "options": ["100 molécules", "1 000 molécules", "10 000 molécules", "100 000 molécules"], "correctOptions": ["10 000 molécules"]}, {"question": "Qu'est-ce que la DL50 ?", "answer": "Dose létale pour 50% des animaux testés", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Déterminée lors de l'étude de toxicité aiguë sur au moins 2 espèces de mammifères.", "options": ["Dose létale pour 50% des animaux testés", "Dose efficace chez 50% des patients", "Demi-vie d'élimination du médicament", "Dose limite de 50 mg par prise"], "correctOptions": ["Dose létale pour 50% des animaux testés"]}, {"question": "Que teste la Phase 1 des essais cliniques ?", "answer": "La tolérance chez l'homme", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Sur quelques dizaines de volontaires sains. On administre des doses croissantes.", "options": ["La tolérance chez l'homme", "L'efficacité du médicament", "La comparaison avec le placebo", "Le rapport coût-efficacité"], "correctOptions": ["La tolérance chez l'homme"]}, {"question": "Sur qui se fait la Phase 1 des essais cliniques ?", "answer": "Volontaires sains", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Quelques dizaines de volontaires sains. Phase 2 = environ 500 malades. Phase 3 = centaines à milliers de malades.", "options": ["Volontaires sains", "500 malades environ", "Plusieurs milliers de malades", "Des enfants et personnes âgées"], "correctOptions": ["Volontaires sains"]}, {"question": "Que teste la Phase 2 des essais cliniques ?", "answer": "L'efficacité et la dose optimale", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Sur environ 500 malades. Détermination de la dose optimale.", "options": ["La tolérance chez le volontaire sain", "L'efficacité et la dose optimale", "La comparaison avec le traitement de référence", "La pharmacovigilance post-commercialisation"], "correctOptions": ["L'efficacité et la dose optimale"]}, {"question": "Que teste la Phase 3 des essais cliniques ?", "answer": "Essai comparatif (vs traitement de référence ou placebo)", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Études randomisées, contrôlées, en aveugle, multicentriques sur un large groupe.", "options": ["La tolérance chez le volontaire sain", "La dose optimale sur 500 malades", "Essai comparatif (vs traitement de référence ou placebo)", "La toxicité sur les animaux"], "correctOptions": ["Essai comparatif (vs traitement de référence ou placebo)"]}, {"question": "Pour combien d'années l'AMM est-elle accordée ?", "answer": "5 ans renouvelables", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Attribuée par la Commission d'AMM avec un numéro à 7 chiffres.", "options": ["1 an renouvelable", "5 ans renouvelables", "10 ans renouvelables", "20 ans définitifs"], "correctOptions": ["5 ans renouvelables"]}, {"question": "Quels sont les taux de remboursement possibles d'un médicament ?", "answer": "100%, 65%, 30%, 15%", "category": "Mise sur le marché", "type": "qcm-multi", "explanation": "Déterminés après évaluation du SMR et de l'ASMR par la Commission de Transparence.", "options": ["100%", "65%", "50%", "30%", "15%", "5%"], "correctOptions": ["100%", "65%", "30%", "15%"]}, {"question": "Combien existe-t-il de centres régionaux de pharmacovigilance en France ?", "answer": "31 centres", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Ils recueillent les déclarations d'EI et renseignent les professionnels de santé.", "options": ["10 centres", "21 centres", "31 centres", "50 centres"], "correctOptions": ["31 centres"]}, {"question": "Qu'est-ce qu'un médicament générique ?", "answer": "Copie conforme du princeps avec même composition en PA, même forme et bioéquivalence démontrée", "category": "Mise sur le marché", "type": "open", "explanation": "Disponible après expiration du brevet (20 ans). Bioéquivalence démontrée par études de biodisponibilité.", "options": [], "correctOptions": []}, {"question": "Qu'est-ce que le CPP ?", "answer": "Comité de Protection des Personnes", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Vérifie la protection des personnes dans les essais cliniques. Cadre : Loi Jardé (2012).", "options": ["Comité de Protection des Personnes", "Commission de Prescription Pharmaceutique", "Conseil de Pharmacovigilance Permanent", "Centre de Prévention des Pathologies"], "correctOptions": ["Comité de Protection des Personnes"]}, {"question": "Qu'évalue le SMR ?", "answer": "Le Service Médical Rendu (de I à IV)", "category": "Mise sur le marché", "type": "qcm-single", "explanation": "Évalué par la Commission de Transparence. Détermine si le médicament est remboursable.", "options": ["Le Service Médical Rendu (de I à IV)", "La Surveillance des Médicaments à Risque", "Le Suivi du Métabolisme Rénal", "Le Seuil Minimal de Remboursement"], "correctOptions": ["Le Service Médical Rendu (de I à IV)"]}, {"question": "Quelle est la définition du médicament selon le Code de la Santé Publique ?", "answer": "Toute substance possédant des propriétés curatives ou préventives, ou pouvant établir un diagnostic médical", "category": "Généralités médicament", "type": "open", "explanation": "Article L 511-1 du CSP.", "options": [], "correctOptions": []}, {"question": "De quoi est composé un médicament ?", "answer": "Principe(s) actif(s) + excipients", "category": "Généralités médicament", "type": "qcm-single", "explanation": "Le PA est responsable de l'action pharmacologique. Les excipients facilitent la préparation et l'administration.", "options": ["Principe(s) actif(s) + excipients", "Vitamines + minéraux", "Excipients + solvants", "Protéines + glucides"], "correctOptions": ["Principe(s) actif(s) + excipients"]}, {"question": "Citez les 6 origines possibles d'un principe actif.", "answer": "Végétale, animale, microbiologique, minérale, synthétique, biotechnologique", "category": "Généralités médicament", "type": "open", "explanation": "", "options": [], "correctOptions": []}, {"question": "Qu'est-ce que la DCI d'un médicament ?", "answer": "Dénomination Commune Internationale : nom du PA utilisé dans tous les pays, défini par l'OMS", "category": "Généralités médicament", "type": "qcm-single", "explanation": "Ex: paracétamol, ibuprofène. Permet d'éviter les confusions entre pays.", "options": ["Dénomination Commune Internationale", "Dose Clinique Initiale", "Désignation Chimique Industrielle", "Dénomination Commerciale Interne"], "correctOptions": ["Dénomination Commune Internationale"]}, {"question": "Quels sont les rôles des excipients ?", "answer": "Faciliter la préparation, l'administration, masquer le goût, assurer la conservation, améliorer la biodisponibilité", "category": "Généralités médicament", "type": "open", "explanation": "L'excipient n'a PAS d'action pharmacologique. Sa propriété principale est l'inertie.", "options": [], "correctOptions": []}, {"question": "Qu'est-ce qu'un excipient à effet notoire (EEN) ?", "answer": "Excipient nécessitant des précautions d'emploi chez certains patients", "category": "Généralités médicament", "type": "qcm-single", "explanation": "Ex: lactose, saccharose, éthanol, huile d'arachide, aspartam. Obligatoirement mentionnés sur l'emballage.", "options": ["Excipient nécessitant des précautions d'emploi chez certains patients", "Excipient ayant une action pharmacologique puissante", "Excipient utilisé uniquement en milieu hospitalier", "Excipient interdit dans les médicaments génériques"], "correctOptions": ["Excipient nécessitant des précautions d'emploi chez certains patients"]}, {"question": "Qu'est-ce qu'une préparation magistrale ?", "answer": "Médicament préparé extemporanément en officine selon une prescription pour un malade déterminé", "category": "Généralités médicament", "type": "qcm-single", "explanation": "Fabriquée à l'officine, sur mesure pour un patient.", "options": ["Médicament préparé en officine pour un malade déterminé", "Médicament préparé industriellement en grande quantité", "Médicament préparé à l'hôpital dans la PUI", "Médicament vendu sans ordonnance"], "correctOptions": ["Médicament préparé en officine pour un malade déterminé"]}, {"question": "Qu'est-ce qu'une spécialité pharmaceutique ?", "answer": "Médicament préparé industriellement à l'avance, sous conditionnement particulier avec dénomination spéciale", "category": "Généralités médicament", "type": "qcm-single", "explanation": "Ex: Doliprane®, Nurofen®, Clamoxyl®.", "options": ["Médicament préparé industriellement avec dénomination spéciale", "Médicament préparé en officine sur ordonnance", "Médicament réservé aux hôpitaux", "Médicament fabriqué à partir de plantes"], "correctOptions": ["Médicament préparé industriellement avec dénomination spéciale"]}, {"question": "Quelle est la différence entre PMF et PMO ?", "answer": "PMF = sans ordonnance ; PMO = sur ordonnance (substances dangereuses)", "category": "Généralités médicament", "type": "qcm-single", "explanation": "PMO comprend Liste 1 (risques élevés), Liste 2 (risques moindres) et Liste des stupéfiants.", "options": ["PMF = sans ordonnance ; PMO = sur ordonnance", "PMF = pharmacie de France ; PMO = pharmacie du monde", "PMF = prescription maximale fixée ; PMO = prescription minimale obligatoire", "PMF = premier médicament fabriqué ; PMO = premier médicament original"], "correctOptions": ["PMF = sans ordonnance ; PMO = sur ordonnance"]}, {"question": "Quelle est la différence entre usage externe et usage interne ?", "answer": "Externe = action locale, pas de diffusion sanguine ; Interne = action systémique via la circulation générale", "category": "Généralités médicament", "type": "open", "explanation": "", "options": [], "correctOptions": []}, {"question": "Qu'est-ce que le dosage d'un médicament ?", "answer": "Quantité de principe actif par unité de médicament", "category": "Généralités médicament", "type": "qcm-single", "explanation": "Ex: comprimé dosé à 500 mg de paracétamol. À ne pas confondre avec la dose (quantité administrée).", "options": ["Quantité de principe actif par unité de médicament", "Quantité de médicament administrée en 24h", "Nombre de prises par jour", "Rythme d'administration du médicament"], "correctOptions": ["Quantité de principe actif par unité de médicament"]}, {"question": "Qu'est-ce que la pharmacocinétique ?", "answer": "L'étude du devenir du médicament dans l'organisme (ADME)", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "À ne pas confondre avec la pharmacodynamie = action du médicament sur l'organisme.", "options": ["L'étude du devenir du médicament dans l'organisme", "L'étude de l'action du médicament sur l'organisme", "L'étude de la fabrication du médicament", "L'étude des interactions entre médicaments"], "correctOptions": ["L'étude du devenir du médicament dans l'organisme"]}, {"question": "Où a lieu principalement l'absorption par voie orale ?", "answer": "Au niveau du duodénum", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "La résorption par voie orale s'appelle l'absorption.", "options": ["Au niveau de l'estomac", "Au niveau du duodénum", "Au niveau du côlon", "Au niveau de l'œsophage"], "correctOptions": ["Au niveau du duodénum"]}, {"question": "Qu'est-ce que la diffusion passive ?", "answer": "Résorption dans le sens du gradient de concentration, sans énergie", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Le transport actif va CONTRE le gradient et NÉCESSITE de l'énergie.", "options": ["Dans le sens du gradient, sans énergie", "Contre le gradient, avec énergie", "Uniquement par voie IV", "Par transport vésiculaire"], "correctOptions": ["Dans le sens du gradient, sans énergie"]}, {"question": "Qu'est-ce que la biodisponibilité ?", "answer": "Fraction de la dose administrée atteignant la circulation générale sous forme inchangée", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Par voie IV = 100%. Mesurée par l'aire sous la courbe (ASC).", "options": ["Fraction atteignant la circulation générale sous forme inchangée", "Quantité de médicament éliminée par les reins", "Durée d'action du médicament dans l'organisme", "Capacité du médicament à traverser la barrière hémato-encéphalique"], "correctOptions": ["Fraction atteignant la circulation générale sous forme inchangée"]}, {"question": "Quelle est la biodisponibilité par voie IV ?", "answer": "100%", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Car le médicament arrive directement dans la circulation, pas d'étape de résorption.", "options": ["25%", "50%", "75%", "100%"], "correctOptions": ["100%"]}, {"question": "Qu'est-ce que la marge thérapeutique ?", "answer": "Intervalle des concentrations plasmatiques efficaces, à la fois actives et non toxiques", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Entre le seuil d'efficacité et le seuil de toxicité.", "options": ["Intervalle des concentrations actives et non toxiques", "Durée pendant laquelle le médicament est efficace", "Nombre de médicaments pouvant être associés", "Différence entre dose maximale et dose minimale"], "correctOptions": ["Intervalle des concentrations actives et non toxiques"]}, {"question": "Citez des médicaments à marge thérapeutique étroite.", "answer": "AVK, digoxine, certains antiépileptiques, hormones thyroïdiennes, lithium, colchicine", "category": "Pharmacocinétique", "type": "open", "explanation": "Concentrations toxiques proches des concentrations thérapeutiques → risque d'EI graves.", "options": [], "correctOptions": []}, {"question": "Qu'est-ce que la bioéquivalence ?", "answer": "Deux formes du même PA ayant même biodisponibilité et même vitesse d'accès au site d'action", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Évaluée par ASC (quantité) et Tmax/Cmax (vitesse). Obligatoire pour les génériques.", "options": ["Même biodisponibilité et même vitesse d'accès", "Même couleur et même forme galénique", "Même prix et même conditionnement", "Même excipient et même conservation"], "correctOptions": ["Même biodisponibilité et même vitesse d'accès"]}, {"question": "Où se fait principalement le métabolisme des médicaments ?", "answer": "Dans le foie", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Biotransformation enzymatique → rend la molécule plus hydrosoluble pour faciliter l'élimination rénale.", "options": ["Dans l'estomac", "Dans le foie", "Dans les reins", "Dans les poumons"], "correctOptions": ["Dans le foie"]}, {"question": "Quel est le but du métabolisme des médicaments ?", "answer": "Rendre la molécule plus hydrosoluble pour faciliter son élimination rénale", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Biotransformation par réactions enzymatiques hépatiques.", "options": ["Rendre la molécule plus hydrosoluble pour l'élimination", "Augmenter l'efficacité du médicament", "Transformer le médicament en vitamines", "Stocker le médicament dans les tissus"], "correctOptions": ["Rendre la molécule plus hydrosoluble pour l'élimination"]}, {"question": "Quelle est la principale voie d'élimination des médicaments ?", "answer": "La voie rénale", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Condition essentielle : hydrosolubilité. Autres voies : biliaire, pulmonaire, mammaire, salivaire.", "options": ["La voie rénale", "La voie biliaire", "La voie pulmonaire", "La voie cutanée"], "correctOptions": ["La voie rénale"]}, {"question": "Qu'est-ce que la clairance ?", "answer": "Volume de sang débarrassé du médicament par unité de temps (ml/min)", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Attention : par unité de TEMPS, pas de surface.", "options": ["Volume de sang débarrassé par unité de temps (ml/min)", "Volume de sang débarrassé par unité de surface", "Quantité de médicament éliminée en 24h", "Concentration maximale du médicament"], "correctOptions": ["Volume de sang débarrassé par unité de temps (ml/min)"]}, {"question": "Qu'est-ce que la demi-vie d'élimination (T1/2) ?", "answer": "Temps nécessaire à l'élimination de la moitié du médicament dans le sang", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Paramètre essentiel pour déterminer le rythme d'administration.", "options": ["Temps pour éliminer la moitié du médicament", "Temps pour que le médicament atteigne son effet maximal", "Durée de vie du médicament avant péremption", "Temps entre deux prises du médicament"], "correctOptions": ["Temps pour éliminer la moitié du médicament"]}, {"question": "Qu'est-ce que le volume de distribution (Vd) ?", "answer": "Indicateur de la répartition : Vd faible = reste dans le sang ; Vd élevé = fortement distribué dans les tissus", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "", "options": ["Vd faible = sang, Vd élevé = tissus", "Vd faible = tissus, Vd élevé = sang", "Volume total de sang dans l'organisme", "Volume de médicament à administrer"], "correctOptions": ["Vd faible = sang, Vd élevé = tissus"]}, {"question": "Qu'est-ce que la P-glycoprotéine ?", "answer": "Protéine de transport actif qui rejette le PA absorbé vers la lumière intestinale", "category": "Pharmacocinétique", "type": "qcm-single", "explanation": "Elle diminue la biodisponibilité orale des médicaments.", "options": ["Protéine qui rejette le PA vers la lumière intestinale", "Protéine qui facilite l'absorption du PA", "Enzyme hépatique de métabolisation", "Récepteur membranaire des médicaments"], "correctOptions": ["Protéine qui rejette le PA vers la lumière intestinale"]}, {"question": "Quelles sont les conséquences de la liaison aux protéines plasmatiques ?", "answer": "Augmentation de la durée de vie et risque d'interactions par compétition", "category": "Pharmacocinétique", "type": "open", "explanation": "Fraction libre = diffusible, active. Fraction liée = pas d'action pharmacologique, réserve de PA.", "options": [], "correctOptions": []}, {"question": "Qu'est-ce que la pharmacodynamie ?", "answer": "L'étude de l'action du médicament sur l'organisme", "category": "Pharmacodynamie", "type": "qcm-single", "explanation": "Étudie les effets pharmacologiques du médicament. ≠ Pharmacocinétique = devenir du médicament.", "options": ["L'étude de l'action du médicament sur l'organisme", "L'étude du devenir du médicament dans l'organisme", "L'étude de la toxicité du médicament", "L'étude de la fabrication du médicament"], "correctOptions": ["L'étude de l'action du médicament sur l'organisme"]}, {"question": "Qu'est-ce qu'un récepteur pharmacologique ?", "answer": "Macromolécule protéique sur laquelle la fixation d'un médicament provoque un effet pharmacologique", "category": "Pharmacodynamie", "type": "qcm-single", "explanation": "Cible du médicament, situé sur la membrane plasmique.", "options": ["Macromolécule protéique, cible du médicament", "Petite molécule qui se lie au médicament", "Enzyme qui dégrade le médicament", "Canal ionique qui transporte le médicament"], "correctOptions": ["Macromolécule protéique, cible du médicament"]}, {"question": "Qu'est-ce qu'un ligand en pharmacologie ?", "answer": "Substance qui se lie à un récepteur", "category": "Pharmacodynamie", "type": "qcm-single", "explanation": "Endogène = physiologique (hormones, neurotransmetteurs). Exogène = médicaments.", "options": ["Substance qui se lie à un récepteur", "Récepteur qui reçoit le médicament", "Enzyme de métabolisation", "Protéine de transport sanguin"], "correctOptions": ["Substance qui se lie à un récepteur"]}, {"question": "Qu'est-ce qu'un agoniste ?", "answer": "Ligand qui active le récepteur et mime l'effet de la substance naturelle", "category": "Pharmacodynamie", "type": "qcm-single", "explanation": "L'agoniste provoque un effet comparable à celui du ligand endogène.", "options": ["Active le récepteur (mime la substance naturelle)", "Bloque le récepteur (s'oppose à la substance naturelle)", "Détruit le récepteur", "Transporte le médicament vers le récepteur"], "correctOptions": ["Active le récepteur (mime la substance naturelle)"]}, {"question": "Qu'est-ce qu'un antagoniste ?", "answer": "Ligand qui bloque le récepteur et s'oppose à l'action de la substance endogène", "category": "Pharmacodynamie", "type": "qcm-single", "explanation": "L'antagoniste empêche la liaison du ligand endogène à son récepteur.", "options": ["Bloque le récepteur (s'oppose à la substance endogène)", "Active le récepteur (mime la substance naturelle)", "Augmente la synthèse du ligand endogène", "Facilite la liaison du ligand endogène"], "correctOptions": ["Bloque le récepteur (s'oppose à la substance endogène)"]}, {"question": "Quelle analogie utilise-t-on pour le récepteur et le ligand ?", "answer": "La clé (ligand) et la serrure (site actif du récepteur)", "category": "Pharmacodynamie", "type": "qcm-single", "explanation": "Le site actif du récepteur = serrure. Le ligand/médicament = clé.", "options": ["La clé (ligand) et la serrure (récepteur)", "Le marteau (ligand) et le clou (récepteur)", "L'aimant (ligand) et le fer (récepteur)", "Le fil (ligand) et l'aiguille (récepteur)"], "correctOptions": ["La clé (ligand) et la serrure (récepteur)"]}, {"question": "Qu'est-ce qu'une classe pharmacologique ?", "answer": "Groupe de médicaments ayant les mêmes effets pharmacologiques", "category": "Pharmacodynamie", "type": "qcm-single", "explanation": "Ex: antibiotiques. Divisée en familles (même mécanisme d'action) : bêta-lactamines, quinolones, macrolides...", "options": ["Mêmes effets pharmacologiques", "Même forme galénique", "Même voie d'administration", "Même prix de vente"], "correctOptions": ["Mêmes effets pharmacologiques"]}, {"question": "Quels sont les différents types de troubles anxieux ?", "answer": "Anxiété généralisée, TOC, troubles phobiques, troubles paniques, syndromes post-traumatiques", "category": "Anxiolytiques", "type": "qcm-multi", "explanation": "Peut être aiguë ou chronique. Peut accompagner une dépression.", "options": ["Anxiété généralisée", "Troubles obsessifs/compulsifs", "Troubles phobiques", "Troubles paniques", "Syndromes post-traumatiques"], "correctOptions": ["Anxiété généralisée", "Troubles obsessifs/compulsifs", "Troubles phobiques", "Troubles paniques", "Syndromes post-traumatiques"]}, {"question": "Quelles sont les 5 propriétés des benzodiazépines ?", "answer": "Anxiolytique, sédative, anti-convulsivante, myorelaxante, amnésiante antérograde", "category": "Anxiolytiques", "type": "qcm-multi", "explanation": "Ces 5 propriétés sont INDISSOCIABLES. Toutes les BZD les possèdent.", "options": ["Anxiolytique", "Sédative", "Anti-convulsivante", "Myorelaxante", "Amnésiante antérograde", "Antidépressive"], "correctOptions": ["Anxiolytique", "Sédative", "Anti-convulsivante", "Myorelaxante", "Amnésiante antérograde"]}, {"question": "Quel est le mécanisme d'action des benzodiazépines ?", "answer": "Potentialisation du GABA en augmentant la fréquence d'ouverture des canaux Cl- → hyperpolarisation neuronale", "category": "Anxiolytiques", "type": "open", "explanation": "Le GABA augmente l'entrée du Cl- → diminution de l'excitabilité neuronale.", "options": [], "correctOptions": []}, {"question": "Qu'est-ce que le GABA ?", "answer": "Neurotransmetteur inhibiteur qui augmente l'entrée du chlore dans le neurone", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "Acide aminé et neurotransmetteur. Les BZD potentialisent son action.", "options": ["Neurotransmetteur inhibiteur (entrée du Cl-)", "Neurotransmetteur excitateur (entrée du Na+)", "Hormone produite par les surrénales", "Enzyme hépatique de détoxification"], "correctOptions": ["Neurotransmetteur inhibiteur (entrée du Cl-)"]}, {"question": "Les BZD à demi-vie longue sont plutôt utilisées comme...", "answer": "Anxiolytiques", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "T1/2 courte → hypnotiques. T1/2 longue → anxiolytiques. Doses élevées → myorelaxants.", "options": ["Anxiolytiques", "Hypnotiques", "Antiépileptiques", "Antidépresseurs"], "correctOptions": ["Anxiolytiques"]}, {"question": "Pourquoi faut-il privilégier les BZD à demi-vie courte chez le sujet âgé et l'insuffisant hépatique ?", "answer": "Car la métabolisation hépatique est réduite, accumulation si T1/2 longue", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "Plus la T1/2 est courte, plus le risque de dépendance est élevé = balance bénéfice/risque.", "options": ["Métabolisation hépatique réduite, risque d'accumulation", "Meilleur goût des comprimés à T1/2 courte", "Plus d'effet amnésiant avec T1/2 courte", "Moins cher en pharmacie"], "correctOptions": ["Métabolisation hépatique réduite, risque d'accumulation"]}, {"question": "Quels sont les principaux effets indésirables des BZD ?", "answer": "Détresse respiratoire, dépendance, tolérance, sevrage, somnolence, hypotonie, réactions paradoxales", "category": "Anxiolytiques", "type": "qcm-multi", "explanation": "Réactions paradoxales surtout chez enfants et SA : agressivité, agitation, confusion.", "options": ["Détresse respiratoire (surdosage)", "Dépendance physique et psychique", "Syndrome de sevrage à l'arrêt", "Somnolence et hypotonie", "Réactions paradoxales (agitation, confusion)", "Hypertension artérielle"], "correctOptions": ["Détresse respiratoire (surdosage)", "Dépendance physique et psychique", "Syndrome de sevrage à l'arrêt", "Somnolence et hypotonie", "Réactions paradoxales (agitation, confusion)"]}, {"question": "Quelle est la contre-indication absolue des benzodiazépines ?", "answer": "Syndrome d'apnée du sommeil", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "Risque de décès indépendant de la dose. Autres CI : IH sévère, IR, alcool.", "options": ["Syndrome d'apnée du sommeil", "Hypertension artérielle", "Diabète de type 2", "Insuffisance rénale légère"], "correctOptions": ["Syndrome d'apnée du sommeil"]}, {"question": "Quelle est la durée maximale de prescription des anxiolytiques BZD ?", "answer": "12 semaines", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "4 semaines pour les hypnotiques. Ordonnance non renouvelable au-delà de 3 mois.", "options": ["4 semaines", "8 semaines", "12 semaines", "6 mois"], "correctOptions": ["12 semaines"]}, {"question": "Comment doit-on arrêter un traitement par benzodiazépines ?", "answer": "Toujours de manière progressive (décroissance sur 2 semaines minimum)", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "Jamais d'arrêt brusque → risque de syndrome de sevrage.", "options": ["Arrêt progressif sur au moins 2 semaines", "Arrêt brutal du jour au lendemain", "Arrêt uniquement en milieu hospitalier", "Remplacement immédiat par un antidépresseur"], "correctOptions": ["Arrêt progressif sur au moins 2 semaines"]}, {"question": "Qu'est-ce que l'hydroxyzine (ATARAX®) ?", "answer": "Antihistaminique à visée anxiolytique, très sédatif", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "Action anxiolytique discutable (surtout sédation). EI : torsades de pointe. CI : glaucome, adénome prostatique.", "options": ["Antihistaminique anxiolytique, très sédatif", "Benzodiazépine à demi-vie courte", "Antidépresseur de la classe des ISRS", "Hypnotique apparenté aux BZD"], "correctOptions": ["Antihistaminique anxiolytique, très sédatif"]}, {"question": "Qu'est-ce que la buspirone ?", "answer": "Agoniste partiel des récepteurs 5HT1A, anxiolytique non BZD", "category": "Anxiolytiques", "type": "qcm-single", "explanation": "Pas sédatif, pas myorelaxant, bien tolérée. Délai d'action : 2-3 semaines.", "options": ["Agoniste partiel 5HT1A, non sédatif", "Benzodiazépine à demi-vie longue", "Antihistaminique H1 sédatif", "Inhibiteur de la recapture de la sérotonine"], "correctOptions": ["Agoniste partiel 5HT1A, non sédatif"]}, {"question": "Qu'est-ce qu'un hypnotique ?", "answer": "Substance capable d'induire et/ou de maintenir le sommeil par dépression du SNC", "category": "Hypnotiques", "type": "qcm-single", "explanation": "Ne soignent PAS l'insomnie (symptomatique seulement). Prescription max : 4 semaines.", "options": ["Substance qui induit/maintient le sommeil", "Substance qui traite la dépression", "Substance qui réduit l'anxiété", "Substance qui calme la douleur"], "correctOptions": ["Substance qui induit/maintient le sommeil"]}, {"question": "Quelle est la durée maximale de prescription des hypnotiques ?", "answer": "4 semaines", "category": "Hypnotiques", "type": "qcm-single", "explanation": "Non renouvelable. 12 semaines pour les anxiolytiques BZD.", "options": ["2 semaines", "4 semaines", "8 semaines", "12 semaines"], "correctOptions": ["4 semaines"]}, {"question": "Quels sont les différents types d'insomnie ?", "answer": "Endormissement, milieu de nuit, fin de nuit, parasomnies", "category": "Hypnotiques", "type": "qcm-multi", "explanation": "Endormissement = anxieux. Fin de nuit = déprimé/âgé. Parasomnies = cauchemars, somnambulisme.", "options": ["Insomnie d'endormissement", "Insomnie de milieu de nuit", "Insomnie de fin de nuit", "Parasomnies"], "correctOptions": ["Insomnie d'endormissement", "Insomnie de milieu de nuit", "Insomnie de fin de nuit", "Parasomnies"]}, {"question": "Citez 2 BZD hypnotiques d'action intermédiaire (8-10h).", "answer": "Loprazolam (HAVLANE®) et Lormétazépam (NOCTAMIDE®)", "category": "Hypnotiques", "type": "qcm-multi", "explanation": "Action intermédiaire 8-10h. Les BZD à action prolongée (17-23h) sont MOGADON® et NUCTALON®.", "options": ["Loprazolam (HAVLANE®)", "Lormétazépam (NOCTAMIDE®)", "Nitrazépam (MOGADON®)", "Zolpidem (STILNOX®)"], "correctOptions": ["Loprazolam (HAVLANE®)", "Lormétazépam (NOCTAMIDE®)"]}, {"question": "Quel est l'antidote des benzodiazépines en cas de surdosage ?", "answer": "Flumazénil", "category": "Hypnotiques", "type": "qcm-single", "explanation": "Surdosage BZD : coma, somnolence, détresse respiratoire.", "options": ["Flumazénil", "Naloxone", "N-acétylcystéine", "Atropine"], "correctOptions": ["Flumazénil"]}, {"question": "Quels sont les apparentés BZD (Z-drugs) ?", "answer": "Zopiclone (IMOVANE®) et Zolpidem (STILNOX®)", "category": "Hypnotiques", "type": "qcm-multi", "explanation": "Même mécanisme GABA mais sous-unité distincte. Moins d'effets résiduels diurnes.", "options": ["Zopiclone (IMOVANE®)", "Zolpidem (STILNOX®)", "Loprazolam (HAVLANE®)", "Hydroxyzine (ATARAX®)"], "correctOptions": ["Zopiclone (IMOVANE®)", "Zolpidem (STILNOX®)"]}, {"question": "Quels avantages ont les Z-drugs par rapport aux BZD classiques ?", "answer": "Moins d'effets résiduels diurnes et ne modifient pas l'architecture du sommeil", "category": "Hypnotiques", "type": "qcm-multi", "explanation": "Fixation préférentielle sur la sous-unité alpha du récepteur GABA.", "options": ["Moins d'effets résiduels diurnes", "Ne modifient pas l'architecture du sommeil", "Aucun risque de dépendance", "Action plus rapide que les BZD"], "correctOptions": ["Moins d'effets résiduels diurnes", "Ne modifient pas l'architecture du sommeil"]}, {"question": "Citez 2 antihistaminiques utilisés comme hypnotiques.", "answer": "Doxylamine (DONORMYL®) et Alimémazine (THÉRALÈNE®)", "category": "Hypnotiques", "type": "qcm-multi", "explanation": "EI anticholinergiques. CI : glaucome, adénome prostatique.", "options": ["Doxylamine (DONORMYL®)", "Alimémazine (THÉRALÈNE®)", "Hydroxyzine (ATARAX®)", "Zopiclone (IMOVANE®)"], "correctOptions": ["Doxylamine (DONORMYL®)", "Alimémazine (THÉRALÈNE®)"]}, {"question": "Quelle réduction de dose pour les hypnotiques chez le sujet âgé ?", "answer": "50 à 70% de réduction", "category": "Hypnotiques", "type": "qcm-single", "explanation": "Éviter les BZD à T1/2 longue. Prudence si IH ou IR.", "options": ["20 à 30%", "30 à 50%", "50 à 70%", "75 à 90%"], "correctOptions": ["50 à 70%"]}, {"question": "Quels sont les effets anticholinergiques des antihistaminiques hypnotiques ?", "answer": "Sécheresse buccale, rétention urinaire, constipation, mydriase, hypotension orthostatique", "category": "Hypnotiques", "type": "qcm-multi", "explanation": "CI qui en découlent : glaucome, adénome prostatique, obstacle urétral.", "options": ["Sécheresse buccale", "Rétention urinaire", "Constipation", "Mydriase", "Diarrhée"], "correctOptions": ["Sécheresse buccale", "Rétention urinaire", "Constipation", "Mydriase"]}, {"question": "Quels neurotransmetteurs sont impliqués dans la dépression ?", "answer": "Sérotonine, noradrénaline, dopamine", "category": "Antidépresseurs", "type": "qcm-multi", "explanation": "Les antidépresseurs corrigent les déséquilibres de ces neurotransmetteurs.", "options": ["Sérotonine", "Noradrénaline", "Dopamine", "GABA", "Acétylcholine"], "correctOptions": ["Sérotonine", "Noradrénaline", "Dopamine"]}, {"question": "Quelles sont les 5 classes d'antidépresseurs ?", "answer": "ISRS, IRSNa, Tricycliques, IMAO, Autres (mirtazapine, bupropion)", "category": "Antidépresseurs", "type": "qcm-multi", "explanation": "", "options": ["ISRS", "IRSNa", "Tricycliques", "IMAO", "Autres (mirtazapine, bupropion)", "Benzodiazépines"], "correctOptions": ["ISRS", "IRSNa", "Tricycliques", "IMAO", "Autres (mirtazapine, bupropion)"]}, {"question": "Que signifie ISRS ?", "answer": "Inhibiteurs Sélectifs de la Recapture de la Sérotonine", "category": "Antidépresseurs", "type": "qcm-single", "explanation": "Ex: fluoxétine, sertraline, escitalopram. EI : nausées, troubles digestifs, insomnie, baisse de libido.", "options": ["Inhibiteurs Sélectifs de la Recapture de la Sérotonine", "Inhibiteurs du Système Rénine-angiotensine Sympathique", "Inducteurs de la Synthèse Rapide de Sérotonine", "Inhibiteurs de la Sécrétion Rénale du Sodium"], "correctOptions": ["Inhibiteurs Sélectifs de la Recapture de la Sérotonine"]}, {"question": "Que signifie IRSNa ?", "answer": "Inhibiteurs de la Recapture de la Sérotonine et de la Noradrénaline", "category": "Antidépresseurs", "type": "qcm-single", "explanation": "Ex: venlafaxine, duloxétine. EI : HTA, sueurs, insomnie. Aussi indiqués pour douleurs neuropathiques.", "options": ["Inhibiteurs de la Recapture de la Sérotonine et de la Noradrénaline", "Inhibiteurs des Récepteurs Sérotoninergiques de type Na", "Inducteurs de la Résistance Synaptique Noradrénergique", "Inhibiteurs de la Résorption du Sodium"], "correctOptions": ["Inhibiteurs de la Recapture de la Sérotonine et de la Noradrénaline"]}, {"question": "Quel est le mécanisme des antidépresseurs tricycliques ?", "answer": "Inhibition non sélective de la recapture de la sérotonine et de la noradrénaline", "category": "Antidépresseurs", "type": "qcm-single", "explanation": "Ex: amitriptyline, clomipramine. Plus d'EI que les ISRS : somnolence, bouche sèche, prise de poids, troubles cardiaques.", "options": ["Inhibition non sélective de la recapture sérotonine/noradrénaline", "Inhibition sélective de la recapture de la sérotonine", "Inhibition de la MAO", "Blocage des récepteurs GABA"], "correctOptions": ["Inhibition non sélective de la recapture sérotonine/noradrénaline"]}, {"question": "Quel est le mécanisme des IMAO ?", "answer": "Inhibition de l'enzyme MAO qui dégrade les neurotransmetteurs", "category": "Antidépresseurs", "type": "qcm-single", "explanation": "Ex: moclobémide. Rare. EI : interactions alimentaires (tyramine), hypotension.", "options": ["Inhibition de la MAO (enzyme de dégradation)", "Inhibition de la recapture de la sérotonine", "Blocage des récepteurs adrénergiques", "Stimulation de la synthèse de dopamine"], "correctOptions": ["Inhibition de la MAO (enzyme de dégradation)"]}, {"question": "Quel est le délai d'action des antidépresseurs ?", "answer": "2 à 4 semaines", "category": "Antidépresseurs", "type": "qcm-single", "explanation": "Patience nécessaire. Pas d'effet immédiat contrairement aux anxiolytiques.", "options": ["Immédiat", "2 à 4 jours", "2 à 4 semaines", "2 à 4 mois"], "correctOptions": ["2 à 4 semaines"]}, {"question": "Quelles sont les indications principales des antidépresseurs ?", "answer": "Dépression modérée à sévère, TOC, anxiété chronique, douleurs neuropathiques", "category": "Antidépresseurs", "type": "qcm-multi", "explanation": "Les antidépresseurs ne sont PAS indiqués pour l'insomnie aiguë.", "options": ["Dépression modérée à sévère", "TOC", "Anxiété chronique", "Douleurs neuropathiques", "Insomnie aiguë"], "correctOptions": ["Dépression modérée à sévère", "TOC", "Anxiété chronique", "Douleurs neuropathiques"]}, {"question": "Pourquoi ne faut-il pas arrêter brutalement un antidépresseur ?", "answer": "Risque de syndrome de sevrage : anxiété, irritabilité, troubles du sommeil, vertiges", "category": "Antidépresseurs", "type": "qcm-single", "explanation": "Toujours décroissance progressive des doses.", "options": ["Syndrome de sevrage (anxiété, vertiges, troubles du sommeil)", "Le médicament devient toxique à l'arrêt", "Les symptômes dépressifs disparaissent définitivement", "L'arrêt brutal augmente l'efficacité"], "correctOptions": ["Syndrome de sevrage (anxiété, vertiges, troubles du sommeil)"]}, {"question": "Quelle différence entre anxiolytiques, antidépresseurs et hypnotiques ?", "answer": "Anxiolytiques = anxiété aiguë, action rapide ; Antidépresseurs = dépression, délai 2-4 sem ; Hypnotiques = sommeil", "category": "Antidépresseurs", "type": "open", "explanation": "Les anxiolytiques (BZD) ont un risque de dépendance. Les antidépresseurs nécessitent une prise prolongée.", "options": [], "correctOptions": []}];
     const loadedCards = courseCards.map((c, i) => ({
@@ -5323,7 +5323,7 @@ function renderClassifyGame(area) {
     return;
   }
   const item = s.pool[s.idx];
-  // Generate 4 choices including correct
+  // Générer 4 choix en incluant la bonne réponse
   const allClasses = pharmaSuffixes.map(x => x.classe);
   const wrong = allClasses.filter(c => c !== item.classe).sort(() => Math.random()-0.5).slice(0,3);
   const opts = [item.classe, ...wrong].sort(() => Math.random()-0.5);
@@ -5370,7 +5370,7 @@ function renderDCICategoryGame(area) {
     return;
   }
   const item = s.pool[s.idx];
-  // Show ALL categories as clickable buttons
+  // Afficher TOUTES les catégories sous forme de boutons
   const cats = [...new Set(pharmaDCIData.map(d => d.categorie))].sort(() => Math.random()-0.5);
   
   area.innerHTML = `<div class="pharma-game-area">
@@ -5463,7 +5463,7 @@ function renderOrdonnanceMed(area, ord) {
     return;
   }
   const med = ord.medicaments[s.medIdx];
-  // Correct answer + distracteurs, shuffled
+  // Bonne réponse + distracteurs, mélangés
   const allOpts = [med.reponse, ...ord.distracteurs].sort(() => Math.random()-0.5);
   
   area.innerHTML = `<div class="pharma-game-area">
@@ -5720,7 +5720,7 @@ function checkVF(answer) {
   const item = pharmaGameState.pool[pharmaGameState.idx];
   const isOk = answer === item.r;
   if (isOk) pharmaGameState.score++;
-  document.querySelectorAll('.pharma-game-area button').forEach(b => b.disabled = true);
+  document.querySelectorAll('.pharma-game-area button').forEach(b => { if (!b.closest('#intNext') && !b.closest('#vfNext')) b.disabled = true; });
   document.getElementById('vfFeedback').innerHTML = pgFeedback(`${isOk?'✅ Correct !':'❌ Non...'} ${item.exp}`, isOk?'correct':'incorrect');
   document.getElementById('vfNext').style.display='block';
 }
@@ -5805,7 +5805,7 @@ function checkInteraction(answeredDangerous) {
   const item = pharmaGameState.pool[pharmaGameState.idx];
   const isOk = answeredDangerous === item.danger;
   if (isOk) pharmaGameState.score++;
-  document.querySelectorAll('.pharma-game-area button').forEach(b => b.disabled = true);
+  document.querySelectorAll('.pharma-game-area button').forEach(b => { if (!b.closest('#intNext') && !b.closest('#vfNext')) b.disabled = true; });
   document.getElementById('intFeedback').innerHTML = pgFeedback(
     `${isOk?'✅ Correct !':'❌ Non...'} ${item.danger?'⚠️ Association dangereuse':'✅ Association acceptable'}<br>${item.explication}`,
     isOk?'correct':'incorrect'
