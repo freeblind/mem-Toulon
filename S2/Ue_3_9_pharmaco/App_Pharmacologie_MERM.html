@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Pharmacologie MERM - Chariot d'urgence & Contraste</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 28px;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid #ddd;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      background: white;
+      padding: 0.5rem;
+      border-radius: 8px 8px 0 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      border-radius: 4px;
+    }
+
+    .tab-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .med-form, .contrast-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .med-card, .contrast-card {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      transition: all 0.3s;
+    }
+
+    .med-card:hover, .contrast-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .med-card h3, .contrast-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      transition: border 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #667eea;
+      color: white;
+    }
+
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .button-group button {
+      flex: 1;
+    }
+
+    .button-group button.secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+    }
+
+    .button-group button.secondary:hover {
+      background: #f0f0f0;
+    }
+
+    .med-card.correct {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .med-card.incorrect,
+    .contrast-card.incorrect {
+      background: #fef2f2;
+      border-color: #fca5a5;
+    }
+
+    .med-card.correct,
+    .contrast-card.correct {
+      background: #f0fdf4;
+      border-color: #86efac;
+    }
+
+    .feedback {
+      font-size: 13px;
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      border-radius: 6px;
+      line-height: 1.5;
+    }
+
+    .feedback.success {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #22c55e;
+    }
+
+    .feedback.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border-left: 4px solid #ef4444;
+    }
+
+    .contrast-info {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #f9f9f9;
+      border-radius: 6px;
+      border-left: 4px solid #fbbf24;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .flashcard {
+      background: white;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      min-height: 350px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .flashcard:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .flashcard.flipped {
+      background: #f0f4ff;
+    }
+
+    .flashcard .label {
+      font-size: 12px;
+      color: #667eea;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .flashcard .content {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      line-height: 1.8;
+      word-break: break-word;
+    }
+
+    .qcm {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .qcm h3 {
+      margin: 0 0 1.5rem;
+      font-size: 16px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .qcm-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .qcm-option {
+      padding: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .qcm-option:hover {
+      background: #f9f9f9;
+      border-color: #667eea;
+    }
+
+    .qcm-option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+      color: #166534;
+    }
+
+    .qcm-option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .progress {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .progress button {
+      flex: 1;
+    }
+
+    .progress button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .progress button:disabled:hover {
+      background: #667eea;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .success-msg {
+      background: #dcfce7;
+      border: 2px solid #22c55e;
+      color: #166534;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .info-box {
+      background: #eff6ff;
+      border-left: 4px solid #3b82f6;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      font-size: 14px;
+      color: #1e40af;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 1.5rem;
+      }
+
+      header h1 {
+        font-size: 22px;
+      }
+
+      .med-form, .contrast-form {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        gap: 0.25rem;
+      }
+
+      .tab-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📋 Pharmacologie MERM</h1>
+      <p>Chariot d'urgence • Produits de contraste • Flashcards • QCM</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(0)">🏥 Chariot urgence</button>
+      <button class="tab-btn" onclick="switchTab(1)">🩻 Produits contraste</button>
+      <button class="tab-btn" onclick="switchTab(2)">📚 Flashcards</button>
+      <button class="tab-btn" onclick="switchTab(3)">❓ QCM</button>
+    </div>
+
+    <!-- TAB 1: CHARIOT D'URGENCE -->
+    <div class="tab-content active" id="tab0">
+      <div class="info-box">
+        ✓ Remplissez les 3 champs pour chaque médicament, puis cliquez "Vérifier" pour voir la correction
+      </div>
+
+      <div class="med-form" id="medForm"></div>
+
+      <div class="button-group">
+        <button onclick="checkAllAnswers()">✓ Vérifier tout</button>
+        <button class="secondary" onclick="resetChariot()">↻ Réinitialiser</button>
+      </div>
+    </div>
+
+    <!-- TAB 2: PRODUITS DE CONTRASTE -->
+    <div class="tab-content" id="tab1">
+      <div class="info-box">
+        ✓ Sélectionnez le produit de contraste adapté et indiquez le volume pour chaque examen du grimoire
+      </div>
+
+      <div class="contrast-form" id="contrastForm"></div>
+
+      <div class="button-group">
+        <button onclick="checkAllContrast()">✓ Vérifier tout</button>
+        <button class="secondary" onclick="resetContrast()">↻ Réinitialiser</button>
+      </div>
+    </div>
+
+    <!-- TAB 3: FLASHCARDS -->
+    <div class="tab-content" id="tab2">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="label">Carte</div>
+          <div class="value"><span id="cardNum">1</span>/<span id="cardTotal">12</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Bien ✓</div>
+          <div class="value" style="color: #22c55e;" id="goodCount">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">À revoir</div>
+          <div class="value" style="color: #ef4444;" id="badCount">0</div>
+        </div>
+      </div>
+
+      <div class="flashcard" id="flashcard" onclick="toggleFlashcard()" data-flipped="false">
+        <div class="label">Clique pour révéler</div>
+        <div class="content" id="flashcardContent">Adrénaline</div>
+      </div>
+
+      <div class="progress">
+        <button onclick="prevCard()">← Précédent</button>
+        <button style="background: #22c55e;" onclick="markGood()">Bien ✓</button>
+        <button style="background: #ef4444;" onclick="markBad()">À revoir ✗</button>
+        <button onclick="nextCard()">Suivant →</button>
+      </div>
+    </div>
+
+    <!-- TAB 4: QCM -->
+    <div class="tab-content" id="tab3">
+      <div class="stats">
+        <div class="stat-card">
+          <div class="label">Question</div>
+          <div class="value"><span id="qcmNum">1</span>/<span id="qcmTotal">6</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Score</div>
+          <div class="value" style="color: #667eea;" id="qcmScore">0%</div>
+        </div>
+      </div>
+
+      <div id="qcmContainer"></div>
+
+      <div class="progress">
+        <button onclick="prevQCM()">← Précédent</button>
+        <button onclick="nextQCM()">Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const medications = [
+      { name: 'Adrénaline', indication: 'Choc, arrêt cardiaque', role: 'Restaurer une circulation efficace', side: 'Tachycardie, hypertension, hyperglycémie' },
+      { name: 'Amiodarone/Cordarone', indication: 'Trouble du rythme cardiaque', role: 'Réguler, ralentir, renforcer le cœur', side: 'Troubles de la thyroïde' },
+      { name: 'Atropine', indication: 'Bradycardie', role: 'Stimulant cardiaque', side: 'Agitation, troubles digestifs' },
+      { name: 'Clonazépam', indication: 'Anxiété, anti-convulsivant', role: 'Anti-convulsivant', side: 'Fatigue, chute, dépendance' },
+      { name: 'Etomidate', indication: 'Anesthésie générale', role: 'Anesthésie avant intubation', side: 'Myoclonie, nausée, vomissement' },
+      { name: 'Furosémide (Lasilix)', indication: 'Diurétique / Insuffisance cardiaque', role: 'Soulager l\'œdème', side: 'Déshydratation, hypokaliémie' },
+      { name: 'Glucose', indication: 'Hypoglycémie', role: 'Remonter la glycémie', side: 'Hyperglycémie (si overdose)' },
+      { name: 'Méthylprednisolone', indication: 'Asthme sévère / Allergie', role: 'Réduire inflammation', side: 'Troubles du sommeil' },
+      { name: 'Midazolam/Hypnovel', indication: 'Anesthésie, sédation', role: 'Anti-convulsivant, amnésie antérograde, myorelaxant', side: 'Dépendance, hypotension' },
+      { name: 'Naloxone/Narcan', indication: 'Overdose aux opiacés', role: 'Antagoniste morphine', side: 'Syndrome de sevrage' },
+      { name: 'Salbutamol (Ventoline)', indication: 'Asthme / Bronchospasme', role: 'Bronchodilatateur', side: 'Tremblements, tachycardie' },
+      { name: 'Trinitrine', indication: 'Infarctus du myocarde / Angor', role: 'Dilater les coronaires', side: 'Céphalée, hypotension' }
+    ];
+
+    const contrastExams = [
+      { exam: 'Angiographie coronarienne', product: 'Xenetix 300 ou 350 (PDCI iodé)', volume: '120-175 ml', ci: 'Clairance < 30 mL/min | Réaction anaphylactique antérieure aux PDCI' },
+      { exam: 'Scanner thoraco-abdo-pelvis injecté', product: 'Xenetix 300 ou 350 (PDCI iodé)', volume: '80-100 ml', ci: 'Clairance < 45 mL/min (relatif) | Réaction anaphylactique antérieure' },
+      { exam: 'Urographie intraveineuse', product: 'Xenetix 300 ou 350 (PDCI iodé)', volume: '70-90 ml', ci: 'Clairance < 30 mL/min | Réaction anaphylactique antérieure' },
+      { exam: 'Angioscanner pulmonaire (EP)', product: 'Xenetix 300 ou 350 (PDCI iodé)', volume: '80-100 ml', ci: 'Clairance < 30 mL/min | Réaction anaphylactique antérieure' },
+      { exam: 'Urétro-cystographie (perforation urinaire)', product: 'Telebrix 12/30/35 (hydrosoluble iodé)', volume: '300-400 ml', ci: 'Obstacle urètre (CI absolue)' },
+      { exam: 'Lavement baryté (colon)', product: 'Micropaque (Baryum NON-iodé)', volume: '100-400 ml', ci: 'Syndrome occlusif/perforant | Si perforation soupçonnée → Gastrographine' },
+      { exam: 'Transit gastro-oesophagien', product: 'Micropaque (Baryum NON-iodé)', volume: '100-336 ml', ci: 'Suspect perforation → utiliser Gastrographine (hydrosoluble iodé)' },
+      { exam: 'IRM cardiaque (exploration myocarde)', product: 'Gadolinium (NON-iodé, IRM seulement)', volume: '0.1-0.2 mmol/kg', ci: 'Clairance < 30 mL/min (risque fibrose néphrogène gadolinium)' },
+      { exam: '⚠️ CAS SPÉCIAL : Allergie iode confirmée', product: 'IMPOSSIBLE avec PDCI/Telebrix iodés', volume: 'N/A', ci: 'Allergie iode = CI ABSOLUE pour : Xenetix, Telebrix, Gastrographine (tous iodés). Solutions : Baryum (GI), Gadolinium (IRM), ou cathétérisme sans contraste' }
+    ];
+
+    const qcmQuestions = [
+      { q: 'Quel produit de contraste pour une angiographie coronarienne ?', opts: ['Baryum', 'Xenetix (PDCI iodé)', 'Gadolinium', 'Telebrix'], correct: 1 },
+      { q: 'Volume typique de PDCI pour un scanner thoraco-abdo ?', opts: ['30-50 ml', '80-100 ml', '150-200 ml', '250+ ml'], correct: 1 },
+      { q: 'Quel produit pour l\'urétro-cystographie ?', opts: ['Micropaque (baryum)', 'Gadolinium', 'Telebrix (hydrosoluble)', 'Xenetix'], correct: 2 },
+      { q: 'Contre-indication majeure du baryum :', opts: ['Allergie iode', 'Syndrome occlusif/perforant', 'Clairance basse', 'Asthme'], correct: 1 },
+      { q: 'PDCI iodé CONTRE-INDIQUÉ si clairance < ?', opts: ['60 mL/min (relatif)', '45 mL/min (relatif)', '30 mL/min (absolu)', '15 mL/min (absolu)'], correct: 2 },
+      { q: 'Quel produit pour IRM cardiaque ?', opts: ['PDCI iodé', 'Baryum', 'Gadolinium', 'Aucun (pas de contraste)'], correct: 2 }
+    ];
+
+    let state = {
+      chariot: {},
+      contrast: {},
+      flashcard: { current: 0, good: 0, bad: 0, answered: {} },
+      qcm: { current: 0, answers: {}, submitted: {} }
+    };
+
+    medications.forEach((m, i) => {
+      state.chariot[i] = { nom: '', role: '', side: '' };
+      state.flashcard.answered[i] = null;
+    });
+
+    contrastExams.forEach((e, i) => {
+      state.contrast[i] = { product: '', volume: '' };
+    });
+
+    function switchTab(idx) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab' + idx).classList.add('active');
+      document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+      if (idx === 2) initFlashcard();
+      if (idx === 3) initQCM();
+    }
+
+    function renderChariot() {
+      const form = document.getElementById('medForm');
+      form.innerHTML = medications.map((m, i) => `
+        <div class="med-card" id="card${i}">
+          <h3>${i + 1}. ?</h3>
+          <div class="form-group">
+            <label>Nom du médicament</label>
+            <input type="text" id="nom${i}" placeholder="ex: Lasilix" onchange="updateChariot(${i})">
+          </div>
+          <div class="form-group">
+            <label>Rôle / Indication</label>
+            <textarea id="role${i}" placeholder="ex: Soulager l'œdème" onchange="updateChariot(${i})"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Effets secondaires</label>
+            <textarea id="side${i}" placeholder="ex: Déshydratation, hypokaliémie" onchange="updateChariot(${i})"></textarea>
+          </div>
+          <button onclick="checkAnswer(${i})" style="width: 100%;">Vérifier</button>
+          <div id="feedback${i}"></div>
+        </div>
+      `).join('');
+    }
+
+    function updateChariot(i) {
+      state.chariot[i] = {
+        nom: document.getElementById('nom' + i).value,
+        role: document.getElementById('role' + i).value,
+        side: document.getElementById('side' + i).value
+      };
+    }
+
+    function normalizeText(text) {
+      return text.toLowerCase()
+        .replace(/é/g, 'e').replace(/è/g, 'e').replace(/ê/g, 'e')
+        .replace(/à/g, 'a').replace(/â/g, 'a')
+        .replace(/ï/g, 'i').replace(/î/g, 'i')
+        .replace(/ô/g, 'o').replace(/ù/g, 'u').replace(/û/g, 'u')
+        .replace(/ç/g, 'c')
+        .replace(/\s+/g, ' ').trim();
+    }
+
+    function findMedicationByName(enteredName) {
+      const normalized = normalizeText(enteredName);
+      for (let med of medications) {
+        const medNormalized = normalizeText(med.name);
+        const medPrimary = normalizeText(med.name.split('/')[0]);
+        if (normalized.includes(medNormalized) || medNormalized.includes(normalized) || 
+            normalized.includes(medPrimary) || medPrimary.includes(normalized)) {
+          return med;
+        }
+      }
+      return null;
+    }
+
+    function checkAnswer(i) {
+      updateChariot(i);
+      const card = document.getElementById('card' + i);
+      const feedback = document.getElementById('feedback' + i);
+      const enteredNom = state.chariot[i].nom.trim();
+      
+      if (!enteredNom) {
+        card.classList.remove('correct', 'incorrect');
+        feedback.innerHTML = '<div class="feedback error">Veuillez entrer un nom</div>';
+        return;
+      }
+
+      const correctMed = findMedicationByName(enteredNom);
+      
+      if (!correctMed) {
+        card.classList.add('incorrect');
+        card.classList.remove('correct');
+        feedback.innerHTML = '<div class="feedback error">Médicament non reconnu. Vérifiez l\'orthographe.</div>';
+        return;
+      }
+
+      const roleMatch = normalizeText(state.chariot[i].role).includes(
+        normalizeText(correctMed.role.split(',')[0])
+      );
+      const sideMatch = normalizeText(state.chariot[i].side).includes(
+        normalizeText(correctMed.side.split(',')[0])
+      );
+
+      const allCorrect = roleMatch && sideMatch;
+
+      card.classList.remove('correct', 'incorrect');
+      feedback.innerHTML = '';
+
+      if (allCorrect) {
+        card.classList.add('correct');
+        feedback.innerHTML = '<div class="feedback success">✓ Correct ! (Médicament : ' + correctMed.name + ')</div>';
+      } else {
+        card.classList.add('incorrect');
+        feedback.innerHTML = `<div class="feedback error">
+          <strong>Correction pour ${correctMed.name} :</strong><br>
+          Rôle: ${correctMed.role}<br>
+          Effets: ${correctMed.side}
+        </div>`;
+      }
+    }
+
+    function checkAllAnswers() {
+      medications.forEach((_, i) => checkAnswer(i));
+    }
+
+    function resetChariot() {
+      medications.forEach((_, i) => {
+        document.getElementById('nom' + i).value = '';
+        document.getElementById('role' + i).value = '';
+        document.getElementById('side' + i).value = '';
+        document.getElementById('card' + i).classList.remove('correct', 'incorrect');
+        document.getElementById('feedback' + i).innerHTML = '';
+      });
+      state.chariot = {};
+      medications.forEach((m, i) => { state.chariot[i] = { nom: '', role: '', side: '' }; });
+    }
+
+    function renderContrast() {
+      const form = document.getElementById('contrastForm');
+      const products = ['Xenetix 300 (PDCI)', 'Xenetix 350 (PDCI)', 'Micropaque (Baryum)', 'Telebrix (hydrosoluble)', 'Gadolinium', 'Pas de contraste'];
+
+      form.innerHTML = contrastExams.map((e, i) => `
+        <div class="contrast-card" id="contrastCard${i}">
+          <h3>${i + 1}. ${e.exam}</h3>
+          <div class="contrast-info">
+            <strong>CI:</strong> ${e.ci}
+          </div>
+          <div class="form-group">
+            <label>Produit de contraste</label>
+            <select id="product${i}" onchange="updateContrast(${i})">
+              <option value="">-- Sélectionnez --</option>
+              ${products.map(p => `<option value="${p}">${p}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Volume</label>
+            <input type="text" id="volume${i}" placeholder="ex: 100 ml" onchange="updateContrast(${i})">
+          </div>
+          <button onclick="checkContrast(${i})" style="width: 100%;">Vérifier</button>
+          <div id="contrastFeedback${i}"></div>
+        </div>
+      `).join('');
+    }
+
+    function updateContrast(i) {
+      state.contrast[i] = {
+        product: document.getElementById('product' + i).value,
+        volume: document.getElementById('volume' + i).value
+      };
+    }
+
+    function checkContrast(i) {
+      updateContrast(i);
+      const card = document.getElementById('contrastCard' + i);
+      const feedback = document.getElementById('contrastFeedback' + i);
+      const correct = contrastExams[i];
+
+      const prodMatch = state.contrast[i].product.toLowerCase().includes(correct.product.toLowerCase().split('(')[0].trim());
+      const volMatch = state.contrast[i].volume.toLowerCase().includes(correct.volume.toLowerCase().split('-')[0].trim());
+
+      const allCorrect = prodMatch && volMatch;
+
+      card.classList.remove('correct', 'incorrect');
+      feedback.innerHTML = '';
+
+      if (allCorrect) {
+        card.classList.add('correct');
+        feedback.innerHTML = '<div class="feedback success">✓ Correct !</div>';
+      } else {
+        card.classList.add('incorrect');
+        feedback.innerHTML = `<div class="feedback error">
+          <strong>Correction :</strong><br>
+          Produit: ${correct.product}<br>
+          Volume: ${correct.volume}
+        </div>`;
+      }
+    }
+
+    function checkAllContrast() {
+      contrastExams.forEach((_, i) => checkContrast(i));
+    }
+
+    function resetContrast() {
+      contrastExams.forEach((_, i) => {
+        document.getElementById('product' + i).value = '';
+        document.getElementById('volume' + i).value = '';
+        document.getElementById('contrastCard' + i).classList.remove('correct', 'incorrect');
+        document.getElementById('contrastFeedback' + i).innerHTML = '';
+      });
+      state.contrast = {};
+      contrastExams.forEach((e, i) => { state.contrast[i] = { product: '', volume: '' }; });
+    }
+
+    function initFlashcard() {
+      state.flashcard.current = 0;
+      showFlashcard();
+    }
+
+    function showFlashcard() {
+      const m = medications[state.flashcard.current];
+      const isFlipped = document.getElementById('flashcard').getAttribute('data-flipped') === 'true';
+      const content = document.getElementById('flashcardContent');
+
+      if (isFlipped) {
+        document.getElementById('flashcard').classList.add('flipped');
+        content.innerHTML = `<strong>Indication:</strong> ${m.indication}<br><br>
+                            <strong>Rôle:</strong> ${m.role}<br><br>
+                            <strong>Effets:</strong> ${m.side}`;
+      } else {
+        document.getElementById('flashcard').classList.remove('flipped');
+        content.textContent = m.name;
+      }
+
+      document.getElementById('cardNum').textContent = state.flashcard.current + 1;
+      document.getElementById('goodCount').textContent = state.flashcard.good;
+      document.getElementById('badCount').textContent = state.flashcard.bad;
+    }
+
+    function toggleFlashcard() {
+      const card = document.getElementById('flashcard');
+      const isFlipped = card.getAttribute('data-flipped') === 'true';
+      card.setAttribute('data-flipped', !isFlipped);
+      showFlashcard();
+    }
+
+    function nextCard() {
+      if (state.flashcard.current < medications.length - 1) {
+        state.flashcard.current++;
+        document.getElementById('flashcard').setAttribute('data-flipped', 'false');
+        showFlashcard();
+      }
+    }
+
+    function prevCard() {
+      if (state.flashcard.current > 0) {
+        state.flashcard.current--;
+        document.getElementById('flashcard').setAttribute('data-flipped', 'false');
+        showFlashcard();
+      }
+    }
+
+    function markGood() {
+      if (!state.flashcard.answered[state.flashcard.current]) {
+        state.flashcard.good++;
+        state.flashcard.answered[state.flashcard.current] = 'good';
+      }
+      nextCard();
+    }
+
+    function markBad() {
+      if (!state.flashcard.answered[state.flashcard.current]) {
+        state.flashcard.bad++;
+        state.flashcard.answered[state.flashcard.current] = 'bad';
+      }
+      nextCard();
+    }
+
+    function initQCM() {
+      state.qcm.current = 0;
+      showQCM();
+    }
+
+    function showQCM() {
+      const q = qcmQuestions[state.qcm.current];
+      const container = document.getElementById('qcmContainer');
+
+      container.innerHTML = `
+        <div class="qcm">
+          <h3>${q.q}</h3>
+          <div class="qcm-options">
+            ${q.opts.map((opt, i) => `
+              <div class="qcm-option" onclick="selectQCM(${i})" id="opt${i}">
+                ${opt}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
+      if (state.qcm.submitted[state.qcm.current] !== undefined) {
+        const correct = q.correct;
+        const selected = state.qcm.answers[state.qcm.current];
+        document.getElementById('opt' + selected)?.classList.add(selected === correct ? 'correct' : 'incorrect');
+        document.getElementById('opt' + correct)?.classList.add('correct');
+      }
+
+      document.getElementById('qcmNum').textContent = state.qcm.current + 1;
+      updateQCMScore();
+    }
+
+    function selectQCM(i) {
+      if (state.qcm.submitted[state.qcm.current] === undefined) {
+        state.qcm.answers[state.qcm.current] = i;
+        const q = qcmQuestions[state.qcm.current];
+        state.qcm.submitted[state.qcm.current] = true;
+
+        document.getElementById('opt' + i).classList.add(i === q.correct ? 'correct' : 'incorrect');
+        if (i !== q.correct) {
+          document.getElementById('opt' + q.correct).classList.add('correct');
+        }
+        updateQCMScore();
+      }
+    }
+
+    function updateQCMScore() {
+      const correct = Object.keys(state.qcm.submitted).filter(k => {
+        const q = qcmQuestions[k];
+        return state.qcm.answers[k] === q.correct;
+      }).length;
+      const total = Object.keys(state.qcm.submitted).length;
+      const score = total > 0 ? Math.round((correct / total) * 100) : 0;
+      document.getElementById('qcmScore').textContent = score + '%';
+    }
+
+    function nextQCM() {
+      if (state.qcm.current < qcmQuestions.length - 1) {
+        state.qcm.current++;
+        showQCM();
+      }
+    }
+
+    function prevQCM() {
+      if (state.qcm.current > 0) {
+        state.qcm.current--;
+        showQCM();
+      }
+    }
+
+    document.getElementById('cardTotal').textContent = medications.length;
+    document.getElementById('qcmTotal').textContent = qcmQuestions.length;
+    renderChariot();
+    renderContrast();
+  </script>
+</body>
+</html>

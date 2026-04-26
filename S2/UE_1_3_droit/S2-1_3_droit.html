@@ -213,26 +213,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 .mem-card.error-flash { animation:errFlash 0.5s; }
 @keyframes errFlash { 0%,100%{} 50%{ filter:brightness(0.5) sepia(1) hue-rotate(340deg); } }
 
-/* ORDER */
-.order-container { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:16px; box-shadow:var(--shadow); }
-.order-list { list-style:none; }
-.order-item { display:flex; align-items:center; gap:8px; background:var(--surface2); border:2px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:8px; cursor:grab; user-select:none; touch-action:none; transition:all 0.2s; }
-.order-item:active { cursor:grabbing; }
-.order-item.dragging { opacity:0.4; border-style:dashed; }
-.order-item.drag-over { border-color:var(--accent); background:var(--accent-light); transform:scale(1.01); }
-.order-item.correct-pos { border-color:var(--green); background:var(--green-light); }
-.order-item.wrong-pos { border-color:var(--red); background:var(--red-light); }
-.order-handle { color:var(--text-soft); font-size:1.2rem; flex-shrink:0; }
-.order-num { width:26px; height:26px; background:var(--accent); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:600; flex-shrink:0; }
-.order-text { font-size:0.88rem; flex:1; }
-.order-check-btn { margin-top:12px; width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.9rem; font-weight:600; cursor:pointer; transition:all 0.2s; min-height:44px; }
-.order-shuffle-btn { margin-top:8px; width:100%; padding:10px; background:var(--surface); color:var(--text-soft); border:1px solid var(--border); border-radius:8px; font-family:'DM Sans',sans-serif; font-size:0.85rem; cursor:pointer; min-height:44px; }
-.order-result { display:none; margin-top:10px; padding:12px; border-radius:8px; text-align:center; font-weight:600; }
-.order-result.show { display:block; }
-.order-result.perfect { background:var(--green-light); color:var(--green); }
-.order-result.partial { background:var(--orange-light); color:var(--orange); }
-.order-result.bad { background:var(--red-light); color:var(--red); }
-
 /* MATCH GAME */
 .match-area { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
 .match-col-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); text-align:center; margin-bottom:8px; }
@@ -326,7 +306,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   <div class="score-badge" id="global-score">⭐ 0 pts</div>
 </header>
 
-<!-- TABS BAR -->
 <div class="tabs" id="tabs-bar">
   <button class="tab-btn active" onclick="showTab('accueil',this)">
     <span class="tab-icon">🏠</span><span class="tab-label">Accueil</span>
@@ -368,7 +347,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 
 <main>
 
-<!-- ══════════ ACCUEIL ══════════ -->
 <section id="accueil" class="section active">
   <div class="section-heading">
     <span class="section-icon">⚖️</span>
@@ -379,7 +357,7 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
     <div class="card" style="border-left:4px solid var(--accent);cursor:pointer;" onclick="showTab('flashcards',document.querySelectorAll('.tab-btn')[1])">
       <div style="font-size:1.8rem;margin-bottom:6px;">🃏</div>
       <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">Flashcards</div>
-      <div style="font-size:0.8rem;color:var(--text-soft);">60 cartes · toutes les notions clés</div>
+      <div style="font-size:0.8rem;color:var(--text-soft);">Toutes les notions clés</div>
     </div>
     <div class="card" style="border-left:4px solid var(--orange);cursor:pointer;" onclick="showTab('qcm',document.querySelectorAll('.tab-btn')[2])">
       <div style="font-size:1.8rem;margin-bottom:6px;">📝</div>
@@ -410,6 +388,7 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
       <span class="badge badge-blue">Habilitations MEM</span>
       <span class="badge badge-orange">Loi Kouchner</span>
       <span class="badge badge-green">Loi Léonetti-Claeys</span>
+      <span class="badge badge-red">Éthique</span>
     </div>
   </div>
 
@@ -467,25 +446,26 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   </div>
 </section>
 
-<!-- ══════════ FLASHCARDS ══════════ -->
 <section id="flashcards" class="section">
   <div class="section-heading">
     <span class="section-icon">🃏</span>
-    <div><h2>Flashcards</h2><p>Cliquez sur la carte pour retourner · évaluez-vous honnêtement</p></div>
+    <div><h2>Flashcards</h2><p>Cliquez pour retourner · Cumulez les thèmes · Frappez là où ça fait mal</p></div>
   </div>
 
+  <div class="filter-wrap" id="fc-filters" style="margin-bottom:16px;">
+    <button class="filter-tag active" data-theme="all" onclick="toggleThemeFC('all')">Tout</button>
+    <button class="filter-tag" data-theme="responsabilite" onclick="toggleThemeFC('responsabilite')">Responsabilité</button>
+    <button class="filter-tag" data-theme="secret" onclick="toggleThemeFC('secret')">Secret pro</button>
+    <button class="filter-tag" data-theme="droits" onclick="toggleThemeFC('droits')">Droits patients</button>
+    <button class="filter-tag" data-theme="findevie" onclick="toggleThemeFC('findevie')">Fin de vie</button>
+    <button class="filter-tag" data-theme="exercice" onclick="toggleThemeFC('exercice')">Exercice MEM</button>
+    <button class="filter-tag" data-theme="droit" onclick="toggleThemeFC('droit')">Droit</button>
+    <button class="filter-tag" data-theme="ethique" onclick="toggleThemeFC('ethique')">Éthique</button>
+  </div>
+  
   <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-    <select id="fc-theme" onchange="filterFC()" style="padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:0.85rem;flex:1;min-width:160px;">
-      <option value="all">Toutes les cartes</option>
-      <option value="responsabilite">Responsabilité</option>
-      <option value="secret">Secret professionnel</option>
-      <option value="droits">Droits patients</option>
-      <option value="findevie">Fin de vie</option>
-      <option value="exercice">Exercice MEM</option>
-      <option value="droit">Droit public/privé</option>
-    </select>
-    <button onclick="shuffleFC()" style="padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-height:40px">🔀 Mélanger</button>
-    <button onclick="retryUnknownFC()" id="btn-retry-fc" style="padding:9px 16px;border-radius:8px;border:1px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;display:none;min-height:40px">🔁 Non sues</button>
+    <button onclick="shuffleFC()" style="padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-height:40px">🔀 Mélanger le sang</button>
+    <button onclick="retryUnknownFC()" id="btn-retry-fc" style="padding:9px 16px;border-radius:8px;border:1px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;display:none;min-height:40px">🔁 Affronter les non sues</button>
   </div>
 
   <div class="scorecard">
@@ -501,30 +481,34 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
     <span id="fc-counter" style="font-size:0.85rem;color:var(--text-soft)">1 / 1</span>
     <button class="nav-btn" id="fc-next" onclick="fcNav(1)">Suiv. →</button>
   </div>
+  
   <div class="fc-scene" id="fc-scene" onclick="flipCard()">
     <div class="fc-card-inner" id="fc-card-inner">
       <div class="fc-front">
         <div class="fc-label" id="fc-theme-badge">Droit</div>
-        <div class="fc-q" id="fc-question">Chargement…</div>
-        <div class="hint-flip">↑ Cliquez pour retourner</div>
+        <div class="fc-q" id="fc-question">Chargement de la douleur…</div>
+        <div class="hint-flip" id="fc-hint-front">↑ Frappe pour retourner</div>
       </div>
-      <div class="fc-back"><div class="fc-a" id="fc-answer">Réponse ici</div></div>
+      <div class="fc-back">
+        <div class="fc-a" id="fc-answer">Réponse ici</div>
+        <div class="hint-flip" style="margin-top:20px; color:var(--text-soft); font-size:0.7rem;">↓ Frappe pour revoir la question</div>
+      </div>
     </div>
   </div>
-  <div class="fc-actions" id="fc-actions" style="display:none">
+  
+  <div class="fc-actions" id="fc-actions" style="display:none; margin-top:20px;">
     <button class="fc-btn fc-btn-know" onclick="markCardFC(true)">✅ Je sais</button>
     <button class="fc-btn fc-btn-unknown" onclick="markCardFC(false)">❌ Pas su</button>
-    <button class="fc-btn fc-btn-skip" onclick="fcNav(1)">→ Suivant</button>
+    <button class="fc-btn fc-btn-skip" onclick="fcNav(1)">→ Fuir au suivant</button>
   </div>
   <div class="fc-meta" id="fc-meta"></div>
   <div class="unknown-pile" id="unknown-pile-fc" style="display:none">
-    <h3>❌ Cartes non sues (<span id="unknown-count-fc">0</span>)</h3>
+    <h3>❌ Blessures ouvertes (<span id="unknown-count-fc">0</span>)</h3>
     <ul class="unknown-list" id="unknown-list-fc"></ul>
-    <button class="btn-retry" onclick="retryUnknownFC()">🔁 Retravailler ces cartes</button>
+    <button class="btn-retry" onclick="retryUnknownFC()">🔁 Retourner au charbon</button>
   </div>
 </section>
 
-<!-- ══════════ QCM ══════════ -->
 <section id="qcm" class="section">
   <div class="section-heading">
     <span class="section-icon">📝</span>
@@ -538,11 +522,11 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
     <button class="filter-tag" onclick="filterQCM('findevie',this)">Fin de vie</button>
     <button class="filter-tag" onclick="filterQCM('exercice',this)">Exercice MEM</button>
     <button class="filter-tag" onclick="filterQCM('droit',this)">Droit public/privé</button>
+    <button class="filter-tag" onclick="filterQCM('ethique',this)">Éthique</button>
   </div>
   <div id="qcm-container"></div>
 </section>
 
-<!-- ══════════ VRAI / FAUX ══════════ -->
 <section id="vraifaux" class="section">
   <div class="section-heading">
     <span class="section-icon">✅</span>
@@ -551,7 +535,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   <div id="vf-container"></div>
 </section>
 
-<!-- ══════════ SCÉNARIOS ══════════ -->
 <section id="scenarios" class="section">
   <div class="section-heading">
     <span class="section-icon">🎭</span>
@@ -560,7 +543,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   <div id="scenarios-container"></div>
 </section>
 
-<!-- ══════════ ASSOCIER ══════════ -->
 <section id="match" class="section">
   <div class="section-heading">
     <span class="section-icon">🔗</span>
@@ -569,7 +551,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   <div id="match-container"></div>
 </section>
 
-<!-- ══════════ FLASH QUIZ ══════════ -->
 <section id="flashquiz" class="section">
   <div class="section-heading">
     <span class="section-icon">⚡</span>
@@ -596,7 +577,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   </div>
 </section>
 
-<!-- ══════════ MEMORY ══════════ -->
 <section id="memory" class="section">
   <div class="section-heading">
     <span class="section-icon">🧠</span>
@@ -614,7 +594,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   </div>
 </section>
 
-<!-- ══════════ QUESTIONS OUVERTES ══════════ -->
 <section id="ouvertes" class="section">
   <div class="section-heading">
     <span class="section-icon">✍️</span>
@@ -623,7 +602,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   <div id="qo-container"></div>
 </section>
 
-<!-- ══════════ GLOSSAIRE ══════════ -->
 <section id="glossaire" class="section">
   <div class="section-heading">
     <span class="section-icon">📖</span>
@@ -636,11 +614,11 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
     <button class="filter-tag" onclick="filterDefs('droits',this)">Droits</button>
     <button class="filter-tag" onclick="filterDefs('findevie',this)">Fin de vie</button>
     <button class="filter-tag" onclick="filterDefs('droit',this)">Droit général</button>
+    <button class="filter-tag" onclick="filterDefs('ethique',this)">Éthique</button>
   </div>
   <div class="def-grid" id="def-grid"></div>
 </section>
 
-<!-- ══════════ LOIS CLÉS ══════════ -->
 <section id="lois" class="section">
   <div class="section-heading">
     <span class="section-icon">📜</span>
@@ -730,7 +708,6 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   </div>
 </section>
 
-<!-- ══════════ ANKI ══════════ -->
 <section id="anki" class="section">
   <div class="section-heading">
     <span class="section-icon">🗂️</span>
@@ -738,12 +715,12 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   </div>
 
   <div class="anki-info">
-    <strong>📁 Fichier à télécharger :</strong> <code>S2-1_3_droit.apkg</code><br>
-    <span style="color:var(--text-soft);font-size:0.82rem;">Le fichier .apkg contient toutes les cartes au format Anki. Importez-le dans Anki Desktop ou AnkiDroid pour une révision espacée optimale.</span>
+    <strong>📁 Fichier à télécharger :</strong> <code>S2-1_3_droit.txt</code><br>
+    <span style="color:var(--text-soft);font-size:0.82rem;">Importez-le dans Anki Desktop ou AnkiDroid pour une révision espacée implacable.</span>
   </div>
 
   <button class="anki-dl-btn" onclick="downloadAnki()">
-    ⬇️ Télécharger S2-1_3_droit.apkg
+    ⬇️ Télécharger S2-1_3_droit.txt
   </button>
 
   <div style="margin-bottom:16px;">
@@ -822,101 +799,90 @@ const FLASHCARDS = [
   { theme:'droit', q:'Déontologie : définition', a:'Science des devoirs. Ensemble des règles et devoirs qui régissent une profession.' },
   { theme:'droit', q:'Premier texte de loi connu', a:'Le Code d\'Hammourabi, en l\'an -1750. Règles de vie courante utilisées pendant plus de 1000 ans.' },
   { theme:'droit', q:'Qu\'est-ce qu\'un "référé-liberté" ?', a:'Recours devant le juge administratif pour faire cesser dans les <strong>48h</strong> une atteinte à une liberté fondamentale causée par l\'Administration.' },
+  { theme:'droit', q:'Le système de soins constitue-t-il un élément du système de santé ? Par qui est-il contrôlé en région ?', a:'<strong>Vrai.</strong> Il constitue un élément du système de santé. Au niveau régional, il est sous la poigne des Agences Régionales de Santé (<strong>ARS</strong>).' },
+
+  // ETHIQUE
+  { theme:'ethique', q:'Définissez la notion d\'éthique.', a:'Ensemble de principes et de règles qui montrent le comportement des êtres humains entre eux et envers leur environnement.' },
+  { theme:'ethique', q:'Explicitez les 4 principes fondamentaux vus en cours qui sous-tendent l\'éthique.', a:'1. <strong>Déontologique</strong> : l\'éthique du devoir.<br>2. <strong>Liberté</strong> : repose sur la valeur de l\'autonomie.<br>3. <strong>Traditionnelle</strong> : exprime le respect sacré de la vie.<br>4. <strong>Clinique</strong> : mettre le patient au centre du processus décisionnel.' },
+  { theme:'ethique', q:'Citez les 3 étapes de la méthode d\'analyse éthique.', a:'1. <strong>Clarification du problème</strong>.<br>2. <strong>Concertation</strong>.<br>3. <strong>Délibération</strong>.' },
+  { theme:'ethique', q:'Citez les 6 principales règles de l\'éthique de discussion lors d\'une réunion collégiale.', a:'1. Droit à la parole pour tous<br>2. Écoute active et bienveillante<br>3. Non-jugement<br>4. Confidentialité<br>5. Argumentation (non violence symbolique)<br>6. Possibilité de changer d\'avis' },
+  { theme:'ethique', q:'Citez 5 incidents fréquents lors d\'actes en imagerie médicale (jurisprudence).', a:'1. Extravasation du produit de contraste<br>2. Malaise vagal du patient debout<br>3. Chute du patient (oubli de barrières)<br>4. Mauvaise posologie / mauvais produit<br>5. Réalisation sans prescription valide' }
 ];
 
 const QCM_DATA = [
-  { theme:'responsabilite', q:'Quelles sont les 3 conditions nécessaires pour engager la responsabilité civile ?', multi:true, opts:['Une faute commise','Un dommage ou préjudice','Un lien de causalité faute-préjudice','La présence d\'un médecin','Une décision de justice préalable'], correct:[0,1,2], exp:'La responsabilité civile (indemnitaire) nécessite les 3 conditions : faute + dommage + lien de causalité. L\'objectif est la réparation financière (dommages et intérêts).' },
-  { theme:'responsabilite', q:'L\'aléa thérapeutique est :', multi:false, opts:['Une faute médicale délibérée','Une suite inattendue non imputable à l\'équipe soignante','Un acte de soin négligent','Une erreur de diagnostic'], correct:[1], exp:'L\'aléa est une complication imprévisible qui ne peut être imputée à la défaillance des soignants. Il est indemnisé par l\'ONIAM (loi 2002).' },
-  { theme:'responsabilite', q:'Quels sont les 3 types de fautes pénales ?', multi:true, opts:['Faute simple','Faute caractérisée','Faute délibérée','Faute administrative','Faute disciplinaire'], correct:[0,1,2], exp:'Faute simple (imprudence, négligence), faute caractérisée (degré de gravité aggravé), faute délibérée (mise en danger délibérée de la vie d\'autrui).' },
-  { theme:'responsabilite', q:'La responsabilité pénale est :', multi:false, opts:['Portée par l\'établissement de santé','Individuelle et recherche un coupable','Collective et vise une réparation financière','Applicable uniquement aux médecins'], correct:[1], exp:'La responsabilité pénale est INDIVIDUELLE. Elle recherche un coupable (art. 121-1 du code pénal : "nul n\'est pénalement responsable que de son propre fait").' },
-  { theme:'secret', q:'La peine pour violation du secret professionnel (art. 226-13) est :', multi:false, opts:['6 mois + 7 500€','1 an + 15 000€','3 ans + 45 000€','2 ans + 30 000€'], correct:[1], exp:'Article 226-13 du code pénal : 1 an d\'emprisonnement et/ou 15 000€ d\'amende. À ne pas confondre avec la non-dénonciation (3 ans + 45 000€) ou la non-assistance (2 ans + 30 000€).' },
-  { theme:'secret', q:'Le secret partagé est possible quand :', multi:true, opts:['Tous les soignants participent à la PEC du patient','Les infos partagées sont nécessaires à la continuité des soins','La famille du patient demande les informations','Les soignants travaillent dans le même établissement','Le patient a donné son accord explicite à chaque soignant'], correct:[0,1], exp:'Art. L1110-4 CSP : les infos peuvent être partagées si les soignants participent TOUS à la PEC ET que les informations sont NÉCESSAIRES à la coordination/continuité des soins.' },
-  { theme:'secret', q:'Selon l\'art. 434-3, la peine pour non-dénonciation de sévices sur mineur est :', multi:false, opts:['1 an + 15 000€','2 ans + 30 000€','3 ans + 45 000€','5 ans + 75 000€'], correct:[2], exp:'Art. 434-3 : 3 ans d\'emprisonnement et/ou 45 000€ d\'amende pour ne pas avoir informé les autorités de sévices sur mineur ou personne vulnérable dont on a connaissance.' },
-  { theme:'droits', q:'La loi Kouchner (2002) consacre notamment :', multi:true, opts:['Le droit à l\'information du patient','Le consentement libre et éclairé','La création de l\'ONIAM','La sédation profonde jusqu\'au décès','L\'accès direct au dossier médical'], correct:[0,1,2,4], exp:'La loi du 4 mars 2002 : patient acteur de sa santé, droit à l\'info, consentement éclairé, personne de confiance, accès dossier, création ONIAM et commissions de conciliation. La sédation profonde est la loi Claeys-Léonetti (2016).' },
-  { theme:'droits', q:'Le MEM peut-il informer le patient des résultats de son scanner ?', multi:false, opts:['Oui, si le patient lui demande directement','Oui, si le médecin est absent','Non, l\'information médicale appartient au médecin','Non, sauf si le médecin lui a délégué cette tâche'], correct:[2], exp:'L\'information médicale appartient au médecin (périmètre de compétence). Le MEM peut uniquement informer sur le déroulement de l\'examen et le circuit des résultats (envoi au prescripteur).' },
-  { theme:'droits', q:'La personne de confiance :', multi:true, opts:['Est désignée par écrit par le patient majeur','Son avis prévaut sur tout avis non médical (hors DA)','Est automatiquement le conjoint du patient','Est consultée si le patient ne peut exprimer sa volonté','Sa désignation est irrévocable'], correct:[0,1,3], exp:'La PC est désignée par ÉCRIT par une personne MAJEURE (peut être un proche ou le médecin traitant). Son avis prévaut sur tout avis non médical sauf les directives anticipées. Elle est RÉVOCABLE à tout moment.' },
-  { theme:'findevie', q:'Les directives anticipées selon la loi Claeys-Léonetti (2016) :', multi:true, opts:['N\'ont plus de durée de validité limitée','S\'imposent au médecin sauf si inappropriées (décision collégiale)','Restent valables 3 ans maximum','Peuvent être rédigées par tout majeur','Ne peuvent pas refuser un traitement'], correct:[0,1,3], exp:'Claeys-Léonetti 2016 : les DA n\'ont plus de limite de durée (avant 3 ans), s\'imposent au médecin sauf si inappropriées (procédure collégiale), rédigées par tout majeur, peuvent refuser/arrêter tout traitement.' },
-  { theme:'findevie', q:'La sédation profonde et continue est autorisée quand :', multi:true, opts:['Souffrance réfractaire aux traitements + pronostic vital à court terme','Décision du patient d\'arrêter un traitement vital','Simple demande du patient','Patient déprimé souhaitant mourir','Insupportabilité de la situation jugée par l\'équipe seule'], correct:[0,1], exp:'Art. de la loi 2016 : sédation profonde autorisée pour souffrance réfractaire (pronostic vital court terme) ET/OU décision patient d\'arrêt de traitement vital. Décision collégiale obligatoire.' },
-  { theme:'exercice', q:'Les conditions d\'exercice du MEM sont :', multi:true, opts:['Être diplômé (DE ou DTSIMRT)','Exercer selon le décret 2016-1672','Ne pas être interdit d\'exercer','Avoir 5 ans d\'expérience minimum','Être inscrit à un ordre professionnel'], correct:[0,1,2], exp:'3 conditions : diplôme reconnu, exercice selon le décret 2016-1672 (modifié 2018), ne pas être interdit d\'exercer. + attestation radioprotection si utilisation de RI. Il n\'y a pas d\'ordre professionnel MEM.' },
-  { theme:'exercice', q:'La peine pour exercice illégal de la profession de MEM (art. L4353-1) est :', multi:false, opts:['6 mois + 7 500€','1 an + 15 000€','3 ans + 45 000€','2 ans + 30 000€'], correct:[1], exp:'Art. L4353-1 : 1 an d\'emprisonnement et 15 000€ d\'amende pour exercice illégal des professions de MEM et technicien de laboratoire médical.' },
-  { theme:'droit', q:'L\'ordre judiciaire est compétent pour :', multi:true, opts:['Toutes les infractions pénales','Les litiges d\'ordre privé (responsabilité civile)','Les affaires concernant les hôpitaux publics','Les conflits avec une administration publique'], correct:[0,1], exp:'L\'ordre judiciaire traite toutes les infractions pénales ET les litiges de droit privé (cliniques, cabinets). L\'ordre administratif traite les affaires impliquant le domaine public (hôpitaux publics).' },
-  { theme:'droit', q:'Le Conseil d\'État est :', multi:false, opts:['La juridiction de 1er degré de l\'ordre administratif','Au sommet de l\'ordre judiciaire','Au sommet de l\'ordre administratif','Une juridiction d\'exception'], correct:[2], exp:'Le Conseil d\'État est au sommet de la hiérarchie de l\'ordre ADMINISTRATIF. Il a un rôle administratif (avis sur projets de loi) et juridictionnel (juge de cassation en administratif). La Cour de cassation est au sommet de l\'ordre judiciaire.' },
+  { theme:'responsabilite', q:'Quelles sont les 3 conditions nécessaires pour engager la responsabilité civile ?', multi:true, opts:['Une faute commise','Un dommage ou préjudice','Un lien de causalité faute-préjudice','La présence d\'un médecin','Une décision de justice préalable'], correct:[0,1,2], exp:'La responsabilité civile nécessite les 3 conditions : faute + dommage + lien de causalité. L\'objectif est la réparation financière.' },
+  { theme:'responsabilite', q:'L\'aléa thérapeutique est :', multi:false, opts:['Une faute médicale délibérée','Une suite inattendue non imputable à l\'équipe soignante','Un acte de soin négligent','Une erreur de diagnostic'], correct:[1], exp:'L\'aléa est une complication imprévisible qui ne peut être imputée à la défaillance des soignants. Indemnisé par l\'ONIAM.' },
+  { theme:'ethique', q:'Les 4 principes fondamentaux qui sous-tendent l\'éthique selon le cours sont :', multi:true, opts:['Déontologique (devoir)','Financier (rentabilité)','Liberté (autonomie)','Traditionnelle (respect de la vie)','Clinique (patient au centre)'], correct:[0,2,3,4], exp:'Les 4 principes : déontologique, liberté, traditionnelle, clinique.' },
+  { theme:'ethique', q:'Les 3 étapes de l\'analyse éthique sont :', multi:true, opts:['Clarification du problème','Condamnation du fautif','Concertation','Délibération','Archivage'], correct:[0,2,3], exp:'Clarification du problème, concertation, délibération.' },
+  { theme:'responsabilite', q:'Quels sont les 3 types de fautes pénales ?', multi:true, opts:['Faute simple','Faute caractérisée','Faute délibérée','Faute administrative','Faute disciplinaire'], correct:[0,1,2], exp:'Faute simple, faute caractérisée, faute délibérée.' },
+  { theme:'responsabilite', q:'Parmi ces incidents fréquents en imagerie (jurisprudence), on retrouve :', multi:true, opts:['Extravasation du produit de contraste','Chute du patient','Retard du médecin','Malaise vagal du patient debout','Mauvaise posologie'], correct:[0,1,3,4], exp:'Les 5 incidents fréquents : Extravasation, malaise vagal debout, chute, erreur posologie/produit, réalisation sans prescription.' },
+  { theme:'secret', q:'Le secret professionnel couvre :', multi:true, opts:['Ce qui est confié','Ce qui est vu et lu','Ce qui est entendu','Ce qui est constaté ou compris'], correct:[0,1,2,3], exp:'Le secret couvre TOUT : confié, vu, lu, entendu, constaté, compris.' },
+  { theme:'droits', q:'La loi Kouchner (2002) consacre notamment :', multi:true, opts:['Le droit à l\'information du patient','Le consentement libre et éclairé','La création de l\'ONIAM','La sédation profonde jusqu\'au décès'], correct:[0,1,2], exp:'La sédation profonde relève de la loi Claeys-Léonetti (2016).' },
+  { theme:'exercice', q:'Les conditions d\'exercice du MEM sont :', multi:true, opts:['Être diplômé (DE ou DTSIMRT)','Exercer selon le décret 2016-1672','Ne pas être interdit d\'exercer','Avoir 5 ans d\'expérience minimum'], correct:[0,1,2], exp:'3 conditions : diplôme reconnu, exercice selon le décret 2016-1672, ne pas être interdit d\'exercer.' },
+  { theme:'droit', q:'Le système de soins est contrôlé au niveau régional par :', multi:false, opts:['La CPAM','Le Ministère de la Santé','Les ARS','La HAS'], correct:[2], exp:'Le système de soins est sous le contrôle des Agences Régionales de Santé (ARS).' }
 ];
 
 const VF_DATA = [
-  { q:'Un étudiant MEM en stage ne peut en aucun cas engager sa responsabilité juridique.', rep:false, exp:'FAUX. L\'art. L4311-12 du CSP autorise les étudiants à réaliser personnellement des actes en stage, sous la responsabilité d\'un professionnel diplômé. Ils peuvent donc engager leur responsabilité.' },
-  { q:'La responsabilité civile est portée par le MEM individuellement.', rep:false, exp:'FAUX. La responsabilité civile (indemnitaire) est portée par l\'ÉTABLISSEMENT de santé. C\'est l\'établissement qui indemnise via les dommages et intérêts.' },
-  { q:'L\'aléa thérapeutique peut être indemnisé par l\'ONIAM.', rep:true, exp:'VRAI. L\'ONIAM (créé par la loi Kouchner 2002) indemnise les accidents médicaux non imputables à une faute, dont l\'aléa thérapeutique, sous certains critères de gravité.' },
-  { q:'Le secret professionnel couvre uniquement ce que le patient confie verbalement au soignant.', rep:false, exp:'FAUX. Le secret couvre ce qui est confié, mais aussi ce qui a été vu, lu, entendu, constaté ou compris (formule du code de déontologie).' },
-  { q:'Les directives anticipées s\'imposent toujours au médecin, sans exception.', rep:false, exp:'FAUX. Selon la loi Claeys-Léonetti (2016), les DA s\'imposent au médecin SAUF si elles sont jugées inappropriées ou non conformes à la situation médicale → décision collégiale pour le refus d\'application.' },
-  { q:'La vaccination infantile obligatoire respecte la Convention européenne des droits de l\'Homme selon la CEDH.', rep:true, exp:'VRAI. La CEDH a reconnu que la vaccination obligatoire poursuit les objectifs légitimes de protection de la santé. L\'intérêt supérieur de l\'enfant prime.' },
-  { q:'Il existe 3 générations des droits de l\'Homme.', rep:true, exp:'VRAI. 1ère : Liberté (droits civils et politiques), 2ème : Égalité (droits économiques et sociaux), 3ème : Fraternité (droits solidarité, environnement, bioéthique).' },
-  { q:'Le référé-liberté permet de faire cesser une atteinte à une liberté fondamentale dans les 48h.', rep:true, exp:'VRAI. Le référé-liberté devant le juge administratif permet d\'obtenir une décision d\'urgence en 48h pour faire cesser une atteinte à une liberté fondamentale causée par l\'Administration.' },
-  { q:'Seul un médecin radiologue peut prescrire un examen radiologique.', rep:false, exp:'FAUX (selon le partiel UE 1.3). Tout médecin peut prescrire un examen radiologique dans son périmètre de compétence.' },
-  { q:'Lors des actes radiologiques, le radiologue doit toujours être physiquement présent aux côtés du MEM.', rep:false, exp:'FAUX. Les habilitations 1, 2 et 3 permettent au MEM de travailler en autonomie. Seule l\'habilitation 4 exige la présence du médecin (actes interventionnels).' },
-  { q:'La loi Claeys-Léonetti (2016) a supprimé la durée de validité de 3 ans des directives anticipées.', rep:true, exp:'VRAI. Avant 2016, les DA étaient valables 3 ans. La loi Claeys-Léonetti a supprimé cette limite de durée.' },
-  { q:'L\'euthanasie est légale en France depuis la loi Claeys-Léonetti de 2016.', rep:false, exp:'FAUX. L\'euthanasie reste illégale en France. La loi 2016 autorise la sédation profonde et continue, ce qui est différent. L\'euthanasie est pratiquée légalement dans d\'autres pays (Belgique, Pays-Bas…).' },
-  { q:'La personne de confiance peut être le médecin traitant du patient.', rep:true, exp:'VRAI. La personne de confiance peut être un parent, un proche OU le médecin traitant (loi Kouchner 2002, art. L1111-6).' },
-  { q:'Un MEM peut informer la famille d\'un patient des résultats d\'un examen si le patient est inconscient.', rep:false, exp:'FAUX. Même si le patient est inconscient, l\'information médicale appartient au médecin. Le MEM doit informer le médecin de la situation, pas la famille directement.' },
-  { q:'Les enfants non vaccinés ne peuvent pas être acceptés en école maternelle ou en crèche.', rep:true, exp:'VRAI. Les enfants non vaccinés ne sont pas acceptés dans les écoles maternelles ou crèches (dans le cadre de la vaccination infantile obligatoire).' },
+  { q:'La déontologie précise les devoirs des professionnels. Le MEM est soumis à un code déontologique professionnel.', rep:false, exp:'FAUX. Le MEM n\'a pas de "Code de déontologie" propre validé par un Ordre (contrairement aux médecins ou infirmiers), il est soumis aux règles professionnelles du CSP.' },
+  { q:'Est considérée comme exerçant la profession de MEM toute personne qui, non médecin, exécute des actes sous la responsabilité et la surveillance d\'un médecin. Ces actes se font sur prescription médicale.', rep:true, exp:'VRAI. C\'est la définition stricte de l\'article L4351-1 du CSP.' },
+  { q:'Seul un médecin radiologue peut prescrire un examen radiologique.', rep:false, exp:'FAUX. Tout médecin, dans la limite de ses compétences, peut prescrire un examen radiologique (ex: urgentiste, généraliste, rhumatologue).' },
+  { q:'Lors des actes radiologiques, le radiologue doit toujours être présent aux côtés du MEM.', rep:false, exp:'FAUX. Seule l\'habilitation 4 (actes interventionnels) exige la présence du médecin. Les habilitations 1, 2 et 3 se font en autonomie ou avec un médecin joignable.' },
+  { q:'La loi du 4 mars 2002 (Kouchner) précise que le patient est acteur de sa santé et qu\'il doit être informé afin d\'obtenir son consentement libre et éclairé.', rep:true, exp:'VRAI. C\'est le pilier de la Loi Kouchner, mettant fin au paternalisme médical.' },
+  { q:'Le système de soins constitue un élément du système de santé. Au niveau régional, il est sous le contrôle des ARS.', rep:true, exp:'VRAI. Les Agences Régionales de Santé (ARS) pilotent la santé en région depuis 2010.' },
+  { q:'Le secret partagé est possible avec la famille si le patient est d\'accord.', rep:false, exp:'FAUX. Le secret partagé (art. L1110-4) concerne UNIQUEMENT l\'échange entre professionnels de santé qui participent tous à la prise en charge du patient.' },
+  { q:'Les directives anticipées s\'imposent toujours au médecin, sans exception.', rep:false, exp:'FAUX. Selon la loi Claeys-Léonetti (2016), elles s\'imposent SAUF si elles sont jugées manifestement inappropriées ou non conformes à la situation médicale (après procédure collégiale).' }
 ];
 
 const SCENARIOS = [
   {
     titre: 'Violette — Cancer détecté au scanner',
-    cas: 'Violette est MEM dans un centre hospitalier. Elle vient de prendre en charge une patiente de 55 ans pour un scanner et l\'examen a mis en évidence un cancer. La patiente souhaite savoir si l\'on a trouvé quelque chose suite à l\'examen.',
+    cas: 'Violette est MEM dans un centre hospitalier. Elle vient de prendre en charge une patiente de 55 ans pour un scanner et l\'examen a mis en évidence un cancer. La patiente souhaite savoir si l\'on a trouvé quelque chose.',
     q: 'Que peut lui répondre Violette ?',
-    reponse: '<strong>Violette ne peut rien dire sur les résultats médicaux.</strong><br><br>Elle peut uniquement informer la patiente du circuit des résultats : les résultats seront envoyés au médecin prescripteur et la patiente doit se rapprocher de lui dans les jours ou semaines à venir.<br><br><em>Justification :</em> L\'information médicale appartient au médecin, pas au MEM. Il peut donner des informations sur le déroulé de l\'examen et le circuit des résultats seulement.'
+    reponse: '<strong>Violette ne peut rien dire sur les résultats médicaux.</strong><br><br>L\'information médicale appartient au médecin. Elle peut uniquement informer la patiente du circuit des résultats : ils seront envoyés au prescripteur.'
   },
   {
     titre: 'Fabrice — Refus d\'examen aux urgences',
-    cas: 'Fabrice est MEM dans un service d\'imagerie aux urgences. Il va prendre en charge un patient et ce dernier refuse de réaliser son examen radiologique. Pendant la discussion avec l\'urgentiste, le patient tombe en état de choc et est pris en charge en urgence. L\'urgentiste revient avec le patient inconscient.',
+    cas: 'Un patient refuse son examen radiologique. Pendant la discussion, il tombe en choc et revient inconscient avec l\'urgentiste.',
     q: 'Que doit faire Fabrice face au refus initial, puis face au patient inconscient ?',
-    reponse: '<strong>Face au refus :</strong> Le patient a le droit de refuser son examen. Fabrice doit informer l\'urgentiste responsable du patient. Ce dernier devra tout mettre en œuvre pour que le patient revienne sur sa décision.<br><br><strong>Face au patient inconscient :</strong> L\'urgentiste peut demander à Fabrice de réaliser l\'examen car les conditions dérogatoires sont réunies :<br>• Urgence médicale<br>• Pronostic vital engagé<br>• Acte indispensable et proportionné<br>• Absence d\'alternatives<br>• Acte dans le but de sauver le patient'
+    reponse: '<strong>Face au refus :</strong> Le patient a le droit de refuser (Loi Kouchner). Fabrice prévient l\'urgentiste.<br><br><strong>Face au patient inconscient :</strong> L\'examen est réalisé car on est dans l\'exception de l\'urgence vitale (urgence, pronostic vital, acte indispensable, sans alternative).'
   },
   {
-    titre: 'Stéphanie — Scanner injecté sur mineure (15 ans)',
-    cas: 'Stéphanie est MEM en service d\'imagerie pédiatrique. Elle doit réaliser un scanner injecté à une patiente de 15 ans. Elle cherche dans le dossier et ne trouve pas l\'autorisation parentale.',
-    q: 'a) Peut-elle réaliser l\'examen ? b) Si l\'autorisation parentale est obtenue mais que la patiente refuse, l\'examen est-il réalisé ?',
-    reponse: '<strong>a) Non, Stéphanie ne peut pas réaliser l\'examen</strong> sans autorisation parentale, sauf situations dérogatoires :<br>• Urgence médicale<br>• Mineur anticipé (émancipé)<br>• Refus parental mettant en danger l\'enfant<br>• Soins en centre de dépistage<br>• IVG (avec accompagnant majeur)<br>• Contraception d\'urgence<br><br><strong>b) La décision incombe au titulaire de l\'autorité parentale.</strong><br>Cependant (L1111-2 CSP) : les mineurs ont le droit de recevoir l\'information et de participer à la décision (selon leur degré de maturité). En pratique, il faut essayer de convaincre la jeune patiente et prendre en compte son refus.'
+    titre: 'Stéphanie — Scanner sur mineure (15 ans)',
+    cas: 'Stéphanie doit réaliser un scanner injecté à une patiente de 15 ans. Pas d\'autorisation parentale dans le dossier.',
+    q: 'Peut-elle réaliser l\'examen ? Et si la patiente refuse malgré l\'accord des parents ?',
+    reponse: '<strong>Sans autorisation :</strong> NON, sauf exceptions (urgence, refus parental dangereux, IVG, contraception...).<br><strong>Si la patiente refuse :</strong> La décision finale incombe aux parents, mais le mineur a le droit de participer à la décision. En pratique, on ne force pas brutalement un mineur de 15 ans.'
   },
   {
-    titre: 'Pierre — Épouse qui demande les résultats',
-    cas: 'Pierre est MEM dans un service de radiologie. L\'examen IRM a mis en évidence un cancer. Le patient est dans sa cabine en train de se rhabiller. Pierre informe l\'épouse que l\'examen est terminé. L\'épouse profite de l\'absence de son époux pour demander à Pierre le résultat de l\'examen.',
-    q: 'Que peut lui répondre Pierre ?',
-    reponse: '<strong>Pierre ne peut donner aucune information à l\'épouse.</strong><br><br>Pour 2 motifs :<br><br>1. <strong>La famille ne doit pas être informée avant le patient</strong> — c\'est le patient qui décide de qui sera informé et quand.<br><br>2. <strong>Hors périmètre de compétence du MEM</strong> — l\'information médicale appartient au médecin, pas au MEM.'
-  },
-  {
-    titre: 'Cas réel — Extravasion du produit de contraste (CA Aix 2019)',
-    cas: 'Suite à une IRM cérébrale, extravasion du produit de contraste lors de l\'injection par le manipulateur radio, hématome des parties molles et atteinte des tendons. Le manipulateur a alerté le radiologue qui n\'a pas examiné la patiente, n\'a pas noté l\'évènement indésirable dans le CR, ni informé la patiente. Un pansement alcoolisé a été posé au lieu d\'une hypothermie.',
+    titre: 'Cas réel — Extravasation du produit (Jurisprudence)',
+    cas: 'Extravasation du produit par le MEM. Le radiologue alerté n\'examine pas la patiente, ne note rien au CR, ne l\'informe pas. Un pansement inadapté est posé.',
     q: 'Qui est responsable et pourquoi ?',
-    reponse: '<strong>Le radiologue a été condamné.</strong><br><br>Analyse :<br>• L\'extravasion est un <strong>aléa thérapeutique</strong> (complication exceptionnelle, non imputable au MEM).<br>• Mais la prise en charge était <strong>défectueuse</strong> (pansement alcoolisé ≠ hypothermie requise).<br>• Le radiologue a <strong>failli à son obligation</strong> :<br>  - Ne pas avoir examiné la patiente<br>  - Ne pas avoir noté l\'événement indésirable<br>  - Ne pas avoir informé la patiente<br><br>→ <strong>Faute dans l\'exercice médical</strong> (4ème catégorie de fautes dans le domaine de la santé).'
-  },
+    reponse: '<strong>Le radiologue est condamné.</strong><br>L\'extravasation est un aléa thérapeutique (non fautif). Mais la mauvaise gestion post-incident (absence d\'examen, d\'info, traitement inadapté) constitue une <strong>faute dans l\'exercice médical</strong>.'
+  }
 ];
 
 const MATCH_SETS = [
   {
-    titre: 'Risques du soin',
+    titre: 'Principes Éthiques & Étapes',
     paires: [
-      { gauche: 'Aléa', droite: 'Suite inattendue non imputable aux soignants' },
-      { gauche: 'Erreur', droite: 'Acte attentionné mais inapproprié' },
-      { gauche: 'Faute', droite: 'Acte négligent, imprudent, sans précautions' },
-      { gauche: 'Contentieux', droite: 'Conflit/litige entraînant une action juridique' },
+      { gauche: 'Déontologique', droite: 'Éthique du devoir' },
+      { gauche: 'Liberté', droite: 'Valeur de l\'autonomie' },
+      { gauche: 'Traditionnelle', droite: 'Respect sacré de la vie' },
+      { gauche: 'Concertation', droite: '2ème étape de la méthode éthique' },
     ]
   },
   {
-    titre: 'Types de responsabilité',
+    titre: 'Risques du soin',
     paires: [
-      { gauche: 'Responsabilité pénale', droite: 'Individuelle · cherche un coupable' },
-      { gauche: 'Responsabilité civile', droite: 'Établissement · réparation financière' },
-      { gauche: 'Responsabilité disciplinaire', droite: 'Indépendante du pénal et du civil' },
-      { gauche: 'ONIAM', droite: 'Indemnise les accidents médicaux sans faute' },
+      { gauche: 'Aléa', droite: 'Suite inattendue non imputable' },
+      { gauche: 'Erreur', droite: 'Acte attentionné mais inapproprié' },
+      { gauche: 'Faute', droite: 'Acte négligent, imprudent' },
+      { gauche: 'Contentieux', droite: 'Conflit entraînant une action juridique' },
     ]
   },
   {
     titre: 'Peines / Articles',
     paires: [
-      { gauche: 'Art. 226-13 (secret pro)', droite: '1 an + 15 000€' },
+      { gauche: 'Art. 226-13 (secret)', droite: '1 an + 15 000€' },
       { gauche: 'Art. 434-3 (non-dénonciation)', droite: '3 ans + 45 000€' },
       { gauche: 'Art. 223-7 (non-assistance)', droite: '2 ans + 30 000€' },
       { gauche: 'Art. L4353-1 (exercice illégal)', droite: '1 an + 15 000€' },
@@ -930,7 +896,7 @@ const MATCH_SETS = [
       { gauche: 'Loi Claeys-Léonetti', droite: '2 février 2016' },
       { gauche: 'Décret MEM', droite: '5 décembre 2016' },
     ]
-  },
+  }
 ];
 
 const FLASH_QUIZ_Q = [
@@ -938,22 +904,15 @@ const FLASH_QUIZ_Q = [
   { q:'L\'aléa thérapeutique est indemnisé par ?', opts:['La CPAM','L\'ONIAM','L\'ARS','L\'HAS'], correct:1 },
   { q:'Loi Kouchner : date ?', opts:['4 mars 2002','22 avril 2005','2 février 2016','1 janvier 2010'], correct:0 },
   { q:'Peine pour exercice illégal MEM ?', opts:['3 ans + 45 000€','1 an + 15 000€','2 ans + 30 000€','5 ans + 75 000€'], correct:1 },
-  { q:'Peine pour non-dénonciation (434-3) ?', opts:['1 an + 15 000€','2 ans + 30 000€','3 ans + 45 000€','6 mois + 7 500€'], correct:2 },
+  { q:'Principe éthique de "liberté" repose sur ?', opts:['L\'autonomie','Le devoir','La justice','Le respect de la vie'], correct:0 },
   { q:'Qui supporte la responsabilité civile en établissement ?', opts:['Le MEM','Le médecin','L\'établissement','Le patient'], correct:2 },
-  { q:'Le secret partagé est possible si ?', opts:['La famille le demande','Les soignants participent tous à la PEC','Le directeur l\'autorise','Le patient est inconscient'], correct:1 },
-  { q:'Qu\'est-ce qu\'une faute pénale délibérée ?', opts:['Imprudence simple','Mise en danger délibérée de la vie d\'autrui','Erreur de diagnostic','Absence de précaution'], correct:1 },
-  { q:'Les DA (Claeys-Léonetti 2016) s\'imposent ?', opts:['Toujours, sans exception','Au médecin sauf si inappropriées (décision collégiale)','Uniquement à la famille','Jamais au médecin'], correct:1 },
+  { q:'Quelle est la 3ème étape de la méthode d\'analyse éthique ?', opts:['Concertation','Clarification','Délibération','Information'], correct:2 },
+  { q:'Les DA (Claeys-Léonetti 2016) s\'imposent ?', opts:['Toujours','Au médecin sauf si inappropriées','Uniquement à la famille','Jamais au médecin'], correct:1 },
   { q:'Habilitation 4 (MEM) : condition spéciale ?', opts:['Autonomie totale','Médecin joignable','Présence obligatoire du médecin','Protocole écrit seul'], correct:2 },
-  { q:'Loi Léonetti : date ?', opts:['4 mars 2002','22 avril 2005','2 février 2016','9 juin 1999'], correct:1 },
-  { q:'Art. L4351-1 définit ?', opts:['Les droits du patient','La définition du MEM','Le secret professionnel','L\'exercice illégal'], correct:1 },
   { q:'Non-assistance à personne en danger (223-7) : peine ?', opts:['1 an + 15 000€','3 ans + 45 000€','2 ans + 30 000€','5 ans + 75 000€'], correct:2 },
-  { q:'Qui est au sommet de l\'ordre administratif ?', opts:['Cour de cassation','Cour d\'appel','Conseil d\'État','Tribunal administratif'], correct:2 },
-  { q:'La personne de confiance : son avis prévaut sur ?', opts:['Les directives anticipées','Tout avis non médical (hors DA)','L\'avis médical','Rien du tout'], correct:1 },
-  { q:'Décret 2016-1672 concerne ?', opts:['Les droits des patients','Les actes et activités des MEM','Le secret professionnel','La fin de vie'], correct:1 },
-  { q:'L\'euthanasie en France est ?', opts:['Légale depuis 2016','Légale depuis 2002','Toujours illégale','Légale en soins palliatifs'], correct:2 },
-  { q:'Qu\'est-ce que l\'obstination déraisonnable ?', opts:['Un refus de soin','Des soins inutiles et disproportionnés maintenant artificiellement la vie','Une sédation profonde','Un aléa thérapeutique'], correct:1 },
-  { q:'L\'ordre judiciaire traite ?', opts:['Uniquement les hôpitaux publics','Toutes les infractions pénales et litiges privés','Uniquement les affaires administratives','Les contentieux avec l\'État'], correct:1 },
-  { q:'Combien de niveaux d\'habilitation pour le MEM ?', opts:['2','3','4','5'], correct:2 },
+  { q:'Qui contrôle le système de soins en région ?', opts:['La CPAM','L\'Ordre des médecins','L\'ARS','Le Ministère'], correct:2 },
+  { q:'L\'euthanasie en France est ?', opts:['Légale depuis 2016','Légale depuis 2002','Illégale','Légale en soins palliatifs'], correct:2 },
+  { q:'Parmi les 5 incidents fréquents en imagerie, on trouve :', opts:['Retard du patient','Extravasation du produit','Matériel débranché','Perte du dossier'], correct:1 }
 ];
 
 const MEMORY_PAIRES = [
@@ -962,53 +921,41 @@ const MEMORY_PAIRES = [
   ['Non-assistance', '2 ans + 30 000€'],
   ['Exercice illégal', '1 an + 15 000€'],
   ['Loi Kouchner', '4 mars 2002'],
-  ['Loi Léonetti', '22 avril 2005'],
+  ['Liberté (éthique)', 'Valeur de l\'autonomie'],
   ['Aléa', 'Suite inattendue non imputable aux soignants'],
   ['ONIAM', 'Indemnise les accidents médicaux sans faute'],
 ];
 
 const DEF_DATA = [
-  { terme:'Responsabilité', cat:'responsabilite', def:'Principe selon lequel chacun doit répondre de ses actes ou des conséquences de ses actes (ou de n\'avoir rien fait).', src:'TD1' },
-  { terme:'Contentieux', cat:'responsabilite', def:'Litige, conflit entre deux parties qui entraîne une action juridique.', src:'Cours' },
-  { terme:'Aléa thérapeutique', cat:'responsabilite', def:'Suite inattendue ou complication d\'un traitement qui ne peut être imputée à la défaillance de l\'équipe soignante. Indemnisé par l\'ONIAM.', src:'TD1' },
-  { terme:'Erreur', cat:'responsabilite', def:'Acte ou décision attentionné(e), mais qui se révèle inapproprié(e).', src:'TD1' },
+  { terme:'Éthique', cat:'ethique', def:'Ensemble de principes et de règles qui dictent le comportement des êtres humains entre eux et envers leur environnement dans ce monde rude.', src:'Cours' },
+  { terme:'Éthique de la discussion', cat:'ethique', def:'Règles d\'une réunion collégiale : 1. Parole pour tous, 2. Écoute active, 3. Non-jugement, 4. Confidentialité, 5. Argumentation, 6. Possibilité de changer d\'avis.', src:'Cours' },
+  { terme:'Responsabilité', cat:'responsabilite', def:'Principe selon lequel chacun doit répondre de ses actes ou de n\'avoir rien fait.', src:'TD1' },
+  { terme:'Aléa thérapeutique', cat:'responsabilite', def:'Suite inattendue non imputable à la défaillance de l\'équipe soignante. Indemnisé par l\'ONIAM.', src:'TD1' },
   { terme:'Faute', cat:'responsabilite', def:'Acte de soin négligent, imprudent, dénué de précautions nécessaires.', src:'TD1' },
-  { terme:'Faute délibérée', cat:'responsabilite', def:'Comportement particulier qui constitue une mise en danger délibérée de la vie d\'autrui.', src:'Cours' },
-  { terme:'ONIAM', cat:'responsabilite', def:'Office National d\'Indemnisation des Accidents Médicaux. Créé par la loi Kouchner 2002. Prend en charge l\'indemnisation de la solidarité nationale (aléa thérapeutique).', src:'Loi 2002' },
-  { terme:'Conciliation', cat:'responsabilite', def:'Renonciation à un droit en échange d\'une contrepartie négociée. La conciliation réussie devient une transaction ayant autorité de chose jugée.', src:'Cours' },
-  { terme:'Secret professionnel', cat:'secret', def:'Couvre non seulement ce qui est confié par le patient, mais aussi ce qui a été vu, lu, entendu, constaté ou compris (codes de déontologie).', src:'Art. 226-13' },
-  { terme:'Secret partagé', cat:'secret', def:'Échange d\'informations entre soignants participant à la PEC d\'un patient, limité à ce qui est nécessaire pour la coordination ou continuité des soins.', src:'Art. L1110-4' },
-  { terme:'Dérogation au secret', cat:'secret', def:'Art. 226-14 : la loi autorise la révélation du secret notamment pour les sévices sur mineur -15 ans ou personne vulnérable ne pouvant se protéger.', src:'Art. 226-14' },
-  { terme:'Personne de confiance', cat:'droits', def:'Personne majeure désignée par écrit par un patient, pouvant être un parent, proche ou médecin traitant. Consultée si le patient ne peut exprimer sa volonté. Son avis prévaut sur tout avis non médical (hors DA). Révocable à tout moment.', src:'Loi 2002' },
-  { terme:'Consentement éclairé', cat:'droits', def:'Le patient prend les décisions concernant sa santé après avoir été informé des conséquences de ses choix. Droit de refus, même si cela met en danger sa vie.', src:'Art. L1111-4' },
-  { terme:'Commission des usagers (CDU)', cat:'droits', def:'Veille au respect des droits des usagers et facilite leurs démarches. Remplace la CRUQ-PC depuis 2016.', src:'Loi 2002' },
-  { terme:'Directives anticipées', cat:'findevie', def:'Souhaits d\'une personne majeure sur sa fin de vie (poursuite, limitation, refus ou arrêt de traitement). Sans limite de durée depuis 2016. S\'imposent au médecin sauf si inappropriées. Révocables à tout moment.', src:'Claeys-Léonetti 2016' },
-  { terme:'Euthanasie', cat:'findevie', def:'Action d\'un tiers qui va mettre fin à la vie d\'un patient, atteint d\'une maladie grave, à sa demande, pour mettre fin à une situation jugée intolérable. Illégale en France.', src:'TD2' },
-  { terme:'Suicide assisté', cat:'findevie', def:'Prescription par le médecin d\'une drogue mortelle, à la demande du patient, atteint d\'une maladie grave, que celui-ci s\'administre sans tiers. Illégal en France.', src:'TD2' },
-  { terme:'Sédation profonde et continue', cat:'findevie', def:'Diminution de la vigilance pouvant aller jusqu\'à la perte de conscience, maintenue jusqu\'au décès, pour supprimer une souffrance réfractaire. Autorisée par la loi Claeys-Léonetti 2016.', src:'Claeys-Léonetti 2016' },
-  { terme:'Obstination déraisonnable', cat:'findevie', def:'Actes de soins inutiles, disproportionnés ou n\'ayant d\'autre objet que maintenir artificiellement la vie. Interdite par la loi Léonetti 2005.', src:'Loi Léonetti 2005' },
-  { terme:'Droit', cat:'droit', def:'Ensemble des règles destinées à régir les individus dans une société donnée. La règle de droit est générale et permanente.', src:'Cours' },
-  { terme:'Déontologie', cat:'droit', def:'Science des devoirs. Ensemble des règles et devoirs qui régissent une profession. Le MEM n\'a pas de code déontologique propre mais est soumis aux règles professionnelles.', src:'Cours' },
-  { terme:'Ordre judiciaire', cat:'droit', def:'Compétent pour toutes les infractions pénales et les litiges de droit privé (cliniques, cabinets). 3 niveaux : Tribunal correctionnel → Cour d\'appel → Cour de cassation.', src:'Cours' },
-  { terme:'Ordre administratif', cat:'droit', def:'Compétent pour les affaires civiles concernant le domaine public (hôpital public). 3 niveaux : Tribunal administratif → Cour administrative d\'appel → Conseil d\'État.', src:'Cours' },
-  { terme:'Référé-liberté', cat:'droit', def:'Recours devant le juge administratif permettant de faire cesser en 48h une atteinte à une liberté fondamentale causée par l\'Administration (ex : affaire Vincent Lambert).', src:'TD2' },
+  { terme:'ONIAM', cat:'responsabilite', def:'Office National d\'Indemnisation des Accidents Médicaux (créé par la loi Kouchner 2002).', src:'Loi 2002' },
+  { terme:'Secret professionnel', cat:'secret', def:'Couvre ce qui est confié, vu, lu, entendu, constaté ou compris (art. 226-13).', src:'Art. 226-13' },
+  { terme:'Secret partagé', cat:'secret', def:'Échange limité aux soignants participant à la prise en charge, nécessaire pour la continuité des soins.', src:'Art. L1110-4' },
+  { terme:'Personne de confiance', cat:'droits', def:'Désignée par écrit, consultée si le patient ne peut s\'exprimer. Avis prévaut sur tout avis non médical.', src:'Loi 2002' },
+  { terme:'Directives anticipées', cat:'findevie', def:'Souhaits sur la fin de vie. Sans limite de durée depuis 2016. S\'imposent au médecin.', src:'Loi 2016' },
+  { terme:'Sédation profonde', cat:'findevie', def:'Diminution de la vigilance jusqu\'au décès pour supprimer une souffrance réfractaire.', src:'Loi 2016' },
+  { terme:'Droit', cat:'droit', def:'Ensemble des règles destinées à régir les individus dans une société.', src:'Cours' },
+  { terme:'Ordre administratif', cat:'droit', def:'Gère les affaires concernant le domaine public (hôpital). Tribunal → Cour d\'appel → Conseil d\'État.', src:'Cours' },
 ];
 
 const QO_DATA = [
-  { q:'Définissez la notion d\'éthique (partiel UE 1.3 S2).', rep:'L\'éthique est la réflexion sur les valeurs qui guident l\'action humaine, notamment dans les relations avec autrui et envers l\'environnement. Elle pose les questions du bien, du juste, du bon comportement dans des situations complexes.' },
-  { q:'Explicitez les 4 principes fondamentaux qui sous-tendent l\'éthique médicale.', rep:'1. <strong>Autonomie</strong> : repose sur la valeur de l\'autonomie du patient → mettre le patient au centre du processus décisionnel (consentement éclairé).<br>2. <strong>Bienfaisance</strong> : agir dans l\'intérêt du patient, faire le bien.<br>3. <strong>Non-malfaisance</strong> : ne pas nuire (primum non nocere).<br>4. <strong>Justice</strong> : équité dans l\'accès aux soins, traitement équitable de tous les patients.' },
-  { q:'Citez les 3 étapes de la méthode d\'analyse éthique (partiel).', rep:'1. <strong>Clarification du problème</strong> (rassembler les informations, identifier les acteurs)<br>2. <strong>Analyse</strong> (identifier les valeurs en tension, les enjeux, les alternatives)<br>3. <strong>Décision et justification</strong> (choisir l\'action la plus éthique et l\'argumenter)' },
-  { q:'Citez les 6 principales règles de l\'éthique de discussion lors d\'une réunion collégiale.', rep:'1. Droit à la parole pour tous<br>2. Écoute active et bienveillante<br>3. Non-jugement<br>4. Confidentialité<br>5. Argumentation (non violence symbolique)<br>6. Possibilité de changer d\'avis au cours de la discussion' },
-  { q:'Définissez le secret professionnel et précisez ses conditions de partage.', rep:'Le secret professionnel couvre non seulement ce qui est confié par le patient, mais aussi ce qui a été vu, lu, entendu, constaté ou compris (art. 226-13 CP — peine : 1 an + 15 000€).<br><br>Secret partagé (art. L1110-4 CSP) : échange possible entre soignants à condition qu\'ils participent TOUS à la prise en charge du patient ET que les informations partagées sont nécessaires à la coordination ou continuité des soins.' },
-  { q:'Citez 5 incidents fréquents lors d\'actes en imagerie médicale ayant fait l\'objet de jurisprudence.', rep:'1. Extravasion du produit de contraste lors de l\'injection<br>2. Malaise vagal du patient debout pendant un examen<br>3. Chute du patient (oubli des barrières de sécurité)<br>4. Mauvaise posologie ou mauvais produit administré<br>5. Réalisation d\'un examen sans prescription médicale valide (ou au-delà de la prescription)' },
-  { q:'Précisez les 4 grandes catégories de fautes dans le domaine de la santé.', rep:'1. <strong>Insuffisance dans la gestion hospitalière</strong> (ex : utilisation d\'un matériel défectueux)<br>2. <strong>Faute des équipes de soins ou de service</strong> (ex : chute pour oubli de barrière)<br>3. <strong>Faute dans l\'exécution des soins</strong> (ex : mauvaise posologie, mauvais produit)<br>4. <strong>Faute dans l\'exercice médical</strong>' },
+  { q:'Définissez la notion d\'éthique (partiel).', rep:'L\'éthique est un ensemble de principes et de règles qui dictent le comportement des êtres humains entre eux et envers leur environnement. Elle pose les questions du bien, du juste, et de la survie.' },
+  { q:'Explicitez les 4 principes fondamentaux de l\'éthique médicale.', rep:'1. <strong>Déontologique</strong> : l\'éthique du devoir.<br>2. <strong>Liberté</strong> : repose sur la valeur inébranlable de l\'autonomie.<br>3. <strong>Traditionnelle</strong> : exprime le respect sacré et brut de la vie.<br>4. <strong>Clinique</strong> : mettre le patient au centre du processus décisionnel.' },
+  { q:'Citez les 3 étapes de la méthode d\'analyse éthique.', rep:'1. <strong>Clarification du problème</strong> : nettoyer la plaie pour voir clair.<br>2. <strong>Concertation</strong> : rassembler les esprits.<br>3. <strong>Délibération</strong> : trancher et assumer.' },
+  { q:'Citez les 6 principales règles de l\'éthique de discussion en réunion collégiale.', rep:'1. Droit à la parole pour tous.<br>2. Écoute active et bienveillante.<br>3. Non-jugement.<br>4. Confidentialité.<br>5. Argumentation (éviter la violence verbale).<br>6. Possibilité de changer d\'avis.' },
+  { q:'Définissez le secret professionnel et ses conditions de partage.', rep:'Il couvre ce qui est confié, vu, lu, entendu, constaté ou compris (peine : 1 an + 15 000€).<br>Partage possible entre soignants participant TOUS à la prise en charge, uniquement pour ce qui est nécessaire aux soins.' },
+  { q:'Citez 5 incidents fréquents en imagerie médicale ayant fait l\'objet de jurisprudence.', rep:'1. Extravasation du produit de contraste.<br>2. Malaise vagal du patient debout.<br>3. Chute du patient (barrières oubliées).<br>4. Mauvaise posologie ou erreur de produit.<br>5. Réalisation sans prescription médicale valide.' },
+  { q:'Précisez les 4 grandes catégories de fautes dans le domaine de la santé.', rep:'1. Insuffisance dans la gestion hospitalière (matériel usé).<br>2. Faute des équipes de soins (oubli de sécurité).<br>3. Faute dans l\'exécution des soins (erreur de dose).<br>4. Faute dans l\'exercice médical pur.' }
 ];
 
 // ═══════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════
 let totalScore = 0;
-let fcDeck = [...FLASHCARDS], fcIndex = 0, fcFlipped = false, fcKnown = [], fcUnknown = [];
 let fqActive = false, fqTimer = null, fqIndex = 0, fqScore = 0, fqLives = 3, fqShuffled = [];
 
 // ═══════════════════════════════════════════════════════
@@ -1030,70 +977,134 @@ function addScore(pts) {
 }
 
 // ═══════════════════════════════════════════════════════
-// FLASHCARDS
+// FLASHCARDS : LE MOTEUR RÉVISÉ
 // ═══════════════════════════════════════════════════════
-function filterFC() {
-  const theme = document.getElementById('fc-theme').value;
-  fcDeck = theme === 'all' ? [...FLASHCARDS] : FLASHCARDS.filter(c => c.theme === theme);
+let fcDeck = [...FLASHCARDS], fcIndex = 0, fcFlipped = false, fcKnown = [], fcUnknown = [];
+let activeFCThemes = ['all'];
+
+function toggleThemeFC(theme) {
+  if (theme === 'all') {
+    activeFCThemes = ['all'];
+  } else {
+    if (activeFCThemes.includes('all')) activeFCThemes = [];
+    if (activeFCThemes.includes(theme)) {
+      activeFCThemes = activeFCThemes.filter(t => t !== theme);
+      if (activeFCThemes.length === 0) activeFCThemes = ['all'];
+    } else {
+      activeFCThemes.push(theme);
+    }
+  }
+  
+  document.querySelectorAll('#fc-filters .filter-tag').forEach(btn => {
+    if (activeFCThemes.includes(btn.dataset.theme)) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+  
+  applyFilterFC();
+}
+
+function applyFilterFC() {
+  if (activeFCThemes.includes('all')) {
+    fcDeck = [...FLASHCARDS];
+  } else {
+    fcDeck = FLASHCARDS.filter(c => activeFCThemes.includes(c.theme));
+  }
   fcKnown = []; fcUnknown = []; fcIndex = 0; fcFlipped = false;
   renderFC();
 }
+
 function shuffleFC() {
   fcDeck.sort(() => Math.random() - 0.5);
   fcKnown = []; fcUnknown = []; fcIndex = 0; fcFlipped = false;
   renderFC();
 }
+
 function renderFC() {
   const card = fcDeck[fcIndex];
-  if (!card) return;
-  document.getElementById('fc-question').textContent = card.q;
+  if (!card) {
+      document.getElementById('fc-question').innerHTML = "Aucune carte dans ce tas.";
+      document.getElementById('fc-scene').style.pointerEvents = 'none';
+      return;
+  }
+  document.getElementById('fc-scene').style.pointerEvents = 'auto';
+  document.getElementById('fc-question').innerHTML = card.q;
   document.getElementById('fc-answer').innerHTML = card.a;
   document.getElementById('fc-theme-badge').textContent = card.theme.charAt(0).toUpperCase() + card.theme.slice(1);
   document.getElementById('fc-counter').textContent = (fcIndex+1) + ' / ' + fcDeck.length;
   document.getElementById('fc-total').textContent = fcDeck.length;
   document.getElementById('fc-known').textContent = fcKnown.length;
   document.getElementById('fc-unknown').textContent = fcUnknown.length;
+  
   const pct = fcDeck.length ? Math.round((fcKnown.length + fcUnknown.length) / fcDeck.length * 100) : 0;
   document.getElementById('fc-progress').style.width = pct + '%';
-  document.getElementById('fc-progress-label').textContent = (fcKnown.length + fcUnknown.length) + ' / ' + fcDeck.length + ' répondues';
+  document.getElementById('fc-progress-label').textContent = (fcKnown.length + fcUnknown.length) + ' / ' + fcDeck.length + ' encaissées';
+  
   document.getElementById('fc-prev').disabled = fcIndex === 0;
   document.getElementById('fc-next').disabled = fcIndex === fcDeck.length - 1;
+  
+  const scene = document.getElementById('fc-scene');
   if (fcFlipped) {
-    document.getElementById('fc-scene').classList.add('flipped');
+    scene.classList.add('flipped');
     document.getElementById('fc-actions').style.display = 'flex';
-    document.getElementById('fc-meta').textContent = 'Est-ce que vous saviez ?';
+    document.getElementById('fc-meta').textContent = 'Alors, tu l\'avais ou tu saignes ?';
   } else {
-    document.getElementById('fc-scene').classList.remove('flipped');
+    scene.classList.remove('flipped');
     document.getElementById('fc-actions').style.display = 'none';
     document.getElementById('fc-meta').textContent = '';
   }
-  const showRetry = fcUnknown.length > 0 && (fcKnown.length + fcUnknown.length) >= fcDeck.length;
+  
+  const isFinished = (fcKnown.length + fcUnknown.length) >= fcDeck.length && fcDeck.length > 0;
+  const showRetry = fcUnknown.length > 0 && isFinished;
   document.getElementById('btn-retry-fc').style.display = showRetry ? 'inline-block' : 'none';
-  if (fcUnknown.length > 0 && (fcKnown.length + fcUnknown.length) >= fcDeck.length) {
-    const pile = document.getElementById('unknown-pile-fc');
+  
+  const pile = document.getElementById('unknown-pile-fc');
+  if (showRetry) {
     pile.style.display = 'block';
     document.getElementById('unknown-count-fc').textContent = fcUnknown.length;
     document.getElementById('unknown-list-fc').innerHTML = fcUnknown.map(c => `<li>${c.q}</li>`).join('');
+  } else {
+    pile.style.display = 'none';
   }
 }
+
 function flipCard() {
-  if (!fcFlipped) { fcFlipped = true; renderFC(); }
+  if (fcDeck.length === 0) return;
+  fcFlipped = !fcFlipped; 
+  renderFC();
 }
+
 function fcNav(dir) {
   fcIndex = Math.max(0, Math.min(fcDeck.length - 1, fcIndex + dir));
-  fcFlipped = false; renderFC();
+  fcFlipped = false; 
+  renderFC();
 }
+
 function markCardFC(known) {
   const card = fcDeck[fcIndex];
-  if (known) { fcKnown.push(card); addScore(2); }
-  else fcUnknown.push(card);
+  if (!fcKnown.includes(card) && !fcUnknown.includes(card)) {
+    if (known) { fcKnown.push(card); addScore(2); }
+    else fcUnknown.push(card);
+  } else {
+    if (known && fcUnknown.includes(card)) {
+        fcUnknown = fcUnknown.filter(c => c !== card);
+        fcKnown.push(card); addScore(2);
+    } else if (!known && fcKnown.includes(card)) {
+        fcKnown = fcKnown.filter(c => c !== card);
+        fcUnknown.push(card);
+    }
+  }
   fcFlipped = false;
   if (fcIndex < fcDeck.length - 1) fcIndex++;
   renderFC();
 }
+
 function retryUnknownFC() {
   if (fcUnknown.length === 0) return;
-  fcDeck = [...fcUnknown]; fcUnknown = []; fcKnown = []; fcIndex = 0; fcFlipped = false;
+  fcDeck = [...fcUnknown]; 
+  fcUnknown = []; 
+  fcKnown = []; 
+  fcIndex = 0; 
+  fcFlipped = false;
   renderFC();
 }
 renderFC();
@@ -1132,14 +1143,22 @@ function filterQCM(cat, btn) {
   buildQCM(data);
 }
 function validerQCM(qi) {
-  const q = QCM_DATA.find((qq, i) => { const c = document.getElementById('opts-'+i); return c && c.parentElement.querySelector('button') && i === qi; });
-  if (!q) { const allQ = document.querySelectorAll('.qcm-item'); const item = allQ[qi]; if (!item) return; }
   const allOpts = document.querySelectorAll(`#opts-${qi} .qcm-option`);
   const selected = [];
   allOpts.forEach((opt, oi) => { if (opt.querySelector('input').checked) selected.push(oi); });
   if (selected.length === 0) return;
-  const qData = Array.from(document.querySelectorAll('.qcm-item')).map((_, i) => QCM_DATA[i] || null).filter(Boolean)[qi];
+  
+  // Find correct data source based on current filter state
+  const activeBtn = document.querySelector('#qcm-filters .filter-tag.active');
+  const cat = activeBtn ? (activeBtn.textContent === 'Tout' ? 'all' : activeBtn.textContent.toLowerCase()) : 'all';
+  // Note: the category matching might be tricky if accents differ. Let's just pull from the DOM order.
+  const dataList = cat === 'all' ? QCM_DATA : QCM_DATA.filter(q => q.theme.toLowerCase() === cat.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace('secret pro','secret').replace('droits patients','droits').replace('droit public/prive','droit').replace('exercice mem','exercice').replace('fin de vie','findevie').replace('responsabilite','responsabilite'));
+  
+  // Fallback to searching QCM_DATA matching the question text
+  const qText = document.querySelectorAll('.qcm-item')[qi].querySelector('.qcm-q').textContent.replace(/^Q\d+\.\s*/, '');
+  const qData = QCM_DATA.find(q => q.q === qText);
   if (!qData) return;
+
   allOpts.forEach((opt, oi) => {
     opt.classList.add('locked');
     opt.querySelector('input').disabled = true;
@@ -1215,8 +1234,7 @@ function buildScenarios() {
   });
 }
 function revealScenario(i) {
-  const ans = document.getElementById(`sc-ans-${i}`);
-  ans.classList.add('show');
+  document.getElementById(`sc-ans-${i}`).classList.add('show');
   addScore(1);
 }
 buildScenarios();
@@ -1224,7 +1242,7 @@ buildScenarios();
 // ═══════════════════════════════════════════════════════
 // MATCH GAME
 // ═══════════════════════════════════════════════════════
-let matchSetIndex = 0, matchSelected = null, matchDone = 0, matchMatched = [];
+let matchSel = {};
 function buildMatch() {
   const cont = document.getElementById('match-container');
   cont.innerHTML = '';
@@ -1249,78 +1267,51 @@ function initMatchSet(si) {
   const leftEl = document.getElementById(`match-left-${si}`);
   const rightEl = document.getElementById(`match-right-${si}`);
   const shuffled = [...set.paires].sort(() => Math.random() - 0.5);
-  leftEl.innerHTML = '';
-  rightEl.innerHTML = '';
+  leftEl.innerHTML = ''; rightEl.innerHTML = '';
   set.paires.forEach((p, pi) => {
     const lbtn = document.createElement('div');
-    lbtn.className = 'match-item';
-    lbtn.textContent = p.gauche;
-    lbtn.dataset.key = `l-${si}-${pi}`;
-    lbtn.dataset.pair = pi;
-    lbtn.dataset.side = 'left';
-    lbtn.dataset.si = si;
+    lbtn.className = 'match-item'; lbtn.textContent = p.gauche;
+    lbtn.dataset.pair = pi; lbtn.dataset.side = 'left'; lbtn.dataset.si = si;
     lbtn.onclick = () => handleMatch(lbtn);
     leftEl.appendChild(lbtn);
   });
   shuffled.forEach((p, pi) => {
     const originalIdx = set.paires.findIndex(pp => pp.droite === p.droite);
     const rbtn = document.createElement('div');
-    rbtn.className = 'match-item';
-    rbtn.textContent = p.droite;
-    rbtn.dataset.key = `r-${si}-${pi}`;
-    rbtn.dataset.pair = originalIdx;
-    rbtn.dataset.side = 'right';
-    rbtn.dataset.si = si;
+    rbtn.className = 'match-item'; rbtn.textContent = p.droite;
+    rbtn.dataset.pair = originalIdx; rbtn.dataset.side = 'right'; rbtn.dataset.si = si;
     rbtn.onclick = () => handleMatch(rbtn);
     rightEl.appendChild(rbtn);
   });
 }
-let matchSel = {};
 function handleMatch(el) {
   if (el.classList.contains('matched-ok') || el.classList.contains('locked')) return;
-  const si = el.dataset.si;
-  const side = el.dataset.side;
+  const si = el.dataset.si, side = el.dataset.side;
   if (matchSel[si] && matchSel[si].side === side) {
     if (matchSel[si].el) matchSel[si].el.classList.remove('selected');
   }
   if (matchSel[si] && matchSel[si].side !== side) {
     const other = matchSel[si].el;
     if (parseInt(el.dataset.pair) === parseInt(other.dataset.pair)) {
-      el.classList.add('matched-ok');
-      other.classList.add('matched-ok');
-      el.classList.remove('selected');
-      addScore(3);
-      const leftEl = document.getElementById(`match-left-${si}`);
-      const rightEl = document.getElementById(`match-right-${si}`);
-      const allLeft = leftEl.querySelectorAll('.match-item');
-      const allRight = rightEl.querySelectorAll('.match-item');
-      const totalPairs = MATCH_SETS[parseInt(si)].paires.length;
-      const matched = leftEl.querySelectorAll('.matched-ok').length;
-      if (matched === totalPairs) {
+      el.classList.add('matched-ok'); other.classList.add('matched-ok');
+      el.classList.remove('selected'); addScore(3);
+      const matched = document.getElementById(`match-left-${si}`).querySelectorAll('.matched-ok').length;
+      if (matched === MATCH_SETS[parseInt(si)].paires.length) {
         const res = document.getElementById(`match-result-${si}`);
-        res.style.display = 'block';
-        res.style.background = 'var(--green-light)';
-        res.style.color = 'var(--green)';
+        res.style.display = 'block'; res.style.background = 'var(--green-light)'; res.style.color = 'var(--green)';
         res.textContent = '🎉 Parfait ! Toutes les paires trouvées !';
       }
     } else {
-      el.classList.add('matched-wrong');
-      other.classList.add('matched-wrong');
-      setTimeout(() => {
-        el.classList.remove('matched-wrong','selected');
-        other.classList.remove('matched-wrong','selected');
-      }, 600);
+      el.classList.add('matched-wrong'); other.classList.add('matched-wrong');
+      setTimeout(() => { el.classList.remove('matched-wrong','selected'); other.classList.remove('matched-wrong','selected'); }, 600);
     }
-    matchSel[si] = null;
-    return;
+    matchSel[si] = null; return;
   }
   el.classList.add('selected');
   matchSel[si] = { el, side, pair: el.dataset.pair };
 }
 function resetMatch(si) {
-  matchSel[si] = null;
-  document.getElementById(`match-result-${si}`).style.display = 'none';
-  initMatchSet(si);
+  matchSel[si] = null; document.getElementById(`match-result-${si}`).style.display = 'none'; initMatchSet(si);
 }
 buildMatch();
 
@@ -1332,8 +1323,7 @@ function startFlashQuiz() {
   fqIndex = 0; fqScore = 0; fqLives = 3;
   document.getElementById('fq-start').style.display = 'none';
   document.getElementById('fq-game').style.display = 'block';
-  renderLives();
-  nextFQ();
+  renderLives(); nextFQ();
 }
 function renderLives() {
   document.getElementById('fq-lives').innerHTML = Array.from({length:3},(_,i) => `<span class="life${i >= fqLives ? ' lost' : ''}">❤️</span>`).join('');
@@ -1345,58 +1335,46 @@ function nextFQ() {
   document.getElementById('fq-qnum').textContent = fqIndex + 1;
   document.getElementById('fq-question').textContent = q.q;
   document.getElementById('fq-score-live').textContent = fqScore;
-  const opts = document.getElementById('fq-options');
-  opts.innerHTML = '';
+  const opts = document.getElementById('fq-options'); opts.innerHTML = '';
   const shuffOpts = q.opts.map((o,i) => ({o,i})).sort(() => Math.random() - 0.5);
   shuffOpts.forEach(({o, i}) => {
-    const b = document.createElement('button');
-    b.className = 'flash-opt';
-    b.textContent = o;
+    const b = document.createElement('button'); b.className = 'flash-opt'; b.textContent = o;
     b.onclick = () => answerFQ(i === q.correct, i, q.correct, shuffOpts);
     opts.appendChild(b);
   });
-  let t = 30;
-  const bar = document.getElementById('fq-timer-bar');
-  bar.style.width = '100%';
-  bar.className = 'timer-bar';
+  let t = 30; const bar = document.getElementById('fq-timer-bar');
+  bar.style.width = '100%'; bar.className = 'timer-bar';
   document.getElementById('fq-timer').textContent = t;
   fqTimer = setInterval(() => {
-    t--;
-    document.getElementById('fq-timer').textContent = t;
+    t--; document.getElementById('fq-timer').textContent = t;
     bar.style.width = (t/30*100) + '%';
-    if (t <= 10) bar.className = 'timer-bar danger';
-    else if (t <= 20) bar.className = 'timer-bar warning';
+    if (t <= 10) bar.className = 'timer-bar danger'; else if (t <= 20) bar.className = 'timer-bar warning';
     if (t <= 0) { clearInterval(fqTimer); autoMissFQ(q.correct, shuffOpts); }
   }, 1000);
 }
 function answerFQ(correct, chosen, correctIdx, shuffOpts) {
   clearInterval(fqTimer);
-  const btns = document.querySelectorAll('.flash-opt');
-  btns.forEach(b => b.disabled = true);
+  const btns = document.querySelectorAll('.flash-opt'); btns.forEach(b => b.disabled = true);
   const chosenBtn = btns[shuffOpts.findIndex(s => s.i === chosen)];
   const correctBtn = btns[shuffOpts.findIndex(s => s.i === correctIdx)];
   if (correct) { chosenBtn.classList.add('correct-ans'); fqScore += 5; addScore(5); }
   else { chosenBtn.classList.add('wrong-ans'); correctBtn.classList.add('missed'); fqLives--; renderLives(); }
-  document.getElementById('fq-score-live').textContent = fqScore;
-  fqIndex++;
+  document.getElementById('fq-score-live').textContent = fqScore; fqIndex++;
   if (fqLives <= 0) { setTimeout(endFQ, 1000); return; }
   setTimeout(nextFQ, 1200);
 }
 function autoMissFQ(correctIdx, shuffOpts) {
-  const btns = document.querySelectorAll('.flash-opt');
-  btns.forEach(b => b.disabled = true);
+  const btns = document.querySelectorAll('.flash-opt'); btns.forEach(b => b.disabled = true);
   const correctBtn = btns[shuffOpts.findIndex(s => s.i === correctIdx)];
   if (correctBtn) correctBtn.classList.add('missed');
-  fqLives--; renderLives();
-  fqIndex++;
+  fqLives--; renderLives(); fqIndex++;
   if (fqLives <= 0) { setTimeout(endFQ, 1000); return; }
   setTimeout(nextFQ, 1200);
 }
 function endFQ() {
   clearInterval(fqTimer);
   const msg = fqScore >= 80 ? '🏆 Excellent !' : fqScore >= 50 ? '👍 Bien joué !' : '📚 À réviser !';
-  const overlay = document.createElement('div');
-  overlay.className = 'game-over-overlay';
+  const overlay = document.createElement('div'); overlay.className = 'game-over-overlay';
   overlay.innerHTML = `<div class="game-over-box">
     <div class="game-over-emoji">${fqScore >= 80 ? '🏆' : fqScore >= 50 ? '🎉' : '📚'}</div>
     <div class="game-over-title">${msg}</div>
@@ -1419,49 +1397,33 @@ let memCards = [], memFlipped = [], memMatched = 0, memTries = 0, memLocked = fa
 function initMemory() {
   memMatched = 0; memTries = 0; memFlipped = []; memLocked = false;
   document.getElementById('mem-success').style.display = 'none';
-  document.getElementById('mem-pairs').textContent = '0/8';
-  document.getElementById('mem-tries').textContent = '0';
-  const paires = MEMORY_PAIRES.slice(0,8);
-  const cards = [];
-  paires.forEach((p, i) => {
-    cards.push({ id: i*2, pairId: i, text: p[0] });
-    cards.push({ id: i*2+1, pairId: i, text: p[1] });
-  });
+  document.getElementById('mem-pairs').textContent = '0/8'; document.getElementById('mem-tries').textContent = '0';
+  const paires = MEMORY_PAIRES.slice(0,8); const cards = [];
+  paires.forEach((p, i) => { cards.push({ id: i*2, pairId: i, text: p[0] }); cards.push({ id: i*2+1, pairId: i, text: p[1] }); });
   cards.sort(() => Math.random() - 0.5);
-  const grid = document.getElementById('memory-grid');
-  grid.innerHTML = '';
+  const grid = document.getElementById('memory-grid'); grid.innerHTML = '';
   cards.forEach((card, idx) => {
-    const c = document.createElement('div');
-    c.className = 'mem-card';
+    const c = document.createElement('div'); c.className = 'mem-card';
     c.innerHTML = `<div class="mem-card-inner"><div class="mem-front">⚖️</div><div class="mem-back">${card.text}</div></div>`;
     c.onclick = () => flipMem(c, card, idx);
-    grid.appendChild(c);
-    memCards[idx] = { el: c, card };
+    grid.appendChild(c); memCards[idx] = { el: c, card };
   });
 }
 function flipMem(el, card, idx) {
   if (memLocked || el.classList.contains('flipped') || el.classList.contains('matched')) return;
-  el.classList.add('flipped');
-  memFlipped.push({ el, card, idx });
+  el.classList.add('flipped'); memFlipped.push({ el, card, idx });
   if (memFlipped.length === 2) {
-    memLocked = true; memTries++;
-    document.getElementById('mem-tries').textContent = memTries;
+    memLocked = true; memTries++; document.getElementById('mem-tries').textContent = memTries;
     const [a, b] = memFlipped;
     if (a.card.pairId === b.card.pairId) {
-      a.el.classList.add('matched'); b.el.classList.add('matched');
-      memMatched++;
+      a.el.classList.add('matched'); b.el.classList.add('matched'); memMatched++;
       document.getElementById('mem-pairs').textContent = memMatched + '/8';
-      memFlipped = []; memLocked = false;
-      addScore(4);
-      if (memMatched === 8) { setTimeout(() => document.getElementById('mem-success').style.display = 'block', 300); }
+      memFlipped = []; memLocked = false; addScore(4);
+      if (memMatched === 8) setTimeout(() => document.getElementById('mem-success').style.display = 'block', 300);
     } else {
       setTimeout(() => {
         a.el.classList.add('error-flash'); b.el.classList.add('error-flash');
-        setTimeout(() => {
-          a.el.classList.remove('flipped','error-flash');
-          b.el.classList.remove('flipped','error-flash');
-          memFlipped = []; memLocked = false;
-        }, 400);
+        setTimeout(() => { a.el.classList.remove('flipped','error-flash'); b.el.classList.remove('flipped','error-flash'); memFlipped = []; memLocked = false; }, 400);
       }, 700);
     }
   }
@@ -1499,12 +1461,9 @@ buildQO();
 // GLOSSAIRE
 // ═══════════════════════════════════════════════════════
 function buildDefs(data) {
-  const grid = document.getElementById('def-grid');
-  grid.innerHTML = '';
+  const grid = document.getElementById('def-grid'); grid.innerHTML = '';
   data.forEach(d => {
-    const c = document.createElement('div');
-    c.className = 'def-card';
-    c.dataset.cat = d.cat;
+    const c = document.createElement('div'); c.className = 'def-card'; c.dataset.cat = d.cat;
     c.innerHTML = `<div class="def-term">${d.terme} <span class="def-source">${d.src}</span></div><div class="def-body">${d.def}</div>`;
     grid.appendChild(c);
   });
@@ -1523,8 +1482,7 @@ buildDefs(DEF_DATA);
 function buildAnkiPreview() {
   const prev = document.getElementById('anki-preview');
   FLASHCARDS.forEach((c, i) => {
-    const row = document.createElement('div');
-    row.className = 'anki-card-row';
+    const row = document.createElement('div'); row.className = 'anki-card-row';
     row.innerHTML = `<div class="anki-front-cell">${c.q}</div><div class="anki-back-cell">${c.a.replace(/<[^>]+>/g,'')}</div>`;
     prev.appendChild(row);
   });
@@ -1532,28 +1490,15 @@ function buildAnkiPreview() {
 buildAnkiPreview();
 
 function downloadAnki() {
-  // Generate a proper Anki .apkg (which is a zip with collection.anki2 SQLite and media)
-  // Since we can't run Python here, we create a text file that is valid Anki import format
-  // The .apkg format requires SQLite which we can approximate with a tab-separated text
-  // We'll create the closest possible: a tab-delimited .txt that Anki can import
-  
   const lines = ['#separator:tab', '#html:true', '#notetype column:1'];
-  FLASHCARDS.forEach(c => {
-    lines.push(`Basic\t${c.q}\t${c.a}`);
-  });
+  FLASHCARDS.forEach(c => { lines.push(`Basic\t${c.q}\t${c.a}`); });
   const content = lines.join('\n');
   const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = 'S2-1_3_droit.txt';
-  a.click();
-  URL.revokeObjectURL(url);
-  
-  // Show info
-  setTimeout(() => {
-    alert('📥 Fichier téléchargé !\n\nPour importer dans Anki :\n1. Ouvrez Anki\n2. Fichier → Importer\n3. Sélectionnez "S2-1_3_droit.txt"\n4. Type de note : Basique\n5. Champ 1 → Question, Champ 2 → Réponse\n6. Importer\n\nNote : Le format .apkg natif nécessite une base SQLite qui ne peut pas être créée directement depuis le navigateur. Le fichier .txt est le format d\'import universel d\'Anki.');
-  }, 300);
+  a.href = url; a.download = 'S2-1_3_droit.txt';
+  a.click(); URL.revokeObjectURL(url);
+  setTimeout(() => { alert('📥 Fichier téléchargé !\n\nPour importer dans Anki :\n1. Ouvrez Anki\n2. Fichier → Importer\n3. Sélectionnez "S2-1_3_droit.txt"\n4. Type de note : Basique\n5. Champ 1 → Question, Champ 2 → Réponse\n6. Importer'); }, 300);
 }
 
 // ═══════════════════════════════════════════════════════

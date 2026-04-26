@@ -179,23 +179,30 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 /* ── FLASHCARDS ── */
 .fc-scene {
   width: 100%; max-width: 560px; margin: 0 auto;
-  height: 240px; perspective: 1200px; cursor: pointer;
+  cursor: pointer;
 }
 .fc-card-inner {
-  width: 100%; height: 100%;
-  position: relative; transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+  width: 100%; position: relative;
   border-radius: var(--radius);
+  transform-origin: center center;
 }
-.fc-scene.flipped .fc-card-inner { transform: rotateY(180deg); }
+.fc-card-inner.flip-out { animation: fcFlipOut 0.18s ease-in forwards; }
+.fc-card-inner.flip-in  { animation: fcFlipIn  0.18s ease-out forwards; }
+@keyframes fcFlipOut { from { transform: scaleY(1); } to { transform: scaleY(0.04); } }
+@keyframes fcFlipIn  { from { transform: scaleY(0.04); } to { transform: scaleY(1); } }
 .fc-front, .fc-back {
-  position: absolute; inset: 0; border-radius: var(--radius);
+  border-radius: var(--radius);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 32px 28px; backface-visibility: hidden;
-  box-shadow: var(--shadow-lg);
+  padding: 28px 24px; box-shadow: var(--shadow-lg); min-height: 190px; width: 100%;
 }
 .fc-front { background: var(--accent); color: white; }
-.fc-back { background: var(--surface); border: 2px solid var(--border); transform: rotateY(180deg); overflow-y: auto; }
+.fc-back {
+  background: var(--surface); border: 2px solid var(--border);
+  align-items: flex-start; justify-content: flex-start;
+}
+.fc-back .fc-a table { border-collapse: collapse; width: 100%; font-size: 0.84em; }
+.fc-back .fc-a td { padding: 4px 8px; border: 1px solid var(--border); }
+.fc-hidden { display: none !important; }
 .fc-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; margin-bottom: 12px; }
 .fc-q { font-family: 'DM Serif Display', serif; font-size: 1.15rem; text-align: center; line-height: 1.4; }
 .fc-a { font-size: 0.88rem; line-height: 1.7; text-align: left; width: 100%; }
@@ -209,10 +216,12 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 .progress-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 12px 0 4px; }
 .progress-bar { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.4s; }
 .progress-label { font-size: 0.78rem; color: var(--text-soft); text-align: center; margin-bottom: 16px; }
-.scorecard { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
-.scorecard-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
-.scorecard-num { font-family: 'DM Serif Display', serif; font-size: 1.8rem; }
-.scorecard-label { font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }
+.scorecard { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 20px; }
+.scorecard-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; box-shadow: var(--shadow); }
+.scorecard-num { font-family: 'DM Serif Display', serif; font-size: 1.6rem; }
+.scorecard-label { font-size: 0.72rem; color: var(--text-soft); margin-top: 2px; }
+.fc-btn-skip-perm { background: var(--surface2); color: var(--text-soft); border: 1.5px solid var(--border); }
+.fc-btn-skip-perm:hover { background: var(--border); }
 .nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .nav-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500; transition: all 0.15s; min-height: 40px; }
 .nav-btn:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
@@ -553,11 +562,11 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
   .mem-card { min-height: 58px; }
   .mem-back { font-size: 0.52rem; }
   .assoc-grid { gap: 8px; }
-  .scorecard { grid-template-columns: repeat(3,1fr); gap: 8px; }
-  .scorecard-num { font-size: 1.4rem; }
+  .scorecard { grid-template-columns: repeat(4,1fr); gap: 6px; }
+  .scorecard-num { font-size: 1.2rem; }
+  .scorecard-label { font-size: 0.65rem; }
   main { padding: 16px 12px 80px; }
   .scramble-word { font-size: 1.5rem; letter-spacing: 4px; }
-  .fc-scene { height: 210px; }
   .fc-q { font-size: 1rem; }
   .def-grid { grid-template-columns: 1fr; }
 }
@@ -594,8 +603,8 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 
 <!-- ══════════ FLASHCARDS ══════════ -->
 <section id="flashcards" class="section active">
-  <div class="section-heading"><div><h2>Flashcards</h2><p>Cliquez sur la carte pour la retourner · Marquez ce que vous savez ou non</p></div></div>
-  <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
+  <div class="section-heading"><div><h2>Flashcards</h2><p>Cliquez sur la carte pour la retourner · Triage en 3 catégories</p></div></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px">
     <select id="fc-theme" onchange="filterFlashcards()" style="padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:0.85rem;color:var(--text)">
       <option value="all">Tous les thèmes</option>
       <option value="definitions">Définitions clés</option>
@@ -605,17 +614,32 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
       <option value="probantes">Données probantes</option>
       <option value="politique">Politique de santé</option>
       <option value="modeles">Modèles en santé</option>
+      <option value="épidémio">Épidémiologie</option>
     </select>
-    <button onclick="shuffleCards()" style="padding:9px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-height:40px">🔀 Mélanger</button>
-    <button onclick="retryUnknown()" id="btn-retry-fc" style="padding:9px 16px;border-radius:8px;border:1px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;display:none;min-height:40px">🔁 Revoir les non sus</button>
+    <button onclick="shuffleCards()" style="padding:9px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;min-height:40px">🔀 Mélanger</button>
+    <button onclick="retryUnknown()" id="btn-retry-fc" style="padding:9px 14px;border-radius:8px;border:1px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;display:none;min-height:40px">🔁 Revoir non sues</button>
+    <button onclick="retryKnown()" id="btn-retry-known" style="padding:9px 14px;border-radius:8px;border:1px solid var(--green);background:var(--green-light);color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:500;display:none;min-height:40px">✅ Revoir maîtrisées</button>
+  </div>
+
+  <!-- ── Bande sauvegarde ── -->
+  <div id="fc-save-bar" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:16px">
+    <span style="font-size:0.8rem;font-weight:600;color:var(--text-soft);flex:0 0 auto">💾 Triage :</span>
+    <button onclick="saveTriage()" title="Sauvegarder le triage dans un fichier JSON" style="padding:7px 13px;border-radius:7px;border:1px solid var(--accent);background:var(--accent-light);color:var(--accent);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;min-height:36px">⬇️ Exporter JSON</button>
+    <label title="Charger un fichier JSON de triage" style="padding:7px 13px;border-radius:7px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;min-height:36px;display:inline-flex;align-items:center">
+      ⬆️ Importer JSON
+      <input type="file" accept=".json" onchange="loadTriage(event)" style="display:none">
+    </label>
+    <span id="fc-save-status" style="font-size:0.78rem;color:var(--text-soft);font-style:italic;flex:1;min-width:80px"></span>
+    <button onclick="resetTriage()" title="Effacer tout le triage et recommencer à zéro" style="padding:7px 13px;border-radius:7px;border:1.5px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;min-height:36px;margin-left:auto">🗑️ Reset</button>
   </div>
   <div class="scorecard">
-    <div class="scorecard-item"><div class="scorecard-num" id="fc-total" style="color:var(--text)">0</div><div class="scorecard-label">cartes totales</div></div>
-    <div class="scorecard-item"><div class="scorecard-num" id="fc-known" style="color:var(--green)">0</div><div class="scorecard-label">✅ sues</div></div>
+    <div class="scorecard-item"><div class="scorecard-num" id="fc-total" style="color:var(--text)">0</div><div class="scorecard-label">📚 total</div></div>
+    <div class="scorecard-item"><div class="scorecard-num" id="fc-known" style="color:var(--green)">0</div><div class="scorecard-label">✅ maîtrisées</div></div>
     <div class="scorecard-item"><div class="scorecard-num" id="fc-unknown" style="color:var(--red)">0</div><div class="scorecard-label">❌ non sues</div></div>
+    <div class="scorecard-item"><div class="scorecard-num" id="fc-skip" style="color:var(--text-soft)">0</div><div class="scorecard-label">💨 ignorées</div></div>
   </div>
   <div class="progress-bar-wrap"><div class="progress-bar" id="fc-progress" style="width:0%"></div></div>
-  <div class="progress-label" id="fc-progress-label">0 / 0</div>
+  <div class="progress-label" id="fc-progress-label">0 / 0 cartes révisées</div>
   <div style="height:16px"></div>
   <div class="nav-row">
     <button class="nav-btn" id="fc-prev" onclick="fcNav(-1)">← Préc.</button>
@@ -629,19 +653,24 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
         <div class="fc-q" id="fc-question">Chargement…</div>
         <div class="hint-flip">↑ Cliquez pour retourner</div>
       </div>
-      <div class="fc-back"><div class="fc-a" id="fc-answer">Réponse ici</div></div>
+      <div class="fc-back fc-hidden"><div class="fc-a" id="fc-answer">Réponse ici</div></div>
     </div>
   </div>
   <div class="fc-actions" id="fc-actions" style="display:none">
-    <button class="fc-btn fc-btn-know" onclick="markCard(true)">✅ Je sais</button>
-    <button class="fc-btn fc-btn-unknown" onclick="markCard(false)">❌ Pas su</button>
-    <button class="fc-btn fc-btn-skip" onclick="fcNav(1)">→ Suivant</button>
+    <button class="fc-btn fc-btn-know" onclick="markCard('know')">✅ Maîtrisé</button>
+    <button class="fc-btn fc-btn-unknown" onclick="markCard('unknown')">❌ Pas su</button>
+    <button class="fc-btn fc-btn-skip-perm" onclick="markCard('skip')" title="Carte non importante, à exclure">💨 On s'en fout</button>
   </div>
   <div class="fc-meta" id="fc-meta"></div>
   <div class="unknown-pile" id="unknown-pile" style="display:none">
-    <h3>❌ Cartes non sues (<span id="unknown-count">0</span>)</h3>
+    <h3>❌ Non sues (<span id="unknown-count">0</span>)</h3>
     <ul class="unknown-list" id="unknown-list"></ul>
     <button class="btn-retry" onclick="retryUnknown()">🔁 Retravailler ces cartes</button>
+  </div>
+  <div class="unknown-pile" id="known-pile" style="display:none;background:var(--green-light);border-color:var(--green)">
+    <h3 style="color:var(--green)">✅ Maîtrisées (<span id="known-count">0</span>)</h3>
+    <ul class="unknown-list" id="known-list"></ul>
+    <button class="btn-retry" style="background:var(--green)" onclick="retryKnown()">✅ Réviser les maîtrisées</button>
   </div>
 </section>
 
@@ -1133,6 +1162,19 @@ const FLASHCARDS = [
   { theme:'politique', q:'À quoi servent les indicateurs de santé ? (4 fonctions)', a:'• Définir les <strong>problèmes de santé publique</strong> à un moment donné<br>• Mettre en évidence une <strong>évolution dans le temps</strong><br>• Définir des <strong>différences entre populations</strong><br>• <strong>Évaluer l\'atteinte des objectifs</strong> d\'un programme' },
   { theme:'modeles', q:'Caractéristiques du Modèle Biomédical', a:'• Depuis le <strong>19e siècle</strong><br>• Recherche de l\'<strong>agent pathogène</strong> (corps-machine de Descartes)<br>• Vision : réparer l\'organe malade<br>• Centré sur la <strong>biologie</strong>' },
   { theme:'modeles', q:'Comment fonctionne le modèle de Dahlgren et Whitehead ?', a:'Modèle en couches concentriques :<br>🔵 Centre : facteurs <strong>biologiques non modifiables</strong> (âge, sexe, gènes)<br>🟠 Comportements individuels<br>🟡 Réseaux sociaux<br>🟢 Conditions de vie et travail<br>⚫ Contexte socio-économique et environnemental' },
+  { theme:'épidémio', q:'Quelle est la différence entre épidémie, endémie et pandémie ?', a:'<strong>Épidémie :</strong> grand nombre de cas soudain dans une région/population donnée. (ex: grippe saisonnière)<br><br><strong>Endémie :</strong> présence habituelle et STABLE d\'une maladie dans une région précise. Peut toucher PLUS de personnes qu\'une épidémie ! (ex: paludisme en Afrique)<br><br><strong>Pandémie :</strong> épidémie s\'étendant à plusieurs continents voire la planète. (ex: Covid-19, grippe espagnole)' },
+  { theme:'épidémio', q:'Quelles sont les 3 dimensions de l\'épidémiologie ?', a:'<strong>1. Descriptive :</strong> recueille des informations sur l\'état de santé (qui ? quoi ? où ? quand ?). Ex : étude du tabagisme féminin.<br><br><strong>2. Analytique :</strong> recherche les causes et facteurs de risque (enquêtes exposés/non-exposés ou cas-témoins). Ex : facteurs influençant le tabagisme.<br><br><strong>3. Évaluative :</strong> évalue l\'impact des programmes de prévention. Ex : évaluation des politiques anti-tabac.' },
+  { theme:'épidémio', q:'Formule et définition du taux d\'incidence', a:'<strong>Définition :</strong> Nombre de <u>NOUVEAUX</u> cas d\'une maladie dans une population donnée, durant une période connue.<br><br><strong>Formule :</strong><br><code>Incidence = (Nb nouveaux cas / Population à risque) × 1 000</code><br><br>📌 Exprimé en <strong>‰</strong> (pour 1 000 personnes).<br>📌 Enquête utilisée : <strong>longitudinale (cohorte)</strong>.<br><br>Ex : 41 cas sur 500 personnes → 41/500 × 1000 = <strong>82 ‰</strong>' },
+  { theme:'épidémio', q:'Formule et définition du taux de prévalence', a:'<strong>Définition :</strong> Nombre TOTAL de cas (anciens + nouveaux) présents dans la population à un moment donné.<br><br><strong>Formule :</strong><br><code>Prévalence = (Nb total de cas / Population à risque) × 1 000</code><br><br>📌 Exprimé en <strong>‰</strong>.<br>📌 Enquête utilisée : <strong>transversale</strong> (observation instantanée).<br><br>⚠️ Différence clé : prévalence = TOUS les cas / incidence = NOUVEAUX cas uniquement.' },
+  { theme:'épidémio', q:'Formule et définition du taux de mortalité brut', a:'<strong>Définition :</strong> Fréquence des décès dans une population sur une période.<br><br><strong>Formule :</strong><br><code>Mortalité = (Nb de décès / Effectif moyen) × 1 000</code><br><br>📌 Effectif moyen = effectif au milieu de l\'année (ou moyenne début/fin d\'année).<br>📌 Exprimé en <strong>‰</strong>.<br><br>Ex : 524 685 décès / 57 000 000 hab. = <strong>9,2 ‰</strong> (France 1991)' },
+  { theme:'épidémio', q:'Formule et définition de la létalité', a:'<strong>Définition :</strong> Mesure la virulence d\'une maladie — risque d\'entraîner la mort pour CETTE maladie.<br><br><strong>Formule :</strong><br><code>Létalité = (Nb décès liés à la maladie / Nb nouveaux cas de cette maladie) × 100</code><br><br>📌 Exprimée en <strong>%</strong>.<br><br>Ex : tétanos France 2003 → 5 décès / 30 cas = <strong>16,7 %</strong><br>Ex : Ébola → <strong>30 à 90 %</strong> selon la forme' },
+  { theme:'épidémio', q:'Formule et définition du taux de morbidité', a:'<strong>Définition :</strong> Pourcentage des individus malades dans une population, dans un temps donné, d\'une ou de l\'ensemble des maladies.<br><br><strong>Formule :</strong><br><code>Morbidité = Nb de malades / Population étudiée</code><br><br>📌 Renseigne sur la <strong>fréquence des pathologies</strong> dans les populations.' },
+  { theme:'épidémio', q:'Quelle est la différence entre facteur de risque et marqueur de risque ?', a:'<strong>Facteur de risque :</strong> augmente la probabilité de maladie ET une action est POSSIBLE dessus.<br>➡️ Ex : tabac, alcool, sédentarité, alimentation<br><br><strong>Marqueur de risque :</strong> augmente aussi la probabilité de maladie MAIS aucune action n\'est à priori envisageable sur le marqueur.<br>➡️ Ex : l\'<strong>âge</strong>, le <strong>sexe</strong>, les prédispositions génétiques' },
+  { theme:'épidémio', q:'Qu\'est-ce que le Risque Relatif (RR) ? Formule et interprétation.', a:'<strong>Définition :</strong> Rapport de l\'incidence chez les exposés / incidence chez les non-exposés.<br><br><strong>Formule :</strong> RR = [a/(a+b)] / [c/(c+d)]<br><br>📊 Interprétation :<br>• RR <strong>> 1</strong> → facteur de <strong>risque</strong> (exposés plus malades)<br>• RR <strong>≈ 1</strong> → <strong>pas de lien</strong><br>• RR <strong>< 1</strong> → facteur <strong>protecteur</strong><br><br>📌 Utilisé dans les études <strong>exposés/non exposés</strong> (prospectives).' },
+  { theme:'épidémio', q:'Qu\'est-ce que l\'Odds Ratio (OR) ? Formule et interprétation.', a:'<strong>Définition :</strong> Rapport de la cote d\'exposition chez les malades (cas) par la cote d\'exposition chez les non-malades (témoins).<br><br><strong>Formule :</strong> OR = (a × d) / (b × c)<br><br>📌 L\'OR est une <strong>approximation du RR</strong> si la maladie est rare.<br>📌 Utilisé dans les études <strong>cas-témoins rétrospectives</strong>.<br>📌 Un seul OR ne suffit pas à affirmer un lien causal !' },
+  { theme:'épidémio', q:'Enquête exposés/non exposés vs enquête cas-témoins : comparaison', a:'<table style="font-size:0.85em;border-collapse:collapse;width:100%"><tr style="background:var(--accent-light)"><td style="padding:4px 8px;font-weight:700"></td><td style="padding:4px 8px;font-weight:700">Exposés/Non exposés</td><td style="padding:4px 8px;font-weight:700">Cas-Témoins</td></tr><tr><td style="padding:4px 8px">Sélection</td><td style="padding:4px 8px">Sur l\'<strong>exposition</strong></td><td style="padding:4px 8px">Sur la <strong>maladie</strong></td></tr><tr style="background:var(--surface2)"><td style="padding:4px 8px">Temporalité</td><td style="padding:4px 8px"><strong>Prospective</strong></td><td style="padding:4px 8px"><strong>Rétrospective</strong></td></tr><tr><td style="padding:4px 8px">Mesure</td><td style="padding:4px 8px"><strong>RR</strong> (ou OR)</td><td style="padding:4px 8px"><strong>OR</strong> uniquement</td></tr><tr style="background:var(--surface2)"><td style="padding:4px 8px">Avantages</td><td style="padding:4px 8px">Donne l\'incidence, contrôle biais</td><td style="padding:4px 8px">Rapide, peu coûteux, maladies rares</td></tr><tr><td style="padding:4px 8px">Inconvénients</td><td style="padding:4px 8px">Long, coûteux, impossible si maladie rare</td><td style="padding:4px 8px">Biais mémoire, pas d\'incidence</td></tr></table>' },
+  { theme:'épidémio', q:'Qu\'est-ce que l\'éco-épidémiologie (approche One Health) ?', a:'Discipline <strong>émergente et transversale</strong> faisant intervenir :<br>• L\'<strong>écologie</strong><br>• La <strong>médecine humaine</strong><br>• La <strong>médecine vétérinaire</strong> (maladies à réservoir animal)<br><br><strong>Objectif :</strong> comprendre comment les modifications environnementales et les activités humaines influent sur la santé humaine ET animale.<br><br>📌 Ex : déforestation → modification de niche écologique → expansion des moustiques → paludisme dans de nouvelles zones.' },
+  { theme:'épidémio', q:'Citez les 5 types de mortalité spécifique à connaître', a:'<strong>Mortalité infantile :</strong> décès < 1 an<br><strong>Mortalité néonatale :</strong> décès < 28 jours<br><strong>Mortalité périnatale :</strong> décès 0-6 jours OU fœtus ≥ 28 SA<br><strong>Mortalité post-néonatale :</strong> décès 28-364 jours<br><br>📌 Relation : Mortalité périnatale ⊂ Mortalité néonatale ⊂ Mortalité infantile<br><strong>Espérance de vie à la naissance :</strong> durée de vie moyenne d\'une génération fictive soumise aux conditions de mortalité de l\'année.' },
 ];
 
 const QCM_DATA = [
@@ -1148,6 +1190,15 @@ const QCM_DATA = [
   { theme:'probantes', q:'Quelle est la bonne ordre des 7 étapes de la démarche probante ?', multi:false, options:[{t:'Rechercher → Évaluer → Définir → Adapter → Interpréter → Mettre en oeuvre → Évaluer',correct:false},{t:'Définir → Rechercher → Évaluer qualité → Interpréter → Adapter → Mettre en œuvre → Évaluer',correct:true},{t:'Évaluer → Définir → Adapter → Mettre en œuvre → Interpréter → Rechercher → Évaluer',correct:false},{t:'Définir → Adapter → Rechercher → Évaluer qualité → Interpréter → Mettre en œuvre → Évaluer',correct:false}], explication:'L\'ordre logique : 1. Définir → 2. Rechercher → 3. Évaluer qualité → 4. Interpréter → 5. Adapter → 6. Mettre en œuvre → 7. Évaluer l\'impact.' },
   { theme:'probantes', q:'Quels sont les enjeux des données probantes en santé publique ? (plusieurs réponses)', multi:true, options:[{t:'Être plus efficace dans les interventions',correct:true},{t:'Légitimiser l\'action professionnelle',correct:true},{t:'Remplacer le jugement clinique par des algorithmes',correct:false},{t:'Crédibiliser la prise de parole auprès des politiques',correct:true},{t:'Faire reconnaître le secteur de la promotion de la santé',correct:true}], explication:'Les 5 enjeux : efficacité, amélioration des pratiques, légitimité, crédibilité, reconnaissance du secteur. Les données ne remplacent pas le jugement clinique.' },
   { theme:'definitions', q:'Quelles affirmations sur la structure d\'une politique de santé publique sont correctes ?', multi:true, options:[{t:'Le plan de santé est plus général que le programme',correct:true},{t:'L\'action de santé est la composante opérationnelle d\'un programme',correct:true},{t:'Le programme de santé est plus général que le plan',correct:false},{t:'Un plan de santé fixe des priorités générales (ex: Plan cancer)',correct:true}], explication:'Du plus général au plus particulier : PLAN → PROGRAMME → ACTION.' },
+  { theme:'épidémio', q:'Quelle est la définition de l\'épidémiologie selon l\'OMS (1968) ?', multi:false, options:[{t:'Étude de la distribution des maladies et des invalidités dans les populations humaines, ainsi que des influences qui déterminent cette distribution',correct:true},{t:'Science et art de prévenir les maladies et de promouvoir la santé dans les populations',correct:false},{t:'Étude des facteurs de risque individuels sur la santé',correct:false},{t:'Analyse statistique des données hospitalières nationales',correct:false}], explication:'L\'OMS (1968) définit l\'épidémiologie comme « une étude de la distribution des maladies et des invalidités dans les populations humaines, ainsi que des influences qui déterminent cette distribution ». Elle porte sur des groupes, pas des individus.' },
+  { theme:'épidémio', q:'Parmi ces situations, laquelle correspond à une endémie ?', multi:false, options:[{t:'Le paludisme frappe soudainement une ville européenne en hiver',correct:false},{t:'Le paludisme est présent en permanence en Afrique subsaharienne avec une incidence stable',correct:true},{t:'La grippe se propage sur tous les continents en une saison',correct:false},{t:'Un nouveau variant de grippe apparaît dans 150 pays simultanément',correct:false}], explication:'L\'endémie se définit par la présence HABITUELLE d\'une maladie dans une région précise avec une incidence stable. Le paludisme en Afrique subsaharienne en est l\'exemple type. Attention : une endémie peut toucher plus de personnes qu\'une pandémie !' },
+  { theme:'épidémio', q:'Dans une population de 2 000 personnes, 40 nouveaux cas de grippe ont été relevés en 2024. Quel est le taux d\'incidence ?', multi:false, options:[{t:'2 ‰',correct:false},{t:'20 ‰',correct:true},{t:'40 ‰',correct:false},{t:'0,2 ‰',correct:false}], explication:'Taux d\'incidence = (Nb nouveaux cas / Population à risque) × 1 000 = (40 / 2 000) × 1 000 = 20 ‰. On divise le nombre de NOUVEAUX cas par la population à risque, multiplié par 1 000.' },
+  { theme:'épidémio', q:'Un chercheur souhaite calculer la prévalence du diabète dans une région. Quel type d\'enquête doit-il réaliser ?', multi:false, options:[{t:'Enquête longitudinale de cohorte',correct:false},{t:'Enquête transversale',correct:true},{t:'Enquête cas-témoins',correct:false},{t:'Enquête exposés/non-exposés',correct:false}], explication:'La prévalence nécessite une observation INSTANTANÉE de la population → enquête transversale. Pour l\'incidence (nouveaux cas sur une période), on utilise une enquête longitudinale (cohorte).' },
+  { theme:'épidémio', q:'En France, 30 personnes ont contracté le tétanos en 2003, dont 5 sont décédées. Quelle est la létalité du tétanos ?', multi:false, options:[{t:'5 %',correct:false},{t:'16,7 %',correct:true},{t:'30 %',correct:false},{t:'0,17 %',correct:false}], explication:'Létalité = (Nb décès liés à la maladie / Nb nouveaux cas de cette maladie) × 100 = (5 / 30) × 100 = 16,7 %. La létalité mesure la virulence (risque de mourir si on est malade).' },
+  { theme:'épidémio', q:'Dans une étude exposés/non-exposés, le Risque Relatif (RR) est calculé à 3,2. Que signifie ce résultat ?', multi:false, options:[{t:'Les non-exposés ont 3,2 fois plus de risque d\'être malades',correct:false},{t:'Les exposés ont 3,2 fois plus de risque d\'être malades que les non-exposés',correct:true},{t:'Le facteur étudié est protecteur',correct:false},{t:'Il n\'y a pas de lien entre exposition et maladie',correct:false}], explication:'RR > 1 → le facteur étudié est suspect d\'être un facteur de risque. RR = 3,2 → les exposés ont 3,2 fois plus de risque d\'être malades que les non-exposés. Si RR < 1 → facteur protecteur. Si RR ≈ 1 → pas de lien.' },
+  { theme:'épidémio', q:'Quelles sont les caractéristiques de l\'enquête cas-témoins ? (plusieurs réponses)', multi:true, options:[{t:'Enquête rétrospective',correct:true},{t:'Sélection des sujets sur leur statut vis-à-vis de la maladie (malades/non-malades)',correct:true},{t:'Permet de calculer un Risque Relatif direct',correct:false},{t:'Utilise l\'Odds Ratio (OR) comme mesure d\'association',correct:true},{t:'Adaptée aux maladies rares',correct:true}], explication:'L\'enquête cas-témoins est rétrospective, sélectionne sur la maladie, utilise l\'OR (impossible de calculer RR car pas d\'incidence), et est adaptée aux maladies rares. Le RR est calculable seulement dans les études exposés/non-exposés.' },
+  { theme:'épidémio', q:'Quelle est la différence entre facteur de risque et marqueur de risque ?', multi:false, options:[{t:'Le facteur de risque est modifiable, le marqueur ne l\'est pas',correct:true},{t:'Le marqueur de risque augmente le risque mais le facteur non',correct:false},{t:'Le facteur de risque est toujours biologique, le marqueur toujours comportemental',correct:false},{t:'Il n\'y a aucune différence pratique entre les deux',correct:false}], explication:'Tous deux augmentent la probabilité de maladie. Mais le facteur de risque est MODIFIABLE (tabac, alcool → on peut agir), tandis que le marqueur de risque ne l\'est pas (âge, sexe → on ne peut pas intervenir dessus).' },
+  { theme:'épidémio', q:'L\'éco-épidémiologie (approche One Health) intègre quels domaines ? (plusieurs réponses)', multi:true, options:[{t:'Médecine humaine',correct:true},{t:'Médecine vétérinaire',correct:true},{t:'Écologie',correct:true},{t:'Sociologie politique',correct:false},{t:'Économie de la santé',correct:false}], explication:'L\'éco-épidémiologie (ou approche « Une Seule Santé ») est transversale et fait intervenir l\'écologie, la médecine humaine et la médecine vétérinaire, notamment pour les maladies zoonotiques à réservoir animal.' },
 ];
 
 const VF_DATA = [
@@ -1165,6 +1216,14 @@ const VF_DATA = [
   { q:'L\'indicateur de santé peut être utilisé pour évaluer l\'atteinte des objectifs d\'un programme de santé.', correct:true, explication:'VRAI. Les indicateurs permettent de définir des problèmes, suivre leur évolution, comparer des populations ET évaluer si les objectifs d\'un programme ont été atteints.' },
   { q:'Hippocrate avait une vision mécaniste de la maladie similaire à celle de Descartes.', correct:false, explication:'FAUX. Hippocrate avait une vision globale et environnementale (air, eaux, lieux). C\'est Descartes qui a introduit la vision dualiste corps-esprit et mécaniste.' },
   { q:'La Déclaration d\'Alma-Ata (1978) a défini les soins de santé primaires.', correct:true, explication:'VRAI. La Déclaration d\'Alma-Ata (1978) est le texte fondateur des soins de santé primaires avec les principes d\'équité, participation communautaire et intersectorialité.' },
+  { q:'La prévalence correspond uniquement aux nouveaux cas d\'une maladie sur une période donnée.', correct:false, explication:'FAUX. La prévalence correspond au nombre TOTAL de cas (anciens + nouveaux) présents à un moment donné. C\'est l\'INCIDENCE qui ne prend en compte que les NOUVEAUX cas sur une période.' },
+  { q:'Une maladie endémique touche nécessairement moins de personnes qu\'une épidémie.', correct:false, explication:'FAUX. Une maladie endémique peut concerner PLUS de personnes qu\'une épidémie ou même qu\'une pandémie. L\'endémie est définie par sa stabilité et sa permanence dans une zone géographique, pas par le nombre de cas.' },
+  { q:'Pour calculer un Risque Relatif (RR), on utilise une enquête cas-témoins rétrospective.', correct:false, explication:'FAUX. Le RR se calcule dans les enquêtes EXPOSÉS/NON-EXPOSÉS (prospectives). Dans les enquêtes cas-témoins, on ne peut pas calculer l\'incidence → on utilise l\'Odds Ratio (OR). L\'OR est une approximation du RR si la maladie est rare.' },
+  { q:'Le taux d\'incidence s\'exprime en pour mille (‰) et concerne uniquement les nouveaux cas.', correct:true, explication:'VRAI. L\'incidence = (nouveaux cas / population à risque) × 1 000. Elle mesure la fréquence d\'apparition de NOUVEAUX cas sur une période donnée. La prévalence, elle, inclut aussi les anciens cas.' },
+  { q:'La létalité d\'une maladie est identique à son taux de mortalité dans la population générale.', correct:false, explication:'FAUX. La létalité = décès par maladie / nouveaux cas de cette maladie (%). Elle mesure la virulence (risque de mort si on est DÉJÀ malade). La mortalité brute rapporte les décès à l\'ENSEMBLE de la population (malade ou non), exprimée en ‰.' },
+  { q:'L\'éco-épidémiologie (approche One Health) intègre la médecine humaine, la médecine vétérinaire et l\'écologie.', correct:true, explication:'VRAI. L\'éco-épidémiologie est une discipline transversale faisant intervenir ces trois domaines pour comprendre l\'influence des modifications environnementales sur la santé humaine et animale. Ex : déforestation → expansion des moustiques vecteurs de malaria.' },
+  { q:'Dans une enquête exposés/non-exposés, les sujets sont sélectionnés sur la base de leur statut de malade ou non.', correct:false, explication:'FAUX. Dans l\'enquête exposés/non-exposés, les sujets sont sélectionnés sur la base de leur EXPOSITION au facteur étudié, puis suivis pour voir s\'ils développent la maladie. C\'est dans l\'enquête CAS-TÉMOINS que la sélection se fait sur le statut de malade/non-malade.' },
+  { q:'L\'épidémiologie analytique évalue l\'impact des programmes de prévention et d\'intervention.', correct:false, explication:'FAUX. C\'est l\'épidémiologie ÉVALUATIVE qui évalue l\'impact des programmes et actions de prévention. L\'épidémiologie analytique cherche les causes des maladies et les facteurs de risque via des enquêtes (exposés/non-exposés ou cas-témoins).' },
 ];
 
 const QO_DATA = [
@@ -1180,6 +1239,12 @@ const QO_DATA = [
   { q:'Citez les 7 étapes mises en place dans la réalisation d\'une démarche probante en santé publique.', reponse:'<div class="tag">Réponse attendue</div>1. <strong>Définir le problème</strong> : qui est mon groupe cible ? quel problème ?<br>2. <strong>Rechercher les données probantes</strong> : où chercher les meilleures données ?<br>3. <strong>Évaluer la qualité</strong> : les méthodes sont-elles fiables ?<br>4. <strong>Interpréter les résultats</strong> : que révèlent les données ?<br>5. <strong>Adapter au contexte</strong> : est-ce applicable à mon terrain ?<br>6. <strong>Mettre en œuvre</strong> : comment utiliser les données ?<br>7. <strong>Évaluer</strong> : avons-nous obtenu le résultat prévu ?' },
   { q:'Expliquez l\'évolution des définitions de la santé entre 1937 et 2001. Que constatez-vous ?', reponse:'<div class="tag">Réponse attendue</div><strong>1937 :</strong> La santé = absence de maladie (vision négative et purement biologique)<br><strong>1946 (OMS) :</strong> état de complet bien-être physique, mental et social (vision positive et tripartite)<br><strong>2001 :</strong> ressource pour la vie quotidienne, capacité d\'adaptation dynamique<br><br><strong>Constat :</strong> On passe d\'une vision purement biologique et curative à une vision globale, positive et dynamique.' },
   { q:'Citez les 5 enjeux/objectifs de travailler à partir de données probantes en santé publique.', reponse:'<div class="tag">Réponse attendue</div>1. <strong>Être plus efficace</strong> : faire ce qui est efficace, meilleure utilisation des fonds publics<br>2. <strong>Améliorer ses pratiques</strong> : confronter sa pratique aux bonnes pratiques, partager les expériences<br>3. <strong>Légitimiser son action</strong> : valoriser l\'activité, objectiver la validité, justifier les financements<br>4. <strong>Crédibiliser la prise de parole</strong> : s\'appuyer sur des faits, faire du plaidoyer auprès des politiques<br>5. <strong>Faire reconnaître un secteur d\'intervention</strong> : donner de la crédibilité à la promotion de la santé' },
+  { q:'📐 CALCUL — Taux d\'incidence : Dans une population de 500 personnes, 41 cas de grippe saisonnière ont été recensés au cours de l\'année 2011. Calculez le taux d\'incidence annuel et interprétez le résultat.', reponse:'<div class="tag">Formule</div><strong>Taux d\'incidence = (Nb de nouveaux cas / Population à risque) × 1 000</strong><br><br><div class="tag">Application numérique</div>Incidence = (41 / 500) × 1 000 = <strong>82 ‰</strong><br><br><div class="tag">Interprétation</div>En 2011, dans cette population de 500 personnes, le taux d\'incidence de la grippe saisonnière était de <strong>82 pour 1 000 personnes</strong> (soit 8,2 % de la population a contracté la grippe dans l\'année).<br><br>📌 Enquête adaptée : <strong>longitudinale (cohorte)</strong> — on suit les nouveaux cas.' },
+  { q:'📐 CALCUL — Létalité : En France, en 2003, 30 personnes ont contracté le tétanos, dont 5 sont décédées. Calculez la létalité du tétanos et interprétez.', reponse:'<div class="tag">Formule</div><strong>Létalité = (Nb de décès liés à la maladie / Nb de nouveaux cas) × 100</strong><br><br><div class="tag">Application numérique</div>Létalité = (5 / 30) × 100 = <strong>16,7 %</strong><br><br><div class="tag">Interprétation</div>La létalité du tétanos en France en 2003 était de <strong>16,7 %</strong> : parmi les personnes ayant contracté le tétanos, environ 1 sur 6 est décédée.<br><br>📌 La létalité mesure la <strong>virulence</strong> d\'une maladie (risque de mourir si on est déjà malade). À ne pas confondre avec la mortalité (qui rapporte les décès à l\'ensemble de la population).' },
+  { q:'📐 CALCUL — Taux de mortalité brut : En 1991, on a enregistré en France 524 685 décès pour une population moyenne de 57 millions d\'habitants. Calculez le taux brut de mortalité.', reponse:'<div class="tag">Formule</div><strong>Taux de mortalité brut = (Nb de décès / Effectif moyen de la population) × 1 000</strong><br><br><div class="tag">Application numérique</div>Mortalité = (524 685 / 57 000 000) × 1 000 = <strong>9,2 ‰</strong><br><br><div class="tag">Interprétation</div>En 1991, le taux brut de mortalité en France était de <strong>9,2 pour 1 000 habitants</strong>.<br><br>📌 L\'effectif moyen = effectif au milieu de l\'année (ou moyenne début/fin d\'année).' },
+  { q:'📐 CALCUL — Odds Ratio (OR) : Une étude cas-témoins sur la toxoplasmose chez les femmes enceintes donne les résultats suivants : parmi 80 cas (femmes ayant contracté la toxoplasmose), 55 consomment de la viande de mouton et 25 non. Parmi 80 témoins, 28 consomment du mouton et 52 non. Calculez l\'OR et interprétez.', reponse:'<div class="tag">Formule</div><strong>OR = (a × d) / (b × c)</strong><br>a = cas exposés, b = témoins exposés, c = cas non-exposés, d = témoins non-exposés<br><br><div class="tag">Tableau 2×2</div>• Cas exposés (a) = 55 | Cas non-exposés (c) = 25<br>• Témoins exposés (b) = 28 | Témoins non-exposés (d) = 52<br><br><div class="tag">Application numérique</div>OR = (55 × 52) / (28 × 25) = 2 860 / 700 = <strong>4,1</strong><br><br><div class="tag">Interprétation</div>OR = 4,1 → Le risque de contracter la toxoplasmose est environ <strong>4 fois plus élevé</strong> chez les consommatrices de viande de mouton que chez les non-consommatrices.<br><br>📌 Un OR seul ne suffit pas à affirmer un lien causal — il faut discuter des critères internes et externes à l\'étude.' },
+  { q:'📐 FORMULES — Récapitulatif : Citez les 5 principaux indicateurs épidémiologiques avec leur formule et leur unité de mesure.', reponse:'<div class="tag">Récapitulatif des formules à connaître</div><table style="width:100%;border-collapse:collapse;font-size:0.88em"><tr style="background:var(--accent-light)"><td style="padding:6px 8px;font-weight:700;border:1px solid var(--border)">Indicateur</td><td style="padding:6px 8px;font-weight:700;border:1px solid var(--border)">Formule</td><td style="padding:6px 8px;font-weight:700;border:1px solid var(--border)">Unité</td></tr><tr><td style="padding:6px 8px;border:1px solid var(--border)"><strong>Incidence</strong></td><td style="padding:6px 8px;border:1px solid var(--border)">Nb <u>nouveaux</u> cas / Population à risque</td><td style="padding:6px 8px;border:1px solid var(--border)">‰</td></tr><tr style="background:var(--surface2)"><td style="padding:6px 8px;border:1px solid var(--border)"><strong>Prévalence</strong></td><td style="padding:6px 8px;border:1px solid var(--border)">Nb <u>total</u> de cas / Population à risque</td><td style="padding:6px 8px;border:1px solid var(--border)">‰</td></tr><tr><td style="padding:6px 8px;border:1px solid var(--border)"><strong>Morbidité</strong></td><td style="padding:6px 8px;border:1px solid var(--border)">Nb de malades / Population étudiée</td><td style="padding:6px 8px;border:1px solid var(--border)">%</td></tr><tr style="background:var(--surface2)"><td style="padding:6px 8px;border:1px solid var(--border)"><strong>Mortalité brute</strong></td><td style="padding:6px 8px;border:1px solid var(--border)">Nb de décès / Effectif moyen</td><td style="padding:6px 8px;border:1px solid var(--border)">‰</td></tr><tr><td style="padding:6px 8px;border:1px solid var(--border)"><strong>Létalité</strong></td><td style="padding:6px 8px;border:1px solid var(--border)">Nb décès par maladie / Nb nouveaux cas</td><td style="padding:6px 8px;border:1px solid var(--border)">%</td></tr></table><br>📌 <strong>Risque Relatif (RR)</strong> = Incidence exposés / Incidence non-exposés → études exposés/non-exposés<br>📌 <strong>Odds Ratio (OR)</strong> = (a×d) / (b×c) → études cas-témoins' },
+  { q:'Quelle est la différence entre épidémiologie descriptive, analytique et évaluative ? Donnez pour chacune son but et un exemple.', reponse:'<div class="tag">Réponse attendue</div><strong>1. Épidémiologie descriptive :</strong><br>But : recueillir des informations sur l\'état de santé de la population pour caractériser la situation (qui ? quoi ? où ? quand ?). Mesures : incidence, prévalence, mortalité.<br>Ex : étude de l\'évolution du tabagisme féminin en France<br><br><strong>2. Épidémiologie analytique :</strong><br>But : rechercher les causes des maladies et les facteurs de risque, établir des relations de causalité entre une exposition et une maladie.<br>Méthodes : enquêtes exposés/non-exposés (RR) ou cas-témoins (OR)<br>Ex : identifier les facteurs qui influencent le tabagisme chez les femmes<br><br><strong>3. Épidémiologie évaluative :</strong><br>But : évaluer l\'impact et l\'efficacité des programmes et actions de prévention ou actes thérapeutiques.<br>Ex : évaluer l\'impact des politiques de lutte contre le tabagisme féminin' },
 ];
 
 const DEFINITIONS = [
@@ -1211,6 +1276,31 @@ const DEFINITIONS = [
   { term:'Modèle biopsychosocial', source:'Années 1970', cat:'santé', body:'Élargit le modèle biomédical en intégrant les facteurs psychologiques et sociaux dans la compréhension de la maladie. Utilisé en soins infirmiers.' },
   { term:'Modèle écologique', source:'Années 1980', cat:'santé', body:'Reconnaît l\'origine multifactorielle de la santé : facteurs culturels, sociaux, politiques et environnementaux interagissent. Base de la santé publique moderne.' },
   { term:'Développement durable', source:'OMS/ONU', cat:'politique', body:'Mode de développement répondant aux besoins du présent sans compromettre la capacité des générations futures à répondre aux leurs. Lien fort avec la santé publique écologique.' },
+  { term:'Épidémie', source:'Larousse/OMS', cat:'épidémio', body:'Apparition d\'un grand nombre de cas d\'une maladie infectieuse ou accroissement considérable du nombre des cas dans une région ou population donnée. Du grec démos = le peuple.' },
+  { term:'Endémie', source:'OMS', cat:'épidémio', body:'Présence habituelle d\'une maladie, en général infectieuse, dans une population déterminée ou une région précise, avec une incidence stable. Du grec endemia = séjour. Peut toucher plus de personnes qu\'une épidémie ou une pandémie.' },
+  { term:'Pandémie', source:'OMS', cat:'épidémio', body:'Épidémie qui s\'étend à la quasi-totalité d\'une population d\'un continent ou de plusieurs continents, voire de la planète. Du grec pan = tout et demos = peuple. Les pandémies sont d\'abord classées comme épidémies. Ex : Covid-19, grippe espagnole, VIH.' },
+  { term:'Taux d\'incidence', source:'OMS/INSEE', cat:'épidémio', body:'Nombre de NOUVEAUX cas d\'une maladie observés pendant une période donnée rapporté à la population à risque. Exprimé pour 1 000 personnes (‰). Formule : (Nb nouveaux cas / Population à risque) × 1 000. Enquête : longitudinale (cohorte).' },
+  { term:'Taux de prévalence', source:'OMS', cat:'épidémio', body:'Nombre TOTAL de cas d\'une maladie (anciens + nouveaux) présents dans la population à un moment donné, rapporté à la population à risque. Exprimé pour 1 000 personnes (‰). Formule : (Nb total de cas / Population à risque) × 1 000. Enquête : transversale.' },
+  { term:'Taux de morbidité', source:'OMS', cat:'épidémio', body:'Pourcentage des individus malades dans une population pendant une période donnée, d\'une maladie particulière ou de l\'ensemble des maladies. Formule : Nb de malades / Population étudiée.' },
+  { term:'Taux de mortalité', source:'OMS/INSEE', cat:'épidémio', body:'Rapport du nombre de décès de l\'année à la population totale moyenne de l\'année. Exprimé en ‰. Formule : (Nombre de décès / Effectif moyen de la population) × 1 000.' },
+  { term:'Létalité', source:'OMS', cat:'épidémio', body:'Mesure la virulence d\'une maladie : risque d\'entraîner la mort pour CETTE maladie. Formule : (Nb décès liés à la maladie / Nb nouveaux cas de cette maladie) × 100. Exprimée en %. Ex : Ébola 30 à 90%.' },
+  { term:'Mortalité infantile', source:'OMS/INSEE', cat:'épidémio', body:'Décès d\'enfants âgés de moins d\'un an au sein d\'une population donnée pendant une période t.' },
+  { term:'Mortalité néonatale', source:'OMS', cat:'épidémio', body:'Décès d\'enfants âgés de moins de 28 jours.' },
+  { term:'Mortalité périnatale', source:'OMS', cat:'épidémio', body:'Décès d\'un enfant âgé de moins d\'une semaine (0 à 6 jours), ou décès d\'un fœtus de 28 semaines ou plus de gestation.' },
+  { term:'Mortalité post-néonatale', source:'OMS', cat:'épidémio', body:'Décès d\'un enfant âgé de moins d\'un an mais d\'au moins 28 jours (de 28 à 364 jours).' },
+  { term:'Espérance de vie à la naissance', source:'INSEE', cat:'épidémio', body:'Durée de vie moyenne d\'une génération fictive soumise aux conditions de mortalité par âge de l\'année considérée.' },
+  { term:'Taux de natalité', source:'INSEE', cat:'épidémio', body:'Rapport du nombre de naissances vivantes de l\'année à la population totale moyenne de l\'année.' },
+  { term:'Taux de fécondité', source:'INSEE', cat:'épidémio', body:'Nombre d\'enfants nés vivants des femmes d\'un âge donné au cours de l\'année, rapporté à la population moyenne de l\'année des femmes de même âge.' },
+  { term:'Épidémiologie descriptive', source:'Triboulet 2026', cat:'épidémio', body:'Recueille des informations sur l\'état de santé de la population pour répondre aux questions fondamentales caractérisant la situation (qui ? quoi ? où ? quand ?). Ex : étude de l\'évolution du tabagisme féminin.' },
+  { term:'Épidémiologie analytique', source:'Triboulet 2026', cat:'épidémio', body:'Recherche les causes des maladies et les facteurs de risque en établissant des relations de causalité entre une exposition et une maladie. Méthodes : enquêtes exposés/non-exposés (RR) ou cas-témoins (OR).' },
+  { term:'Épidémiologie évaluative', source:'Triboulet 2026', cat:'épidémio', body:'Évalue l\'impact et les résultats des programmes et actions de prévention ou actes thérapeutiques mis en place pour lutter contre la maladie.' },
+  { term:'Risque relatif (RR)', source:'Épidémiologie analytique', cat:'épidémio', body:'Rapport de l\'incidence de la maladie chez les exposés à l\'incidence chez les non-exposés. RR > 1 = facteur de risque ; RR ≈ 1 = pas de lien ; RR < 1 = facteur protecteur. Formule : [a/(a+b)] / [c/(c+d)].' },
+  { term:'Odds Ratio (OR)', source:'Épidémiologie analytique', cat:'épidémio', body:'Rapport de la cote d\'exposition chez les malades (cas) par la cote d\'exposition chez les non-malades (témoins). Approximation du RR si la maladie est rare. Formule : (a×d)/(b×c). Utilisé dans les études cas-témoins rétrospectives.' },
+  { term:'Marqueur de risque', source:'Épidémiologie', cat:'épidémio', body:'Augmente la probabilité de survenue de la maladie mais aucune action n\'est à priori envisageable sur le marqueur lui-même. Ex : l\'âge, le sexe. À distinguer du facteur de risque (modifiable).' },
+  { term:'Zoonose', source:'OMS', cat:'épidémio', body:'Maladie infectieuse ou parasitaire pouvant être transmise de l\'animal à l\'être humain (et vice-versa). Ex : Ébola (chauve-souris frugivore), Peste bubonique (rongeurs/puces), Rage.' },
+  { term:'Éco-épidémiologie (One Health)', source:'Triboulet 2026', cat:'épidémio', body:'Discipline émergente et transversale faisant intervenir écologie, médecine humaine et médecine vétérinaire. Objectif : comprendre comment les modifications environnementales et les activités humaines influent sur la santé humaine et animale.' },
+  { term:'Cohorte (épidémio)', source:'Épidémiologie', cat:'épidémio', body:'Population suivie au cours du temps qui partage un événement origine commun (même période de naissance, même zone géographique, même exposition particulière). Utilisée dans les enquêtes longitudinales pour calculer l\'incidence.' },
+  { term:'Pyramide des âges', source:'INSEE', cat:'épidémio', body:'Représentation graphique de la répartition par sexe et âge d\'une population à un instant donné. Deux histogrammes : hommes à gauche, femmes à droite. Les effectifs sont portés horizontalement et les âges verticalement.' },
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -1235,6 +1325,17 @@ const FLASH_QUESTIONS = [
   { q:"Quel site fournit des données expérientielles en France ?", opts:["PubMed","Cochrane","Oscars / Bib-bop","ANSES"], ans:2 },
   { q:"La 1ère étape de la démarche probante est…", opts:["Rechercher","Évaluer","Définir le problème","Adapter"], ans:2 },
   { q:"Quel principe est central dans la promotion de la santé ?", opts:["Dépistage","Empowerment","Vaccination","Iatrogénèse"], ans:1 },
+  { q:"Quel type d'enquête permet de calculer l'incidence ?", opts:["Transversale","Cas-témoins","Longitudinale (cohorte)","Transversale répétée"], ans:2 },
+  { q:"Quelle mesure d'association est utilisée dans une étude cas-témoins ?", opts:["Risque Relatif (RR)","Odds Ratio (OR)","Taux de prévalence","Taux de morbidité"], ans:1 },
+  { q:"Incidence = (41 / 500) × 1000. Résultat ?", opts:["8,2 ‰","82 ‰","41 ‰","20,5 ‰"], ans:1 },
+  { q:"Létalité tétanos : 5 décès / 30 cas = ?", opts:["5 %","10 %","16,7 %","30 %"], ans:2 },
+  { q:"La pandémie s'étend…", opts:["À une seule ville","À une région précise","À plusieurs continents","Avec une incidence stable"], ans:2 },
+  { q:"L'endémie se caractérise par…", opts:["Une apparition soudaine","Une incidence stable dans une région précise","Une extension mondiale","Des cas uniquement aigus"], ans:1 },
+  { q:"RR = 0,6. Que signifie ce résultat ?", opts:["Facteur de risque fort","Pas de lien","Facteur protecteur","Non interprétable"], ans:2 },
+  { q:"One Health fait intervenir : écologie + médecine humaine + ?", opts:["Sociologie","Médecine vétérinaire","Biochimie","Génétique"], ans:1 },
+  { q:"Taux de mortalité France 1991 : 524 685 décès / 57 000 000 = ?", opts:["9,2 ‰","5,2 ‰","9,2 %","52 ‰"], ans:0 },
+  { q:"Ébola 2013-2016 : combien de cas et de décès ?", opts:["28 646 cas / 11 310 décès","5 000 cas / 1 000 décès","100 000 cas / 50 000 décès","10 000 cas / 5 000 décès"], ans:0 },
+  { q:"La mortalité infantile concerne les décès d'enfants…", opts:["< 7 jours","< 28 jours","< 1 an","< 5 ans"], ans:2 },
 ];
 
 const MEMORY_PAIRS = [
@@ -1246,6 +1347,14 @@ const MEMORY_PAIRS = [
   { term:"Données expérientielles", def:"Savoir-faire des professionnels de terrain" },
   { term:"Données contextuelles", def:"Littérature grise : qui, quoi, où ?" },
   { term:"Promotion de la santé", def:"Conception positive, facteurs de protection" },
+  { term:"Épidémie", def:"Augmentation soudaine des cas dans une région" },
+  { term:"Endémie", def:"Présence habituelle et stable dans une région" },
+  { term:"Pandémie", def:"Épidémie s'étendant à plusieurs continents" },
+  { term:"Taux d'incidence", def:"Nouveaux cas / population à risque × 1000" },
+  { term:"Taux de prévalence", def:"Tous les cas (anciens+nouveaux) / pop. à risque" },
+  { term:"Létalité", def:"Décès liés à la maladie / nouveaux cas × 100" },
+  { term:"Risque Relatif (RR)", def:"Incidence exposés / Incidence non-exposés" },
+  { term:"Odds Ratio (OR)", def:"(a×d) / (b×c) — études cas-témoins" },
 ];
 
 const SCRAMBLE_WORDS = [
@@ -1259,6 +1368,13 @@ const SCRAMBLE_WORDS = [
   { word:"COCHRANE", hint:"Base de données de revues systématiques en santé" },
   { word:"DEPISTAGE", hint:"Détection précoce : prévention secondaire" },
   { word:"IATROGENE", hint:"Se dit d'un effet indésirable causé par un acte médical" },
+  { word:"ENDEMIE", hint:"Présence habituelle et stable d'une maladie dans une région précise" },
+  { word:"PANDEMIE", hint:"Épidémie s'étendant à plusieurs continents (ex: Covid-19)" },
+  { word:"INCIDENCE", hint:"Taux de NOUVEAUX cas sur une période donnée (pour 1000)" },
+  { word:"PREVALENCE", hint:"Nombre TOTAL de cas présents à un moment donné (pour 1000)" },
+  { word:"LETALITE", hint:"Mesure la virulence : décès / nouveaux cas × 100" },
+  { word:"ZOONOSE", hint:"Maladie transmise de l'animal à l'être humain (ex: Ébola, Rage)" },
+  { word:"COHORTE", hint:"Population suivie dans le temps partageant un événement commun" },
 ];
 
 const ASSOC_ROUNDS = [
@@ -1266,6 +1382,10 @@ const ASSOC_ROUNDS = [
   { pairs:[ {term:"Prévention universelle",def:"Pour l'ensemble de la population"}, {term:"Prévention sélective",def:"Pour un sous-groupe à risque"}, {term:"Prévention ciblée",def:"Pour les personnes à haut risque"}, {term:"Prévention quaternaire",def:"Éviter la surmédicalisation"} ] },
   { pairs:[ {term:"PubMed",def:"Données scientifiques internationales"}, {term:"Oscars/Bib-bop",def:"Données expérientielles France"}, {term:"Santé publique France",def:"Données mixtes nationales"}, {term:"INSERM",def:"Données contextuelles / nationales"} ] },
   { pairs:[ {term:"Inégalités Sociales de Santé",def:"Différences évitables entre groupes sociaux"}, {term:"Facteur de risque",def:"Augmente la probabilité d'une maladie"}, {term:"Indicateur de santé",def:"Permet de définir et suivre un problème de santé"}, {term:"Épidémiologie",def:"Étude de la distribution des maladies en population"} ] },
+  { pairs:[ {term:"Épidémie",def:"Augmentation soudaine de cas dans une région"}, {term:"Endémie",def:"Présence stable et habituelle dans une zone"}, {term:"Pandémie",def:"Extension sur plusieurs continents"}, {term:"Zoonose",def:"Maladie transmissible de l'animal à l'homme"} ] },
+  { pairs:[ {term:"Taux d'incidence",def:"Nouveaux cas / population à risque × 1000"}, {term:"Taux de prévalence",def:"Tous les cas / population à risque × 1000"}, {term:"Létalité",def:"Décès / nouveaux cas de la maladie × 100"}, {term:"Taux de mortalité",def:"Décès / effectif moyen de la population × 1000"} ] },
+  { pairs:[ {term:"Risque Relatif (RR)",def:"Mesure dans les enquêtes exposés/non exposés"}, {term:"Odds Ratio (OR)",def:"Mesure dans les enquêtes cas-témoins"}, {term:"Facteur de risque",def:"Augmente le risque et est MODIFIABLE"}, {term:"Marqueur de risque",def:"Augmente le risque mais NON modifiable"} ] },
+  { pairs:[ {term:"Épidémiologie descriptive",def:"Qui ? Quoi ? Où ? Quand ? (caractériser)"}, {term:"Épidémiologie analytique",def:"Pourquoi ? Recherche des causes et facteurs de risque"}, {term:"Épidémiologie évaluative",def:"Évalue l'impact des programmes de prévention"}, {term:"One Health",def:"Écologie + médecine humaine + médecine vétérinaire"} ] },
 ];
 
 const MYSTERY_QUESTIONS = [
@@ -1281,15 +1401,22 @@ const MYSTERY_QUESTIONS = [
   { def:"Renforcement du pouvoir d'agir des individus et des communautés sur leur propre santé — principe central de la promotion de la santé.", ans:"Empowerment", opts:["Participation communautaire","Empowerment","Autonomie patient","Self-management"], expl:"L'empowerment est l'un des principes clés de la promotion de la santé." },
   { def:"Littérature grise comprenant des informations de type qui, quoi, où, comment, combien — sur le contexte d'une population donnée.", ans:"Données contextuelles", opts:["Données expérientielles","Données scientifiques","Données quantitatives","Données contextuelles"], expl:"Les données contextuelles constituent le 3ème type de savoirs (ARS, ORS, INSEE...)." },
   { def:"Démarche qui consiste à croiser le jugement médical aux travaux de recherche scientifique pour prendre des décisions cliniques éclairées.", ans:"Evidence-Based Medicine", opts:["Health Technology Assessment","Evidence-Based Medicine","Médecine préventive","Pharmacovigilance"], expl:"L'EBM vise à réduire l'écart entre les connaissances scientifiques disponibles et la pratique clinique réelle." },
+  { def:"Nombre de NOUVEAUX cas d'une maladie observés pendant une période donnée rapporté à la population à risque. Exprimé pour 1 000.", ans:"Taux d'incidence", opts:["Taux de prévalence","Taux de morbidité","Taux d'incidence","Taux de mortalité"], expl:"L'incidence mesure les NOUVEAUX cas sur une période. La prévalence inclut tous les cas (anciens + nouveaux) à un instant donné." },
+  { def:"Présence habituelle d'une maladie, en général infectieuse, dans une population déterminée ou une région précise, avec une incidence stable.", ans:"Endémie", opts:["Épidémie","Endémie","Pandémie","Zoonose"], expl:"L'endémie se caractérise par sa STABILITÉ dans une région précise. Elle peut toucher plus de personnes qu'une épidémie ou une pandémie !" },
+  { def:"Rapport de la cote d'exposition chez les malades par la cote d'exposition chez les non-malades. Approximation du RR si la maladie est rare.", ans:"Odds Ratio (OR)", opts:["Risque Relatif (RR)","Odds Ratio (OR)","Risque Attribuable","Risque Absolu"], expl:"L'OR est calculé dans les études CAS-TÉMOINS rétrospectives. Formule : (a×d)/(b×c). C'est une approximation du RR si la maladie est rare." },
+  { def:"Mesure la virulence d'une maladie : risque d'entraîner la mort POUR CETTE MALADIE. Formule : décès liés à la maladie / nouveaux cas × 100.", ans:"Létalité", opts:["Mortalité","Morbidité","Létalité","Prévalence"], expl:"La létalité ≠ mortalité ! Létalité = risque de mourir si on est malade. Mortalité brute = décès rapportés à l'ensemble de la population (‰)." },
+  { def:"Discipline émergente et transversale faisant intervenir écologie, médecine humaine et médecine vétérinaire pour comprendre l'influence des changements environnementaux sur la santé.", ans:"Éco-épidémiologie (One Health)", opts:["Santé environnementale","Éco-épidémiologie (One Health)","Médecine tropicale","Santé planétaire"], expl:"L'approche One Health reconnaît que la santé humaine, animale et environnementale sont intrinsèquement liées. Ex : déforestation → expansion des vecteurs → nouvelles zones d'endémie." },
+  { def:"Population suivie au cours du temps qui partage un événement origine commun (même naissance, même exposition, même zone géographique).", ans:"Cohorte (épidémio)", opts:["Échantillon représentatif","Groupe témoin","Cohorte (épidémio)","Panel d'experts"], expl:"La cohorte est utilisée dans les enquêtes LONGITUDINALES pour calculer l'incidence. Ex : cohorte Framingham (cardiovasculaire, États-Unis)." },
+  { def:"Augmente la probabilité de survenue de la maladie mais aucune action n'est à priori envisageable sur ce facteur lui-même. Ex : l'âge, le sexe.", ans:"Marqueur de risque", opts:["Facteur de risque","Déterminant de santé","Marqueur de risque","Indicateur de santé"], expl:"Le marqueur de risque augmente le risque MAIS est non modifiable (âge, sexe). Le facteur de risque est lui MODIFIABLE (tabac, alcool, sédentarité)." },
 ];
 
 // ═══════════════════════════════════════════════════════════
 //  FLASHCARDS
 // ═══════════════════════════════════════════════════════════
-let fcCards = [...FLASHCARDS], fcIndex = 0, fcKnown = new Set(), fcUnknown = new Set(), fcIsFlipped = false;
+let fcCards = [...FLASHCARDS], fcIndex = 0, fcKnown = new Set(), fcUnknown = new Set(), fcSkipped = new Set(), fcIsFlipped = false;
 
 function themeLabel(t) {
-  const map = { definitions:'Définitions', determinants:'Déterminants', prevention:'Prévention', promotion:'Promotion de la santé', probantes:'Données probantes', politique:'Politique de santé', modeles:'Modèles en santé' };
+  const map = { definitions:'Définitions', determinants:'Déterminants', prevention:'Prévention', promotion:'Promotion de la santé', probantes:'Données probantes', politique:'Politique de santé', modeles:'Modèles en santé', épidémio:'Épidémiologie' };
   return map[t] || t;
 }
 
@@ -1303,49 +1430,86 @@ function renderFlashcard() {
   document.getElementById('fc-prev').disabled = fcIndex === 0;
   document.getElementById('fc-next').disabled = fcIndex === fcCards.length - 1;
   fcIsFlipped = false;
-  document.getElementById('fc-scene').classList.remove('flipped');
+  // Show front, hide back
+  document.querySelector('.fc-front').classList.remove('fc-hidden');
+  document.querySelector('.fc-back').classList.add('fc-hidden');
   document.getElementById('fc-actions').style.display = 'none';
   document.getElementById('fc-meta').textContent = '';
   updateFCProgress();
 }
 
 function flipCard() {
-  fcIsFlipped = !fcIsFlipped;
-  document.getElementById('fc-scene').classList.toggle('flipped', fcIsFlipped);
-  if (fcIsFlipped) document.getElementById('fc-actions').style.display = 'flex';
+  const inner = document.getElementById('fc-card-inner');
+  const front = document.querySelector('.fc-front');
+  const back  = document.querySelector('.fc-back');
+  inner.classList.add('flip-out');
+  setTimeout(() => {
+    fcIsFlipped = !fcIsFlipped;
+    if (fcIsFlipped) { front.classList.add('fc-hidden'); back.classList.remove('fc-hidden'); document.getElementById('fc-actions').style.display = 'flex'; }
+    else             { back.classList.add('fc-hidden');  front.classList.remove('fc-hidden'); document.getElementById('fc-actions').style.display = 'none'; }
+    inner.classList.remove('flip-out');
+    inner.classList.add('flip-in');
+    setTimeout(() => inner.classList.remove('flip-in'), 200);
+  }, 185);
 }
 
-function markCard(known) {
+function markCard(result) {
   const card = fcCards[fcIndex];
-  if (known) { fcKnown.add(card.q); fcUnknown.delete(card.q); addPoints(2); }
-  else { fcUnknown.add(card.q); fcKnown.delete(card.q); }
-  updateUnknownPile(); updateFCProgress();
+  if (result === 'know') {
+    fcKnown.add(card.q); fcUnknown.delete(card.q); fcSkipped.delete(card.q); addPoints(2);
+  } else if (result === 'unknown') {
+    fcUnknown.add(card.q); fcKnown.delete(card.q); fcSkipped.delete(card.q);
+  } else if (result === 'skip') {
+    fcSkipped.add(card.q); fcKnown.delete(card.q); fcUnknown.delete(card.q);
+  }
+  updateUnknownPile(); updateFCProgress(); persistTriage();
   if (fcIndex < fcCards.length - 1) setTimeout(() => { fcIndex++; renderFlashcard(); }, 200);
 }
 
 function fcNav(dir) { fcIndex = Math.max(0, Math.min(fcCards.length-1, fcIndex+dir)); renderFlashcard(); }
 
 function updateFCProgress() {
-  const total = FLASHCARDS.length, reviewed = fcKnown.size + fcUnknown.size, pct = total > 0 ? Math.round(reviewed/total*100) : 0;
-  document.getElementById('fc-progress').style.width = pct+'%';
-  document.getElementById('fc-progress-label').textContent = reviewed + ' / ' + total + ' cartes révisées';
+  const total = FLASHCARDS.filter(c => !fcSkipped.has(c.q)).length;
+  const reviewed = fcKnown.size + fcUnknown.size;
+  const pct = total > 0 ? Math.round(reviewed / total * 100) : 0;
+  document.getElementById('fc-progress').style.width = pct + '%';
+  document.getElementById('fc-progress-label').textContent = reviewed + ' / ' + total + ' cartes révisées (hors ignorées)';
   document.getElementById('fc-total').textContent = fcCards.length;
   document.getElementById('fc-known').textContent = fcKnown.size;
   document.getElementById('fc-unknown').textContent = fcUnknown.size;
+  document.getElementById('fc-skip').textContent = fcSkipped.size;
 }
 
 function updateUnknownPile() {
-  const pile = document.getElementById('unknown-pile'), list = document.getElementById('unknown-list'), btn = document.getElementById('btn-retry-fc');
-  if (fcUnknown.size === 0) { pile.style.display='none'; btn.style.display='none'; return; }
-  pile.style.display='block'; btn.style.display='inline-block';
-  document.getElementById('unknown-count').textContent = fcUnknown.size;
-  list.innerHTML = '';
-  [...fcUnknown].forEach(q => { const li = document.createElement('li'); li.textContent = q; list.appendChild(li); });
+  // Non sues
+  const pile = document.getElementById('unknown-pile');
+  const list = document.getElementById('unknown-list');
+  const btn = document.getElementById('btn-retry-fc');
+  if (fcUnknown.size === 0) { pile.style.display = 'none'; btn.style.display = 'none'; }
+  else {
+    pile.style.display = 'block'; btn.style.display = 'inline-block';
+    document.getElementById('unknown-count').textContent = fcUnknown.size;
+    list.innerHTML = '';
+    [...fcUnknown].forEach(q => { const li = document.createElement('li'); li.textContent = q; list.appendChild(li); });
+  }
+  // Maîtrisées
+  const knownPile = document.getElementById('known-pile');
+  const knownList = document.getElementById('known-list');
+  const btnKnown = document.getElementById('btn-retry-known');
+  if (fcKnown.size === 0) { knownPile.style.display = 'none'; btnKnown.style.display = 'none'; }
+  else {
+    knownPile.style.display = 'block'; btnKnown.style.display = 'inline-block';
+    document.getElementById('known-count').textContent = fcKnown.size;
+    knownList.innerHTML = '';
+    [...fcKnown].forEach(q => { const li = document.createElement('li'); li.textContent = q; list.appendChild(li); });
+  }
 }
 
 function filterFlashcards() {
   const theme = document.getElementById('fc-theme').value;
   fcCards = theme === 'all' ? [...FLASHCARDS] : FLASHCARDS.filter(c => c.theme === theme);
+  // Exclure les ignorées du flow normal
+  fcCards = fcCards.filter(c => !fcSkipped.has(c.q));
   fcIndex = 0; renderFlashcard();
 }
 
@@ -1358,6 +1522,103 @@ function retryUnknown() {
   const unknownCards = FLASHCARDS.filter(c => fcUnknown.has(c.q));
   if (!unknownCards.length) return;
   fcCards = unknownCards; fcIndex = 0; fcUnknown.clear(); updateUnknownPile(); renderFlashcard();
+}
+
+function retryKnown() {
+  const knownCards = FLASHCARDS.filter(c => fcKnown.has(c.q));
+  if (!knownCards.length) return;
+  fcCards = knownCards; fcIndex = 0; fcKnown.clear(); updateUnknownPile(); renderFlashcard();
+}
+
+// ── Persistance localStorage ──────────────────────────────
+const FC_LS_KEY = 'fc_triage_v1';
+
+function persistTriage() {
+  const data = {
+    known:   [...fcKnown],
+    unknown: [...fcUnknown],
+    skipped: [...fcSkipped],
+    savedAt: new Date().toISOString()
+  };
+  try { localStorage.setItem(FC_LS_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function loadTriageFromLS() {
+  try {
+    const raw = localStorage.getItem(FC_LS_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    fcKnown   = new Set(data.known   || []);
+    fcUnknown = new Set(data.unknown || []);
+    fcSkipped = new Set(data.skipped || []);
+    updateUnknownPile(); updateFCProgress();
+    const d = new Date(data.savedAt);
+    showSaveStatus('✅ Triage chargé (sauvegardé le ' + d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}) + ')');
+  } catch(e) {}
+}
+
+function showSaveStatus(msg, duration=4000) {
+  const el = document.getElementById('fc-save-status');
+  if (!el) return;
+  el.textContent = msg;
+  clearTimeout(el._t);
+  if (duration) el._t = setTimeout(() => { el.textContent = ''; }, duration);
+}
+
+// ── Exporter JSON ─────────────────────────────────────────
+function saveTriage() {
+  const data = {
+    version: 1,
+    description: 'Triage flashcards MERM UE 1.2.S2',
+    savedAt: new Date().toISOString(),
+    known:   [...fcKnown],
+    unknown: [...fcUnknown],
+    skipped: [...fcSkipped]
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = 'triage_flashcards_' + dateStr + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  persistTriage();
+  showSaveStatus('✅ Fichier JSON exporté + sauvegardé en local');
+}
+
+// ── Importer JSON ─────────────────────────────────────────
+function loadTriage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.version !== 1) throw new Error('Format inconnu');
+      fcKnown   = new Set(data.known   || []);
+      fcUnknown = new Set(data.unknown || []);
+      fcSkipped = new Set(data.skipped || []);
+      persistTriage();
+      updateUnknownPile(); updateFCProgress();
+      // Recharger le deck en excluant les ignorées
+      filterFlashcards();
+      const d = new Date(data.savedAt);
+      showSaveStatus('✅ Importé (sauvegardé le ' + d.toLocaleDateString('fr-FR') + ')', 6000);
+    } catch(err) {
+      showSaveStatus('❌ Fichier invalide : ' + err.message, 6000);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ── Reset ─────────────────────────────────────────────────
+function resetTriage() {
+  if (!confirm('Effacer tout le triage (maîtrisées, non sues, ignorées) ? Cette action est irréversible.')) return;
+  fcKnown.clear(); fcUnknown.clear(); fcSkipped.clear();
+  try { localStorage.removeItem(FC_LS_KEY); } catch(e) {}
+  filterFlashcards();
+  updateUnknownPile(); updateFCProgress();
+  showSaveStatus('🗑️ Triage réinitialisé', 4000);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2081,7 +2342,8 @@ function devineShowEnd() {
 
 
 window.addEventListener('DOMContentLoaded', () => {
-  renderFlashcard();
+  loadTriageFromLS();   // ← charge le triage depuis localStorage avant le premier rendu
+  filterFlashcards();   // ← exclut d'emblée les ignorées du deck
   buildQCM(QCM_DATA);
   buildVF();
   buildQO();
