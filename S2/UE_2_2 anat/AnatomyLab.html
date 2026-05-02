@@ -261,28 +261,30 @@ function load(){
     console.log('[AnatomyLab] Loaded from localStorage:',S.schemas.length,'schemas');
   }catch(e){S.schemas=[];}
 }
-// Async: try to load schema.json from same folder (works via HTTP, Firefox file://)
+// Try to auto-load schema.json (works on HTTP/HTTPS, blocked on file://)
 function tryAutoLoad(){
   if(!window.fetch)return;
+  const isFileProto=location.protocol==='file:';
+  if(isFileProto){
+    console.log('[AnatomyLab] file:// protocol — auto-fetch disabled (CORS). Use 📂 Importer JSON or push to GitHub Pages.');
+    if(!S.schemas.length)render(); // re-render to show import prompt
+    return;
+  }
   fetch('./schema.json')
     .then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .then(d=>{
       if(!d||!d.schemas)throw new Error('Invalid JSON');
       const imported=d.schemas.map(migrate);
       if(!imported.length)return;
-      // Merge: add schemas not already in localStorage (by title+semester)
       const newOnes=imported.filter(imp=>!S.schemas.some(ex=>ex.title===imp.title&&ex.semester===imp.semester));
-      if(!newOnes.length){
-        console.log('[AnatomyLab] schema.json already loaded');
-        return;
-      }
+      if(!newOnes.length){console.log('[AnatomyLab] schema.json already up to date');return;}
       S.schemas=[...S.schemas,...newOnes];
       save();
       console.log('[AnatomyLab] Auto-loaded schema.json:',newOnes.length,'new schemas');
-      showToast('✅ schema.json chargé automatiquement ('+newOnes.length+' nouveaux schémas)','success');
+      showToast('✅ schema.json chargé ('+newOnes.length+' schémas)','success');
       render();
     })
-    .catch(e=>console.log('[AnatomyLab] schema.json non trouvé ou inaccessible:',e.message));
+    .catch(e=>console.log('[AnatomyLab] schema.json:',e.message));
 }
 
 /* ══ MIGRATION ══ */
@@ -495,7 +497,7 @@ function renderHome(app){
     <div style="margin-bottom:14px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;"><span>Stockage local</span><span style="color:${bc}">${si.pct}%</span></div>
       <div style="height:4px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${si.pct}%;background:${bc};border-radius:3px"></div></div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.6">💡 <b>Workflow</b> : éditez → <b>💾 Sauvegarder JSON</b> (crée <code>anatomylab_sauvegarde.json</code>) → renommez-le <code>schema.json</code> et placez-le dans le même dossier que ce fichier HTML → il se chargera automatiquement au prochain démarrage (via serveur HTTP ou Firefox). Sinon : <b>📂 Importer JSON</b> pour charger manuellement.</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.7">${location.protocol==='file:'?`<span style='color:var(--warn)'>⚠️ <b>Mode local (file://)</b></span> — Chrome bloque le chargement automatique. Utilisez <b>📂 Importer JSON</b> ci-dessus ou glissez votre fichier .json ici. Vos schémas sont mémorisés automatiquement après import.`:`✅ <b>Chargement auto actif</b> — placez <code>schema.json</code> dans le même dossier, il sera chargé automatiquement.`}</div>
     </div>
     <div class="filter-bar">
       <div class="sem-filters">
@@ -504,7 +506,7 @@ function renderHome(app){
       </div>
       <input class="search-input" id="s-inp" placeholder="🔍 Rechercher…" value="${search}">
     </div>
-    ${list.length===0?`<div class="empty-state"><div class="empty-icon">${S.schemas.length===0?'🫁':'🔍'}</div><h3>${S.schemas.length===0?'Aucun schéma — commencez !':'Aucun résultat'}</h3></div>`
+    ${list.length===0?`<div class="empty-state"><div class="empty-icon">${S.schemas.length===0?'🫁':'🔍'}</div><h3>${S.schemas.length===0?'Aucun schéma — commencez !':'Aucun résultat'}</h3>${S.schemas.length===0?`<div style='margin:18px auto;max-width:340px'><button class='btn btn-primary w-full' id='btn-import-big' style='font-size:16px;padding:14px;border-radius:12px;gap:10px'>📂 Importer votre fichier JSON</button><div style='font-size:11px;color:var(--muted);margin-top:10px'>ou glissez-déposez votre <code>.json</code> n'importe où sur cette page</div></div>`:''}</div>`
     :`<div class="schema-grid">${list.map(sc=>`<div class="schema-card"><div class="card-img-area" style="${sc.bgColor&&sc.bgColor!=='transparent'?'background:'+sc.bgColor:''}">
       ${sc.imageData?`<img class="card-img" src="${sc.imageData}" alt="">`:`<div class="card-no-img">🖼️<span>Pas d'image</span></div>`}
       <div class="card-overlay">
@@ -520,6 +522,8 @@ function renderHome(app){
   </div>
 </div>`;
   document.getElementById('btn-new').onclick=()=>{const sc=createSchema();S.editorId=sc.id;S.view='editor';render();};
+  const bigImport=document.getElementById('btn-import-big');
+  if(bigImport)bigImport.onclick=()=>document.getElementById('json-import').click();
   // Drag-drop JSON onto home page
   const homeContent=document.getElementById('home-content');
   if(homeContent){
