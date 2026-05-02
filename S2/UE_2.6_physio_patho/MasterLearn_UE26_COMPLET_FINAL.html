@@ -108,7 +108,7 @@ body {
   align-items: center;
 }
 
-.theme-toggle, .export-btn {
+.theme-toggle, .export-btn, .save-btn, .load-btn {
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text);
@@ -123,6 +123,40 @@ body {
   background: var(--surface2);
   transform: translateY(-2px);
 }
+
+.save-btn { border-color: var(--green); color: var(--green); }
+.save-btn:hover { background: var(--green-bg); transform: translateY(-2px); }
+.load-btn { border-color: var(--blue); color: var(--blue); }
+.load-btn:hover { background: var(--blue-bg); transform: translateY(-2px); }
+
+.save-status {
+  font-size: 0.8rem;
+  color: var(--green);
+  font-weight: 500;
+  min-width: 120px;
+  text-align: center;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--surface);
+  border: 1px solid var(--green);
+  color: var(--text);
+  padding: 14px 22px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.95rem;
+  z-index: 9999;
+  animation: toastIn 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 350px;
+}
+.toast.error { border-color: var(--red); }
+@keyframes toastIn { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
 
 /* ======================== LAYOUT ======================== */
 .container {
@@ -830,6 +864,9 @@ body {
   <div class="logo">🧠 MasterLearn — Appareil Urinaire</div>
   <div class="header-controls">
     <button class="export-btn" onclick="exportFullHTML()">💾 Exporter avec images</button>
+    <button class="save-btn" onclick="saveAllProgress()" title="Sauvegarder la progression">💾 Sauvegarder</button>
+    <button class="load-btn" onclick="loadAllProgress()" title="Charger la progression">📂 Charger</button>
+    <span class="save-status" id="saveStatus"></span>
     <button class="theme-toggle" onclick="toggleTheme()">🌓 Thème</button>
   </div>
 </div>
@@ -894,6 +931,18 @@ body {
         <div class="nav-icon">🏥</div>
         <h3>Fiches Pathologies</h3>
         <p>9 pathologies : signes cliniques, facteurs de risque, examens, produits de contraste et traitements</p>
+      </div>
+
+      <div class="nav-card" onclick="showSection('cours-td1')">
+        <div class="nav-icon">🔬</div>
+        <h3>Cours TD1 — Physiologie</h3>
+        <p>Homéostasie, fonctions rénales, anatomie fine, créatinine, DFG, MRC, dialyse, greffe</p>
+      </div>
+
+      <div class="nav-card" onclick="showSection('cours-td2')">
+        <div class="nav-icon">🧬</div>
+        <h3>Cours TD2 — Pathologie urinaire</h3>
+        <p>Malformations, Bosniak, cancer prostate (PI-RADS), HBP, cancer vessie</p>
       </div>
     </div>
   </div>
@@ -1528,6 +1577,449 @@ body {
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ======================== COURS TD1 COMPLEMENT ======================== -->
+  <div id="cours-td1" class="section">
+    <button class="back-btn" onclick="showSection('home')">← Retour</button>
+
+    <div class="content-box">
+      <h2>🌡️ Homéostasie &amp; Fonctions du Rein — TD1</h2>
+
+      <div class="definition-item">
+        <strong>Homéostasie</strong>
+        <p>Ensemble des processus physiologiques permettant le <strong>maintien constant du milieu intérieur</strong> de l'organisme afin d'en assurer le bon fonctionnement.</p>
+      </div>
+
+      <h3>Les 8 fonctions rénales concourant à l'homéostasie</h3>
+      <div class="definition-item">
+        <strong>1. Production et excrétion d'urine</strong>
+        <p>Fonction principale d'élimination des déchets sous forme liquide.</p>
+      </div>
+      <div class="definition-item">
+        <strong>2. Évacuation des déchets métaboliques</strong>
+        <p>Urée, créatinine, acide urique, bilirubine…</p>
+      </div>
+      <div class="definition-item">
+        <strong>3. Contrôle de l'équilibre eau et électrolytes</strong>
+        <p>Régulation sodium (Na⁺), potassium (K⁺), calcium (Ca²⁺), chlore (Cl⁻)…</p>
+      </div>
+      <div class="definition-item">
+        <strong>4. Maintien du pH sanguin (équilibre acido-basique)</strong>
+        <p>Réabsorption des bicarbonates et excrétion des ions H⁺.</p>
+      </div>
+      <div class="definition-item">
+        <strong>5. Équilibre de la tension artérielle</strong>
+        <p>Via le contrôle du volume sanguin (volémie) et la production de <strong>rénine</strong> (enzyme → système rénine-angiotensine-aldostérone).</p>
+      </div>
+      <div class="definition-item">
+        <strong>6. Production d'érythropoïétine (EPO)</strong>
+        <p>Hormone stimulant l'hématopoïèse → production de globules rouges en cas d'hypoxie.</p>
+      </div>
+      <div class="definition-item">
+        <strong>7. Activation de la vitamine D</strong>
+        <p>Forme active (calcitriol) → absorption du calcium et du phosphore par les intestins, réabsorption du calcium par les reins, minéralisation osseuse.</p>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>🫘 Anatomie Fine du Rein</h2>
+
+      <div class="definition-item">
+        <strong>Forme et dimensions</strong>
+        <p>Forme de <strong>haricot</strong> (et non d'olive ❌). Dimensions : <strong>12 cm de long × 6 cm de large</strong> (et non 3 cm de large ❌).</p>
+      </div>
+      <div class="definition-item">
+        <strong>Capsule rénale</strong>
+        <p>Enveloppe <strong>fibreuse</strong> entourant directement le rein.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Parenchyme rénal</strong>
+        <p>Constitué du <strong>cortex</strong> (contient les glomérules et tubules contournés) et de la <strong>médullaire</strong> (pyramides de Malpighi avec les anses de Henlé et tubes collecteurs). Le <strong>sinus rénal</strong> contient les vaisseaux sanguins et les voies excrétrices.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Loge rénale (et non toge ❌)</strong>
+        <p>Entoure le rein ET la glande surrénale (pôle supérieur). Délimitée par le <strong>fascia rénal</strong> avec ses feuillets :</p>
+        <ul>
+          <li>Feuillet prérénal (antérieur)</li>
+          <li>Feuillet rétrorénal (postérieur)</li>
+          <li>Feuillet intersurrénalorénal (entre rein et surrénale)</li>
+          <li>Capsule adipeuse (entourant le rein)</li>
+          <li>Graisse pararénale (en dehors du fascia)</li>
+          <li>Muscle grand psoas (en arrière)</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Vascularisation — Pédicule rénal</strong>
+        <p>Les reins sont vascularisés par le <strong>pédicule rénal</strong> : artère rénale (née de l'<strong>aorte abdominale</strong>) et veine rénale (rejoint la VCI).</p>
+      </div>
+      <div class="definition-item">
+        <strong>Corpuscule rénal</strong>
+        <p>Autre nom du <strong>glomérule</strong> = corpuscule rénal de Malpighi.</p>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>🔩 Uretères, Vessie — Détails</h2>
+
+      <div class="definition-item">
+        <strong>Uretères</strong>
+        <p>Voies excrétrices <strong>extrarénales</strong>, trajet du <strong>bassinet vers la vessie</strong> (et non l'inverse ❌). Longueur : <strong>≥ 25 cm</strong> (et non 15 cm ❌). Transport par péristaltisme.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Vessie — Forme et capacité</strong>
+        <p>Organe musculo-membraneux. Forme <strong>pyriforme</strong> (en poire — et non noisiforme ❌).<br>
+        Capacité physiologique : <strong>150 ml</strong> → 1er besoin d'uriner / <strong>300 ml</strong> → besoin normal.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Les 3 orifices de la loge fibreuse vésicale</strong>
+        <ul>
+          <li><strong>1 orifice urétral</strong> : antérieur et médian, au col de la vessie, entouré du sphincter interne</li>
+          <li><strong>2 orifices urétéraux</strong> : latéraux, en forme de fentes, à 25 mm l'un de l'autre et 30 mm de l'orifice urétral</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Les 3 tuniques de la paroi vésicale</strong>
+        <ul>
+          <li><strong>A. La séreuse</strong> (couche externe)</li>
+          <li><strong>B. La musculeuse (détrusor)</strong> : 3 couches de muscles lisses</li>
+          <li><strong>C. La muqueuse (urothélium)</strong> : rouge, lisse et unie</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>🧪 Créatinine, DFG et Fonction Rénale</h2>
+
+      <div class="definition-item">
+        <strong>Créatinine</strong>
+        <p>Déchet chimique issu du <strong>métabolisme musculaire</strong> — dégradation de la créatine (production d'énergie). Filtrée en continu par les reins. Sa mesure évalue la fonction rénale.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Taux normaux de créatininémie</strong>
+        <ul>
+          <li>Homme : 7–13 mg/L (65–120 µmol/L)</li>
+          <li>Femme : 6–11 mg/L (50–100 µmol/L)</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Clairance de la créatinine</strong>
+        <p>Test mesurant le bon fonctionnement rénal = rapport entre la vitesse d'élimination urinaire de la créatinine et sa concentration sanguine. Détermine le <strong>Débit de Filtration Glomérulaire (DFG)</strong>. S'effectue à partir d'un prélèvement sanguin <strong>ET</strong> urinaire.</p>
+      </div>
+      <div class="definition-item">
+        <strong>TFG / DFG — Taux/Débit de Filtration Glomérulaire</strong>
+        <p>Volume de filtrat formé par les 2 reins chaque minute. Valeur normale : <strong>125 ml/min</strong>.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Formules de calcul du DFG</strong>
+        <ul>
+          <li><strong>Cockcroft &amp; Gault</strong></li>
+          <li><strong>MDRD</strong> (Modification of Diet in Renal Disease)</li>
+        </ul>
+        <p>Paramètres nécessaires : poids, taille, créatinine, sexe, couleur de peau.</p>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>🏥 Maladie Rénale Chronique (MRC) / Insuffisance Rénale Chronique</h2>
+
+      <div class="definition-item">
+        <strong>Définition</strong>
+        <p>Diminution <strong>progressive et irréversible</strong> des fonctions excrétrices et endocriniennes du rein, liée à la destruction de néphrons. Définie par une atteinte rénale persistant <strong>&gt; 3 mois</strong>.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Principal facteur de risque</strong>
+        <p><strong>Diabète</strong> (puis HTA, obésité, maladies cardiovasculaires)</p>
+      </div>
+      <div class="definition-item">
+        <strong>Examen de référence</strong>
+        <p>Débit de Filtration Glomérulaire estimé (DFGe)</p>
+      </div>
+
+      <h3>Stades MRC selon DFG</h3>
+      <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+        <thead>
+          <tr style="background:var(--accent-glow); border-bottom:2px solid var(--accent);">
+            <th style="padding:10px; text-align:left;">Stade</th>
+            <th style="padding:10px;">DFG (ml/min)</th>
+            <th style="padding:10px; text-align:left;">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">1</td><td style="padding:10px; text-align:center;">&gt; 90</td><td style="padding:10px;">Normal ou ↑</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">2</td><td style="padding:10px; text-align:center;">60–89</td><td style="padding:10px;">Légèrement diminué</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">3</td><td style="padding:10px; text-align:center;">30–59</td><td style="padding:10px;">Modérément diminué</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;">4</td><td style="padding:10px; text-align:center;">15–29</td><td style="padding:10px;">Sévèrement diminué</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:10px;"><strong>5</strong></td><td style="padding:10px; text-align:center;"><strong>&lt; 15</strong></td><td style="padding:10px;"><strong>Insuffisance terminale</strong></td></tr>
+        </tbody>
+      </table>
+
+      <h3>Signes cliniques MRC avancée</h3>
+      <ul>
+        <li>Œdèmes (rétention hydrosodée)</li>
+        <li>HTA</li>
+        <li>Anémie (↓ EPO)</li>
+        <li>Hyperkaliémie (complication fréquente)</li>
+        <li>Acidose métabolique</li>
+      </ul>
+
+      <h3>Régime alimentaire adapté</h3>
+      <ul>
+        <li><strong>Restriction en sel</strong></li>
+        <li>Restriction en protéines (et non augmentation ❌)</li>
+        <li>Restriction en potassium (hypokaliémique ❌ = faux)</li>
+      </ul>
+    </div>
+
+    <div class="content-box">
+      <h2>💉 Traitements de Suppléance Rénale</h2>
+
+      <div class="definition-item">
+        <strong>Hémodialyse</strong>
+        <p>Filtration du sang à travers une <strong>membrane artificielle</strong> (dialyseur). Séances de <strong>3 à 4 heures</strong>, 3×/semaine. Abord vasculaire permanent : <strong>fistule artério-veineuse (FAV)</strong> (et non sonde urinaire ❌ ni chambre implantable ❌).</p>
+      </div>
+      <div class="definition-item">
+        <strong>Dialyse Péritonéale (DP)</strong>
+        <p>Utilise le <strong>péritoine du patient</strong> comme membrane d'échange. Avantage : <strong>plus grande autonomie</strong> du patient.</p>
+        <ul>
+          <li><strong>DPCA</strong> (Dialyse Péritonéale Continue Ambulatoire) : échanges <strong>manuels plusieurs fois par jour</strong></li>
+          <li><strong>DPA</strong> : technique nocturne automatisée</li>
+        </ul>
+        <p>Complication spécifique majeure : <strong>péritonite</strong></p>
+      </div>
+      <div class="definition-item">
+        <strong>Transplantation Rénale (Greffe)</strong>
+        <p>Indiquée en MRC stade terminal. Greffon implanté en <strong>fosse iliaque</strong> (et non à la place du rein natif ❌). Donneur vivant compatible OU décédé.</p>
+        <ul>
+          <li>Traitement indispensable après greffe : <strong>immunosuppresseurs au long cours</strong></li>
+          <li>Risque précoce majeur : <strong>rejet du greffon</strong></li>
+          <li>Complication du traitement IS : <strong>augmentation du risque infectieux</strong></li>
+          <li>Suivi : dosage créatinine + taux IS + consultations spécialisées (<strong>Toutes les réponses</strong>)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== COURS TD2 COMPLEMENT ======================== -->
+  <div id="cours-td2" class="section">
+    <button class="back-btn" onclick="showSection('home')">← Retour</button>
+
+    <div class="content-box">
+      <h2>🧬 Malformations et Lésions Rénales — TD2</h2>
+
+      <h3>Malformations Rénales Congénitales</h3>
+      <div class="definition-item">
+        <strong>Types de malformations</strong>
+        <ul>
+          <li><strong>Agénésie</strong> : absence totale de développement d'un ou des deux reins</li>
+          <li><strong>Bifidité / Duplication</strong> : duplication du bassinet et/ou de l'uretère</li>
+          <li><strong>Malrotation</strong> : orientation anormale du hile rénal</li>
+          <li><strong>Fusion (rein en fer à cheval)</strong> : les deux reins sont fusionnés par leur pôle inférieur</li>
+          <li><strong>Ectopique (rein pelvien)</strong> : rein non descendu en position lombaire</li>
+          <li><strong>Rein dromadaire</strong> : bosse sur le bord externe du rein gauche (variante normale)</li>
+          <li><strong>Lobulations fœtales</strong> : persistance des lobes fœtaux</li>
+        </ul>
+      </div>
+
+      <h3>Lésions Rénales</h3>
+      <div class="definition-item">
+        <strong>Lésions kystiques (liquidiennes)</strong>
+        <p>Contenu liquidien (anéchogène, paroi fine et régulière, forme arrondie, renforcement échogénique postérieur). Incluent les kystes simples et la polykystose.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Lésions solides</strong>
+        <ul>
+          <li>Masse <strong>non encapsulée</strong> (carcinome à cellules rénales)</li>
+          <li>Masse <strong>encapsulée</strong> (oncocytome, angiomyolipome)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>📸 Imagerie des Lésions Rénales</h2>
+
+      <div class="definition-item">
+        <strong>Échographie</strong>
+        <p>1ʳᵉ intention. Distingue lésions <strong>kystiques</strong> (anéchogène, paroi fine, renforcement postérieur = critères de bénignité) des lésions <strong>solides tissulaires</strong>. <br>
+        ⚠ Tout kyste ne répondant pas à tous les critères de bénignité → complément par <strong>scanner</strong>.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Scanner multi-phases (référence tumeurs parenchymateuses)</strong>
+        <ul>
+          <li><strong>Sans injection</strong> : densité spontanée (kyste simple : 0–20 UH, pas de rehaussement)</li>
+          <li><strong>Temps cortico-médullaire</strong> : rehaussement tumoral précoce</li>
+          <li><strong>Temps néphréphrogénique</strong></li>
+          <li><strong>Temps tardif</strong> : évaluation voies excrétrices</li>
+        </ul>
+        <p>Évalue : stade local, atteinte ganglionnaire, thrombus veineux (V. rénale / VCI), métastases (foie, poumon, cerveau, os). <br>
+        <strong>Uroscanner</strong> = référence pour les tumeurs de la voie excrétrice supérieure (TVES).</p>
+      </div>
+      <div class="definition-item">
+        <strong>IRM</strong>
+        <p>Séquences T1 et T2 sans injection, puis avec <strong>gadolinium IV</strong> en bolus (20–30 s, 60 s, &gt; 3 min).</p>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>📊 Classification de Bosniak (Kystes Rénaux)</h2>
+      <p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px;">Classification tomodensitométrique évaluant le risque de malignité d'un kyste rénal.</p>
+
+      <table style="width:100%; border-collapse:collapse; margin:16px 0;">
+        <thead>
+          <tr style="background:var(--accent-glow); border-bottom:2px solid var(--accent);">
+            <th style="padding:10px; text-align:left;">Stade</th>
+            <th style="padding:10px; text-align:left;">Description</th>
+            <th style="padding:10px; text-align:left;">Conduite</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;"><strong>I</strong></td>
+            <td style="padding:10px;">Kyste simple bénin (eau pure, paroi fine, pas de cloison ni calcification)</td>
+            <td style="padding:10px; color:var(--green);">🟢 STOP — bénin</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;"><strong>II</strong></td>
+            <td style="padding:10px;">Kyste remanié probablement bénin (cloisons fines, calcifications fines)</td>
+            <td style="padding:10px; color:var(--green);">🟢 STOP — probablement bénin</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;"><strong>IIF</strong></td>
+            <td style="padding:10px;">À surveiller (cloisons multiples fines, calcifications nodulaires, densité &gt; 20 UH)</td>
+            <td style="padding:10px; color:var(--orange);">🟡 IRM + surveillance</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;"><strong>III</strong></td>
+            <td style="padding:10px;">Suspect (paroi épaissie, cloisons épaisses, rehaussement)</td>
+            <td style="padding:10px; color:var(--red);">🔴 CHIRURGIE</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;"><strong>IV</strong></td>
+            <td style="padding:10px;">Malin (composante solide rehaussée, paroi irrégulière)</td>
+            <td style="padding:10px; color:var(--red);">🔴 CHIRURGIE</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="color:var(--text2); font-size:0.9rem;">Éléments pris en compte : homogénéité, cloisons, épaisseur et rehaussement de paroi, calcifications.</p>
+    </div>
+
+    <div class="content-box">
+      <h2>🔬 Cancer de la Prostate</h2>
+
+      <div class="definition-item">
+        <strong>Épidémiologie</strong>
+        <p><strong>2ᵉ</strong> cause de cancer chez l'homme dans les pays industrialisés (et non 1ʳᵉ ❌).</p>
+      </div>
+      <div class="definition-item">
+        <strong>Facteurs de risque</strong>
+        <ul>
+          <li>Âge &gt; 50 ans</li>
+          <li>Hérédité familiale</li>
+          <li>Origines ethniques afro-américano-antillaises</li>
+          <li>Facteurs géographiques</li>
+          <li>Infections/inflammations chroniques, exposition au cadmium</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Diagnostic précoce : 3 éléments</strong>
+        <ul>
+          <li><strong>Toucher rectal (TR)</strong></li>
+          <li><strong>Dosage PSA</strong> (antigène spécifique de la prostate)</li>
+          <li><strong>Biopsies prostatiques</strong> (sous échographie endorectale)</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Score de Gleason</strong>
+        <p>Score histopronostique (2 à 10). Valeurs élevées = tumeur plus agressive, pronostic moins bon. <em>Ne pas confondre avec "Gleabon" ❌</em></p>
+      </div>
+      <div class="definition-item">
+        <strong>Examen de référence en imagerie</strong>
+        <p><strong>IRM prostatique</strong> — permet aussi de guider et repérer les cibles à biopsier.</p>
+      </div>
+      <div class="definition-item">
+        <strong>Score PI-RADS</strong>
+        <p>Prostate Imaging Reporting and Data System — échelle à 5 points évaluant la probabilité de cancer significatif :</p>
+        <ul>
+          <li>PI-RADS 1–2 : très faible probabilité</li>
+          <li>PI-RADS 3 : intermédiaire</li>
+          <li>PI-RADS 4–5 : haute à très haute probabilité</li>
+        </ul>
+        <p>3 séquences IRM obligatoires : <strong>diffusion / morphologique T2 / perfusion</strong></p>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>🔵 Hyperplasie Bénigne de la Prostate (HBP)</h2>
+
+      <div class="definition-item">
+        <strong>Définition</strong>
+        <p>Hypertrophie bénigne développée avec le temps au dépend de la zone entourant l'urètre. Touche principalement les hommes de &gt; 50 ans, fréquence croissante avec l'âge. Gêne à l'évacuation de l'urine. Entraîne une <strong>hypertrophie du détrusor</strong> (et non hypotrophie ❌).</p>
+      </div>
+      <div class="definition-item">
+        <strong>Signes cliniques</strong>
+        <ul>
+          <li>Jet faible, retard au démarrage</li>
+          <li>Sensation de vidange incomplète</li>
+          <li><strong>Pollakiurie</strong> nocturne (nycturie) — et non polyurie ❌</li>
+          <li>Dysurie</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Examens diagnostiques</strong>
+        <ul>
+          <li><strong>Score IPSS</strong> (International Prostate Symptom Score) — 8 questions auto-évaluées</li>
+          <li><strong>Toucher rectal (TR)</strong> : prostate augmentée, lisse, homogène, régulière</li>
+          <li><strong>Débitmétrie urinaire</strong> + bilan urodynamique</li>
+          <li><strong>Échographie vésico-prostatique sus-pubienne</strong> : volume prostatique, résidu post-mictionnel</li>
+          <li>Biologie : PSA, créatinine</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Complications possibles</strong>
+        <ul>
+          <li>Hématurie macroscopique</li>
+          <li>Rétention vésicale aiguë</li>
+          <li>Rétention vésicale chronique + calculs vésicaux</li>
+          <li>Dilatation du haut appareil urinaire → insuffisance rénale obstructive</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="content-box">
+      <h2>🎗️ Cancer de la Vessie</h2>
+
+      <div class="definition-item">
+        <strong>Facteurs de risque principaux</strong>
+        <ul>
+          <li><strong>Tabac</strong> (+++)</li>
+          <li><strong>Amines aromatiques</strong> (exposition professionnelle : chimie, caoutchouc)</li>
+          <li>(Alcool et hérédité : rôle moins établi)</li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Signe clinique le plus fréquent</strong>
+        <p><strong>Hématurie</strong> (indolore, macroscopique, totale) — signe d'alarme majeur</p>
+      </div>
+      <div class="definition-item">
+        <strong>Examen de référence</strong>
+        <p><strong>Cystoscopie</strong> (fibroscopie vésicale) avec biopsies — visualisation directe de la tumeur</p>
+      </div>
+      <div class="definition-item">
+        <strong>Type histologique le plus fréquent</strong>
+        <p><strong>Carcinome urothélial</strong> (= carcinome transitionnel) — 90 % des cas</p>
+      </div>
+      <div class="definition-item">
+        <strong>Voies de dissémination</strong>
+        <ul>
+          <li>Voie <strong>sanguine</strong></li>
+          <li>Voie <strong>lymphatique</strong></li>
+        </ul>
+      </div>
+      <div class="definition-item">
+        <strong>Lésions secondaires les plus fréquentes</strong>
+        <p>Foie, poumon, os</p>
+      </div>
     </div>
   </div>
 
@@ -2214,7 +2706,28 @@ const flashcardsDatabase = [
   {id: 31, front: "Produit de contraste pour le TOGD (transit baryté) ?", back: "Sulfate de baryum : Micropaque® suspension 100g/100mL ou poudre 336,2g\n⚠ CI si perforation suspectée → utiliser Gastrografine® (iodé hydrosoluble)", tags: ["radiologie", "produit contraste", "baryum", "TOGD"], mastered: false},
   {id: 32, front: "Symptômes typiques du RGO ?", back: "Pyrosis (brûlures rétrosternales ascendantes)\n+ Régurgitations acides\nAggravés en position allongée et postprandial", tags: ["digestif", "RGO", "clinique"], mastered: false},
   {id: 33, front: "Cause principale du RGO ?", back: "Incompétence/hypotonie du Sphincter Inférieur de l'Œsophage (SIO = cardia)\nSouvent associée à une hernie hiatale par glissement", tags: ["digestif", "RGO", "physiopath"], mastered: false},
-  {id: 34, front: "Examen gold standard pour confirmer un RGO ?", back: "pH-métrie œsophagienne des 24h\n(quantifie les épisodes de reflux acide)\n+ Manométrie haute résolution si bilan chirurgical", tags: ["digestif", "RGO", "examens", "pH-métrie"], mastered: false}
+  {id: 34, front: "Examen gold standard pour confirmer un RGO ?", back: "pH-métrie œsophagienne des 24h\n(quantifie les épisodes de reflux acide)\n+ Manométrie haute résolution si bilan chirurgical", tags: ["digestif", "RGO", "examens", "pH-métrie"], mastered: false},
+  {id: 35, front: "Définissez l'homéostasie", back: "Ensemble des processus physiologiques maintenant le MILIEU INTÉRIEUR constant\npour assurer le bon fonctionnement de l'organisme", tags: ["urinaire", "physiologie", "homéostasie"], mastered: false},
+  {id: 36, front: "Forme et dimensions d'un rein chez l'adulte ?", back: "Forme de HARICOT (non d'olive ❌)\n12 cm de long × 6 cm de large (non 3 cm ❌)", tags: ["urinaire", "anatomie", "rein"], mastered: false},
+  {id: 37, front: "Autre nom du glomérule ?", back: "CORPUSCULE RÉNAL (corpuscule de Malpighi)", tags: ["urinaire", "anatomie", "néphron"], mastered: false},
+  {id: 38, front: "Longueur des uretères ?", back: "≥ 25 cm (non 15 cm ❌)\nTrajet : bassinet → vessie (non l'inverse ❌)", tags: ["urinaire", "anatomie", "uretère"], mastered: false},
+  {id: 39, front: "Capacité vésicale : 1er besoin et besoin normal ?", back: "1er besoin : 150 ml\nBesoin normal : 300 ml\nForme : PYRIFORME (poire, non noisiforme ❌)", tags: ["urinaire", "vessie", "anatomie"], mastered: false},
+  {id: 40, front: "Citez les 3 tuniques de la paroi vésicale", back: "A. Séreuse\nB. Musculeuse = DÉTRUSOR (3 couches lisses)\nC. Muqueuse = UROTHÉLIUM (rouge, lisse, unie)", tags: ["urinaire", "vessie", "histologie"], mastered: false},
+  {id: 41, front: "Taux normaux de créatinine sanguine (H / F) ?", back: "Homme : 7–13 mg/L (65–120 µmol/L)\nFemme : 6–11 mg/L (50–100 µmol/L)", tags: ["urinaire", "biologie", "créatinine"], mastered: false},
+  {id: 42, front: "DFG normal et formules de calcul ?", back: "DFG normal : 125 ml/min\nFormules : Cockcroft & Gault / MDRD\nParamètres : poids, taille, créatinine, sexe, couleur de peau", tags: ["urinaire", "DFG", "biologie"], mastered: false},
+  {id: 43, front: "MRC : définition et critère temporel ?", back: "Diminution progressive et IRRÉVERSIBLE des fonctions rénales\nDéfinie par atteinte rénale persistant > 3 MOIS", tags: ["urinaire", "MRC", "pathologie"], mastered: false},
+  {id: 44, front: "MRC stade 5 : DFG et traitement ?", back: "DFG < 15 ml/min → Insuffisance terminale\nTraitements : Hémodialyse / Dialyse péritonéale / Transplantation rénale", tags: ["urinaire", "MRC", "dialyse"], mastered: false},
+  {id: 45, front: "Abord vasculaire permanent en hémodialyse ?", back: "FISTULE ARTÉRIO-VEINEUSE (FAV)\nSéances : 3-4h × 3/semaine", tags: ["urinaire", "hémodialyse", "MRC"], mastered: false},
+  {id: 46, front: "Différence hémodialyse vs dialyse péritonéale ?", back: "Hémodialyse : membrane artificielle, en centre, FAV\nDP : péritoine du patient, plus autonome\nDPCA : échanges manuels plusieurs fois/j\nComplication spécifique DP : PÉRITONITE", tags: ["urinaire", "dialyse", "MRC"], mastered: false},
+  {id: 47, front: "Où est implanté le greffon rénal ?", back: "En FOSSE ILIAQUE (et non à la place du rein natif ❌)\nTraitement post-greffe : immunosuppresseurs au long cours\nRisque précoce : REJET du greffon", tags: ["urinaire", "greffe", "transplantation"], mastered: false},
+  {id: 48, front: "Citez les malformations rénales congénitales", back: "Agénésie (absence développement)\nBifidité/Duplication\nMalrotation\nFusion = rein en FER À CHEVAL\nEctopique = rein pelvien\nRein dromadaire", tags: ["urinaire", "malformation", "anatomie"], mastered: false},
+  {id: 49, front: "Classification de Bosniak : stades et conduite ?", back: "I/II : STOP (bénin)\nIIF : IRM + surveillance\nIII/IV : CHIRURGIE (suspect/malin)\n→ Basée sur scanner : cloisons, paroi, calcifications, rehaussement", tags: ["urinaire", "Bosniak", "kyste", "imagerie"], mastered: false},
+  {id: 50, front: "3 éléments du diagnostic précoce du cancer de la prostate ?", back: "1. Toucher rectal (TR)\n2. Dosage PSA\n3. Biopsies prostatiques (sous écho endorectale)", tags: ["urinaire", "cancer prostate", "diagnostic"], mastered: false},
+  {id: 51, front: "Score PI-RADS — définition et séquences IRM ?", back: "Prostate Imaging Reporting and Data System\nÉchelle 1-5 : probabilité de cancer significatif\n1-2 = très faible / 4-5 = très haute\n3 séquences : DIFFUSION / T2 / PERFUSION", tags: ["urinaire", "IRM", "PI-RADS", "prostate"], mastered: false},
+  {id: 52, front: "HBP : signes cliniques et complication grave ?", back: "Signes : jet faible, retard démarrage, pollakiurie nocturne, dysurie\nComplication grave : rétention urinaire aiguë\n→ Insuffisance rénale obstructive possible", tags: ["urinaire", "HBP", "prostate"], mastered: false},
+  {id: 53, front: "Cancer de la vessie : FdR, signe, examen, histologie ?", back: "FdR : TABAC + amines aromatiques\nSigne : HÉMATURIE (indolore, macroscopique)\nExamen référence : CYSTOSCOPIE avec biopsies\nHistologie : carcinome UROTHÉLIAL (90%)", tags: ["urinaire", "cancer vessie", "imagerie"], mastered: false},
+  {id: 54, front: "Signe clinique recherché dans la colique néphrétique aux examens biol. ?", back: "HÉMATURIE MICROSCOPIQUE (dans 95% des cas)", tags: ["urinaire", "colique néphrétique", "biologie"], mastered: false},
+  {id: 55, front: "Type de calcul rénal le plus fréquent et sa densité scanner ?", back: "OXALATE DE CALCIUM (75% des cas)\nAspect scanner : radio-opaque, irrégulier, spiculé, densité ~690 UH", tags: ["urinaire", "lithiase", "scanner"], mastered: false}
 ];
 
 let flashcardsState = {
@@ -2229,6 +2742,13 @@ const partielQuestions = [
   {id: 'p2', section: 'Appareil Digestif', question: "Citez les 4 fonctions du foie :", type: 'open', answer: "", correction: "1. Métabolisme\n2. Sécrétion bile\n3. Détoxification\n4. Stockage", points: 1, tags: ["digestif", "foie"]},
   {id: 'p3', section: 'Appareil Urinaire', question: "Citez l'unité fonctionnelle du rein et ses composants :", type: 'open', answer: "", correction: "Le NÉPHRON :\n- Capsule Bowman\n- Glomérule\n- Tubule proximal\n- Anse Henlé\n- Tubule distal\n- Tube collecteur", points: 2, tags: ["urinaire", "anatomie"]},
   {id: 'p4', section: 'Appareil Urinaire', question: "Citez les 3 grandes fonctions du rein :", type: 'open', answer: "", correction: "1. Excrétion déchets\n2. Régulation hydroélectrolytique\n3. Régulation acido-basique", points: 1.5, tags: ["urinaire", "physiologie"]}
+,
+  {id: 'p5', section: 'Appareil Urinaire — TD1', question: "Définissez le terme homéostasie et citez 4 fonctions rénales concourant à son maintien.", type: 'open', answer: "", correction: "Homéostasie : maintien constant du milieu intérieur.\nFonctions rénales : \n1. Production/excrétion d'urine\n2. Évacuation des déchets (urée, créatinine)\n3. Contrôle eau et électrolytes\n4. Maintien pH sanguin\n5. Régulation TA (rénine, volémie)\n6. Production EPO (hématopoïèse)\n7. Activation vitamine D", points: 3, tags: ["urinaire", "homéostasie", "fonctions"]},
+  {id: 'p6', section: 'Appareil Urinaire — TD1', question: "Définissez la créatinine et citez les taux normaux pour l'homme et la femme.", type: 'open', answer: "", correction: "Créatinine : déchet du métabolisme musculaire (dégradation de la créatine). Filtrée en continu par les reins.\nHomme : 7-13 mg/L (65-120 µmol/L)\nFemme : 6-11 mg/L (50-100 µmol/L)", points: 2, tags: ["urinaire", "créatinine", "biologie"]},
+  {id: 'p7', section: 'Appareil Urinaire — TD1', question: "Citez les 3 tuniques de la paroi vésicale et décrivez brièvement chacune.", type: 'open', answer: "", correction: "A. Séreuse (couche externe)\nB. Musculeuse (détrusor) : 3 couches de muscles lisses\nC. Muqueuse (urothélium) : rouge, lisse et unie", points: 1.5, tags: ["urinaire", "vessie", "anatomie"]},
+  {id: 'p8', section: 'Appareil Urinaire — TD2', question: "Une femme de 35 ans présente depuis 3 jours des brûlures mictionnelles et une pollakiurie, sans fièvre ni douleur lombaire.\n1) Quelle est votre hypothèse diagnostique ?\n2) Quels examens complémentaires réalisez-vous ?\n3) Des examens d'imagerie sont-ils indiqués ?", type: 'open', answer: "", correction: "1) Cystite aiguë (infection urinaire basse)\n2) Bandelette urinaire (BU) + ECBU\n3) Pas d'examen d'imagerie indiqué en urgence pour cystite simple", points: 3, tags: ["urinaire", "cystite", "cas clinique"]},
+  {id: 'p9', section: 'Appareil Urinaire — TD2', question: "La même patiente revient 3 jours après avec fièvre, frissons et douleur lombaire gauche.\n1) Nouvelle hypothèse diagnostique ?\n2) Quel examen d'imagerie demandez-vous ?\n3) Décrivez l'aspect attendu en imagerie.", type: 'open', answer: "", correction: "1) Pyélonéphrite aiguë\n2) Scanner abdomino-pelvien avec injection PCI (protocole sans, artériel et portal)\n3) Au temps précoce : lésions hypodenses / Au temps tardif : lésions hyperdenses. Atteinte uni ou bilatérale, segmentaire, multifocale ou diffuse.", points: 3, tags: ["urinaire", "pyélonéphrite", "cas clinique", "scanner"]},
+  {id: 'p10', section: 'Appareil Urinaire — TD2', question: "Mr X, douleur lombaire droite irradiante avec nausées, sportif transpirant beaucoup.\n1) Hypothèse clinique et définition ?\n2) Signe clinique biologiquement recherché ?\n3) Examens d'imagerie et résultat attendu ? (type de calcul le plus fréquent + densité)", type: 'open', answer: "", correction: "1) Colique néphrétique droite : douleur aiguë lombo-abdominale liée à un obstacle augmentant la pression dans les voies urinaires.\n2) Hématurie microscopique (95% des cas)\n3) ASP + écho rénale / Scanner abdominopelvien sans injection low dose. Calcul le plus fréquent : oxalate de calcium (75%). Densité : ~690 UH, radio-opaque, irrégulier, spiculé.\nDiagnostics différentiels : infarctus rénal, sigmoïdite, fissuration aorte, appendicite, torsion testiculaire.", points: 4, tags: ["urinaire", "colique néphrétique", "cas clinique", "lithiase"]}
 ];
 
 let qcmData = {
@@ -2459,6 +2979,146 @@ let qcmData = {
       ],
       correct: [1],
       multipleChoice: false
+    },
+    {
+      id: 21,
+      question: "La maladie rénale chronique (MRC) est définie par :",
+      options: ["Une insuffisance rénale aiguë de plus de 48h", "Une atteinte rénale persistante > 3 mois", "Une élévation isolée de la créatinine", "Une infection urinaire récidivante"],
+      correct: [1],
+      multipleChoice: false
+    },
+    {
+      id: 22,
+      question: "Le principal facteur de risque de MRC est :",
+      options: ["L'anémie", "La potomanie", "L'urémie", "Le diabète"],
+      correct: [3],
+      multipleChoice: false
+    },
+    {
+      id: 23,
+      question: "Une MRC est classée stade 5 lorsque le DFG est :",
+      options: ["> 90 ml/min", "60-89 ml/min", "30-59 ml/min", "< 15 ml/min"],
+      correct: [3],
+      multipleChoice: false
+    },
+    {
+      id: 24,
+      question: "L'hémodialyse repose sur :",
+      options: ["Une filtration du sang à travers une membrane artificielle", "Une injection de médicaments dans le péritoine", "Une stimulation électrique rénale", "Une transfusion sanguine"],
+      correct: [0],
+      multipleChoice: false
+    },
+    {
+      id: 25,
+      question: "Le principal abord vasculaire permanent en hémodialyse est :",
+      options: ["Une sonde urinaire", "Un cathéter périphérique court", "Une fistule artério-veineuse", "Une chambre implantable"],
+      correct: [2],
+      multipleChoice: false
+    },
+    {
+      id: 26,
+      question: "La durée habituelle d'une séance d'hémodialyse est :",
+      options: ["30 minutes", "1 heure", "3 à 4 heures", "8 heures"],
+      correct: [2],
+      multipleChoice: false
+    },
+    {
+      id: 27,
+      question: "La dialyse péritonéale utilise comme membrane d'échange :",
+      options: ["Une membrane externe artificielle", "Le péritoine du patient", "Le foie", "La rate"],
+      correct: [1],
+      multipleChoice: false
+    },
+    {
+      id: 28,
+      question: "La DPCA (Dialyse Péritonéale Continue Ambulatoire) se caractérise par :",
+      options: ["Des séances uniquement en centre hospitalier", "Une technique nocturne automatisée", "Une circulation extracorporelle", "Des échanges manuels réalisés plusieurs fois par jour"],
+      correct: [3],
+      multipleChoice: false
+    },
+    {
+      id: 29,
+      question: "La complication majeure spécifique à la dialyse péritonéale est :",
+      options: ["La thrombose veineuse profonde", "L'endocardite", "La péritonite", "L'AVC"],
+      correct: [2],
+      multipleChoice: false
+    },
+    {
+      id: 30,
+      question: "Après une greffe rénale, le traitement indispensable est :",
+      options: ["Antibiothérapie à vie", "Anticoagulation systémique", "Immunosuppresseurs au long cours", "Diurétiques à forte dose"],
+      correct: [2],
+      multipleChoice: false
+    },
+    {
+      id: 31,
+      question: "Le greffon rénal est le plus souvent implanté :",
+      options: ["En position lombaire à la place du rein natif", "En fosse iliaque", "Dans la cavité thoracique", "En position abdominale haute"],
+      correct: [1],
+      multipleChoice: false
+    },
+    {
+      id: 32,
+      question: "La classification de Bosniak IIF d'un kyste rénal implique :",
+      options: ["Aucun suivi nécessaire", "Surveillance par IRM", "Chirurgie immédiate", "Biopsie systématique"],
+      correct: [1],
+      multipleChoice: false
+    },
+    {
+      id: 33,
+      question: "L'examen de référence pour le cancer de la prostate est :",
+      options: ["L'échographie endorectale", "Le scanner abdomino-pelvien", "L'IRM prostatique", "La scintigraphie osseuse"],
+      correct: [2],
+      multipleChoice: false
+    },
+    {
+      id: 34,
+      question: "Le score PI-RADS évalue :",
+      options: ["Le degré de malignité après biopsie", "La probabilité de cancer prostatique significatif à l'IRM", "Le stade d'une HBP", "La fonction érectile"],
+      correct: [1],
+      multipleChoice: false
+    },
+    {
+      id: 35,
+      question: "Les principaux facteurs de risque du cancer de la vessie sont :",
+      options: ["L'alcool et l'hérédité", "Le tabac et les amines aromatiques", "L'obésité et le diabète", "Les infections urinaires répétées"],
+      correct: [1],
+      multipleChoice: false
+    },
+    {
+      id: 36,
+      question: "L'examen de référence pour diagnostiquer un cancer de la vessie est :",
+      options: ["Le scanner abdomino-pelvien", "L'échographie rénale", "L'ECBU", "La cystoscopie"],
+      correct: [3],
+      multipleChoice: false
+    },
+    {
+      id: 37,
+      question: "La nature histologique la plus fréquente du cancer de la vessie est :",
+      options: ["L'adénocarcinome", "Le carcinome épidermoïde", "Le carcinome urothélial", "Le sarcome"],
+      correct: [2],
+      multipleChoice: false
+    },
+    {
+      id: 38,
+      question: "Concernant la cystite aiguë, quel énoncé est VRAI ?",
+      options: ["Elle touche la vessie ET le rein", "Elle se caractérise par une absence de fièvre", "Elle est plus fréquente chez l'homme", "Elle nécessite un examen radiologique"],
+      correct: [1],
+      multipleChoice: false
+    },
+    {
+      id: 39,
+      question: "Les 4 signes cliniques de la cystite aiguë simple sont :",
+      options: ["Pollakiurie, impériosité, brûlures mictionnelles, douleurs hypogastriques", "Fièvre, frissons, lombalgies, nausées", "Hématurie macroscopique, fièvre, anurie, polyurie", "Dysurie, rétention, purulence, AEG"],
+      correct: [0],
+      multipleChoice: false
+    },
+    {
+      id: 40,
+      question: "Dans le cancer de la prostate, le score de Gleason :",
+      options: ["Est un score radiologique IRM", "Mesure le degré de dédifférenciation cellulaire (2 à 10)", "S'applique aux tumeurs urothéliales", "Remplace le dosage PSA"],
+      correct: [1],
+      multipleChoice: false
     }
   ],
   userAnswers: []
@@ -2547,7 +3207,26 @@ let hangmanData = {
     {word: "URETERE", hint: "Conduit transportant l'urine du rein à la vessie"},
     {word: "VESSIE", hint: "Réservoir de l'urine"},
     {word: "BOWMAN", hint: "Capsule entourant le glomérule"},
-    {word: "CALICE", hint: "Structure collectant l'urine dans le rein"}
+,
+    {word: "HOMEOSTASIE", hint: "Maintien constant du milieu intérieur"},
+    {word: "CREATININE", hint: "Déchet du métabolisme musculaire filtré par les reins"},
+    {word: "CLEARANCE", hint: "Capacité d'un organe à éliminer une substance"},
+    {word: "GLOMERULAIRE", hint: "Qualifie la filtration dans le corpuscule rénal"},
+    {word: "NEPHRECTOMIE", hint: "Ablation chirurgicale du rein"},
+    {word: "PYURIE", hint: "Présence de pus dans l'urine"},
+    {word: "DIALYSE", hint: "Technique de suppléance rénale"},
+    {word: "UROTHELIAL", hint: "Type histologique du cancer de la vessie"},
+    {word: "CYSTOSCOPIE", hint: "Endoscopie vésicale de référence"},
+    {word: "BOSNIAK", hint: "Classification des kystes rénaux au scanner"},
+    {word: "PERITONITE", hint: "Complication majeure de la dialyse péritonéale"},
+    {word: "GLEASON", hint: "Score histopronostique du cancer de la prostate"},
+    {word: "PIRADES", hint: "Score IRM évaluant le cancer de la prostate"},
+    {word: "UROSCANNER", hint: "Référence pour les tumeurs de la voie excrétrice supérieure"},
+    {word: "CYSTALGIE", hint: "Douleur de la vessie"},
+    {word: "NEPHROLOGIE", hint: "Spécialité médicale des maladies du rein"},
+    {word: "DETRUSOR", hint: "Muscle lisse de la paroi vésicale"},
+    {word: "BASSINET", hint: "Structure collectrice du rein reliée à l'uretère"},
+    {word: "OXALATE", hint: "Nature chimique du calcul le plus fréquent"}
   ],
   currentWord: null,
   guessedLetters: [],
@@ -3605,9 +4284,140 @@ function exportFullHTML() {
   alert('✅ Fichier exporté avec succès ! Le fichier contient toutes vos annotations et images.');
 }
 
+// ======================== SAVE / LOAD ========================
+
+const SAVE_KEY = 'masterlearn_ue26_progress';
+
+function showToast(msg, isError = false) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.innerHTML = (isError ? '⚠️ ' : '✅ ') + msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.4s'; setTimeout(() => t.remove(), 400); }, 3000);
+}
+
+function updateSaveStatus(text) {
+  const el = document.getElementById('saveStatus');
+  if (el) el.textContent = text;
+}
+
+function buildSaveData() {
+  return {
+    version: 2,
+    savedAt: new Date().toISOString(),
+    flashcards: flashcardsDatabase.map(c => ({ id: c.id, mastered: c.mastered })),
+    qcmAnswers: qcmData.userAnswers || [],
+    partielAnswers: partielQuestions.map(q => ({ id: q.id, answer: q.answer || '' })),
+    theme: currentTheme
+  };
+}
+
+function saveAllProgress(silent = false) {
+  try {
+    const data = buildSaveData();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    const ts = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    updateSaveStatus('✓ Sauvé ' + ts);
+    if (!silent) showToast('Progression sauvegardée !');
+    // Also export as downloadable JSON backup
+    if (!silent) {
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'masterlearn_ue26_sauvegarde_' + new Date().toISOString().slice(0,10) + '.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+  } catch(e) {
+    showToast('Erreur de sauvegarde : ' + e.message, true);
+  }
+}
+
+function loadAllProgress(fromAuto = false) {
+  try {
+    // Try localStorage first
+    let raw = localStorage.getItem(SAVE_KEY);
+    
+    if (!raw && !fromAuto) {
+      // Manual load → file picker
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          applyProgress(JSON.parse(ev.target.result));
+          showToast('Fichier chargé : ' + file.name);
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+      return;
+    }
+    
+    if (!raw) { if (!fromAuto) showToast('Aucune sauvegarde locale trouvée.', true); return; }
+    
+    applyProgress(JSON.parse(raw));
+    if (!fromAuto) showToast('Progression chargée depuis la mémoire locale.');
+  } catch(e) {
+    showToast('Erreur de chargement : ' + e.message, true);
+  }
+}
+
+function applyProgress(data) {
+  if (!data) return;
+  
+  // Flashcards
+  if (data.flashcards) {
+    data.flashcards.forEach(saved => {
+      const card = flashcardsDatabase.find(c => c.id === saved.id);
+      if (card) card.mastered = saved.mastered;
+    });
+  }
+  
+  // QCM answers
+  if (data.qcmAnswers && data.qcmAnswers.length) {
+    qcmData.userAnswers = data.qcmAnswers;
+  }
+  
+  // Partiel answers
+  if (data.partielAnswers) {
+    data.partielAnswers.forEach(saved => {
+      const q = partielQuestions.find(p => p.id === saved.id);
+      if (q) q.answer = saved.answer;
+    });
+  }
+  
+  // Theme
+  if (data.theme) {
+    currentTheme = data.theme;
+    document.documentElement.setAttribute('data-theme', currentTheme);
+  }
+  
+  const savedAt = data.savedAt ? new Date(data.savedAt).toLocaleString('fr-FR') : '?';
+  updateSaveStatus('✓ Chargé ' + savedAt.slice(0,16));
+}
+
+// Auto-save every 2 minutes
+setInterval(() => saveAllProgress(true), 120000);
+
 // ======================== INITIALIZE ========================
 window.addEventListener('load', function() {
   console.log('✅ MasterLearn - Appareil Urinaire chargé avec succès !');
+  // Auto-load on startup
+  loadAllProgress(true);
+  const ts = localStorage.getItem(SAVE_KEY);
+  if (ts) {
+    try {
+      const d = JSON.parse(ts);
+      const savedAt = d.savedAt ? new Date(d.savedAt).toLocaleString('fr-FR') : '?';
+      updateSaveStatus('✓ Auto-chargé ' + savedAt.slice(0,16));
+    } catch(e) {}
+  }
 });
 </script>
 
