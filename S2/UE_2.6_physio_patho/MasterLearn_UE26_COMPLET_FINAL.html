@@ -323,6 +323,185 @@ body {
   box-shadow: 0 4px 12px var(--accent-glow);
 }
 
+/* ======================== FLASHCARDS ======================== */
+.flashcard-container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.flashcard-controls {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.filter-section {
+  margin-bottom: 16px;
+}
+
+.filter-section h4 {
+  color: var(--text2);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+}
+
+.tag-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag-filter {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  user-select: none;
+}
+
+.tag-filter:hover {
+  border-color: var(--accent);
+  color: var(--accent2);
+}
+
+.tag-filter.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.stats-bar {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 20px;
+  text-align: center;
+  flex: 1;
+  min-width: 100px;
+}
+
+.stat-number {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--accent2);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text3);
+  margin-top: 4px;
+}
+
+/* 3D flip card */
+.flashcard {
+  perspective: 1200px;
+  max-width: 640px;
+  margin: 0 auto 20px;
+  cursor: pointer;
+  min-height: 280px;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  inset: 0;
+  min-height: 280px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: border-color var(--transition);
+}
+
+.card-front {
+  border-color: var(--accent);
+}
+
+.card-back {
+  border-color: var(--green);
+  transform: rotateY(180deg);
+  background: var(--bg3);
+}
+
+.flashcard:hover .card-front,
+.flashcard:hover .card-back {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-content {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--text);
+  max-width: 500px;
+  white-space: pre-line;
+}
+
+.mastery-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 20px 0 12px;
+}
+
+.btn-mastered {
+  background: var(--green);
+}
+
+.btn-mastered:hover {
+  background: #00a17a;
+}
+
+.btn-not-mastered {
+  background: var(--red);
+}
+
+.btn-not-mastered:hover {
+  background: #c0603f;
+}
+
+.flashcard-navigation {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
 /* ======================== SCHEMA ANNOTATOR ======================== */
 .schema-container {
   background: var(--surface);
@@ -856,6 +1035,48 @@ body {
   border-radius: var(--radius-sm);
   margin: 16px 0;
 }
+
+/* ======================== PRINT ======================== */
+@media print {
+  body { background: #fff !important; color: #000 !important; }
+  .app-header, .back-btn, .patho-tab, .patho-print-btn,
+  #home, #cours, #schemas, #flashcards, #partiel, #qcm, #quiz, #hangman, #crossword,
+  #cours-td1, #cours-td2 { display: none !important; }
+  #pathologies { display: block !important; }
+  .content-box {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 0 !important;
+    padding: 16px !important;
+  }
+  .content-box[id^="patho-"] {
+    page-break-before: always;
+    break-before: page;
+    border: 2px solid #333 !important;
+    padding: 20px !important;
+  }
+  .content-box[id^="patho-"]:first-of-type {
+    page-break-before: auto;
+    break-before: auto;
+  }
+  #patho-intro-box { display: none !important; }
+  .definition-item {
+    background: #f9f9f9 !important;
+    border-left: 4px solid #666 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 8px !important;
+  }
+  .definition-item strong { color: #333 !important; }
+  h2 { color: #111 !important; font-size: 1.3rem !important; }
+  h3 { color: #333 !important; }
+  p, li { color: #222 !important; }
+  .patho-intro-box { display: none !important; }
+  a { color: #000 !important; text-decoration: none !important; }
+}
+
 </style>
 </head>
 <body data-theme="light">
@@ -1145,77 +1366,109 @@ body {
     </div>
 
     <div class="content-box">
-      <h2>🔬 Examens Radiologiques</h2>
-      
-      <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+<h2>🔬 Examens Radiologiques — Tableau Complet</h2>
+      <p style="color:var(--text2);font-size:0.9rem;margin-bottom:16px;">
+        <strong>Scanner (sans)</strong> = sans injection / <strong>Scanner (inj.)</strong> = avec PCI iodé IV / <strong>TOGD</strong> = transit baryté (Micropaque®) / <strong>Écho-endo</strong> = écho-endoscopie / <strong>TEP</strong> = TEP-TDM (FDG)
+      </p>
+      <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:0.88rem;">
         <thead>
-          <tr style="background: var(--accent-glow); border-bottom: 2px solid var(--accent);">
-            <th style="padding: 12px; text-align: left;">Élément recherché</th>
-            <th style="padding: 12px;">Écho</th>
-            <th style="padding: 12px;">ASP</th>
-            <th style="padding: 12px;">UIV</th>
-            <th style="padding: 12px;">Cysto</th>
-            <th style="padding: 12px;">Scanner</th>
-            <th style="padding: 12px;">IRM</th>
+          <tr style="background:var(--accent-glow);border-bottom:2px solid var(--accent);">
+            <th style="padding:10px;text-align:left;min-width:200px;">Pathologie / Indication</th>
+            <th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">Écho</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">ASP</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">UIV</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">Cysto</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">Scanner sans</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">Scanner inj.</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">IRM</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">TOGD</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">Écho-endo</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">TEP-TDM</th>
           </tr>
         </thead>
         <tbody>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Morphologie rénale</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="background:var(--bg3);">
+            <td colspan="11" style="padding:10px 12px;font-weight:700;font-size:0.95rem;color:var(--accent2);">🫘 APPAREIL URINAIRE</td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Dilatation cavités pyélocalicielles</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Morphologie rénale</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Recherche de lithiase</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Dilatation voies excrétrices</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Analyse dynamique uretère</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Recherche lithiase / calcul</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Reflux vésical</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Colique néphrétique</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Bilan incontinence</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Analyse dynamique uretère</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Reflux vésico-urétéral</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Bilan incontinence</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #0984e3;">Cystite aiguë <span style="font-size:0.78rem;color:var(--text3)">(BU + ECBU)</span></td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #0984e3;">Pyélonéphrite aiguë</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #0984e3;">Prostatite aiguë</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Tumeur rénale (bilan)</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Cancer prostate</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">HBP</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Cancer de la vessie</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="background:var(--bg3);">
+            <td colspan="11" style="padding:10px 12px;font-weight:700;font-size:0.95rem;color:var(--accent2);">🍽️ APPAREIL DIGESTIF</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">RGO</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">Ulcère gastroduodénal</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Cancer de l'œsophage (bilan)</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #f39c12;">Occlusion intestinale</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">Maladie de Crohn</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">Rectocolite hémorragique</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
         </tbody>
       </table>
+      </div>
+      <p style="color:var(--text3);font-size:0.8rem;margin-top:12px;">✓ = examen indiqué/pertinent pour cette indication · Cystite : pas d'imagerie en 1ʳᵉ intention (BU/ECBU suffisants)</p>
     </div>
   </div>
 
@@ -1506,77 +1759,109 @@ body {
     </div>
 
     <div class="content-box">
-      <h2>🔬 Examens Radiologiques</h2>
-      
-      <table style="width:100%; border-collapse: collapse; margin: 20px 0;">
+<h2>🔬 Examens Radiologiques — Tableau Complet</h2>
+      <p style="color:var(--text2);font-size:0.9rem;margin-bottom:16px;">
+        <strong>Scanner (sans)</strong> = sans injection / <strong>Scanner (inj.)</strong> = avec PCI iodé IV / <strong>TOGD</strong> = transit baryté (Micropaque®) / <strong>Écho-endo</strong> = écho-endoscopie / <strong>TEP</strong> = TEP-TDM (FDG)
+      </p>
+      <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:0.88rem;">
         <thead>
-          <tr style="background: var(--accent-glow); border-bottom: 2px solid var(--accent);">
-            <th style="padding: 12px; text-align: left;">Élément recherché</th>
-            <th style="padding: 12px;">Écho</th>
-            <th style="padding: 12px;">ASP</th>
-            <th style="padding: 12px;">UIV</th>
-            <th style="padding: 12px;">Cysto</th>
-            <th style="padding: 12px;">Scanner</th>
-            <th style="padding: 12px;">IRM</th>
+          <tr style="background:var(--accent-glow);border-bottom:2px solid var(--accent);">
+            <th style="padding:10px;text-align:left;min-width:200px;">Pathologie / Indication</th>
+            <th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">Écho</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">ASP</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">UIV</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">Cysto</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">Scanner sans</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">Scanner inj.</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">IRM</th><th style="padding:10px;text-align:center;font-size:0.9rem;writing-mode:horizontal-tb;">TOGD</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">Écho-endo</th><th style="padding:10px;text-align:center;font-size:0.8rem;writing-mode:horizontal-tb;">TEP-TDM</th>
           </tr>
         </thead>
         <tbody>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Morphologie rénale</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="background:var(--bg3);">
+            <td colspan="11" style="padding:10px 12px;font-weight:700;font-size:0.95rem;color:var(--accent2);">🫘 APPAREIL URINAIRE</td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Dilatation cavités pyélocalicielles</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Morphologie rénale</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Recherche de lithiase</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Dilatation voies excrétrices</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Analyse dynamique uretère</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Recherche lithiase / calcul</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Reflux vésical</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Colique néphrétique</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 12px;">Bilan incontinence</td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;"></td>
-            <td style="padding: 12px; text-align: center;">✓</td>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Analyse dynamique uretère</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Reflux vésico-urétéral</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #6c5ce7;">Bilan incontinence</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #0984e3;">Cystite aiguë <span style="font-size:0.78rem;color:var(--text3)">(BU + ECBU)</span></td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #0984e3;">Pyélonéphrite aiguë</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #0984e3;">Prostatite aiguë</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Tumeur rénale (bilan)</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Cancer prostate</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">HBP</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Cancer de la vessie</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="background:var(--bg3);">
+            <td colspan="11" style="padding:10px 12px;font-weight:700;font-size:0.95rem;color:var(--accent2);">🍽️ APPAREIL DIGESTIF</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">RGO</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">Ulcère gastroduodénal</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #e17055;">Cancer de l'œsophage (bilan)</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #f39c12;">Occlusion intestinale</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">Maladie de Crohn</td>
+            <td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:10px;color:var(--text);border-left:3px solid #00b894;">Rectocolite hémorragique</td>
+            <td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--text3);"></td><td style="padding:10px;text-align:center;color:var(--green);">✓</td><td style="padding:10px;text-align:center;color:var(--text3);"></td>
           </tr>
         </tbody>
       </table>
+      </div>
+      <p style="color:var(--text3);font-size:0.8rem;margin-top:12px;">✓ = examen indiqué/pertinent pour cette indication · Cystite : pas d'imagerie en 1ʳᵉ intention (BU/ECBU suffisants)</p>
     </div>
   </div>
 
@@ -2028,10 +2313,17 @@ body {
   <div id="pathologies" class="section">
     <button class="back-btn" onclick="showSection('home')">← Retour</button>
 
-    <div class="content-box">
-      <h2>🏥 Fiches Pathologies — Clinique & Imagerie</h2>
-      <p style="color:var(--text2); font-size:0.95rem; margin-bottom:20px;">Signes classiques · Facteurs de risque · Examens (1ʳᵉ et 2ᵉ intention) · Produit de contraste · Traitement</p>
-      <div style="display:flex; flex-wrap:wrap; gap:10px;">
+    <div class="content-box" id="patho-intro-box">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <div>
+          <h2 style="margin-bottom:6px;">🏥 Fiches Pathologies — Clinique &amp; Imagerie</h2>
+          <p style="color:var(--text2);font-size:0.95rem;">Signes classiques · Facteurs de risque · Examens (1ʳᵉ et 2ᵉ intention) · Produit de contraste · Traitement</p>
+        </div>
+        <button onclick="window.print()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 18px;border-radius:var(--radius-sm);cursor:pointer;font-size:0.9rem;white-space:nowrap;flex-shrink:0;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'">
+          🖨️ Imprimer les fiches
+        </button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
         <a href="#patho-cystite" class="patho-tab">💧 Cystite</a>
         <a href="#patho-pyelo" class="patho-tab">🔥 Pyélonéphrite</a>
         <a href="#patho-prostatite" class="patho-tab">🔴 Prostatite</a>
@@ -3381,14 +3673,16 @@ function renderCurrentCard() {
   container.innerHTML = `
     <div style="text-align:center;color:var(--text3);margin-bottom:16px">Carte ${progress}</div>
     <div class="flashcard" id="currentFlashcard" onclick="flipCard()">
-      <div class="card-front">
-        <div style="color:var(--accent);font-weight:600;margin-bottom:24px">Question</div>
-        <div class="card-content">${card.front}</div>
-        <div style="color:var(--text3);margin-top:32px;font-size:0.9rem">Cliquez pour voir la réponse</div>
-      </div>
-      <div class="card-back">
-        <div style="color:var(--green);font-weight:600;margin-bottom:24px">Réponse</div>
-        <div class="card-content" style="white-space:pre-line">${card.back}</div>
+      <div class="flashcard-inner">
+        <div class="card-front">
+          <div style="color:var(--accent);font-weight:600;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px">❓ Question</div>
+          <div class="card-content">${card.front}</div>
+          <div style="color:var(--text3);margin-top:28px;font-size:0.85rem">↩ Cliquez pour révéler la réponse</div>
+        </div>
+        <div class="card-back">
+          <div style="color:var(--green);font-weight:600;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:20px">✅ Réponse</div>
+          <div class="card-content" style="white-space:pre-line">${card.back}</div>
+        </div>
       </div>
     </div>
     <div style="text-align:center;margin-top:12px">
