@@ -1083,7 +1083,7 @@ function refreshTxt(tid){const sc=getSchema(S.editorId);if(!sc)return;const t=(s
 function loadImage(file){compressImage(file).then(data=>{const sc=getSchema(S.editorId);if(!sc)return;sc.imageData=data;save();const si=storageInfo();if(si.pct>75)showToast('⚠️ Stockage à '+si.pct+'%','warn');else showToast('✅ Image chargée','success');render();});}
 
 /* ══ EXERCISES ══ */
-function exPins(sc,ex){return sc.markers.map(m=>{const g=ex.groups.find(gr=>gr.groupId===m.groupId);if(!g)return'';let bc=m.color;if(ex.submitted){const ok=isCorrect(ex.answers[g.groupId]||'',g);bc=ok?'var(--success)':'var(--error)';}return`<div class="marker-pin" style="left:${m.x*100}%;top:${m.y*100}%;border-color:${bc};color:${pinText(m.color)};background:rgba(6,16,30,.9);box-shadow:0 0 8px ${bc}99">${g.displayNum}</div>`;}).join('');}
+function exPins(sc,ex){return sc.markers.map(m=>{const g=ex.groups.find(gr=>gr.groupId===m.groupId);if(!g)return'';let bc=m.color;if(ex.submitted){const ok=isCorrect(ex.answers[g.groupId]||'',g)||(ex.manualCorrect&&ex.manualCorrect[g.groupId]);bc=ok?'var(--success)':'var(--error)';}return`<div class="marker-pin fill-pin" data-gid="${g.groupId}" style="left:${m.x*100}%;top:${m.y*100}%;border-color:${bc};color:${pinText(m.color)};background:rgba(6,16,30,.9);box-shadow:0 0 8px ${bc}99">${g.displayNum}</div>`;}).join('');}
 function setupExCanvas(sc,exMode){setTimeout(()=>drawAll(sc,document.getElementById('main-img'),document.getElementById('arrow-canvas'),exMode),50);}
 
 function renderExFill(app){
@@ -1097,14 +1097,29 @@ function renderExFill(app){
     <div class="exercise-panel">
       <div class="panel-title">Identifiez les zones</div>
       <div class="tolerance-info">✅ <strong>Tolérance</strong> : casse, accents, tirets ignorés · Alias acceptés</div>
-      <div class="fill-list">${ex.groups.map(g=>{const ans=ex.answers[g.groupId]||'';const ok=ex.submitted?isCorrect(ans,g):null;const bc=g.markers[0]?g.markers[0].color:PIN_COLORS[0];const allAcc=[g.label,...(g.aliases||[])].filter(l=>l.trim());return`<div>
-        <div class="fill-row">
-          <div class="fill-num" style="border-color:${bc};color:${bc}">${g.displayNum}</div>
-          <input class="input" ${ex.submitted?'disabled':''} placeholder="Zone ${g.displayNum}…" value="${ans}" data-gid="${g.groupId}" style="${ex.submitted?(ok?'border-color:var(--success);color:var(--success)':'border-color:var(--error);color:var(--error)'):''}">
-          ${ex.submitted&&!ok?`<span style="font-size:10px;color:var(--success);white-space:nowrap;flex-shrink:0">→ ${g.label}</span>`:''}
-        </div>
-        ${ex.submitted&&allAcc.length>1?`<div style="font-size:10px;color:var(--muted);padding-left:28px;margin-top:1px">= ${allAcc.slice(1).join(' / ')}</div>`:''}
-      </div>`;}).join('')}</div>
+      <div class="fill-list">${ex.groups.map(g=>{
+        const ans=ex.answers[g.groupId]||'';
+        const autoOk=ex.submitted?isCorrect(ans,g):null;
+        const manOk=ex.submitted&&ex.manualCorrect&&ex.manualCorrect[g.groupId];
+        const ok=autoOk||manOk;
+        const bc=g.markers[0]?g.markers[0].color:PIN_COLORS[0];
+        const allAcc=[g.label,...(g.aliases||[])].filter(l=>l.trim());
+        return`<div style="margin-bottom:4px;border-radius:8px;padding:6px 8px;background:${ex.submitted?(ok?'rgba(0,224,154,.07)':'rgba(255,77,106,.07)'):'var(--bg)'};border:1px solid ${ex.submitted?(ok?'var(--success)':'var(--error)'):'var(--border)'};transition:border .2s">
+          <div class="fill-row" style="gap:6px">
+            <div class="fill-num" style="border-color:${bc};color:${bc};flex-shrink:0">${g.displayNum}</div>
+            <input class="input" ${ex.submitted?'disabled':''} placeholder="Zone ${g.displayNum}…" value="${ans}" data-gid="${g.groupId}"
+              style="background:transparent;border-color:transparent;padding:4px 6px;${ex.submitted?(ok?'color:var(--success);font-weight:600':'color:var(--error)'):''}">
+            ${ex.submitted&&ok?'<span style="font-size:16px;flex-shrink:0">✅</span>':''}
+            ${ex.submitted&&!ok&&!manOk?'<span style="font-size:16px;flex-shrink:0">❌</span>':''}
+          </div>
+          ${ex.submitted&&!ok&&!manOk?`<div style="margin-top:5px;padding:5px 8px;background:rgba(0,200,224,.1);border-radius:6px;border-left:3px solid var(--accent)">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:2px">Réponse attendue :</div>
+            <div style="font-size:13px;font-weight:700;color:var(--accent)">${g.label}</div>
+            ${allAcc.length>1?`<div style="font-size:10px;color:var(--muted);margin-top:1px">Alias : ${allAcc.slice(1).join(' / ')}</div>`:''}
+            <button class="btn btn-xs" data-mark-ok="${g.groupId}" style="margin-top:6px;border-color:var(--warn);color:var(--warn);font-size:12px;padding:3px 10px">✓ Considérer comme correct</button>
+          </div>`:''}
+          ${ex.submitted&&manOk?`<div style="font-size:11px;color:var(--warn);margin-top:3px;padding-left:4px">✓ Accepté manuellement · Réponse : ${g.label}</div>`:''}
+        </div>`;}).join('')}</div>
       ${ex.submitted&&ex.score!==null?`<div style="text-align:center;padding:10px;border:2px solid;border-radius:var(--radius);border-color:${ex.score>=80?'var(--success)':ex.score>=50?'var(--warn)':'var(--error)'}"><div style="font-size:26px;font-weight:800;font-family:monospace;color:${ex.score>=80?'var(--success)':ex.score>=50?'var(--warn)':'var(--error)'}">${ex.score}%</div><div style="font-size:12px;color:var(--muted)">${ex.score>=80?'🎉 Excellent !':ex.score>=50?'💪 Bien !':'📚 À retravailler'}</div></div>`:''}
       <div class="panel-footer">${!ex.submitted?`<button class="btn btn-primary w-full" id="btn-submit">✅ Corriger</button>`:`<button class="btn btn-secondary w-full" id="btn-retry">🔄 Recommencer</button>`}
       <button class="btn btn-ghost w-full" id="btn-back2">← Quitter</button></div>
@@ -1137,8 +1152,8 @@ function highlightPin(groupId){
   const group=ex.groups.find(g=>g.groupId===groupId);if(!group)return;
   group.markers.forEach(m=>{
     // Find the pin element — iterate over .marker-pin elements
-    document.querySelectorAll('.marker-pin').forEach(pin=>{
-      if(pin.dataset.gid===groupId||pin.dataset.gid===m.groupId)pin.classList.add('highlight');
+    document.querySelectorAll('.fill-pin[data-gid="'+groupId+'"]').forEach(pin=>{
+      pin.classList.add('highlight');
     });
   });
 }
