@@ -227,7 +227,17 @@ let S={
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 function norm(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[-_'`]/g,' ').replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();}
-function isCorrect(ans,marker){const n=norm(ans);if(!n)return false;return[marker.label,...(marker.aliases||[])].filter(l=>l&&l.trim()).some(l=>norm(l)===n);}
+function isCorrect(ans,marker){
+  const n=norm(ans);if(!n)return false;
+  const ns=normNoSp(ans);
+  const all=[marker.label,...(marker.aliases||[])].filter(l=>l&&l.trim());
+  return all.some(l=>{
+    const ln=norm(l);
+    if(ln===n)return true;               // exact match (with spaces)
+    if(normNoSp(l)===ns)return true;     // match ignoring spaces (subclavière = sub clavière)
+    return false;
+  });
+}
 function getSemColor(s){return SEM_COLORS[s]||'#5a7fa0';}
 function pinText(bg){const h=(bg||'').replace('#','');if(h.length!==6)return'#fff';const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return(0.299*r+0.587*g+0.114*b)>160?'#000':'#fff';}
 function getDisplayNum(all,m){const seen=[];for(const x of all){if(!seen.includes(x.groupId))seen.push(x.groupId);if(x.id===m.id)return seen.indexOf(m.groupId)+1;}return'?';}
@@ -447,7 +457,7 @@ function startClickPin(schemaId){
   const groups=shuffle(buildGroups(labeled)).map((g,i)=>({...g,displayNum:i+1}));
   S.ex={mode:'clickpin',schemaId,groups,
         cpQueue:shuffle([...groups]),cpIdx:0,cpResults:[],cpDone:false,
-        cpFeedback:null,cpTimeout:null,
+        cpFeedback:null,cpTimeout:null,manualCorrect:{},
         // unused but keep consistent
         answers:{},submitted:false,score:null,revealed:{},locateQueue:[],locateIdx:0,locateResults:[],locateDone:false,feedback:null,feedbackTimeout:null};
   S.view='ex-clickpin';render();
@@ -557,7 +567,7 @@ function startEx(schemaId,mode){
   S.exerciseModalOpen=false;S.exerciseSchemaId=null;const sc=getSchema(schemaId);if(!sc)return;
   const shuffledGroups=shuffle(buildGroups(sc.markers.filter(m=>m.label.trim()))).map((g,i)=>({...g,displayNum:i+1}));
   S.ex={mode,schemaId,groups:shuffledGroups,answers:{},submitted:false,score:null,revealed:{},
-        locateQueue:shuffle(shuffledGroups.map(g=>g.label)),locateIdx:0,locateResults:[],locateDone:false,feedback:null,feedbackTimeout:null};
+        locateQueue:shuffle(shuffledGroups.map(g=>g.label)),locateIdx:0,locateResults:[],locateDone:false,feedback:null,feedbackTimeout:null,manualCorrect:{}};
   S.view=mode==='fill'?'ex-fill':mode==='reveal'?'ex-reveal':'ex-locate';render();
 }
 
@@ -1030,9 +1040,27 @@ function renderExFill(app){
   const back=()=>{S.view='home';render();};document.getElementById('btn-back').onclick=back;document.getElementById('btn-back2').onclick=back;
   const bs=document.getElementById('btn-submit');if(bs)bs.onclick=submitFill;
   const br=document.getElementById('btn-retry');if(br)br.onclick=()=>startEx(ex.schemaId,'fill');
+  document.querySelectorAll('[data-mark-ok]').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();markManualCorrect(btn.dataset.markOk);};});
   setupExCanvas(sc,true);
 }
-function submitFill(){const ex=S.ex;if(!ex||ex.submitted)return;let ok=0;ex.groups.forEach(g=>{if(isCorrect(ex.answers[g.groupId]||'',g))ok++;});ex.submitted=true;ex.score=Math.round(ok/ex.groups.length*100);render();}
+function submitFill(){
+  const ex=S.ex;if(!ex||ex.submitted)return;
+  let ok=0;
+  ex.groups.forEach(g=>{if(isCorrect(ex.answers[g.groupId]||'',g)||(ex.manualCorrect&&ex.manualCorrect[g.groupId]))ok++;});
+  ex.submitted=true;ex.score=Math.round(ok/ex.groups.length*100);render();
+}
+function markManualCorrect(groupId){
+  const ex=S.ex;if(!ex)return;
+  if(!ex.manualCorrect)ex.manualCorrect={};
+  ex.manualCorrect[groupId]=true;
+  // Recalculate score
+  if(ex.submitted){
+    let ok=0;
+    ex.groups.forEach(g=>{if(isCorrect(ex.answers[g.groupId]||'',g)||ex.manualCorrect[g.groupId])ok++;});
+    ex.score=Math.round(ok/ex.groups.length*100);
+  }
+  render();
+}
 
 function renderExReveal(app){
   const ex=S.ex;const sc=getSchema(ex.schemaId);if(!sc){S.view='home';render();return;}
