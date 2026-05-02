@@ -25,7 +25,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .form-group{margin-bottom:9px;}.label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
 .sem-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;}
 .app-header{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--border);min-height:50px;flex-shrink:0;flex-wrap:wrap;}
-.header-brand{font-size:17px;font-weight:800;color:var(--accent);white-space:nowrap;}
+.header-brand{font-size:17px;font-weight:800;color:var(--accent);white-space:nowrap;line-height:1.3;}
 .header-brand em{font-style:normal;font-size:11px;font-weight:500;color:var(--muted);margin-left:4px;}
 .header-spacer{flex:1;min-width:6px;}
 .header-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
@@ -469,7 +469,7 @@ function renderHome(app){
   const si=storageInfo();const bc=si.pct>80?'var(--error)':si.pct>50?'var(--warn)':'var(--success)';
   app.innerHTML=`<div class="home-view">
   <div class="app-header">
-    <div class="header-brand">🔬 AnatomyLab <em>v7</em></div>
+    <div class="header-brand">🔬 AnatomyLab <em>v7</em><br><span style="font-size:10px;font-weight:400;color:var(--muted);letter-spacing:.2px;white-space:nowrap">par BEYER Sébastien · Étudiant M.E.M. 2025–2028 · Toulon</span></div>
     <div class="header-spacer"></div>
     <div class="header-actions">
       <button class="btn btn-primary btn-sm" id="btn-new">＋ Nouveau</button>
@@ -1070,38 +1070,79 @@ function renderExLocate(app){
   const label=ex.locateQueue[ex.locateIdx]||'';
   const pct=ex.locateQueue.length?Math.round(ex.locateIdx/ex.locateQueue.length*100):0;
   app.innerHTML=`<div class="exercise-view">
-  <div class="app-header"><button class="btn btn-ghost btn-sm" id="btn-back">← Quitter</button><div class="ex-title">🎯 <strong>${sc.title}</strong></div><div class="header-actions"><span class="sem-badge" style="background:${getSemColor(sc.semester)};color:#000">${sc.semester}</span></div></div>
+  <div class="app-header">
+    <button class="btn btn-ghost btn-sm" id="btn-back">← Quitter</button>
+    <div class="ex-title">🎯 <strong>${sc.title}</strong> – Trouver le numéro</div>
+    <div class="header-actions"><span class="sem-badge" style="background:${getSemColor(sc.semester)};color:#000">${sc.semester}</span></div>
+  </div>
   <div class="exercise-layout">
-    <div class="exercise-img-area"><div class="img-wrapper cursor-locate" id="img-wrapper" style="${bgStyle(sc)}">
-      <img class="main-img-ex" id="main-img" src="${sc.imageData||''}" draggable="false">
-      <canvas class="arrow-canvas" id="arrow-canvas"></canvas></div></div>
+    <div class="exercise-img-area">
+      <div class="img-wrapper" id="img-wrapper" style="${bgStyle(sc)}">
+        <img class="main-img-ex" id="main-img" src="${sc.imageData||''}" draggable="false">
+        <canvas class="arrow-canvas" id="arrow-canvas"></canvas>
+        ${ex.groups.map(g=>g.markers.map(m=>{
+          let bc=m.color,extra='';
+          if(ex.feedback){
+            if(g.groupId===ex.feedback.clickedGroupId){
+              bc=ex.feedback.correct?'var(--success)':'var(--error)';
+              extra='transform:translate(-50%,-50%) scale(1.35);';
+            } else if(!ex.feedback.correct&&[m.label,...(m.aliases||[])].map(l=>l.trim()).includes(label)){
+              bc='var(--warn)';extra='transform:translate(-50%,-50%) scale(1.25);';
+            }
+          }
+          return `<div class="marker-pin locpin" data-gid="${g.groupId}"
+            style="left:${m.x*100}%;top:${m.y*100}%;border-color:${bc};color:${pinText(m.color)};background:rgba(6,16,30,.93);box-shadow:0 0 9px ${bc}99;cursor:pointer;${extra}transition:all .2s"
+          >${g.displayNum}</div>`;
+        }).join('')).join('')}
+      </div>
+    </div>
     <div class="locate-panel">
-      <div style="font-weight:700;font-size:14px">🎯 Localiser</div>
-      <div style="font-size:11px;color:var(--muted)">Cliquez sur la zone :</div>
+      <div style="font-weight:700;font-size:14px">🎯 Quel numéro ?</div>
+      <div style="font-size:11px;color:var(--muted)">Cliquez sur le <b>numéro</b> correspondant à :</div>
       <div class="locate-target">${label}</div>
+      ${ex.groups.find(g=>g.label===label)&&(ex.groups.find(g=>g.label===label).aliases||[]).filter(a=>a.trim()).length
+        ?`<div style="font-size:11px;color:var(--muted);text-align:center">= ${ex.groups.find(g=>g.label===label).aliases.filter(a=>a.trim()).join(' / ')}</div>`:''}
       <div class="locate-pb"><div class="locate-fill" style="width:${pct}%"></div></div>
       <div class="locate-ptext">${ex.locateIdx} / ${ex.locateQueue.length}</div>
+      ${ex.feedback?`<div style="font-size:13px;font-weight:700;text-align:center;padding:8px;border-radius:8px;margin:4px 0;background:${ex.feedback.correct?'rgba(0,224,154,.15)':'rgba(255,77,106,.15)'};color:${ex.feedback.correct?'var(--success)':'var(--error)'}">${ex.feedback.correct?'✓ Correct !':'✗ Raté — c\'était le N°'+ex.feedback.correctNums.join(' ou ')}</div>`:''}
       <div class="locate-history">${[...ex.locateResults].reverse().map(r=>`<div class="hist-item ${r.correct?'ok':'ko'}">${r.correct?'✓':'✗'} ${r.label}${r.skipped?' (passé)':''}</div>`).join('')}</div>
-      <div class="panel-footer"><button class="btn btn-ghost w-full" id="btn-skip">⏭ Passer</button><button class="btn btn-ghost w-full" id="btn-back2">← Quitter</button></div>
+      <div class="panel-footer">
+        <button class="btn btn-ghost w-full" id="btn-skip">⏭ Passer</button>
+        <button class="btn btn-ghost w-full" id="btn-back2">← Quitter</button>
+      </div>
     </div>
-  </div></div>`;
-  const back=()=>{S.view='home';render();};document.getElementById('btn-back').onclick=back;document.getElementById('btn-back2').onclick=back;
-  document.getElementById('btn-skip').onclick=()=>locateAnswer(null,null,true);
-  const wrapper=document.getElementById('img-wrapper');
-  if(wrapper){wrapper.onclick=e=>{if(e.target.closest('.click-indicator'))return;const img=document.getElementById('main-img');const r=img.getBoundingClientRect();locateAnswer((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height,false);};setupExCanvas(sc,true);setTimeout(()=>renderFeedback(sc,ex),60);}
+  </div>
+</div>`;
+  const back=()=>{S.view='home';render();};
+  document.getElementById('btn-back').onclick=back;
+  document.getElementById('btn-back2').onclick=back;
+  document.getElementById('btn-skip').onclick=()=>locateAnswer(null,true);
+  document.querySelectorAll('.locpin').forEach(pin=>{
+    pin.onclick=e=>{e.stopPropagation();locateAnswer(pin.dataset.gid,false);};
+  });
+  setupExCanvas(sc,true);
 }
-function renderFeedback(sc,ex){if(!ex.feedback)return;const wrapper=document.getElementById('img-wrapper');if(!wrapper)return;const fb=ex.feedback;if(fb.clickX!==null){const ind=document.createElement('div');ind.className='click-indicator '+(fb.correct?'click-ok':'click-ko');ind.style.left=(fb.clickX*100)+'%';ind.style.top=(fb.clickY*100)+'%';ind.textContent=fb.correct?'✓':'✗';wrapper.appendChild(ind);}if(!fb.correct&&fb.candidates.length){fb.candidates.forEach(m=>{const c=document.createElement('div');c.className='marker-pin show-correct';c.style.left=(m.x*100)+'%';c.style.top=(m.y*100)+'%';c.style.borderColor=m.color||PIN_COLORS[0];c.title=m.label;c.textContent='★';wrapper.appendChild(c);});}}
-function locateAnswer(xp,yp,skip){
+
+function locateAnswer(clickedGroupId,skip){
   const ex=S.ex;const sc=getSchema(ex.schemaId);if(!sc)return;
   const label=ex.locateQueue[ex.locateIdx];if(!label){ex.locateDone=true;render();return;}
-  const candidates=sc.markers.filter(m=>[m.label,...(m.aliases||[])].map(l=>l.trim()).includes(label));
-  let correct=false;
-  if(!skip&&xp!==null){const img=document.getElementById('main-img');const r=img?img.getBoundingClientRect():{width:800,height:600};const aspect=r.width/r.height;correct=candidates.some(m=>{const dx=(xp-m.x)*aspect,dy=yp-m.y;return Math.sqrt(dx*dx+dy*dy)<HIT_RADIUS;});}
-  ex.locateResults.push({label,correct,skipped:skip});ex.feedback={correct,clickX:xp,clickY:yp,label,candidates};
+  // candidates = all groups whose label or aliases include this label
+  const correctGroups=ex.groups.filter(g=>[g.label,...(g.aliases||[])].map(l=>l.trim()).includes(label));
+  const correctGids=new Set(correctGroups.map(g=>g.groupId));
+  const correct=!skip&&clickedGroupId!=null&&correctGids.has(clickedGroupId);
+  const correctNums=correctGroups.map(g=>g.displayNum);
+  ex.locateResults.push({label,correct,skipped:skip});
+  if(!skip)ex.feedback={clickedGroupId,correct,correctNums};
+  else ex.feedback=null;
   if(ex.feedbackTimeout)clearTimeout(ex.feedbackTimeout);
-  ex.feedbackTimeout=setTimeout(()=>{ex.feedback=null;ex.locateIdx++;if(ex.locateIdx>=ex.locateQueue.length)ex.locateDone=true;render();},skip?0:1000);
+  ex.feedbackTimeout=setTimeout(()=>{
+    ex.feedback=null;ex.locateIdx++;
+    if(ex.locateIdx>=ex.locateQueue.length)ex.locateDone=true;
+    render();
+  },skip?0:1000);
   render();
 }
+
 function renderLocateScore(app,sc,ex){
   const results=ex.locateResults,ok=results.filter(r=>r.correct).length,total=results.length,pct=total>0?Math.round(ok/total*100):0;
   const color=pct>=80?'var(--success)':pct>=50?'var(--warn)':'var(--error)';
