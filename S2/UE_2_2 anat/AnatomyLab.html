@@ -111,6 +111,17 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .marker-pin.editable{cursor:grab;}.marker-pin.editable:hover{transform:translate(-50%,-50%) scale(1.2);}.marker-pin.editable:active{cursor:grabbing;}
 .marker-pin.selected{outline:3px solid rgba(255,179,64,.9);outline-offset:2px;}
 .marker-pin.show-correct{width:32px;height:32px;font-size:14px;z-index:20;}
+.marker-pin.highlight{
+  transform:translate(-50%,-50%) scale(1.5)!important;
+  box-shadow:0 0 0 4px rgba(255,179,64,.6),0 0 22px rgba(255,179,64,.9)!important;
+  border-color:var(--warn)!important;
+  z-index:15;
+  animation:pinPulse 1s ease-in-out infinite;
+}
+@keyframes pinPulse{
+  0%,100%{transform:translate(-50%,-50%) scale(1.5);}
+  50%{transform:translate(-50%,-50%) scale(1.7);}
+}
 .tip-handle{position:absolute;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:rgba(6,16,30,.9);border:2px solid var(--warn);cursor:grab;z-index:12;pointer-events:auto;box-shadow:0 0 7px rgba(255,179,64,.6);}
 .tip-handle:hover{transform:translate(-50%,-50%) scale(1.3);}
 .brace-handle{position:absolute;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;background:rgba(6,16,30,.9);border:2px solid;cursor:grab;z-index:12;pointer-events:auto;}
@@ -178,7 +189,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 </style>
 </head>
 <body>
-<div id="app"></div>
+<div id="splash" style="position:fixed;inset:0;background:#06101e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:99999;transition:opacity .4s">
+  <div style="font-size:42px">🔬</div>
+  <div style="font-size:22px;font-weight:800;color:#00c8e0;letter-spacing:-.5px">AnatomyLab</div>
+  <div style="font-size:12px;color:#5a7fa0;letter-spacing:.3px">par BEYER Sébastien · M.E.M. 2025-2028 · Toulon</div>
+  <div style="width:260px;background:#1e3554;border-radius:6px;overflow:hidden;height:6px;margin-top:6px">
+    <div id="splash-bar" style="height:100%;background:#00c8e0;width:0%;border-radius:6px;transition:width .35s ease"></div>
+  </div>
+  <div id="splash-msg" style="font-size:12px;color:#5a7fa0;min-height:18px">Initialisation…</div>
+</div>
+<div id="app" style="opacity:0;transition:opacity .4s"></div>
 <input type="file" id="img-upload" accept="image/*" style="display:none">
 <input type="file" id="json-import" accept=".json" style="display:none">
 <div id="toast"></div>
@@ -187,6 +207,20 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <script>
 
 'use strict';
+
+/* ══ SPLASH ══ */
+function splashMsg(msg, pct){
+  const bar=document.getElementById('splash-bar');
+  const txt=document.getElementById('splash-msg');
+  if(bar) bar.style.width=pct+'%';
+  if(txt) txt.textContent=msg;
+}
+function splashDone(){
+  const splash=document.getElementById('splash');
+  const app=document.getElementById('app');
+  if(app) app.style.opacity='1';
+  if(splash){ splash.style.opacity='0'; setTimeout(()=>{ if(splash.parentNode) splash.parentNode.removeChild(splash); },450); }
+}
 
 /* ══ CONSTANTS ══ */
 const STORAGE_KEY='anatomylab_v5';
@@ -255,17 +289,31 @@ function compressImage(file){return new Promise(resolve=>{const img=new Image(),
 function storageInfo(){try{const u=new Blob([localStorage.getItem(STORAGE_KEY)||'']).size;return{u,pct:Math.min(100,Math.round(u/5e6*100))};}catch{return{u:0,pct:0};}}
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({schemas:S.schemas}));}catch(e){showToast('⚠️ Stockage plein — exportez !','warn');}}
 function load(){
+  splashMsg('Recherche des schémas…', 10);
   // 1. Try schema.js side-by-side file (works from file:// — Chrome, Brave, Edge)
   if(window.ANATOMY_SCHEMAS&&Array.isArray(window.ANATOMY_SCHEMAS)&&window.ANATOMY_SCHEMAS.length){
-    S.schemas=window.ANATOMY_SCHEMAS.map(migrate);
+    splashMsg('Chargement de schema.js ('+window.ANATOMY_SCHEMAS.length+' schémas)…', 30);
+    const total=window.ANATOMY_SCHEMAS.length;
+    S.schemas=window.ANATOMY_SCHEMAS.map((sc,i)=>{
+      if(i%10===0) splashMsg('Migration '+i+'/'+total+'…', 30+Math.round(i/total*55));
+      return migrate(sc);
+    });
+    splashMsg('Finalisation…', 90);
     console.log('[AnatomyLab] Loaded from schema.js:',S.schemas.length,'schemas');
-    save(); // sync to localStorage for next time
+    save();
     return;
   }
   // 2. Try localStorage
+  splashMsg('Chargement depuis la mémoire locale…', 40);
   try{
-    const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-    S.schemas=(d.schemas||[]).map(migrate);
+    const raw=localStorage.getItem(STORAGE_KEY)||'{}';
+    splashMsg('Déchiffrement des données…', 60);
+    const d=JSON.parse(raw);
+    const total=(d.schemas||[]).length;
+    S.schemas=(d.schemas||[]).map((sc,i)=>{
+      if(i%10===0) splashMsg('Migration '+i+'/'+total+'…', 60+Math.round(i/total*25));
+      return migrate(sc);
+    });
     console.log('[AnatomyLab] Loaded from localStorage:',S.schemas.length,'schemas');
   }catch(e){S.schemas=[];}
 }
@@ -1062,7 +1110,12 @@ function renderExFill(app){
       <button class="btn btn-ghost w-full" id="btn-back2">← Quitter</button></div>
     </div>
   </div></div>`;
-  document.querySelectorAll('[data-gid]').forEach(inp=>{inp.oninput=e=>{ex.answers[e.target.dataset.gid]=e.target.value;};inp.onkeydown=e=>{if(e.key==='Enter')submitFill();};});
+  document.querySelectorAll('[data-gid]').forEach(inp=>{
+    inp.oninput=e=>{ex.answers[e.target.dataset.gid]=e.target.value;};
+    inp.onkeydown=e=>{if(e.key==='Enter')submitFill();};
+    inp.onfocus=e=>{ if(!ex.submitted) highlightPin(e.target.dataset.gid); };
+    inp.onblur=()=>{ document.querySelectorAll('.marker-pin.highlight').forEach(p=>p.classList.remove('highlight')); };
+  });
   const back=()=>{S.view='home';render();};document.getElementById('btn-back').onclick=back;document.getElementById('btn-back2').onclick=back;
   const bs=document.getElementById('btn-submit');if(bs)bs.onclick=submitFill;
   const br=document.getElementById('btn-retry');if(br)br.onclick=()=>startEx(ex.schemaId,'fill');
@@ -1074,6 +1127,20 @@ function submitFill(){
   let ok=0;
   ex.groups.forEach(g=>{if(isCorrect(ex.answers[g.groupId]||'',g)||(ex.manualCorrect&&ex.manualCorrect[g.groupId]))ok++;});
   ex.submitted=true;ex.score=Math.round(ok/ex.groups.length*100);render();
+}
+function highlightPin(groupId){
+  // Remove previous highlight
+  document.querySelectorAll('.marker-pin.highlight').forEach(p=>p.classList.remove('highlight'));
+  if(!groupId)return;
+  // Find all pins belonging to this group
+  const ex=S.ex;const sc=getSchema(ex&&ex.schemaId);if(!sc)return;
+  const group=ex.groups.find(g=>g.groupId===groupId);if(!group)return;
+  group.markers.forEach(m=>{
+    // Find the pin element — iterate over .marker-pin elements
+    document.querySelectorAll('.marker-pin').forEach(pin=>{
+      if(pin.dataset.gid===groupId||pin.dataset.gid===m.groupId)pin.classList.add('highlight');
+    });
+  });
 }
 function markManualCorrect(groupId){
   const ex=S.ex;if(!ex)return;
@@ -1325,9 +1392,13 @@ window.addEventListener('resize',()=>{
 });
 
 /* ══ INIT ══ */
+splashMsg('Démarrage…', 5);
 load();
+splashMsg('Rendu de l\'interface…', 92);
 render();
-setTimeout(tryAutoLoad, 400);
+splashMsg('Prêt !', 100);
+setTimeout(splashDone, 350);
+setTimeout(tryAutoLoad, 500);
 
 </script>
 </body>
