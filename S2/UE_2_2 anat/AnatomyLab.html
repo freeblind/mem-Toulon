@@ -183,6 +183,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <input type="file" id="json-import" accept=".json" style="display:none">
 <div id="toast"></div>
 <textarea id="__edata" style="display:none"></textarea>
+<script src="schema.js" id="schema-ext"></script>
 <script>
 
 'use strict';
@@ -254,7 +255,14 @@ function compressImage(file){return new Promise(resolve=>{const img=new Image(),
 function storageInfo(){try{const u=new Blob([localStorage.getItem(STORAGE_KEY)||'']).size;return{u,pct:Math.min(100,Math.round(u/5e6*100))};}catch{return{u:0,pct:0};}}
 function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({schemas:S.schemas}));}catch(e){showToast('⚠️ Stockage plein — exportez !','warn');}}
 function load(){
-  // 1. Try localStorage
+  // 1. Try schema.js side-by-side file (works from file:// — Chrome, Brave, Edge)
+  if(window.ANATOMY_SCHEMAS&&Array.isArray(window.ANATOMY_SCHEMAS)&&window.ANATOMY_SCHEMAS.length){
+    S.schemas=window.ANATOMY_SCHEMAS.map(migrate);
+    console.log('[AnatomyLab] Loaded from schema.js:',S.schemas.length,'schemas');
+    save(); // sync to localStorage for next time
+    return;
+  }
+  // 2. Try localStorage
   try{
     const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
     S.schemas=(d.schemas||[]).map(migrate);
@@ -302,6 +310,16 @@ function migrate(sc){
 }
 
 /* ══ EXPORT / IMPORT ══ */
+function exportSchemaJS(){
+  // Creates schema.js — place it next to AnatomyLab.html for auto-loading from file://
+  const data=JSON.stringify(S.schemas,null,2);
+  const js='// AnatomyLab — données auto-chargées\n// Placez ce fichier dans le même dossier que AnatomyLab.html\nwindow.ANATOMY_SCHEMAS = '+data+';\n';
+  const b=new Blob([js],{type:'application/javascript'});
+  const u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download='schema.js';document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(u);
+  showToast('✅ schema.js exporté — placez-le à côté du HTML','success');
+}
 function exportJSON(){const b=new Blob([JSON.stringify({schemas:S.schemas},null,2)],{type:'application/json'});const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='anatomylab_sauvegarde.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);showToast('✅ JSON exporté','success');}
 function importJSON(file){const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(!d.schemas)throw 0;S.schemas=d.schemas.map(migrate);save();showToast('✅ Import OK — '+d.schemas.length+' schémas','success');render();}catch{showToast('❌ JSON invalide','error');}};r.readAsText(file);}
 function exportStandalone(){
@@ -489,6 +507,7 @@ function renderHome(app){
       <button class="btn btn-primary btn-sm" id="btn-new">＋ Nouveau</button>
       <button class="btn btn-sm" id="btn-import">📂 Importer JSON</button>
       <button class="btn btn-sm" id="btn-save">💾 Sauvegarder JSON</button>
+      <button class="btn btn-secondary btn-sm" id="btn-export-js" title="Exporter schema.js pour chargement automatique">⚡ Exporter schema.js</button>
 
       <button class="btn btn-sm" id="btn-random" style="border-color:#8b5cf6;color:#8b5cf6" title="Révision aléatoire">🎲 Aléatoire</button>
     </div>
@@ -497,7 +516,7 @@ function renderHome(app){
     <div style="margin-bottom:14px;padding:8px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:3px;"><span>Stockage local</span><span style="color:${bc}">${si.pct}%</span></div>
       <div style="height:4px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${si.pct}%;background:${bc};border-radius:3px"></div></div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.7">${location.protocol==='file:'?`<span style='color:var(--warn)'>⚠️ <b>Mode local (file://)</b></span> — Chrome bloque le chargement automatique. Utilisez <b>📂 Importer JSON</b> ci-dessus ou glissez votre fichier .json ici. Vos schémas sont mémorisés automatiquement après import.`:`✅ <b>Chargement auto actif</b> — placez <code>schema.json</code> dans le même dossier, il sera chargé automatiquement.`}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px;line-height:1.7">${window.ANATOMY_SCHEMAS?'✅ <b>schema.js chargé automatiquement</b> ('+window.ANATOMY_SCHEMAS.length+' schémas)':location.protocol==='file:'?'⚡ <b>Chargement auto</b> : cliquez <b>⚡ Exporter schema.js</b> → placez <code>schema.js</code> dans le même dossier que ce fichier HTML → rechargez. Ou <b>📂 Importer JSON</b> manuellement.':'✅ Serveur HTTP détecté — <code>schema.json</code> chargé automatiquement si présent.'}</div>
     </div>
     <div class="filter-bar">
       <div class="sem-filters">
@@ -537,6 +556,7 @@ function renderHome(app){
     };
   }
   document.getElementById('btn-save').onclick=exportJSON;
+  document.getElementById('btn-export-js').onclick=exportSchemaJS;
   document.getElementById('btn-import').onclick=()=>document.getElementById('json-import').click();
   document.getElementById('s-inp').oninput=e=>{S.filter.search=e.target.value;render();};
   document.querySelectorAll('[data-sem]').forEach(el=>el.onclick=()=>{S.filter.semester=el.dataset.sem;render();});
