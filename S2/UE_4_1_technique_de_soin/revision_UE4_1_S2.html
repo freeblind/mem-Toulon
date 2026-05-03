@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Révisions UE 4.1.S2 – Techniques de soins</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0b1a2e; --card:#122040; --card2:#162848; --border:#1e3560;
+  --teal:#0ec9a4; --blue:#3b8bff; --red:#ff4d6d; --green:#0ec9a4;
+  --yellow:#ffd166; --text:#dce8f8; --muted:#6c8ab0; --white:#f0f7ff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(ellipse 80% 50% at 20% 0%,rgba(14,201,164,.07) 0%,transparent 60%),
+  radial-gradient(ellipse 60% 40% at 80% 100%,rgba(59,139,255,.06) 0%,transparent 60%);}
+
+/* HEADER */
+.app-header{padding:24px 32px 0;max-width:780px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.brand-dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);}
+.brand-name{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.14em;color:var(--teal);text-transform:uppercase;}
+.app-title{font-family:'Outfit',sans-serif;font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;color:var(--white);line-height:1.1;}
+.app-title span{color:var(--teal);}
+
+/* TOP BAR */
+.top-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:16px 0 0;flex-wrap:wrap;}
+.score-display{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);
+  background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px;}
+.score-display b{color:var(--teal);font-size:16px;}
+.progress-wrap{flex:1;min-width:120px;height:4px;background:var(--border);border-radius:2px;max-width:300px;}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:2px;transition:width .4s ease;}
+.progress-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap;}
+
+/* MODE TABS */
+.mode-tabs{display:flex;gap:4px;max-width:780px;margin:16px auto 0;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;padding:4px;}
+.mode-btn{flex:1;padding:8px 12px;border:none;background:transparent;color:var(--muted);
+  cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;font-size:12px;
+  border-radius:7px;transition:all .2s;letter-spacing:.02em;}
+.mode-btn:hover{color:var(--text);background:var(--card2);}
+.mode-btn.active{background:var(--teal);color:var(--navy);box-shadow:0 2px 10px rgba(14,201,164,.3);}
+
+/* MAIN */
+main{max-width:780px;margin:0 auto;padding:20px 32px 80px;}
+
+/* SCREENS */
+.screen{display:none;animation:fadeIn .3s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* START SCREEN */
+.start-screen{text-align:center;padding:60px 20px;}
+.start-icon{font-size:48px;margin-bottom:16px;}
+.start-title{font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--white);margin-bottom:8px;}
+.start-sub{color:var(--muted);font-size:14px;margin-bottom:32px;}
+.start-btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  color:var(--navy);border:none;border-radius:10px;cursor:pointer;
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:15px;
+  box-shadow:0 4px 20px rgba(14,201,164,.3);transition:all .2s;}
+.start-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(14,201,164,.4);}
+
+/* QUESTION CARD */
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;
+  position:relative;overflow:hidden;}
+.q-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--teal),var(--blue));}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.q-badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--teal);background:rgba(14,201,164,.1);border:1px solid rgba(14,201,164,.2);
+  padding:3px 10px;border-radius:20px;}
+.q-pts{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.q-text{font-size:15px;line-height:1.7;color:var(--text);}
+.q-text strong{color:var(--white);}
+.q-topic{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;}
+
+/* TEXTAREA (open questions) */
+.answer-area{margin-top:18px;}
+.answer-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.answer-label::before{content:'';display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--blue);}
+.answer-textarea{width:100%;min-height:140px;background:rgba(255,255,255,.03);
+  border:1px solid var(--border);border-radius:10px;padding:14px 16px;
+  color:var(--white);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.8;
+  resize:vertical;transition:border-color .2s;
+  background-image:repeating-linear-gradient(transparent,transparent 27px,rgba(255,255,255,.04) 27px,rgba(255,255,255,.04) 28px);}
+.answer-textarea:focus{outline:none;border-color:var(--blue);background:rgba(59,139,255,.04);}
+.answer-textarea::placeholder{color:var(--muted);font-style:italic;}
+
+/* VF LIST */
+.vf-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
+.vf-item{padding:12px 14px;background:var(--card2);border:1px solid var(--border);
+  border-radius:10px;transition:border-color .25s;}
+.vf-item.answered-correct{border-color:rgba(14,201,164,.5);background:rgba(14,201,164,.05);}
+.vf-item.answered-wrong{border-color:rgba(255,77,109,.5);background:rgba(255,77,109,.05);}
+.vf-row{display:flex;align-items:center;gap:12px;}
+.vf-stmt{flex:1;font-size:13px;line-height:1.5;color:var(--text);}
+.vf-btns{display:flex;gap:6px;flex-shrink:0;}
+.vf-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);
+  background:transparent;font-family:'Outfit',sans-serif;font-weight:700;
+  font-size:12px;cursor:pointer;color:var(--muted);transition:all .2s;letter-spacing:.04em;}
+.vf-btn:hover:not(:disabled){border-color:var(--teal);color:var(--teal);}
+.vf-btn.sel-ok{background:var(--green);border-color:var(--green);color:var(--navy);}
+.vf-btn.sel-ko{background:var(--red);border-color:var(--red);color:#fff;}
+.vf-btn.show-right{background:rgba(14,201,164,.15);border-color:var(--green);color:var(--green);}
+.vf-btn:disabled{cursor:default;}
+.vf-expl{display:none;margin-top:8px;padding:10px 12px;border-radius:0 6px 6px 0;
+  font-size:12px;line-height:1.6;animation:slideDown .2s ease;}
+.vf-expl.show{display:block;}
+.vf-expl.ok{background:rgba(14,201,164,.07);border-left:3px solid var(--green);}
+.vf-expl.ko{background:rgba(255,77,109,.08);border-left:3px solid var(--red);}
+@keyframes slideDown{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+
+/* CORRECTION BLOCK */
+.correction-block{display:none;margin-top:20px;border:1px solid rgba(59,139,255,.25);
+  border-radius:12px;overflow:hidden;animation:slideDown .3s ease;}
+.correction-block.show{display:block;}
+.correction-header{background:rgba(59,139,255,.1);padding:10px 16px;
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--blue);}
+.correction-body{padding:16px;}
+.correction-items{list-style:none;display:flex;flex-direction:column;gap:6px;}
+
+/* SELF SCORE */
+.selfcheck-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;display:block;margin-top:14px;}
+.selfcheck-list{display:flex;flex-direction:column;gap:6px;}
+.selfcheck-item{display:flex;align-items:flex-start;gap:10px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--border);background:var(--card2);
+  transition:all .2s;}
+.selfcheck-item:hover{border-color:var(--blue);}
+.selfcheck-item.checked{border-color:var(--teal);background:rgba(14,201,164,.08);}
+.selfcheck-item input[type=checkbox]{display:none;}
+.selfcheck-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--muted);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  margin-top:1px;transition:all .2s;}
+.selfcheck-item.checked .selfcheck-box{background:var(--teal);border-color:var(--teal);}
+.selfcheck-box::after{content:'✓';font-size:11px;color:var(--navy);display:none;}
+.selfcheck-item.checked .selfcheck-box::after{display:block;}
+.selfcheck-text{font-size:13px;line-height:1.5;color:var(--text);}
+.selfcheck-pts{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);
+  white-space:nowrap;margin-left:auto;flex-shrink:0;padding:2px 7px;
+  background:rgba(255,255,255,.05);border-radius:4px;}
+.my-score-display{margin-top:12px;padding:10px 14px;border-radius:8px;
+  background:rgba(14,201,164,.08);border:1px solid rgba(14,201,164,.2);
+  font-family:'DM Mono',monospace;font-size:13px;color:var(--teal);
+  display:flex;align-items:center;gap:8px;}
+.my-score-display .pts-val{font-size:20px;font-weight:700;}
+
+/* AUTO SCORE (VF) */
+.auto-score{margin-top:14px;padding:12px 16px;border-radius:8px;
+  background:rgba(14,201,164,.08);border:1px solid rgba(14,201,164,.2);
+  display:none;align-items:center;gap:12px;}
+.auto-score.show{display:flex;}
+.auto-score-label{font-size:12px;color:var(--muted);}
+.auto-score-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;color:var(--teal);}
+
+/* ACTIONS */
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.btn-reveal{display:flex;align-items:center;gap:7px;padding:10px 20px;
+  background:transparent;border:1px solid var(--border);border-radius:8px;
+  color:var(--muted);font-family:'Outfit',sans-serif;font-weight:600;font-size:13px;
+  cursor:pointer;transition:all .25s;}
+.btn-reveal:hover{border-color:var(--blue);color:var(--blue);}
+.btn-reveal.active{border-color:var(--blue);color:var(--blue);background:rgba(59,139,255,.08);}
+.btn-next{display:flex;align-items:center;gap:7px;padding:11px 24px;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  color:var(--navy);border:none;border-radius:8px;cursor:pointer;
+  font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;
+  box-shadow:0 2px 14px rgba(14,201,164,.25);transition:all .2s;
+  display:none;}
+.btn-next.show{display:flex;}
+.btn-next:hover{transform:translateY(-1px);}
+
+/* END SCREEN */
+.end-screen{text-align:center;padding:40px 20px;}
+.end-score-ring{position:relative;width:160px;height:160px;margin:0 auto 24px;
+  display:flex;align-items:center;justify-content:center;}
+.end-score-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg);}
+.end-score-ring circle{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1s ease;}
+.ring-bg{stroke:var(--border);}
+.ring-fill{stroke:var(--teal);}
+.end-score-num{font-family:'Outfit',sans-serif;font-size:36px;font-weight:800;color:var(--white);}
+.end-score-den{font-family:'DM Mono',monospace;font-size:13px;color:var(--muted);}
+.end-title{font-family:'Outfit',sans-serif;font-size:24px;font-weight:700;color:var(--white);margin-bottom:8px;}
+.end-sub{color:var(--muted);font-size:14px;margin-bottom:28px;}
+.end-breakdown{text-align:left;background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:16px;margin-bottom:24px;}
+.end-breakdown-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.end-row{display:flex;justify-content:space-between;align-items:center;
+  padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.end-row:last-child{border:none;}
+.end-row-pts{font-family:'DM Mono',monospace;color:var(--teal);}
+.btn-restart{padding:12px 28px;background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);cursor:pointer;
+  font-family:'Outfit',sans-serif;font-weight:600;font-size:14px;transition:all .2s;}
+.btn-restart:hover{border-color:var(--teal);color:var(--teal);}
+
+@media(max-width:600px){
+  .app-header,main{padding-left:16px;padding-right:16px;}
+  .mode-tabs{flex-wrap:wrap;}
+  .vf-row{flex-direction:column;align-items:flex-start;}
+  .vf-btns{width:100%;}
+  .vf-btn{flex:1;text-align:center;}
+}
+
+/* ══ À SAVOIR ══ */
+.sav-layout{display:flex;gap:24px;align-items:flex-start;min-height:400px;}
+.sav-nav{position:sticky;top:16px;width:160px;flex-shrink:0;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 0;}
+.sav-nav-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted);padding:0 14px 10px;border-bottom:1px solid var(--border);}
+.sav-nav-link{display:block;padding:8px 14px;font-size:12px;color:var(--muted);
+  text-decoration:none;cursor:pointer;transition:all .2s;border-left:2px solid transparent;
+  font-family:'DM Sans',sans-serif;}
+.sav-nav-link:hover{color:var(--text);background:rgba(255,255,255,.04);}
+.sav-nav-link.active{color:var(--teal);border-left-color:var(--teal);background:rgba(14,201,164,.06);}
+.sav-content{flex:1;min-width:0;display:flex;flex-direction:column;gap:28px;}
+.sav-section{display:flex;flex-direction:column;gap:14px;}
+.sav-section-header{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;
+  color:var(--white);padding-bottom:10px;border-bottom:1px solid var(--border);}
+.sav-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+.sav-card-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:13px;
+  color:var(--white);margin-bottom:12px;}
+.sav-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sav-2col-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.sav-items{display:flex;flex-direction:column;gap:5px;}
+.sav-item{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.55;color:var(--text);}
+.sav-num{width:20px;height:20px;border-radius:50%;background:var(--teal);color:var(--navy);
+  font-family:'DM Mono',monospace;font-size:10px;font-weight:700;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;}
+.sav-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;margin-top:6px;}
+.sav-dot.teal{background:var(--teal);}
+.sav-dot.red{background:var(--red);}
+.sav-dot.yellow{background:var(--yellow);}
+.sav-badge{padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;flex-shrink:0;}
+.bg-teal{background:rgba(14,201,164,.2);color:var(--teal);}
+.bg-yellow{background:rgba(255,209,102,.2);color:var(--yellow);}
+.bg-red{background:rgba(255,77,109,.2);color:var(--red);}
+.sav-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-bottom:4px;}
+.tag-blue{background:rgba(59,139,255,.2);color:var(--blue);}
+.tag-red{background:rgba(255,77,109,.15);color:var(--red);}
+.tag-purple{background:rgba(160,100,255,.15);color:#c084fc;}
+.sav-highlight{background:rgba(14,201,164,.06);border:1px solid rgba(14,201,164,.2);
+  border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.7;color:var(--text);}
+.sav-formula{display:inline-block;margin-top:4px;padding:4px 12px;
+  background:rgba(14,201,164,.15);border-radius:6px;font-family:'DM Mono',monospace;
+  font-size:14px;color:var(--teal);}
+.sav-exception{display:inline-block;margin-top:6px;padding:4px 10px;
+  background:rgba(255,209,102,.1);border-left:3px solid var(--yellow);
+  border-radius:0 6px 6px 0;font-size:12px;color:var(--yellow);}
+.sav-alert{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);
+  border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);margin-top:10px;}
+.sav-grid3{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+.sav-chip{padding:5px 12px;border-radius:20px;font-size:12px;
+  background:var(--card2);border:1px solid var(--border);color:var(--text);}
+.chip-red{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.3);color:var(--red);}
+.sav-table{width:100%;border-collapse:collapse;font-size:12px;}
+.sav-table th{background:rgba(255,255,255,.05);padding:8px 10px;text-align:left;
+  color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;border-bottom:1px solid var(--border);}
+.sav-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04);
+  color:var(--text);vertical-align:top;line-height:1.5;}
+.sav-table tr:last-child td{border:none;}
+.highlight-cell{color:var(--teal);font-family:'DM Mono',monospace;font-weight:700;}
+.sav-voies{display:flex;flex-direction:column;gap:8px;}
+.sav-voie{padding:12px 14px;border-radius:8px;border-left:4px solid;}
+.voie-prox{border-color:#ff9f43;background:rgba(255,159,67,.07);}
+.voie-med{border-color:#5f27cd;background:rgba(95,39,205,.07);}
+.voie-dist{border-color:var(--teal);background:rgba(14,201,164,.07);}
+.voie-label{font-weight:700;font-size:13px;color:var(--white);}
+.voie-sub{font-size:11px;color:var(--muted);margin:2px 0 5px;}
+.voie-content{font-size:13px;color:var(--text);}
+.sav-stomie-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.sav-stomie-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;
+  padding:14px;text-align:center;}
+.stomie-icon{font-size:28px;margin-bottom:8px;}
+.stomie-title{font-family:'Outfit',sans-serif;font-weight:700;font-size:12px;
+  color:var(--white);margin-bottom:5px;}
+.stomie-desc{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.4;}
+.stomie-ex{font-size:11px;color:var(--teal);font-family:'DM Mono',monospace;}
+.sav-steps{display:flex;flex-direction:column;gap:6px;}
+.sav-step{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text);
+  padding:8px 10px;border-radius:7px;background:var(--card2);border:1px solid var(--border);}
+.step-n{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));
+  color:var(--navy);font-family:'DM Mono',monospace;font-size:11px;font-weight:700;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+
+/* LEXIQUE */
+.lex-topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+.lex-search{flex:1;min-width:160px;padding:8px 14px;background:var(--card2);
+  border:1px solid var(--border);border-radius:8px;color:var(--white);font-size:13px;
+  font-family:'DM Sans',sans-serif;}
+.lex-search::placeholder{color:var(--muted);}
+.lex-search:focus{outline:none;border-color:var(--teal);}
+.lex-filter-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:11px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all .2s;white-space:nowrap;}
+.lex-filter-btn:hover{border-color:var(--teal);color:var(--teal);}
+.lex-filter-btn.active{background:var(--teal);border-color:var(--teal);color:var(--navy);font-weight:700;}
+.lex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.lex-card{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:14px;transition:border-color .2s;}
+.lex-card:hover{border-color:var(--teal);}
+.lex-term{font-family:'DM Mono',monospace;font-size:16px;font-weight:700;
+  color:var(--teal);margin-bottom:3px;}
+.lex-full{font-size:11px;color:var(--white);font-weight:600;margin-bottom:7px;line-height:1.3;}
+.lex-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+.lex-cat{display:inline-block;margin-top:8px;padding:2px 8px;border-radius:4px;
+  font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.06em;
+  background:rgba(59,139,255,.15);color:var(--blue);}
+
+@media(max-width:640px){
+  .sav-layout{flex-direction:column;}
+  .sav-nav{position:static;width:100%;display:flex;flex-wrap:wrap;gap:4px;padding:8px;}
+  .sav-nav-title{display:none;}
+  .sav-nav-link{border-left:none;border-bottom:2px solid transparent;padding:5px 10px;
+    border-radius:6px;font-size:11px;}
+  .sav-nav-link.active{border-bottom-color:var(--teal);background:rgba(14,201,164,.08);}
+  .sav-2col,.sav-2col-cards,.sav-stomie-grid{grid-template-columns:1fr;}
+}
+
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="brand"><div class="brand-dot"></div><span class="brand-name">IFPVPS · MERM · UE 4.1.S2</span></div>
+  <div class="app-title">Techniques de <span>soins</span></div>
+  <div class="top-bar">
+    <div class="score-display">Score : <b id="scoreVal">0</b> / <span id="scoreMax">20</span> pts</div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 0</div>
+  </div>
+</div>
+
+<div class="mode-tabs" style="flex-wrap:wrap;">
+  <div style="width:100%;display:flex;gap:4px;flex-wrap:wrap;">
+    <button class="mode-btn active" data-mode="s1" onclick="setMode('s1')">S1</button>
+    <button class="mode-btn" data-mode="s2" onclick="setMode('s2')">S2</button>
+    <button class="mode-btn" data-mode="s3" onclick="setMode('s3')">S3</button>
+    <button class="mode-btn" data-mode="s4" onclick="setMode('s4')">S4</button>
+    <div style="width:1px;background:var(--border);margin:2px 2px;"></div>
+    <button class="mode-btn" data-mode="s1v" onclick="setMode('s1v')" style="font-size:11px;">S1 Alt</button>
+    <button class="mode-btn" data-mode="s2v" onclick="setMode('s2v')" style="font-size:11px;">S2 Alt</button>
+    <button class="mode-btn" data-mode="s3v" onclick="setMode('s3v')" style="font-size:11px;">S3 Alt</button>
+    <button class="mode-btn" data-mode="s4v" onclick="setMode('s4v')" style="font-size:11px;">S4 Alt</button>
+    <div style="width:1px;background:var(--border);margin:2px 2px;"></div>
+    <button class="mode-btn" data-mode="mix" onclick="setMode('mix')">🔀</button>
+    <button class="mode-btn" data-mode="sav" onclick="setMode('sav')">📚</button>
+    <button class="mode-btn lex-btn" onclick="openLex()">📖</button>
+  </div>
+</div>
+
+<main>
+  <div class="screen active" id="screen-start">
+    <div class="start-screen">
+      <div class="start-icon">🏥</div>
+      <div class="start-title">Prêt à réviser ?</div>
+      <div class="start-sub" id="start-sub-text">Session 1 · 7 questions · 20 pts</div>
+      <button class="start-btn" onclick="startQuiz()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        Commencer
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-question">
+    <div class="q-card" id="qCard">
+      <div class="q-meta">
+        <span class="q-badge" id="qBadge">Question 1</span>
+        <span class="q-pts" id="qPts">— pts</span>
+      </div>
+      <p class="q-text" id="qText"></p>
+      <p class="q-topic" id="qTopic"></p>
+      <!-- VF list -->
+      <div class="vf-list" id="vfList"></div>
+      <!-- Open textarea -->
+      <div class="answer-area" id="answerArea" style="display:none">
+        <div class="answer-label">Votre réponse</div>
+        <textarea class="answer-textarea" id="answerTA" placeholder="Écrivez votre réponse ici avant de consulter la correction…" rows="7"></textarea>
+      </div>
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn-reveal" id="btnReveal" onclick="revealCorrection()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Voir la correction
+        </button>
+        <button class="btn-next show" id="btnNext" onclick="nextQuestion()" style="display:none">
+          Suivante
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <!-- Correction panel -->
+      <div class="correction-block" id="corrBlock">
+        <div class="correction-header" id="corrHeader">✦ Correction</div>
+        <div class="correction-body" id="corrBody"></div>
+      </div>
+      <!-- Auto score (VF) -->
+      <div class="auto-score" id="autoScore">
+        <span class="auto-score-label">Score automatique :</span>
+        <span class="auto-score-val" id="autoScoreVal">0 pt</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-end">
+    <div class="end-screen">
+      <div class="end-score-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle class="ring-bg" cx="80" cy="80" r="70"/>
+          <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70"
+            stroke-dasharray="439.8" stroke-dashoffset="439.8"/>
+        </svg>
+        <div><div class="end-score-num" id="endNum">0</div><div class="end-score-den" id="endDen">/ 20</div></div>
+      </div>
+      <div class="end-title" id="endTitle">Résultats</div>
+      <div class="end-sub" id="endSub"></div>
+      <div class="end-breakdown" id="endBreakdown">
+        <div class="end-breakdown-title">Détail par question</div>
+        <div id="endRows"></div>
+      </div>
+      <button class="btn-restart" onclick="restartQuiz()">↺ Recommencer</button>
+    </div>
+  </div>
+
+  <!-- À SAVOIR SCREEN -->
+  <div class="screen" id="screen-sav">
+    <div style="margin-bottom:20px;">
+      <div class="app-title" style="font-size:1.3rem;margin-bottom:4px;">📚 À <span>Savoir</span></div>
+      <div style="font-size:12px;color:var(--muted);">Synthèses par chapitre — cliquez sur un chapitre pour y accéder directement</div>
+    </div>
+    
+<div class="sav-layout">
+  <!-- NAV SIDEBAR -->
+  <nav class="sav-nav" id="savNav">
+    <div class="sav-nav-title">Chapitres</div>
+    <a class="sav-nav-link active" href="#sav-transferts" onclick="savScroll('sav-transferts',this)">🚑 Transferts</a>
+    <a class="sav-nav-link" href="#sav-meopa" onclick="savScroll('sav-meopa',this)">💨 MEOPA</a>
+    <a class="sav-nav-link" href="#sav-oxygeno" onclick="savScroll('sav-oxygeno',this)">🫁 Oxygénothérapie</a>
+    <a class="sav-nav-link" href="#sav-sondes" onclick="savScroll('sav-sondes',this)">🔧 Sondes</a>
+    <a class="sav-nav-link" href="#sav-cvc" onclick="savScroll('sav-cvc',this)">💉 CVC / PICC / PAC</a>
+    <a class="sav-nav-link" href="#sav-stomies" onclick="savScroll('sav-stomies',this)">🩺 Stomies</a>
+    <a class="sav-nav-link" href="#sav-aspir" onclick="savScroll('sav-aspir',this)">🫧 Aspirations</a>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="sav-content" id="savContent">
+
+    <!-- TRANSFERTS -->
+    <section class="sav-section" id="sav-transferts">
+      <div class="sav-section-header">🚑 Transferts &amp; Surveillance</div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">5 éléments à contrôler à l'arrivée d'un patient en imagerie</div>
+        <div class="sav-items">
+          <div class="sav-item"><span class="sav-num">1</span><span><strong>Identification</strong> du patient et service d'origine</span></div>
+          <div class="sav-item"><span class="sav-num">2</span><span><strong>Indication</strong> de l'examen à réaliser</span></div>
+          <div class="sav-item"><span class="sav-num">3</span><span><strong>Pathologies et gestes thérapeutiques</strong> à maintenir pendant l'examen</span></div>
+          <div class="sav-item"><span class="sav-num">4</span><span><strong>Paramètres de surveillance</strong> (TA, pouls, SpO₂, conscience…)</span></div>
+          <div class="sav-item"><span class="sav-num">5</span><span><strong>Appareillage et sondes</strong> en place</span></div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Plan cardio-respiratoire — équipements à vérifier</div>
+        <div class="sav-2col">
+          <div>
+            <div class="sav-tag tag-blue">Cardio-respiratoire</div>
+            <div class="sav-items">
+              <div class="sav-item"><span class="sav-dot"></span>Respirateur automatique + alarme débranchement + insufflateur manuel</div>
+              <div class="sav-item"><span class="sav-dot"></span>Aspirateur électrique de mucosités</div>
+              <div class="sav-item"><span class="sav-dot"></span>Scope (TA, pouls, oxymètre)</div>
+              <div class="sav-item"><span class="sav-dot"></span>PSE / pompe volumétrique</div>
+            </div>
+          </div>
+          <div>
+            <div class="sav-tag tag-purple">Locomoteur</div>
+            <div class="sav-items">
+              <div class="sav-item"><span class="sav-dot"></span>Matelas coquille</div>
+              <div class="sav-item"><span class="sav-dot"></span>Collier cervical</div>
+              <div class="sav-item"><span class="sav-dot"></span>Système de contention</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Incidents de conditionnement fréquents</div>
+        <div class="sav-grid3">
+          <div class="sav-chip">Pansement à refaire</div>
+          <div class="sav-chip">KT veineux obstrué</div>
+          <div class="sav-chip">Tubulures plicaturées</div>
+          <div class="sav-chip">Sonde d'intubation déplacée</div>
+          <div class="sav-chip">Sonde urinaire déconnectée</div>
+          <div class="sav-chip">Drain thoracique déconnecté</div>
+          <div class="sav-chip">KT artériel obstrué</div>
+          <div class="sav-chip">Panne respirateur</div>
+          <div class="sav-chip">Panne matériel</div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Complications fréquentes lors d'un transfert</div>
+        <div class="sav-grid3">
+          <div class="sav-chip chip-red">Agitation / chute</div>
+          <div class="sav-chip chip-red">Désadaptation respirateur</div>
+          <div class="sav-chip chip-red">Instabilité hémodynamique</div>
+          <div class="sav-chip chip-red">Désaturation</div>
+          <div class="sav-chip chip-red">Arythmie</div>
+          <div class="sav-chip chip-red">Arrêt cardio-respiratoire</div>
+          <div class="sav-chip chip-red">Extubation accidentelle</div>
+          <div class="sav-chip chip-red">Sédation insuffisante</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MEOPA -->
+    <section class="sav-section" id="sav-meopa">
+      <div class="sav-section-header">💨 MEOPA — Protoxyde d'azote</div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Définition &amp; Composition</div>
+        <div class="sav-highlight">
+          <strong>MEOPA</strong> = Mélange Équimolaire d'Oxygène et de Protoxyde d'Azote<br>
+          <span class="sav-formula"><strong>50 % O₂  +  50 % N₂O</strong></span><br>
+          <span style="color:var(--muted);font-size:12px;">(l'air ambiant ne contient que 21 % d'O₂)</span><br>
+          Spécialités : Antasol, Entonox, Kalinox, Oxynox • AMM 2001 • Médicament liste I
+        </div>
+      </div>
+
+      <div class="sav-2col-cards">
+        <div class="sav-card">
+          <div class="sav-card-title">3 Propriétés</div>
+          <div class="sav-items">
+            <div class="sav-item"><span class="sav-badge bg-teal">1</span><strong>Sédatif</strong> — sédation consciente</div>
+            <div class="sav-item"><span class="sav-badge bg-teal">2</span><strong>Anxiolytique</strong></div>
+            <div class="sav-item"><span class="sav-badge bg-teal">3</span><strong>Amnésiant</strong></div>
+          </div>
+        </div>
+        <div class="sav-card">
+          <div class="sav-card-title">Pharmacologie</div>
+          <div class="sav-items">
+            <div class="sav-item"><span class="sav-dot"></span>Absorption pulmonaire : 1–3 min</div>
+            <div class="sav-item"><span class="sav-dot"></span>Efficacité pleine : ≥ 3 min d'inhalation</div>
+            <div class="sav-item"><span class="sav-dot"></span>Élimination rapide : effet ON/OFF</div>
+            <div class="sav-item"><span class="sav-dot"></span>Arrêt de l'effet : 3–5 min après l'arrêt</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Règles d'administration — ⚠️ à retenir</div>
+        <div class="sav-items">
+          <div class="sav-item"><span class="sav-badge bg-yellow">⏱</span>Durée max : <strong>60 min en continu / jour</strong></div>
+          <div class="sav-item"><span class="sav-badge bg-yellow">📅</span>Si répétition : max <strong>15 jours</strong> consécutifs</div>
+          <div class="sav-item"><span class="sav-badge bg-yellow">👤</span>Personnel <strong>formé et périodiquement réévalué</strong> (≠ simple prescription)</div>
+          <div class="sav-item"><span class="sav-badge bg-yellow">👨‍⚕️</span>Le MEM est habilité à administrer le MEOPA</div>
+          <div class="sav-item"><span class="sav-badge bg-yellow">👁</span>Surveillance <strong>continue</strong> par soignant formé dédié uniquement à cette tâche</div>
+          <div class="sav-item"><span class="sav-badge bg-yellow">👶</span>Autorisé à partir de <strong>1 mois</strong> de vie</div>
+        </div>
+      </div>
+
+      <div class="sav-2col-cards">
+        <div class="sav-card">
+          <div class="sav-card-title">Indications</div>
+          <div class="sav-items">
+            <div class="sav-item"><span class="sav-dot teal"></span>Ponctions (veineuse, lombaire, articulaire…)</div>
+            <div class="sav-item"><span class="sav-dot teal"></span>Chirurgies superficielles, sutures</div>
+            <div class="sav-item"><span class="sav-dot teal"></span>Pansements petites brûlures</div>
+            <div class="sav-item"><span class="sav-dot teal"></span>Sondages</div>
+            <div class="sav-item"><span class="sav-dot teal"></span>Examens radiologiques (écho, fibroscopie…)</div>
+            <div class="sav-item"><span class="sav-dot teal"></span>Traumatologie / petites réductions</div>
+            <div class="sav-item"><span class="sav-dot teal"></span>Crise drépanocytaire aiguë</div>
+          </div>
+        </div>
+        <div class="sav-card">
+          <div class="sav-card-title">Contre-indications ❌</div>
+          <div class="sav-items">
+            <div class="sav-item"><span class="sav-dot red"></span>Refus du patient</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Ventilation avec FiO₂ &gt; 50 %</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Épanchement gazeux non traité (pneumothorax, emphysème, embolie gazeuse, accident de plongée…)</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Distension gazeuse abdominale / HIC</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Anomalies neurologiques récentes / TC / chirurgie oreille moyenne ou sinus</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Déficit en vitamine B12</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Enfant &lt; 1 mois</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OXYGENO -->
+    <section class="sav-section" id="sav-oxygeno">
+      <div class="sav-section-header">🫁 Oxygénothérapie &amp; Aérosolthérapie</div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Statut &amp; règle générale</div>
+        <div class="sav-highlight">
+          L'oxygène est un <strong>médicament</strong> — administration sur <strong>prescription médicale</strong><br>
+          <span class="sav-exception">⚡ Exception : en urgence vitale, le MEM peut initier le débit sans prescription</span>
+        </div>
+        <div class="sav-alert">
+          ⚠️ <strong>Incompatible avec les corps gras</strong> (huile, vaseline, crème…) — comburant puissant → risque d'incendie / explosion
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Dispositifs d'administration — Comparatif</div>
+        <table class="sav-table">
+          <thead><tr><th>Dispositif</th><th>Débit</th><th>Indication / Particularité</th></tr></thead>
+          <tbody>
+            <tr><td>Lunettes nasales</td><td>0,5 – 4 l/min</td><td>Faibles besoins, confort patient, usage prolongé possible</td></tr>
+            <tr><td>Sondes nasales</td><td>1 – 4 l/min</td><td><strong>Usage court</strong> — risque d'irritation de la muqueuse nasale</td></tr>
+            <tr><td>Masque simple</td><td>5 – 8 l/min</td><td>Couvre nez ET bouche</td></tr>
+            <tr><td>Masque à haute concentration (MHC)</td><td class="highlight-cell"><strong>9 – 15 l/min</strong></td><td>Ballon réservoir — évite ré-inhalation CO₂</td></tr>
+            <tr><td>Masque à effet Venturi</td><td>Variable</td><td>FiO₂ précise et contrôlée</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sav-2col-cards">
+        <div class="sav-card">
+          <div class="sav-card-title">Règles de sécurité O₂</div>
+          <div class="sav-items">
+            <div class="sav-item"><span class="sav-dot red"></span>Pas de corps gras (vaseline, huile…)</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Pas de flamme / cigarette à proximité</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Bouteille maintenue verticale, attachée</div>
+            <div class="sav-item"><span class="sav-dot red"></span>Vérifier l'étanchéité des raccords</div>
+          </div>
+        </div>
+        <div class="sav-card">
+          <div class="sav-card-title">Surveillance oxygénothérapie</div>
+          <div class="sav-items">
+            <div class="sav-item"><span class="sav-dot teal"></span><strong>SpO₂</strong> normale : 95 – 100 %</div>
+            <div class="sav-item"><span class="sav-dot yellow"></span>SpO₂ &lt; 92 % : hypoxémie</div>
+            <div class="sav-item"><span class="sav-dot red"></span>SpO₂ &lt; 88 % : hypoxémie sévère</div>
+            <div class="sav-item"><span class="sav-dot teal"></span>Fréquence respiratoire, coloration</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Aérosolthérapie</div>
+        <div class="sav-highlight">
+          Administration de médicaments par voie inhalée sous forme de <strong>particules en suspension</strong> dans un gaz vecteur (O₂ ou air)<br>
+          Action locale (bronches) ou systémique
+        </div>
+      </div>
+    </section>
+
+    <!-- SONDES -->
+    <section class="sav-section" id="sav-sondes">
+      <div class="sav-section-header">🔧 Sondes</div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Sonde Naso-Gastrique (SNG)</div>
+        <div class="sav-highlight">
+          Introduction d'une sonde via le nez jusqu'à l'estomac — <strong>sur prescription médicale</strong>
+        </div>
+        <table class="sav-table" style="margin-top:12px">
+          <thead><tr><th>Sonde</th><th>Matériau</th><th>Durée</th><th>Indication principale</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Salem</strong> (CH 16-18)</td><td>PVC</td><td>3–4 jours</td><td>Occlusion, aspiration, prévention inhalation, hémorragie digestive haute</td></tr>
+            <tr><td><strong>Faucher</strong></td><td>PVC / caoutchouc</td><td>Ponctuel</td><td>Lavage gastrique d'urgence (intoxication)</td></tr>
+            <tr><td><strong>Polyuréthane / silicone</strong></td><td>Silicone / PU</td><td>Long terme</td><td>Nutrition entérale prolongée</td></tr>
+          </tbody>
+        </table>
+        <div class="sav-alert" style="margin-top:12px">
+          ⚠️ Prise d'air en aspiration douce = <strong>OUVERTE</strong> (évite collapsus et ulcère) — clampée seulement en siphonnage
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Indications de la SNG</div>
+        <div class="sav-grid3">
+          <div class="sav-chip">Syndrome occlusif</div>
+          <div class="sav-chip">Repos digestif post-op</div>
+          <div class="sav-chip">Prévention inhalation (coma, intubé)</div>
+          <div class="sav-chip">Hémorragie digestive haute</div>
+          <div class="sav-chip">Patient dans le coma</div>
+          <div class="sav-chip">Tubage gastrique bactériologique</div>
+          <div class="sav-chip">Nutrition entérale</div>
+          <div class="sav-chip">Lavage gastrique (intoxication)</div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Sondage Urinaire à Demeure (SAD)</div>
+        <div class="sav-highlight">
+          Introduction d'une sonde dans l'urètre jusqu'à la vessie — maintien permanent pour drainage continu
+        </div>
+        <div class="sav-2col">
+          <div>
+            <div class="sav-tag tag-blue">Indications</div>
+            <div class="sav-items" style="margin-top:6px">
+              <div class="sav-item"><span class="sav-dot teal"></span>Rétention urinaire aiguë / chronique</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Surveillance stricte diurèse</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Chirurgie petit bassin (prévention)</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Incontinence (protection cutanée)</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Irrigation / lavage vésical</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Instillation intravésicale</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Cystographie rétrograde (imagerie)</div>
+            </div>
+          </div>
+          <div>
+            <div class="sav-tag tag-red">Risques &amp; Effets secondaires</div>
+            <div class="sav-items" style="margin-top:6px">
+              <div class="sav-item"><span class="sav-dot red"></span>Infection urinaire (principale)</div>
+              <div class="sav-item"><span class="sav-dot red"></span>Hématurie</div>
+              <div class="sav-item"><span class="sav-dot red"></span>Lésions tissulaires</div>
+              <div class="sav-item"><span class="sav-dot red"></span>Spasmes vésicaux</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CVC -->
+    <section class="sav-section" id="sav-cvc">
+      <div class="sav-section-header">💉 CVC / PICC-line / Chambre implantable</div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Comparatif des dispositifs</div>
+        <table class="sav-table">
+          <thead><tr><th>Dispositif</th><th>Voie d'accès</th><th>Durée</th><th>Particularité</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>CVC</strong><br><span style="font-size:11px;color:var(--muted)">Cathéter veineux central</span></td>
+              <td>Veine sous-clavière ou jugulaire → <strong>VCS</strong></td>
+              <td class="highlight-cell">6 mois</td>
+              <td>Maintenu par point de suture • 1 à 3 voies</td>
+            </tr>
+            <tr>
+              <td><strong>PICC-line</strong><br><span style="font-size:11px;color:var(--muted)">Cathéter central à insertion périphérique</span></td>
+              <td>Veine périphérique du <strong>bras</strong> → VCS (sous écho)</td>
+              <td class="highlight-cell">3 – 6 mois</td>
+              <td>Système de fixation adhésif • 1–2 lumières</td>
+            </tr>
+            <tr>
+              <td><strong>PAC</strong><br><span style="font-size:11px;color:var(--muted)">Chambre implantable / Port-à-Cath</span></td>
+              <td>Boîtier sous-cutané → cathéter → <strong>VCS</strong></td>
+              <td class="highlight-cell">Jusqu'à 10 ans</td>
+              <td>Aiguille de <strong>Huber</strong> (non-carottante, 7 j max)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">CVC 3 voies — affectation des lumières</div>
+        <div class="sav-voies">
+          <div class="sav-voie voie-prox">
+            <div class="voie-label">Voie Proximale</div>
+            <div class="voie-sub">La plus courte — la plus éloignée de l'oreillette</div>
+            <div class="voie-content">Amines vasoactives &amp; produits <strong>non flashables</strong></div>
+          </div>
+          <div class="sav-voie voie-med">
+            <div class="voie-label">Voie Médiane</div>
+            <div class="voie-sub">Voie du milieu</div>
+            <div class="voie-content">Produits de <strong>sédation</strong> (évite le bolus)</div>
+          </div>
+          <div class="sav-voie voie-dist">
+            <div class="voie-label">Voie Distale</div>
+            <div class="voie-sub">La plus longue — la plus proche de l'oreillette — <strong>plus grand calibre</strong></div>
+            <div class="voie-content">Réanimation, alimentation parentérale, culots globulaires, autres médicaments</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Indications des cathéters centraux</div>
+        <div class="sav-grid3">
+          <div class="sav-chip">Accès périphérique impossible</div>
+          <div class="sav-chip">Insuffisance circulatoire aiguë</div>
+          <div class="sav-chip">Remplissage vasculaire rapide</div>
+          <div class="sav-chip">Hémodialyse</div>
+          <div class="sav-chip">Nutrition parentérale</div>
+          <div class="sav-chip">Chimiothérapie</div>
+          <div class="sav-chip">Antibiothérapie au long cours</div>
+          <div class="sav-chip">Drogues vasoactives</div>
+          <div class="sav-chip">Produits irritants veineux</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STOMIES -->
+    <section class="sav-section" id="sav-stomies">
+      <div class="sav-section-header">🩺 Stomies</div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Les 3 grands types de stomies</div>
+        <div class="sav-stomie-grid">
+          <div class="sav-stomie-card">
+            <div class="stomie-icon">🫁</div>
+            <div class="stomie-title">Stomies aériennes</div>
+            <div class="stomie-desc">Ouverture sur les voies respiratoires</div>
+            <div class="stomie-ex">Trachéotomie<br>Trachéostomie</div>
+          </div>
+          <div class="sav-stomie-card">
+            <div class="stomie-icon">🔄</div>
+            <div class="stomie-title">Stomies d'élimination</div>
+            <div class="stomie-desc">Ouverture sur tube digestif ou urinaire</div>
+            <div class="stomie-ex">Colostomie · Iléostomie<br>Urétérostomie cutanée</div>
+          </div>
+          <div class="sav-stomie-card">
+            <div class="stomie-icon">🍽️</div>
+            <div class="stomie-title">Stomies d'alimentation</div>
+            <div class="stomie-desc">Ouverture pour apport nutritif direct</div>
+            <div class="stomie-ex">Gastrostomie (PEG)<br>Jéjunostomie</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Trachéotomie vs Trachéostomie ⚠️ distinction clé</div>
+        <table class="sav-table">
+          <thead><tr><th></th><th>Trachéotomie</th><th>Trachéostomie</th></tr></thead>
+          <tbody>
+            <tr><td>Caractère</td><td><strong>Provisoire ou définitive</strong></td><td><strong>Définitive uniquement</strong></td></tr>
+            <tr><td>Technique</td><td>Ouverture dans la trachée + canule</td><td>Trachée abouchée directement à la peau</td></tr>
+            <tr><td>Indication</td><td>Obstruction VA, chirurgie ORL, paralysie cordes vocales, fausses routes, larynx non fonctionnel</td><td>Laryngectomie totale uniquement</td></tr>
+            <tr><td>Canule</td><td>Canule insérée pour maintenir l'orifice</td><td>Canule jusqu'à cicatrisation complète</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Caractéristiques générales des stomies</div>
+        <div class="sav-items">
+          <div class="sav-item"><span class="sav-dot teal"></span>Peuvent être <strong>transitoires ou définitives</strong></div>
+          <div class="sav-item"><span class="sav-dot teal"></span>Types d'élimination : <strong>terminale</strong> ou <strong>latérale</strong> (canon de fusil) — « médiane » n'est PAS un type reconnu ❌</div>
+          <div class="sav-item"><span class="sav-dot teal"></span>Porteur de stomie = <strong>stomisé</strong> — suivi par infirmier stomathérapeute</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ASPIRATIONS -->
+    <section class="sav-section" id="sav-aspir">
+      <div class="sav-section-header">🫧 Aspirations endo-trachéales</div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Définition &amp; Objectifs</div>
+        <div class="sav-highlight">
+          Introduction d'une sonde d'aspiration dans la lumière d'une canule de trachéotomie pour dégager les sécrétions et assurer une ventilation adéquate.<br>
+          <span style="color:var(--muted);font-size:12px;">Critères d'une aspiration correcte : <strong>ascendante · aseptique · douce · brève · efficace</strong></span>
+        </div>
+        <div class="sav-2col">
+          <div>
+            <div class="sav-tag tag-blue">Objectifs</div>
+            <div class="sav-items" style="margin-top:6px">
+              <div class="sav-item"><span class="sav-dot teal"></span>Maintenir la perméabilité des VA</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Améliorer les échanges gazeux</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Prévenir la surinfection pulmonaire</div>
+              <div class="sav-item"><span class="sav-dot teal"></span>Favoriser la phonation</div>
+            </div>
+          </div>
+          <div>
+            <div class="sav-tag tag-red">Complications possibles</div>
+            <div class="sav-items" style="margin-top:6px">
+              <div class="sav-item"><span class="sav-dot red"></span>Lésions de la muqueuse trachéale</div>
+              <div class="sav-item"><span class="sav-dot red"></span><strong>Hypoxémie</strong></div>
+              <div class="sav-item"><span class="sav-dot red"></span>Toux excessive</div>
+              <div class="sav-item"><span class="sav-dot red"></span>Augmentation des sécrétions (irritation)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Règles à respecter — ⚠️ absolues</div>
+        <div class="sav-items">
+          <div class="sav-item"><span class="sav-badge bg-red">❌</span><strong>Ne JAMAIS aspirer en introduisant la sonde</strong> — introduction sans aspiration</div>
+          <div class="sav-item"><span class="sav-badge bg-yellow">⏱</span>Durée max : <strong>10 secondes</strong> par aspiration</div>
+          <div class="sav-item"><span class="sav-badge bg-teal">✓</span>Soin <strong>stérile</strong> en post-opératoire et chez le patient ventilé</div>
+          <div class="sav-item"><span class="sav-badge bg-teal">✓</span>Aspiration <strong>uniquement à l'intérieur</strong> de la canule</div>
+          <div class="sav-item"><span class="sav-badge bg-teal">✓</span>Retrait lent en <strong>mouvement de rotation</strong> en obturant le stop vide</div>
+          <div class="sav-item"><span class="sav-badge bg-teal">✓</span>Humidification suffisante des voies aériennes</div>
+        </div>
+      </div>
+
+      <div class="sav-card">
+        <div class="sav-card-title">Technique — étapes chronologiques</div>
+        <div class="sav-steps">
+          <div class="sav-step"><span class="step-n">1</span>Position semi-assise, explication au patient</div>
+          <div class="sav-step"><span class="step-n">2</span>SHA + masque + protection oculaire si risque de projection</div>
+          <div class="sav-step"><span class="step-n">3</span>Gants non stériles • Mesurer la longueur de pénétration de la sonde</div>
+          <div class="sav-step"><span class="step-n">4</span>Adapter la sonde au stop vide + tuyau d'aspiration</div>
+          <div class="sav-step"><span class="step-n">5</span><strong>Introduire délicatement SANS aspirer</strong> dans la canule</div>
+          <div class="sav-step"><span class="step-n">6</span>Obturer le stop vide → remonter lentement en rotation (&lt; 10 s)</div>
+          <div class="sav-step"><span class="step-n">7</span>Jeter la sonde → retirer gants → SHA</div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- sav-content -->
+</div><!-- sav-layout -->
+
+  </div>
+
+  <!-- LEXIQUE MODAL -->
+  <div id="lexModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,.75);z-index:1000;overflow-y:auto;padding:20px;">
+    <div style="max-width:900px;margin:0 auto;background:var(--card);border:1px solid var(--border);
+      border-radius:16px;padding:24px;position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div class="app-title" style="font-size:1.3rem;margin-bottom:2px;">📖 <span>Lexique</span></div>
+          <div style="font-size:12px;color:var(--muted);">22 termes médicaux et abréviations</div>
+        </div>
+        <button onclick="closeLex()" style="background:var(--card2);border:1px solid var(--border);
+          color:var(--text);border-radius:8px;padding:6px 14px;cursor:pointer;font-size:14px;">✕ Fermer</button>
+      </div>
+      <div class="lex-topbar">
+        <input class="lex-search" type="text" placeholder="Rechercher un terme…" oninput="searchLex(this.value)">
+        <button class="lex-filter-btn active" onclick="filterLex('Tous',this)">Tous</button>
+        <button class="lex-filter-btn" onclick="filterLex('Dispositifs',this)">Dispositifs</button>
+        <button class="lex-filter-btn" onclick="filterLex('Médicaments',this)">Médicaments</button>
+        <button class="lex-filter-btn" onclick="filterLex('Soins',this)">Soins</button>
+        <button class="lex-filter-btn" onclick="filterLex('Surveillance',this)">Surveillance</button>
+        <button class="lex-filter-btn" onclick="filterLex('Anatomie',this)">Anatomie</button>
+      </div>
+      
+<div class="lex-grid" id="lexGrid">
+</div>
+<script>
+const LEXIQUE = [
+  {term:'MEOPA',full:'Mélange Équimolaire d\'Oxygène et de Protoxyde d\'Azote',desc:'Gaz anesthésique composé de 50 % O₂ + 50 % N₂O. Utilisé pour analgésie de courte durée. Propriétés : sédatif, anxiolytique, amnésiant.',cat:'Médicaments'},
+  {term:'CVC',full:'Cathéter Veineux Central',desc:'Dispositif souple en silicone introduit dans une veine de gros calibre (sous-clavière, jugulaire) jusqu\'à la veine cave supérieure. Maintenu 6 mois.',cat:'Dispositifs'},
+  {term:'PICC-line',full:'Peripherally Inserted Central Catheter',desc:'Cathéter central inséré sous écho dans une veine périphérique du bras, monté jusqu\'à la VCS. Maintenu 3–6 mois.',cat:'Dispositifs'},
+  {term:'PAC',full:'Port-à-Cathéter (chambre implantable)',desc:'Boîtier implanté sous la peau (taille d\'une pièce d\'1€) relié à un cathéter vers la VCS. Accessible par aiguille de Huber. Maintenu jusqu\'à 10 ans.',cat:'Dispositifs'},
+  {term:'MHC',full:'Masque à Haute Concentration',desc:'Masque O₂ avec ballon réservoir. Débit : 9–15 l/min. Évite la ré-inhalation du CO₂. Couvre nez ET bouche.',cat:'Oxygénothérapie'},
+  {term:'SpO₂',full:'Saturation Pulsée en Oxygène',desc:'Mesure non invasive du taux d\'oxyhémoglobine par oxymétrie de pouls. Normale : 95–100 %. &lt; 92 % = hypoxémie. &lt; 88 % = hypoxémie sévère.',cat:'Surveillance'},
+  {term:'SAD',full:'Sonde à Demeure',desc:'Sonde urinaire laissée en place dans la vessie pour drainage continu des urines. Posée sur prescription médicale.',cat:'Soins'},
+  {term:'SNG',full:'Sonde Naso-Gastrique',desc:'Sonde introduite par le nez jusqu\'à l\'estomac. Indications : aspiration, nutrition entérale, lavage gastrique. Pose sur prescription.',cat:'Soins'},
+  {term:'PSE',full:'Pousse-Seringue Électrique',desc:'Dispositif permettant l\'administration continue et précise d\'un médicament par voie intraveineuse à débit constant (ml/h). Aussi appelé SAP (Seringue Auto-Pulsée).',cat:'Dispositifs'},
+  {term:'VCS',full:'Veine Cave Supérieure',desc:'Grande veine ramenant le sang veineux de la tête, du cou et des membres supérieurs vers l\'oreillette droite. Destination des cathéters centraux.',cat:'Anatomie'},
+  {term:'SHA',full:'Solution Hydro-Alcoolique',desc:'Solution antiseptique pour friction des mains (hygiène des mains). Remplace le lavage au savon dans la plupart des situations de soins.',cat:'Hygiène'},
+  {term:'MEM',full:'Manipulateur en Électroradiologie Médicale',desc:'Professionnel paramédical spécialisé dans les actes d\'imagerie médicale et de radiothérapie. Habilité à réaliser certains soins techniques.',cat:'Métiers'},
+  {term:'OLD',full:'Oxygénothérapie Longue Durée',desc:'Traitement par O₂ à domicile, prescrit lorsque la SpO₂ est chroniquement basse. Administrée via concentrateur ou bouteille.',cat:'Oxygénothérapie'},
+  {term:'FiO₂',full:'Fraction Inspirée en Oxygène',desc:'Proportion d\'O₂ dans le mélange gazeux inhalé. Air ambiant = 21 %. MEOPA = 50 %. MHC peut atteindre 60–80 %.',cat:'Oxygénothérapie'},
+  {term:'ECBU',full:'Examen Cyto-Bactériologique des Urines',desc:'Analyse bactériologique des urines permettant de détecter une infection urinaire et d\'identifier le germe responsable.',cat:'Biologie'},
+  {term:'HIC',full:'Hypertension Intracrânienne',desc:'Augmentation anormale de la pression à l\'intérieur du crâne. Contre-indication au MEOPA.',cat:'Pathologie'},
+  {term:'AMM',full:'Autorisation de Mise sur le Marché',desc:'Autorisation administrative permettant la commercialisation d\'un médicament en France. Le MEOPA a obtenu son AMM en 2001.',cat:'Réglementation'},
+  {term:'VCI',full:'Veine Cave Inférieure',desc:'Grande veine ramenant le sang des membres inférieurs et abdomen vers l\'oreillette droite. Accès alternatif pour les CVC (si VCS inaccessible).',cat:'Anatomie'},
+  {term:'PEG',full:'Gastrostomie Endoscopique Percutanée',desc:'Pose endoscopique d\'une sonde de nutrition directement dans l\'estomac à travers la paroi abdominale. Stomie d\'alimentation définitive.',cat:'Soins'},
+  {term:'TA',full:'Tension Artérielle (ou Pression Artérielle)',desc:'Pression exercée par le sang sur les parois artérielles. Paramètre de surveillance essentiel lors des transferts. Mesurée en mmHg.',cat:'Surveillance'},
+  {term:'N₂O',full:'Protoxyde d\'Azote',desc:'Gaz anesthésique composant à 50 % le MEOPA. Propriétés : sédatif, anxiolytique, amnésiant. Forte diffusivité dans les espaces aériens (d\'où les CI en cas d\'épanchement gazeux).',cat:'Médicaments'},
+  {term:'KT',full:'Cathéter',desc:'Tube fin et flexible introduit dans un vaisseau sanguin ou une cavité pour administrer des substances ou assurer un drainage.',cat:'Dispositifs'},
+];
+
+const cats = [...new Set(LEXIQUE.map(l=>l.cat))];
+let activeCat = 'Tous';
+let search = '';
+
+function renderLex() {
+  const grid = document.getElementById('lexGrid');
+  if (!grid) return;
+  const filtered = LEXIQUE.filter(l =>
+    (activeCat==='Tous' || l.cat===activeCat) &&
+    (search==='' || l.term.toLowerCase().includes(search.toLowerCase()) || l.full.toLowerCase().includes(search.toLowerCase()))
+  );
+  grid.innerHTML = filtered.map(l => `
+    <div class="lex-card">
+      <div class="lex-term">${l.term}</div>
+      <div class="lex-full">${l.full}</div>
+      <div class="lex-desc">${l.desc}</div>
+      <div class="lex-cat">${l.cat}</div>
+    </div>`).join('');
+}
+
+function filterLex(cat, el) {
+  activeCat = cat;
+  document.querySelectorAll('.lex-filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderLex();
+}
+
+function searchLex(val) {
+  search = val;
+  renderLex();
+}
+
+renderLex();
+</script>
+
+    </div>
+  </div>
+
+</main>
+
+<script>
+// ═══════════════════════════ DATA ════════════════════════════════════════════
+const QS_S1 = [
+{
+  id:'s1q1',session:1,pts:2.5,type:'open',
+  topic:'Transferts et surveillances',
+  text:'À l\'arrivée d\'un patient en service d\'imagerie médicale, le radiologue et le MEM sont responsables de la bonne installation et de la sécurité du patient. Citez <strong>5 éléments</strong> que le MEM doit contrôler pour une prise en charge sécuritaire.',
+  items:[
+    {text:'<strong>Identification du patient</strong> et service d\'origine',pts:0.5,opt:false},
+    {text:'<strong>Indication de l\'examen</strong> à réaliser',pts:0.5,opt:false},
+    {text:'<strong>Pathologies et gestes thérapeutiques</strong> à maintenir pendant l\'examen',pts:0.5,opt:false},
+    {text:'<strong>Paramètres de surveillance</strong> (TA, pouls, SpO₂, conscience…)',pts:0.5,opt:false},
+    {text:'<strong>Appareillage et sondes</strong> en place (respirateur, scope, PSE, drains, sondes…)',pts:0.5,opt:false},
+    {text:'<em>Tout autre élément pertinent issu du CM « Transferts et surveillances » est accepté.</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s1q2',session:1,pts:1.5,type:'open',
+  topic:'Protoxyde d\'azote – MEOPA',
+  text:'Citez les <strong>3 propriétés</strong> du protoxyde d\'azote (MEOPA).',
+  items:[
+    {text:'<strong>Sédatif</strong> – induit une sédation consciente (attitude détachée de l\'environnement)',pts:0.5,opt:false},
+    {text:'<strong>Anxiolytique</strong>',pts:0.5,opt:false},
+    {text:'<strong>Amnésiant</strong>',pts:0.5,opt:false}
+  ]
+},
+{
+  id:'s1q3',session:1,pts:2.5,type:'open',
+  topic:'Protoxyde d\'azote – MEOPA',
+  text:'Citez <strong>5 contre-indications</strong> à l\'utilisation du MEOPA.',
+  items:[
+    {text:'Refus du patient',pts:0.5,opt:false},
+    {text:'Nécessité d\'une ventilation avec concentration d\'O₂ > 50 %',pts:0.5,opt:false},
+    {text:'Épanchement gazeux non traité (pneumothorax, emphysème, embolie gazeuse, accident de plongée…)',pts:0.5,opt:false},
+    {text:'Distension gazeuse abdominale ou hypertension intracrânienne',pts:0.5,opt:false},
+    {text:'Anomalies neurologiques récentes / traumatisme crânien / injection gaz intra-oculaire / chirurgie oreille moyenne ou sinus',pts:0.5,opt:false},
+    {text:'Déficit en vitamine B12',pts:0.5,opt:false},
+    {text:'<em>5 réponses attendues parmi les 6 ci-dessus.</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s1q4',session:1,pts:3,type:'vf',
+  topic:'Stomies digestives',
+  text:'Pour chacune des affirmations suivantes concernant les <strong>stomies digestives</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Elles peuvent être d\'alimentation ou d\'élimination.',correct:'V',expl:'✓ Exact — les stomies digestives comprennent les stomies d\'alimentation (gastrostomie, jéjunostomie) et les stomies d\'élimination (colostomie, iléostomie).'},
+    {stmt:'Elles peuvent être transitoires ou définitives.',correct:'V',expl:'✓ Exact — une stomie peut être temporaire (ex. dérivation post-op) ou définitive (ex. après exérèse rectale totale).'},
+    {stmt:'Pour les stomies d\'élimination, elles peuvent être latérales, <em>médianes</em> ou terminales.',correct:'F',expl:'✗ FAUX — les deux types anatomiques reconnus sont <strong>terminale</strong> et <strong>latérale</strong> (en canon de fusil / double canon). Le terme « médiane » n\'est pas une classification anatomique de stomie.'}
+  ]
+},
+{
+  id:'s1q5',session:1,pts:3,type:'vf',
+  topic:'Cathéters veineux centraux',
+  text:'Concernant les <strong>cathéters veineux centraux (CVC)</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Les CVC d\'abord central sont composés des chambres implantables et des cathéters tunnélisés.',correct:'V',expl:'✓ Exact — l\'abord central regroupe : cathéter tunnélisé et chambre implantable (PAC).'},
+    {stmt:'Un CVC est introduit jusqu\'à la jonction veine cave inférieure – oreillette droite.',correct:'F',expl:'✗ FAUX — un CVC est introduit jusqu\'à la <strong>veine cave SUPÉRIEURE</strong> (pas inférieure). La VCS aboutit directement à l\'oreillette droite.'},
+    {stmt:'Il est maintenu par un point de suture ainsi qu\'un système de fixation adhésif opaque.',correct:'F',expl:'✗ FAUX — le CVC est maintenu par un <strong>point de suture uniquement</strong>. C\'est le PICC-line qui utilise un système de fixation adhésif. Le qualificatif « opaque » est incorrect.'},
+    {stmt:'Le PICC-line est inséré sous contrôle écho dans une veine périphérique du bras et monté jusqu\'à l\'extrémité distale de la VCS.',correct:'V',expl:'✓ Exact — définition exacte du PICC-line.'},
+    {stmt:'La chambre implantable (PAC) est un boîtier implanté sous la peau, relié à un cathéter positionné dans la VCS.',correct:'V',expl:'✓ Exact — le PAC est de la taille d\'une pièce d\'un euro, implanté sous la peau, relié à un cathéter vers la VCS.'},
+    {stmt:'Les dispositifs de perfusion sont connectés au PAC grâce à une aiguille de Vuibert.',correct:'F',expl:'✗ FAUX — l\'aiguille utilisée est l\'<strong>aiguille de HUBER</strong> (non-carottante, maintenue 7 jours max), et non l\'aiguille de Vuibert.'},
+    {stmt:'Un CVC est un dispositif pouvant être maintenu en place pendant 6 mois.',correct:'V',expl:'✓ Exact — durée de maintien d\'un CVC : 6 mois.'},
+    {stmt:'Un PAC est un dispositif pouvant être maintenu en place jusqu\'à 10 ans.',correct:'V',expl:'✓ Exact — durée de maintien d\'un PAC : jusqu\'à 10 ans.'}
+  ]
+},
+{
+  id:'s1q6',session:1,pts:4.5,type:'vf',
+  topic:'Oxygénothérapie',
+  text:'Pour chaque affirmation suivante concernant l\'<strong>oxygénothérapie</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'L\'oxygène est un médicament sur prescription médicale sauf dans le cadre des soins d\'urgence où le MEM peut décider du débit.',correct:'F',expl:'✗ FAUX — en urgence le MEM peut administrer de l\'O₂, mais le débit n\'est pas libre : il est fixé à <strong>15 l/min</strong>. Ce n\'est pas le MEM qui « décide du débit » ; le débit d\'urgence est standardisé. Un débit précis différent de 15 l/min reste soumis à prescription médicale.'},
+    {stmt:'L\'oxygène peut être utilisé en présence d\'un corps gras.',correct:'F',expl:'✗ FAUX — l\'O₂ est un <strong>comburant puissant</strong>, strictement incompatible avec tout corps gras (huile, crème, vaseline…). Risque d\'inflammation voire d\'explosion.'},
+    {stmt:'Les lunettes à oxygène sont indiquées pour un débit d\'O₂ supérieur à 10 l/min.',correct:'F',expl:'✗ FAUX — les lunettes nasales sont adaptées aux <strong>faibles débits</strong> (0,5 à 4 l/min). Pour des débits supérieurs, un masque est nécessaire.'},
+    {stmt:'Les sondes nasales sont prescrites pour un usage court en raison du risque d\'irritation des narines.',correct:'V',expl:'✓ Exact — le contact prolongé avec la muqueuse nasale peut provoquer irritation et nécrose locale, d\'où l\'usage limité dans le temps.'},
+    {stmt:'Un masque à oxygène doit englober seulement le nez.',correct:'F',expl:'✗ FAUX — un masque doit couvrir à la fois le <strong>nez ET la bouche</strong> pour être efficace.'},
+    {stmt:'Un masque à haute concentration est utilisé avec un débit de 9 à 15 l/min.',correct:'V',expl:'✓ Exact — le MHC nécessite 9–15 l/min pour éviter la ré-inhalation du CO₂ grâce au ballon réservoir.'}
+  ]
+},
+{
+  id:'s1q7',session:1,pts:3,type:'open',
+  topic:'Types de stomies',
+  text:'Il existe <strong>3 grands types de stomies</strong>. Citez-les et pour chacun donnez un exemple.',
+  items:[
+    {text:'<strong>Stomies aériennes</strong> — ouverture sur les voies respiratoires &nbsp;<em>(ex : trachéotomie, trachéostomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies de décharge / élimination</strong> — ouverture sur le tube digestif ou urinaire &nbsp;<em>(ex : colostomie, iléostomie, urétérostomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies d\'alimentation</strong> — ouverture pour apport nutritif direct &nbsp;<em>(ex : gastrostomie, jéjunostomie)</em>',pts:1,opt:false}
+  ]
+}
+];
+
+const QS_S2 = [
+{
+  id:'s2q1',session:2,pts:2.5,type:'open',
+  topic:'Appareillage – Plan cardio-respiratoire',
+  text:'Lors de l\'arrivée d\'un patient hospitalisé en imagerie, citez <strong>5 éléments du plan cardio-respiratoire</strong> que le MEM doit vérifier.',
+  items:[
+    {text:'<strong>Respirateur automatique</strong> muni d\'une alarme de débranchement (+ insufflateur manuel de secours)',pts:0.5,opt:false},
+    {text:'<strong>Aspirateur électrique de mucosités</strong>',pts:0.5,opt:false},
+    {text:'<strong>Scope</strong> (TA, pouls, oxymètre de pouls…)',pts:0.5,opt:false},
+    {text:'<strong>Dispositif de perfusion à débit continu</strong> (pousse-seringue, pompe volumétrique)',pts:0.5,opt:false},
+    {text:'<strong>Matelas coquille / collier cervical</strong> (plan locomoteur – accepté si plan cardio-resp déjà complet)',pts:0.5,opt:false}
+  ]
+},
+{
+  id:'s2q2',session:2,pts:1.5,type:'open',
+  topic:'Complications lors d\'un transfert',
+  text:'Citez <strong>3 complications fréquentes</strong> pouvant survenir lors du transfert intra-hospitalier d\'un patient.',
+  items:[
+    {text:'<strong>Agitation / chute</strong>',pts:0.5,opt:false},
+    {text:'<strong>Désaturation</strong> (baisse de la SpO₂)',pts:0.5,opt:false},
+    {text:'<strong>Instabilité hémodynamique</strong>',pts:0.5,opt:false},
+    {text:'<em>Autres acceptés : arythmie, désadaptation du respirateur, arrêt cardio-respiratoire, sédation insuffisante, extubation accidentelle…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s2q3',session:2,pts:2.5,type:'open',
+  topic:'Sonde naso-gastrique',
+  text:'Citez <strong>5 indications</strong> de la pose d\'une sonde naso-gastrique (SNG).',
+  items:[
+    {text:'<strong>Syndrome occlusif</strong> (arrêt des matières et gaz)',pts:0.5,opt:false},
+    {text:'Mise au repos du système digestif <strong>après chirurgie digestive</strong>',pts:0.5,opt:false},
+    {text:'Prévention de l\'<strong>inhalation</strong> chez le patient intubé-ventilé',pts:0.5,opt:false},
+    {text:'<strong>Hémorragie digestive haute</strong> (lavage gastrique à l\'eau froide)',pts:0.5,opt:false},
+    {text:'Patient <strong>dans le coma</strong> (prévention du syndrome de Mendelson)',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : tubage gastrique bactériologique, nutrition entérale, intoxication médicamenteuse…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s2q4',session:2,pts:3,type:'vf',
+  topic:'Sonde naso-gastrique',
+  text:'Concernant la <strong>sonde naso-gastrique (SNG)</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'La pose d\'une SNG est réalisable par le MEM sans prescription médicale préalable.',correct:'F',expl:'✗ FAUX — la pose d\'une SNG est soumise à <strong>prescription médicale</strong> (écrite, datée, signée).'},
+    {stmt:'La sonde de Salem est en PVC et s\'utilise pour une courte durée de 3 à 4 jours, dégradée par l\'acidité gastrique.',correct:'V',expl:'✓ Exact — le PVC est dégradé par l\'acidité gastrique, limitant la sonde de Salem à 3–4 jours.'},
+    {stmt:'Lorsque la SNG est en aspiration douce, la prise d\'air de la sonde doit être clampée.',correct:'F',expl:'✗ FAUX — en aspiration douce, la prise d\'air doit être <strong>OUVERTE</strong> pour éviter que la sonde ne se collabe à la paroi gastrique (risque d\'ulcère). Elle n\'est clampée qu\'en mode siphonnage.'},
+    {stmt:'La sonde de Faucher est indiquée pour la nutrition entérale prolongée.',correct:'F',expl:'✗ FAUX — la sonde de Faucher est utilisée pour le <strong>lavage gastrique d\'urgence</strong> (intoxication médicamenteuse). La nutrition entérale prolongée requiert des sondes souples (polyuréthane/silicone).'},
+    {stmt:'Une SNG peut prévenir le risque d\'inhalation du contenu gastrique chez un patient dans le coma.',correct:'V',expl:'✓ Exact — la SNG en aspiration permet d\'éviter le syndrome de Mendelson.'},
+    {stmt:'Une SNG peut être utilisée pour réaliser un lavage gastrique en cas d\'intoxication médicamenteuse.',correct:'V',expl:'✓ Exact — le lavage gastrique est une indication de la SNG, bien que de moins en moins pratiqué au profit du charbon actif.'}
+  ]
+},
+{
+  id:'s2q5',session:2,pts:3,type:'vf',
+  topic:'Aspirations endo-trachéales',
+  text:'Concernant les <strong>aspirations endo-trachéales</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'L\'aspiration endo-trachéale vise à maintenir la perméabilité des voies aériennes et à améliorer les échanges gazeux.',correct:'V',expl:'✓ Exact — objectifs : maintenir la perméabilité des VA, améliorer les échanges gazeux, prévenir la surinfection.'},
+    {stmt:'La sonde d\'aspiration doit être introduite dans la canule tout en aspirant pour être plus efficace.',correct:'F',expl:'✗ FAUX — il ne faut <strong>JAMAIS aspirer en introduisant la sonde</strong> : cela lèse la muqueuse trachéale. L\'aspiration ne débute qu\'au retrait.'},
+    {stmt:'La durée maximale d\'une aspiration endo-trachéale est de 10 secondes.',correct:'V',expl:'✓ Exact — chaque aspiration ≤ 10 secondes pour éviter une désaturation.'},
+    {stmt:'L\'aspiration consiste à introduire la sonde sans aspirer, puis à la remonter lentement en rotation tout en obturant l\'orifice du stop vide.',correct:'V',expl:'✓ Exact — technique correcte selon le cours.'},
+    {stmt:'La trachéostomie est une stomie provisoire réalisée après laryngectomie totale.',correct:'F',expl:'✗ FAUX — la trachéostomie est <strong>DÉFINITIVE</strong> (trachée abouchée à la peau). La <strong>trachéotomie</strong> peut être provisoire ou définitive.'},
+    {stmt:'L\'hypoxémie est une complication possible des aspirations endo-trachéales.',correct:'V',expl:'✓ Exact — l\'hypoxémie fait partie des complications reconnues avec les lésions de muqueuse et la toux excessive.'}
+  ]
+},
+{
+  id:'s2q6',session:2,pts:4.5,type:'vf',
+  topic:'CVC / PICC-line / Chambre implantable',
+  text:'Concernant les <strong>dispositifs d\'abord veineux central</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Un CVC est introduit jusqu\'à la veine cave supérieure (ou inférieure en cas d\'accès difficile).',correct:'V',expl:'✓ Exact — la VCS est privilégiée ; la VCI est un accès alternatif.'},
+    {stmt:'Le PICC-line est inséré dans une veine centrale du cou sous contrôle échographique.',correct:'F',expl:'✗ FAUX — le PICC-line est inséré dans une <strong>veine périphérique du BRAS</strong> (sous écho), puis monté jusqu\'à la VCS.'},
+    {stmt:'Un CVC d\'abord central peut être maintenu en place pendant 6 mois.',correct:'V',expl:'✓ Exact — durée de maintien : 6 mois.'},
+    {stmt:'La chambre implantable (PAC) est accessible grâce à une aiguille de Huber pouvant rester en place 7 jours.',correct:'V',expl:'✓ Exact — l\'aiguille de Huber est non-carottante, maintenue jusqu\'à 7 jours.'},
+    {stmt:'Un PAC peut être maintenu en place jusqu\'à 10 ans.',correct:'V',expl:'✓ Exact — durée de maintien d\'un PAC : jusqu\'à 10 ans.'},
+    {stmt:'Sur un CVC 3 voies, la voie proximale est réservée aux amines et aux produits non flashables.',correct:'V',expl:'✓ Exact — voie proximale (plus courte, éloignée de l\'oreillette) : amines et produits non flashables. Voie distale (plus longue) : réa, alimentation parentérale.'},
+    {stmt:'La chambre implantable est un boîtier placé directement à la surface de la peau, visible à l\'œil nu.',correct:'F',expl:'✗ FAUX — le PAC est implanté <strong>SOUS la peau</strong>. Il est palpable mais non visible.'},
+    {stmt:'Le PICC-line est inséré dans une veine périphérique du bras et peut être maintenu de 3 à 6 mois.',correct:'V',expl:'✓ Exact — durée de maintien du PICC-line : 3 à 6 mois.'},
+    {stmt:'Les cathéters tunnélisés et les chambres implantables sont des dispositifs d\'abord central.',correct:'V',expl:'✓ Exact — classification cours : abord central = cathéter tunnélisé + PAC.'}
+  ]
+},
+{
+  id:'s2q7',session:2,pts:3,type:'open',
+  topic:'Stomies aériennes',
+  text:'Concernant les <strong>stomies aériennes</strong>, décrivez les 2 types en précisant pour chacun : le caractère provisoire ou définitif, l\'objectif principal et une indication.',
+  items:[
+    {text:'<strong>Trachéotomie</strong> — provisoire ou définitive — objectif : permettre l\'entrée de l\'air sans passer par le nez/bouche, protéger des fausses routes — indications : obstruction VA, chirurgie naso-pharyngée, paralysie des cordes vocales, larynx non fonctionnel',pts:1.5,opt:false},
+    {text:'<strong>Trachéostomie</strong> — définitive uniquement — objectif : trachée directement abouchée à la peau — indication unique : laryngectomie totale',pts:1.5,opt:false}
+  ]
+}
+];
+
+const QS_S3 = [
+{
+  id:'s3q1',session:3,pts:2.5,type:'open',
+  topic:'Sondage urinaire à demeure',
+  text:'Citez <strong>5 indications</strong> du sondage urinaire à demeure (SAD).',
+  items:[
+    {text:'<strong>Rétention urinaire</strong> aiguë ou chronique',pts:0.5,opt:false},
+    {text:'<strong>Surveillance stricte de la diurèse</strong> (entrées / sorties)',pts:0.5,opt:false},
+    {text:'Intervention chirurgicale sur le <strong>petit bassin</strong> (prévention)',pts:0.5,opt:false},
+    {text:'<strong>Incontinence urinaire</strong> (protection cutanée)',pts:0.5,opt:false},
+    {text:'<strong>Irrigation / lavage vésical</strong>',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : instillation intravésicale, cystographie rétrograde, ECBU, rééducation vésicale, mesure du résidu post-mictionnel…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s3q2',session:3,pts:1.5,type:'open',
+  topic:'MEOPA – Règles d\'administration',
+  text:'Citez <strong>3 règles</strong> encadrant la durée et la répétition de l\'administration du MEOPA.',
+  items:[
+    {text:'L\'inhalation ne doit pas dépasser <strong>60 minutes en continu</strong> par jour',pts:0.5,opt:false},
+    {text:'En cas de répétition, elle ne doit pas dépasser <strong>15 jours</strong> consécutifs',pts:0.5,opt:false},
+    {text:'L\'efficacité antalgique se manifeste pleinement après au moins <strong>3 minutes</strong> d\'inhalation',pts:0.5,opt:false}
+  ]
+},
+{
+  id:'s3q3',session:3,pts:2.5,type:'open',
+  topic:'Incidents de conditionnement',
+  text:'Citez <strong>5 incidents de conditionnement</strong> fréquents pouvant survenir lors du transfert intra-hospitalier d\'un patient appareillé.',
+  items:[
+    {text:'<strong>Pansement</strong> à refaire',pts:0.5,opt:false},
+    {text:'<strong>Cathéter veineux obstrué</strong>',pts:0.5,opt:false},
+    {text:'<strong>Tubulures plicaturées</strong>',pts:0.5,opt:false},
+    {text:'<strong>Sonde d\'intubation déplacée</strong>',pts:0.5,opt:false},
+    {text:'<strong>Sonde urinaire déconnectée</strong>',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : drain thoracique déconnecté, cathéter artériel obstrué, panne du respirateur…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s3q4',session:3,pts:3,type:'vf',
+  topic:'MEOPA',
+  text:'Concernant le <strong>MEOPA</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Le MEOPA contient 50 % d\'oxygène et 50 % de protoxyde d\'azote.',correct:'V',expl:'✓ Exact — MEOPA = Mélange Équimolaire d\'Oxygène et de Protoxyde d\'Azote (50/50). L\'air ne contient que 21 % d\'O₂.'},
+    {stmt:'Le MEOPA peut être administré par tout personnel soignant non formé, sous réserve d\'une prescription médicale.',correct:'F',expl:'✗ FAUX — l\'administration exige du <strong>personnel spécifiquement formé</strong> et périodiquement réévalué. Une prescription seule ne suffit pas.'},
+    {stmt:'L\'effet antalgique du MEOPA se manifeste pleinement après au moins 3 minutes d\'inhalation.',correct:'V',expl:'✓ Exact — absorption rapide (1–3 min) mais efficacité pleine atteinte après 3 minutes. Effet ON/OFF : arrêt en 3–5 min après l\'arrêt.'},
+    {stmt:'L\'inhalation de MEOPA ne doit pas dépasser 60 minutes en continu par jour.',correct:'V',expl:'✓ Exact — règle de durée maximale : 60 min/jour en continu.'},
+    {stmt:'Le MEOPA est indiqué en cas de pneumothorax non traité.',correct:'F',expl:'✗ FAUX — le pneumothorax non traité est une <strong>CONTRE-INDICATION absolue</strong>. La forte diffusivité du N₂O dans les espaces aériens aggraverait l\'épanchement gazeux.'},
+    {stmt:'Le MEOPA est autorisé chez l\'enfant de moins de 1 mois.',correct:'F',expl:'✗ FAUX — l\'AMM précise : adulte et enfant de <strong>plus de 1 mois</strong>. Contre-indiqué avant 1 mois de vie.'}
+  ]
+},
+{
+  id:'s3q5',session:3,pts:3,type:'vf',
+  topic:'Stomies',
+  text:'Concernant les <strong>stomies</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Les stomies peuvent être d\'alimentation ou d\'élimination.',correct:'V',expl:'✓ Exact — stomies d\'alimentation (gastrostomie…) et d\'élimination (colostomie…) sont les deux grandes fonctions.'},
+    {stmt:'Une stomie peut être transitoire ou définitive.',correct:'V',expl:'✓ Exact — ex. une colostomie de dérivation peut être temporaire, une trachéostomie après laryngectomie est définitive.'},
+    {stmt:'La trachéotomie et la trachéostomie sont toutes deux définitives.',correct:'F',expl:'✗ FAUX — la <strong>trachéotomie</strong> peut être <strong>provisoire ou définitive</strong>. Seule la <strong>trachéostomie</strong> est toujours définitive.'},
+    {stmt:'Les stomies digestives comprennent uniquement les stomies d\'élimination.',correct:'F',expl:'✗ FAUX — les stomies digestives incluent aussi les <strong>stomies d\'alimentation</strong> (gastrostomie, jéjunostomie).'},
+    {stmt:'La colostomie est un exemple de stomie d\'élimination.',correct:'V',expl:'✓ Exact — la colostomie est une ouverture du côlon à la peau pour élimination des matières fécales.'},
+    {stmt:'La gastrostomie est un exemple de stomie d\'alimentation.',correct:'V',expl:'✓ Exact — la gastrostomie (PEG) permet l\'alimentation entérale directe dans l\'estomac.'}
+  ]
+},
+{
+  id:'s3q6',session:3,pts:4.5,type:'vf',
+  topic:'Oxygénothérapie / Aérosolthérapie',
+  text:'Concernant l\'<strong>oxygénothérapie</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'En situation d\'urgence vitale, le MEM peut administrer l\'oxygène à 15 l/min sans prescription médicale préalable.',correct:'V',expl:'✓ Exact — en urgence, le débit d\'O₂ appliqué est <strong>15 l/min</strong> ; c\'est ce débit standardisé que le MEM peut initier, pas un débit « au choix ». Tout autre débit précis reste soumis à prescription.'},
+    {stmt:'L\'oxygène est incompatible avec les corps gras.',correct:'V',expl:'✓ Exact — O₂ = comburant ; corps gras = combustible → risque incendie/explosion.'},
+    {stmt:'Les lunettes à oxygène sont indiquées pour des débits supérieurs à 10 l/min.',correct:'F',expl:'✗ FAUX — lunettes nasales = <strong>faibles débits</strong> (0,5–4 l/min). Débits élevés → masque simple ou MHC.'},
+    {stmt:'Les sondes nasales sont préconisées pour un usage court en raison du risque d\'irritation des narines.',correct:'V',expl:'✓ Exact — usage court recommandé pour éviter irritation et nécrose locale de la muqueuse nasale.'},
+    {stmt:'Un masque à oxygène doit englober uniquement le nez du patient.',correct:'F',expl:'✗ FAUX — le masque doit couvrir <strong>nez ET bouche</strong> pour délivrer la FiO₂ correcte.'},
+    {stmt:'Un masque à haute concentration s\'utilise avec un débit de 9 à 15 l/min.',correct:'V',expl:'✓ Exact — débit 9–15 l/min pour maintenir le ballon réservoir gonflé et éviter la ré-inhalation du CO₂.'},
+    {stmt:'L\'aérosolthérapie consiste en l\'administration de médicaments par voie inhalée sous forme de particules en suspension dans un gaz vecteur.',correct:'V',expl:'✓ Exact — définition de l\'aérosolthérapie : nébulisation d\'un médicament en fines particules inhalées.'},
+    {stmt:'La saturation périphérique en O₂ (SpO₂) normale est comprise entre 95 % et 100 %.',correct:'V',expl:'✓ Exact — SpO₂ normale : 95–100 %. En dessous de 92 % : hypoxémie. En dessous de 88 % : hypoxémie sévère.'},
+    {stmt:'Le concentrateur d\'oxygène est un dispositif utilisable à domicile pour l\'oxygénothérapie longue durée.',correct:'V',expl:'✓ Exact — le concentrateur extrait l\'O₂ de l\'air ambiant (21 % → ~93 %) ; idéal pour l\'OLD à domicile.'}
+  ]
+},
+{
+  id:'s3q7',session:3,pts:3,type:'open',
+  topic:'Types de stomies',
+  text:'Il existe <strong>3 grands types de stomies</strong>. Citez-les et donnez un exemple concret pour chacun.',
+  items:[
+    {text:'<strong>Stomies aériennes</strong> — ouverture sur les voies respiratoires &nbsp;<em>(ex : trachéotomie, trachéostomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies de décharge / élimination</strong> — ouverture sur le tube digestif ou urinaire &nbsp;<em>(ex : colostomie, iléostomie, urétérostomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies d\'alimentation</strong> — ouverture pour apport nutritif direct &nbsp;<em>(ex : gastrostomie, jéjunostomie)</em>',pts:1,opt:false}
+  ]
+}
+];
+
+const QS_S4 = [
+{
+  id:'s4q1',session:4,pts:2.5,type:'open',
+  topic:'Cathéters centraux – Indications',
+  text:'Citez <strong>5 indications</strong> justifiant la pose d\'un cathéter veineux central (CVC, PICC-line ou PAC).',
+  items:[
+    {text:'<strong>Accès veineux périphérique impossible</strong>',pts:0.5,opt:false},
+    {text:'<strong>Insuffisance circulatoire aiguë</strong>',pts:0.5,opt:false},
+    {text:'<strong>Nutrition parentérale</strong>',pts:0.5,opt:false},
+    {text:'<strong>Chimiothérapie</strong> ou antibiothérapie au long cours',pts:0.5,opt:false},
+    {text:'Administration de <strong>drogues vasoactives</strong> ou produits irritants veineux',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : hémodialyse, remplissage vasculaire rapide, prélèvements sanguins répétés…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s4q2',session:4,pts:1.5,type:'open',
+  topic:'Aspirations trachéales – Objectifs et critères',
+  text:'Citez les <strong>5 critères</strong> d\'une aspiration endo-trachéale correcte (tels que définis dans le cours).',
+  items:[
+    {text:'<strong>Ascendante</strong> — la sonde remonte en direction de l\'extérieur de la canule',pts:0.3,opt:false},
+    {text:'<strong>Aseptique</strong> — soin stérile en post-op et chez le patient ventilé',pts:0.3,opt:false},
+    {text:'<strong>Douce</strong> — sans traumatisme de la muqueuse',pts:0.3,opt:false},
+    {text:'<strong>Brève</strong> — durée ≤ 10 secondes',pts:0.3,opt:false},
+    {text:'<strong>Efficace</strong> — sécrétions effectivement drainées',pts:0.3,opt:false}
+  ]
+},
+{
+  id:'s4q3',session:4,pts:2.5,type:'open',
+  topic:'Sécurité – Oxygène',
+  text:'Citez <strong>5 règles de sécurité</strong> à respecter lors de l\'utilisation de l\'oxygène en service.',
+  items:[
+    {text:'Ne jamais utiliser de <strong>corps gras</strong> (vaseline, huile…) sur le matériel O₂ ou le patient',pts:0.5,opt:false},
+    {text:'Éloigner toute <strong>source de chaleur, de flamme ou d\'étincelle</strong> (cigarette…)',pts:0.5,opt:false},
+    {text:'Maintenir la bouteille <strong>verticale et attachée</strong> pour éviter toute chute',pts:0.5,opt:false},
+    {text:'Vérifier l\'<strong>étanchéité des raccords</strong> et la quantité de gaz disponible',pts:0.5,opt:false},
+    {text:'En urgence, le débit administré sans prescription est <strong>fixé à 15 l/min</strong> (et non laissé à l\'appréciation du soignant)',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : pas de choc sur la bouteille, stockage dans endroit ventilé, ne pas utiliser en présence d\'aérosol…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s4q4',session:4,pts:3,type:'vf',
+  topic:'MEOPA – Règles précises',
+  text:'Concernant les <strong>règles d\'administration du MEOPA</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Le MEOPA est soumis à prescription médicale écrite, datée et signée par un médecin ou une sage-femme.',correct:'V',expl:'✓ Exact — la prescription médicale est obligatoire (écrite, datée, signée), après vérification des CI et des médicaments associés.'},
+    {stmt:'La surveillance pendant l\'administration du MEOPA peut être partagée entre la personne qui réalise le soin et celle qui administre le gaz.',correct:'F',expl:'✗ FAUX — la surveillance pendant l\'administration doit être réalisée par un soignant formé <strong>se consacrant exclusivement à cette tâche</strong>, distinct de la personne qui réalise le soin douloureux.'},
+    {stmt:'En cas de répétition sur plusieurs jours, l\'inhalation de MEOPA ne doit pas dépasser 15 jours consécutifs.',correct:'V',expl:'✓ Exact — en cas de répétition : max 15 jours consécutifs.'},
+    {stmt:'Le débit de MEOPA est fixé à 15 l/min quel que soit le patient.',correct:'F',expl:'✗ FAUX — le débit est adapté <strong>en fonction de la capacité ventilatoire du patient</strong>. Il n\'y a pas de débit fixe standardisé pour le MEOPA (contrairement à l\'O₂ d\'urgence).'},
+    {stmt:'Les aides-soignants peuvent utiliser la valve à la demande sous la responsabilité d\'un professionnel formé présent.',correct:'V',expl:'✓ Exact — l\'utilisation de la valve à la demande autorise la collaboration des aides-soignants, <strong>sous la responsabilité et en présence</strong> d\'un professionnel formé ayant initié l\'administration.'},
+    {stmt:'Le MEOPA peut être utilisé en toute sécurité pour un patient présentant un emphysème pulmonaire.',correct:'F',expl:'✗ FAUX — l\'emphysème est un <strong>épanchement gazeux</strong>, ce qui constitue une contre-indication formelle au MEOPA (risque d\'aggravation par diffusion du N₂O dans les espaces aériens).'}
+  ]
+},
+{
+  id:'s4q5',session:4,pts:3,type:'vf',
+  topic:'Sondage urinaire',
+  text:'Concernant le <strong>sondage urinaire à demeure (SAD)</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Le sondage urinaire continu consiste à introduire et à laisser en place une sonde dans la vessie pour éliminer les urines en continu.',correct:'V',expl:'✓ Exact — définition du sondage à demeure : sonde laissée en place pour drainage continu.'},
+    {stmt:'Le sondage urinaire intermittent ne peut être réalisé que par le MEM ; le patient lui-même ne peut pas le pratiquer.',correct:'F',expl:'✗ FAUX — le sondage intermittent peut être réalisé par le MEM (hétéro-sondage) <strong>ou par le patient lui-même</strong> (auto-sondage).'},
+    {stmt:'Une indication du SAD en imagerie médicale est la cystographie rétrograde.',correct:'V',expl:'✓ Exact — la cystographie rétrograde (remplissage de la vessie avec du produit de contraste) nécessite la pose d\'une sonde vésicale.'},
+    {stmt:'La principale complication du sondage à demeure est l\'infection urinaire.',correct:'V',expl:'✓ Exact — l\'infection urinaire est le risque majeur du SAD, lié à la présence prolongée d\'un corps étranger dans l\'urètre et la vessie.'},
+    {stmt:'Le sondage urinaire peut être réalisé par le MEM sur sa propre initiative, sans prescription, pour vider la vessie d\'un patient agité.',correct:'F',expl:'✗ FAUX — le sondage est un acte réalisé <strong>sur prescription médicale</strong>. Le MEM n\'a pas l\'initiative de cet acte.'},
+    {stmt:'Un reflux vésico-urétéral est un risque de la rétention urinaire non traitée.',correct:'V',expl:'✓ Exact — la rétention chronique non traitée peut provoquer un reflux des urines vers les reins (risque d\'insuffisance rénale aiguë par dilatation).'}
+  ]
+},
+{
+  id:'s4q6',session:4,pts:4.5,type:'vf',
+  topic:'Révision générale',
+  text:'Questions de <strong>révision générale</strong>, répondez VRAI ou FAUX :',
+  items:[
+    {stmt:'Un CVC d\'abord central (cathéter tunnélisé) a une durée de maintien de 6 mois, identique à celle du PICC-line.',correct:'F',expl:'✗ FAUX — CVC tunnélisé : 6 mois. PICC-line : <strong>3 à 6 mois</strong>. Les deux peuvent durer 6 mois, mais le PICC-line peut être retiré dès 3 mois. Ce n\'est donc pas strictement identique.'},
+    {stmt:'La sonde de Salem en PVC doit être remplacée au bout de 3 à 4 jours car le PVC est dégradé par l\'acidité gastrique.',correct:'V',expl:'✓ Exact — le PVC se dégrade en milieu acide, imposant un remplacement régulier de la sonde de Salem.'},
+    {stmt:'La trachéostomie est indiquée en cas de paralysie des cordes vocales.',correct:'F',expl:'✗ FAUX — la paralysie des cordes vocales est une indication de la <strong>trachéotomie</strong>, pas de la trachéostomie (qui ne s\'indique qu\'en cas de laryngectomie totale).'},
+    {stmt:'En aspiration endo-trachéale, l\'aspiration de sécrétions doit se faire lors de l\'introduction de la sonde pour maximiser son efficacité.',correct:'F',expl:'✗ FAUX — l\'aspiration lors de l\'introduction est <strong>formellement interdite</strong> (lésion de la muqueuse). L\'aspiration débute uniquement au retrait de la sonde.'},
+    {stmt:'La voie distale d\'un CVC 3 lumières est celle qui se retrouve la plus proche de l\'oreillette droite et présente le plus grand calibre.',correct:'V',expl:'✓ Exact — voie distale = la plus longue, la plus proche de l\'oreillette droite, le plus grand calibre → réservée à la réanimation, alimentation parentérale, culots…'},
+    {stmt:'La gastrostomie est une stomie d\'élimination utilisée pour drainer le contenu gastrique.',correct:'F',expl:'✗ FAUX — la gastrostomie est une stomie <strong>d\'ALIMENTATION</strong> (apport nutritif direct dans l\'estomac). Le drainage du contenu gastrique correspond à la SNG en aspiration.'},
+    {stmt:'L\'administration de MEOPA lors d\'une réduction de fracture est une indication reconnue.',correct:'V',expl:'✓ Exact — la traumatologie (y compris les petites réductions de fracture ou luxation, repositionnement de membre lors de pose de plâtre) est une indication explicite du cours.'},
+    {stmt:'Une SpO₂ à 93 % chez un adulte sain au repos est dans la norme.',correct:'F',expl:'✗ FAUX — la SpO₂ normale est de <strong>95–100 %</strong>. Une valeur à 93 % correspond à une hypoxémie légère nécessitant une surveillance.'},
+    {stmt:'Le PAC (chambre implantable) nécessite une aiguille spéciale dite non-carottante pour ne pas altérer le septum en silicone lors des ponctions répétées.',correct:'V',expl:'✓ Exact — l\'aiguille de Huber est non-carottante : elle écarte les fibres du silicone sans en prélever, permettant des milliers de ponctions sans détériorer le PAC.'}
+  ]
+},
+{
+  id:'s4q7',session:4,pts:3,type:'open',
+  topic:'CVC 3 voies',
+  text:'Décrivez les <strong>3 voies d\'un CVC 3 lumières</strong> en précisant pour chacune : sa position relative (proximale/médiane/distale), sa relation avec l\'oreillette droite et son affectation thérapeutique.',
+  items:[
+    {text:'<strong>Voie proximale</strong> : la plus courte → la plus éloignée de l\'oreillette droite → réservée aux <strong>amines vasoactives et produits non flashables</strong>',pts:1,opt:false},
+    {text:'<strong>Voie médiane</strong> : position intermédiaire → réservée aux <strong>produits de sédation</strong> (évite le bolus accidentel)',pts:1,opt:false},
+    {text:'<strong>Voie distale</strong> : la plus longue → la plus proche de l\'oreillette droite → plus grand calibre → réservée à la <strong>réanimation, alimentation parentérale, culots globulaires</strong>, autres médicaments',pts:1,opt:false}
+  ]
+}
+];
+
+const QS_S1V = [
+{
+  id:'s1vq1',session:1,pts:2.5,type:'open',
+  topic:'Transferts et surveillances',
+  text:'Lors de l\'accueil d\'un patient transféré en service d\'imagerie, le MEM doit contrôler plusieurs éléments avant l\'examen. Lesquels ? Citez-en <strong>5</strong>.',
+  items:[
+    {text:'<strong>Identification du patient</strong> et service d\'origine',pts:0.5,opt:false},
+    {text:'<strong>Indication de l\'examen</strong> à réaliser',pts:0.5,opt:false},
+    {text:'<strong>Pathologies et gestes thérapeutiques</strong> à maintenir pendant l\'examen',pts:0.5,opt:false},
+    {text:'<strong>Paramètres de surveillance</strong> (TA, pouls, SpO₂, conscience…)',pts:0.5,opt:false},
+    {text:'<strong>Appareillage et sondes</strong> en place',pts:0.5,opt:false},
+    {text:'<em>Tout autre élément pertinent issu du CM « Transferts et surveillances » est accepté.</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s1vq2',session:1,pts:1.5,type:'open',
+  topic:'Protoxyde d\'azote – MEOPA',
+  text:'Quelles sont les <strong>3 propriétés pharmacologiques</strong> du protoxyde d\'azote justifiant son utilisation lors d\'actes douloureux ?',
+  items:[
+    {text:'<strong>Sédatif</strong> – induit une sédation consciente',pts:0.5,opt:false},
+    {text:'<strong>Anxiolytique</strong>',pts:0.5,opt:false},
+    {text:'<strong>Amnésiant</strong>',pts:0.5,opt:false}
+  ]
+},
+{
+  id:'s1vq3',session:1,pts:2.5,type:'open',
+  topic:'Protoxyde d\'azote – MEOPA',
+  text:'Dans quelles <strong>5 situations cliniques</strong> l\'utilisation du MEOPA est-elle formellement contre-indiquée ?',
+  items:[
+    {text:'Refus du patient',pts:0.5,opt:false},
+    {text:'Nécessité d\'une ventilation avec O₂ > 50 %',pts:0.5,opt:false},
+    {text:'Épanchement gazeux non traité (pneumothorax, emphysème, embolie gazeuse…)',pts:0.5,opt:false},
+    {text:'Distension gazeuse abdominale ou hypertension intracrânienne',pts:0.5,opt:false},
+    {text:'Anomalies neurologiques récentes / traumatisme crânien / chirurgie oreille ou sinus / injection gaz intra-oculaire',pts:0.5,opt:false},
+    {text:'Déficit en vitamine B12',pts:0.5,opt:false},
+    {text:'<em>5 réponses attendues parmi les 6 ci-dessus.</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s1vq4',session:1,pts:3,type:'vf',
+  topic:'Stomies digestives – variante',
+  text:'Pour chacune des affirmations suivantes concernant les <strong>stomies digestives</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'Les stomies digestives ne peuvent avoir qu\'une fonction d\'élimination.',correct:'F',expl:'✗ FAUX — les stomies digestives peuvent être d\'<strong>alimentation</strong> (gastrostomie, jéjunostomie) <strong>ou</strong> d\'élimination (colostomie…). La fonction est double, pas unique.'},
+    {stmt:'Toute stomie digestive est définitive et irréversible par nature.',correct:'F',expl:'✗ FAUX — une stomie peut être <strong>transitoire</strong> (ex. dérivation post-opératoire temporaire) ou définitive. Elle n\'est pas irréversible par définition.'},
+    {stmt:'Pour les stomies d\'élimination, les types anatomiques reconnus sont uniquement terminale et latérale.',correct:'V',expl:'✓ Exact — contrairement à la session 1 qui proposait « médiane » (faux), <strong>terminale</strong> et <strong>latérale</strong> (en canon de fusil) sont bien les deux seuls types anatomiques reconnus.'}
+  ]
+},
+{
+  id:'s1vq5',session:1,pts:3,type:'vf',
+  topic:'CVC – variante',
+  text:'Concernant les <strong>cathéters veineux centraux (CVC)</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'Les PICC-lines et les cathéters tunnélisés constituent ensemble les CVC d\'abord central.',correct:'F',expl:'✗ FAUX — l\'abord central comprend les <strong>cathéters tunnélisés et les PAC</strong>. Le PICC-line est un abord <strong>périphérique</strong> (inséré dans une veine du bras).'},
+    {stmt:'Un CVC est introduit jusqu\'à la veine cave supérieure.',correct:'V',expl:'✓ Exact — la VCS est la destination standard d\'un CVC (abord sous-clavier ou jugulaire). La VCI n\'est qu\'un accès alternatif en cas de difficulté.'},
+    {stmt:'Un CVC est maintenu en place uniquement grâce à un système de fixation adhésif transparent, sans point de suture.',correct:'F',expl:'✗ FAUX — le CVC est maintenu par un <strong>point de suture</strong>. C\'est le PICC-line qui utilise un système de fixation adhésif. Pas de suture = description du PICC-line, non du CVC.'},
+    {stmt:'Le PICC-line ne remonte pas jusqu\'aux cavités centrales : il reste dans les veines périphériques du bras.',correct:'F',expl:'✗ FAUX — bien qu\'inséré dans une veine périphérique du bras, le PICC-line est monté jusqu\'à <strong>l\'extrémité distale de la VCS</strong>. Il est donc bien un cathéter central, malgré l\'insertion périphérique.'},
+    {stmt:'Le PAC est un boîtier implanté sous la peau, de la taille approximative d\'une pièce d\'un euro.',correct:'V',expl:'✓ Exact — taille d\'une pièce d\'un euro, implanté sous la peau, relié à un cathéter vers la VCS.'},
+    {stmt:'L\'aiguille de Huber utilisée pour le PAC est dite non-carottante car elle n\'altère pas le septum en silicone lors des ponctions.',correct:'V',expl:'✓ Exact — non-carottante = elle écarte les fibres du silicone sans en prélever, permettant des milliers de ponctions répétées sans abîmer le PAC.'},
+    {stmt:'Un PICC-line peut rester en place de 6 à 12 mois.',correct:'F',expl:'✗ FAUX — la durée de maintien d\'un PICC-line est de <strong>3 à 6 mois</strong> (pas 6 à 12 mois).'},
+    {stmt:'Le PAC est un dispositif qui doit être renouvelé tous les 5 ans pour des raisons de sécurité.',correct:'F',expl:'✗ FAUX — le PAC peut être maintenu jusqu\'à <strong>10 ans</strong>. Il n\'existe pas de règle de renouvellement systématique à 5 ans.'}
+  ]
+},
+{
+  id:'s1vq6',session:1,pts:4.5,type:'vf',
+  topic:'Oxygénothérapie – variante CORRIGÉE',
+  text:'Concernant l\'<strong>oxygénothérapie</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'En situation d\'urgence vitale, le MEM peut administrer l\'oxygène à 15 l/min sans prescription médicale préalable.',correct:'V',expl:'✓ Exact — en urgence, le débit d\'O₂ standardisé est <strong>15 l/min</strong>. C\'est ce débit spécifique que le MEM peut initier. Ce n\'est pas le MEM qui « décide librement du débit » — le débit d\'urgence est fixé.'},
+    {stmt:'L\'emploi de vaseline sur les lèvres d\'un patient sous O₂ est autorisé car elle n\'est pas en contact direct avec le circuit.',correct:'F',expl:'✗ FAUX — tout corps gras est interdit en présence d\'O₂, même s\'il n\'est pas directement sur le circuit. L\'O₂ est un comburant puissant et tout corps gras à proximité constitue un risque incendie.'},
+    {stmt:'Les lunettes nasales à O₂ sont adaptées aux débits compris entre 0,5 et 4 l/min.',correct:'V',expl:'✓ Exact — plage de débits des lunettes nasales : 0,5–4 l/min. Au-delà, un masque est nécessaire.'},
+    {stmt:'Les sondes nasales peuvent être maintenues en place plusieurs semaines sans précaution particulière.',correct:'F',expl:'✗ FAUX — les sondes nasales sont réservées à un <strong>usage court</strong> en raison du risque d\'irritation et de nécrose de la muqueuse nasale.'},
+    {stmt:'Un masque à oxygène couvre à la fois le nez et la bouche.',correct:'V',expl:'✓ Exact — par définition, un masque à O₂ doit couvrir nez ET bouche pour délivrer la FiO₂ souhaitée.'},
+    {stmt:'Le masque à haute concentration (MHC) nécessite un débit minimum de 9 l/min pour maintenir le ballon réservoir correctement gonflé.',correct:'V',expl:'✓ Exact — débit 9–15 l/min pour maintenir le ballon gonflé et éviter la ré-inhalation de CO₂ expiré.'}
+  ]
+},
+{
+  id:'s1vq7',session:1,pts:3,type:'open',
+  topic:'Types de stomies',
+  text:'En vous appuyant sur le cours, listez les <strong>3 catégories de stomies</strong> existantes et illustrez chacune d\'un exemple clinique.',
+  items:[
+    {text:'<strong>Stomies aériennes</strong> — ouverture sur les voies respiratoires &nbsp;<em>(ex : trachéotomie, trachéostomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies de décharge / élimination</strong> — ouverture sur le tube digestif ou urinaire &nbsp;<em>(ex : colostomie, iléostomie, urétérostomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies d\'alimentation</strong> — ouverture pour apport nutritif direct &nbsp;<em>(ex : gastrostomie, jéjunostomie)</em>',pts:1,opt:false}
+  ]
+}
+];
+
+const QS_S2V = [
+{
+  id:'s2vq1',session:2,pts:2.5,type:'open',
+  topic:'Appareillage – Plan cardio-respiratoire',
+  text:'Lors de la prise en charge d\'un patient hospitalisé arrivant en imagerie, quel équipement cardio-respiratoire le MEM doit-il obligatoirement vérifier ? Citez <strong>5 éléments</strong>.',
+  items:[
+    {text:'<strong>Respirateur automatique</strong> muni d\'une alarme de débranchement (+ insufflateur manuel de secours)',pts:0.5,opt:false},
+    {text:'<strong>Aspirateur électrique de mucosités</strong>',pts:0.5,opt:false},
+    {text:'<strong>Scope</strong> (TA, pouls, oxymètre de pouls…)',pts:0.5,opt:false},
+    {text:'<strong>Dispositif de perfusion à débit continu</strong> (PSE, pompe volumétrique)',pts:0.5,opt:false},
+    {text:'<strong>Matelas coquille / collier cervical / contention</strong> (plan locomoteur)',pts:0.5,opt:false}
+  ]
+},
+{
+  id:'s2vq2',session:2,pts:1.5,type:'open',
+  topic:'Complications lors d\'un transfert',
+  text:'Lors d\'un transfert intra-hospitalier, quelles sont <strong>3 complications médicales fréquentes</strong> auxquelles le MEM doit être prêt à réagir ?',
+  items:[
+    {text:'<strong>Agitation / chute</strong>',pts:0.5,opt:false},
+    {text:'<strong>Désaturation</strong> (baisse de la SpO₂)',pts:0.5,opt:false},
+    {text:'<strong>Instabilité hémodynamique</strong>',pts:0.5,opt:false},
+    {text:'<em>Autres acceptés : arythmie, désadaptation du respirateur, arrêt cardio-respiratoire, sédation insuffisante, extubation accidentelle…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s2vq3',session:2,pts:2.5,type:'open',
+  topic:'Sonde naso-gastrique',
+  text:'Dans quels <strong>5 contextes cliniques</strong> la pose d\'une sonde naso-gastrique (SNG) est-elle indiquée ?',
+  items:[
+    {text:'<strong>Syndrome occlusif</strong>',pts:0.5,opt:false},
+    {text:'Mise au repos digestif <strong>après chirurgie digestive</strong>',pts:0.5,opt:false},
+    {text:'Prévention de l\'<strong>inhalation</strong> chez le patient intubé-ventilé',pts:0.5,opt:false},
+    {text:'<strong>Hémorragie digestive haute</strong>',pts:0.5,opt:false},
+    {text:'Patient <strong>dans le coma</strong> (prévention syndrome de Mendelson)',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : tubage gastrique bactériologique, nutrition entérale, intoxication médicamenteuse…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s2vq4',session:2,pts:3,type:'vf',
+  topic:'Sonde naso-gastrique – variante',
+  text:'Concernant la <strong>sonde naso-gastrique (SNG)</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'La SNG peut être posée par le MEM sur son initiative propre, sans attendre la prescription médicale, si la situation clinique l\'exige.',correct:'F',expl:'✗ FAUX — la SNG est un acte <strong>soumis à prescription médicale</strong> dans tous les cas, y compris en urgence. Le MEM n\'a pas l\'initiative de cet acte.'},
+    {stmt:'La dégradation de la sonde de Salem par l\'acidité gastrique impose un remplacement toutes les 3 à 4 jours.',correct:'V',expl:'✓ Exact — le PVC (matériau de la sonde de Salem) est dégradé par l\'acide gastrique, imposant un remplacement à 3–4 jours.'},
+    {stmt:'La prise d\'air d\'une SNG en aspiration douce doit rester ouverte pour éviter que la sonde ne se collabe à la paroi gastrique.',correct:'V',expl:'✓ Exact — prise d\'air OUVERTE en aspiration douce : évite le collapsus de la sonde contre la paroi (risque d\'ulcère gastrique). Clampée seulement en siphonnage.'},
+    {stmt:'La sonde de Faucher est indiquée pour l\'alimentation entérale des patients dénutris ne pouvant pas s\'alimenter oralement.',correct:'F',expl:'✗ FAUX — la sonde de Faucher est réservée au <strong>lavage gastrique d\'urgence</strong> (intoxication médicamenteuse). La nutrition entérale utilise des sondes souples en polyuréthane ou silicone.'},
+    {stmt:'Chez un patient intubé-ventilé, la SNG est systématiquement mise en place pour prévenir le risque de régurgitation et d\'inhalation.',correct:'V',expl:'✓ Exact — prévention de l\'inhalation du contenu gastrique (syndrome de Mendelson) chez les patients intubés-ventilés est une indication reconnue.'},
+    {stmt:'Le lavage gastrique par SNG est aujourd\'hui la technique de référence dans les intoxications médicamenteuses aiguës.',correct:'F',expl:'✗ FAUX — le cours précise que le lavage gastrique est « de moins en moins pratiqué <strong>au profit du charbon actif</strong> ». Il n\'est plus la technique de référence.'}
+  ]
+},
+{
+  id:'s2vq5',session:2,pts:3,type:'vf',
+  topic:'Aspirations endo-trachéales – variante',
+  text:'Concernant les <strong>aspirations endo-trachéales</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'L\'aspiration endo-trachéale a uniquement pour objectif d\'améliorer la ventilation ; elle ne contribue pas à la prévention des infections pulmonaires.',correct:'F',expl:'✗ FAUX — l\'aspiration a <strong>plusieurs objectifs</strong> : maintenir la perméabilité des VA, améliorer les échanges gazeux, <strong>prévenir la surinfection pulmonaire</strong> et favoriser la phonation.'},
+    {stmt:'Pour réaliser une aspiration, on introduit la sonde en maintenant une aspiration continue dès l\'entrée dans la canule.',correct:'F',expl:'✗ FAUX — l\'aspiration lors de l\'introduction est formellement interdite. La sonde est <strong>introduite sans aspirer</strong>, et l\'aspiration ne débute qu\'au retrait.'},
+    {stmt:'Chaque aspiration doit durer au maximum 10 secondes pour éviter la désaturation du patient.',correct:'V',expl:'✓ Exact — durée maximale de 10 secondes par aspiration.'},
+    {stmt:'Le mouvement de rotation lors du retrait de la sonde est contre-indiqué car il majore les lésions de la muqueuse.',correct:'F',expl:'✗ FAUX — le mouvement de rotation lors du retrait est au contraire <strong>recommandé</strong> par le cours (retrait lent en rotation tout en obstruant le stop vide).'},
+    {stmt:'La trachéotomie peut être réversible (provisoire) contrairement à la trachéostomie qui est toujours définitive.',correct:'V',expl:'✓ Exact — trachéotomie = provisoire ou définitive. Trachéostomie = toujours définitive (abouchement de la trachée à la peau après laryngectomie totale).'},
+    {stmt:'Une aspiration insuffisante en fréquence ou en efficacité expose le patient à un risque de pneumonie nosocomiale.',correct:'V',expl:'✓ Exact — prévenir la surinfection pulmonaire est un objectif explicite de l\'aspiration endo-trachéale régulière.'}
+  ]
+},
+{
+  id:'s2vq6',session:2,pts:4.5,type:'vf',
+  topic:'CVC / PICC / PAC – variante',
+  text:'Concernant les <strong>dispositifs d\'abord veineux central</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'Un CVC est monté jusqu\'à la veine cave supérieure afin d\'être à proximité de l\'oreillette droite et permettre un débit important.',correct:'V',expl:'✓ Exact — proximité de l\'oreillette droite → diffusion rapide, débit important, fiabilité dans la durée.'},
+    {stmt:'Le PICC-line, inséré dans le bras, n\'atteint pas les cavités centrales du cœur : il reste dans la veine brachiale.',correct:'F',expl:'✗ FAUX — le PICC-line remonte depuis la veine périphérique du bras jusqu\'à l\'<strong>extrémité distale de la VCS</strong>. Il est bien un cathéter central.'},
+    {stmt:'La durée maximale de maintien d\'un CVC standard est de 3 mois.',correct:'F',expl:'✗ FAUX — un CVC peut être maintenu <strong>6 mois</strong>, pas seulement 3.'},
+    {stmt:'L\'aiguille de Huber peut rester dans le PAC pendant 7 jours maximum.',correct:'V',expl:'✓ Exact — l\'aiguille de Huber est maintenue au maximum 7 jours.'},
+    {stmt:'Un PAC doit être renouvelé après 5 ans d\'utilisation pour des raisons de sécurité.',correct:'F',expl:'✗ FAUX — un PAC peut être maintenu jusqu\'à <strong>10 ans</strong>. Il n\'y a pas de règle de renouvellement à 5 ans.'},
+    {stmt:'La voie distale d\'un CVC 3 lumières est réservée aux produits de sédation afin d\'éviter les bolus.',correct:'F',expl:'✗ FAUX — c\'est la <strong>voie médiane</strong> qui est réservée aux produits de sédation (pour éviter le bolus). La voie distale est réservée à la réanimation, alimentation parentérale, culots globulaires.'},
+    {stmt:'Le PAC n\'est pas visible à travers la peau mais il reste palpable comme une petite bosse ferme sous la peau thoracique.',correct:'V',expl:'✓ Exact — implanté sous la peau, le PAC n\'est pas visible à l\'œil nu mais est palpable.'},
+    {stmt:'Un PICC-line est un cathéter central à insertion périphérique, maintenu 3 à 6 mois.',correct:'V',expl:'✓ Exact — définition et durée exactes du PICC-line.'},
+    {stmt:'Les cathéters tunnélisés appartiennent à la catégorie des abords périphériques.',correct:'F',expl:'✗ FAUX — les cathéters tunnélisés appartiennent à la catégorie des <strong>abords centraux</strong> (avec les PAC).'}
+  ]
+},
+{
+  id:'s2vq7',session:2,pts:3,type:'open',
+  topic:'Stomies aériennes',
+  text:'Comparez <strong>trachéotomie et trachéostomie</strong> en indiquant pour chacune : son caractère (provisoire/définitif), son objectif et son indication principale.',
+  items:[
+    {text:'<strong>Trachéotomie</strong> — provisoire ou définitive — objectif : permettre l\'entrée de l\'air sans passer par le nez/bouche, protéger des fausses routes — indications : obstruction VA, chirurgie ORL, paralysie des cordes vocales, larynx non fonctionnel',pts:1.5,opt:false},
+    {text:'<strong>Trachéostomie</strong> — définitive uniquement — objectif : trachée abouchée à la peau — indication unique : laryngectomie totale',pts:1.5,opt:false}
+  ]
+}
+];
+
+const QS_S3V = [
+{
+  id:'s3vq1',session:3,pts:2.5,type:'open',
+  topic:'Sondage urinaire à demeure',
+  text:'Dans quels <strong>5 contextes</strong> le sondage urinaire à demeure est-il indiqué ?',
+  items:[
+    {text:'<strong>Rétention urinaire</strong> aiguë ou chronique',pts:0.5,opt:false},
+    {text:'<strong>Surveillance stricte de la diurèse</strong>',pts:0.5,opt:false},
+    {text:'Chirurgie sur le <strong>petit bassin</strong> (prévention)',pts:0.5,opt:false},
+    {text:'<strong>Incontinence urinaire</strong>',pts:0.5,opt:false},
+    {text:'<strong>Irrigation / lavage vésical</strong>',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : instillation intravésicale, cystographie, ECBU, rééducation vésicale…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s3vq2',session:3,pts:1.5,type:'open',
+  topic:'MEOPA – Règles d\'administration',
+  text:'Quelles sont les <strong>3 règles temporelles</strong> qui encadrent l\'utilisation du MEOPA ?',
+  items:[
+    {text:'Durée max d\'inhalation en continu : <strong>60 minutes par jour</strong>',pts:0.5,opt:false},
+    {text:'En cas de répétition : max <strong>15 jours</strong> consécutifs',pts:0.5,opt:false},
+    {text:'Efficacité antalgique pleine après <strong>3 minutes</strong> d\'inhalation minimum',pts:0.5,opt:false}
+  ]
+},
+{
+  id:'s3vq3',session:3,pts:2.5,type:'open',
+  topic:'Incidents de conditionnement',
+  text:'Citez <strong>5 incidents liés au conditionnement</strong> qui peuvent survenir lors du déplacement d\'un patient porteur de dispositifs médicaux.',
+  items:[
+    {text:'<strong>Pansement</strong> à refaire',pts:0.5,opt:false},
+    {text:'<strong>Cathéter veineux obstrué</strong>',pts:0.5,opt:false},
+    {text:'<strong>Tubulures plicaturées</strong>',pts:0.5,opt:false},
+    {text:'<strong>Sonde d\'intubation déplacée</strong>',pts:0.5,opt:false},
+    {text:'<strong>Sonde urinaire déconnectée</strong>',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : drain déconnecté, cathéter artériel obstrué, panne du respirateur…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s3vq4',session:3,pts:3,type:'vf',
+  topic:'MEOPA – variante',
+  text:'Concernant le <strong>MEOPA</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'Le MEOPA est un mélange composé de 75 % d\'oxygène et 25 % de protoxyde d\'azote.',correct:'F',expl:'✗ FAUX — le MEOPA est un mélange <strong>équimolaire</strong> : <strong>50 % O₂ + 50 % N₂O</strong>. La proportion 75/25 est incorrecte.'},
+    {stmt:'L\'administration du MEOPA nécessite une formation spécifique et une évaluation périodique des connaissances du personnel soignant.',correct:'V',expl:'✓ Exact — le cours précise : personnel « spécifiquement formé et dont les connaissances sont périodiquement réévaluées ».'},
+    {stmt:'L\'effet antalgique du MEOPA se manifeste dès la première minute d\'inhalation.',correct:'F',expl:'✗ FAUX — l\'efficacité antalgique pleine se manifeste après au moins <strong>3 minutes</strong> d\'inhalation. Avant, l\'effet est partiel.'},
+    {stmt:'Une même séance de MEOPA peut durer jusqu\'à 2 heures si le patient le tolère bien et que le soin l\'exige.',correct:'F',expl:'✗ FAUX — la durée maximale est <strong>60 minutes en continu par jour</strong>, quelle que soit la tolérance du patient.'},
+    {stmt:'En cas de fracture d\'un membre non compliquée, le MEOPA est contre-indiqué.',correct:'F',expl:'✗ FAUX — la traumatologie (y compris les réductions de fracture ou luxation, pose de plâtre) est une <strong>indication reconnue</strong> du MEOPA. Ce n\'est pas une CI.'},
+    {stmt:'Le MEOPA est contre-indiqué avant l\'âge de 1 mois.',correct:'V',expl:'✓ Exact — l\'AMM précise : adulte et enfant de plus de 1 mois. Avant 1 mois = contre-indiqué.'}
+  ]
+},
+{
+  id:'s3vq5',session:3,pts:3,type:'vf',
+  topic:'Stomies – variante',
+  text:'Concernant les <strong>stomies</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'Une stomie d\'alimentation permet l\'évacuation des selles directement à travers la paroi abdominale.',correct:'F',expl:'✗ FAUX — l\'évacuation des selles correspond à une stomie <strong>d\'élimination</strong> (colostomie, iléostomie). La stomie d\'alimentation (gastrostomie, jéjunostomie) sert à l\'apport nutritif.'},
+    {stmt:'Une stomie transitoire peut être refermée chirurgicalement lorsqu\'elle n\'est plus nécessaire.',correct:'V',expl:'✓ Exact — une stomie provisoire (ex. colostomie de dérivation post-op) peut être fermée chirurgicalement une fois la cause traitée.'},
+    {stmt:'La trachéostomie est indiquée en cas de paralysie des cordes vocales.',correct:'F',expl:'✗ FAUX — la paralysie des cordes vocales est une indication de la <strong>trachéotomie</strong>. La trachéostomie n\'est indiquée que dans le cadre d\'une laryngectomie totale.'},
+    {stmt:'La gastrostomie est une stomie d\'alimentation, et non d\'élimination.',correct:'V',expl:'✓ Exact — la gastrostomie (PEG) est une stomie d\'alimentation permettant l\'apport nutritif direct dans l\'estomac.'},
+    {stmt:'La colostomie est un exemple de stomie intestinale d\'élimination.',correct:'V',expl:'✓ Exact — la colostomie est une ouverture du côlon à la peau pour l\'élimination des matières fécales.'},
+    {stmt:'La jéjunostomie est une stomie d\'alimentation réalisée au niveau du jéjunum (intestin grêle).',correct:'V',expl:'✓ Exact — la jéjunostomie est une stomie d\'alimentation au niveau du jéjunum, utilisée quand la gastrostomie n\'est pas réalisable.'}
+  ]
+},
+{
+  id:'s3vq6',session:3,pts:4.5,type:'vf',
+  topic:'Oxygénothérapie – variante',
+  text:'Concernant l\'<strong>oxygénothérapie</strong>, répondez VRAI ou FAUX : <em>(⚠ certaines affirmations ont été reformulées)</em>',
+  items:[
+    {stmt:'Hors urgence, l\'administration d\'O₂ sans prescription médicale est autorisée si le MEM juge la saturation du patient insuffisante.',correct:'F',expl:'✗ FAUX — hors urgence, l\'O₂ est un médicament à prescription médicale obligatoire. Le jugement clinique du MEM ne suffit pas à lui seul.'},
+    {stmt:'L\'oxygène est un comburant : en présence d\'une source d\'ignition, tout corps gras peut s\'enflammer au contact de l\'O₂.',correct:'V',expl:'✓ Exact — O₂ = comburant puissant + corps gras = combustible → risque incendie/explosion au moindre point d\'ignition.'},
+    {stmt:'Les lunettes nasales peuvent délivrer jusqu\'à 10 l/min en cas de besoin élevé en O₂.',correct:'F',expl:'✗ FAUX — les lunettes nasales sont limitées à <strong>0,5–4 l/min</strong>. Au-delà, elles sont inefficaces et inconfortables ; un masque s\'impose.'},
+    {stmt:'L\'usage prolongé des sondes nasales est déconseillé en raison du risque d\'irritation et de nécrose de la muqueuse nasale.',correct:'V',expl:'✓ Exact — usage court recommandé pour éviter les lésions de la muqueuse nasale par contact prolongé.'},
+    {stmt:'Un masque à oxygène couvrant uniquement le nez permet d\'atteindre des FiO₂ plus élevées qu\'un masque couvrant nez et bouche.',correct:'F',expl:'✗ FAUX — un masque ne couvrant que le nez est <strong>inefficace</strong> : le patient peut respirer par la bouche, diluant la FiO₂. Le masque doit couvrir nez ET bouche.'},
+    {stmt:'Un masque à haute concentration s\'utilise à faible débit (1 à 3 l/min) pour un usage prolongé.',correct:'F',expl:'✗ FAUX — le MHC nécessite un <strong>débit élevé de 9 à 15 l/min</strong> pour maintenir le ballon réservoir gonflé et éviter la ré-inhalation du CO₂.'},
+    {stmt:'L\'aérosolthérapie peut être administrée avec de l\'air comprimé comme gaz vecteur en alternative à l\'oxygène.',correct:'V',expl:'✓ Exact — l\'aérosolthérapie utilise un gaz vecteur (O₂ ou air comprimé) pour nébuliser le médicament en fines particules inhalées.'},
+    {stmt:'Une SpO₂ à 90 % est considérée comme normale chez un adulte sain au repos.',correct:'F',expl:'✗ FAUX — la SpO₂ normale est <strong>95–100 %</strong>. 90 % correspond à une hypoxémie significative nécessitant une prise en charge.'},
+    {stmt:'Le concentrateur d\'oxygène produit de l\'O₂ en le séparant de l\'azote et des autres gaz de l\'air ambiant.',correct:'V',expl:'✓ Exact — le concentrateur sépare l\'O₂ des autres composants de l\'air (principalement N₂) pour délivrer une concentration de ~93 % d\'O₂.'}
+  ]
+},
+{
+  id:'s3vq7',session:3,pts:3,type:'open',
+  topic:'Types de stomies',
+  text:'Nommez et définissez les <strong>3 grands types de stomies</strong>. Donnez pour chacun un exemple et précisez son rôle principal.',
+  items:[
+    {text:'<strong>Stomies aériennes</strong> — ouverture sur les voies respiratoires, rôle : assurer la ventilation &nbsp;<em>(ex : trachéotomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies d\'élimination</strong> — ouverture sur le tube digestif ou urinaire, rôle : évacuer les déchets &nbsp;<em>(ex : colostomie)</em>',pts:1,opt:false},
+    {text:'<strong>Stomies d\'alimentation</strong> — ouverture pour apport nutritif, rôle : nourrir le patient sans passer par la bouche &nbsp;<em>(ex : gastrostomie)</em>',pts:1,opt:false}
+  ]
+}
+];
+
+const QS_S4V = [
+{
+  id:'s4vq1',session:4,pts:2.5,type:'open',
+  topic:'Cathéters centraux – Indications',
+  text:'Quelles sont les <strong>5 situations cliniques</strong> qui justifient la mise en place d\'un cathéter veineux central ?',
+  items:[
+    {text:'<strong>Accès veineux périphérique impossible</strong>',pts:0.5,opt:false},
+    {text:'<strong>Insuffisance circulatoire aiguë</strong> (remplissage rapide)',pts:0.5,opt:false},
+    {text:'<strong>Nutrition parentérale</strong>',pts:0.5,opt:false},
+    {text:'<strong>Chimiothérapie</strong> ou antibiothérapie prolongée',pts:0.5,opt:false},
+    {text:'Administration de <strong>drogues vasoactives</strong> ou produits veinotoxiques',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : hémodialyse, prélèvements sanguins répétés…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s4vq2',session:4,pts:1.5,type:'open',
+  topic:'Aspirations trachéales – Objectifs',
+  text:'Citez les <strong>5 critères</strong> qui définissent une aspiration endo-trachéale correcte selon le cours.',
+  items:[
+    {text:'<strong>Ascendante</strong>',pts:0.3,opt:false},
+    {text:'<strong>Aseptique</strong>',pts:0.3,opt:false},
+    {text:'<strong>Douce</strong>',pts:0.3,opt:false},
+    {text:'<strong>Brève</strong> (≤ 10 secondes)',pts:0.3,opt:false},
+    {text:'<strong>Efficace</strong>',pts:0.3,opt:false}
+  ]
+},
+{
+  id:'s4vq3',session:4,pts:2.5,type:'open',
+  topic:'Sécurité – Oxygène',
+  text:'Citez <strong>5 règles de sécurité</strong> à respecter lors de l\'utilisation de l\'O₂ en milieu de soins.',
+  items:[
+    {text:'Aucun <strong>corps gras</strong> sur le matériel ou le patient',pts:0.5,opt:false},
+    {text:'Aucune <strong>flamme, cigarette, source d\'ignition</strong> à proximité',pts:0.5,opt:false},
+    {text:'Bouteille maintenue <strong>verticale et attachée</strong>',pts:0.5,opt:false},
+    {text:'Vérifier l\'<strong>étanchéité des raccords</strong> et la quantité disponible',pts:0.5,opt:false},
+    {text:'En urgence : débit standardisé à <strong>15 l/min</strong> (non laissé au libre choix)',pts:0.5,opt:false},
+    {text:'<em>Aussi acceptés : stockage en zone ventilée, pas d\'aérosol à proximité…</em>',pts:0,opt:true}
+  ]
+},
+{
+  id:'s4vq4',session:4,pts:3,type:'vf',
+  topic:'MEOPA – variante',
+  text:'Concernant les <strong>règles d\'administration du MEOPA</strong>, répondez VRAI ou FAUX : <em>(⚠ variante)</em>',
+  items:[
+    {stmt:'La prescription de MEOPA peut être donnée oralement par le médecin en cas d\'urgence.',correct:'F',expl:'✗ FAUX — la prescription de MEOPA doit être <strong>écrite, datée et signée</strong> par un médecin ou une sage-femme. Une prescription orale ne suffit pas.'},
+    {stmt:'La personne qui administre le MEOPA doit se consacrer exclusivement à cette surveillance et ne peut pas simultanément réaliser le soin douloureux.',correct:'V',expl:'✓ Exact — la surveillance est assurée par un soignant dédié <strong>exclusivement à cette tâche</strong>. Les actes douloureux sont réalisés par une autre personne.'},
+    {stmt:'En cas de répétition de séances, le MEOPA peut être utilisé quotidiennement pendant 1 mois.',correct:'F',expl:'✗ FAUX — en cas de répétition, la durée ne doit pas dépasser <strong>15 jours consécutifs</strong>, pas 1 mois.'},
+    {stmt:'Le débit de MEOPA est adapté en fonction de la capacité ventilatoire du patient, il n\'est pas fixe.',correct:'V',expl:'✓ Exact — le cours précise : « le débit du gaz est adapté en fonction de la capacité du patient à ventiler ». Il n\'y a pas de débit fixe standardisé pour le MEOPA.'},
+    {stmt:'Les aides-soignants peuvent utiliser la valve à la demande du MEOPA uniquement si le professionnel formé est absent momentanément.',correct:'F',expl:'✗ FAUX — les aides-soignants peuvent utiliser la valve à la demande <strong>uniquement sous la responsabilité et en présence</strong> du professionnel formé. L\'absence de celui-ci ne le permet pas.'},
+    {stmt:'Un patient présentant un déficit en vitamine B12 ne doit pas recevoir de MEOPA.',correct:'V',expl:'✓ Exact — le déficit en vitamine B12 est une contre-indication au MEOPA (le N₂O oxyde la cobalamine et aggrave le déficit, risque neurologique).'}
+  ]
+},
+{
+  id:'s4vq5',session:4,pts:3,type:'vf',
+  topic:'Sondage urinaire – variante',
+  text:'Concernant le <strong>sondage urinaire</strong>, répondez VRAI ou FAUX : <em>(⚠ variante)</em>',
+  items:[
+    {stmt:'Le sondage urinaire intermittent ne peut être effectué que par du personnel soignant, jamais par le patient lui-même.',correct:'F',expl:'✗ FAUX — le sondage urinaire intermittent peut être réalisé par le soignant (hétéro-sondage) <strong>ou par le patient lui-même</strong> (auto-sondage), notamment chez les patients atteints de pathologies neurologiques.'},
+    {stmt:'La cystographie rétrograde est une indication de sondage urinaire dans le cadre de l\'imagerie médicale.',correct:'V',expl:'✓ Exact — la cystographie rétrograde (remplissage de la vessie avec du PC iodé via une sonde) est une indication typique du sondage en imagerie.'},
+    {stmt:'Le principal risque infectieux du SAD est la septicémie à point de départ urinaire.',correct:'F',expl:'✗ FAUX — le risque infectieux principal du SAD est l\'<strong>infection urinaire</strong> (cystite, pyélonéphrite). La septicémie est une complication grave possible mais secondaire à l\'infection urinaire.'},
+    {stmt:'Un sondage urinaire réalisé avant une chirurgie du petit bassin est une indication préventive.',correct:'V',expl:'✓ Exact — le sondage préventif avant chirurgie pelvienne évite la rétention post-opératoire et protège la voie urinaire pendant l\'intervention.'},
+    {stmt:'Une rétention urinaire chronique non traitée peut conduire à une insuffisance rénale aiguë par dilatation des reins.',correct:'V',expl:'✓ Exact — la stase urinaire prolongée peut provoquer un reflux des urines vers les reins (reflux vésico-urétéral) → dilatation → insuffisance rénale aiguë.'},
+    {stmt:'Le sondage urinaire est toujours contre-indiqué en cas d\'allergie connue au latex.',correct:'F',expl:'✗ FAUX — l\'allergie au latex n\'est pas une contre-indication absolue au sondage : il suffit d\'utiliser des sondes et gants <strong>sans latex</strong> (silicone, PVC). C\'est une précaution, pas une CI absolue.'}
+  ]
+},
+{
+  id:'s4vq6',session:4,pts:4.5,type:'vf',
+  topic:'Révision générale – variante',
+  text:'Questions de <strong>révision générale</strong>, répondez VRAI ou FAUX : <em>(⚠ variante)</em>',
+  items:[
+    {stmt:'Le PICC-line a la même durée de maintien qu\'un CVC d\'abord central (cathéter tunnélisé), soit 6 mois.',correct:'F',expl:'✗ FAUX — PICC-line : <strong>3–6 mois</strong>. CVC tunnélisé : <strong>6 mois</strong>. Durées différentes.'},
+    {stmt:'La prise d\'air d\'une SNG en mode siphonnage doit être clampée.',correct:'V',expl:'✓ Exact — en siphonnage, la prise d\'air est clampée. En aspiration douce, elle est ouverte.'},
+    {stmt:'La trachéostomie est indiquée chez un patient présentant une paralysie des cordes vocales.',correct:'F',expl:'✗ FAUX — c\'est la <strong>trachéotomie</strong> (provisoire ou définitive) qui est indiquée. La trachéostomie est réservée à la laryngectomie totale.'},
+    {stmt:'Lors d\'une aspiration endo-trachéale, on peut aspirer en introduisant si les sécrétions sont très abondantes.',correct:'F',expl:'✗ FAUX — quelle que soit l\'abondance des sécrétions, <strong>on ne doit jamais aspirer lors de l\'introduction</strong>. En cas de sécrétions abondantes, on enlève la chemise interne pour la nettoyer.'},
+    {stmt:'La voie médiane d\'un CVC 3 lumières est réservée à la sédation pour éviter les injections accidentelles en bolus.',correct:'V',expl:'✓ Exact — la voie médiane est spécifiquement réservée aux produits de sédation car sa position intermédiaire réduit le risque de bolus accidentel.'},
+    {stmt:'La colostomie est une stomie d\'alimentation permettant l\'apport nutritif direct.',correct:'F',expl:'✗ FAUX — la colostomie est une stomie d\'<strong>ÉLIMINATION</strong> (évacuation des matières fécales). La stomie d\'alimentation est la gastrostomie ou jéjunostomie.'},
+    {stmt:'La fracture costale non compliquée est une contre-indication à l\'utilisation du MEOPA.',correct:'F',expl:'✗ FAUX — la fracture costale simple n\'est pas une CI au MEOPA. Ce sont les épanchements gazeux <strong>non traités</strong> (pneumothorax, pneumomédiastin…) qui le sont. Une fracture costale sans pneumothorax associé peut bénéficier du MEOPA.'},
+    {stmt:'Une SpO₂ de 88 % chez un adulte correspond à une hypoxémie sévère nécessitant une intervention.',correct:'V',expl:'✓ Exact — SpO₂ < 88 % = hypoxémie sévère. Intervention (O₂, position, appel médecin) nécessaire.'},
+    {stmt:'L\'aiguille de Huber est utilisée pour le PICC-line.',correct:'F',expl:'✗ FAUX — l\'aiguille de Huber est utilisée pour ponctionner le <strong>PAC (chambre implantable)</strong>. Le PICC-line utilise un raccord Luer-Lock standard, pas d\'aiguille de Huber.'}
+  ]
+},
+{
+  id:'s4vq7',session:4,pts:3,type:'open',
+  topic:'CVC 3 voies',
+  text:'Pour un CVC à 3 lumières, expliquez quel médicament ou produit est assigné à chaque voie et <strong>pourquoi cette répartition est importante</strong>.',
+  items:[
+    {text:'<strong>Voie proximale</strong> (la plus courte, la plus éloignée de l\'oreillette) → amines vasoactives et produits non flashables — <em>pourquoi : les amines ne doivent pas être injectées en bolus brusque vers l\'oreillette</em>',pts:1,opt:false},
+    {text:'<strong>Voie médiane</strong> → produits de sédation — <em>pourquoi : évite les bolus accidentels de sédatifs</em>',pts:1,opt:false},
+    {text:'<strong>Voie distale</strong> (la plus longue, la plus proche de l\'oreillette, le plus grand calibre) → réanimation, alimentation parentérale, culots globulaires — <em>pourquoi : grand calibre permet les débits élevés et l\'administration de produits visqueux</em>',pts:1,opt:false}
+  ]
+}
+];
+
+// Session registry
+const SESSIONS = {
+  s1: {label:'Session 1', qs:QS_S1, pts:20},
+  s2: {label:'Session 2', qs:QS_S2, pts:20},
+  s3: {label:'Session 3', qs:QS_S3, pts:20},
+  s4: {label:'Session 4', qs:QS_S4, pts:20},
+  s1v:{label:'Session 1 – Variante', qs:QS_S1V, pts:20},
+  s2v:{label:'Session 2 – Variante', qs:QS_S2V, pts:20},
+  s3v:{label:'Session 3 – Variante', qs:QS_S3V, pts:20},
+  s4v:{label:'Session 4 – Variante', qs:QS_S4V, pts:20},
+};
+
+function allQs() {
+  return [...QS_S1,...QS_S2,...QS_S3,...QS_S4,...QS_S1V,...QS_S2V,...QS_S3V,...QS_S4V];
+}
+
+function QUESTIONS() { return getQueue(); }  // compat shim
+
+
+// ═══════════════════════════ APP STATE ═══════════════════════════════════════
+let mode = 's1';
+let queue = [];
+let qIndex = 0;
+let totalScore = 0;
+let qScores = [];
+let corrRevealed = false;
+let vfAnswered = 0;
+let vfTotal = 0;
+
+// setMode replaced below
+
+function updateStartSub() {
+  const qs = getQueue();
+  const totalPts = qs.reduce((a,q)=>a+q.pts,0);
+  const label = mode==='mix' ? 'Mélange — toutes sessions' : (SESSIONS[mode]?.label || mode);
+  const sub = document.getElementById('start-sub-text');
+  if (sub) sub.textContent = label + ' · ' + qs.length + ' questions · ' + Math.round(totalPts) + ' pts';
+}
+
+function getQueue() {
+  if (mode === 'mix') {
+    const qs = allQs();
+    shuffle(qs);
+    return qs;
+  }
+  const sess = SESSIONS[mode];
+  return sess ? [...sess.qs] : [];
+}
+
+function shuffle(arr) {
+  for (let i=arr.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+}
+
+function resetState() {
+  totalScore = 0; qIndex = 0; qScores = [];
+  updateScoreDisplay();
+}
+
+function startQuiz() {
+  queue = getQueue();
+  qIndex = 0; totalScore = 0; qScores = [];
+  showScreen('question');
+  renderQuestion();
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+}
+
+// ═══════════════════════════ RENDER QUESTION ═════════════════════════════════
+function renderQuestion() {
+  const q = queue[qIndex];
+  corrRevealed = false;
+  vfAnswered = 0;
+
+  // meta
+  const sessionLabel = mode==='mix' ? 'S'+q.session+' · Q'+q.num : 'Question '+q.num;
+  document.getElementById('qBadge').textContent = sessionLabel;
+  document.getElementById('qPts').textContent = q.pts + ' pt' + (q.pts>1?'s':'');
+  document.getElementById('qText').innerHTML = q.text;
+  document.getElementById('qTopic').textContent = '📌 ' + q.topic;
+
+  // reset panels
+  document.getElementById('corrBlock').classList.remove('show');
+  document.getElementById('autoScore').classList.remove('show');
+  const btnReveal = document.getElementById('btnReveal');
+  const btnNext   = document.getElementById('btnNext');
+  btnReveal.classList.remove('active');
+  btnNext.style.display = 'none';
+
+  if (q.type === 'open') {
+    document.getElementById('vfList').innerHTML = '';
+    document.getElementById('vfList').style.display = 'none';
+    document.getElementById('answerArea').style.display = 'block';
+    document.getElementById('answerTA').value = '';
+    btnReveal.style.display = 'flex';
+    renderOpenCorrection(q);
+  } else {
+    document.getElementById('answerArea').style.display = 'none';
+    document.getElementById('vfList').style.display = 'flex';
+    btnReveal.style.display = 'none';
+    vfTotal = q.items.length;
+    renderVF(q);
+  }
+
+  updateProgress();
+}
+
+function renderOpenCorrection(q) {
+  const body = document.getElementById('corrBody');
+  const scorableItems = q.items.filter(i=>!i.opt&&i.pts>0);
+  let html = '<span class="selfcheck-label">Cochez les éléments que vous aviez :</span>';
+  html += '<div class="selfcheck-list" id="selfList">';
+  scorableItems.forEach((item,idx) => {
+    html += `<label class="selfcheck-item" onclick="toggleCheck(this,${idx})">
+      <div class="selfcheck-box"></div>
+      <span class="selfcheck-text">${item.text}</span>
+      <span class="selfcheck-pts">${item.pts} pt</span>
+    </label>`;
+  });
+  html += '</div>';
+  // optional items
+  const optItems = q.items.filter(i=>i.opt);
+  if (optItems.length) {
+    html += '<div style="margin-top:10px;font-size:12px;color:var(--muted);font-style:italic;">';
+    optItems.forEach(i=>{ html += '<div style="padding:3px 0;">'+i.text+'</div>'; });
+    html += '</div>';
+  }
+  html += `<div class="my-score-display" id="myScore">
+    <span style="color:var(--muted);font-size:12px;">Mon score :</span>
+    <span class="pts-val" id="myScoreVal">0</span>
+    <span style="color:var(--muted);font-size:12px;">/ ${q.pts} pt${q.pts>1?'s':''}</span>
+  </div>`;
+  body.innerHTML = html;
+  document.getElementById('corrHeader').textContent = '✦ Correction — cochez vos bonnes réponses';
+}
+
+function renderVF(q) {
+  const list = document.getElementById('vfList');
+  list.innerHTML = '';
+  q.items.forEach((item,idx) => {
+    const div = document.createElement('div');
+    div.className = 'vf-item';
+    div.dataset.correct = item.correct;
+    div.dataset.idx = idx;
+    div.innerHTML = `
+      <div class="vf-row">
+        <span class="vf-stmt">${item.stmt}</span>
+        <div class="vf-btns">
+          <button class="vf-btn" onclick="answerVF(this,'V')">VRAI</button>
+          <button class="vf-btn" onclick="answerVF(this,'F')">FAUX</button>
+        </div>
+      </div>
+      <div class="vf-expl ${item.correct==='V'?'ok':'ko'}">${item.expl}</div>`;
+    list.appendChild(div);
+  });
+}
+
+// ═══════════════════════════ VF LOGIC ════════════════════════════════════════
+function answerVF(btn, answer) {
+  const item = btn.closest('.vf-item');
+  if (item.dataset.answered) return;
+  item.dataset.answered = '1';
+
+  const correct = item.dataset.correct;
+  const isRight = answer === correct;
+  const expl = item.querySelector('.vf-expl');
+  item.querySelectorAll('.vf-btn').forEach(b => {
+    b.disabled = true;
+    const isV = b.textContent.trim()==='VRAI';
+    if ((isV && correct==='V')||(!isV && correct==='F')) b.classList.add('show-right');
+  });
+  btn.classList.add(isRight ? 'sel-ok' : 'sel-ko');
+  item.classList.add(isRight ? 'answered-correct' : 'answered-wrong');
+  if (!isRight) expl.classList.add('show');
+
+  vfAnswered++;
+  if (vfAnswered === vfTotal) onAllVFAnswered();
+}
+
+function onAllVFAnswered() {
+  const q = queue[qIndex];
+  const items = document.querySelectorAll('#vfList .vf-item');
+  const nCorrect = [...items].filter(i=>i.classList.contains('answered-correct')).length;
+  const pts = Math.round((nCorrect / q.items.length) * q.pts * 100) / 100;
+
+  document.getElementById('autoScoreVal').textContent =
+    pts + ' pt' + (pts>1?'s':'') + '  (' + nCorrect + '/' + q.items.length + ' correctes)';
+  document.getElementById('autoScore').classList.add('show');
+
+  addScore(q, pts);
+  showNextBtn();
+}
+
+// ═══════════════════════════ OPEN LOGIC ═══════════════════════════════════════
+function toggleCheck(el, idx) {
+  el.classList.toggle('checked');
+  recalcSelfScore();
+}
+
+function recalcSelfScore() {
+  const q = queue[qIndex];
+  const scorableItems = q.items.filter(i=>!i.opt&&i.pts>0);
+  const checks = document.querySelectorAll('#selfList .selfcheck-item.checked');
+  let score = 0;
+  checks.forEach(ch => {
+    const idx = parseInt(ch.dataset ? ch.dataset.idx : 0);
+    // find pts from label index
+    const allLabels = document.querySelectorAll('#selfList .selfcheck-item');
+    const labelIdx = [...allLabels].indexOf(ch);
+    if (labelIdx >= 0 && labelIdx < scorableItems.length)
+      score += scorableItems[labelIdx].pts;
+  });
+  document.getElementById('myScoreVal').textContent = Math.round(score*100)/100;
+  return score;
+}
+
+function revealCorrection() {
+  if (corrRevealed) return;
+  corrRevealed = true;
+  const btn = document.getElementById('btnReveal');
+  btn.classList.add('active');
+  document.getElementById('corrBlock').classList.add('show');
+  // add index to self-check labels
+  const labels = document.querySelectorAll('#selfList .selfcheck-item');
+  labels.forEach((l,i)=>l.dataset.idx=i);
+  showNextBtn();
+}
+
+function onOpenNext() {
+  const score = recalcSelfScore();
+  const q = queue[qIndex];
+  addScore(q, score);
+}
+
+// ═══════════════════════════ SCORING ═════════════════════════════════════════
+function addScore(q, pts) {
+  // only add once per question
+  if (qScores[qIndex] !== undefined) return;
+  qScores[qIndex] = {label: (mode==='mix'?'S'+q.session+'·':'')+'Q'+q.num+' '+q.topic, pts, max:q.pts};
+  totalScore += pts;
+  updateScoreDisplay();
+}
+
+function updateScoreDisplay() {
+  const max = queue.length ? queue.reduce((a,q)=>a+q.pts,0) : 20;
+  document.getElementById('scoreVal').textContent = Math.round(totalScore*100)/100;
+  document.getElementById('scoreMax').textContent = max;
+}
+
+function showNextBtn() {
+  document.getElementById('btnNext').style.display = 'flex';
+}
+
+// ═══════════════════════════ NAVIGATION ══════════════════════════════════════
+function nextQuestion() {
+  // If open and correction not yet added to score, add it now
+  const q = queue[qIndex];
+  if (q.type==='open' && qScores[qIndex]===undefined) onOpenNext();
+
+  qIndex++;
+  if (qIndex >= queue.length) { showEnd(); return; }
+  renderQuestion();
+}
+
+function updateProgress() {
+  const total = queue.length;
+  const pct = total ? ((qIndex) / total * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = (qIndex+1) + ' / ' + total;
+}
+
+// ═══════════════════════════ END SCREEN ══════════════════════════════════════
+function showEnd() {
+  const maxPts = queue.reduce((a,q)=>a+q.pts,0);
+  const pct = maxPts ? totalScore/maxPts : 0;
+  const score20 = Math.round(pct*20*10)/10;
+
+  document.getElementById('endNum').textContent = Math.round(totalScore*10)/10;
+  document.getElementById('endDen').textContent = '/ ' + Math.round(maxPts*10)/10 + ' pts';
+
+  // ring animation
+  const circumference = 2 * Math.PI * 70;
+  const offset = circumference * (1 - pct);
+  setTimeout(()=>{
+    document.getElementById('ringFill').style.strokeDashoffset = offset;
+  }, 100);
+
+  const titles = [
+    [0,.4,'💪 Continue à réviser','Il y a encore des lacunes à combler.'],
+    [.4,.6,'🙂 Correct','Quelques points à consolider.'],
+    [.6,.8,'👍 Bien joué','Bonne maîtrise des bases.'],
+    [.8,1,'🏆 Excellent !','Très bonne préparation au partiel !'],
+    [1,2,'🌟 Parfait !','Tu maîtrises parfaitement ce chapitre !'],
+  ];
+  const [,, title, sub] = titles.find(([lo,hi])=>pct>=lo&&pct<hi) || titles[4];
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endSub').textContent = sub;
+
+  // breakdown
+  const rows = document.getElementById('endRows');
+  rows.innerHTML = qScores.map(s=>`
+    <div class="end-row">
+      <span>${s.label}</span>
+      <span class="end-row-pts">${Math.round(s.pts*100)/100} / ${s.max} pt${s.max>1?'s':''}</span>
+    </div>`).join('');
+
+  showScreen('end');
+}
+
+function restartQuiz() {
+  totalScore=0; qScores=[]; qIndex=0;
+  showScreen('start');
+  updateStartSub();
+}
+
+// ═══════════════════════════ INIT ════════════════════════════════════════════
+updateStartSub();
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll('.mode-btn:not(.lex-btn)').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === m);
+  });
+  updateStartSub();
+  if (m==='sav') { showScreen('sav'); return; }
+  showScreen('start');
+  resetState();
+}
+
+function savScroll(id, el) {
+  event.preventDefault();
+  document.querySelectorAll('.sav-nav-link').forEach(l=>l.classList.remove('active'));
+  el.classList.add('active');
+  const target = document.getElementById(id);
+  if (target) target.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function openLex() {
+  document.getElementById('lexModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  setTimeout(renderLex, 10);
+}
+function closeLex() {
+  document.getElementById('lexModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeLex(); });
+
+</script>
+</body>
+</html>
