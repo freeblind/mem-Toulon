@@ -201,7 +201,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <div id="app" style="opacity:0;transition:opacity .4s"></div>
 <input type="file" id="img-upload" accept="image/*" style="display:none">
 <input type="file" id="json-import" accept=".json" style="display:none">
-<input type="file" id="scores-import" accept=".json" style="display:none">
 <div id="toast"></div>
 <textarea id="__edata" style="display:none"></textarea>
 <script src="schema.js" id="schema-ext"></script>
@@ -225,7 +224,6 @@ function splashDone(){
 
 /* ══ CONSTANTS ══ */
 const STORAGE_KEY='anatomylab_v5';
-const SCORES_KEY='anatomylab_scores_v1';
 const HIT_RADIUS=0.065;
 const SEMESTERS=['S1','S2','S3','S4','S5','S6','Autre'];
 const SEM_COLORS={S1:'#8b5cf6',S2:'#00c8e0',S3:'#00e09a',S4:'#ffb340',S5:'#f97316',S6:'#ec4899',Autre:'#6366f1'};
@@ -459,7 +457,6 @@ function redrawCanvas(){const sc=getSchema(S.editorId);if(!sc)return;drawAll(sc,
 
 /* ══ RANDOM MODAL STATE ══ */
 S.randomModal={open:false,schemaId:null,sem:'all'};
-  S.val={active:false,mode:'fill',semFilter:'all',queue:[],done:[],sessionScores:{},currentSchemaId:null,_currentAttempts:0,startTime:0};
 
 function openRandomModal(){
   S.randomModal={...S.randomModal,open:true};
@@ -473,8 +470,7 @@ function getRandomPool(){
   if(S.randomModal.sem&&S.randomModal.sem!=='all')pool=pool.filter(s=>s.semester===S.randomModal.sem);
   return pool;
 }
-function closeRandomModal(){S.randomModal={open:false,schemaId:null,sem:'all'};
-  S.val={active:false,mode:'fill',semFilter:'all',queue:[],done:[],sessionScores:{},currentSchemaId:null,_currentAttempts:0,startTime:0};render();}
+function closeRandomModal(){S.randomModal={open:false,schemaId:null,sem:'all'};render();}
 function renderRandomModal(){
   const app=document.getElementById('app');
   const sc=getSchema(S.randomModal.schemaId);
@@ -537,261 +533,12 @@ function startClickPin(schemaId){
   S.view='ex-clickpin';render();
 }
 
-/* ══ SCORES STORAGE ══ */
-function loadScores(){try{return JSON.parse(localStorage.getItem(SCORES_KEY)||'[]');}catch{return[];}}
-function saveScores(sessions){try{localStorage.setItem(SCORES_KEY,JSON.stringify(sessions));}catch(e){showToast('⚠️ Stockage scores plein','warn');}}
-
-function exportScores(ueName){
-  const sessions=loadScores();
-  const now=new Date();
-  const dateStr=String(now.getDate()).padStart(2,'0')+'_'+String(now.getMonth()+1).padStart(2,'0')+'_'+now.getFullYear();
-  const safeName=(ueName||'UE').replace(/[^a-zA-Z0-9_\-]/g,'_').replace(/__+/g,'_');
-  const filename=safeName+'___'+dateStr+'.json';
-  const b=new Blob([JSON.stringify({ue:ueName,date:dateStr,sessions},null,2)],{type:'application/json'});
-  const u=URL.createObjectURL(b),a=document.createElement('a');
-  a.href=u;a.download=filename;document.body.appendChild(a);a.click();
-  document.body.removeChild(a);URL.revokeObjectURL(u);
-  showToast('✅ Scores exportés : '+filename,'success');
-}
-
-function importScoresFile(file){
-  const r=new FileReader();
-  r.onload=e=>{
-    try{
-      const d=JSON.parse(e.target.result);
-      const sessions=d.sessions||[];
-      if(!Array.isArray(sessions))throw new Error();
-      const existing=loadScores();
-      // Merge by sessionId
-      const merged=[...existing];
-      sessions.forEach(s=>{if(!merged.find(x=>x.id===s.id))merged.push(s);});
-      saveScores(merged);
-      showToast('✅ Scores importés ('+sessions.length+' sessions)','success');
-      render();
-    }catch{showToast('❌ Fichier de scores invalide','error');}
-  };r.readAsText(file);
-}
-
-/* ══ VALIDATION DES ACQUIS ══ */
-function openValidationModal(){
-  const hasSchemas=S.schemas.some(s=>s.markers.some(m=>m.label.trim()));
-  if(!hasSchemas){showToast('Aucun schéma avec libellés disponible','warn');return;}
-  const app=document.getElementById('app');
-  if(!document.getElementById('val-modal-overlay'))app.insertAdjacentHTML('beforeend','<div class="modal-overlay" id="val-modal-overlay"></div>');
-  const sessions=loadScores();
-  const lastSession=sessions.length?sessions[sessions.length-1]:null;
-  document.getElementById('val-modal-overlay').innerHTML=`<div class="modal" style="max-width:460px">
-    <div class="modal-header"><h2>🎓 Validation des acquis</h2><button class="btn-close" id="val-close">✕</button></div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:12px">
-      Tous les schémas sont enchaînés. Tout schéma sous 75% est remis en file jusqu'à validation.
-    </div>
-    <div class="form-group"><label class="label">Mode d'exercice</label>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="mode-btn val-mode-btn" data-vmode="fill" style="flex:1;min-width:120px"><span class="mode-icon">✍️</span><span><span class="mode-name">Écriture</span></span></button>
-        <button class="mode-btn val-mode-btn" data-vmode="clickpin" style="flex:1;min-width:120px"><span class="mode-icon">🔢</span><span><span class="mode-name">Trouver N°</span></span></button>
-        <button class="mode-btn val-mode-btn" data-vmode="locate" style="flex:1;min-width:120px"><span class="mode-icon">🎯</span><span><span class="mode-name">Localiser</span></span></button>
-      </div>
-    </div>
-    <div class="form-group"><label class="label">Semestre</label>
-      <div style="display:flex;gap:4px;flex-wrap:wrap">
-        <div class="filter-btn val-sem-btn active" data-vsem="all">Tous</div>
-        ${SEMESTERS.map(s=>`<div class="filter-btn val-sem-btn" data-vsem="${s}" style="border-color:${getSemColor(s)};color:${getSemColor(s)}">${s}</div>`).join('')}
-      </div>
-    </div>
-    ${lastSession?`<div style="font-size:11px;color:var(--muted);padding:7px 10px;background:var(--bg);border-radius:7px;margin-bottom:10px">
-      📊 Dernière session : ${lastSession.date} · ${Object.keys(lastSession.scores||{}).length} schémas
-      <button class="btn btn-xs" id="val-show-scores" style="margin-left:8px">Voir scores</button>
-    </div>`:''}
-    <div style="display:flex;gap:7px;margin-top:4px">
-      <button class="btn btn-primary" id="val-start" style="flex:1">🎓 Commencer la validation</button>
-      <button class="btn btn-secondary btn-sm" id="val-export-scores">💾 Exporter scores</button>
-      <button class="btn btn-sm" id="val-import-scores">📂 Importer</button>
-    </div>
-  </div>`;
-
-  let valMode='fill',valSem='all';
-  function updateModeUI(){document.querySelectorAll('.val-mode-btn').forEach(b=>{b.style.borderColor=b.dataset.vmode===valMode?'var(--accent)':'';b.style.background=b.dataset.vmode===valMode?'rgba(0,200,224,.08)':'';}); }
-  function updateSemUI(){document.querySelectorAll('.val-sem-btn').forEach(b=>{const active=b.dataset.vsem===valSem;b.classList.toggle('active',active);if(active&&b.dataset.vsem!=='all'){b.style.background=getSemColor(b.dataset.vsem);b.style.borderColor=getSemColor(b.dataset.vsem);b.style.color='#000';}else if(active){b.style.background='';b.style.borderColor='';}else{b.style.background='';b.style.borderColor=getSemColor(b.dataset.vsem)||'';b.style.color=getSemColor(b.dataset.vsem)||'';} });}
-  updateModeUI();updateSemUI();
-  document.querySelectorAll('.val-mode-btn').forEach(b=>b.onclick=()=>{valMode=b.dataset.vmode;updateModeUI();});
-  document.querySelectorAll('.val-sem-btn').forEach(b=>b.onclick=()=>{valSem=b.dataset.vsem;updateSemUI();});
-  document.getElementById('val-close').onclick=()=>document.getElementById('val-modal-overlay').remove();
-  document.getElementById('val-modal-overlay').onclick=e=>{if(e.target.id==='val-modal-overlay')e.target.remove();};
-  document.getElementById('val-start').onclick=()=>{document.getElementById('val-modal-overlay').remove();startValidation(valMode,valSem);};
-  document.getElementById('val-export-scores').onclick=()=>{
-    const ue=prompt('Nom de l\'UE pour le fichier de scores (ex: UE_2_2)','UE');
-    if(ue!==null)exportScores(ue);
-  };
-  document.getElementById('val-import-scores').onclick=()=>document.getElementById('scores-import').click();
-  const vss=document.getElementById('val-show-scores');if(vss)vss.onclick=()=>{document.getElementById('val-modal-overlay').remove();renderScoreHistory();};
-}
-
-function startValidation(mode,semFilter){
-  let schemas=S.schemas.filter(s=>s.markers.some(m=>m.label.trim()));
-  if(semFilter&&semFilter!=='all')schemas=schemas.filter(s=>s.semester===semFilter);
-  if(!schemas.length){showToast('Aucun schéma disponible pour ce filtre','warn');return;}
-  S.val={active:true,mode,semFilter,queue:schemas.map(s=>({id:s.id,attempts:0})),done:[],sessionScores:{},currentSchemaId:null,startTime:Date.now()};
-  valNext();
-}
-
-function valNext(){
-  if(!S.val.active)return;
-  if(!S.val.queue.length){valFinish();return;}
-  const item=S.val.queue.shift();
-  S.val.currentSchemaId=item.id;
-  S.val._currentAttempts=(item.attempts||0)+1;
-  const mode=S.val.mode;
-  if(mode==='fill')startEx(item.id,'fill');
-  else if(mode==='clickpin')startClickPin(item.id);
-  else startEx(item.id,'locate');
-}
-
-function valRecordAndContinue(pct){
-  if(!S.val.active)return;
-  const sid=S.val.currentSchemaId;
-  const sc=getSchema(sid);
-  const prev=S.val.sessionScores[sid];
-  const best=prev?Math.max(prev.score,pct):pct;
-  S.val.sessionScores[sid]={title:sc?sc.title:'?',semester:sc?sc.semester:'?',score:best,lastScore:pct,attempts:S.val._currentAttempts};
-  if(pct>=75){
-    S.val.done.push(sid);
-  } else {
-    // Re-queue with incremented attempts
-    S.val.queue.push({id:sid,attempts:S.val._currentAttempts});
-  }
-  // Show brief result overlay then continue
-  S.view='val-between';render();
-}
-
-function valFinish(){
-  S.val.active=false;
-  // Save session to localStorage
-  const sessions=loadScores();
-  const now=new Date();
-  const dateStr=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
-  sessions.push({id:Date.now().toString(36),date:dateStr,mode:S.val.mode,semFilter:S.val.semFilter,scores:S.val.sessionScores});
-  if(sessions.length>20)sessions.splice(0,sessions.length-20);
-  saveScores(sessions);
-  S.view='val-results';render();
-}
-
-function renderValBetween(app){
-  const sid=S.val.currentSchemaId;
-  const sc=getSchema(sid);
-  const ss=S.val.sessionScores[sid];
-  const pct=ss?ss.lastScore:0;
-  const ok=pct>=75;
-  const remaining=S.val.queue.filter((item,i,arr)=>arr.findIndex(x=>x.id===item.id)===i).length;
-  const total=S.val.done.length+new Set(S.val.queue.map(x=>x.id)).size;
-  app.innerHTML=`<div class="score-view" style="flex-direction:column;gap:16px">
-    <div class="score-card" style="border-color:${ok?'var(--success)':'var(--warn)'}">
-      <div style="font-size:38px">${ok?'✅':'🔄'}</div>
-      <div style="font-size:18px;font-weight:700;margin:6px 0">${sc?sc.title:'?'}</div>
-      <div class="score-big" style="color:${ok?'var(--success)':'var(--warn)'}">${pct}%</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px">${ok?'✅ Validé (≥75%) — schéma terminé !':'🔄 Score insuffisant — remis en file d\'attente'}</div>
-      <div style="margin-top:12px;padding:8px;background:var(--bg);border-radius:8px;font-size:12px;color:var(--muted)">
-        ✅ Validés : <b style="color:var(--success)">${S.val.done.length}</b> &nbsp;|&nbsp;
-        🔄 En attente : <b style="color:var(--warn)">${remaining}</b>
-      </div>
-      <button class="btn btn-primary w-full" id="val-continue" style="margin-top:14px;font-size:15px">
-        ${S.val.queue.length?'➡️ Schéma suivant':'🏁 Voir les résultats'}
-      </button>
-      <button class="btn btn-ghost w-full" id="val-abort" style="margin-top:6px;font-size:12px">⏹ Arrêter la validation</button>
-    </div>
-  </div>`;
-  document.getElementById('val-continue').onclick=()=>{if(S.val.queue.length)valNext();else valFinish();};
-  document.getElementById('val-abort').onclick=()=>{S.val.active=false;S.view='home';render();};
-}
-
-function renderValResults(app){
-  const ss=S.val.sessionScores;
-  const entries=Object.entries(ss).sort((a,b)=>a[1].score-b[1].score);
-  const avg=entries.length?Math.round(entries.reduce((s,[,v])=>s+v.score,0)/entries.length):0;
-  const validated=entries.filter(([,v])=>v.score>=75).length;
-  app.innerHTML=`<div class="exercise-view">
-  <div class="app-header">
-    <button class="btn btn-ghost btn-sm" id="vr-back">← Accueil</button>
-    <div class="ex-title">🎓 <strong>Résultats de validation</strong></div>
-    <div class="header-actions">
-      <button class="btn btn-secondary btn-sm" id="vr-export">💾 Exporter scores</button>
-    </div>
-  </div>
-  <div class="score-view" style="overflow-y:auto;align-items:flex-start;padding:16px">
-    <div style="width:100%;max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:10px">
-      <div class="score-card" style="border-color:${avg>=75?'var(--success)':'var(--warn)'}">
-        <div style="font-size:36px">${avg>=90?'🏆':avg>=75?'🎉':avg>=50?'💪':'📚'}</div>
-        <div class="score-big" style="color:${avg>=75?'var(--success)':'var(--warn)'}">${avg}%</div>
-        <div style="font-size:13px;color:var(--muted)">Moyenne générale · ${validated}/${entries.length} schémas validés (≥75%)</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        ${entries.map(([sid,v])=>{
-          const bar=Math.round(v.score);
-          const col=v.score>=75?'var(--success)':v.score>=50?'var(--warn)':'var(--error)';
-          return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-              <span class="sem-badge" style="background:${getSemColor(v.semester)};color:#000;font-size:10px">${v.semester}</span>
-              <span style="flex:1;font-weight:600;font-size:13px">${v.title}</span>
-              <span style="font-weight:800;font-size:16px;color:${col}">${v.score}%</span>
-              ${v.score>=75?'<span style="color:var(--success)">✅</span>':'<span style="color:var(--error)">❌</span>'}
-            </div>
-            <div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden">
-              <div style="height:100%;width:${bar}%;background:${col};border-radius:3px;transition:width .5s"></div>
-            </div>
-            <div style="font-size:10px;color:var(--muted);margin-top:3px">${v.attempts} passage${v.attempts>1?'s':''}</div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  </div>
-</div>`;
-  document.getElementById('vr-back').onclick=()=>{S.view='home';render();};
-  document.getElementById('vr-export').onclick=()=>{const ue=prompt('Nom de l\'UE','UE');if(ue!==null)exportScores(ue);};
-}
-
-function renderScoreHistory(app2){
-  const sessions=loadScores();
-  const app=app2||document.getElementById('app');
-  app.innerHTML=`<div class="exercise-view">
-  <div class="app-header">
-    <button class="btn btn-ghost btn-sm" id="sh-back">← Accueil</button>
-    <div class="ex-title">📊 <strong>Historique des scores</strong></div>
-    <div class="header-actions">
-      <button class="btn btn-sm" id="sh-import">📂 Importer</button>
-      <button class="btn btn-xs btn-danger" id="sh-clear">🗑️ Effacer</button>
-    </div>
-  </div>
-  <div style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px">
-    ${!sessions.length?'<div class="empty-state"><div class="empty-icon">📊</div><h3>Aucune session enregistrée</h3></div>':
-    sessions.slice().reverse().map(s=>{
-      const entries=Object.values(s.scores||{});
-      const avg=entries.length?Math.round(entries.reduce((sum,v)=>sum+v.score,0)/entries.length):0;
-      const validated=entries.filter(v=>v.score>=75).length;
-      return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="font-size:18px">${avg>=75?'✅':'📚'}</span>
-          <div style="flex:1"><div style="font-weight:700">${s.date} · ${s.mode}</div>
-          <div style="font-size:11px;color:var(--muted)">${s.semFilter==='all'?'Tous semestres':s.semFilter} · ${entries.length} schémas</div></div>
-          <span style="font-size:22px;font-weight:800;color:${avg>=75?'var(--success)':'var(--warn)'}">${avg}%</span>
-        </div>
-        <div style="font-size:11px;color:var(--muted)">${validated}/${entries.length} validés</div>
-        <div style="height:4px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px">
-          <div style="height:100%;width:${avg}%;background:${avg>=75?'var(--success)':'var(--warn)'};border-radius:3px"></div>
-        </div>
-      </div>`;
-    }).join('')}
-  </div>
-</div>`;
-  document.getElementById('sh-back').onclick=()=>{S.view='home';render();};
-  document.getElementById('sh-import').onclick=()=>document.getElementById('scores-import').click();
-  document.getElementById('sh-clear').onclick=()=>{if(confirm('Effacer tout l\'historique ?')){saveScores([]);render();}};
-}
-
 /* ══ RENDER ROUTER ══ */
 function render(){
   const app=document.getElementById('app');
   if(S.randomModal&&S.randomModal.open){renderRandomModal();return;}
   if(S.exerciseModalOpen&&S.exerciseSchemaId){renderExModal();return;}
-  ({home:renderHome,editor:renderEditor,'ex-fill':renderExFill,'ex-reveal':renderExReveal,'ex-locate':renderExLocate,'ex-clickpin':renderExClickPin,'val-between':renderValBetween,'val-results':renderValResults,'score-history':renderScoreHistory}[S.view]||renderHome)(app);
+  ({home:renderHome,editor:renderEditor,'ex-fill':renderExFill,'ex-reveal':renderExReveal,'ex-locate':renderExLocate,'ex-clickpin':renderExClickPin}[S.view]||renderHome)(app);
 }
 
 /* ══ HOME ══ */
@@ -806,8 +553,6 @@ function renderHome(app){
     <div class="header-spacer"></div>
     <div class="header-actions">
       <button class="btn btn-primary btn-sm" id="btn-new">＋ Nouveau</button>
-      <button class="btn btn-sm" id="btn-validation" style="border-color:#8b5cf6;color:#8b5cf6">🎓 Validation</button>
-      <button class="btn btn-xs btn-ghost" id="btn-score-history" title="Historique des scores">📊</button>
       <button class="btn btn-sm" id="btn-import">📂 Importer JSON</button>
       <button class="btn btn-sm" id="btn-save">💾 Sauvegarder JSON</button>
       <button class="btn btn-secondary btn-sm" id="btn-export-js" title="Exporter schema.js pour chargement automatique">⚡ Exporter schema.js</button>
@@ -844,8 +589,6 @@ function renderHome(app){
   </div>
 </div>`;
   document.getElementById('btn-new').onclick=()=>{const sc=createSchema();S.editorId=sc.id;S.view='editor';render();};
-  document.getElementById('btn-validation').onclick=openValidationModal;
-  document.getElementById('btn-score-history').onclick=()=>{S.view='score-history';render();};
   const bigImport=document.getElementById('btn-import-big');
   if(bigImport)bigImport.onclick=()=>document.getElementById('json-import').click();
   // Drag-drop JSON onto home page
@@ -924,122 +667,6 @@ function drawOptsHtml(ed){
   </div>`;
 }
 
-/* ══ PRINT / SAVE ══ */
-function openPrintMenu(schemaId){
-  const sc=getSchema(schemaId);if(!sc||!sc.imageData){showToast('Aucune image à imprimer','warn');return;}
-  const app=document.getElementById('app');
-  if(!document.getElementById('print-modal-overlay'))
-    app.insertAdjacentHTML('beforeend','<div class="modal-overlay" id="print-modal-overlay"></div>');
-  document.getElementById('print-modal-overlay').innerHTML=`
-  <div class="modal" style="max-width:380px">
-    <div class="modal-header"><h2>🖨️ Imprimer / 💾 Enregistrer</h2><button class="btn-close" id="pm-close">✕</button></div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Choisissez le mode :</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="mode-btn" id="pm-blank"><span class="mode-icon">🖼️</span><span><span class="mode-name">Image vierge</span><span class="mode-desc">Uniquement l'image, sans annotations</span></span></button>
-      <button class="mode-btn" id="pm-markers"><span class="mode-icon">🔢</span><span><span class="mode-name">Image + numéros & flèches</span><span class="mode-desc">Numéros, flèches, accolades et textes</span></span></button>
-      <button class="mode-btn" id="pm-correction"><span class="mode-icon">📋</span><span><span class="mode-name">Image corrigée</span><span class="mode-desc">Numéros, flèches et libellés complets</span></span></button>
-    </div>
-    <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Action</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-secondary" id="pm-do-print" style="flex:1">🖨️ Imprimer</button>
-        <button class="btn btn-primary" id="pm-do-save" style="flex:1">💾 Enregistrer PNG</button>
-      </div>
-    </div>
-  </div>`;
-
-  let pmMode='markers';
-  const modeButtons={blank:document.getElementById('pm-blank'),markers:document.getElementById('pm-markers'),correction:document.getElementById('pm-correction')};
-  function setMode(m){
-    pmMode=m;
-    Object.entries(modeButtons).forEach(([k,btn])=>{
-      btn.style.borderColor=k===m?'var(--accent)':'';
-      btn.style.background=k===m?'rgba(0,200,224,.08)':'';
-    });
-  }
-  setMode('markers');
-  Object.entries(modeButtons).forEach(([k,btn])=>btn.onclick=()=>setMode(k));
-  document.getElementById('pm-close').onclick=()=>{document.getElementById('print-modal-overlay').remove();};
-  document.getElementById('print-modal-overlay').onclick=e=>{if(e.target.id==='print-modal-overlay')e.target.remove();};
-  document.getElementById('pm-do-print').onclick=()=>{doRenderSchema(sc,pmMode,'print');};
-  document.getElementById('pm-do-save').onclick=()=>{doRenderSchema(sc,pmMode,'save');};
-}
-
-function doRenderSchema(sc,mode,action){
-  const img=new Image();
-  img.onload=()=>{
-    const W=img.naturalWidth,H=img.naturalHeight;
-    const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;
-    const ctx=canvas.getContext('2d');
-
-    // Background
-    if(sc.bgColor&&sc.bgColor!=='transparent'){ctx.fillStyle=sc.bgColor;ctx.fillRect(0,0,W,H);}
-    ctx.drawImage(img,0,0,W,H);
-
-    if(mode!=='blank'){
-      const r={width:W,height:H};
-      // Draw arrows + braces + shapes + texts
-      sc.markers.forEach(m=>(m.arrows||[]).forEach(a=>drawArrow(ctx,r,m.x,m.y,a.x,a.y,a.color,a.width,a.outline)));
-      (sc.braces||[]).forEach(b=>drawCurlyBrace(ctx,r,b));
-      (sc.shapes||[]).forEach(sh=>drawShape(ctx,r,sh));
-      if(mode==='correction'){drawTexts(ctx,r,sc.texts);}
-      // Draw marker pins
-      sc.markers.forEach((m,idx)=>{
-        const dispNum=getDisplayNum(sc.markers,m);
-        const pinR=Math.max(14,Math.min(22,W*0.018));
-        const x=m.x*W,y=m.y*H;
-        ctx.save();
-        ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=6;
-        ctx.beginPath();ctx.arc(x,y,pinR,0,Math.PI*2);
-        ctx.fillStyle='rgba(6,16,30,.92)';ctx.fill();
-        ctx.strokeStyle=m.color||'#00c8e0';ctx.lineWidth=2.5;ctx.stroke();
-        ctx.shadowBlur=0;
-        // Number
-        ctx.font=`800 ${Math.round(pinR*0.9)}px monospace`;
-        ctx.fillStyle=pinText(m.color||'#00c8e0');
-        ctx.textAlign='center';ctx.textBaseline='middle';
-        ctx.fillText(String(dispNum),x,y+1);
-        // Correction label
-        if(mode==='correction'&&m.label){
-          const fs=Math.max(11,Math.min(16,W*0.013));
-          ctx.font=`600 ${fs}px 'Segoe UI',sans-serif`;
-          const tw=ctx.measureText(m.label).width;
-          const lx=x+pinR+4,ly=y;
-          ctx.fillStyle='rgba(6,16,30,.82)';
-          ctx.fillRect(lx-3,ly-fs/2-3,tw+8,fs+6);
-          ctx.strokeStyle=m.color||'#00c8e0';ctx.lineWidth=1;
-          ctx.strokeRect(lx-3,ly-fs/2-3,tw+8,fs+6);
-          ctx.fillStyle='#fff';ctx.textAlign='left';ctx.textBaseline='middle';
-          ctx.fillText(m.label,lx+1,ly+1);
-        }
-        ctx.restore();
-      });
-    }
-
-    if(action==='save'){
-      const a=document.createElement('a');
-      const suffix=mode==='blank'?'vierge':mode==='markers'?'numerotee':'corrigee';
-      a.download=(sc.title||'schema').replace(/[^a-z0-9]/gi,'_')+'_'+suffix+'.png';
-      a.href=canvas.toDataURL('image/png');
-      document.body.appendChild(a);a.click();document.body.removeChild(a);
-      showToast('✅ Image PNG enregistrée','success');
-    } else {
-      // Print
-      const dataUrl=canvas.toDataURL('image/png');
-      const win=window.open('','_blank');
-      if(!win){showToast('⚠️ Autorisez les popups pour imprimer','warn');return;}
-      win.document.write(`<!DOCTYPE html><html><head><title>${sc.title||'Schéma'}</title>
-      <style>*{margin:0;padding:0;}body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff;}
-      img{max-width:100%;max-height:100vh;object-fit:contain;}
-      @media print{body{min-height:auto;}img{width:100%;height:auto;}}</style></head>
-      <body><img src="${dataUrl}" onload="setTimeout(()=>{window.print();},200)"></body></html>`);
-      win.document.close();
-    }
-  };
-  img.crossOrigin='anonymous';
-  img.src=sc.imageData;
-}
-
 function renderEditor(app){
   const _sbScroll=document.querySelector('.editor-sidebar')?.scrollTop||0;
   const sc=getSchema(S.editorId);if(!sc){S.view='home';render();return;}
@@ -1062,7 +689,6 @@ function renderEditor(app){
     <button class="btn btn-ghost btn-sm" id="btn-back">← Retour</button>
     <div class="ex-title">✏️ <strong>${sc.title||'Sans titre'}</strong></div>
     <div class="header-spacer"></div>
-    <button class="btn btn-sm" id="btn-print-menu" title="Imprimer / Enregistrer">🖨️ Imprimer / 💾</button>
     <button class="btn btn-primary btn-sm" id="btn-start-ex">▶ Exercice</button>
   </div>
   <div class="editor-layout">
@@ -1235,7 +861,6 @@ function renderEditor(app){
   document.getElementById('sel-sem').onchange=e=>{sc.semester=e.target.value;save();};
   document.getElementById('btn-back').onclick=()=>{S.view='home';resetEditor();render();};
   document.getElementById('btn-start-ex').onclick=()=>openExModal(S.editorId);
-  document.getElementById('btn-print-menu').onclick=()=>openPrintMenu(S.editorId);
   const up=document.getElementById('btn-upload-img');if(up)up.onclick=()=>document.getElementById('img-upload').click();
   const upN=document.getElementById('tool-upload-new');if(upN)upN.onclick=()=>document.getElementById('img-upload').click();
   document.querySelectorAll('[data-bg]').forEach(sw=>sw.onclick=()=>{sc.bgColor=sw.dataset.bg;save();render();});
@@ -1496,9 +1121,7 @@ function renderExFill(app){
           ${ex.submitted&&manOk?`<div style="font-size:11px;color:var(--warn);margin-top:3px;padding-left:4px">✓ Accepté manuellement · Réponse : ${g.label}</div>`:''}
         </div>`;}).join('')}</div>
       ${ex.submitted&&ex.score!==null?`<div style="text-align:center;padding:10px;border:2px solid;border-radius:var(--radius);border-color:${ex.score>=80?'var(--success)':ex.score>=50?'var(--warn)':'var(--error)'}"><div style="font-size:26px;font-weight:800;font-family:monospace;color:${ex.score>=80?'var(--success)':ex.score>=50?'var(--warn)':'var(--error)'}">${ex.score}%</div><div style="font-size:12px;color:var(--muted)">${ex.score>=80?'🎉 Excellent !':ex.score>=50?'💪 Bien !':'📚 À retravailler'}</div></div>`:''}
-      <div class="panel-footer">${!ex.submitted?`<button class="btn btn-primary w-full" id="btn-submit">✅ Corriger</button>`:`
-        ${S.val.active?`<button class="btn btn-primary w-full" id="btn-val-next">➡️ Continuer la validation</button>`:`<button class="btn btn-secondary w-full" id="btn-retry">🔄 Recommencer</button>`}
-      `}
+      <div class="panel-footer">${!ex.submitted?`<button class="btn btn-primary w-full" id="btn-submit">✅ Corriger</button>`:`<button class="btn btn-secondary w-full" id="btn-retry">🔄 Recommencer</button>`}
       <button class="btn btn-ghost w-full" id="btn-back2">← Quitter</button></div>
     </div>
   </div></div>`;
@@ -1511,7 +1134,6 @@ function renderExFill(app){
   const back=()=>{S.view='home';render();};document.getElementById('btn-back').onclick=back;document.getElementById('btn-back2').onclick=back;
   const bs=document.getElementById('btn-submit');if(bs)bs.onclick=submitFill;
   const br=document.getElementById('btn-retry');if(br)br.onclick=()=>startEx(ex.schemaId,'fill');
-  const bvn=document.getElementById('btn-val-next');if(bvn)bvn.onclick=()=>valRecordAndContinue(ex.score||0);
   document.querySelectorAll('[data-mark-ok]').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();markManualCorrect(btn.dataset.markOk);};});
   setupExCanvas(sc,true);
 }
@@ -1520,7 +1142,6 @@ function submitFill(){
   let ok=0;
   ex.groups.forEach(g=>{if(isCorrect(ex.answers[g.groupId]||'',g)||(ex.manualCorrect&&ex.manualCorrect[g.groupId]))ok++;});
   ex.submitted=true;ex.score=Math.round(ok/ex.groups.length*100);render();
-  // Validation mode: hook after render so score buttons show, then auto-advance via "Continuer"
 }
 function highlightPin(groupId){
   // Remove previous highlight
@@ -1652,12 +1273,8 @@ function locateAnswer(clickedGroupId,skip){
   if(ex.feedbackTimeout)clearTimeout(ex.feedbackTimeout);
   ex.feedbackTimeout=setTimeout(()=>{
     ex.feedback=null;ex.locateIdx++;
-    if(ex.locateIdx>=ex.locateQueue.length){ex.locateDone=true;}
+    if(ex.locateIdx>=ex.locateQueue.length)ex.locateDone=true;
     render();
-    if(ex.locateDone&&S.val.active){
-      const pct=Math.round(ex.locateResults.filter(r=>r.correct).length/ex.locateResults.length*100);
-      setTimeout(()=>valRecordAndContinue(pct),800);
-    }
   },skip?0:1000);
   render();
 }
@@ -1753,13 +1370,8 @@ function clickPinAnswer(clickedGroupId,skip){
   if(ex.cpTimeout)clearTimeout(ex.cpTimeout);
   ex.cpTimeout=setTimeout(()=>{
     ex.cpFeedback=null;ex.cpIdx++;
-    if(ex.cpIdx>=ex.cpQueue.length){ex.cpDone=true;}
+    if(ex.cpIdx>=ex.cpQueue.length)ex.cpDone=true;
     render();
-    // Validation hook: when done
-    if(ex.cpDone&&S.val.active){
-      const pct=Math.round(ex.cpResults.filter(r=>r.correct).length/ex.cpResults.length*100);
-      setTimeout(()=>valRecordAndContinue(pct),800);
-    }
   },skip?0:1100);
   render();
 }
@@ -1789,7 +1401,6 @@ function renderClickPinScore(app,sc,ex){
 /* ══ FILE INPUTS ══ */
 document.getElementById('img-upload').onchange=e=>{const f=e.target.files[0];if(f)loadImage(f);e.target.value='';};
 document.getElementById('json-import').onchange=e=>{const f=e.target.files[0];if(f)importJSON(f);e.target.value='';};
-document.getElementById('scores-import').onchange=e=>{const f=e.target.files[0];if(f)importScoresFile(f);e.target.value='';};
 window.addEventListener('resize',()=>{
   if(S.view==='editor'){redrawCanvas();}
   else{const sc=S.ex?getSchema(S.ex.schemaId):null;if(sc)drawAll(sc,document.getElementById('main-img'),document.getElementById('arrow-canvas'),true);}
