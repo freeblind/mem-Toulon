@@ -460,7 +460,7 @@ function redrawCanvas(){const sc=getSchema(S.editorId);if(!sc)return;drawAll(sc,
 
 /* ══ RANDOM MODAL STATE ══ */
 S.randomModal={open:false,schemaId:null,sem:'all'};
-  S.val={active:false,mode:'fill',semFilter:'all',queue:[],done:[],sessionScores:{},currentSchemaId:null,_currentAttempts:0,startTime:0};
+  S.val={active:false,mode:'fill',semFilter:'all',targeted:false,queue:[],done:[],sessionScores:{},currentSchemaId:null,_currentAttempts:0,_targetGroups:null,startTime:0};
 
 function openRandomModal(){
   S.randomModal={...S.randomModal,open:true};
@@ -475,7 +475,7 @@ function getRandomPool(){
   return pool;
 }
 function closeRandomModal(){S.randomModal={open:false,schemaId:null,sem:'all'};
-  S.val={active:false,mode:'fill',semFilter:'all',queue:[],done:[],sessionScores:{},currentSchemaId:null,_currentAttempts:0,startTime:0};render();}
+  S.val={active:false,mode:'fill',semFilter:'all',targeted:false,queue:[],done:[],sessionScores:{},currentSchemaId:null,_currentAttempts:0,_targetGroups:null,startTime:0};render();}
 function renderRandomModal(){
   const app=document.getElementById('app');
   const sc=getSchema(S.randomModal.schemaId);
@@ -526,10 +526,12 @@ function renderRandomModal(){
 }
 
 /* ── ex-clickpin ── */
-function startClickPin(schemaId){
+function startClickPin(schemaId,filterGroupIds){
   const sc=getSchema(schemaId);if(!sc)return;
   const labeled=sc.markers.filter(m=>m.label.trim());
-  const groups=shuffle(buildGroups(labeled)).map((g,i)=>({...g,displayNum:i+1}));
+  let allGroups=buildGroups(labeled);
+  if(filterGroupIds&&filterGroupIds.length)allGroups=allGroups.filter(g=>filterGroupIds.includes(g.groupId));
+  const groups=shuffle(allGroups).map((g,i)=>({...g,displayNum:i+1}));
   S.ex={mode:'clickpin',schemaId,groups,
         cpQueue:shuffle([...groups]),cpIdx:0,cpResults:[],cpDone:false,
         cpFeedback:null,cpTimeout:null,manualCorrect:{},
@@ -542,6 +544,10 @@ function startClickPin(schemaId){
 function loadScores(){try{return JSON.parse(localStorage.getItem(SCORES_KEY)||'[]');}catch{return[];}}
 function saveScores(sessions){try{localStorage.setItem(SCORES_KEY,JSON.stringify(sessions));}catch(e){showToast('⚠️ Stockage scores plein','warn');}}
 
+function promptExportScores(){
+  const ue=prompt('Nom de l\'UE pour le fichier (ex: UE_2_2)','UE');
+  if(ue!==null)exportScores(ue);
+}
 function exportScores(ueName){
   const sessions=loadScores();
   const now=new Date();
@@ -593,6 +599,15 @@ function openValidationModal(){
         <button class="mode-btn val-mode-btn" data-vmode="locate" style="flex:1;min-width:120px"><span class="mode-icon">🎯</span><span><span class="mode-name">Localiser</span></span></button>
       </div>
     </div>
+    <div class="form-group" style="margin-top:8px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)" id="targeted-label">
+        <input type="checkbox" id="val-targeted" style="width:16px;height:16px;accent-color:var(--accent)">
+        <span>
+          <span style="font-weight:600;font-size:13px">🎯 Mode ciblé</span>
+          <span style="display:block;font-size:11px;color:var(--muted)">Aux 2ème passage+, ne réinterroger que les zones ratées</span>
+        </span>
+      </label>
+    </div>
     <div class="form-group"><label class="label">Semestre</label>
       <div style="display:flex;gap:4px;flex-wrap:wrap">
         <div class="filter-btn val-sem-btn active" data-vsem="all">Tous</div>
@@ -622,7 +637,13 @@ function openValidationModal(){
   document.querySelectorAll('.val-sem-btn').forEach(b=>b.onclick=()=>{valSem=b.dataset.vsem;updateSemUI();});
   document.getElementById('val-close').onclick=()=>document.getElementById('val-modal-overlay').remove();
   document.getElementById('val-modal-overlay').onclick=e=>{if(e.target.id==='val-modal-overlay')e.target.remove();};
-  document.getElementById('val-start').onclick=()=>{document.getElementById('val-modal-overlay').remove();startValidation(valMode,valSem);};
+  const vtgt=document.getElementById('val-targeted');
+  if(vtgt)vtgt.checked=S.val.targeted;
+  document.getElementById('val-start').onclick=()=>{
+    const targeted=document.getElementById('val-targeted')?.checked||false;
+    document.getElementById('val-modal-overlay').remove();
+    startValidation(valMode,valSem,targeted);
+  };
   const vresume=document.getElementById('val-resume');
   if(vresume){const saved=valHasSavedProgress();vresume.onclick=()=>{document.getElementById('val-modal-overlay').remove();if(saved)valResumeProgress(saved);};}
   document.getElementById('val-export-scores').onclick=()=>{
@@ -633,11 +654,11 @@ function openValidationModal(){
   const vss=document.getElementById('val-show-scores');if(vss)vss.onclick=()=>{document.getElementById('val-modal-overlay').remove();renderScoreHistory();};
 }
 
-function startValidation(mode,semFilter){
+function startValidation(mode,semFilter,targeted){
   let schemas=S.schemas.filter(s=>s.markers.some(m=>m.label.trim()));
   if(semFilter&&semFilter!=='all')schemas=schemas.filter(s=>s.semester===semFilter);
   if(!schemas.length){showToast('Aucun schéma disponible pour ce filtre','warn');return;}
-  S.val={active:true,mode,semFilter,queue:shuffle(schemas).map(s=>({id:s.id,attempts:0})),done:[],sessionScores:{},currentSchemaId:null,startTime:Date.now()};
+  S.val={active:true,mode,semFilter,targeted:!!targeted,queue:shuffle(schemas).map(s=>({id:s.id,attempts:0})),done:[],sessionScores:{},currentSchemaId:null,_currentAttempts:0,_targetGroups:null,startTime:Date.now()};
   valNext();
 }
 
@@ -647,10 +668,17 @@ function valNext(){
   const item=S.val.queue.shift();
   S.val.currentSchemaId=item.id;
   S.val._currentAttempts=(item.attempts||0)+1;
+  // Targeted mode: only wrong groups from previous attempt
+  let tg=null;
+  if(S.val.targeted&&item.attempts>0){
+    const prev=S.val.sessionScores[item.id];
+    if(prev&&prev.wrongGroups&&prev.wrongGroups.length){tg=prev.wrongGroups;}
+  }
+  S.val._targetGroups=tg;
   const mode=S.val.mode;
-  if(mode==='fill')startEx(item.id,'fill');
-  else if(mode==='clickpin')startClickPin(item.id);
-  else startEx(item.id,'locate');
+  if(mode==='fill')startEx(item.id,'fill',tg);
+  else if(mode==='clickpin')startClickPin(item.id,tg);
+  else startEx(item.id,'locate',tg);
 }
 
 function valSaveProgress(){
@@ -665,10 +693,25 @@ function valHasSavedProgress(){
   try{const d=JSON.parse(localStorage.getItem(VAL_PROGRESS_KEY)||'null');return d&&d.queue&&(d.queue.length+d.done.length)>0?d:null;}catch{return null;}
 }
 function valResumeProgress(saved){
-  S.val={active:true,mode:saved.mode,semFilter:saved.semFilter,
+  S.val={active:true,mode:saved.mode,semFilter:saved.semFilter,targeted:!!saved.targeted,
     queue:saved.queue,done:saved.done,sessionScores:saved.sessionScores,
     currentSchemaId:null,_currentAttempts:0,startTime:saved.startTime||Date.now()};
   valNext();
+}
+function valComputeWrongGroups(){
+  const ex=S.ex;if(!ex)return[];
+  const mode=ex.mode;
+  try{
+    if(mode==='fill'){
+      return ex.groups.filter(g=>!isCorrect(ex.answers[g.groupId]||'',g)&&!(ex.manualCorrect&&ex.manualCorrect[g.groupId])).map(g=>g.groupId);
+    } else if(mode==='clickpin'){
+      const wrongLabels=new Set(ex.cpResults.filter(r=>!r.correct&&!r.skipped).map(r=>r.label));
+      return ex.groups.filter(g=>wrongLabels.has(g.label)).map(g=>g.groupId);
+    } else {
+      const wrongLabels=new Set(ex.locateResults.filter(r=>!r.correct&&!r.skipped).map(r=>r.label));
+      return ex.groups.filter(g=>wrongLabels.has(g.label)).map(g=>g.groupId);
+    }
+  }catch{return[];}
 }
 function valRecordAndContinue(pct){
   if(!S.val.active)return;
@@ -676,10 +719,11 @@ function valRecordAndContinue(pct){
   const sc=getSchema(sid);
   const prev=S.val.sessionScores[sid];
   const best=prev?Math.max(prev.score,pct):pct;
-  S.val.sessionScores[sid]={title:sc?sc.title:'?',semester:sc?sc.semester:'?',score:best,lastScore:pct,attempts:S.val._currentAttempts};
+  const wrongGroups=S.val.targeted?valComputeWrongGroups():[];
+  S.val.sessionScores[sid]={title:sc?sc.title:'?',semester:sc?sc.semester:'?',score:best,lastScore:pct,attempts:S.val._currentAttempts,wrongGroups};
   if(pct>=75){S.val.done.push(sid);}
   else{S.val.queue.push({id:sid,attempts:S.val._currentAttempts});}
-  valSaveProgress(); // persist after each schema
+  valSaveProgress();
   S.view='val-between';render();
 }
 
@@ -717,13 +761,24 @@ function renderValBetween(app){
       <button class="btn btn-primary w-full" id="val-continue" style="margin-top:14px;font-size:15px">
         ${S.val.queue.length?'➡️ Schéma suivant':'🏁 Voir les résultats'}
       </button>
-      <button class="btn btn-ghost w-full" id="val-save-quit" style="margin-top:6px;font-size:12px">💾 Sauvegarder et quitter</button>
+      <button class="btn btn-ghost w-full" id="val-save-quit" style="margin-top:6px;font-size:12px">💾 Sauvegarder progression et quitter</button>
+      <button class="btn btn-secondary btn-sm w-full" id="val-export-mid" style="margin-top:4px;font-size:12px">📁 Exporter scores en fichier</button>
       <button class="btn btn-ghost w-full" id="val-abort" style="margin-top:4px;font-size:11px;color:var(--error)">⏹ Abandonner (perte de progression)</button>
     </div>
   </div>`;
   document.getElementById('val-continue').onclick=()=>{if(S.val.queue.length)valNext();else valFinish();};
   const vsq=document.getElementById('val-save-quit');
   if(vsq)vsq.onclick=()=>{valSaveProgress();S.val.active=false;showToast('✅ Progression sauvegardée — reprenez depuis 🎓 Validation','success');S.view='home';render();};
+  const vem=document.getElementById('val-export-mid');
+  if(vem)vem.onclick=()=>{
+    // Save current session to scores then export
+    valSaveProgress();
+    const sessions=loadScores();
+    const now=new Date();
+    const dateStr=String(now.getDate()).padStart(2,'0')+'_'+String(now.getMonth()+1).padStart(2,'0')+'_'+now.getFullYear();
+    const ue=prompt("Nom de l'UE (ex: UE_2_2)","UE");
+    if(ue!==null)exportScores(ue);
+  };
   document.getElementById('val-abort').onclick=()=>{if(confirm('Abandonner ? La progression sera perdue.')){valClearProgress();S.val.active=false;S.view='home';render();}};
 }
 
@@ -918,9 +973,11 @@ function renderExModal(){
   document.getElementById('ex-modal-overlay').onclick=e=>{if(e.target.id==='ex-modal-overlay')closeExModal();};
   if(hasLabels){document.getElementById('mode-fill').onclick=()=>startEx(S.exerciseSchemaId,'fill');document.getElementById('mode-reveal').onclick=()=>startEx(S.exerciseSchemaId,'reveal');document.getElementById('mode-locate').onclick=()=>startEx(S.exerciseSchemaId,'locate');}
 }
-function startEx(schemaId,mode){
+function startEx(schemaId,mode,filterGroupIds){
   S.exerciseModalOpen=false;S.exerciseSchemaId=null;const sc=getSchema(schemaId);if(!sc)return;
-  const shuffledGroups=shuffle(buildGroups(sc.markers.filter(m=>m.label.trim()))).map((g,i)=>({...g,displayNum:i+1}));
+  let allGroups=buildGroups(sc.markers.filter(m=>m.label.trim()));
+  if(filterGroupIds&&filterGroupIds.length)allGroups=allGroups.filter(g=>filterGroupIds.includes(g.groupId));
+  const shuffledGroups=shuffle(allGroups).map((g,i)=>({...g,displayNum:i+1}));
   S.ex={mode,schemaId,groups:shuffledGroups,answers:{},submitted:false,score:null,revealed:{},
         locateQueue:shuffle(shuffledGroups.map(g=>g.label)),locateIdx:0,locateResults:[],locateDone:false,feedback:null,feedbackTimeout:null,manualCorrect:{}};
   S.view=mode==='fill'?'ex-fill':mode==='reveal'?'ex-reveal':'ex-locate';render();
@@ -1138,7 +1195,16 @@ function renderEditor(app){
         <div class="sidebar-h">Informations</div>
         <div class="form-group"><label class="label">Titre</label><input class="input" id="inp-title" value="${sc.title||''}"></div>
         <div class="form-group"><label class="label">Catégorie</label><input class="input" id="inp-cat" value="${sc.category||''}"></div>
-        <div class="form-group"><label class="label">Semestre</label><select class="select" style="width:100%" id="sel-sem">${SEMESTERS.map(s=>`<option value="${s}" ${sc.semester===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="form-group" style="margin-top:8px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)" id="targeted-label">
+        <input type="checkbox" id="val-targeted" style="width:16px;height:16px;accent-color:var(--accent)">
+        <span>
+          <span style="font-weight:600;font-size:13px">🎯 Mode ciblé</span>
+          <span style="display:block;font-size:11px;color:var(--muted)">Aux 2ème passage+, ne réinterroger que les zones ratées</span>
+        </span>
+      </label>
+    </div>
+    <div class="form-group"><label class="label">Semestre</label><select class="select" style="width:100%" id="sel-sem">${SEMESTERS.map(s=>`<option value="${s}" ${sc.semester===s?'selected':''}>${s}</option>`).join('')}</select></div>
         <div class="form-group"><label class="label">Fond</label>
           <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
             ${BG_PRESETS.map(c=>`<div class="color-swatch ${sc.bgColor===c?'active':''} ${needsRing(c)||c==='transparent'?'ring':''}" data-bg="${c}" style="background:${c==='transparent'?'linear-gradient(45deg,#999 25%,transparent 25%,transparent 75%,#999 75%),linear-gradient(45deg,#999 25%,transparent 25%,transparent 75%,#999 75%);background-size:8px 8px;background-position:0 0,4px 4px':c}"></div>`).join('')}
