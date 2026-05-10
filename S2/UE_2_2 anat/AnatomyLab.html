@@ -226,6 +226,7 @@ function splashDone(){
 /* ══ CONSTANTS ══ */
 const STORAGE_KEY='anatomylab_v5';
 const SCORES_KEY='anatomylab_scores_v1';
+const VAL_PROGRESS_KEY='anatomylab_val_progress';
 const HIT_RADIUS=0.065;
 const SEMESTERS=['S1','S2','S3','S4','S5','S6','Autre'];
 const SEM_COLORS={S1:'#8b5cf6',S2:'#00c8e0',S3:'#00e09a',S4:'#ffb340',S5:'#f97316',S6:'#ec4899',Autre:'#6366f1'};
@@ -602,8 +603,12 @@ function openValidationModal(){
       📊 Dernière session : ${lastSession.date} · ${Object.keys(lastSession.scores||{}).length} schémas
       <button class="btn btn-xs" id="val-show-scores" style="margin-left:8px">Voir scores</button>
     </div>`:''}
+    ${valHasSavedProgress()?`<div style="padding:8px 10px;background:rgba(255,179,64,.1);border:1px solid var(--warn);border-radius:8px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+      <div style="flex:1;font-size:12px"><b style="color:var(--warn)">🔄 Progression en cours</b><br><span style="color:var(--muted)">${Object.keys(valHasSavedProgress().sessionScores||{}).length} schémas faits · ${valHasSavedProgress().queue.length} restants</span></div>
+      <button class="btn btn-sm" id="val-resume" style="border-color:var(--warn);color:var(--warn)">▶ Reprendre</button>
+    </div>`:''}
     <div style="display:flex;gap:7px;margin-top:4px">
-      <button class="btn btn-primary" id="val-start" style="flex:1">🎓 Commencer la validation</button>
+      <button class="btn btn-primary" id="val-start" style="flex:1">🎓 Nouvelle session</button>
       <button class="btn btn-secondary btn-sm" id="val-export-scores">💾 Exporter scores</button>
       <button class="btn btn-sm" id="val-import-scores">📂 Importer</button>
     </div>
@@ -618,6 +623,8 @@ function openValidationModal(){
   document.getElementById('val-close').onclick=()=>document.getElementById('val-modal-overlay').remove();
   document.getElementById('val-modal-overlay').onclick=e=>{if(e.target.id==='val-modal-overlay')e.target.remove();};
   document.getElementById('val-start').onclick=()=>{document.getElementById('val-modal-overlay').remove();startValidation(valMode,valSem);};
+  const vresume=document.getElementById('val-resume');
+  if(vresume){const saved=valHasSavedProgress();vresume.onclick=()=>{document.getElementById('val-modal-overlay').remove();if(saved)valResumeProgress(saved);};}
   document.getElementById('val-export-scores').onclick=()=>{
     const ue=prompt('Nom de l\'UE pour le fichier de scores (ex: UE_2_2)','UE');
     if(ue!==null)exportScores(ue);
@@ -646,6 +653,23 @@ function valNext(){
   else startEx(item.id,'locate');
 }
 
+function valSaveProgress(){
+  try{localStorage.setItem(VAL_PROGRESS_KEY,JSON.stringify({
+    mode:S.val.mode,semFilter:S.val.semFilter,
+    queue:S.val.queue,done:S.val.done,
+    sessionScores:S.val.sessionScores,startTime:S.val.startTime
+  }));}catch(e){}
+}
+function valClearProgress(){try{localStorage.removeItem(VAL_PROGRESS_KEY);}catch(e){}}
+function valHasSavedProgress(){
+  try{const d=JSON.parse(localStorage.getItem(VAL_PROGRESS_KEY)||'null');return d&&d.queue&&(d.queue.length+d.done.length)>0?d:null;}catch{return null;}
+}
+function valResumeProgress(saved){
+  S.val={active:true,mode:saved.mode,semFilter:saved.semFilter,
+    queue:saved.queue,done:saved.done,sessionScores:saved.sessionScores,
+    currentSchemaId:null,_currentAttempts:0,startTime:saved.startTime||Date.now()};
+  valNext();
+}
 function valRecordAndContinue(pct){
   if(!S.val.active)return;
   const sid=S.val.currentSchemaId;
@@ -653,13 +677,9 @@ function valRecordAndContinue(pct){
   const prev=S.val.sessionScores[sid];
   const best=prev?Math.max(prev.score,pct):pct;
   S.val.sessionScores[sid]={title:sc?sc.title:'?',semester:sc?sc.semester:'?',score:best,lastScore:pct,attempts:S.val._currentAttempts};
-  if(pct>=75){
-    S.val.done.push(sid);
-  } else {
-    // Re-queue with incremented attempts
-    S.val.queue.push({id:sid,attempts:S.val._currentAttempts});
-  }
-  // Show brief result overlay then continue
+  if(pct>=75){S.val.done.push(sid);}
+  else{S.val.queue.push({id:sid,attempts:S.val._currentAttempts});}
+  valSaveProgress(); // persist after each schema
   S.view='val-between';render();
 }
 
@@ -670,6 +690,7 @@ function valFinish(){
   const now=new Date();
   const dateStr=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear();
   sessions.push({id:Date.now().toString(36),date:dateStr,mode:S.val.mode,semFilter:S.val.semFilter,scores:S.val.sessionScores});
+  valClearProgress();
   if(sessions.length>20)sessions.splice(0,sessions.length-20);
   saveScores(sessions);
   S.view='val-results';render();
@@ -696,11 +717,14 @@ function renderValBetween(app){
       <button class="btn btn-primary w-full" id="val-continue" style="margin-top:14px;font-size:15px">
         ${S.val.queue.length?'➡️ Schéma suivant':'🏁 Voir les résultats'}
       </button>
-      <button class="btn btn-ghost w-full" id="val-abort" style="margin-top:6px;font-size:12px">⏹ Arrêter la validation</button>
+      <button class="btn btn-ghost w-full" id="val-save-quit" style="margin-top:6px;font-size:12px">💾 Sauvegarder et quitter</button>
+      <button class="btn btn-ghost w-full" id="val-abort" style="margin-top:4px;font-size:11px;color:var(--error)">⏹ Abandonner (perte de progression)</button>
     </div>
   </div>`;
   document.getElementById('val-continue').onclick=()=>{if(S.val.queue.length)valNext();else valFinish();};
-  document.getElementById('val-abort').onclick=()=>{S.val.active=false;S.view='home';render();};
+  const vsq=document.getElementById('val-save-quit');
+  if(vsq)vsq.onclick=()=>{valSaveProgress();S.val.active=false;showToast('✅ Progression sauvegardée — reprenez depuis 🎓 Validation','success');S.view='home';render();};
+  document.getElementById('val-abort').onclick=()=>{if(confirm('Abandonner ? La progression sera perdue.')){valClearProgress();S.val.active=false;S.view='home';render();}};
 }
 
 function renderValResults(app){
@@ -1479,7 +1503,7 @@ function renderExFill(app){
         const ok=autoOk||manOk;
         const bc=g.markers[0]?g.markers[0].color:PIN_COLORS[0];
         const allAcc=[g.label,...(g.aliases||[])].filter(l=>l.trim());
-        return`<div style="margin-bottom:4px;border-radius:8px;padding:6px 8px;background:${ex.submitted?(ok?'rgba(0,224,154,.07)':'rgba(255,77,106,.07)'):'var(--bg)'};border:1px solid ${ex.submitted?(ok?'var(--success)':'var(--error)'):'var(--border)'};transition:border .2s">
+        return`<div data-row-gid="${g.groupId}" style="margin-bottom:4px;border-radius:8px;padding:6px 8px;background:${ex.submitted?(ok?'rgba(0,224,154,.07)':'rgba(255,77,106,.07)'):'var(--bg)'};border:1px solid ${ex.submitted?(ok?'var(--success)':'var(--error)'):'var(--border)'};transition:border .2s">
           <div class="fill-row" style="gap:6px">
             <div class="fill-num" style="border-color:${bc};color:${bc};flex-shrink:0">${g.displayNum}</div>
             <input class="input" ${ex.submitted?'disabled':''} placeholder="Zone ${g.displayNum}…" value="${ans}" data-gid="${g.groupId}"
@@ -1513,7 +1537,30 @@ function renderExFill(app){
   const br=document.getElementById('btn-retry');if(br)br.onclick=()=>startEx(ex.schemaId,'fill');
   const bvn=document.getElementById('btn-val-next');if(bvn)bvn.onclick=()=>valRecordAndContinue(ex.score||0);
   document.querySelectorAll('[data-mark-ok]').forEach(btn=>{btn.onclick=e=>{e.stopPropagation();markManualCorrect(btn.dataset.markOk);};});
+  // Click correction row or input → highlight pin on schema
+  document.querySelectorAll('[data-gid]').forEach(el=>{
+    el.addEventListener('focus',e=>highlightPin(el.dataset.gid));
+    el.addEventListener('blur',()=>document.querySelectorAll('.fill-pin.highlight').forEach(p=>p.classList.remove('highlight')));
+  });
+  document.querySelectorAll('[data-row-gid]').forEach(row=>{
+    row.style.cursor='pointer';
+    row.onclick=e=>{if(e.target.tagName==='BUTTON'||e.target.tagName==='INPUT')return;
+      highlightPin(row.dataset.rowGid);
+      setTimeout(()=>document.querySelectorAll('.fill-pin.highlight').forEach(p=>p.classList.remove('highlight')),1500);
+    };
+  });
   setupExCanvas(sc,true);
+  // Click pin → focus its input
+  document.querySelectorAll('.fill-pin[data-gid]').forEach(pin=>{
+    pin.style.cursor='pointer';
+    pin.title='Cliquer pour aller à cette zone';
+    pin.onclick=e=>{
+      e.stopPropagation();
+      const inp=document.querySelector('[data-gid="'+pin.dataset.gid+'"]');
+      if(inp&&!ex.submitted){inp.focus();inp.scrollIntoView({block:'nearest'});}
+      else highlightPin(pin.dataset.gid);
+    };
+  });
 }
 function submitFill(){
   const ex=S.ex;if(!ex||ex.submitted)return;
