@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UE 3.4 — Médecine Nucléaire</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e17;--bg2:#111827;--bg3:#1a2235;--pan:#161f30;--brd:#2a3a55;--ac:#00d4aa;--a2:#ff6b35;--a3:#a78bfa;--a4:#fbbf24;--tx:#e2e8f0;--tx2:#94a3b8;--tx3:#64748b;--ok:#22c55e;--er:#ef4444;--wa:#f59e0b;--fm:'Space Mono',monospace;--fb:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:14px;line-height:1.6;min-height:100vh}
+.hdr{background:linear-gradient(135deg,#0a0e17,#111827,#0d1a2a);border-bottom:1px solid var(--brd);padding:11px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px}
+.ht{font-family:var(--fm);font-size:11px;color:var(--ac);letter-spacing:.08em;text-transform:uppercase}
+.hs{color:var(--tx2);font-size:9px}
+.nav{display:flex;gap:2px;flex-wrap:wrap;background:var(--bg3);padding:3px;border-radius:9px;border:1px solid var(--brd)}
+.nt{padding:5px 10px;border-radius:6px;border:none;background:transparent;color:var(--tx2);font-family:var(--fb);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.nt:hover{background:var(--bg2);color:var(--tx)}.nt.on{background:var(--ac);color:#000;font-weight:700}
+.main{max-width:1100px;margin:0 auto;padding:18px 12px}
+.sec{display:none}.sec.on{display:block}
+.sh{margin-bottom:20px;padding-bottom:11px;border-bottom:1px solid var(--brd)}
+.sh h2{font-family:var(--fm);font-size:15px;color:var(--ac);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.sh p{color:var(--tx2);font-size:11px}
+.g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:11px;margin-bottom:16px}
+.ca{background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:15px;transition:border-color .2s,transform .2s}
+.ca:hover{border-color:var(--ac);transform:translateY(-2px)}
+.ctt{font-family:var(--fm);font-size:9px;color:var(--a2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.ca h3{font-size:13px;margin-bottom:6px;color:var(--tx)}
+.ca p,.ca li{font-size:11px;color:var(--tx2)}.ca ul{padding-left:13px}.ca li{margin-bottom:2px}
+/* TABLE */
+.tb{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:16px}
+.tb th{background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac);white-space:nowrap}
+.tb td{padding:7px 8px;border-bottom:1px solid var(--brd);vertical-align:top}
+.tb tr:hover td{background:var(--bg3)}
+.nn{font-family:var(--fm);font-weight:700;color:var(--tx);font-size:11px}
+.ns{font-size:8px;vertical-align:super}
+.fn{font-size:9px;color:var(--tx2);font-style:italic}
+.td{color:#00d4aa;font-weight:600}.tt{color:#ff6b35;font-weight:600}.tc{color:#a78bfa;font-weight:600}
+/* FLIP */
+.fc{perspective:1000px;cursor:pointer}
+.fi{position:relative;transform-style:preserve-3d;transition:transform .5s;min-height:115px}
+.fc.flp .fi{transform:rotateY(180deg)}
+.ff,.fbk{position:absolute;width:100%;backface-visibility:hidden;background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:13px;min-height:115px;display:flex;flex-direction:column;justify-content:center}
+.fbk{transform:rotateY(180deg);border-color:var(--ac)}
+.fh{font-size:9px;color:var(--tx3);text-align:right;margin-top:4px;font-style:italic}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:14px}
+.fw{position:relative;min-height:115px}
+/* COINCIDENCES */
+.ctabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.ctab{padding:6px 12px;border-radius:7px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);font-size:11px;cursor:pointer;transition:all .2s;font-family:var(--fb);font-weight:500}
+.ctab:hover{border-color:var(--ac)}
+.ctab.av{border-color:var(--ok);color:var(--ok);background:rgba(34,197,94,.1)}
+.ctab.ad{border-color:var(--wa);color:var(--wa);background:rgba(245,158,11,.1)}
+.ctab.af{border-color:var(--er);color:var(--er);background:rgba(239,68,68,.1)}
+.ctab.ai{border-color:var(--tx3);color:var(--tx3);background:rgba(100,116,139,.1)}
+.ctab.aht{border-color:var(--a3);color:var(--a3);background:rgba(167,139,250,.1)}
+.cpanel{display:none}.cpanel.on{display:flex;gap:15px;flex-wrap:wrap;align-items:flex-start}
+.cdesc{flex:1;min-width:195px}
+.cttl{font-family:var(--fm);font-size:11px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cttl.v{color:var(--ok)}.cttl.d{color:var(--wa)}.cttl.f{color:var(--er)}.cttl.i{color:var(--tx3)}.cttl.ht{color:var(--a3)}
+.cpt{font-size:11px;color:var(--tx2);margin-bottom:5px;padding-left:12px;position:relative}
+.cpt::before{content:'→';position:absolute;left:0;color:var(--ac)}
+/* QUIZ */
+.qs{background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:18px;margin-top:18px}
+.qh{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;flex-wrap:wrap;gap:5px}
+.qh h3{font-family:var(--fm);font-size:11px;color:var(--a2);text-transform:uppercase}
+.qsc{font-family:var(--fm);font-size:10px;color:var(--tx2);background:var(--bg3);padding:3px 10px;border-radius:18px;border:1px solid var(--brd)}
+.qt{font-size:13px;font-weight:500;margin-bottom:9px;color:var(--tx);line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:5px}
+.ob{padding:7px 12px;border-radius:7px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);text-align:left;font-family:var(--fb);font-size:11px;cursor:pointer;transition:all .2s;line-height:1.4}
+.ob:hover:not(:disabled){border-color:var(--ac);color:var(--tx);background:rgba(0,212,170,.07)}
+.ob.ok{border-color:var(--ok);background:rgba(34,197,94,.1);color:var(--ok)}
+.ob.ko{border-color:var(--er);background:rgba(239,68,68,.1);color:var(--er)}
+.ob:disabled{cursor:default}
+.fb2{margin-top:5px;padding:7px 11px;border-radius:7px;font-size:11px;line-height:1.5}
+.fb2.ok{background:rgba(34,197,94,.1);color:var(--ok);border:1px solid rgba(34,197,94,.3)}
+.fb2.ko{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+.btn{padding:6px 14px;border-radius:7px;border:none;font-family:var(--fb);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s}
+.bp{background:var(--ac);color:#000}.bp:hover{background:#00b894}
+.bs{background:var(--bg3);color:var(--tx2);border:1px solid var(--brd)}.bs:hover{border-color:var(--ac);color:var(--ac)}
+.qnav{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-top:10px}
+.szbtn{padding:5px 11px;border-radius:6px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);font-family:var(--fm);font-size:10px;cursor:pointer;transition:all .2s}
+.szbtn.on{background:rgba(0,212,170,.15);color:var(--ac);border-color:var(--ac)}
+.szbtn:hover{border-color:var(--ac);color:var(--ac)}
+/* CQ */
+.cqp{margin-bottom:10px}
+.cqph{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--bg3);border-radius:7px;cursor:pointer;border:1px solid var(--brd);transition:border-color .2s}
+.cqph:hover{border-color:var(--ac)}
+.cqpl{font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--a4)}
+.cqpb{display:none;padding:8px 12px;border:1px solid var(--brd);border-top:none;border-radius:0 0 7px 7px;background:var(--pan)}
+.cqp.op .cqpb{display:block}.cqp.op .cqph{border-radius:7px 7px 0 0;border-color:var(--a4)}
+.cqi{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid rgba(42,58,85,.5);font-size:11px}
+.cqi:last-child{border-bottom:none}
+.mb2{font-size:8px;font-weight:700;padding:2px 6px;border-radius:9px;background:rgba(0,212,170,.15);color:var(--ac);border:1px solid rgba(0,212,170,.3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0}
+.pb2{font-size:8px;font-weight:700;padding:2px 6px;border-radius:9px;background:rgba(148,163,184,.1);color:var(--tx3);border:1px solid rgba(148,163,184,.2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;flex-shrink:0}
+.ib{background:var(--bg3);border-left:3px solid var(--ac);border-radius:0 7px 7px 0;padding:10px 12px;margin-bottom:11px;font-size:11px;color:var(--tx2)}
+.ib strong{color:var(--tx)}.ib.w{border-left-color:var(--wa)}.ib.t{border-left-color:var(--a3)}
+.acc{margin-bottom:8px}
+.acch{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;cursor:pointer;transition:all .2s;font-weight:500;font-size:12px}
+.acch:hover{border-color:var(--ac)}.acc.op .acch{border-radius:7px 7px 0 0;border-color:var(--ac);color:var(--ac)}
+.accb{display:none;padding:12px;background:var(--pan);border:1px solid var(--ac);border-top:none;border-radius:0 0 7px 7px;font-size:11px;color:var(--tx2);line-height:1.7}
+.acc.op .accb{display:block}
+.aci{transition:transform .2s;font-size:10px}.acc.op .aci{transform:rotate(180deg)}
+.mviz{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px;background:var(--bg3);border-radius:9px;margin:8px 0;font-size:10px}
+.mbox{background:var(--pan);border:1px solid var(--brd);border-radius:7px;padding:7px 10px;text-align:center}
+.marr{color:var(--ac);font-size:14px}.mlab{font-size:8px;color:var(--tx3);margin-top:2px}
+.pb{height:4px;background:var(--bg3);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.pf{height:100%;background:var(--ac);border-radius:2px;transition:width .3s}
+.flt{padding:4px 11px;border-radius:18px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);font-size:10px;cursor:pointer;transition:all .2s;font-family:var(--fb)}
+.flt.on{background:rgba(0,212,170,.15);color:var(--ac);border-color:var(--ac)}
+/* COLLI CARDS */
+.cug{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:9px;margin-bottom:14px}
+.cuc{background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:13px}
+.cun{font-family:var(--fm);font-weight:700;font-size:12px;margin-bottom:2px}
+.eb{display:inline-block;padding:2px 6px;border-radius:3px;font-size:9px;font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.elo{background:rgba(0,212,170,.2);color:#00d4aa}.eme{background:rgba(251,191,36,.2);color:#fbbf24}.ehi{background:rgba(255,107,53,.2);color:#ff6b35}
+.ciso{font-size:9px;color:var(--ac);margin-bottom:4px;font-family:var(--fm)}.cwh{font-size:10px;color:var(--tx2)}
+/* HOME */
+.hg{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:9px;margin-top:14px}
+.hc{background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:14px;cursor:pointer;transition:all .2s;text-align:left}
+.hc:hover{border-color:var(--ac);transform:translateY(-2px)}
+.hci{font-size:19px;margin-bottom:7px}.hct{font-weight:600;font-size:12px;margin-bottom:2px}.hcs{font-size:10px;color:var(--tx2)}
+.div{height:1px;background:var(--brd);margin:18px 0}
+.mc{background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:13px;margin-bottom:8px}
+.mc:hover{border-color:var(--a3)}.mn{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--brd);border-radius:2px}
+@media(max-width:600px){.hdr{flex-direction:column;align-items:flex-start}.nav{overflow-x:auto;width:100%}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div><div class="ht">⚛️ UE 3.4 — Médecine Nucléaire</div><div class="hs">IFPVPS Toulon · Promo 2025–2028</div></div>
+  <nav class="nav">
+    <button class="nt on" onclick="go('home')">🏠</button>
+    <button class="nt" onclick="go('rn')">⚛️ Radionucléides</button>
+    <button class="nt" onclick="go('cam')">📷 Caméra Anger</button>
+    <button class="nt" onclick="go('tep')">🔵 TEP</button>
+    <button class="nt" onclick="go('cq')">✅ CQ</button>
+    <button class="nt" onclick="go('modes')">🔄 Modes</button>
+    <button class="nt" onclick="go('mrp')">💊 MRP</button>
+    <button class="nt" onclick="go('art')">⚠️ Artefacts</button>
+    <button class="nt" onclick="go('quiz')">🎯 Quiz</button>
+  </nav>
+</header>
+<main class="main">
+
+<!-- HOME -->
+<section id="home" class="sec on">
+  <div class="sh"><h2>Tableau de bord</h2><p>Clique sur un module pour démarrer</p></div>
+  <div class="ib"><strong>Objectifs UE 3.4 :</strong> Radioprotection · Gamma-caméra & CZT · Secteurs MN · Contrôles qualité · TEP · Activimètres · Sondes per-opératoires</div>
+  <div class="hg">
+    <div class="hc" onclick="go('rn')"><div class="hci">⚛️</div><div class="hct">Radionucléides</div><div class="hcs">8 isotopes · Noms complets · Pics keV · T½</div></div>
+    <div class="hc" onclick="go('cam')"><div class="hci">📷</div><div class="hct">Caméra Anger</div><div class="hcs">Chaîne · Collimateurs animés · Quand utiliser quoi</div></div>
+    <div class="hc" onclick="go('tep')"><div class="hci">🔵</div><div class="hct">TEP</div><div class="hcs">5 types de coïncidences · Vitesse réglable</div></div>
+    <div class="hc" onclick="go('cq')"><div class="hci">✅</div><div class="hct">Contrôles Qualité</div><div class="hcs">Filtre MEM uniquement · Quotidien → Annuel</div></div>
+    <div class="hc" onclick="go('modes')"><div class="hci">🔄</div><div class="hct">Modes d'Acquisition</div><div class="hcs">Dynamique · Statique · Balayage · TEMP</div></div>
+    <div class="hc" onclick="go('mrp')"><div class="hci">💊</div><div class="hct">MRP &amp; Familles</div><div class="hcs">TEP · Scintigraphie · RIV</div></div>
+    <div class="hc" onclick="go('art')"><div class="hci">⚠️</div><div class="hct">Artefacts</div><div class="hcs">10 types · Causes · Solutions · SPECT/CT</div></div>
+    <div class="hc" onclick="go('quiz')"><div class="hci">🎯</div><div class="hct">Quiz Global</div><div class="hcs">65+ questions · Choix 20 / 40 / 60 / Tout</div></div>
+  </div>
+</section>
+
+<!-- RADIONUCLÉIDES -->
+<section id="rn" class="sec">
+  <div class="sh"><h2>⚛️ Radionucléides</h2><p>Flashcards · Tableau à compléter · Quiz</p></div>
+  <div class="acc" id="meta-acc">
+    <div class="acch" onclick="tog('meta-acc')"><span>🔬 Qu'est-ce que <em>métastable</em> (le <sup>m</sup> de Tc-99<sup>m</sup>) ?</span><span class="aci">▼</span></div>
+    <div class="accb">
+      <p>Un noyau <strong>métastable</strong> est dans un <strong>état nucléaire excité à longue durée de vie</strong>. Le <strong>Tc-99m</strong> émet un <strong>photon γ pur de 140 keV</strong> sans β ni α.</p>
+      <div class="mviz">
+        <div class="mbox"><div class="nn">Mo-99</div><div class="mlab">T½=66h · Générateur</div></div>
+        <div class="marr">→ β⁻</div>
+        <div class="mbox" style="border-color:var(--ac)"><div class="nn" style="color:var(--ac)">Tc-99<sup>m</sup></div><div class="mlab">T½=6h · Excité ★ · 140 keV</div></div>
+        <div class="marr">→ γ 140 keV</div>
+        <div class="mbox"><div class="nn">Tc-99</div><div class="mlab">Quasi-stable</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="div"></div>
+
+  <!-- MODE TABS -->
+  <div style="display:flex;gap:5px;margin-bottom:14px;flex-wrap:wrap">
+    <button class="btn bp" id="rntab-fc" onclick="showRnTab('fc')">🃏 Flashcards</button>
+    <button class="btn bs" id="rntab-tb" onclick="showRnTab('tb')">📋 Tableau à compléter</button>
+    <button class="btn bs" id="rntab-qz" onclick="showRnTab('qz')">🎯 Quiz</button>
+  </div>
+
+  <!-- ===== FLASHCARD MODE ===== -->
+  <div id="rnfc">
+    <!-- Nuclide filter -->
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px" id="rnFilterBtns"></div>
+    <!-- Single card -->
+    <div style="max-width:560px;margin:0 auto">
+      <!-- Progress -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-family:var(--fm);font-size:10px;color:var(--tx3)" id="fcProg">Question 1/1</span>
+        <div style="display:flex;gap:4px">
+          <button class="btn bs" onclick="fcShuffle()" style="font-size:10px;padding:4px 9px">🔀 Mélanger</button>
+          <button class="btn bs" onclick="fcReset()" style="font-size:10px;padding:4px 9px">🔄 Restart</button>
+        </div>
+      </div>
+      <!-- Progress bar -->
+      <div style="height:3px;background:var(--brd);border-radius:2px;margin-bottom:14px;overflow:hidden">
+        <div class="pf" id="fcPrg" style="width:0%"></div>
+      </div>
+      <!-- Card -->
+      <div id="fcCard" style="min-height:220px;background:var(--pan);border:1px solid var(--brd);border-radius:14px;padding:22px;margin-bottom:12px;text-align:center;cursor:pointer;transition:all .3s;position:relative" onclick="fcFlip()">
+        <div id="fcNuclide" style="font-family:var(--fm);font-size:11px;color:var(--a2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px"></div>
+        <div id="fcFront" style="font-size:15px;font-weight:500;color:var(--tx);line-height:1.5;margin-bottom:18px"></div>
+        <div id="fcBack" style="display:none;padding:14px;background:var(--bg3);border-radius:9px;border:1px solid var(--ac);text-align:left">
+          <div style="font-size:12px;font-weight:700;color:var(--ac);margin-bottom:5px">Réponse :</div>
+          <div id="fcAns" style="font-size:13px;color:var(--tx);line-height:1.6"></div>
+          <div id="fcHint" style="font-size:11px;color:var(--tx3);margin-top:6px;font-style:italic"></div>
+        </div>
+        <div id="fcTip" style="font-size:10px;color:var(--tx3);position:absolute;bottom:12px;right:14px;font-style:italic">👆 Cliquer pour voir la réponse</div>
+      </div>
+      <!-- Action buttons (visible after flip) -->
+      <div id="fcActions" style="display:none;display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn" style="background:rgba(34,197,94,.15);color:var(--ok);border:1px solid rgba(34,197,94,.4);font-size:12px" onclick="fcGrade(1)">✓ Bien retenu</button>
+        <button class="btn" style="background:rgba(239,68,68,.15);color:var(--er);border:1px solid rgba(239,68,68,.4);font-size:12px" onclick="fcGrade(0)">✗ À revoir</button>
+        <button class="btn bs" style="font-size:12px" onclick="fcNext()">→ Suivante</button>
+      </div>
+      <!-- Stats -->
+      <div style="display:flex;gap:10px;justify-content:center;font-size:11px;color:var(--tx3)" id="fcStats">
+        <span>✓ <span id="fcOk" style="color:var(--ok)">0</span> retenues</span>
+        <span>✗ <span id="fcKo" style="color:var(--er)">0</span> à revoir</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TABLE MODE ===== -->
+  <div id="rntb" style="display:none">
+    <div class="ib">Complète chaque ligne. Clique sur les boutons pour l'émission et la visée. Valide manuellement les champs libres si ta réponse est correcte mais formulée différemment.</div>
+    <div style="margin-bottom:10px;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn bp" onclick="tbCheck()">🔍 Vérifier tout</button>
+      <button class="btn bs" onclick="tbReset()">🔄 Effacer tout</button>
+      <button class="btn bs" onclick="tbReveal()">👁 Voir la correction</button>
+    </div>
+    <div style="overflow-x:auto">
+      <table id="tbTable" style="width:100%;border-collapse:collapse;font-size:11px;min-width:700px">
+        <thead>
+          <tr>
+            <th style="background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac);white-space:nowrap">Nom complet</th>
+            <th style="background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac)">Symbole</th>
+            <th style="background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac)">Émission</th>
+            <th style="background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac)">Pic (keV)</th>
+            <th style="background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac)">T½</th>
+            <th style="background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac)">Production</th>
+            <th style="background:var(--bg3);color:var(--ac);font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:7px 8px;text-align:left;border-bottom:2px solid var(--ac)">Visée</th>
+          </tr>
+        </thead>
+        <tbody id="tbBody"></tbody>
+      </table>
+    </div>
+    <div id="tbScore" style="margin-top:12px;font-family:var(--fm);font-size:12px;color:var(--tx2)"></div>
+  </div>
+
+  <!-- ===== QUIZ MODE ===== -->
+  <div id="rnqz" style="display:none">
+    <div class="qs"><div class="qh"><h3>🎯 Quiz Radionucléides</h3><div class="qsc" id="qnSc">0/0</div></div><div id="qnC"></div><div class="qnav"><button class="btn bs" onclick="startQ('qnC','qnSc','qnSt',qRN,8)">🔄 Nouveau</button></div></div>
+  </div>
+</section>
+
+<!-- CAMÉRA ANGER -->
+<section id="cam" class="sec">
+  <div class="sh"><h2>📷 Caméra d'Anger</h2><p>Chaîne de détection · Collimateurs animés · Qualité image</p></div>
+  <div class="g2">
+    <div class="ca"><div class="ctt">① Collimateur</div><h3>Filtre des photons</h3><p>Filtre les γ, ne laisse passer que les photons utiles (axe perpendiculaire). Plomb. Les <strong>septas</strong> absorbent les photons hors axe. Leur géométrie = compromis résolution/sensibilité.</p></div>
+    <div class="ca"><div class="ctt">② Cristal NaI (scintillation)</div><h3>γ → lumière</h3><p>Iodure de sodium thallié, ~9,5 mm. Photons γ → <strong>photons lumineux</strong>. 1er maillon de la chaîne. Latence = temps mort (limite taux de comptage).</p></div>
+    <div class="ca"><div class="ctt">③ Photomultiplicateurs</div><h3>Lumière → électricité</h3><p>Réseau hexagonal de PM derrière le cristal. Convertit les flashs en <strong>signal électrique amplifié</strong>. Position calculée par pondération (logique d'Anger). CZT supprime cette étape.</p></div>
+  </div>
+  <div class="div"></div>
+  <h3 style="font-family:var(--fm);color:var(--ac);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🎬 Simulateur interactif de collimateur</h3>
+  <div style="background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:16px;margin-bottom:14px">
+    <p style="font-size:11px;color:var(--tx2);margin-bottom:12px">Les photons arrivent de la source (patient) dans toutes les directions. <span style="color:#22c55e">■ Vert = passe (utile)</span> · <span style="color:#ef4444">■ Rouge = bloqué par un septa</span>. Les photons à angles larges = rayonnement diffusé indésirable.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+      <div>
+        <div style="font-size:9px;color:var(--tx3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Preset collimateur</div>
+        <div style="display:flex;gap:4px">
+          <button class="cpreset btn" data-preset="lehr" style="font-size:10px;padding:4px 9px;border-radius:5px;border:1px solid #00d4aa;background:rgba(0,212,170,.15);color:#00d4aa;cursor:pointer">LEHR</button>
+          <button class="cpreset btn" data-preset="leap" style="font-size:10px;padding:4px 9px;border-radius:5px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);cursor:pointer">LEAP</button>
+          <button class="cpreset btn" data-preset="meap" style="font-size:10px;padding:4px 9px;border-radius:5px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);cursor:pointer">MEAP</button>
+          <button class="cpreset btn" data-preset="heap" style="font-size:10px;padding:4px 9px;border-radius:5px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);cursor:pointer">HEAP</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:9px;color:var(--tx3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Activité (photons/s)</div>
+        <input type="range" id="ci-act" min="1" max="10" value="5" style="width:90px;accent-color:var(--ac)"> <span id="ci-act-v" style="font-size:10px;color:var(--ac);font-family:var(--fm)">×1</span>
+      </div>
+      <div>
+        <div style="font-size:9px;color:var(--tx3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Longueur septas</div>
+        <input type="range" id="ci-len" min="10" max="60" value="40" style="width:90px;accent-color:var(--ac)"> <span id="ci-len-v" style="font-size:10px;color:var(--ac);font-family:var(--fm)">40</span>
+      </div>
+      <div>
+        <div style="font-size:9px;color:var(--tx3);font-family:var(--fm);text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Épaisseur septas</div>
+        <input type="range" id="ci-thk" min="1" max="14" value="3" style="width:90px;accent-color:var(--ac)"> <span id="ci-thk-v" style="font-size:10px;color:var(--ac);font-family:var(--fm)">3</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <canvas id="colliAnim" width="400" height="280" style="border-radius:8px;background:#0d1520;flex-shrink:0;max-width:100%"></canvas>
+      <div style="flex:1;min-width:200px">
+        <div style="font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:10px">Effets mesurés</div>
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:var(--tx2)">Résolution spatiale</span><span id="ci-res" style="color:var(--ac);font-family:var(--fm)">--</span></div>
+          <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden"><div id="ci-res-bar" style="height:100%;background:var(--ac);border-radius:4px;transition:width .4s;width:0%"></div></div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:2px" id="ci-res-desc"></div>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:var(--tx2)">Sensibilité (coups/s)</span><span id="ci-sen" style="color:var(--a2);font-family:var(--fm)">--</span></div>
+          <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden"><div id="ci-sen-bar" style="height:100%;background:var(--a2);border-radius:4px;transition:width .4s;width:0%"></div></div>
+          <div style="font-size:9px;color:var(--tx3);margin-top:2px" id="ci-sen-desc"></div>
+        </div>
+        <div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px"><span style="color:var(--tx2)">Rejet du diffusé</span><span id="ci-scat" style="color:var(--a3);font-family:var(--fm)">--</span></div>
+          <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden"><div id="ci-scat-bar" style="height:100%;background:var(--a3);border-radius:4px;transition:width .4s;width:0%"></div></div>
+        </div>
+        <div style="background:var(--bg3);border-radius:7px;padding:9px;font-size:10px;color:var(--tx2);line-height:1.6;margin-top:4px" id="ci-explain">
+          Ajuste les paramètres ou choisis un preset pour voir l'effet.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="div"></div>
+  <h3 style="font-family:var(--fm);color:var(--ac);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px">🎯 Quel collimateur pour quoi ?</h3>
+  <div class="cug">
+    <div class="cuc" style="border-top:3px solid #00d4aa"><div class="cun" style="color:#00d4aa">LEHR</div><span class="eb elo">Basse énergie</span><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">Low Energy High Resolution</div><div class="ciso">Tc-99m (140 keV) · I-123 (159 keV) · Tl-201</div><div class="cwh">✅ <strong>Routine scintigraphique</strong> : os, rein, thyroïde, cardiaque MIBI, hépatique, poumon. Septas longs fins = résolution max, sensibilité réduite.</div></div>
+    <div class="cuc" style="border-top:3px solid #00b4d8"><div class="cun" style="color:#00b4d8">LEAP</div><span class="eb elo">Basse énergie</span><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">Low Energy All Purpose</div><div class="ciso">Tc-99m</div><div class="cwh">✅ Quand on préfère <strong>sensibilité sur résolution</strong>. Corps entier, patients agités. Compromis résolution/durée.</div></div>
+    <div class="cuc" style="border-top:3px solid #fbbf24"><div class="cun" style="color:#fbbf24">MEAP</div><span class="eb eme">Énergie moyenne</span><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">Medium Energy All Purpose</div><div class="ciso">In-111 (171+245 keV) · Ga-67 (93-300 keV)</div><div class="cwh">✅ Isotopes énergie intermédiaire : <strong>infection (Ga-67)</strong>, oncologie (In-111 Octréoscan). Septas épais pour stopper les énergies moyennes.</div></div>
+    <div class="cuc" style="border-top:3px solid #ff6b35"><div class="cun" style="color:#ff6b35">HEAP</div><span class="eb ehi">Haute énergie</span><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">High Energy All Purpose</div><div class="ciso">I-131 (364 keV)</div><div class="cwh">✅ Post-thérapie thyroïde (I-131), <strong>MIBG thérapeutique</strong>. Septas très épais. LEHR avec I-131 = pénétration septale !</div></div>
+    <div class="cuc" style="border-top:3px solid #a78bfa"><div class="cun" style="color:#a78bfa">SMARTZOOM</div><span class="eb elo">Basse énergie</span><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">Focalisant</div><div class="ciso">Tc-99m</div><div class="cwh">✅ <strong>Cardio SPECT uniquement</strong>. Trous coniques = zoom sur le cœur dans le champ de vue.</div></div>
+    <div class="cuc" style="border-top:3px solid #64748b"><div class="cun" style="color:#94a3b8">Pinhole</div><span class="eb elo">Basse énergie</span><div style="font-size:9px;color:var(--tx3);margin-bottom:4px">Sténopé — 1 seul trou</div><div class="ciso">Tc-99m · I-123</div><div class="cwh">✅ Organes <strong>petits</strong> : thyroïde, parathyroïde. Image agrandie+inversée. Très haute résolution, très faible sensibilité.</div></div>
+  </div>
+  <div class="ib w"><strong>⚠️ Pénétration septale :</strong> LEHR (septas fins) + I-131 (364 keV) = les photons haute énergie traversent les septas → artefacts étoile, image floue. Adapter le collimateur à l'énergie !</div>
+  <div class="g2">
+    <div class="ca" style="border-color:rgba(251,191,36,.4)"><div class="ctt" style="color:var(--a4)">Caméra Anger (NaI)</div><h3 style="color:var(--a4)">Avantages / Limites</h3><ul><li>✅ Coût abordable · Polyvalente · Grand champ</li><li>❌ Perte d'info cristal + PM · Temps mort</li></ul></div>
+    <div class="ca" style="border-color:rgba(0,212,170,.4)"><div class="ctt" style="color:var(--ac)">Caméra CZT</div><h3 style="color:var(--ac)">Avantages / Limites</h3><ul><li>✅ Détection directe γ → élec. · Sensibilité + résolution</li><li>❌ Coût très élevé · Champ réduit (cardio)</li></ul></div>
+  </div>
+  <div class="div"></div>
+  <h3 style="font-family:var(--fm);color:var(--ac);font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🔗 SPECT/CT — Caméra Anger + Scanner</h3>
+  <div class="ib t"><strong>SPECT/CT = TEMP couplée à un TDM (scanner) sur le même appareil.</strong> Acquisition séquentielle : d'abord le TEMP (scintigraphie fonctionnelle), puis immédiatement le TDM (anatomique), sans bouger le patient.</div>
+  <div class="g2">
+    <div class="ca"><div class="ctt">Correction d'atténuation</div><h3>Pourquoi le TDM ?</h3><p>Les photons γ sont partiellement absorbés par les tissus (os, poumons, abdomen). Sans correction, une zone derrière le foie semble moins active qu'elle ne l'est vraiment. Le TDM génère une <strong>carte d'atténuation</strong> (µ en HU → µ en keV) qui corrige chaque voxel de l'image TEMP.</p></div>
+    <div class="ca"><div class="ctt">Recalage anatomique / fonctionnel</div><h3>Fusion des images</h3><p>Le TDM fournit l'anatomie précise (os, organes, vaisseaux). Le TEMP fournit la <strong>fonction</strong> (captation du MRP). La fusion des deux permet de localiser exactement où se situe une hyperfixation : dans un os ? un ganglion ? un organe ? Indispensable en oncologie.</p></div>
+    <div class="ca"><div class="ctt">Contrôle qualité de recalage</div><h3>CQ semestriel</h3><p>Le <strong>recalage SPECT/CT</strong> est vérifié tous les 6 mois par le radiophysicien avec un fantôme. Si la caméra tourne légèrement, il peut y avoir un décalage spatial entre TEMP et TDM → faux localisations. C'est un des CQ semestriels.</p></div>
+    <div class="ca"><div class="ctt">Avantages cliniques</div><h3>Pourquoi c'est mieux</h3><ul><li>Meilleure sensibilité et spécificité diagnostique</li><li>Localisation précise des lésions</li><li>Correction d'atténuation → quantification plus fiable</li><li>Un seul passage patient (gain de temps)</li><li>Irradiation supplémentaire du TDM (à justifier)</li></ul></div>
+  </div>
+</section>
+
+<!-- TEP -->
+<section id="tep" class="sec">
+  <div class="sh"><h2>🔵 La TEP</h2><p>5 cas de coïncidence · Animations · Vitesse réglable</p></div>
+  <div class="ib"><strong>TEP = Tomographie par Émission de Positons.</strong> Isotopes β⁺ → positon s'annihile → 2γ de <strong>511 keV</strong> à 180° → anneau de détecteurs + circuit de coïncidence.</div>
+  <!-- EFFICIENCY BANNER -->
+  <div style="background:var(--pan);border:1px solid var(--brd);border-radius:11px;padding:13px 16px;margin:12px 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div><div style="font-family:var(--fm);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Annihilations utiles pour l'image</div><div style="font-size:26px;font-weight:700;color:var(--ac);font-family:var(--fm)">≈ 1–3 %</div></div>
+    <div style="flex:1;min-width:210px">
+      <div style="display:flex;gap:2px;margin-bottom:4px;border-radius:3px;overflow:hidden;height:8px"><div style="width:2.5%;background:var(--ac)"></div><div style="flex:1;background:var(--brd)"></div></div>
+      <div style="font-size:11px;color:var(--tx2);line-height:1.6">Sur <strong>100 annihilations</strong> dans le patient, seulement <strong style="color:var(--ac)">1 à 3</strong> donnent une coïncidence vraie exploitable. Les autres : sortent <strong>hors du champ géométrique</strong>, sont absorbées (atténuation), ou deviennent des coïncidences parasites. <strong>C'est pourquoi on injecte plusieurs centaines de MBq.</strong></div>
+    </div>
+  </div>
+  <div class="div"></div>
+  <!-- SPEED SLIDER -->
+  <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px;background:var(--bg3);padding:8px 12px;border-radius:7px;border:1px solid var(--brd);flex-wrap:wrap">
+    <span style="font-family:var(--fm);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Vitesse</span>
+    <span style="font-size:10px;color:var(--tx3)">🐢</span>
+    <input type="range" id="spd" min="1" max="10" value="5" style="width:100px;accent-color:var(--ac)" oninput="setSp(this.value)">
+    <span style="font-size:10px;color:var(--tx3)">🐇</span>
+    <span style="font-family:var(--fm);font-size:10px;color:var(--ac);min-width:32px" id="spdL">×1.0</span>
+    <span style="font-size:10px;color:var(--tx3)">← Mettre au minimum pour bien voir les trajectoires</span>
+  </div>
+  <!-- TABS -->
+  <div class="ctabs">
+    <button class="ctab" id="tab-v" onclick="showC('v')">✅ Vraie</button>
+    <button class="ctab" id="tab-d" onclick="showC('d')">⚠️ Diffusée</button>
+    <button class="ctab" id="tab-f" onclick="showC('f')">❌ Fortuite</button>
+    <button class="ctab" id="tab-ht" onclick="showC('ht')">🕐 Hors temps</button>
+    <button class="ctab" id="tab-i" onclick="showC('i')">⚫ Hors champ</button>
+  </div>
+  <!-- PANELS -->
+  <div class="cpanel" id="cp-v">
+    <canvas id="cv-v" width="310" height="310" style="border-radius:9px;background:#0d1520;flex-shrink:0"></canvas>
+    <div class="cdesc">
+      <div class="cttl v">✅ Coïncidence Vraie</div>
+      <div class="cpt">Les <strong>2 photons γ de la même annihilation</strong> sont détectés simultanément.</div>
+      <div class="cpt">Ils voyagent en ligne droite à <strong>180°</strong> sans aucune déviation.</div>
+      <div class="cpt">Les <strong>2 détecteurs opposés</strong> sont bien touchés.</div>
+      <div class="cpt">Arrivée dans la <strong>fenêtre de coïncidence</strong> (≈5-10 ns).</div>
+      <div class="cpt">La <strong>LOR</strong> passe par le vrai point d'émission → reconstruction correcte.</div>
+      <div style="margin-top:9px;padding:8px;background:rgba(34,197,94,.1);border-radius:7px;border:1px solid rgba(34,197,94,.3);font-size:10px;color:var(--ok)">✅ LOR correcte → contribue à l'image → c'est ce qu'on veut !</div>
+    </div>
+  </div>
+  <div class="cpanel" id="cp-d">
+    <canvas id="cv-d" width="310" height="310" style="border-radius:9px;background:#0d1520;flex-shrink:0"></canvas>
+    <div class="cdesc">
+      <div class="cttl d">⚠️ Coïncidence Diffusée</div>
+      <div class="cpt">Un photon subit une <strong>diffusion Compton</strong> dans les tissus.</div>
+      <div class="cpt">Sa <strong>direction est modifiée</strong> avant d'atteindre le détecteur.</div>
+      <div class="cpt">LOR calculée <strong>incorrecte</strong> → mauvaise localisation.</div>
+      <div class="cpt">Dégradation du contraste et du rapport signal/bruit.</div>
+      <div class="cpt"><strong>Correction :</strong> fenêtrage énergétique (les photons Compton ont moins que 511 keV → rejetés si &lt;450 keV).</div>
+      <div style="margin-top:9px;padding:8px;background:rgba(245,158,11,.1);border-radius:7px;border:1px solid rgba(245,158,11,.3);font-size:10px;color:var(--wa)">⚠️ LOR déviée → faux positionnement → perte de contraste</div>
+    </div>
+  </div>
+  <div class="cpanel" id="cp-f">
+    <canvas id="cv-f" width="310" height="310" style="border-radius:9px;background:#0d1520;flex-shrink:0"></canvas>
+    <div class="cdesc">
+      <div class="cttl f">❌ Coïncidence Fortuite</div>
+      <div class="cpt">Deux annihilations <strong>indépendantes</strong> se produisent à des endroits différents.</div>
+      <div class="cpt">Chaque annihilation émet bien ses 2 photons à 180° vers <strong>des détecteurs opposés</strong> corrects.</div>
+      <div class="cpt">Mais par coïncidence temporelle, 1 photon de A et 1 photon de B arrivent dans la <strong>même fenêtre de temps</strong> sur deux détecteurs non-opposés entre eux.</div>
+      <div class="cpt">→ <strong>Fausse LOR</strong> entre ces 2 détecteurs → bruit de fond uniforme.</div>
+      <div class="cpt"><strong>Correction :</strong> méthode du délai (delayed window) → mesure les fortuites → soustraction.</div>
+      <div style="margin-top:9px;padding:8px;background:rgba(239,68,68,.1);border-radius:7px;border:1px solid rgba(239,68,68,.3);font-size:10px;color:var(--er)">❌ Fausse LOR → bruit de fond uniforme · Augmente avec l'activité²</div>
+    </div>
+  </div>
+  <div class="cpanel" id="cp-ht">
+    <canvas id="cv-ht" width="310" height="310" style="border-radius:9px;background:#0d1520;flex-shrink:0"></canvas>
+    <div class="cdesc">
+      <div class="cttl ht">🕐 Coïncidence Hors Temps</div>
+      <div class="cpt">L'annihilation est <strong>parfaitement réelle</strong> : 2 photons à 180° vers les bons détecteurs opposés.</div>
+      <div class="cpt">Mais le 2ème photon arrive <strong>en dehors de la fenêtre de coïncidence</strong> (au-delà de 2-5 ns selon les systèmes).</div>
+      <div class="cpt">Raisons : chemin plus long, interaction légère, jitter électronique.</div>
+      <div class="cpt">→ Le système <strong>ne valide pas la coïncidence</strong> (fenêtre déjà fermée).</div>
+      <div class="cpt"><strong>Note :</strong> une fenêtre trop large = plus de vraies coïncidences acceptées mais aussi plus de fortuites. C'est un réglage de compromis.</div>
+      <div class="cpt">Les systèmes TOF (TEP numérique) ont une meilleure résolution temporelle → fenêtre plus étroite possible.</div>
+      <div style="margin-top:9px;padding:8px;background:rgba(167,139,250,.1);border-radius:7px;border:1px solid rgba(167,139,250,.3);font-size:10px;color:var(--a3)">🕐 Vraie annihilation, bons détecteurs — mais trop en retard → annihilation perdue</div>
+    </div>
+  </div>
+  <div class="cpanel" id="cp-i">
+    <canvas id="cv-i" width="310" height="310" style="border-radius:9px;background:#0d1520;flex-shrink:0"></canvas>
+    <div class="cdesc">
+      <div class="cttl i">⚫ Hors champ — Non détectée</div>
+      <div class="cpt"><strong>Annihilation réelle</strong> : 2 photons à 180°, aucune diffusion. Tout est correct physiquement.</div>
+      <div class="cpt">Mais l'axe des photons <strong>ne pointe pas vers 2 détecteurs opposés</strong>. Ici : les photons sortent hors de l'anneau (haut/bas).</div>
+      <div class="cpt"><strong>Aucun détecteur touché</strong> → ignorée en silence. Pas d'erreur, juste pas de signal.</div>
+      <div class="cpt">C'est la <strong>principale cause</strong> du faible rendement (1-3%).</div>
+      <div class="cpt">Comme il y a des <strong>milliards d'annihilations/seconde</strong>, on a quand même assez de coïncidences utiles.</div>
+      <div style="margin-top:9px;padding:8px;background:rgba(100,116,139,.1);border-radius:7px;border:1px solid rgba(100,116,139,.2);font-size:10px;color:var(--tx3)">⚫ Pas de LOR, pas d'erreur → ignorée → principale perte de sensibilité</div>
+    </div>
+  </div>
+
+  <div class="acc" id="tnum-acc" style="margin-top:18px">
+    <div class="acch" onclick="tog('tnum-acc')"><span>📊 TEP analogique vs TEP numérique (TOF)</span><span class="aci">▼</span></div>
+    <div class="accb">
+      <p><strong>TEP analogique :</strong> Cristaux + PMT. Résolution temporelle ≈500-600 ps.</p><br>
+      <p><strong>TEP numérique (dSiPM) :</strong> Détecteurs silicium numériques. Résolution temporelle ≈200-300 ps → <strong>TOF</strong> : mesure du temps d'arrivée différentiel → localisation du point d'annihilation sur la LOR. Meilleure image, moins de bruit, fenêtre plus étroite = moins de fortuites.</p>
+    </div>
+  </div>
+  <div class="qs"><div class="qh"><h3>🎯 Quiz TEP</h3><div class="qsc" id="qtSc">0/0</div></div><div id="qtC"></div><div class="qnav"><button class="btn bs" onclick="startQ('qtC','qtSc','qtSt',qTEP,8)">🔄 Nouveau</button></div></div>
+</section>
+
+<!-- CQ -->
+<section id="cq" class="sec">
+  <div class="sh"><h2>✅ Contrôles Qualité</h2><p>Périodicité · MEM vs Radiophysicien</p></div>
+  <div style="display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap">
+    <button class="flt on" id="fa" onclick="fcq('all')">Tous</button>
+    <button class="flt" id="fm" onclick="fcq('mem')">🩺 MEM uniquement</button>
+    <button class="flt" id="fp" onclick="fcq('physio')">🔬 Radiophysicien</button>
+  </div>
+  <div id="cqTL"></div>
+  <div class="div"></div>
+  <div class="g2">
+    <div class="ca"><div class="ctt">Galette Co-57</div><h3>Uniformité quotidienne</h3><p>Disque plat Co-57 (122 keV). Posé chaque matin sur chaque tête. T½=271,8j → valide toute l'année. Transporté en valise à roulette.</p></div>
+    <div class="ca"><div class="ctt">Fantôme cylindrique</div><h3>CQ hebdomadaire scanner</h3><p>Fantôme eau + modules. Densité eau (0 HU), résolution TDM, recalage spatial SPECT/TDM.</p></div>
+    <div class="ca"><div class="ctt">Activimètre (chambre ionisation)</div><h3>CQ quotidien</h3><p>Mesure l'activité exacte avant injection. Étalonné avec <strong>Cs-137</strong>. Contrôle MEM avant chaque vacation.</p></div>
+    <div class="ca"><div class="ctt">Sources ponctuelles</div><h3>Résolution, centre de rotation</h3><p>Mesure résolution spatiale (MTF) et centre de rotation (COR) en TEMP. CQ semestriel par radiophysicien.</p></div>
+  </div>
+  <div class="qs"><div class="qh"><h3>🎯 Quiz CQ</h3><div class="qsc" id="qcqSc">0/0</div></div><div id="qcqC"></div><div class="qnav"><button class="btn bs" onclick="startQ('qcqC','qcqSc','qcqSt',qCQ,8)">🔄 Nouveau</button></div></div>
+</section>
+
+<!-- MODES -->
+<section id="modes" class="sec">
+  <div class="sh"><h2>🔄 Modes d'Acquisition</h2><p>Scintigraphie planaire et tomographique</p></div>
+  <div id="modesC"></div>
+  <div class="qs"><div class="qh"><h3>🎯 Quiz Modes</h3><div class="qsc" id="qmSc">0/0</div></div><div id="qmC"></div><div class="qnav"><button class="btn bs" onclick="startQ('qmC','qmSc','qmSt',qMOD,8)">🔄 Nouveau</button></div></div>
+</section>
+
+<!-- MRP -->
+<section id="mrp" class="sec">
+  <div class="sh"><h2>💊 MRP &amp; Familles</h2><p>Médicament Radio-Pharmaceutique · 3 familles</p></div>
+  <div class="g2">
+    <div class="ca" style="border-color:rgba(0,212,170,.4)"><div class="ctt">V — Vecteur</div><h3 style="color:var(--ac)">Le transporteur</h3><p>Médicament ou cellule acheminant le radioélément vers l'organe cible via des <strong>processus physiologiques naturels</strong>. Ex: bisphosphonate (os), MIBI (myocarde), FDG (cellules hypermétaboliques).</p></div>
+    <div class="ca" style="border-color:rgba(255,107,53,.4)"><div class="ctt">M — Marqueur</div><h3 style="color:var(--a2)">Le radioélément</h3><p>Partie radioactive = <strong>radionucléide</strong>. Émet un rayonnement capté par les détecteurs pour former l'image. Ex: Tc-99m, I-123, F-18, I-131.</p></div>
+    <div class="ca"><div class="ctt">Logiciel Venus</div><h3>Gestion des MRP</h3><p>Commander, prescrire, préparer, tracer les doses. Gestion RDV, commandes, stock. Utilisé dans le <strong>laboratoire chaud</strong>.</p></div>
+  </div>
+  <div class="div"></div>
+  <div class="g2">
+    <div class="ca" style="border-color:rgba(0,212,170,.4)"><div class="ctt" style="color:#00d4aa">Famille 1 — TEP</div><h3>Imagerie β⁺</h3><p>Émission β⁺ → annihilation → γ 511 keV. Isotopes : F-18, Ga-68, Rb-82. <strong>Diagnostic</strong></p></div>
+    <div class="ca" style="border-color:rgba(0,212,170,.4)"><div class="ctt" style="color:#00d4aa">Famille 2 — Scintigraphie</div><h3>Imagerie γ planaire/TEMP</h3><p>Rayonnement γ. Isotopes : Tc-99m, I-123, Tl-201, Ga-67. <strong>Diagnostic</strong></p></div>
+    <div class="ca" style="border-color:rgba(255,107,53,.4)"><div class="ctt" style="color:#ff6b35">Famille 3 — RIV</div><h3>Radiothérapie Interne Vectorisée</h3><p>α + β⁻. Isotopes : I-131, Lu-177, Ra-223, Y-90. <strong>Thérapeutique</strong></p></div>
+  </div>
+  <div class="ib t"><strong>La Trilogie :</strong> Épisode 1 = Physiologie de l'organe/pathologie · Épisode 2 = Le MRP (vecteur+marqueur, injection, fixation) · Épisode 3 = Détection/Image (gamma-caméra ou TEP)</div>
+</section>
+
+<!-- ARTEFACTS -->
+<section id="art" class="sec">
+  <div class="sh"><h2>⚠️ Artefacts en Scintigraphie</h2><p>Causes · Types · Solutions</p></div>
+  <div class="ib w"><strong>Un artefact</strong> est une anomalie de l'image qui ne correspond pas à une réalité physiologique mais à un problème technique, de patient, ou de protocole. Les reconnaître est essentiel pour ne pas les interpréter comme une pathologie.</div>
+  <div class="g2">
+    <div class="ca" style="border-top:3px solid var(--er)">
+      <div class="ctt" style="color:var(--er)">① Pénétration septale</div><h3>Mauvais collimateur</h3>
+      <p><strong>Cause :</strong> Utilisation d'un collimateur basse énergie (LEHR) avec un isotope haute énergie (I-131, 364 keV). Les photons traversent les septas trop fins.<br><strong>Aspect :</strong> Flou diffus, étoiles autour des sources chaudes, perte de contraste.<br><strong>Solution :</strong> Adapter le collimateur à l'énergie (HEAP pour I-131).</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--er)">
+      <div class="ctt" style="color:var(--er)">② Flou de mouvement</div><h3>Patient ou organe bougé</h3>
+      <p><strong>Cause :</strong> Patient qui bouge pendant l'acquisition (respiration, inconfort, patient non coopérant). Aussi : mouvement cardiaque ou respiratoire non corrigé en TEMP.<br><strong>Aspect :</strong> Image floue, contours dédoublés, zones de captation étalées.<br><strong>Solution :</strong> Immobilisation, gating respiratoire, réduire le temps d'acquisition.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--wa)">
+      <div class="ctt" style="color:var(--wa)">③ Mauvais pic d'énergie</div><h3>Spectrométrie décalée</h3>
+      <p><strong>Cause :</strong> La fenêtre énergétique n'est pas centrée sur le pic photoélectrique (PM vieillissant, dérive thermique). On sélectionne trop de diffusé ou on perd des photons utiles.<br><strong>Aspect :</strong> Image floue, granuleuse, perte de contraste, zones chaudes/froides artificielles.<br><strong>Solution :</strong> CQ quotidien du pic d'énergie avec galette Co-57.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--wa)">
+      <div class="ctt" style="color:var(--wa)">④ Défaut d'uniformité du cristal</div><h3>Cristal ou PM défectueux</h3>
+      <p><strong>Cause :</strong> Un ou plusieurs photomultiplicateurs défectueux, fissure du cristal NaI, mauvais couplage optique. La réponse n'est pas uniforme sur toute la surface.<br><strong>Aspect :</strong> Zone froide (trou) ou chaude (anneau) circulaire, indépendante de la physiologie.<br><strong>Solution :</strong> CQ d'uniformité quotidien (galette Co-57) → repérage immédiat.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--wa)">
+      <div class="ctt" style="color:var(--wa)">⑤ Artefact de centre de rotation (TEMP)</div><h3>COR décalé en tomoscintigraphie</h3>
+      <p><strong>Cause :</strong> Le centre de rotation mécanique des têtes ne coïncide pas avec le centre de reconstruction. Se produit si la caméra a subi un choc ou si le CQ semestriel n'est pas fait.<br><strong>Aspect :</strong> En TEMP : doubles contours, image "fantôme" annulaire, épaississement artificiel des structures.<br><strong>Solution :</strong> CQ semestriel du COR (centre de rotation) par le radiophysicien.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--wa)">
+      <div class="ctt" style="color:var(--wa)">⑥ Contamination radioactive</div><h3>Source indésirable</h3>
+      <p><strong>Cause :</strong> Contamination cutanée du patient (urine Tc-99m), contamination du collimateur ou de la table, injection paravasculaire (sous-cutanée au lieu d'IV).<br><strong>Aspect :</strong> Foyer chaud intense et localisé, non anatomique (souvent en surface). Injection parasca : zone chaude au site d'injection + défaut de fixation en distal.<br><strong>Solution :</strong> Décontamination, repositionnement, répétition si nécessaire.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--tx3)">
+      <div class="ctt" style="color:var(--tx3)">⑦ Atténuation (sans correction)</div><h3>Absorption des photons dans les tissus</h3>
+      <p><strong>Cause :</strong> Les photons γ sont partiellement absorbés par les tissus denses (os, diaphragme, seins). En TEMP cardiaque : le diaphragme peut atténuer la paroi inférieure.<br><strong>Aspect :</strong> Zone froide artefactuelle en inférieur (homme) ou antéro-latéral (sein chez la femme).<br><strong>Solution :</strong> SPECT/CT avec correction d'atténuation par TDM.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--tx3)">
+      <div class="ctt" style="color:var(--tx3)">⑧ Rayonnement diffusé (Compton)</div><h3>Photons dévoyés dans les tissus</h3>
+      <p><strong>Cause :</strong> Les photons γ interagissent par effet Compton dans les tissus → changement de direction et perte d'énergie → détectés mais mal localisés.<br><strong>Aspect :</strong> Fond diffus sur toute l'image, réduction du contraste, "brouillard" dans les cavités.<br><strong>Solution :</strong> Fenêtrage énergétique strict, méthodes de correction du diffusé.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--tx3)">
+      <div class="ctt" style="color:var(--tx3)">⑨ Artefact de recalage SPECT/CT</div><h3>Décalage TEMP/TDM</h3>
+      <p><strong>Cause :</strong> Le patient a bougé entre l'acquisition TEMP et l'acquisition TDM (respiration, repositionnement). La correction d'atténuation est alors appliquée au mauvais endroit.<br><strong>Aspect :</strong> Hyperfixation ou hypo-fixation artefactuelle, notamment au dôme hépatique (interface foie/poumon).<br><strong>Solution :</strong> Acquisition TDM en respiration libre (même conditions TEMP), recalage manuel si nécessaire.</p>
+    </div>
+    <div class="ca" style="border-top:3px solid var(--tx3)">
+      <div class="ctt" style="color:var(--tx3)">⑩ Mauvais MRP ou paramètres erronés</div><h3>Erreur de protocole</h3>
+      <p><strong>Cause :</strong> Mauvais isotope sélectionné dans le logiciel (fenêtre d'énergie inadaptée), mauvais MRP injecté, délai trop court entre injection et acquisition.<br><strong>Aspect :</strong> Image d'aspect inhabituel, fixation non conforme aux attendus physiologiques.<br><strong>Solution :</strong> Reprogrammer l'examen, vérifier les paramètres, recalibrer si nécessaire.</p>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ GLOBAL -->
+<section id="quiz" class="sec">
+  <div class="sh"><h2>🎯 Quiz Global UE 3.4</h2><p>65+ questions sur tout le cours · Choisir la taille</p></div>
+  <div class="qs">
+    <div class="qh"><h3>Grand Quiz</h3><div class="qsc" id="qgSc">0/0</div></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-family:var(--fm);font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em">Nombre de questions :</span>
+      <button class="szbtn" id="sz20" onclick="setSz(20)">20</button>
+      <button class="szbtn" id="sz40" onclick="setSz(40)">40</button>
+      <button class="szbtn" id="sz60" onclick="setSz(60)">60</button>
+      <button class="szbtn on" id="szAll" onclick="setSz(0)">Tout</button>
+      <span style="font-family:var(--fm);font-size:10px;color:var(--ac)" id="szInfo">Toutes les questions</span>
+    </div>
+    <div class="pb"><div class="pf" id="qgPrg" style="width:0%"></div></div>
+    <div id="qgC"></div>
+    <div class="qnav"><button class="btn bp" id="qgStart" onclick="startGlobal()">🎲 Démarrer</button></div>
+  </div>
+</section>
+
+</main>
+<script>
+// ========== NAV ==========
+function go(id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.querySelectorAll('.nt').forEach(t=>{if((t.getAttribute('onclick')||'').includes("'"+id+"'"))t.classList.add('on')});
+  window.scrollTo(0,0);
+}
+function tog(id){document.getElementById(id).classList.toggle('op')}
+
+// ========== COLLIMATOR STATIC ANIM ==========
+// ========== INTERACTIVE COLLIMATOR ==========
+const colliPresets={
+  lehr:{sLen:50,sThk:2.5,name:'LEHR',color:'#00d4aa',desc:'Septas longs et fins → Résolution spatiale maximale, sensibilité réduite. Idéal pour Tc-99m routine.'},
+  leap:{sLen:25,sThk:3,name:'LEAP',color:'#00b4d8',desc:'Septas moyens → Compromis résolution/sensibilité. Utilisé quand temps acquisition limité.'},
+  meap:{sLen:40,sThk:7,name:'MEAP',color:'#fbbf24',desc:'Septas épais → Bloque le rayonnement d énergie moyenne. Pour Ga-67, In-111.'},
+  heap:{sLen:45,sThk:12,name:'HEAP',color:'#ff6b35',desc:'Septas très épais → Bloque les photons haute énergie. Obligatoire avec I-131 (364 keV).'},
+};
+let colliState2={sLen:50,sThk:2.5,holeW:8,activity:5};
+let colliPhotons=[];let colliT2=0;let colliAF2=null;
+
+function ciSetPreset(preset){
+  const p=colliPresets[preset];if(!p)return;
+  colliState2.sLen=p.sLen;colliState2.sThk=p.sThk;
+  document.getElementById('ci-len').value=p.sLen;document.getElementById('ci-len-v').textContent=p.sLen;
+  document.getElementById('ci-thk').value=p.sThk;document.getElementById('ci-thk-v').textContent=p.sThk;
+  document.querySelectorAll('.cpreset').forEach(b=>{
+    const isSel=b.dataset.preset===preset;
+    b.style.borderColor=isSel?p.color:'var(--brd)';
+    b.style.background=isSel?'rgba('+hexToRgb(p.color)+',0.15)':'var(--bg3)';
+    b.style.color=isSel?p.color:'var(--tx2)';
+  });
+  document.getElementById('ci-explain').innerHTML='<strong style="color:'+p.color+'">'+p.name+'</strong> : '+p.desc;
+  ciUpdateMetrics();
+}
+function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return r+','+g+','+b}
+
+function ciUpdateMetrics(){
+  const {sLen,sThk,activity}=colliState2;
+  const holeW=colliState2.holeW||8;
+  // Acceptance angle = atan(hole_width / septa_length) in degrees
+  const accAngle=Math.atan(holeW/sLen)*180/Math.PI;
+  // Resolution ∝ 1/accAngle (smaller angle = better resolution)
+  const res=Math.round(100-accAngle*2.5);
+  // Sensitivity ∝ accAngle * activity (larger angle = more photons pass)
+  const sen=Math.round(Math.min(95,(accAngle*2.5+activity*3)));
+  // Scatter rejection ∝ septa thickness
+  const scat=Math.round(Math.min(95,sThk*6));
+  
+  const setMetric=(id,val,desc)=>{
+    document.getElementById('ci-'+id).textContent=val+'%';
+    document.getElementById('ci-'+id+'-bar').style.width=val+'%';
+    const desc2=document.getElementById('ci-'+id+'-desc');if(desc2)desc2.textContent=desc;
+  };
+  setMetric('res',Math.max(5,Math.min(95,res)),'Angle d'acceptance: '+accAngle.toFixed(1)+'° — moins = plus précis');
+  setMetric('sen',Math.max(5,Math.min(95,sen)),'Flux de photons acceptés: '+sen+'% — plus = plus rapide');
+  setMetric('scat',Math.max(5,Math.min(95,scat)),'Septas épais = moins de pénétration');
+}
+
+function drawColliAnim(){
+  const cv=document.getElementById('colliAnim');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  const {sLen,sThk,activity}=colliState2;
+  const holeW=8;
+  const per=sThk+holeW;
+  const nCols=Math.floor((W-20)/per);
+  const startX=10;
+  const septaBottom=H-50; // bottom of septa (patient side)
+  const septaTop=septaBottom-sLen; // top of septa (detector side)
+  const detH=22; // detector height
+  const detY=septaTop-detH;
+  const crystalH=14;
+  const crystalY=detY-crystalH;
+  const pmH=16;
+  const pmY=crystalY-pmH;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#0d1520';ctx.fillRect(0,0,W,H);
+
+  // Draw patient source
+  ctx.fillStyle='rgba(251,191,36,.12)';ctx.beginPath();ctx.ellipse(W/2,H-20,W/2-15,16,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(251,191,36,.5)';ctx.font='9px monospace';ctx.textAlign='center';ctx.fillText('Source γ (patient)',W/2,H-16);
+
+  // Emit new photons
+  if(colliT2%Math.max(1,Math.round(15/activity))===0){
+    // Random position and angle
+    const angle=(Math.random()-0.5)*Math.PI*0.7; // -63° to +63°
+    const x=startX+Math.random()*(W-30);
+    colliPhotons.push({x,y:H-35,angle,speed:3,alive:true,accepted:null});
+  }
+
+  // Acceptance angle
+  const accRad=Math.atan(holeW/sLen);
+
+  // Draw septas
+  ctx.fillStyle='#4b5563';
+  for(let i=0;i<=nCols;i++){
+    const sx=startX+i*per;if(sx>W-15)break;
+    ctx.fillRect(sx,septaTop,sThk,sLen);
+  }
+
+  // Draw detector strip
+  ctx.fillStyle='rgba(0,212,170,.18)';ctx.fillRect(10,detY,W-20,detH);
+  ctx.strokeStyle='rgba(0,212,170,.5)';ctx.lineWidth=1;ctx.strokeRect(10,detY,W-20,detH);
+  ctx.fillStyle='rgba(0,212,170,.6)';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('DÉTECTEUR',W/2,detY+13);
+
+  // Crystal
+  ctx.fillStyle='rgba(251,191,36,.15)';ctx.fillRect(10,crystalY,W-20,crystalH);
+  ctx.strokeStyle='rgba(251,191,36,.4)';ctx.strokeRect(10,crystalY,W-20,crystalH);
+  ctx.fillStyle='rgba(251,191,36,.5)';ctx.fillText('Cristal NaI',W/2,crystalY+9);
+
+  // PM
+  ctx.fillStyle='rgba(167,139,250,.15)';ctx.fillRect(10,pmY,W-20,pmH);
+  ctx.strokeStyle='rgba(167,139,250,.4)';ctx.strokeRect(10,pmY,W-20,pmH);
+  ctx.fillStyle='rgba(167,139,250,.5)';ctx.fillText('Photomultiplicateurs',W/2,pmY+11);
+
+  // Update and draw photons
+  colliPhotons=colliPhotons.filter(p=>{
+    if(!p.alive)return false;
+    p.x+=Math.sin(p.angle)*p.speed;
+    p.y-=Math.cos(p.angle)*p.speed;
+
+    if(p.y<detY){p.alive=false;return false}
+
+    // Check if inside septa zone and blocked
+    if(p.y<=septaBottom&&p.y>=septaTop){
+      // Find which slot the photon is in
+      const relX=p.x-startX;
+      const slotIdx=Math.floor(relX/per);
+      const slotPos=relX-slotIdx*per;
+      if(slotPos>=0&&slotPos<sThk){
+        // Hit a septa wall
+        p.alive=false;
+        // Draw blocked flash
+        ctx.save();ctx.fillStyle='#ef4444';ctx.shadowColor='#ef4444';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fill();ctx.restore();
+        return false;
+      }
+      // Also block if angle too wide (would have been blocked entering)
+      if(p.accepted===null){
+        p.accepted=Math.abs(p.angle)<=accRad;
+        if(!p.accepted){p.alive=false;return false}
+      }
+    }
+
+    // Draw photon
+    const col=p.accepted===false?'#ef4444':p.y<septaTop?'#22c55e':'rgba(0,212,170,0.7)';
+    ctx.save();ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=6;ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.restore();
+    return p.y>pmY;
+  });
+
+  // Keep photon count reasonable
+  if(colliPhotons.length>120)colliPhotons=colliPhotons.slice(-80);
+
+  colliT2++;colliAF2=requestAnimationFrame(drawColliAnim);
+}
+
+function initColliInteractive(){
+  const lenSl=document.getElementById('ci-len');
+  const thkSl=document.getElementById('ci-thk');
+  const actSl=document.getElementById('ci-act');
+  if(lenSl)lenSl.addEventListener('input',function(){colliState2.sLen=parseInt(this.value);document.getElementById('ci-len-v').textContent=this.value;colliPhotons=[];ciUpdateMetrics()});
+  if(thkSl)thkSl.addEventListener('input',function(){colliState2.sThk=parseInt(this.value);document.getElementById('ci-thk-v').textContent=this.value;colliPhotons=[];ciUpdateMetrics()});
+  if(actSl)actSl.addEventListener('input',function(){colliState2.activity=parseInt(this.value);document.getElementById('ci-act-v').textContent='x'+this.value;ciUpdateMetrics()});
+  document.querySelectorAll('.cpreset').forEach(b=>b.addEventListener('click',()=>ciSetPreset(b.dataset.preset)));
+  ciSetPreset('lehr');
+  drawColliAnim();
+}
+
+
+// ========== TEP ANIMATIONS ==========
+const aH={v:null,d:null,f:null,ht:null,i:null};
+let aC=null,sp2=0.012;
+function setSp(v){sp2=0.003+(parseInt(v)-1)*0.003;document.getElementById('spdL').textContent='×'+(sp2/0.012).toFixed(1)}
+function showC(type){
+  Object.keys(aH).forEach(t=>{
+    document.getElementById('cp-'+t).classList.remove('on');
+    const tb=document.getElementById('tab-'+t);if(tb)tb.className='ctab';
+    if(aH[t]){cancelAnimationFrame(aH[t]);aH[t]=null}
+  });
+  document.getElementById('cp-'+type).classList.add('on');
+  const tb=document.getElementById('tab-'+type);
+  if(tb){const cm={v:'av',d:'ad',f:'af',ht:'aht',i:'ai'};tb.classList.add(cm[type]||'av')}
+  aC=type;
+  ({v:animV,d:animD,f:animF,ht:animHT,i:animI})[type]?.();
+}
+const SZ=310;
+function ring(ctx,cx,cy,r,col){
+  for(let i=0;i<32;i++){const a=i/32*Math.PI*2;ctx.fillStyle=col;ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),6,0,Math.PI*2);ctx.fill()}
+}
+function pat(ctx,cx,cy,w,h){
+  ctx.fillStyle='rgba(251,191,36,.12)';ctx.beginPath();ctx.ellipse(cx,cy,w||42,h||56,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='rgba(251,191,36,.3)';ctx.lineWidth=1;ctx.stroke();
+  ctx.fillStyle='rgba(251,191,36,.5)';ctx.font='9px monospace';ctx.textAlign='center';ctx.fillText('Patient',cx,cy+3);
+}
+function fl(ctx,x,y,col){ctx.save();ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=15;ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);ctx.fill();ctx.restore()}
+
+// VRAIE
+function animV(){
+  const cv=document.getElementById('cv-v');if(!cv)return;
+  const ctx=cv.getContext('2d');const cx=SZ/2,cy=SZ/2,r=125;let t=0;
+  function fr(){
+    if(aC!=='v')return;
+    ctx.fillStyle='#0d1520';ctx.fillRect(0,0,SZ,SZ);
+    ring(ctx,cx,cy,r,'#1a3a3a');pat(ctx,cx,cy);
+    const ex=cx+15,ey=cy-10;
+    ctx.fillStyle='rgba(0,212,170,.8)';ctx.beginPath();ctx.arc(ex,ey,3.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(0,212,170,.4)';ctx.font='8px monospace';ctx.textAlign='left';ctx.fillText('Annihilation',ex+5,ey+3);
+    const ph=(t*sp2)%1;const a1=1.1,a2=a1+Math.PI;
+    const d1x=ex+r*Math.cos(a1),d1y=ey+r*Math.sin(a1),d2x=ex+r*Math.cos(a2),d2y=ey+r*Math.sin(a2);
+    if(ph>0.08){ctx.strokeStyle='rgba(0,212,170,.1)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(d1x,d1y);ctx.lineTo(d2x,d2y);ctx.stroke();ctx.setLineDash([])}
+    [['#00d4aa',a1],['#fbbf24',a2]].forEach(([col,a])=>{
+      const px=ex+r*ph*Math.cos(a),py=ey+r*ph*Math.sin(a);
+      ctx.save();ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=11;ctx.beginPath();ctx.arc(px,py,4.5,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.fillStyle=col+'aa';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('γ 511',px,py-8);
+    });
+    if(ph>0.91){
+      fl(ctx,d1x,d1y,'#00d4aa');fl(ctx,d2x,d2y,'#fbbf24');
+      ctx.strokeStyle='rgba(34,197,94,.9)';ctx.lineWidth=2.5;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(d1x,d1y);ctx.lineTo(d2x,d2y);ctx.stroke();
+      ctx.fillStyle='#22c55e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('VRAIE',cx,cy+88);
+    }
+    t++;aH.v=requestAnimationFrame(fr);
+  }fr();
+}
+
+// DIFFUSÉE
+function animD(){
+  const cv=document.getElementById('cv-d');if(!cv)return;
+  const ctx=cv.getContext('2d');const cx=SZ/2,cy=SZ/2,r=125;let t=0;
+  function fr(){
+    if(aC!=='d')return;
+    ctx.fillStyle='#0d1520';ctx.fillRect(0,0,SZ,SZ);
+    ring(ctx,cx,cy,r,'#3a2a1a');pat(ctx,cx,cy);
+    const ex=cx-6,ey=cy-6;
+    ctx.fillStyle='rgba(245,158,11,.8)';ctx.beginPath();ctx.arc(ex,ey,3.5,0,Math.PI*2);ctx.fill();
+    const ph=(t*sp2)%1;const a1=0.9,a2=a1+Math.PI;
+    const def=Math.PI/3.2,da=a2+def;
+    const d1x=ex+r*Math.cos(a1),d1y=ey+r*Math.sin(a1);
+    const d2x=ex+r*Math.cos(da),d2y=ey+r*Math.sin(da);
+    const mx=ex+r*0.4*Math.cos(a2),my=ey+r*0.4*Math.sin(a2);
+    ctx.strokeStyle='rgba(245,158,11,.1)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(d1x,d1y);ctx.lineTo(ex+r*Math.cos(a2),ey+r*Math.sin(a2));ctx.stroke();ctx.setLineDash([]);
+    const p1x=ex+r*ph*Math.cos(a1),p1y=ey+r*ph*Math.sin(a1);
+    ctx.save();ctx.fillStyle='#00d4aa';ctx.shadowColor='#00d4aa';ctx.shadowBlur=11;ctx.beginPath();ctx.arc(p1x,p1y,4.5,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.fillStyle='#00d4aaaa';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('γ direct',p1x,p1y-8);
+    let p2x,p2y;
+    if(ph<0.4){p2x=ex+r*ph*Math.cos(a2);p2y=ey+r*ph*Math.sin(a2);}
+    else{const rem=ph-0.4;p2x=mx+r*rem*Math.cos(da);p2y=my+r*rem*Math.sin(da);
+      if(ph>0.4&&ph<0.5){ctx.save();ctx.fillStyle='#f59e0b';ctx.shadowColor='#f59e0b';ctx.shadowBlur=20;ctx.beginPath();ctx.arc(mx,my,8,0,Math.PI*2);ctx.fill();ctx.restore();
+        ctx.fillStyle='rgba(245,158,11,.9)';ctx.font='bold 9px monospace';ctx.textAlign='left';ctx.fillText('COMPTON',mx+9,my+3);}
+    }
+    ctx.save();ctx.fillStyle='#fbbf24';ctx.shadowColor='#fbbf24';ctx.shadowBlur=11;ctx.beginPath();ctx.arc(p2x,p2y,4.5,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.fillStyle='#fbbf24aa';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('γ devie',p2x,p2y-8);
+    if(ph>0.9){
+      fl(ctx,d1x,d1y,'#00d4aa');fl(ctx,d2x,d2y,'#fbbf24');
+      ctx.strokeStyle='rgba(239,68,68,.7)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(d1x,d1y);ctx.lineTo(d2x,d2y);ctx.stroke();
+      ctx.fillStyle='#f59e0b';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('LOR INCORRECTE',cx,cy+88);
+    }
+    t++;aH.d=requestAnimationFrame(fr);
+  }fr();
+}
+
+// FORTUITE — AMÉLIORÉE: 2 annihilations avec vrais 180° chacune
+function animF(){
+  const cv=document.getElementById('cv-f');if(!cv)return;
+  const ctx=cv.getContext('2d');const cx=SZ/2,cy=SZ/2,r=125;let t=0;
+  // Annihilation A: photons → détecteurs à 0° et 180° (gauche et droite du ring)
+  // Annihilation B: photons → détecteurs à 90° et 270° (haut et bas du ring)
+  // Par coïncidence: photon de A (droite) + photon de B (bas) arrivent en même temps → fausse LOR diagonale
+  const eAx=cx-20,eAy=cy+15; // Source A (patient gauche)
+  const eBx=cx+15,eBy=cy-22; // Source B (patient haut-droit)
+  const aA1=Math.PI,aA2=0;       // A → gauche et droite
+  const aB1=Math.PI/2,aB2=-Math.PI/2; // B → bas et haut
+
+  function fr(){
+    if(aC!=='f')return;
+    ctx.fillStyle='#0d1520';ctx.fillRect(0,0,SZ,SZ);
+    ring(ctx,cx,cy,r,'#2a1a1a');pat(ctx,cx,cy);
+    const ph=(t*sp2)%1;
+
+    // Draw both annihilation points
+    ctx.fillStyle='#f87171';ctx.beginPath();ctx.arc(eAx,eAy,3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fb923c';ctx.beginPath();ctx.arc(eBx,eBy,3,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(248,113,113,.5)';ctx.font='8px monospace';ctx.textAlign='right';ctx.fillText('Annihil. A',eAx-4,eAy+3);
+    ctx.fillStyle='rgba(251,146,60,.5)';ctx.textAlign='left';ctx.fillText('Annihil. B',eBx+4,eBy+3);
+
+    // Compute detector positions
+    const dA1x=eAx+r*Math.cos(aA1),dA1y=eAy+r*Math.sin(aA1);
+    const dA2x=eAx+r*Math.cos(aA2),dA2y=eAy+r*Math.sin(aA2);
+    const dB1x=eBx+r*Math.cos(aB1),dB1y=eBy+r*Math.sin(aB1);
+    const dB2x=eBx+r*Math.cos(aB2),dB2y=eBy+r*Math.sin(aB2);
+
+    // Draw CORRECT LORs dashed (what should have been)
+    ctx.strokeStyle='rgba(248,113,113,.15)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+    ctx.beginPath();ctx.moveTo(dA1x,dA1y);ctx.lineTo(dA2x,dA2y);ctx.stroke();
+    ctx.strokeStyle='rgba(251,146,60,.15)';
+    ctx.beginPath();ctx.moveTo(dB1x,dB1y);ctx.lineTo(dB2x,dB2y);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Photons A1 & A2 (red)
+    const pA1x=eAx+r*ph*Math.cos(aA1),pA1y=eAy+r*ph*Math.sin(aA1);
+    const pA2x=eAx+r*ph*Math.cos(aA2),pA2y=eAy+r*ph*Math.sin(aA2);
+    ctx.save();ctx.fillStyle='#f87171';ctx.shadowColor='#f87171';ctx.shadowBlur=9;ctx.beginPath();ctx.arc(pA1x,pA1y,4,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.save();ctx.fillStyle='#fca5a5';ctx.shadowColor='#fca5a5';ctx.shadowBlur=7;ctx.beginPath();ctx.arc(pA2x,pA2y,4,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.fillStyle='rgba(248,113,113,.6)';ctx.font='7px monospace';ctx.textAlign='center';
+    ctx.fillText('γA',pA1x,pA1y-7);ctx.fillText('γA',pA2x,pA2y-7);
+
+    // Photons B1 & B2 (orange)
+    const pB1x=eBx+r*ph*Math.cos(aB1),pB1y=eBy+r*ph*Math.sin(aB1);
+    const pB2x=eBx+r*ph*Math.cos(aB2),pB2y=eBy+r*ph*Math.sin(aB2);
+    ctx.save();ctx.fillStyle='#fb923c';ctx.shadowColor='#fb923c';ctx.shadowBlur=9;ctx.beginPath();ctx.arc(pB1x,pB1y,4,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.save();ctx.fillStyle='#fdba74';ctx.shadowColor='#fdba74';ctx.shadowBlur=7;ctx.beginPath();ctx.arc(pB2x,pB2y,4,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.fillStyle='rgba(251,146,60,.6)';ctx.textAlign='center';
+    ctx.fillText('γB',pB1x,pB1y-7);ctx.fillText('γB',pB2x,pB2y-7);
+
+    // When photons hit detectors
+    if(ph>0.87){
+      // A2 (droite) + B1 (bas) arrive en même temps → FAUSSE coïncidence
+      fl(ctx,dA2x,dA2y,'#f87171');  // photon A arrivé à sa bonne dest droite
+      fl(ctx,dB1x,dB1y,'#fb923c');  // photon B arrivé à sa bonne dest bas
+      // show false LOR between these two
+      ctx.strokeStyle='rgba(239,68,68,.85)';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+      ctx.beginPath();ctx.moveTo(dA2x,dA2y);ctx.lineTo(dB1x,dB1y);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle='#ef4444';ctx.font='bold 10px sans-serif';ctx.textAlign='center';
+      ctx.fillText('FAUSSE LOR',cx,cy+85);
+      ctx.fillStyle='rgba(239,68,68,.5)';ctx.font='8px monospace';
+      ctx.fillText('(γA droite + γB bas : simultanes)',cx,cy+97);
+      // show the "orphan" photons faded
+      fl(ctx,dA1x,dA1y,'#94a3b855');// A1 gauche OK mais pas son partenaire
+      fl(ctx,dB2x,dB2y,'#94a3b855');// B2 haut OK mais pas son partenaire
+    }
+    t++;aH.f=requestAnimationFrame(fr);
+  }fr();
+}
+
+// HORS TEMPS
+function animHT(){
+  const cv=document.getElementById('cv-ht');if(!cv)return;
+  const ctx=cv.getContext('2d');const cx=SZ/2,cy=SZ/2,r=125;let t=0;
+  function fr(){
+    if(aC!=='ht')return;
+    ctx.fillStyle='#0d1520';ctx.fillRect(0,0,SZ,SZ);
+    ring(ctx,cx,cy,r,'#1a1a3a');pat(ctx,cx,cy);
+    const ex=cx+10,ey=cy-8;
+    ctx.fillStyle='rgba(167,139,250,.8)';ctx.beginPath();ctx.arc(ex,ey,3.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(167,139,250,.4)';ctx.font='8px monospace';ctx.textAlign='left';ctx.fillText('Annihilation',ex+5,ey+3);
+    const a1=1.2,a2=a1+Math.PI;
+    const d1x=ex+r*Math.cos(a1),d1y=ey+r*Math.sin(a1);
+    const d2x=ex+r*Math.cos(a2),d2y=ey+r*Math.sin(a2);
+    const cyc=1/sp2;
+    // Photon 1: normal speed. Photon 2: delayed (arrives at ~1.7× normal path)
+    const ph1=Math.min((t*sp2),1);
+    const delay=0.35; // photon 2 starts with a delay
+    const ph2=Math.max(0,Math.min(t*sp2-delay,1));
+    // Draw LOR dashed
+    ctx.strokeStyle='rgba(167,139,250,.1)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(d1x,d1y);ctx.lineTo(d2x,d2y);ctx.stroke();ctx.setLineDash([]);
+    // Photon 1 (normal)
+    if(ph1<1){
+      const p1x=ex+r*ph1*Math.cos(a1),p1y=ey+r*ph1*Math.sin(a1);
+      ctx.save();ctx.fillStyle='#a78bfa';ctx.shadowColor='#a78bfa';ctx.shadowBlur=11;ctx.beginPath();ctx.arc(p1x,p1y,4.5,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(167,139,250,.7)';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('γ1',p1x,p1y-8);
+    }
+    if(ph2<1&&ph2>0){
+      const p2x=ex+r*ph2*Math.cos(a2),p2y=ey+r*ph2*Math.sin(a2);
+      ctx.save();ctx.fillStyle='#c4b5fd';ctx.shadowColor='#c4b5fd';ctx.shadowBlur=11;ctx.beginPath();ctx.arc(p2x,p2y,4.5,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(196,181,253,.7)';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('γ2',p2x,p2y-8);
+    }
+    // TIMING WINDOW VISUALIZATION
+    const wY=SZ-40,wX=cx-70,wW=140,wH=18;
+    ctx.fillStyle='rgba(167,139,250,.1)';ctx.fillRect(wX,wY,wW,wH);
+    ctx.strokeStyle='rgba(167,139,250,.4)';ctx.lineWidth=1;ctx.strokeRect(wX,wY,wW,wH);
+    ctx.fillStyle='rgba(167,139,250,.6)';ctx.font='8px monospace';ctx.textAlign='center';ctx.fillText('Fenetre coincidence',cx,wY+12);
+    // Photon 1 arrival marker
+    if(ph1>=1){
+      const x1m=wX+15;
+      ctx.fillStyle='#a78bfa';ctx.fillRect(x1m-2,wY+2,4,14);
+      ctx.fillStyle='#a78bfa';ctx.font='7px monospace';ctx.textAlign='center';ctx.fillText('γ1',x1m,wY-3);
+      // Time window box
+      const winW=60;
+      ctx.fillStyle='rgba(167,139,250,.15)';ctx.fillRect(x1m,wY+2,winW,14);
+      ctx.strokeStyle='rgba(167,139,250,.5)';ctx.strokeRect(x1m,wY+2,winW,14);
+      ctx.fillStyle='rgba(167,139,250,.5)';ctx.font='7px monospace';ctx.textAlign='center';ctx.fillText('≤ 5ns',x1m+winW/2,wY+12);
+    }
+    // Photon 2 arrival marker
+    if(ph2>=1){
+      const x2m=wX+15+90; // arrives AFTER the window (90 > 60)
+      ctx.fillStyle='#ef4444';ctx.fillRect(x2m-2,wY+2,4,14);
+      ctx.fillStyle='#ef4444';ctx.font='7px monospace';ctx.textAlign='center';ctx.fillText('γ2',x2m,wY-3);
+      ctx.fillStyle='#ef4444';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('FENETRE FERMEE',cx,cy+85);
+      ctx.fillStyle='rgba(239,68,68,.5)';ctx.font='8px monospace';ctx.fillText('Arrivee trop tardive → ignore',cx,cy+97);
+    } else if(ph1>=1&&ph2<1){
+      // Window counting down
+      ctx.fillStyle='rgba(167,139,250,.7)';ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillText('Attente γ2 ...',cx,cy+85);
+    }
+    t++;aH.ht=requestAnimationFrame(fr);
+  }fr();
+}
+
+// HORS CHAMP
+function animI(){
+  const cv=document.getElementById('cv-i');if(!cv)return;
+  const ctx=cv.getContext('2d');const cx=SZ/2,cy=SZ/2,r=125;let t=0;
+  function fr(){
+    if(aC!=='i')return;
+    ctx.fillStyle='#0d1520';ctx.fillRect(0,0,SZ,SZ);
+    ring(ctx,cx,cy,r,'#1a1a1a');
+    pat(ctx,cx-55,cy,36,48);
+    const ex=cx-55,ey=cy;
+    ctx.fillStyle='rgba(100,116,139,.7)';ctx.beginPath();ctx.arc(ex,ey,3.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(100,116,139,.4)';ctx.font='8px monospace';ctx.textAlign='right';ctx.fillText('Annihilation',ex-5,ey+3);
+    const ph=(t*sp2)%1;
+    const a1=Math.PI/2*1.05,a2=a1+Math.PI;
+    // Draw trajectory arrows
+    ctx.strokeStyle='rgba(100,116,139,.12)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+    ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex+r*1.8*Math.cos(a1),ey+r*1.8*Math.sin(a1));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(ex+r*1.8*Math.cos(a2),ey+r*1.8*Math.sin(a2));ctx.stroke();
+    ctx.setLineDash([]);
+    // Angle arc
+    if(ph<0.3){
+      ctx.strokeStyle='rgba(100,116,139,.3)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(ex,ey,24,a2-0.05,a1+0.05);ctx.stroke();
+      ctx.fillStyle='rgba(100,116,139,.5)';ctx.font='8px monospace';ctx.textAlign='left';ctx.fillText('180°',ex+26,ey-5);
+    }
+    const inR1=Math.hypot(ex+r*1.5*ph*Math.cos(a1)-cx,ey+r*1.5*ph*Math.sin(a1)-cy);
+    const p1x=ex+r*1.5*ph*Math.cos(a1),p1y=ey+r*1.5*ph*Math.sin(a1);
+    const p2x=ex+r*1.5*ph*Math.cos(a2),p2y=ey+r*1.5*ph*Math.sin(a2);
+    [p1x,p1y,p2x,p2y].forEach((v,i)=>{if(i%2===0){
+      const x=i===0?p1x:p2x,y=i===0?p1y:p2y;
+      const inRing=Math.hypot(x-cx,y-cy)<r+12;
+      ctx.save();ctx.fillStyle=inRing?'#64748b':'#94a3b8';ctx.shadowColor='#94a3b8';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();ctx.restore();
+      ctx.fillStyle='rgba(100,116,139,.5)';ctx.font='7px monospace';ctx.textAlign='center';ctx.fillText('γ 511keV',x,y+(i===0?13:-10));
+    }});
+    if(ph>0.55){
+      ctx.fillStyle='rgba(100,116,139,.6)';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText('Aucun detecteur touche',cx,cy+85);
+      ctx.fillStyle='rgba(100,116,139,.4)';ctx.font='8px monospace';ctx.fillText('→ Annihilation ignoree (pas d erreur)',cx,cy+97);
+    }
+    t++;aH.i=requestAnimationFrame(fr);
+  }fr();
+}
+
+// ========== CQ DATA ==========
+const cqD=[
+  {period:'🌅 Quotidiens',id:'cqd',items:[
+    {n:"Pic d'energie (spectrometrie)",who:'mem',note:'Fenetrage energetique avec Co-57'},
+    {n:"Homogeneite / Uniformite intrinsèque",who:'mem',note:'Galette Co-57 sur chaque tete'},
+    {n:"Calibration scanner TDM",who:'mem',note:'Fantome eau, densite 0 HU'},
+    {n:"Controle activimetre",who:'mem',note:'Source Cs-137 avant chaque vacation'},
+  ]},
+  {period:'📅 Hebdomadaire',id:'cqw',items:[{n:"Fantome du scanner",who:'mem',note:'Fantome eau + modules resolution TDM'}]},
+  {period:'📆 Mensuels',id:'cqm',items:[
+    {n:"Spectrometrie detaillee",who:'physio',note:''},
+    {n:"Concordance taux comptage entre detecteurs",who:'physio',note:''},
+    {n:"Uniformite de la reponse (mesure quantitative)",who:'physio',note:''},
+  ]},
+  {period:'📊 Semestriels',id:'cqs',items:[
+    {n:"Centre de rotation COR",who:'physio',note:'Alignement tetes en TEMP'},
+    {n:"Recalage scanner",who:'physio',note:'Alignement SPECT/TDM'},
+    {n:"Resolution intrinsèque en energie",who:'physio',note:''},
+  ]},
+  {period:'📈 Annuels',id:'cqy',items:[
+    {n:"Resolution spatiale",who:'physio',note:''},
+    {n:"Uniformite en mode corps entier",who:'physio',note:''},
+    {n:"Qualite image mode tomographique",who:'physio',note:''},
+  ]},
+];
+let cqF='all';
+function fcq(f){
+  cqF=f;
+  document.getElementById('fa').classList.toggle('on',f==='all');
+  document.getElementById('fm').classList.toggle('on',f==='mem');
+  document.getElementById('fp').classList.toggle('on',f==='physio');
+  renderCQ();
+}
+function renderCQ(){
+  const c=document.getElementById('cqTL');if(!c)return;
+  c.innerHTML=cqD.map(p=>{
+    const items=p.items.filter(i=>cqF==='all'||i.who===cqF);
+    if(!items.length)return'';
+    return`<div class="cqp op" id="${p.id}">
+      <div class="cqph" onclick="document.getElementById('${p.id}').classList.toggle('op')">
+        <span class="cqpl">${p.period}</span><span style="font-size:10px;color:var(--tx3)">${items.length} controle(s)</span>
+      </div>
+      <div class="cqpb">${items.map(i=>`<div class="cqi">
+        <span class="${i.who==='mem'?'mb2':'pb2'}">${i.who==='mem'?'MEM':'Physio'}</span>
+        <span>${i.n}</span>${i.note?`<span style="font-size:9px;color:var(--tx3);margin-left:auto">— ${i.note}</span>`:''}
+      </div>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ========== MODES ==========
+const modesD=[
+  {name:'Mode Dynamique',color:'#00d4aa',icon:'⚡',def:"Images repetees simultanement a l'injection.",det:'Plusieurs images/minute. Idéal pour le transit en temps reel.',ex:'Scinti renale (MAG3), hepatobiliaire'},
+  {name:'Statique Planaire',color:'#a78bfa',icon:'📸',def:'Acquisition zone du corps dans un plan (precoce et/ou tardif).',det:'Face, profil, obliques : 1 ou 2 detecteurs chacun.',ex:'Scinti osseuse planaire, thyroide, parathyroide'},
+  {name:'Balayage Whole Body',color:'#fbbf24',icon:'↕️',def:'Deplacement de la table sous les detecteurs.',det:'Vitesse table (cm/min) : lente = meilleur comptage = meilleure qualite.',ex:'Scinti osseuse corps entier, MIBG, I-131'},
+  {name:'Synchronisation / Gating',color:'#ff6b35',icon:'💓',def:'Acquisition couplee a l\'ECG.',det:'Cycle cardiaque divise en frames RR. Analyse mouvement cardiaque, calcul FEVG.',ex:'SPECT myocardique synchronise (MIBI-Gating)'},
+  {name:'TEMP (Tomoscintigraphie)',color:'#22c55e',icon:'🔄',def:'Rotation des tetes autour du patient (180 ou 360 degres).',det:'Reconstruction 3D (OSEM). Couplee TDM = SPECT/CT pour correction attenuation.',ex:'TEMP cardiaque, osseux 3D, DaTscan cerebral'},
+];
+function renderModes(){
+  const c=document.getElementById('modesC');if(!c)return;
+  c.innerHTML=modesD.map(m=>`<div class="mc">
+    <div class="mn" style="color:${m.color}">${m.icon} ${m.name}</div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:5px"><strong>${m.def}</strong></div>
+    <div style="font-size:10px;color:var(--tx3)">${m.det}</div>
+    <div style="margin-top:4px;font-size:9px;color:var(--tx3);font-family:var(--fm)">Exemples : ${m.ex}</div>
+  </div>`).join('');
+}
+
+// ========== RADIONUCLIDE DATA ==========
+const rnData=[
+  {id:'tc99m',symbol:'Tc-99m',fullName:'Technetium-99 metastable',emission:['γ'],peak:140,halfLife:'6 h',production:'Generateur',visee:'Diagnostique',color:'#00d4aa',
+   questions:[
+    {q:'Demi-vie du Tc-99m ?',a:'6 heures',hint:'Courte -> faible irradiation du patient'},
+    {q:'Pic energetique du Tc-99m ?',a:'140 keV',hint:'Ideal pour collimateur LEHR de la camera Anger'},
+    {q:'Quelle emission produit le Tc-99m ?',a:'Photon gamma pur (γ) -- pas de beta',hint:'Seul gamma, sans particule -> dosimetrie reduite'},
+    {q:'A quoi sert le Tc-99m ?',a:'Diagnostique : scintigraphies os, rein, thyroide, cardiaque MIBI, poumon, hepatique',hint:'Isotope le plus utilise en scintigraphie'},
+    {q:'Comment est produit le Tc-99m ?',a:'Generateur Mo-99->Tc-99m (vache)',hint:'Mo-99 decroit -> Tc-99m elue chaque matin au serum physio'},
+    {q:'Quel controle qualite est lie au Tc-99m ?',a:'Galette de Co-57 (122 keV proche de 140 keV) verifie l uniformite de la camera Anger',hint:'Co-57 simule le Tc-99m pour tester la camera'},
+  ]},
+  {id:'i123',symbol:'I-123',fullName:'Iode-123',emission:['γ'],peak:159,halfLife:'13,2 h',production:'Cyclotron',visee:'Diagnostique',color:'#60a5fa',
+   questions:[
+    {q:'Demi-vie de I-123 ?',a:'13,2 heures',hint:''},
+    {q:'Pic energetique de I-123 ?',a:'159 keV',hint:'Proche du Tc-99m, collimateur LEHR utilisable'},
+    {q:'Quelle emission produit I-123 ?',a:'Photon gamma pur (γ)',hint:'Pas de beta -> diagnostique uniquement'},
+    {q:'A quoi sert I-123 ?',a:'Diagnostique : scintigraphie thyroidienne, MIBG (neuroblastome, pheo), DaTscan (Parkinson)',hint:'Surtout thyroide et MIBG'},
+    {q:'Comment est produit I-123 ?',a:'Cyclotron',hint:''},
+  ]},
+  {id:'i131',symbol:'I-131',fullName:'Iode-131',emission:['β⁻','γ'],peak:364,halfLife:'8 j',production:'Reacteur',visee:'Therapeutique',color:'#ff6b35',
+   questions:[
+    {q:'Demi-vie de I-131 ?',a:'8 jours',hint:'Assez long pour l effet therapeutique'},
+    {q:'Pic energetique de I-131 ?',a:'364 keV',hint:'Haute energie -> collimateur HEAP obligatoire'},
+    {q:'Quelle emission produit I-131 ?',a:'beta- + photon gamma (364 keV)',hint:'Le beta- detruit localement les cellules thyroidiennes'},
+    {q:'A quoi sert I-131 ?',a:'Therapeutique : ablation cancer thyroidien, traitement hyperthyroidie (Basedow)',hint:'La particule beta- a un effet cytotoxique local'},
+    {q:'Comment est produit I-131 ?',a:'Reacteur nucleaire',hint:'Produit par fission de l uranium'},
+    {q:'Quel collimateur avec I-131 ?',a:'HEAP (High Energy All Purpose) -- JAMAIS LEHR (penetration septale)',hint:'364 keV traverse les septas fins du LEHR'},
+  ]},
+  {id:'f18',symbol:'F-18',fullName:'Fluor-18',emission:['β⁺','γ'],peak:511,halfLife:'110 min',production:'Cyclotron',visee:'Diagnostique',color:'#a78bfa',
+   questions:[
+    {q:'Demi-vie du F-18 ?',a:'110 minutes',hint:'Tres courte -> cyclotron local obligatoire'},
+    {q:'Pic energetique du F-18 ?',a:'511 keV (annihilation)',hint:'Issu de l annihilation e+/e- (E=mc2)'},
+    {q:'Quelle emission produit le F-18 ?',a:'beta+ (positon) -> annihilation -> 2 photons gamma de 511 keV a 180 degres',hint:'Principe de la TEP'},
+    {q:'A quoi sert le F-18 ?',a:'Diagnostique : TEP-TDM oncologie (FDG = analogue glucose), neurologie (Alzheimer), cardiologie (viabilite)',hint:'FDG = fluorodeoxyglucose'},
+    {q:'Comment est produit le F-18 ?',a:'Cyclotron local',hint:'T½ tres courte -> doit etre produit pres du service'},
+  ]},
+  {id:'kr81m',symbol:'Kr-81m',fullName:'Krypton-81 metastable',emission:['γ'],peak:190,halfLife:'13 s',production:'Generateur',visee:'Diagnostique',color:'#34d399',
+   questions:[
+    {q:'Demi-vie du Kr-81m ?',a:'13 secondes',hint:'Extremement courte -> inhalation continue pendant l acquisition'},
+    {q:'Pic energetique du Kr-81m ?',a:'190 keV',hint:''},
+    {q:'Quelle emission produit le Kr-81m ?',a:'Photon gamma pur (γ)',hint:''},
+    {q:'A quoi sert le Kr-81m ?',a:'Diagnostique : scintigraphie de ventilation pulmonaire (inhale, couple a la perfusion Tc-99m MAA)',hint:'Gaz noble inhale, distribue selon la ventilation'},
+    {q:'Comment est produit le Kr-81m ?',a:'Generateur Rb-81 -> Kr-81m',hint:'Rubidium-81 decroit en Krypton-81m'},
+  ]},
+  {id:'co57',symbol:'Co-57',fullName:'Cobalt-57',emission:['γ'],peak:122,halfLife:'271,8 j',production:'Cyclotron',visee:'CQ',color:'#a78bfa',
+   questions:[
+    {q:'Demi-vie du Co-57 ?',a:'271,8 jours',hint:'Longue duree -> galette valable toute l annee'},
+    {q:'Pic energetique du Co-57 ?',a:'122 keV',hint:'Proche de 140 keV Tc-99m -> simule les conditions reelles'},
+    {q:'Quelle emission produit le Co-57 ?',a:'Photon gamma pur (γ)',hint:''},
+    {q:'A quoi sert le Co-57 en medecine nucleaire ?',a:'CQ : galette de cobalt posee chaque matin sur les tetes de camera Anger pour verifier l uniformite',hint:'Galette = source plane uniforme'},
+    {q:'Pourquoi Co-57 pour verifier la camera Anger ?',a:'Son pic de 122 keV est proche du Tc-99m (140 keV) -> simule les conditions reelles',hint:''},
+    {q:'Comment est produit le Co-57 ?',a:'Cyclotron',hint:''},
+  ]},
+  {id:'ge68',symbol:'Ge-68',fullName:'Germanium-68',emission:['β⁺','γ'],peak:511,halfLife:'270,9 j',production:'Generateur',visee:'CQ',color:'#f472b6',
+   questions:[
+    {q:'Demi-vie du Ge-68 ?',a:'270,9 jours (isotope pere)',hint:'Longue T½ -> utilisable toute l annee comme source TEP'},
+    {q:'Pic energetique du Ge-68/Ga-68 ?',a:'511 keV (beta+ du Ga-68 fils -> annihilation)',hint:'Ga-68 T½=68min emetteur beta+ -> 511 keV'},
+    {q:'A quoi sert le Ge-68 ?',a:'CQ de la TEP : fantome cylindrique pour tester uniformite, sensibilite et resolution',hint:'Ge-68 genere du Ga-68 (beta+) en continu'},
+    {q:'Comment est produit le Ge-68 ?',a:'Generateur Ge-68/Ga-68',hint:''},
+  ]},
+  {id:'cs137',symbol:'Cs-137',fullName:'Cesium-137',emission:['β⁻','γ'],peak:662,halfLife:'30,2 ans',production:'Reacteur',visee:'CQ',color:'#94a3b8',
+   questions:[
+    {q:'Demi-vie du Cs-137 ?',a:'30,2 ans',hint:'Tres longue -> source etalon stable pour des annees'},
+    {q:'Pic energetique du Cs-137 ?',a:'662 keV',hint:'Haute energie, source de reference serieuse'},
+    {q:'Quelle emission produit le Cs-137 ?',a:'beta- + photon gamma (662 keV)',hint:''},
+    {q:'A quoi sert le Cs-137 en medecine nucleaire ?',a:'CQ : etalonnage de l activimetre et verification de la spectrometrie',hint:'Source scellee de reference tres stable'},
+    {q:'Comment est produit le Cs-137 ?',a:'Reacteur nucleaire (produit de fission)',hint:''},
+  ]},
+];
+
+function buildFcDeck(filterId){
+  let cards=[];
+  rnData.forEach(rn=>{
+    if(filterId&&filterId!=='all'&&rn.id!==filterId)return;
+    rn.questions.forEach(q=>{cards.push({nuclide:rn.symbol,color:rn.color,q:q.q,a:q.a,hint:q.hint})});
+  });
+  return cards;
+}
+
+// ========== FLASHCARD SYSTEM ==========
+let fcDeck=[],fcIdx=0,fcFlipped2=false,fcOkCount=0,fcKoCount=0,fcFilter='all';
+
+function showRnTab(tab){
+  ['fc','tb','qz'].forEach(t=>{
+    const el=document.getElementById('rn'+t);if(el)el.style.display=t===tab?'block':'none';
+    const btn=document.getElementById('rntab-'+t);if(btn)btn.className='btn '+(t===tab?'bp':'bs');
+  });
+  if(tab==='fc'&&fcDeck.length===0)fcInit();
+  if(tab==='tb')initTbTable();
+}
+
+function fcInit(){
+  fcDeck=buildFcDeck(fcFilter);
+  fcDeck.sort(()=>Math.random()-.5);
+  fcIdx=0;fcFlipped2=false;fcOkCount=0;fcKoCount=0;
+  fcUpdateStats();fcRender();
+}
+function fcShuffle(){fcDeck.sort(()=>Math.random()-.5);fcIdx=0;fcFlipped2=false;fcRender()}
+function fcReset(){fcInit()}
+
+function fcRender(){
+  if(fcDeck.length===0)return;
+  fcFlipped2=false;
+  const card=fcDeck[fcIdx];
+  const nEl=document.getElementById('fcNuclide');if(nEl){nEl.textContent=card.nuclide;nEl.style.color=card.color}
+  const fEl=document.getElementById('fcFront');if(fEl)fEl.textContent=card.q;
+  const aEl=document.getElementById('fcAns');if(aEl)aEl.innerHTML=card.a;
+  const hEl=document.getElementById('fcHint');if(hEl)hEl.textContent=card.hint?'Astuce : '+card.hint:'';
+  const bEl=document.getElementById('fcBack');if(bEl)bEl.style.display='none';
+  const tEl=document.getElementById('fcTip');if(tEl)tEl.style.display='block';
+  const cEl=document.getElementById('fcCard');if(cEl)cEl.style.borderColor='var(--brd)';
+  const acEl=document.getElementById('fcActions');if(acEl)acEl.style.display='none';
+  const pEl=document.getElementById('fcProg');if(pEl)pEl.textContent='Question '+(fcIdx+1)+'/'+fcDeck.length;
+  const prEl=document.getElementById('fcPrg');if(prEl)prEl.style.width=(fcIdx/fcDeck.length*100)+'%';
+}
+
+function fcFlip(){
+  if(fcFlipped2)return;fcFlipped2=true;
+  const bEl=document.getElementById('fcBack');if(bEl)bEl.style.display='block';
+  const tEl=document.getElementById('fcTip');if(tEl)tEl.style.display='none';
+  const cEl=document.getElementById('fcCard');if(cEl)cEl.style.borderColor='var(--ac)';
+  const acEl=document.getElementById('fcActions');if(acEl)acEl.style.display='flex';
+}
+
+function fcGrade(ok){if(ok)fcOkCount++;else fcKoCount++;fcUpdateStats();fcNext()}
+function fcNext(){
+  if(fcIdx<fcDeck.length-1){fcIdx++;fcRender();}
+  else{
+    const cEl=document.getElementById('fcCard');
+    const pct=Math.round(fcOkCount/fcDeck.length*100);
+    if(cEl)cEl.innerHTML='<div style="text-align:center;padding:30px"><div style="font-size:28px;margin-bottom:8px">'+(pct>=70?'🎉':'📚')+'</div><div style="font-size:16px;font-weight:700;color:var(--ac)">'+fcOkCount+'/'+fcDeck.length+' bien retenues</div><div style="font-size:12px;color:var(--tx3);margin-top:6px">Clique sur Restart pour recommencer</div></div>';
+    const acEl=document.getElementById('fcActions');if(acEl)acEl.style.display='none';
+    const prEl=document.getElementById('fcPrg');if(prEl)prEl.style.width='100%';
+  }
+}
+function fcUpdateStats(){
+  const okEl=document.getElementById('fcOk');if(okEl)okEl.textContent=fcOkCount;
+  const koEl=document.getElementById('fcKo');if(koEl)koEl.textContent=fcKoCount;
+}
+
+function fcSetFilter(id){
+  fcFilter=id;
+  document.querySelectorAll('.rnfiltbtn').forEach(b=>b.classList.toggle('on',b.dataset.id===id));
+  fcDeck=buildFcDeck(fcFilter);fcDeck.sort(()=>Math.random()-.5);
+  fcIdx=0;fcOkCount=0;fcKoCount=0;fcFlipped2=false;fcUpdateStats();fcRender();
+}
+
+function initFcFilters(){
+  const c=document.getElementById('rnFilterBtns');if(!c)return;
+  const total=rnData.reduce((s,r)=>s+r.questions.length,0);
+  const btns=[{id:'all',label:'Tous ('+total+' cartes)'},...rnData.map(r=>({id:r.id,label:r.symbol}))];
+  c.innerHTML=btns.map(b=>{const cls='rnfiltbtn flt'+(b.id==='all'?' on':'');return '<span class="'+cls+'" data-fid="'+b.id+'">'+b.label+'</span>'}).join('');
+  c.querySelectorAll('.rnfiltbtn').forEach(b=>{
+    b.style.cssText='display:inline-block;padding:4px 11px;border-radius:18px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);font-size:10px;cursor:pointer;transition:all .2s;margin-bottom:4px';
+    b.addEventListener('click',()=>fcSetFilter(b.dataset.fid));
+  });
+}
+
+// ========== TABLE SYSTEM ==========
+const emitOpts=['γ','β⁺','β⁻','α'];
+const viseeOpts=['Diagnostique','Therapeutique','CQ'];
+const prodOpts=['Generateur','Cyclotron','Reacteur'];
+const tbAnswers={
+  tc99m:{fullName:'Technetium-99 metastable',symbol:'Tc-99m',emission:['γ'],peak:'140',halfLife:'6 h',production:'Generateur',visee:'Diagnostique'},
+  i123:{fullName:'Iode-123',symbol:'I-123',emission:['γ'],peak:'159',halfLife:'13,2 h',production:'Cyclotron',visee:'Diagnostique'},
+  i131:{fullName:'Iode-131',symbol:'I-131',emission:['β⁻','γ'],peak:'364',halfLife:'8 j',production:'Reacteur',visee:'Therapeutique'},
+  f18:{fullName:'Fluor-18',symbol:'F-18',emission:['β⁺','γ'],peak:'511',halfLife:'110 min',production:'Cyclotron',visee:'Diagnostique'},
+  kr81m:{fullName:'Krypton-81 metastable',symbol:'Kr-81m',emission:['γ'],peak:'190',halfLife:'13 s',production:'Generateur',visee:'Diagnostique'},
+  co57:{fullName:'Cobalt-57',symbol:'Co-57',emission:['γ'],peak:'122',halfLife:'271,8 j',production:'Cyclotron',visee:'CQ'},
+  ge68:{fullName:'Germanium-68',symbol:'Ge-68',emission:['β⁺','γ'],peak:'511',halfLife:'270,9 j',production:'Generateur',visee:'CQ'},
+  cs137:{fullName:'Cesium-137',symbol:'Cs-137',emission:['β⁻','γ'],peak:'662',halfLife:'30,2 ans',production:'Reacteur',visee:'CQ'},
+};
+const tbUserEmit={};const tbUserVisee={};const tbUserProd={};const tbManualOkMap={};
+let tbTableInited=false;
+
+function initTbTable(){
+  if(tbTableInited)return;tbTableInited=true;
+  const body=document.getElementById('tbBody');if(!body)return;
+  const inputS='width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:10px;font-family:var(--fb)';
+  body.innerHTML=rnData.map(rn=>{
+    tbUserEmit[rn.id]=[];tbUserVisee[rn.id]='';tbUserProd[rn.id]='';tbManualOkMap[rn.id]={};
+    return '<tr style="border-bottom:1px solid var(--brd)">'
+      +'<td style="padding:5px 6px;vertical-align:middle"><input class="tbinput" data-rn="'+rn.id+'" data-f="name" type="text" placeholder="Nom complet..." style="'+inputS+'"><div id="fb-name-'+rn.id+'" style="font-size:8px;margin-top:2px"></div></td>'
+      +'<td style="padding:5px 6px;vertical-align:middle"><input class="tbinput" data-rn="'+rn.id+'" data-f="sym" type="text" placeholder="Sym." style="width:65px;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:11px;font-family:var(--fm)"><div id="fb-sym-'+rn.id+'" style="font-size:8px;margin-top:2px"></div></td>'
+      +'<td style="padding:5px 6px;vertical-align:middle;min-width:130px"><div style="display:flex;gap:3px;flex-wrap:wrap" id="em-'+rn.id+'">'+emitOpts.map(e=>'<button class="tbemit" data-rn="'+rn.id+'" data-e="'+e+'">'+e+'</button>').join('')+'</div><div id="fb-em-'+rn.id+'" style="font-size:8px;margin-top:2px"></div></td>'
+      +'<td style="padding:5px 6px;vertical-align:middle"><input class="tbinput" data-rn="'+rn.id+'" data-f="pk" type="number" placeholder="keV" style="width:55px;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:11px;font-family:var(--fm)"><div id="fb-pk-'+rn.id+'" style="font-size:8px;margin-top:2px"></div></td>'
+      +'<td style="padding:5px 6px;vertical-align:middle"><input class="tbinput" data-rn="'+rn.id+'" data-f="hl" type="text" placeholder="T½" style="width:65px;background:var(--bg3);border:1px solid var(--brd);border-radius:5px;padding:3px 6px;color:var(--tx);font-size:11px;font-family:var(--fb)"><div id="fb-hl-'+rn.id+'" style="font-size:8px;margin-top:2px"></div></td>'
+      +'<td style="padding:5px 6px;vertical-align:middle;min-width:110px"><div style="display:flex;gap:2px;flex-wrap:wrap" id="pr-'+rn.id+'">'+prodOpts.map(p=>'<button class="tbprod" data-rn="'+rn.id+'" data-p="'+p+'">'+p+'</button>').join('')+'</div><div id="fb-pr-'+rn.id+'" style="font-size:8px;margin-top:2px"></div></td>'
+      +'<td style="padding:5px 6px;vertical-align:middle;min-width:115px"><div style="display:flex;gap:2px;flex-wrap:wrap" id="vi-'+rn.id+'">'+viseeOpts.map(v=>'<button class="tbvisee" data-rn="'+rn.id+'" data-v="'+v+'">'+v+'</button>').join('')+'</div><div id="fb-vi-'+rn.id+'" style="font-size:8px;margin-top:2px"></div></td>'
+      +'</tr>';
+  }).join('');
+  // Add event listeners (no inline onclick = no apostrophe issues)
+  const btnBase='padding:2px 7px;border-radius:4px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);font-size:11px;cursor:pointer';
+  const btn2='padding:2px 5px;border-radius:3px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx2);font-size:9px;cursor:pointer';
+  document.querySelectorAll('.tbemit').forEach(b=>{Object.assign(b.style,{padding:'2px 7px',borderRadius:'4px',border:'1px solid var(--brd)',background:'var(--bg3)',color:'var(--tx2)',fontSize:'11px',cursor:'pointer'});b.addEventListener('click',()=>toggleEmit(b.dataset.rn,b.dataset.e))});
+  document.querySelectorAll('.tbprod').forEach(b=>{Object.assign(b.style,{padding:'2px 5px',borderRadius:'3px',border:'1px solid var(--brd)',background:'var(--bg3)',color:'var(--tx2)',fontSize:'9px',cursor:'pointer'});b.addEventListener('click',()=>toggleProd(b.dataset.rn,b.dataset.p))});
+  document.querySelectorAll('.tbvisee').forEach(b=>{Object.assign(b.style,{padding:'2px 5px',borderRadius:'3px',border:'1px solid var(--brd)',background:'var(--bg3)',color:'var(--tx2)',fontSize:'9px',cursor:'pointer'});b.addEventListener('click',()=>toggleVisee(b.dataset.rn,b.dataset.v))});
+}
+
+function normS(s){return(s||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
+
+function fbSet(id,field,ok,correct,manKey){
+  const el=document.getElementById('fb-'+field+'-'+id);if(!el)return 0;
+  if(tbManualOkMap[id]&&tbManualOkMap[id][manKey]){el.innerHTML='<span style="color:var(--ok)">OK manuel</span>';return 1}
+  if(ok){el.innerHTML='<span style="color:var(--ok)">✓</span>';return 1}
+  const btn=document.createElement('button');
+  btn.textContent='Ma reponse est juste';
+  btn.style.cssText='font-size:8px;padding:1px 4px;border-radius:3px;border:1px solid var(--brd);background:var(--bg3);color:var(--tx3);cursor:pointer;margin-left:4px';
+  btn.addEventListener('click',()=>tbManualOkFn(id,manKey,field));
+  el.innerHTML='<span style="color:var(--er)">✗ '+correct+'</span>';
+  el.appendChild(btn);
+  return 0;
+}
+
+function toggleEmit(id,e){
+  const arr=tbUserEmit[id];const i=arr.indexOf(e);if(i>=0)arr.splice(i,1);else arr.push(e);
+  document.querySelectorAll('[data-rn="'+id+'"].tbemit').forEach(b=>{const s=arr.includes(b.dataset.e);b.style.background=s?'rgba(0,212,170,.2)':'var(--bg3)';b.style.color=s?'var(--ac)':'var(--tx2)';b.style.borderColor=s?'var(--ac)':'var(--brd)'});
+}
+function toggleVisee(id,v){
+  tbUserVisee[id]=tbUserVisee[id]===v?'':v;
+  document.querySelectorAll('[data-rn="'+id+'"].tbvisee').forEach(b=>{const s=b.dataset.v===tbUserVisee[id];b.style.background=s?'rgba(167,139,250,.2)':'var(--bg3)';b.style.color=s?'var(--a3)':'var(--tx2)';b.style.borderColor=s?'var(--a3)':'var(--brd)'});
+}
+function toggleProd(id,p){
+  tbUserProd[id]=tbUserProd[id]===p?'':p;
+  document.querySelectorAll('[data-rn="'+id+'"].tbprod').forEach(b=>{const s=b.dataset.p===tbUserProd[id];b.style.background=s?'rgba(251,191,36,.15)':'var(--bg3)';b.style.color=s?'var(--a4)':'var(--tx2)';b.style.borderColor=s?'var(--a4)':'var(--brd)'});
+}
+function tbManualOkFn(rnId,manKey,field){
+  tbManualOkMap[rnId]=tbManualOkMap[rnId]||{};tbManualOkMap[rnId][manKey]=true;
+  const el=document.getElementById('fb-'+field+'-'+rnId);if(el)el.innerHTML='<span style="color:var(--ok)">OK manuel</span>';
+  tbUpdateScore2();
+}
+let tbLastSc=0,tbTotF=0;
+function tbCheck(){
+  let ok=0,tot=0;
+  rnData.forEach(rn=>{
+    const id=rn.id;const ans=tbAnswers[id];
+    const g=(f)=>(document.querySelector('[data-rn="'+id+'"][data-f="'+f+'"]')||{}).value||'';
+    const nm=g('name'),sy=g('sym'),pk=g('pk'),hl=g('hl');
+    const n1=normS(nm),n2=normS(ans.fullName);
+    ok+=fbSet(id,'name',n1.length>5&&n2.includes(n1.slice(0,6))||n1===n2,ans.fullName,'name');tot++;
+    ok+=fbSet(id,'sym',normS(sy)===normS(ans.symbol),ans.symbol,'sym');tot++;
+    const emOk=tbUserEmit[id].slice().sort().join(',')===[...ans.emission].sort().join(',');
+    const el=document.getElementById('fb-em-'+id);
+    if(el){if(emOk)el.innerHTML='<span style="color:var(--ok)">OK</span>';else el.innerHTML='<span style="color:var(--er)">Attendu: '+ans.emission.join('+')+'</span>'}
+    ok+=emOk?1:0;tot++;
+    ok+=fbSet(id,'pk',normS(pk)===normS(ans.peak+''),ans.peak+' keV','pk');tot++;
+    ok+=fbSet(id,'hl',normS(hl)===normS(ans.halfLife)||normS(hl).startsWith(normS(ans.halfLife).slice(0,3)),ans.halfLife,'hl');tot++;
+    const prOk=tbUserProd[id]===ans.production;
+    const pel=document.getElementById('fb-pr-'+id);
+    if(pel){if(prOk)pel.innerHTML='<span style="color:var(--ok)">OK</span>';else pel.innerHTML='<span style="color:var(--er)">'+ans.production+'</span>'}
+    ok+=prOk?1:0;tot++;
+    const viOk=tbUserVisee[id]===ans.visee;
+    const vel=document.getElementById('fb-vi-'+id);
+    if(vel){if(viOk)vel.innerHTML='<span style="color:var(--ok)">OK</span>';else vel.innerHTML='<span style="color:var(--er)">'+ans.visee+'</span>'}
+    ok+=viOk?1:0;tot++;
+  });
+  tbLastSc=ok;tbTotF=tot;tbUpdateScore2();
+}
+function tbUpdateScore2(){
+  const s=document.getElementById('tbScore');if(s)s.innerHTML='Score : <strong style="color:var(--ac)">'+tbLastSc+'/'+tbTotF+'</strong> ('+Math.round(tbLastSc/(tbTotF||1)*100)+'%)';
+}
+function tbReset(){
+  tbTableInited=false;
+  rnData.forEach(rn=>{tbUserEmit[rn.id]=[];tbUserVisee[rn.id]='';tbUserProd[rn.id]='';tbManualOkMap[rn.id]={}});
+  tbLastSc=0;tbTotF=0;initTbTable();tbUpdateScore2();
+}
+function tbReveal(){
+  initTbTable();
+  rnData.forEach(rn=>{
+    const id=rn.id;const ans=tbAnswers[id];
+    const set=(f,v)=>{const el=document.querySelector('[data-rn="'+id+'"][data-f="'+f+'"]');if(el)el.value=v};
+    set('name',ans.fullName);set('sym',ans.symbol);set('pk',ans.peak+'');set('hl',ans.halfLife);
+    tbUserEmit[id]=[...ans.emission];
+    document.querySelectorAll('[data-rn="'+id+'"].tbemit').forEach(b=>{const s=ans.emission.includes(b.dataset.e);b.style.background=s?'rgba(0,212,170,.2)':'var(--bg3)';b.style.color=s?'var(--ac)':'var(--tx2)';b.style.borderColor=s?'var(--ac)':'var(--brd)'});
+    tbUserVisee[id]=ans.visee;
+    document.querySelectorAll('[data-rn="'+id+'"].tbvisee').forEach(b=>{const s=b.dataset.v===ans.visee;b.style.background=s?'rgba(167,139,250,.2)':'var(--bg3)';b.style.color=s?'var(--a3)':'var(--tx2)';b.style.borderColor=s?'var(--a3)':'var(--brd)'});
+    tbUserProd[id]=ans.production;
+    document.querySelectorAll('[data-rn="'+id+'"].tbprod').forEach(b=>{const s=b.dataset.p===ans.production;b.style.background=s?'rgba(251,191,36,.15)':'var(--bg3)';b.style.color=s?'var(--a4)':'var(--tx2)';b.style.borderColor=s?'var(--a4)':'var(--brd)'});
+  });
+  tbCheck();
+}
+
+// ========== QUIZ ENGINE ==========
+const QST={};
+function startQ(cid,sid,stk,bank,n){
+  const sh=[...bank].sort(()=>Math.random()-.5).slice(0,n||bank.length);
+  QST[stk]={questions:sh,current:0,score:0,answered:0,total:sh.length,cid,sid,opts:[]};
+  renderQ(stk);
+}
+function renderQ(stk){
+  const s=QST[stk];if(!s)return;
+  const c=document.getElementById(s.cid);if(!c)return;
+  document.getElementById(s.sid).textContent=s.score+'/'+s.answered;
+  if(s.current>=s.total){
+    const pct=Math.round(s.score/s.total*100);
+    c.innerHTML='<div style="text-align:center;padding:18px"><div style="font-size:28px;margin-bottom:7px">'+(pct>=70?'🎉':pct>=50?'📚':'💪')+'</div><div style="font-size:20px;font-weight:700;color:'+(pct>=70?'var(--ok)':pct>=50?'var(--wa)':'var(--er)')+'">'+pct+'%</div><div style="font-size:11px;color:var(--tx2);margin-top:5px">'+s.score+'/'+s.total+' bonnes reponses</div></div>';
+    return;
+  }
+  const q=s.questions[s.current];
+  const opts=[...q.w,q.c].sort(()=>Math.random()-.5);s.opts=opts;
+  c.innerHTML='<div><div style="font-size:9px;color:var(--tx3);margin-bottom:3px;font-family:var(--fm)">Q '+(s.current+1)+'/'+s.total+'</div><div class="qt">'+q.q+'</div><div class="opts" id="opts_'+stk+'">'+opts.map((o,i)=>'<button class="ob" data-i="'+i+'" onclick="ansQ(\''+stk+'\','+i+')">'+o+'</button>').join('')+'</div><div class="fb2" id="fbk_'+stk+'" style="display:none"></div><div style="text-align:right;margin-top:8px;display:none" id="nx_'+stk+'"><button class="btn bp" onclick="nextQ(\''+stk+'\')">Suivant →</button></div></div>';
+}
+function ansQ(stk,idx){
+  const s=QST[stk];if(!s)return;
+  const chosen=s.opts[idx],correct=s.questions[s.current].c,expl=s.questions[s.current].e||'';
+  document.getElementById('opts_'+stk).querySelectorAll('.ob').forEach(b=>{b.disabled=true;if(parseInt(b.dataset.i)===idx)b.classList.add(chosen===correct?'ok':'ko');if(b.textContent===correct&&chosen!==correct)b.classList.add('ok')});
+  s.answered++;if(chosen===correct)s.score++;
+  document.getElementById(s.sid).textContent=s.score+'/'+s.answered;
+  const fb=document.getElementById('fbk_'+stk);
+  fb.style.display='block';fb.className='fb2 '+(chosen===correct?'ok':'ko');
+  fb.innerHTML=chosen===correct?('Correct !'+(expl?' - '+expl:'')):'Bonne reponse : '+correct+(expl?' - '+expl:'');
+  document.getElementById('nx_'+stk).style.display='block';
+}
+function nextQ(stk){
+  const s=QST[stk];if(!s)return;s.current++;renderQ(stk);
+  if(stk==='qgSt'){document.getElementById('qgPrg').style.width=Math.round(s.current/s.total*100)+'%'}
+}
+let quizSz=0;
+function setSz(n){
+  quizSz=n;
+  ['sz20','sz40','sz60','szAll'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('on',id==='sz'+n||(n===0&&id==='szAll'))});
+  const all=[...qRN,...qTEP,...qCQ,...qMOD,...qCAM,...qMRP];
+  const actual=n===0?all.length:Math.min(n,all.length);
+  const info=document.getElementById('szInfo');if(info)info.textContent=n===0?'Toutes ('+all.length+' questions)':actual+' questions';
+}
+function startGlobal(){
+  const all=[...qRN,...qTEP,...qCQ,...qMOD,...qCAM,...qMRP];
+  const n=quizSz===0?all.length:Math.min(quizSz,all.length);
+  startQ('qgC','qgSc','qgSt',all,n);
+  document.getElementById('qgPrg').style.width='0%';
+}
+
+// ========== QUESTION BANKS ==========
+const qRN=[
+  {q:'Pic energetique du Tc-99m ?',c:'140 keV',w:['511 keV','364 keV','159 keV'],e:'Ideal pour collimateurs LEHR'},
+  {q:'Demi-vie du Tc-99m ?',c:'6 heures',w:['110 minutes','8 jours','13 secondes'],e:'Courte T½ = faible irradiation'},
+  {q:'Comment est produit le Tc-99m ?',c:'Generateur Mo-99/Tc-99m (vache)',w:['Cyclotron','Reacteur nucleaire direct','Fission du plutonium'],e:'Mo-99 T½=66h, fixe sur alumine'},
+  {q:'Que signifie metastable ?',c:'Etat nucleaire excite a longue duree de vie',w:['Noyau instable emettant beta-','Noyau stable','Emission alpha uniquement'],e:'Se desexcite en emettant gamma 140 keV sans beta'},
+  {q:'Quel isotope en TEP-FDG ?',c:'F-18',w:['Tc-99m','I-123','Ga-67'],e:'F-18 = beta+ → annihilation → 2γ 511 keV'},
+  {q:'Pic energetique du F-18 ?',c:'511 keV (annihilation)',w:['140 keV','364 keV','662 keV'],e:'Conversion de masse e+/e-'},
+  {q:'Demi-vie du F-18 ?',c:'110 minutes',w:['6 heures','8 jours','13 secondes'],e:'Courte T½ → cyclotron local obligatoire'},
+  {q:'Isotope pour ventilation pulmonaire ?',c:'Kr-81m (Krypton)',w:['Tc-99m','I-123','Xe-133'],e:'T½=13s, 190 keV, inhale, generateur Rb-81'},
+  {q:'Role du Co-57 en medecine nucleaire ?',c:'CQ uniformite quotidienne camera Anger (galette)',w:['Scinti thyroide','Therapie tumorale','TEP oncologie'],e:'122 keV proche Tc-99m, T½=271,8j'},
+  {q:'Pourquoi Co-57 pour tester la camera Anger ?',c:'Son pic 122 keV est proche du Tc-99m 140 keV',w:['Cest le moins cher','Il emet des beta-','T½ identique au Tc-99m'],e:'Simule les conditions reelles'},
+  {q:'Utilisation principale de I-131 ?',c:'Therapie cancer thyroidien et hyperthyroidie',w:['TEP oncologique','CQ TEP','Scinti osseuse'],e:'beta- + γ 364 keV, T½=8j'},
+  {q:'Role du Ge-68 ?',c:'CQ de la TEP (fantome)',w:['Scinti hepatique','Therapie cancer','Ventilation pulmonaire'],e:'T½=270,9j, genere Ga-68 beta+ 511 keV'},
+  {q:'Demi-vie du Cs-137 ?',c:'30,2 ans',w:['271,8 jours','8 jours','6 heures'],e:'Source de tres longue duree pour activimetres'},
+  {q:'Emission de I-131 ?',c:'beta- + gamma 364 keV',w:['gamma pur 140 keV','beta+ uniquement','alpha + gamma'],e:'Le beta- assure l effet therapeutique'},
+  {q:'Nom complet de Tc-99m ?',c:'Technetium-99 metastable',w:['Thallium-99','Technetium-99 monophotonique','Tellurium-99'],e:'m = isomere metastable'},
+  {q:'Nom complet de F-18 ?',c:'Fluor-18',w:['Fluorine-18','Fer-18','Francium-18'],e:'Emetteur beta+, cyclotron'},
+  {q:'Collimateur avec I-131 364 keV ?',c:'HEAP (High Energy All Purpose)',w:['LEHR','LEAP','Pinhole'],e:'LEHR trop fin → penetration septale avec 364 keV'},
+  {q:'Collimateur avec Tc-99m en routine ?',c:'LEHR',w:['HEAP','MEAP','Pinhole'],e:'140 keV, basse energie, haute resolution'},
+  {q:'Demi-vie du Co-57 ?',c:'271,8 jours',w:['6 heures','30,2 ans','110 minutes'],e:'Longue T½ → galette valable toute l annee'},
+  {q:'Collimateur thyroide Tc-99m zoom maximal ?',c:'Pinhole',w:['LEHR','HEAP','SMARTZOOM'],e:'Stenope = agrandissement maximal petits organes'},
+  {q:'Nom complet de I-123 ?',c:'Iode-123',w:['Iridium-123','Indium-123','Iode-132'],e:'Emetteur gamma pur, cyclotron'},
+  {q:'Nom complet de Co-57 ?',c:'Cobalt-57',w:['Cuivre-57','Chrome-57','Calcium-57'],e:'Source CQ galette, T½=271,8j'},
+  {q:'Nom complet de Kr-81m ?',c:'Krypton-81 metastable',w:['Krypton-83','Krypton-81 monophotonique','Krypton-80'],e:'Gaz noble, inhale pour ventilation'},
+];
+const qTEP=[
+  {q:'Coincidence VRAIE ?',c:'2 photons de la meme annihilation detectes simultanement dans la fenetre',w:['2 photons diffuses','2 photons d annihilations differentes','1 photon et 1 neutron'],e:'LOR correcte → information utile'},
+  {q:'Coincidence FORTUITE ?',c:'2 photons de 2 annihilations differentes detectes simultanement',w:['2 photons diffuses par Compton','Photons hors fenetre energetique','2 photons de la meme annihilation'],e:'Fausse LOR → bruit de fond uniforme'},
+  {q:'Coincidence DIFFUSEE ?',c:'Photon ayant subi une diffusion Compton → direction modifiee',w:['2 photons d annihilations differentes','Photon arrivant hors fenetre temporelle','Photon emis hors de 180 degres'],e:'LOR incorrecte → perte de contraste'},
+  {q:'Coincidence HORS TEMPS ?',c:'Vrais photons de la meme annihilation mais arrives hors de la fenetre temporelle',w:['2 photons d annihilations differentes','Photons diffuses','Photons hors du champ geometrique'],e:'Peut arriver si chemin plus long ou jitter electronique'},
+  {q:'Pic des photons en TEP ?',c:'511 keV',w:['140 keV','364 keV','662 keV'],e:'E = mc2 pour la paire e+/e-'},
+  {q:'TEP = ?',c:'Tomographie par Emission de Positons',w:['Tomographie par Emission de Protons','Technique Exploration Pulmonaire','Tomographie par Energie de Photons'],e:'Utilise les isotopes beta+'},
+  {q:'L annihilation produit ?',c:'2 photons gamma de 511 keV a 180 degres',w:['1 photon de 1022 keV','2 neutrons','1 alpha + 1 gamma'],e:'Colinearite a 180 degres → definit la LOR'},
+  {q:'Difference TEP numerique vs analogique ?',c:'TEP numerique = meilleure resolution temporelle → TOF possible',w:['TEP numerique utilise NaI','TEP analogique est plus precise','Pas de difference'],e:'dSiPM, TOF = localisation sur la LOR'},
+  {q:'Coincidences fortuites augmentent avec ?',c:'Le carre de l activite injectee',w:['Lineairement avec l activite','La qualite du detecteur','La taille du patient'],e:'Taux fortuites = 2×tau×R1×R2'},
+  {q:'Pourquoi injecter plusieurs centaines de MBq en TEP ?',c:'Car seulement 1 a 3 pourcent des annihilations donnent une coincidence utile',w:['Car le F-18 se desintegre tres vite','Les tissus absorbent 99% des photons','Pour augmenter le bruit de fond'],e:'Perte geometrique = cause principale'},
+  {q:'Principale cause de perte des annihilations en TEP ?',c:'Photons sortant hors du champ geometrique des detecteurs',w:['Absorption totale par les tissus','Les coincidences fortuites eliminent tout','La diffusion Compton'],e:'Limite geometrique de l anneau TEP'},
+  {q:'Fenetre de coincidence temporelle en TEP ?',c:'Environ 5 a 10 nanosecondes',w:['Environ 1 microseconde','Environ 1 milliseconde','Environ 1 seconde'],e:'Si trop large = plus de fortuites. Si trop etroite = perd des vraies.'},
+  {q:'Correction des coincidences diffusees ?',c:'Fenetrage energetique (rejette photons <450 keV)',w:['Blindage en plomb','Methode du delai','TOF uniquement'],e:'Les photons Compton ont une energie reduite'},
+  {q:'Correction des coincidences fortuites ?',c:'Methode du delai (delayed window)',w:['Fenetrage energetique','Algorithme de debruitage','Correction attenuation'],e:'Mesure fortuites dans fenetre decalee → soustraction'},
+];
+const qCQ=[
+  {q:'CQ realise par le MEM chaque matin ?',c:'Pic energie + uniformite (galette Co-57) + controle activimetre',w:['Centre de rotation uniquement','Resolution spatiale annuelle','Recalage scanner mensuel'],e:'Garantit le bon fonctionnement avant la vacation'},
+  {q:'Source pour le controle uniformite quotidien ?',c:'Galette de Co-57',w:['Source de Cs-137','Flacon de Tc-99m','Source Ge-68'],e:'Co-57 : 122 keV proche Tc-99m, T½=271,8j'},
+  {q:'Source etalonnage de l activimetre ?',c:'Cs-137',w:['Co-57','Tc-99m','F-18'],e:'Cs-137 : 662 keV, T½=30,2 ans → reference stable'},
+  {q:'Frequence du controle du fantome scanner ?',c:'Hebdomadaire',w:['Quotidien','Mensuel','Annuel'],e:'Realise par le MEM chaque semaine'},
+  {q:'Role du Ge-68 dans le CQ ?',c:'CQ de la TEP',w:['Uniformite camera Anger','Etalonnage activimetre','Resolution TEMP'],e:'T½=271j, genere Ga-68 beta+ → simule TEP'},
+  {q:'Qui realise le controle du centre de rotation ?',c:'Le radiophysicien (semestriel)',w:['Le MEM quotidien','Le medecin nucleaire','Le technicien TDM'],e:'COR semestriel'},
+  {q:'Controle resolution spatiale : frequence et qui ?',c:'Annuellement par le radiophysicien',w:['Quotidiennement par le MEM','Mensuellement','Hebdomadairement'],e:'Controles annuels sous responsabilite du radiophysicien'},
+  {q:'La galette de cobalt sert a verifier ?',c:'L uniformite (homogeneite) du cristal',w:['La resolution spatiale','Le centre de rotation','L activite des seringues'],e:'Source plane posee sur chaque tete chaque matin'},
+  {q:'L activimetre mesure ?',c:'L activite exacte d un MRP avant injection',w:['Le volume de MRP','L energie du radionucleide','La contamination surfacique'],e:'Chambre d ionisation calibree avec Cs-137'},
+];
+const qMOD=[
+  {q:'Mode Dynamique ?',c:'Images repetees simultanement a l injection du MRP',w:['Rotation des tetes autour du patient','Deplacement de la table corps entier','Acquisition synchronisee a l ECG'],e:'Ideal pour observer le transit en temps reel'},
+  {q:'TEMP ?',c:'Rotation des tetes de detection autour du patient',w:['Balayage corps entier','Acquisition ECG synchronisee','Acquisition d un seul plan'],e:'Tomographie par Emission MonoPhotonique → reconstruction 3D'},
+  {q:'Mode Balayage ?',c:'Deplacement de la table sous les detecteurs',w:['Rotation des tetes','Acquisition simultanee a l injection','Couplage avec ECG'],e:'Whole body : de la tete aux pieds'},
+  {q:'Synchronisation couplee a ?',c:'L electrocardiogramme (ECG)',w:['La respiration uniquement','La pression arterielle','L injection du MRP'],e:'Analyse du cycle cardiaque → FEVG'},
+  {q:'Scinti renale dynamique = quel mode ?',c:'Mode Dynamique',w:['TEMP','Balayage','Synchronisation'],e:'MAG3, DTPA : images toutes les 20-30s des l injection'},
+  {q:'SPECT/CT = ?',c:'TEMP couplee a un TDM sur le meme appareil',w:['TEP couplee a une IRM','Scintigraphie couplee a une echographie','TEMP seule sans TDM'],e:'Correction attenuation + recalage anatomique/fonctionnel'},
+  {q:'Pourquoi coupler le TDM au TEMP (SPECT/CT) ?',c:'Correction d attenuation + localisation anatomique precise',w:['Pour remplacer le collimateur','Pour augmenter l activite injectee','Pour eviter les fortuites'],e:'Le TDM genere la carte d attenuation pour corriger les images TEMP'},
+];
+const qCAM=[
+  {q:'Role du collimateur dans la camera Anger ?',c:'Filtrer les photons gamma pour ne garder que les photons utiles',w:['Amplifier le signal gamma','Convertir les gamma en lumiere','Convertir la lumiere en electricite'],e:'Plomb, septas absorbent les photons hors-axe'},
+  {q:'Role du cristal de scintillation NaI ?',c:'Convertir les photons gamma en photons lumineux',w:['Filtrer les gamma hors axe','Amplifier le signal electrique','Reconstruire l image 3D'],e:'Premier maillon de la chaine image'},
+  {q:'Role des photomultiplicateurs PM ?',c:'Convertir les photons lumineux en signal electrique amplifie',w:['Filtrer les gamma','Convertir gamma en lumiere','Calculer l attenuation'],e:'Reseau hexagonal derriere le cristal'},
+  {q:'Penetration septale : qu est-ce que c est ?',c:'Les photons haute energie traversent des septas trop fins → artefacts',w:['Meilleure resolution spatiale','Perte de sensibilite uniquement','Bruit de fond uniforme'],e:'Ex: LEHR avec I-131 → 364 keV traversent les septas fins'},
+  {q:'Avantage camera CZT vs Anger ?',c:'Detection directe gamma → electrique : meilleure sensibilite et resolution',w:['Moins chere','Grand champ de vue','Meilleur collimateur'],e:'CZT supprime l etape cristal+PM'},
+  {q:'LEHR signifie ?',c:'Low Energy High Resolution',w:['Low Energy High Rate','Long Energy High Resolution','Low Efficiency High Resolution'],e:'Basse energie, haute resolution → Tc-99m routine'},
+  {q:'HEAP signifie ?',c:'High Energy All Purpose',w:['High Efficiency All Purpose','High Energy All Positions','Heavy Energy Active Plate'],e:'Haute energie tout usage → I-131'},
+  {q:'Que se passe-t-il si septas courts ?',c:'Sensibilite augmente mais resolution spatiale diminue',w:['Resolution spatiale augmente','Aucun effet','Sensibilite diminue'],e:'Relation inverse resolution/sensibilite'},
+  {q:'Que se passe-t-il si septas epais ?',c:'Moins de diffuse passe → meilleure qualite mais sensibilite diminue',w:['Resolution spatiale diminue','Sensibilite augmente','Aucun effet sur qualite image'],e:'Septas epais = moins de penetration pour hautes energies'},
+  {q:'Qu est-ce qu un artefact de centre de rotation ?',c:'Decalage entre centre rotation mecanique et centre de reconstruction en TEMP',w:['Erreur de calcul de l attenuation','Zone froide due a un defaut du cristal','Contamination du collimateur'],e:'CQ semestriel du COR par le radiophysicien'},
+  {q:'Artefact de penetration septale ressemble a ?',c:'Etoiles autour des foyers chauds, image floue diffuse',w:['Trou circulaire dans l image','Image granuleuse','Decalage de toute l image'],e:'Utilisation de LEHR avec isotope haute energie comme I-131'},
+];
+const qMRP=[
+  {q:'MRP = ?',c:'Medicament Radio-Pharmaceutique',w:['Methode de Radioprotection Passive','Mesure Radio-Pharmaceutique','Module Radiologie Physique'],e:'Association vecteur (V) + marqueur (M)'},
+  {q:'Role du vecteur V dans un MRP ?',c:'Acheminer le radiolement vers l organe cible',w:['Emettre un rayonnement gamma','Amplifier le signal de detection','Filtrer les photons parasites'],e:'Medicament ou cellule utilisant la physiologie'},
+  {q:'Role du marqueur M dans un MRP ?',c:'Partie radioactive qui emet le rayonnement detectable',w:['Transporter le MRP dans le sang','Proteger l operateur','Stabiliser le medicament'],e:'Radionucleide, capte par les detecteurs pour l image'},
+  {q:'Logiciel gestion preparation MRP ?',c:'Venus',w:['Symbia Net','IQ SPECT','AW WorkStation'],e:'Venus : commander, prescrire, preparer, tracer les doses'},
+  {q:'La RIV utilise quelles emissions ?',c:'Particules alpha et beta-',w:['Photons gamma uniquement','Beta+ positons','Protons'],e:'Effet biologique local des particules'},
+  {q:'La TEP utilise des isotopes emettant ?',c:'Des beta+ positons',w:['Des gamma directs','Des beta-','Des alpha'],e:'Annihilation e+/e- → 2γ 511 keV a 180 degres'},
+  {q:'Les 2 applications medicales de la radioactivite en MN ?',c:'Le diagnostic et la therapie',w:['Le diagnostic et la prevention','La therapie et la rehabilitation','L imagerie et le prelevement'],e:'Diagnostique (TEP, scinti) et therapeutique (RIV)'},
+];
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded',()=>{
+  renderCQ();renderModes();
+  startQ('qnC','qnSc','qnSt',qRN,8);
+  startQ('qtC','qtSc','qtSt',qTEP,8);
+  startQ('qcqC','qcqSc','qcqSt',qCQ,8);
+  startQ('qmC','qmSc','qmSt',qMOD,8);
+  setSz(0);startGlobal();
+  setTimeout(()=>{initColliInteractive();},300);
+  showC('v');
+  initFlips();
+});
+</script>
+</body>
+</html>
