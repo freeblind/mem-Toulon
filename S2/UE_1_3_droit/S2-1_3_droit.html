@@ -294,6 +294,15 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 .habil-n { font-size:1.4rem; font-weight:700; margin-bottom:6px; }
 .habil-title { font-weight:700; font-size:0.88rem; margin-bottom:6px; }
 .habil-desc { font-size:0.82rem; line-height:1.5; color:var(--text-soft); }
+
+/* DISMISS / PRINT */
+.fc-btn-dismiss { background: #7B6A8A; color: white; }
+.fc-btn-dismiss:hover { background: #5c4f68; }
+.dismissed-counter { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; box-shadow: var(--shadow); }
+.print-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+.print-btn { padding:8px 14px; border:1.5px solid var(--border); border-radius:8px; background:var(--surface); font-size:0.8rem; font-weight:600; cursor:pointer; color:var(--text-soft); transition:all 0.15s; display:flex; align-items:center; gap:5px; }
+.print-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-light); }
+@media print { body { background: white !important; } }
 </style>
 </head>
 <body>
@@ -496,16 +505,25 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
     </div>
   </div>
   
+  <div class="print-row">
+    <button class="print-btn" onclick="printFlashcards('all')" title="Imprimer toutes les cartes du filtre actif">🖨️ Toutes les cartes</button>
+    <button class="print-btn" onclick="printFlashcards('unknown')" title="Imprimer les cartes non sues">🖨️ Non sues</button>
+    <button class="print-btn" onclick="printFlashcards('nofout')" title="Imprimer toutes sauf ignorées">🖨️ Sauf ignorées</button>
+  </div>
   <div class="fc-actions" id="fc-actions" style="display:none; margin-top:20px;">
     <button class="fc-btn fc-btn-know" onclick="markCardFC(true)">✅ Je sais</button>
     <button class="fc-btn fc-btn-unknown" onclick="markCardFC(false)">❌ Pas su</button>
-    <button class="fc-btn fc-btn-skip" onclick="fcNav(1)">→ Fuir au suivant</button>
+    <button class="fc-btn fc-btn-dismiss" onclick="dismissCardFC()">🙄 On s'en fout</button>
   </div>
   <div class="fc-meta" id="fc-meta"></div>
   <div class="unknown-pile" id="unknown-pile-fc" style="display:none">
     <h3>❌ Blessures ouvertes (<span id="unknown-count-fc">0</span>)</h3>
     <ul class="unknown-list" id="unknown-list-fc"></ul>
-    <button class="btn-retry" onclick="retryUnknownFC()">🔁 Retourner au charbon</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <button class="btn-retry" onclick="retryUnknownFC()">🔁 Rejouer les non sues</button>
+      <button class="btn-retry" style="background:var(--accent);" onclick="applyFilterFC()">↩️ Recommencer (garder ignorées)</button>
+      <button class="btn-retry" style="background:#7B6A8A;" onclick="resetFCWithDismissed()">🔄 Reset complet (restaurer ignorées)</button>
+    </div>
   </div>
 </section>
 
@@ -790,6 +808,9 @@ const FLASHCARDS = [
   { theme:'exercice', q:'4 niveaux d\'habilitation du MEM (décret 2016-1672)', a:'① Autonomie totale (accueil, gestion, hygiène)<br>② Prescription/protocole SANS injection, autonome<br>③ Prescription/protocole AVEC injection, médecin joignable<br>④ Présence médicale obligatoire (actes interventionnels)' },
   { theme:'exercice', q:'3 types d\'établissements où exerce le MEM', a:'1. Hôpitaux publics (mission service public)<br>2. Cliniques privées à but non lucratif (profits réinvestis)<br>3. Cliniques privées à but lucratif (profits partagés aux actionnaires)' },
   { theme:'exercice', q:'Sur quelle base le MEM réalise-t-il ses actes ?', a:'Sur <strong>prescription médicale</strong> et sous la <strong>responsabilité d\'un médecin</strong> (art. L4351-1)' },
+  { theme:'exercice', q:'Quel article du CSP définit la profession de MEM — donnez le numéro exact', a:'<strong>Article L4351-1</strong> du Code de la Santé Publique. Définit le MEM comme toute personne non médecin exerçant habituellement sous la responsabilité et surveillance d\'un médecin en mesure d\'intervenir immédiatement.' },
+  { theme:'exercice', q:'Quel décret régit les actes et activités du MEM — donnez le numéro et la date exacts', a:'<strong>Décret n°2016-1672 du 5 décembre 2016</strong>, relatif aux actes et activités réalisés par les manipulateurs d\'électroradiologie médicale, modifié par le <strong>Décret n°2018-434 du 4 juin 2018</strong> art. 1.' },
+  { theme:'exercice', q:'Quelles plages d\'articles du CSP encadrent l\'exercice professionnel du MEM ?', a:'<strong>Articles R4351-1 à R4351-29</strong> (partie réglementaire) et <strong>Articles L4351-1 à L4351-13</strong> (partie législative) du Code de la Santé Publique.' },
 
   // DROIT PUBLIC/PRIVE
   { theme:'droit', q:'Différence ordre judiciaire / ordre administratif', a:'<strong>Judiciaire</strong> : affaires pénales et civiles (domaine privé : clinique, cabinet)<br><strong>Administratif</strong> : affaires civiles concernant le domaine public (hôpital public)' },
@@ -979,7 +1000,7 @@ function addScore(pts) {
 // ═══════════════════════════════════════════════════════
 // FLASHCARDS : LE MOTEUR RÉVISÉ
 // ═══════════════════════════════════════════════════════
-let fcDeck = [...FLASHCARDS], fcIndex = 0, fcFlipped = false, fcKnown = [], fcUnknown = [];
+let fcDeck = [...FLASHCARDS], fcIndex = 0, fcFlipped = false, fcKnown = [], fcUnknown = [], fcDismissed = [];
 let activeFCThemes = ['all'];
 
 function toggleThemeFC(theme) {
@@ -1004,11 +1025,14 @@ function toggleThemeFC(theme) {
 }
 
 function applyFilterFC() {
+  let base;
   if (activeFCThemes.includes('all')) {
-    fcDeck = [...FLASHCARDS];
+    base = [...FLASHCARDS];
   } else {
-    fcDeck = FLASHCARDS.filter(c => activeFCThemes.includes(c.theme));
+    base = FLASHCARDS.filter(c => activeFCThemes.includes(c.theme));
   }
+  const dismissedQs = new Set(fcDismissed.map(c => c.q));
+  fcDeck = base.filter(c => !dismissedQs.has(c.q));
   fcKnown = []; fcUnknown = []; fcIndex = 0; fcFlipped = false;
   renderFC();
 }
@@ -1034,6 +1058,8 @@ function renderFC() {
   document.getElementById('fc-total').textContent = fcDeck.length;
   document.getElementById('fc-known').textContent = fcKnown.length;
   document.getElementById('fc-unknown').textContent = fcUnknown.length;
+  const dismissedEl = document.getElementById('fc-dismissed');
+  if (dismissedEl) dismissedEl.textContent = fcDismissed.length;
   
   const pct = fcDeck.length ? Math.round((fcKnown.length + fcUnknown.length) / fcDeck.length * 100) : 0;
   document.getElementById('fc-progress').style.width = pct + '%';
@@ -1107,6 +1133,161 @@ function retryUnknownFC() {
   fcFlipped = false;
   renderFC();
 }
+
+function dismissCardFC() {
+  const card = fcDeck[fcIndex];
+  if (!card) return;
+  // Remove from known/unknown if present
+  fcKnown = fcKnown.filter(c => c !== card);
+  fcUnknown = fcUnknown.filter(c => c !== card);
+  fcDismissed.push(card);
+  fcDeck.splice(fcIndex, 1);
+  if (fcIndex >= fcDeck.length) fcIndex = Math.max(0, fcDeck.length - 1);
+  fcFlipped = false;
+  renderFC();
+}
+
+function resetFCWithDismissed() {
+  fcDismissed = [];
+  fcKnown = []; fcUnknown = []; fcIndex = 0; fcFlipped = false;
+  applyFilterFC();
+}
+
+function printFlashcards(type) {
+  let cards = [];
+  const allFiltered = activeFCThemes.includes('all') ? [...FLASHCARDS] : FLASHCARDS.filter(c => activeFCThemes.includes(c.theme));
+  
+  if (type === 'all') {
+    cards = allFiltered;
+  } else if (type === 'unknown') {
+    cards = fcUnknown.length > 0 ? [...fcUnknown] : allFiltered;
+    if (fcUnknown.length === 0) { alert('Aucune carte "Non sue" pour l\'instant. Imprimez toutes les cartes ou faites d\'abord une session.'); return; }
+  } else if (type === 'nofout') {
+    const dismissedQs = new Set(fcDismissed.map(c => c.q));
+    cards = allFiltered.filter(c => !dismissedQs.has(c.q));
+  }
+  
+  if (!cards || cards.length === 0) {
+    alert('Aucune carte à imprimer dans cette sélection.');
+    return;
+  }
+  
+  const COLS = 2, ROWS = 4, CPP = COLS * ROWS;
+  const pages = [];
+  for (let i = 0; i < cards.length; i += CPP) pages.push(cards.slice(i, i + CPP));
+
+  const themeColors = {
+    responsabilite: '#C0392B', secret: '#8E44AD', droits: '#2980B9',
+    findevie: '#16A085', exercice: '#27AE60', droit: '#D35400', ethique: '#7F8C8D'
+  };
+
+  let pagesHtml = '';
+  pages.forEach(pageCards => {
+    const filled = [...pageCards];
+    while (filled.length < CPP) filled.push(null);
+
+    // Front page: questions in natural reading order
+    pagesHtml += `<div class="p-page">`;
+    filled.forEach(card => {
+      if (card) {
+        const col = themeColors[card.theme] || '#2C5F8A';
+        pagesHtml += `<div class="p-card p-front" style="background:${col}">
+          <div class="p-label">${card.theme}</div>
+          <div class="p-q">${card.q.replace(/<[^>]+>/g,'')}</div>
+        </div>`;
+      } else {
+        pagesHtml += `<div class="p-card p-empty"></div>`;
+      }
+    });
+    pagesHtml += `</div>`;
+
+    // Back page: answers mirrored horizontally (swap columns in each row for duplex)
+    pagesHtml += `<div class="p-page">`;
+    for (let row = 0; row < ROWS; row++) {
+      // Natural: [row*2], [row*2+1]
+      // Mirrored for back: [row*2+1], [row*2]
+      [filled[row*2+1], filled[row*2]].forEach(card => {
+        if (card) {
+          pagesHtml += `<div class="p-card p-back">
+            <div class="p-a">${card.a}</div>
+          </div>`;
+        } else {
+          pagesHtml += `<div class="p-card p-empty"></div>`;
+        }
+      });
+    }
+    pagesHtml += `</div>`;
+  });
+
+  const typeLabel = type === 'all' ? 'Toutes les cartes' : type === 'unknown' ? 'Cartes non sues' : 'Cartes (hors ignorées)';
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html lang="fr"><head>
+<meta charset="UTF-8">
+<title>Flashcards UE 1.3 S2 — ${typeLabel}</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; background: #f0f0f0; }
+.controls { background: white; padding: 12px 20px; display: flex; gap: 10px; align-items: center; border-bottom: 1px solid #ccc; }
+.controls h2 { font-size: 14px; flex: 1; }
+.ctrl-btn { padding: 8px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.ctrl-print { background: #2C5F8A; color: white; }
+.ctrl-close { background: #ccc; color: #333; }
+@media print {
+  .controls { display: none !important; }
+  body { background: white; }
+  .p-page { box-shadow: none !important; margin: 0 !important; }
+}
+.p-page {
+  width: 210mm;
+  height: 297mm;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4mm;
+  padding: 8mm;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  margin: 10px auto;
+  page-break-after: always;
+  break-after: page;
+}
+.p-card {
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  text-align: center;
+  overflow: hidden;
+}
+.p-front { color: white; }
+.p-back { background: white; border: 2px solid #2C5F8A; }
+.p-empty { border: 1px dashed #ddd; background: #fafafa; opacity: 0.3; }
+.p-label { font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.75; margin-bottom: 5px; font-weight: 700; }
+.p-q { font-size: 8.5pt; font-weight: 700; line-height: 1.35; }
+.p-a { font-size: 7.5pt; line-height: 1.45; text-align: left; }
+.p-a strong { color: #2C5F8A; }
+</style>
+</head><body>
+<div class="controls">
+  <h2>🖨️ Flashcards UE 1.3 S2 — ${typeLabel} (${cards.length} cartes · ${pages.length} page${pages.length > 1 ? 's' : ''} recto+verso)</h2>
+  <button class="ctrl-btn ctrl-print" onclick="window.print()">🖨️ Imprimer</button>
+  <button class="ctrl-btn ctrl-close" onclick="window.close()">✕ Fermer</button>
+</div>
+${pagesHtml}
+<script>
+// Auto-print after a short delay
+setTimeout(() => {
+  if (confirm('Imprimer maintenant ?\n\nConseil : activez l\'impression recto-verso (retournement sur le bord long) dans les options imprimante.')) {
+    window.print();
+  }
+}, 600);
+<\/script>
+</body></html>`);
+  win.document.close();
+}
+
 renderFC();
 
 // ═══════════════════════════════════════════════════════

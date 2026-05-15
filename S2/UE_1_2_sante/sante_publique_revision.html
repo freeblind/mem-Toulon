@@ -222,6 +222,20 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
 .scorecard-label { font-size: 0.72rem; color: var(--text-soft); margin-top: 2px; }
 .fc-btn-skip-perm { background: var(--surface2); color: var(--text-soft); border: 1.5px solid var(--border); }
 .fc-btn-skip-perm:hover { background: var(--border); }
+
+/* ── Print modal ── */
+.print-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:2000; align-items:center; justify-content:center; }
+.print-modal-overlay.open { display:flex; }
+.print-modal { background:var(--surface); border-radius:14px; padding:28px 24px; max-width:420px; width:92%; box-shadow:0 24px 64px rgba(0,0,0,.3); }
+.print-modal h3 { margin:0 0 6px; font-size:1.1rem; }
+.print-modal p { color:var(--text-soft); font-size:0.85rem; margin:0 0 18px; }
+.print-modal label { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1.5px solid var(--border); border-radius:9px; cursor:pointer; margin-bottom:8px; font-size:0.88rem; transition:border-color .15s; }
+.print-modal label:hover, .print-modal label.selected { border-color:var(--accent); background:var(--accent-light); }
+.print-modal label input[type=radio] { accent-color:var(--accent); width:16px; height:16px; flex-shrink:0; }
+.print-modal-btns { display:flex; gap:10px; margin-top:20px; }
+.print-modal-btns button { flex:1; padding:11px; border-radius:9px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-weight:600; font-size:0.88rem; min-height:44px; }
+.btn-print-go { background:var(--accent); color:white; }
+.btn-print-cancel { background:var(--surface2); color:var(--text); border:1.5px solid var(--border) !important; }
 .nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .nav-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.84rem; font-weight: 500; transition: all 0.15s; min-height: 40px; }
 .nav-btn:hover:not(:disabled) { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
@@ -629,8 +643,34 @@ main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
       ⬆️ Importer JSON
       <input type="file" accept=".json" onchange="loadTriage(event)" style="display:none">
     </label>
-    <span id="fc-save-status" style="font-size:0.78rem;color:var(--text-soft);font-style:italic;flex:1;min-width:80px"></span>
+    <button onclick="openPrintModal()" title="Imprimer les flashcards en format A4 recto-verso" style="padding:7px 13px;border-radius:7px;border:1px solid #6366f1;background:#eef2ff;color:#4f46e5;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;min-height:36px">🖨️ Imprimer</button>
+    <button onclick="exportAnki()" title="Exporter toutes les flashcards au format Anki (import .txt)" style="padding:7px 13px;border-radius:7px;border:1px solid #0ea5e9;background:#e0f2fe;color:#0369a1;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;min-height:36px">📦 Export Anki</button>
+    <span id="fc-save-status" style="font-size:0.78rem;color:var(--text-soft);font-style:italic;flex:1;min-width:60px"></span>
     <button onclick="resetTriage()" title="Effacer tout le triage et recommencer à zéro" style="padding:7px 13px;border-radius:7px;border:1.5px solid var(--red);background:var(--red-light);color:var(--red);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:600;min-height:36px;margin-left:auto">🗑️ Reset</button>
+  </div>
+
+  <!-- ── Modale impression ── -->
+  <div class="print-modal-overlay" id="print-modal-overlay" onclick="if(event.target===this)closePrintModal()">
+    <div class="print-modal">
+      <h3>🖨️ Imprimer les flashcards</h3>
+      <p>Choisissez les cartes à imprimer · Format A4 recto-verso (2×4 par feuille)</p>
+      <label id="lbl-all" class="selected">
+        <input type="radio" name="print-choice" value="all" checked onchange="updatePrintLabel()"> Toutes les cartes (<span id="pc-all-count">—</span>)
+      </label>
+      <label id="lbl-noskip">
+        <input type="radio" name="print-choice" value="noskip" onchange="updatePrintLabel()"> Toutes sauf "💨 On s'en fout" (<span id="pc-noskip-count">—</span>)
+      </label>
+      <label id="lbl-unknown">
+        <input type="radio" name="print-choice" value="unknown" onchange="updatePrintLabel()"> Uniquement les ❌ non sues (<span id="pc-unknown-count">—</span>)
+      </label>
+      <label id="lbl-known">
+        <input type="radio" name="print-choice" value="known" onchange="updatePrintLabel()"> Uniquement les ✅ maîtrisées (<span id="pc-known-count">—</span>)
+      </label>
+      <div class="print-modal-btns">
+        <button class="btn-print-go" onclick="printFlashcards()">🖨️ Lancer l'impression</button>
+        <button class="btn-print-cancel" onclick="closePrintModal()">Annuler</button>
+      </div>
+    </div>
   </div>
   <div class="scorecard">
     <div class="scorecard-item"><div class="scorecard-num" id="fc-total" style="color:var(--text)">0</div><div class="scorecard-label">📚 total</div></div>
@@ -1133,9 +1173,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 //  DATA — FLASHCARDS
 // ═══════════════════════════════════════════════════════════
 const FLASHCARDS = [
-  { theme:'definitions', q:'Quelle est la définition OMS (1946) de la santé ?', a:'<strong>« La santé est un état de complet bien-être physique, mental et social, et ne consiste pas seulement en une absence de maladie ou d\'invalidité. »</strong><br><br>C\'est une ressource de la vie quotidienne, pas un but en soi.' },
-  { theme:'definitions', q:'Comment a évolué la définition de la santé de 1937 à 2001 ?', a:'<strong>1937</strong> : absence de maladie (vision négative)<br><strong>1946 (OMS)</strong> : état de complet bien-être physique, mental, social (vision positive)<br><strong>2001</strong> : ressource pour vivre, capacité d\'adaptation (vision dynamique)' },
-  { theme:'definitions', q:'Définition OMS de la Santé Publique', a:'<strong>« Science et art de favoriser la santé, de prévenir la maladie et de prolonger la vie grâce aux efforts organisés de la société. »</strong><br>(adapté Acheson 1988, adopté OMS 1999)' },
+  { theme:'definitions', q:'Définition OMS de la santé (Constitution, 1946)', a:'<blockquote style="border-left:3px solid #fff;padding-left:12px;margin:0 0 12px;font-style:italic">« La santé est un état de complet bien-être physique, mental et social, et ne consiste pas seulement en une absence de maladie ou d\'infirmité. »</blockquote><small>— Constitution de l\'OMS, <strong>1946</strong></small><br><br>📌 Définition fondatrice en 3 dimensions : physique, mentale, sociale.<br>⚠️ Critiquée : l\'état « complet » est un idéal inatteignable.' },
+  { theme:'definitions', q:'Définition contemporaine de la santé (Charte d\'Ottawa, OMS 1986)', a:'<blockquote style="border-left:3px solid var(--accent);padding-left:12px;margin:0 0 12px;font-style:italic">« Pour atteindre un état de complet bien-être physique, mental et social, l\'individu, ou le groupe, doit pouvoir identifier et réaliser ses ambitions, satisfaire ses besoins et évoluer avec son milieu ou s\'y adapter. »</blockquote><small>— Charte d\'Ottawa, OMS <strong>1986</strong></small><br><br>📌 Vision <strong>dynamique et positive</strong> : la santé est une <strong>ressource</strong> de la vie quotidienne, pas un but. Accent sur les capacités d\'adaptation.' },
+  { theme:'definitions', q:'Comment a évolué la définition de la santé de 1937 à 2001 ?', a:'<strong>1937 :</strong> absence de maladie → vision purement négative et biologique<br><strong>1946 (OMS) :</strong> état de complet bien-être physique, mental et social → vision positive, tripartite<br><strong>1986 (Ottawa) :</strong> ressource de la vie, capacité d\'adaptation<br><strong>2001 :</strong> capacité à s\'adapter et à gérer les défis → vision dynamique<br><br>📌 Constat : on passe d\'une vision <em>curative</em> à une vision <em>globale, positive et dynamique</em>.' },
+  { theme:'definitions', q:'Définition OMS de la Santé Publique (Acheson 1988 / OMS 1999)', a:'<blockquote style="border-left:3px solid #fff;padding-left:12px;margin:0 0 12px;font-style:italic">« Science et art de favoriser la santé, de prévenir la maladie et de prolonger la vie grâce aux efforts organisés de la société. »</blockquote><small>— Acheson (1988), adopté OMS <strong>1999</strong></small><br><br>📌 5 domaines : prévention des maladies, promotion de la santé, protection de la santé, surveillance sanitaire, réduction des inégalités.' },
   { theme:'definitions', q:'Qu\'est-ce qu\'un indicateur de santé ?', a:'Caractéristique d\'un individu, d\'une population ou d\'un environnement qui se prête à des <strong>mesures (directement ou indirectement)</strong> et peut être utilisée pour décrire un ou plusieurs aspects de la santé (qualité, quantité et temps).' },
   { theme:'definitions', q:'Quelle est la différence entre la santé et la santé publique ?', a:'<strong>Santé</strong> = état individuel de bien-être.<br><strong>Santé publique</strong> = approche collective. Ce sont les efforts organisés de la société pour protéger et améliorer la santé de tous. Elle est liée à l\'économie et à la politique.' },
   { theme:'definitions', q:'Définition de l\'Épidémiologie', a:'Étude de la <strong>distribution et des déterminants</strong> des états ou des événements de santé dans des populations déterminées, et application de cette étude à la <strong>lutte contre les problèmes de santé</strong>.' },
@@ -1148,11 +1189,11 @@ const FLASHCARDS = [
   { theme:'prevention', q:'Définition de la prévention tertiaire + objectif + exemple', a:'<strong>Objectif :</strong> réadaptation et réinsertion, réduire le risque de rechute<br><strong>Actions :</strong> réduire les conséquences d\'une maladie installée<br><strong>Ex :</strong> Rééducation post-AVC, soutien psychologique post-cancer' },
   { theme:'prevention', q:'Définition de la prévention quaternaire + objectif + exemple', a:'<strong>Objectif :</strong> éviter la surmédicalisation et les soins inutiles ou iatrogènes<br><strong>Ex :</strong> soins relationnels, éviter les bilans non justifiés' },
   { theme:'prevention', q:'Quelles sont les 3 approches de la prévention ?', a:'<strong>Universelle :</strong> toute la population (ex: vaccination nationale)<br><strong>Sélective :</strong> un sous-groupe à risque (ex: dépistage sein 50-74 ans)<br><strong>Ciblée (indiquée) :</strong> individus à haut risque ou avec signes précurseurs' },
-  { theme:'promotion', q:'Définition de la Promotion de la santé (Charte Ottawa, 1986)', a:'<strong>« Processus qui confère aux populations les moyens d\'assurer un plus grand contrôle sur leur propre santé, et d\'améliorer celle-ci. »</strong><br>C\'est un processus social et politique global.' },
+  { theme:'promotion', q:'Définition OMS de la Promotion de la santé (Charte Ottawa, 1986)', a:'<blockquote style="border-left:3px solid #fff;padding-left:12px;margin:0 0 12px;font-style:italic">« Processus qui confère aux populations les moyens d\'assurer un plus grand contrôle sur leur propre santé, et d\'améliorer celle-ci. »</blockquote><small>— Charte d\'Ottawa, OMS <strong>1986</strong></small><br><br>📌 C\'est un processus <strong>social et politique global</strong> qui agit à la fois sur les comportements et sur les conditions sociales et environnementales.' },
   { theme:'promotion', q:'Citez les 5 axes d\'action de la Charte d\'Ottawa (1986)', a:'1. Élaborer une <strong>politique publique saine</strong><br>2. Créer des <strong>milieux favorables</strong> à la santé<br>3. Renforcer l\'<strong>action communautaire</strong><br>4. Acquérir des <strong>aptitudes individuelles</strong><br>5. <strong>Réorienter les services</strong> de santé' },
   { theme:'promotion', q:'Différence Prévention ≠ Promotion', a:'<strong>Prévention :</strong> stratégie de protection (éviter la maladie, agir sur les facteurs de risque)<br><strong>Promotion :</strong> stratégie de développement (renforcer les capacités, améliorer l\'environnement, vision positive de la santé)' },
   { theme:'promotion', q:'Qu\'est-ce que l\'Empowerment en santé ?', a:'Processus par lequel les individus <strong>maîtrisent mieux les décisions et actions qui influent sur leur santé</strong>. Peut être social, culturel, psychologique ou politique. Principe fondamental de la promotion de la santé.' },
-  { theme:'probantes', q:'Définition d\'une donnée probante (OMS, 2004)', a:'<strong>« Conclusions tirées de recherches et autres connaissances qui peuvent servir de base utile à la prise de décision dans le domaine de la santé publique et des soins de santé. »</strong>' },
+  { theme:'probantes', q:'Définition OMS d\'une donnée probante (OMS, 2004)', a:'<blockquote style="border-left:3px solid #fff;padding-left:12px;margin:0 0 12px;font-style:italic">« Conclusions tirées de recherches et autres connaissances qui peuvent servir de base utile à la prise de décision dans le domaine de la santé publique et des soins de santé. »</blockquote><small>— OMS, <strong>2004</strong></small><br><br>📌 3 types : données <strong>scientifiques</strong> (recherche), <strong>expérientielles</strong> (terrain), <strong>contextuelles</strong> (littérature grise).' },
   { theme:'probantes', q:'Citez les 3 types de données probantes (trépied décisionnel)', a:'<strong>1. Données scientifiques</strong> : issues de la recherche et littérature scientifique (PubMed, Cochrane)<br><strong>2. Données expérientielles</strong> : savoir-faire, expertise, valeurs des professionnels<br><strong>3. Données contextuelles</strong> : littérature grise, données locales (qui, quoi, où, combien)' },
   { theme:'probantes', q:'Citez les 5 enjeux des données probantes', a:'1. Être plus <strong>efficace</strong><br>2. <strong>Améliorer les pratiques</strong><br>3. <strong>Légitimiser</strong> l\'action<br>4. <strong>Crédibiliser</strong> la prise de parole<br>5. <strong>Faire reconnaître</strong> un secteur d\'intervention' },
   { theme:'probantes', q:'Citez les 7 étapes de la démarche probante', a:'1. <strong>Définir</strong> le problème<br>2. <strong>Rechercher</strong> les données probantes<br>3. <strong>Évaluer</strong> la qualité des données<br>4. <strong>Interpréter</strong> les résultats<br>5. <strong>Adapter</strong> au contexte<br>6. <strong>Mettre en œuvre</strong><br>7. <strong>Évaluer</strong> l\'action' },
@@ -1530,7 +1571,183 @@ function retryKnown() {
   fcCards = knownCards; fcIndex = 0; fcKnown.clear(); updateUnknownPile(); renderFlashcard();
 }
 
-// ── Persistance localStorage ──────────────────────────────
+// ── Modal impression ──────────────────────────────────────
+function openPrintModal() {
+  updatePrintLabel();
+  document.getElementById('print-modal-overlay').classList.add('open');
+}
+function closePrintModal() {
+  document.getElementById('print-modal-overlay').classList.remove('open');
+}
+function updatePrintLabel() {
+  const noSkip = FLASHCARDS.filter(c => !fcSkipped.has(c.q));
+  document.getElementById('pc-all-count').textContent    = FLASHCARDS.length + ' cartes';
+  document.getElementById('pc-noskip-count').textContent = noSkip.length + ' cartes';
+  document.getElementById('pc-unknown-count').textContent= fcUnknown.size + ' cartes';
+  document.getElementById('pc-known-count').textContent  = fcKnown.size + ' cartes';
+  // highlight selected label
+  ['all','noskip','unknown','known'].forEach(v => {
+    const lbl = document.getElementById('lbl-'+v);
+    const radio = lbl.querySelector('input');
+    lbl.classList.toggle('selected', radio.checked);
+  });
+}
+
+// ── Impression A4 recto-verso ─────────────────────────────
+function printFlashcards() {
+  const choice = document.querySelector('input[name="print-choice"]:checked').value;
+  let cards = [];
+  if (choice === 'all')     cards = [...FLASHCARDS];
+  if (choice === 'noskip')  cards = FLASHCARDS.filter(c => !fcSkipped.has(c.q));
+  if (choice === 'unknown') cards = FLASHCARDS.filter(c => fcUnknown.has(c.q));
+  if (choice === 'known')   cards = FLASHCARDS.filter(c => fcKnown.has(c.q));
+  if (!cards.length) { alert('Aucune carte à imprimer dans cette sélection.'); return; }
+  closePrintModal();
+
+  const PER_PAGE = 8; // 2 colonnes × 4 lignes
+  const pages = [];
+  for (let i = 0; i < cards.length; i += PER_PAGE) pages.push(cards.slice(i, i + PER_PAGE));
+
+  // Nettoyage HTML→texte pour le recto (la question)
+  const strip = html => { const d = document.createElement('div'); d.innerHTML = html; return d.textContent || d.innerText || ''; };
+
+  // Thème → couleur
+  const themeColor = { definitions:'#4f46e5', determinants:'#0891b2', prevention:'#dc2626',
+    promotion:'#16a34a', probantes:'#d97706', politique:'#7c3aed', modeles:'#0f766e', épidémio:'#b45309' };
+
+  let html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<title>Flashcards MERM UE 1.2.S2</title>
+<style>
+  @page { size: A4; margin: 8mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; background: white; }
+  .page {
+    display: grid;
+    grid-template-columns: repeat(2, 94mm);
+    grid-template-rows: repeat(4, 66mm);
+    gap: 3.5mm;
+    width: 191.5mm;
+    height: 277mm;
+    page-break-after: always;
+    page-break-inside: avoid;
+  }
+  .page:last-child { page-break-after: auto; }
+  .card {
+    border: 1.5px dashed #bbb;
+    border-radius: 4mm;
+    overflow: hidden;
+    position: relative;
+  }
+  /* ── RECTO ── */
+  .card-front {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 8mm 7mm; text-align: center; height: 100%;
+    color: white;
+  }
+  .card-front .badge {
+    font-size: 7pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; opacity: 0.85; margin-bottom: 6px;
+    background: rgba(255,255,255,.2); padding: 2px 8px; border-radius: 20px;
+  }
+  .card-front .question {
+    font-size: 9.5pt; font-weight: 700; line-height: 1.35;
+  }
+  .card-front .hint {
+    position: absolute; bottom: 5mm; font-size: 7pt; opacity: 0.6;
+  }
+  /* ── VERSO ── */
+  .card-back {
+    display: flex; flex-direction: column;
+    padding: 6mm 7mm; height: 100%;
+    background: white; border-color: #999;
+    font-size: 8pt; line-height: 1.4; color: #111;
+    overflow: hidden;
+  }
+  .card-back .back-badge {
+    font-size: 6.5pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #888; margin-bottom: 5px;
+    border-bottom: 1px solid #eee; padding-bottom: 4px;
+  }
+  .card-back .answer { flex: 1; overflow: hidden; }
+  .card-back strong { font-weight: 700; }
+  .card-back em { font-style: italic; }
+  .card-back blockquote { border-left: 2px solid #999; padding-left: 5px; margin: 4px 0; font-style: italic; color: #444; }
+  .card-back table { width: 100%; border-collapse: collapse; font-size: 7pt; }
+  .card-back td { border: 1px solid #ddd; padding: 2px 4px; }
+  .cut-hint {
+    position: absolute; bottom: 2mm; right: 3mm;
+    font-size: 6pt; color: #ccc;
+  }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style></head><body>\n`;
+
+  pages.forEach((pageCards, pageIdx) => {
+    // ── Page RECTO (fronts) ──
+    html += `<div class="page">\n`;
+    for (let i = 0; i < PER_PAGE; i++) {
+      const c = pageCards[i];
+      if (c) {
+        const color = themeColor[c.theme] || '#4f46e5';
+        const cardNum = pageIdx * PER_PAGE + i + 1;
+        html += `<div class="card card-front" style="background:${color}">
+  <div class="badge">${themeLabel(c.theme)}</div>
+  <div class="question">${strip(c.q)}</div>
+  <div class="hint">↻ verso</div>
+  <div class="cut-hint">#${cardNum}</div>
+</div>\n`;
+      } else {
+        html += `<div class="card" style="background:#f9f9f9"></div>\n`;
+      }
+    }
+    html += `</div>\n`;
+
+    // ── Page VERSO (backs, colonnes miroir pour recto-verso long-edge) ──
+    // Ordre miroir pour 2 colonnes : paires échangées [1,0,3,2,5,4,7,6]
+    const backOrder = [1,0,3,2,5,4,7,6];
+    html += `<div class="page">\n`;
+    backOrder.forEach(i => {
+      const c = pageCards[i];
+      if (c) {
+        const color = themeColor[c.theme] || '#4f46e5';
+        const cardNum = pageIdx * PER_PAGE + i + 1;
+        html += `<div class="card card-back">
+  <div class="back-badge" style="color:${color}">${themeLabel(c.theme)} · #${cardNum}</div>
+  <div class="answer">${c.a}</div>
+</div>\n`;
+      } else {
+        html += `<div class="card" style="background:#f9f9f9"></div>\n`;
+      }
+    });
+    html += `</div>\n`;
+  });
+
+  html += `</body></html>`;
+
+  const w = window.open('', '_blank', 'width=900,height=700');
+  w.document.write(html);
+  w.document.close();
+  w.onload = () => setTimeout(() => w.print(), 400);
+}
+
+// ── Export Anki (TSV) ─────────────────────────────────────
+function exportAnki() {
+  const strip = html => { const d = document.createElement('div'); d.innerHTML = html; return d.textContent.trim(); };
+  let tsv = '#separator:tab\n#html:true\n#notetype column:3\n#deck:UE 1.2 Santé Publique MERM\n';
+  tsv += '#columns:Recto\tVerso\tNotetype\tTags\n';
+  FLASHCARDS.filter(c => !fcSkipped.has(c.q)).forEach(c => {
+    const front = strip(c.q).replace(/\t/g,' ').replace(/\n/g,' ');
+    const back  = c.a.replace(/\t/g,' ').replace(/\n/g,' ');
+    const tag   = (c.theme || 'general').replace(/\s+/g,'_');
+    tsv += `${front}\t${back}\tBasic\t${tag}\n`;
+  });
+  const blob = new Blob([tsv], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'anki_UE1_2_sante_publique.txt';
+  a.click(); URL.revokeObjectURL(url);
+  showSaveStatus('📦 Export Anki téléchargé (hors "On s\'en fout")', 5000);
+}
 const FC_LS_KEY = 'fc_triage_v1';
 
 function persistTriage() {
