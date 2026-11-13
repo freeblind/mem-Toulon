@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UE 2.10 Oncologie — TD interactifs & flashcards</title>
+<style>
+:root{
+  --bg:#f5f6f8; --panel:#fff; --ink:#1c2230; --muted:#5d6678; --line:#dde1ea;
+  --accent:#3b5bdb; --accent-ink:#fff; --ok:#1b8a4b; --ok-bg:#e3f6ea; --ko:#c92a2a; --ko-bg:#fde8e8;
+  --warn:#b7791f; --warn-bg:#fff4d6; --chip:#eef1f8; --shadow:0 1px 3px rgba(20,30,60,.08),0 6px 18px rgba(20,30,60,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#12151c; --panel:#1b2030; --ink:#e7eaf2; --muted:#9aa3b8; --line:#2c3347;
+    --accent:#7c93ff; --accent-ink:#0f1320; --ok:#58d68d; --ok-bg:#16301f; --ko:#ff7b7b; --ko-bg:#3a1a1a;
+    --warn:#f0c36b; --warn-bg:#3a2f14; --chip:#252c40; --shadow:0 1px 3px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header.top{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.bar{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar h1{font-size:17px;margin:0;flex:1 1 220px}
+.bar h1 small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.savebox{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#savestate{font-size:12px;color:var(--muted);min-width:90px;text-align:right}
+nav.tabs{max-width:1100px;margin:0 auto;padding:0 12px 8px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+nav.tabs .sep{flex:0 0 1px;background:var(--line);margin:4px 6px}
+.tab{flex:0 0 auto;border:1px solid var(--line);background:var(--chip);color:var(--ink);padding:7px 13px;border-radius:999px;cursor:pointer;font-size:14px;white-space:nowrap}
+.tab[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.tab.alt{border-style:dashed}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 80px}
+section.view{display:none}
+section.view.on{display:block}
+button,.btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 13px;border-radius:8px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button.good{background:var(--ok-bg);color:var(--ok);border-color:var(--ok)}
+button.bad{background:var(--warn-bg);color:var(--warn);border-color:var(--warn)}
+button.sm{padding:4px 9px;font-size:13px}
+button:disabled{opacity:.5;cursor:not-allowed}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:0 0 14px;box-shadow:var(--shadow)}
+.hero h2{margin:0 0 6px}
+.muted{color:var(--muted)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.stat b{font-size:22px}
+.progress{height:8px;background:var(--chip);border-radius:6px;overflow:hidden;margin:6px 0}
+.progress>i{display:block;height:100%;background:var(--accent)}
+.setHead{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;justify-content:space-between}
+.setHead h2{margin:0 0 4px}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;background:var(--chip);color:var(--muted);margin-right:6px}
+.badge.alt{background:var(--warn-bg);color:var(--warn)}
+.badge.flag{background:var(--warn-bg);color:var(--warn)}
+.q{border-left:4px solid var(--line)}
+.q.done-ok{border-left-color:var(--ok)}
+.q.done-ko{border-left-color:var(--ko)}
+.q .qt{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+.q .qn{font-weight:700;color:var(--accent)}
+.q .qp{margin:0 0 10px}
+textarea{width:100%;min-height:84px;font:inherit;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);resize:vertical}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer;background:var(--bg)}
+.opt input{margin-top:5px}
+.opt .L{font-weight:700;min-width:1.2em}
+.opt.sel{border-color:var(--accent)}
+.opt.r-ok{background:var(--ok-bg);border-color:var(--ok)}
+.opt.r-ko{background:var(--ko-bg);border-color:var(--ko)}
+.opt.r-miss{border:2px dashed var(--ok)}
+.why{font-size:13.5px;color:var(--muted);margin:2px 0 0}
+.mark{font-weight:700;margin-left:auto;white-space:nowrap}
+.vfrow{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin:6px 0;background:var(--bg)}
+.vfrow .t{flex:1}
+.vfrow .btns{display:flex;gap:4px}
+.vfrow .btns button{min-width:38px;padding:4px 8px}
+.vfrow .btns button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.vfrow.r-ok{background:var(--ok-bg);border-color:var(--ok)}
+.vfrow.r-ko{background:var(--ko-bg);border-color:var(--ko)}
+table.m{width:100%;border-collapse:collapse;margin:6px 0}
+table.m th,table.m td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+table.m th{background:var(--chip)}
+select{font:inherit;padding:5px 7px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:100%}
+select.r-ok{border-color:var(--ok);background:var(--ok-bg)}
+select.r-ko{border-color:var(--ko);background:var(--ko-bg)}
+.corr{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--ok-bg);border:1px solid var(--ok)}
+.corr ul{margin:4px 0 4px 20px;padding:0}
+.corr table{border-collapse:collapse;margin:6px 0}
+.corr td,.corr th{border:1px solid var(--ok);padding:4px 8px}
+.verdict{font-weight:700;margin:8px 0 2px}
+.verdict.ok{color:var(--ok)} .verdict.ko{color:var(--ko)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.flag{background:var(--warn-bg);border:1px solid var(--warn);color:var(--ink);padding:8px 10px;border-radius:8px;font-size:14px;margin:8px 0}
+/* flashcards */
+.fcbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 12px}
+.chip{border:1px solid var(--line);background:var(--chip);padding:5px 11px;border-radius:999px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip small{opacity:.8}
+.deck{max-width:720px;margin:0 auto}
+.flip{perspective:1400px;cursor:pointer;outline:none}
+.flip:focus-visible .inner{box-shadow:0 0 0 3px var(--accent)}
+.inner{display:grid;transition:transform .5s;transform-style:preserve-3d;position:relative}
+.flip.flipped .inner{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;min-height:290px;border-radius:18px;border:2px solid var(--line);background:var(--panel);box-shadow:var(--shadow);padding:22px 24px;display:flex;flex-direction:column;justify-content:center}
+.face.back{transform:rotateY(180deg);background:var(--chip)}
+.face .tag{position:absolute;top:12px;left:16px;font-size:12px;color:var(--muted)}
+.face .stat{position:absolute;top:10px;right:14px;font-size:12px;font-weight:700}
+.face{position:relative}
+.face .qa{font-size:20px;line-height:1.45}
+.face.back .qa{font-size:17.5px}
+.face .qa ul{margin:6px 0 6px 22px;padding:0;text-align:left}
+.face .hint{position:absolute;bottom:10px;width:100%;left:0;text-align:center;font-size:12px;color:var(--muted)}
+.st-su .face{border-color:var(--ok)} .st-rev .face{border-color:var(--warn)}
+.deckctl{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.counter{text-align:center;color:var(--muted);margin:10px 0 2px;font-size:14px}
+.sel{min-width:0}
+input[type=search],input[type=text]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.tmr{font-variant-numeric:tabular-nums;font-weight:700}
+@media (max-width:600px){.face{padding:20px 14px;min-height:260px}.face .qa{font-size:18px}.vfrow{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <h1>UE 2.10 Oncologie — révisions<small>TD 1-3, partiel S3, TD alternatifs, flashcards · IFPVPS Toulon</small></h1>
+    <div class="savebox">
+      <span id="savestate">—</span>
+      <button class="sm" id="btnExport" title="Télécharger ta progression en fichier .json">💾 Sauvegarder (fichier)</button>
+      <button class="sm" id="btnImport" title="Recharger une sauvegarde .json">📂 Charger</button>
+      <input type="file" id="fileImport" accept="application/json,.json" hidden>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+</header>
+<main id="main"></main>
+<script>
+/* ===== TD OFFICIELS (contenus issus des PDF fournis) ===== */
+const SETS = [];
+
+/* ---------- TD 1 ---------- */
+SETS.push({
+  id: "td1", title: "TD 1", group: "td",
+  sub: "Prévention, dépistage, épidémiologie, facteurs de risque, cancérogenèse",
+  obj: "Épidémiologie descriptive et analytique ; incidences et mortalité des cancers en France ; facteurs de risque ; dépistages établis en France ; cours dépistage/prévention, épidémiologie, cancérogenèse.",
+  questions: [
+    { id: "td1-A", n: "Q A", type: "open", p: "Définissez le terme prévention.",
+      a: "Ensemble des mesures visant à éviter ou réduire le nombre et la gravité des maladies, des accidents et des handicaps (OMS)." },
+    { id: "td1-B", n: "Q B", type: "open", p: "Explicitez les différents types de prévention.",
+      a: "<ul><li><b>Primaire</b> : actions prioritaires qui suppriment ou diminuent les facteurs de risque, donc diminuent l’incidence. But : empêcher l’apparition d’une maladie ; s’adresse aux individus non malades. Ex : information, promotion de la santé en milieu scolaire, vaccination.</li><li><b>Secondaire</b> : suivi de l’état de santé de la population (dépistage). But : déceler le plus tôt possible la maladie, avant les symptômes, pour bloquer son évolution ; s’adresse aux individus non malades ayant des facteurs de risque. Ex : dépistage du cholestérol, de l’HTA, de la glycémie, séances de sevrage tabagique.</li><li><b>Tertiaire</b> : limite les conséquences ou complications d’une maladie. But : ralentir la maladie ; s’adresse aux personnes malades. Ex : rééducation, réadaptation, soutien psychologique, prévention des escarres, traitement anticoagulant après AVC.</li><li><b>Quaternaire</b> : soins palliatifs lorsque la maladie est incurable.</li></ul>" },
+    { id: "td1-C", n: "Q C", type: "open", p: "Définissez le terme dépistage.",
+      a: "Recherche d’une maladie chez une personne en <b>bonne santé apparente, avant l’apparition des symptômes</b>. Le dépistage peut être individuel ou collectif.<br>Schéma : dépistage → résultat négatif (fin) ou positif → examen complémentaire → résultat négatif ou positif." },
+    { id: "td1-D", n: "Q D", type: "open", p: "Citez les 7 critères de qualité d’un dépistage.",
+      a: "<ul><li>Repérer au mieux les personnes malades (<b>sensibilité</b>)</li><li>Limiter les explorations complémentaires chez les individus considérés à tort comme malades (<b>spécificité</b>)</li><li><b>Sans danger</b></li><li><b>Simple</b> à réaliser</li><li><b>Reproductible</b></li><li><b>Acceptable</b> pour la population (peu invasif, peu douloureux)</li><li><b>Coût acceptable</b></li></ul>" },
+    { id: "td1-E1", n: "Q E", type: "open", p: "Définissez le terme sensibilité et le terme spécificité.",
+      a: "<b>Sensibilité</b> : probabilité qu’un test soit + chez les sujets porteurs de la maladie (taux de VP).<br><b>Spécificité</b> : probabilité qu’un test soit – chez les sujets non malades (taux de VN).<ul><li>Plus un test est sensible, moins il y a de FN.</li><li>Plus un test est spécifique, moins il y a de FP.</li></ul><table><tr><th>Test</th><th>Malade</th><th>Non malade</th></tr><tr><td>Test +</td><td>VP</td><td>FP</td></tr><tr><td>Test –</td><td>FN</td><td>VN</td></tr></table>VP : malades test + · VN : sains test – · FP : sains test + · FN : malades test –." },
+    { id: "td1-E2", n: "Q E (bis)", type: "open", p: "Définissez les termes facteurs endogènes et facteurs exogènes et, pour chacun, proposez 2 exemples.",
+      a: "<b>Endogènes (intrinsèques)</b> : proviennent de l’intérieur de l’organisme. Ex : sexe, âge, facteurs physiologiques, psychologiques, caractéristiques génétiques.<br><b>Exogènes (extrinsèques)</b> : proviennent de l’extérieur. Ex : modes de vie et comportements (alimentation, tabagisme, toxicomanie, alcoolisme, comportements à risque) ; environnement physique et social (habitat, entourage, éducation, milieu scolaire, professionnel, loisirs) ; système de soins." },
+    { id: "td1-1", n: "Q 1", type: "open", p: "Définissez l’épidémiologie descriptive.",
+      a: "Décrit l’état sanitaire et quantifie l’importance des problèmes de santé." },
+    { id: "td1-2", n: "Q 2", type: "open", p: "Définissez l’épidémiologie analytique.",
+      a: "Étudie et analyse le rôle des facteurs susceptibles de favoriser la survenue d’une maladie (facteurs de risque)." },
+    { id: "td1-3", n: "Q 3", type: "open", p: "Définissez la prévalence.",
+      a: "Nombre de cas d’une maladie dans une population <b>à un moment donné</b> (nouveaux cas + anciens cas)." },
+    { id: "td1-4", n: "Q 4", type: "open", p: "Définissez l’incidence.",
+      a: "Nombre de <b>nouveaux cas</b> d’une maladie pendant une période donnée et dans une population donnée." },
+    { id: "td1-5", n: "Q 5", type: "open", p: "5.1 Définissez le RR (risque relatif). 5.2 Que signifie RR = 1 ? 5.3 RR &lt; 1 ? 5.4 RR &gt; 1 ?",
+      a: "<b>RR</b> : risque de survenue d’un événement dans un groupe exposé, par rapport à l’autre groupe, non exposé.<ul><li><b>RR = 1</b> : absence de corrélation, l’hypothèse est nulle.</li><li><b>RR &lt; 1</b> : diminution du risque, facteur de protection.</li><li><b>RR &gt; 1</b> : augmentation du risque, existence d’un facteur de risque.</li></ul>" },
+    { id: "td1-6", n: "Q 6", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "L’incidence du cancer du poumon est plus élevée chez les hommes que chez les femmes.", ok: true },
+        { t: "L’incidence du cancer du poumon est plus élevée chez les femmes que chez les hommes.", ok: false },
+        { t: "Le cancer de la prostate a l’incidence la plus importante des cancers chez l’homme.", ok: true },
+        { t: "Le cancer colorectal a l’incidence la plus importante des cancers chez l’homme.", ok: false, why: "Chez l’homme : prostate, puis poumon, puis colon." },
+        { t: "Le cancer du sein a l’incidence la plus importante des cancers chez la femme.", ok: true } ] },
+    { id: "td1-7", n: "Q 7", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "L’incidence du cancer du poumon a tendance à augmenter chez les hommes.", ok: false, why: "Non retenu à la correction : c’est chez les femmes qu’elle augmente (B)." },
+        { t: "L’incidence du cancer du poumon a tendance à augmenter chez les femmes.", ok: true },
+        { t: "Le cancer du poumon est le cancer avec le plus fort taux de mortalité chez l’homme.", ok: true },
+        { t: "Le cancer du poumon est le cancer avec le plus fort taux de mortalité chez la femme.", ok: false, why: "Chez la femme, la mortalité la plus forte est le cancer du sein (puis poumon, colon)." },
+        { t: "Le taux de mortalité concernant les cancers diminue davantage chez les hommes que chez les femmes.", ok: true } ] },
+    { id: "td1-8", n: "Q 8", type: "open", p: "Citez un avantage du dépistage.",
+      a: "Détecter la maladie à un stade précoce ; traiter précocement pour réduire la mortalité." },
+    { id: "td1-9", n: "Q 9", type: "open", p: "Citez 3 facteurs de risque du cancer du sein.",
+      a: "<ul><li><b>Âge</b> (+ 50 ans)</li><li><b>Histoire hormonale</b> : ménarche précoce, ménopause tardive, grossesse tardive ou nulliparité, absence d’allaitement, traitement hormonal</li><li><b>Facteurs familiaux</b> : antécédents 1er degré, mutation BRCA 1 ou 2</li><li><b>Facteurs comportementaux</b> : alcool, tabac, sédentarité, surpoids, alimentation, travail de nuit et changements réguliers d’horaires</li></ul>" },
+    { id: "td1-10", n: "Q 10", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Le taux de mortalité du cancer de la prostate diminue tous les ans en France.", ok: true },
+        { t: "Le taux de survie à 5 ans pour le cancer de la prostate est élevé.", ok: true, why: "93 %." },
+        { t: "Le dépistage du cancer de la prostate s’effectue par une prise de sang.", ok: true },
+        { t: "Il existe un dépistage national organisé en France pour le cancer de la prostate.", ok: false },
+        { t: "Le taux de survie à 5 ans pour le cancer du poumon est élevé.", ok: false, why: "20 %." } ] },
+    { id: "td1-11", n: "Q 11", type: "open", p: "Citez 2 facteurs de risque du cancer du poumon.",
+      a: "<ul><li><b>Tabac</b> (âge de début, durée, consommation moyenne)</li><li><b>Cannabis</b></li><li><b>Facteurs environnementaux et professionnels</b> : amiante, gaz d’échappement, radon, hydrocarbures, rayonnements ionisants, silice, cadmium</li></ul>" },
+    { id: "td1-12", n: "Q 12", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Le cancer colorectal a un taux de survie à 5 ans important s’il est diagnostiqué à un stade précoce.", ok: true, why: "90 %." },
+        { t: "Le cancer colorectal a un taux de survie à 5 ans important s’il est diagnostiqué à un stade métastatique.", ok: false },
+        { t: "Il existe un dépistage organisé national des cancers colorectaux.", ok: true },
+        { t: "Le test immunologique a une sensibilité importante.", ok: true },
+        { t: "La coloscopie sera proposée en cas de test immunologique positif.", ok: true } ] },
+    { id: "td1-13", n: "Q 13", type: "open", p: "Citez 2 facteurs de risque des cancers colorectaux.",
+      a: "<ul><li>Âge (+ 50 ans)</li><li>Antécédents familiaux</li><li>Habitudes de vie : alimentation, surpoids, sédentarité, alcool, tabac</li></ul>" },
+    { id: "td1-14", n: "Q 14", type: "open", p: "Citez les 3 facteurs de risque exogènes principaux des cancers.",
+      a: "<ol><li><b>Tabac</b></li><li><b>Alcool</b></li><li><b>Alimentation</b></li></ol>" },
+    { id: "td1-15", n: "Q 15", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Pour les cancers de la peau, on distingue 80 % de mélanomes et 20 % de carcinomes cutanés.", ok: false, why: "C’est l’inverse : 80 % de carcinomes cutanés, 20 % de mélanomes." },
+        { t: "L’incidence des cancers de la peau a beaucoup augmenté en France.", ok: true },
+        { t: "83 % des mélanomes seraient dus à l’exposition solaire.", ok: true },
+        { t: "Les traitements hormonaux de la ménopause augmentent le risque de cancer du sein.", ok: true },
+        { t: "Les pilules œstroprogestatives augmentent le risque de cancer du foie.", ok: true } ] },
+    { id: "td1-16", n: "Q 16", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "100 % des cancers du col de l’utérus sont dus aux virus HPV.", ok: true },
+        { t: "La vaccination anti-HPV est destinée uniquement aux filles.", ok: false },
+        { t: "Les populations les moins favorisées sont les moins exposées aux facteurs de cancérogenèse.", ok: false, why: "Non retenu à la correction." },
+        { t: "Le virus HPV induit des cancers ORL.", ok: true },
+        { t: "40 % des cancers pourraient être évités en changeant des comportements et/ou des habitudes de vie.", ok: true } ] },
+    { id: "td1-17", n: "Q 17", type: "open", p: "Explicitez les 4 grandes phases du cycle cellulaire.",
+      a: "<ul><li><b>Interphase</b> :<ul><li><b>G1</b> : croissance cellulaire et préparation de la réplication</li><li><b>S</b> : réplication de l’ADN</li><li><b>G2</b> : croissance cellulaire et préparation de la mitose</li></ul></li><li><b>M</b> : mitose (prophase, métaphase, anaphase, télophase)</li></ul>" },
+    { id: "td1-18", n: "Q 18", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Il existe des récepteurs de facteur de croissance cellulaire qui peuvent favoriser la croissance des cellules cancéreuses.", ok: true },
+        { t: "Les facteurs de croissance peuvent entrer directement dans la cellule afin de réguler les signaux intracellulaires.", ok: false, why: "Ils agissent via un récepteur." },
+        { t: "Il existe des mécanismes de réparation de l’ADN très efficaces.", ok: true },
+        { t: "Les lésions de l’ADN sont très fréquentes.", ok: true, why: "≈ 40 000 ruptures simple brin de l’ADN par jour." },
+        { t: "Les anomalies cellulaires persistantes, après correction, entraînent soit l’apoptose, soit la cancérisation, soit la transmission de maladies héréditaires.", ok: true, why: "Transmission héréditaire si mutation de l’ADN d’une cellule germinale." } ] },
+    { id: "td1-19", n: "Q 19", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Toutes les cellules mutées donnent des cancers.", ok: false },
+        { t: "Les lymphocytes T, par reconnaissance des antigènes, peuvent détruire une cellule cancéreuse.", ok: true },
+        { t: "Les lymphocytes T sont contenus dans les ganglions lymphatiques.", ok: true },
+        { t: "Les lymphocytes T sont transportés via les vaisseaux sanguins.", ok: false, why: "Correction : via les vaisseaux lymphatiques." },
+        { t: "Les ganglions enflés sont l’un des signes d’un envahissement tumoral.", ok: true } ] }
+  ]
+});
+
+/* ---------- TD 2 ---------- */
+const TD2_BUTS = [
+  "Détruire les cellules résiduelles et diminuer le risque de rechute",
+  "Diminuer la taille de la tumeur pour faciliter l’opération et diminuer les risques de récidive du cancer",
+  "Diminuer le temps de traitement",
+  "Détruire les métastases",
+  "Rendre les cellules cancéreuses plus sensibles aux rayonnements"
+];
+const TD2_TERMES = ["Adjuvant", "Néoadjuvant", "Per opératoire", "Chimiothérapie métastatique", "Radio-chimiothérapie concomitante"];
+
+SETS.push({
+  id: "td2", title: "TD 2", group: "td",
+  sub: "Formes et évolutions de la maladie, classification, principaux traitements",
+  obj: "Mobiliser les connaissances des cours sur les formes et évolutions de la maladie et les principaux traitements.",
+  questions: [
+    { id: "td2-1", n: "Q 1", type: "open", p: "1.1 But de la classification des cancers ? 1.2 Citez 3 types de classification. 1.3 But d’un bilan d’extension ?",
+      a: "<b>1.1</b> Établir un pronostic et proposer un traitement.<br><b>1.2</b> Classification TNM · anatomique · anatomopathologique (et moléculaire).<br><b>1.3</b> Le bilan d’extension est un bilan d’imagerie permettant de déterminer si le cancer est localisé, localement avancé ou métastatique." },
+    { id: "td2-2", n: "Q 2", type: "open", p: "Expliquez la classification anatomique des cancers.",
+      a: "Elle distingue les <b>tumeurs solides</b> (amas de cellules à partir d’un tissu) des <b>tumeurs liquides</b> ou hémopathies malignes (cellules cancéreuses circulant dans le sang ou la lymphe).<ul><li>Les tumeurs solides sont les plus fréquentes.</li><li>3 groupes de tumeurs liquides : myélomes (moelle osseuse), leucémies (globules blancs), lymphomes (lymphocytes).</li></ul>" },
+    { id: "td2-3", n: "Q 3", type: "open", p: "Explicitez les 4 types histologiques des cancers.",
+      a: "<ul><li><b>Carcinomes</b> : épidermoïdes (cellules épithéliales ; ex : ORL, gynécologique) et adénocarcinomes (cellules glandulaires ; ex : prostate, sein)</li><li><b>Sarcomes</b> : tissu conjonctif (os, muscle, graisse…)</li><li><b>Mélanomes</b> : mélanocytes</li><li><b>Tumeurs gliales</b> : cellules gliales (cellules de soutien du système nerveux)</li></ul>" },
+    { id: "td2-4", n: "Q 4", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Le diagnostic d’un cancer se fait grâce à l’examen anatomopathologique.", ok: true },
+        { t: "L’examen anatomopathologique s’effectue uniquement après un prélèvement.", ok: true },
+        { t: "L’examen anatomopathologique permet de déterminer le caractère bénin ou malin d’un cancer.", ok: true },
+        { t: "L’examen anatomopathologique permet d’informer sur l’origine du cancer et donc de savoir s’il s’agit d’un primitif ou d’une métastase.", ok: true },
+        { t: "L’immunohistochimie consiste à séquencer l’ADN à la recherche des anomalies génétiques d’une tumeur.", ok: false, why: "Immunohistochimie = marquer un anticorps à la recherche d’un récepteur membranaire particulier. Le séquençage relève de la biologie moléculaire." } ] },
+    { id: "td2-5", n: "Q 5", type: "open", p: "Expliquez la différence entre cancer infiltrant et cancer in situ.",
+      a: "<b>Infiltrant</b> : a franchi la lame basale et peut métastaser.<br><b>In situ</b> : cancer localisé, pas de franchissement de la membrane basale, donc pas de métastase (contrairement aux cancers invasifs)." },
+    { id: "td2-6", n: "Q 6", type: "open", p: "Définissez la néo-angiogenèse.",
+      a: "La tumeur maligne entraîne la formation de nouveaux vaisseaux." },
+    { id: "td2-7", n: "Q 7", type: "open", p: "Expliquez la différence entre tumorectomie et mastectomie.",
+      a: "<b>Tumorectomie</b> : retrait de la tumeur uniquement (chirurgie conservatrice).<br><b>Mastectomie</b> : retrait de toute la glande mammaire (chirurgie non conservatrice)." },
+    { id: "td2-8", n: "Q 8", type: "match", p: "Complétez le tableau (classification TNM).",
+      cols: ["Mot correspondant à l’initiale", "Signification"],
+      ch: [["Tumeur", "Node / ganglion", "Métastase"], ["Taille de la tumeur", "Envahissement ganglionnaire", "Présence de métastase"]],
+      rows: [{ l: "T", a: ["Tumeur", "Taille de la tumeur"] }, { l: "N", a: ["Node / ganglion", "Envahissement ganglionnaire"] }, { l: "M", a: ["Métastase", "Présence de métastase"] }] },
+    { id: "td2-9", n: "Q 9", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "La classification TNM est appliquée uniquement en France.", ok: false, why: "C’est une classification internationale." },
+        { t: "La classification TNM permet de déterminer le stade d’un cancer.", ok: true },
+        { t: "Le stade d’un cancer permet de connaître son pronostic et donc le taux de survie globale.", ok: true },
+        { t: "La classification TNM est identique pour tous les cancers.", ok: false, why: "Non retenu à la correction." },
+        { t: "Un cancer avec T3N0M0 signifie qu’il y a plusieurs ganglions envahis mais aucune métastase.", ok: false, why: "N0 = pas d’envahissement ganglionnaire ; M0 = pas de métastase." } ] },
+    { id: "td2-10", n: "Q 10", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Avant de proposer un traitement, il y a toujours une RCP.", ok: true },
+        { t: "Les oncologues, radiothérapeutes et radiologues peuvent participer à des RCP.", ok: true },
+        { t: "Les décisions des RCP s’appuient sur des diagrammes décisionnels.", ok: true },
+        { t: "Les décisions des RCP s’appuient sur des bigrammes confusionnels.", ok: false },
+        { t: "Après le traitement, une surveillance doit être effectuée pendant minimum trois ans.", ok: false, why: "C’est 5 ans." } ] },
+    { id: "td2-11", n: "Q 11", type: "open", p: "Citez les deux types de métastases osseuses.",
+      a: "<b>Ostéolytiques</b> (lyse osseuse → « trou ») et <b>ostéocondensantes</b> (hyperdensité)." },
+    { id: "td2-12", n: "Q 12", type: "order", p: "Numérotez dans l’ordre chronologique les étapes de la prise en charge.",
+      items: ["Prélèvement", "Anatomopathologie", "Bilan d’extension", "Classification", "Pronostic", "RCP", "Traitement", "Surveillance"],
+      shuffle: [5, 2, 7, 0, 3, 6, 1, 4] },
+    { id: "td2-13", n: "Q 13", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "La radiothérapie est le principal traitement des tumeurs solides.", ok: false, why: "C’est la chirurgie." },
+        { t: "La chirurgie peut être un traitement unique lorsque la lésion est diagnostiquée précocement.", ok: true },
+        { t: "La chirurgie est peu associée à la radiothérapie ou aux traitements systémiques.", ok: false },
+        { t: "La prostatectomie totale consiste à retirer entièrement la prostate et les vésicules séminales avec éventuellement un curage ganglionnaire.", ok: true },
+        { t: "La chirurgie est le principal traitement pour les cancers localisés du sein, de la prostate, du colon et du poumon.", ok: true } ] },
+    { id: "td2-14", n: "Q 14", type: "match", p: "Remplissez le tableau (important +++).",
+      cols: ["Terme médical", "But"], ch: [TD2_TERMES, TD2_BUTS],
+      rows: [
+        { l: "Radiothérapie après chirurgie", a: ["Adjuvant", TD2_BUTS[0]] },
+        { l: "Radiothérapie avant chirurgie", a: ["Néoadjuvant", TD2_BUTS[1]] },
+        { l: "Radiothérapie pendant l’intervention", a: ["Per opératoire", TD2_BUTS[2]] },
+        { l: "Chimiothérapie après chirurgie", a: ["Adjuvant", TD2_BUTS[0]] },
+        { l: "Chimiothérapie avant chirurgie", a: ["Néoadjuvant", TD2_BUTS[1]] },
+        { l: "Chimiothérapie pour traiter les métastases", a: ["Chimiothérapie métastatique", TD2_BUTS[3]] },
+        { l: "Chimiothérapie en association avec la radiothérapie", a: ["Radio-chimiothérapie concomitante", TD2_BUTS[4]] } ] },
+    { id: "td2-15", n: "Q 15", type: "open", p: "Explicitez trois traitements systémiques.",
+      a: "<ul><li><b>Chimiothérapie</b> : agent cytotoxique agissant sur le cycle cellulaire, soit en bloquant certaines étapes, soit en agissant sur l’ADN, l’ARN ou les protéines. Agit sur toutes les cellules → beaucoup d’effets secondaires. Voie orale, sous-cutanée ou veineuse. 4 familles : <b>inhibiteurs de topoisomérase</b> (bloquent le dépliement de l’ADN lors de la réplication et la transcription) ; <b>poisons du fuseau</b> (fuseau mitotique créé en prophase) ; <b>alkylants et sels de platine</b> (empêchent réplication et transcription de l’ADN) ; <b>antimétabolites</b> (bloquent la synthèse d’ADN et d’ARN).</li><li><b>Thérapie ciblée</b> : médicaments agissant de façon sélective sur des caractéristiques (targets) à l’intérieur ou à la surface des cellules cancéreuses ; efficace uniquement si ces targets sont présents. Bloque la croissance cellulaire en agissant sur les facteurs de croissance, leurs récepteurs (partie extra- ou intracellulaire), la transduction intracellulaire. Ex : anticorps monoclonaux, inhibiteurs des protéines kinases, anti-angiogéniques / anti-VEGF. <b>ADC</b> (antibody-drug conjugate) : anticorps ciblant une protéine spécifique + chimiothérapie libérée dans la cellule (+++).</li><li><b>Hormonothérapie</b> (+++) : traitement antihormonal bloquant l’action stimulante des hormones sur les cellules cancéreuses du sein (blocage des œstrogènes) ou de la prostate (blocage des androgènes).</li><li><b>Immunothérapie</b> (+++) : rétablit la réponse immunitaire du patient pour détecter les cellules cancéreuses et les détruire par les lymphocytes T.</li></ul>" },
+    { id: "td2-16", n: "Q 16", type: "qcm", p: "Entourez la ou les bonne(s) réponse(s).",
+      o: [
+        { t: "Certaines cellules cancéreuses sont capables d’exprimer un check-point (point de contrôle immunitaire), ce qui correspond à un frein de la réaction immunitaire.", ok: true },
+        { t: "L’immunothérapie agit sur les check-points pour inhiber le système immunitaire.", ok: false, why: "Elle réactive le système immunitaire par inhibition des points de contrôle, ce qui rend la cellule cancéreuse identifiable par les lymphocytes T." },
+        { t: "L’hormonothérapie est un traitement qui stimule les hormones entraînant le développement des cellules cancéreuses.", ok: false, why: "Elle empêche l’action stimulante des hormones (traitement antihormonal)." },
+        { t: "L’hormonothérapie concerne principalement les cancers du sein et de la prostate.", ok: true },
+        { t: "Les soins de support font partie intégrante du parcours de soins des patients pendant et après la maladie.", ok: true } ] }
+  ]
+});
+
+/* ---------- TD 3 ---------- */
+SETS.push({
+  id: "td3", title: "TD 3", group: "td",
+  sub: "Synthèse de l’ensemble des cours de l’UE 2.10",
+  obj: "Mobiliser les connaissances concernant l’ensemble des cours de l’UE 2.10.",
+  questions: [
+    { id: "td3-1a", n: "Q 1 · prévalence", type: "open", p: "Définissez : la prévalence.", a: "Nombre de cas d’une maladie dans une population à un moment donné (nouveaux cas + anciens cas)." },
+    { id: "td3-1b", n: "Q 1 · incidence", type: "open", p: "Définissez : l’incidence.", a: "Nombre de nouveaux cas d’une maladie pendant une période donnée et dans une population donnée." },
+    { id: "td3-1c", n: "Q 1 · prévention I", type: "open", p: "Définissez : la prévention primaire.", a: "Actions prioritaires permettant de supprimer ou diminuer les facteurs de risque (diminue l’incidence). But : empêcher l’apparition d’une maladie (information, vaccination…)." },
+    { id: "td3-1d", n: "Q 1 · prévention II", type: "open", p: "Définissez : la prévention secondaire.", a: "Suivi de l’état de santé d’une population ; but : déceler au plus vite la maladie et bloquer son évolution (individus asymptomatiques) → dépistage." },
+    { id: "td3-1e", n: "Q 1 · dépistage", type: "open", p: "Définissez : le dépistage.", a: "Recherche d’une maladie chez une personne en bonne santé (asymptomatique)." },
+    { id: "td3-1f", n: "Q 1 · facteur de croissance", type: "open", p: "Définissez : le facteur de croissance.", a: "Protéine sécrétée dans le milieu extracellulaire activant la croissance et la multiplication des cellules (en se fixant sur un récepteur de facteur de croissance à activité tyrosine kinase). Leur expression ou surexpression favorise la croissance des cellules cancéreuses." },
+    { id: "td3-1g", n: "Q 1 · hyperplasie", type: "open", p: "Définissez : l’hyperplasie.", a: "Augmentation du nombre de cellules ou augmentation du nombre de mitoses." },
+    { id: "td3-1h", n: "Q 1 · in situ", type: "open", p: "Définissez : le cancer in situ.", a: "Cancer localisé, n’ayant pas franchi la lame basale et donc ne pouvant pas métastaser." },
+    { id: "td3-2", n: "Q 2", type: "open", p: "Citez 2 critères caractérisant un dépistage efficient (adapté).",
+      a: "Sensible (beaucoup de VP), spécifique (beaucoup de VN), sans danger, simple à réaliser, reproductible, acceptable, peu coûteux." },
+    { id: "td3-3", n: "Q 3", type: "open", p: "Citez 2 acteurs nationaux du dépistage en France.",
+      a: "Ministère de la santé, Santé publique France, Institut national du cancer (INCa) et les régimes de l’assurance maladie." },
+    { id: "td3-4a", n: "Q 4.1", type: "order", p: "Classez les 3 cancers ayant l’incidence la plus élevée chez l’<b>homme</b> (1 = le plus élevé).",
+      items: ["Prostate", "Poumon", "Colon"], shuffle: [2, 0, 1] },
+    { id: "td3-4b", n: "Q 4.2", type: "order", p: "Classez les 3 cancers ayant l’incidence la plus élevée chez la <b>femme</b>.",
+      items: ["Sein", "Colon", "Poumon"], shuffle: [1, 2, 0] },
+    { id: "td3-4c", n: "Q 4.3", type: "order", p: "Classez les 3 cancers ayant le taux de mortalité le plus élevé chez l’<b>homme</b>.",
+      items: ["Poumon", "Colon", "Prostate"], shuffle: [2, 0, 1] },
+    { id: "td3-4d", n: "Q 4.4", type: "order", p: "Classez les 3 cancers ayant le taux de mortalité le plus élevé chez la <b>femme</b>.",
+      items: ["Sein", "Poumon", "Colon"], shuffle: [2, 1, 0] },
+    { id: "td3-5a", n: "Q 5.1", type: "open", p: "Indiquez le pourcentage de cancers pouvant être évités grâce à des changements de comportements et de modes de vie.", a: "<b>40 %</b>." },
+    { id: "td3-5b", n: "Q 5.2", type: "open", p: "Citez les 2 principaux facteurs de risque endogènes.", a: "L’<b>âge</b> (1er facteur de risque) et l’<b>hérédité</b>." },
+    { id: "td3-5c", n: "Q 5.3", type: "open", p: "Citez les 2 principaux facteurs de risque exogènes.", a: "Le <b>tabac</b> et l’<b>alcool</b>." },
+    { id: "td3-6", n: "Q 6", type: "open", p: "Citez les 3 mécanismes empêchant une cellule mutée de devenir cancéreuse.",
+      a: "<ul><li>La <b>réparation</b> (par des enzymes)</li><li>L’<b>apoptose</b> (mort cellulaire programmée)</li><li>Le <b>système immunitaire</b> (lymphocytes T)</li></ul>" },
+    { id: "td3-7", n: "Q 7", type: "open", p: "Expliquez la classification TNM.",
+      a: "Classification internationale des cancers solides permettant d’établir un pronostic et une thérapie en définissant :<ul><li><b>T</b> : taille de la tumeur</li><li><b>N</b> : envahissement ganglionnaire</li><li><b>M</b> : présence ou non de métastase</li></ul>3 déclinaisons : <b>cTNM</b> = clinique · <b>pTNM</b> = post-chirurgie · <b>ypTNM</b> = après traitement d’induction." },
+    { id: "td3-8", n: "Q 8", type: "open", p: "Les cancers ayant 4 types histologiques, citez le type de cellule engendrant des carcinomes.",
+      a: "Les cellules <b>épithéliales</b> → carcinomes épidermoïdes ; les cellules <b>glandulaires</b> → adénocarcinomes." },
+    { id: "td3-9", n: "Q 9", type: "open", p: "Expliquez 3 traitements systémiques.",
+      a: "<ul><li><b>Chimiothérapie</b> : agent cytotoxique agissant sur le cycle cellulaire (blocage d’étapes) ou sur l’ADN, l’ARN ou les protéines.</li><li><b>Thérapie ciblée</b> : médicaments agissant sélectivement sur des caractéristiques (targets) à l’intérieur ou à la surface des cellules cancéreuses ; efficace uniquement si ces caractéristiques sont présentes.</li><li><b>Hormonothérapie</b> : traitement antihormonal bloquant la synthèse ou l’action stimulante des hormones (sein : œstrogènes ; prostate : androgènes).</li></ul>" },
+    { id: "td3-10a", n: "Q 10.1", type: "open", p: "Définissez les soins de support.",
+      a: "Ensemble des soins et soutiens nécessaires aux personnes malades <b>tout au long de la maladie</b>, conjointement aux traitements spécifiques (chirurgie, chimiothérapie, radiothérapie) lorsqu’il y en a, de l’annonce de la maladie au stade palliatif ; concerne aussi les patients guéris. Prise en charge de la douleur en particulier ; logique de prise en charge globale de la personne.<br>À différencier des soins non conventionnels : ostéopathie, reiki, acupuncture, hypnose, homéopathie, phytothérapie…" },
+    { id: "td3-10b", n: "Q 10.2", type: "open", p: "Citez les 4 soins de support « socle ».",
+      a: "<ul><li>Prise en charge de la douleur (dont hypnoanalgésie et analgésie intrathécale)</li><li>Prise en charge diététique et nutritionnelle</li><li>Prise en charge psychologique</li><li>Prise en charge sociale, familiale et professionnelle</li></ul>" },
+    { id: "td3-10c", n: "Q 10.3", type: "open", p: "Citez les 5 soins de support « complémentaires ».",
+      a: "<ul><li>Activité physique</li><li>Conseils d’hygiène de vie</li><li>Soutien psychologique des proches et aidants</li><li>Soutien à la mise en œuvre de la préservation de la fertilité</li><li>Prise en charge des troubles de la sexualité (on préfère « santé sexuelle »)</li></ul>" },
+    { id: "td3-10d", n: "Q 10.4", type: "vf", p: "Répondez par vrai ou faux concernant les cancers.",
+      i: [
+        { t: "Le cancer est perçu par certains patients comme fragilisateur du rôle social et professionnel.", ok: true },
+        { t: "Le cancer est souvent perçu comme associé à la douleur physique et émotionnelle ainsi qu’à la mort.", ok: true },
+        { t: "Le cancer précipite le patient dans un travail psychique de deuil.", ok: true },
+        { t: "Suite à l’annonce d’un diagnostic de cancer, la phase « d’adaptation » dure environ 6 mois pour 70 % des patients.", ok: false, why: "Correction : 3 mois." },
+        { t: "Plus de 20 % des patients vivent le cancer de façon adaptée.", ok: true },
+        { t: "Moins de 15 % des patients décompensent des troubles psychiatriques à l’issue du diagnostic.", ok: false, why: "Correction : 20 %." },
+        { t: "50 % des patients vivent le cancer de façon adaptée.", ok: true } ] },
+    { id: "td3-11", n: "Q 11", type: "open", p: "Proposez une définition de l’index thérapeutique en radiothérapie.",
+      a: "Rapport entre la probabilité de contrôle tumoral (<b>TCP</b>) et la probabilité de complications des tissus sains (<b>NTCP</b>)." },
+    { id: "td3-12", n: "Q 12", type: "open", p: "Citez 4 intérêts à l’utilisation de l’IRM-Linac en radiothérapie.",
+      a: "Système de radiothérapie <b>guidée par IRM</b> :<ul><li>Meilleur contraste des tissus</li><li>Mieux cibler la tumeur</li><li>Réduire les marges du PTV</li><li>Réduire les effets secondaires</li><li>Traiter des tumeurs mobiles</li><li>Délivrer des doses plus élevées avec moins de séances</li><li>Amélioration de la qualité de vie des patients</li><li>Ré-irradiation</li><li>Radiothérapie adaptative « online »</li><li>Recalculer quotidiennement le plan de traitement selon les changements anatomiques</li></ul>" },
+    { id: "td3-13", n: "Q 13", type: "vf", p: "Répondez par vrai ou faux en lien avec la chimiothérapie.",
+      i: [
+        { t: "La chimiothérapie a pour but d’éliminer les cellules cancéreuses où qu’elles se trouvent dans le corps.", ok: true },
+        { t: "La chimiothérapie est prescrite par un médecin spécialiste en proctologie.", ok: false },
+        { t: "La chimiothérapie peut se prescrire avant une chirurgie pour diminuer les risques de récidive du cancer.", ok: true },
+        { t: "La chimiothérapie permet de traiter seulement les cancers in situ.", ok: false, why: "Elle traite aussi les métastases." },
+        { t: "La chimiothérapie est toujours utilisée en association.", ok: false, why: "Utilisation seule possible." },
+        { t: "La chimiothérapie se délivre uniquement par DVI.", ok: false, why: "Voies sous-cutanée et orale possibles." } ] }
+  ]
+});
+
+/* ---------- PARTIEL S3 ---------- */
+SETS.push({
+  id: "partiel", title: "Partiel S3", group: "td", timer: 30,
+  sub: "UE 2.10 S3 « Oncologie » — session 1, 29 janvier 2024, 30 min, /20",
+  obj: "Sujet du partiel fourni (sans corrigé). Les réponses ci-dessous sont reconstituées à partir de tes TD ; les points non couverts par tes documents sont signalés.",
+  questions: [
+    { id: "pa-1", n: "Q 1 · 2 pts", pts: 2, type: "open", p: "Explicitez les quatre types de prévention.",
+      a: "<b>Primaire</b> : supprimer/diminuer les facteurs de risque (↓ incidence), individus non malades (information, vaccination…). <b>Secondaire</b> : dépistage, déceler tôt la maladie avant symptômes. <b>Tertiaire</b> : limiter conséquences/complications chez les malades (rééducation, réadaptation, soutien psychologique…). <b>Quaternaire</b> : soins palliatifs quand la maladie est incurable." },
+    { id: "pa-2", n: "Q 2 · 1 pt", pts: 1, type: "open", p: "Définissez en quatre lignes maximum l’incidence et la prévalence.",
+      a: "<b>Incidence</b> : nombre de nouveaux cas d’une maladie pendant une période donnée dans une population donnée.<br><b>Prévalence</b> : nombre de cas (nouveaux + anciens) d’une maladie dans une population à un moment donné." },
+    { id: "pa-3", n: "Q 3 · 2,5 pts", pts: 2.5, type: "vf", p: "Cochez « Vrai » ou « Faux ».",
+      i: [
+        { t: "L’incidence du cancer du poumon est plus élevée chez les hommes que chez les femmes.", ok: true },
+        { t: "Le cancer colorectal a l’incidence la plus importante des cancers chez l’homme.", ok: false, why: "C’est la prostate (puis poumon, colon)." },
+        { t: "Le cancer du sein a l’incidence la plus importante des cancers chez la femme.", ok: true },
+        { t: "La vaccination contre le HPV est destinée seulement aux filles entre 11 et 14 ans.", ok: false, why: "TD 1 Q16 : « uniquement aux filles » est faux." },
+        { t: "Le test immunologique pour le dépistage du cancer colorectal a une sensibilité importante.", ok: true } ] },
+    { id: "pa-4", n: "Q 4 · 1,5 pt", pts: 1.5, type: "open", p: "Citez les quatre principaux facteurs de risque exogènes des cancers en général.",
+      a: "Tes TD donnent <b>3</b> facteurs principaux : <b>tabac, alcool, alimentation</b> (TD 1 Q14 ; TD 3 Q5.3 : tabac et alcool). <div class='flag'>⚠ Le 4e n’est pas désigné dans tes documents (ils citent aussi surpoids et sédentarité parmi les habitudes de vie). À confirmer avec ton cours.</div>" },
+    { id: "pa-5", n: "Q 5 · 3 pts", pts: 3, type: "open", p: "Explicitez la classification TNM.",
+      a: "Classification internationale des cancers solides qui permet d’établir un pronostic et une thérapie : <b>T</b> taille de la tumeur · <b>N</b> envahissement ganglionnaire · <b>M</b> présence ou non de métastase. Déclinaisons : cTNM (clinique), pTNM (post-chirurgie), ypTNM (après traitement d’induction). Elle permet de déterminer le stade, donc le pronostic et le taux de survie globale." },
+    { id: "pa-6", n: "Q 6 · 2,5 pts", pts: 2.5, type: "vf", p: "Cochez « Vrai » ou « Faux ».",
+      i: [
+        { t: "La classification des cancers permet de déterminer le stade du cancer, puis de connaître le pronostic et donc le taux de survie.", ok: true },
+        { t: "Un cancer infiltrant est un cancer ayant franchi la lame basale et pouvant métastaser.", ok: true },
+        { t: "Les oncogènes sont des gènes intervenant dans le contrôle de la prolifération et capables de provoquer la cancérisation.", ok: true, why: "⚠ Notion non traitée dans tes TD : réponse selon la définition classique, à confirmer avec ton cours." },
+        { t: "Les facteurs de croissance se fixent sur des récepteurs de type leucine carboxylase permettant la synthèse d’une protéine régulatrice qui sera inhibitrice ou accélératrice.", ok: false, why: "TD 3 : récepteur de facteur de croissance à activité tyrosine kinase." },
+        { t: "Le système immunitaire identifie les cellules cancéreuses grâce aux antigènes présents à la surface de la cellule pour la détruire.", ok: true } ] },
+    { id: "pa-7", n: "Q 7 · 3 pts", pts: 3, type: "open", p: "Explicitez trois types de traitements systémiques.",
+      a: "<b>Chimiothérapie</b> (agent cytotoxique sur le cycle cellulaire / ADN / ARN / protéines), <b>thérapie ciblée</b> (targets à l’intérieur ou à la surface des cellules cancéreuses ; efficace seulement si présents), <b>hormonothérapie</b> (bloque l’action stimulante des hormones : œstrogènes sein, androgènes prostate) — ou <b>immunothérapie</b> (rétablit la réponse immunitaire, lymphocytes T, inhibition des check-points)." },
+    { id: "pa-8", n: "Q 8 · 1,5 pt", pts: 1.5, type: "open", p: "Citez les personnes qui peuvent bénéficier d’un accompagnement psychologique en service d’oncologie.",
+      a: "Le <b>patient</b> (prise en charge psychologique : soin de support « socle ») et ses <b>proches et aidants</b> (soutien psychologique des proches et aidants : soin de support « complémentaire »). <div class='flag'>⚠ Formulation à vérifier avec ton cours (le sujet n’est pas corrigé).</div>" },
+    { id: "pa-9", n: "Q 9 · 3 pts", pts: 3, type: "open", p: "Citez les trois types de curiethérapie, puis, pour chacun d’entre eux, donnez un exemple.",
+      a: "<div class='flag'>⚠ La curiethérapie n’est abordée dans aucun des 8 documents fournis : je ne propose pas de réponse pour ne rien inventer. Complète avec ton cours (note ta réponse ci-dessus pour t’auto-évaluer).</div>" }
+  ]
+});
+/* ===== TD ALTERNATIFS : mêmes faits que les TD, questions reformulées / affirmations retournées ===== */
+const PREV_EX = ["Primaire", "Secondaire", "Tertiaire", "Quaternaire"];
+const TESTS = ["VP", "VN", "FP", "FN"];
+
+SETS.push({
+  id: "alt1", title: "Alt 1", group: "alt",
+  sub: "Variante du TD 1 — prévention, épidémiologie, facteurs de risque, cancérogenèse",
+  obj: "Mêmes connaissances que le TD 1, questions reformulées ; certaines affirmations sont retournées (vrai ↔ faux) en s’appuyant uniquement sur les corrections du TD.",
+  questions: [
+    { id: "alt1-1", n: "Q 1", type: "open", p: "Que cherche à obtenir la prévention selon l’OMS ? Quels sont les quatre niveaux de prévention ?",
+      a: "Éviter ou réduire le nombre et la gravité des maladies, des accidents et des handicaps. Niveaux : primaire, secondaire, tertiaire, quaternaire (soins palliatifs quand la maladie est incurable)." },
+    { id: "alt1-2", n: "Q 2", type: "match", p: "Associez chaque action au niveau de prévention correspondant.",
+      cols: ["Niveau"], ch: [PREV_EX],
+      rows: [
+        { l: "Vaccination", a: ["Primaire"] }, { l: "Information, promotion de la santé en milieu scolaire", a: ["Primaire"] },
+        { l: "Dépistage du cholestérol, de l’HTA, de la glycémie", a: ["Secondaire"] }, { l: "Séances de sevrage tabagique", a: ["Secondaire"] },
+        { l: "Rééducation, réadaptation", a: ["Tertiaire"] }, { l: "Prévention des escarres", a: ["Tertiaire"] },
+        { l: "Soins palliatifs (maladie incurable)", a: ["Quaternaire"] } ] },
+    { id: "alt1-3", n: "Q 3", type: "match", p: "Test de dépistage : associez chaque situation à VP, VN, FP ou FN.",
+      cols: ["Catégorie"], ch: [TESTS],
+      rows: [
+        { l: "Individu malade ayant un test +", a: ["VP"] }, { l: "Individu sain ayant un test –", a: ["VN"] },
+        { l: "Individu sain ayant un test +", a: ["FP"] }, { l: "Individu malade ayant un test –", a: ["FN"] },
+        { l: "Plus un test est sensible, moins il y en a…", a: ["FN"] }, { l: "Plus un test est spécifique, moins il y en a…", a: ["FP"] } ] },
+    { id: "alt1-4", n: "Q 4", type: "vf", p: "Épidémiologie : vrai ou faux ?",
+      i: [
+        { t: "La prévalence correspond uniquement aux nouveaux cas d’une maladie.", ok: false, why: "Prévalence = nouveaux cas + anciens cas, à un moment donné." },
+        { t: "L’incidence est le nombre de nouveaux cas pendant une période donnée dans une population donnée.", ok: true },
+        { t: "L’épidémiologie descriptive étudie le rôle des facteurs favorisant la survenue d’une maladie.", ok: false, why: "C’est l’épidémiologie analytique." },
+        { t: "L’épidémiologie descriptive décrit l’état sanitaire et quantifie l’importance des problèmes de santé.", ok: true },
+        { t: "RR = 1 : absence de corrélation (hypothèse nulle).", ok: true },
+        { t: "RR < 1 : augmentation du risque.", ok: false, why: "RR < 1 = diminution du risque, facteur de protection." },
+        { t: "RR > 1 : existence d’un facteur de risque.", ok: true },
+        { t: "Le dépistage recherche une maladie chez une personne en bonne santé apparente, avant les symptômes.", ok: true } ] },
+    { id: "alt1-5", n: "Q 5", type: "qcm", p: "Incidence des cancers : cochez les propositions exactes.",
+      o: [
+        { t: "Le cancer de la prostate est le cancer le plus fréquent (incidence) chez l’homme.", ok: true },
+        { t: "Le cancer colorectal est le cancer le plus fréquent (incidence) chez l’homme.", ok: false },
+        { t: "Le cancer du sein est le cancer le plus fréquent (incidence) chez la femme.", ok: true },
+        { t: "L’incidence du cancer du poumon est plus faible chez les hommes que chez les femmes.", ok: false, why: "Elle est plus élevée chez les hommes." },
+        { t: "Chez la femme, l’incidence du cancer du poumon tend à augmenter.", ok: true } ] },
+    { id: "alt1-6", n: "Q 6", type: "qcm", p: "Mortalité : cochez les propositions exactes.",
+      o: [
+        { t: "Le cancer du poumon a le plus fort taux de mortalité chez l’homme.", ok: true },
+        { t: "Le cancer du poumon a le plus fort taux de mortalité chez la femme.", ok: false, why: "Chez la femme : sein, poumon, colon." },
+        { t: "Le taux de mortalité par cancer diminue davantage chez les hommes que chez les femmes.", ok: true },
+        { t: "Chez l’homme, ordre de mortalité : prostate, poumon, colon.", ok: false, why: "Ordre correct : poumon, colon, prostate." },
+        { t: "Chez la femme, ordre de mortalité : sein, poumon, colon.", ok: true } ] },
+    { id: "alt1-7", n: "Q 7", type: "qcm", p: "Prostate et dépistage : cochez les propositions exactes.",
+      o: [
+        { t: "La survie à 5 ans du cancer de la prostate est élevée (93 %).", ok: true },
+        { t: "La survie à 5 ans du cancer du poumon est élevée.", ok: false, why: "20 %." },
+        { t: "Il existe un dépistage national organisé du cancer de la prostate.", ok: false },
+        { t: "Le dépistage du cancer de la prostate s’effectue par une prise de sang.", ok: true },
+        { t: "Le taux de mortalité du cancer de la prostate diminue tous les ans en France.", ok: true } ] },
+    { id: "alt1-8", n: "Q 8", type: "qcm", p: "Cancer colorectal : cochez les propositions exactes.",
+      o: [
+        { t: "La survie à 5 ans est d’environ 90 % si le diagnostic est précoce.", ok: true },
+        { t: "La survie à 5 ans est importante si le diagnostic est fait au stade métastatique.", ok: false },
+        { t: "Le test immunologique a une sensibilité importante.", ok: true },
+        { t: "La coloscopie est proposée en cas de test immunologique négatif.", ok: false, why: "Elle est proposée si le test est positif." },
+        { t: "Il existe un dépistage organisé national.", ok: true } ] },
+    { id: "alt1-9", n: "Q 9", type: "qcm", p: "Peau, HPV, hormones : cochez les propositions exactes.",
+      o: [
+        { t: "Parmi les cancers de la peau : 80 % de carcinomes cutanés et 20 % de mélanomes.", ok: true },
+        { t: "83 % des mélanomes seraient dus à l’exposition solaire.", ok: true },
+        { t: "100 % des cancers du col de l’utérus sont dus aux HPV.", ok: true },
+        { t: "Le virus HPV n’induit que des cancers du col de l’utérus.", ok: false, why: "Il induit aussi des cancers ORL." },
+        { t: "La vaccination anti-HPV est destinée uniquement aux filles.", ok: false },
+        { t: "Les pilules œstroprogestatives diminuent le risque de cancer du foie.", ok: false, why: "Elles l’augmentent." } ] },
+    { id: "alt1-10", n: "Q 10", type: "qcm", p: "Cellule et ADN : cochez les propositions exactes.",
+      o: [
+        { t: "Les lésions de l’ADN sont rares.", ok: false, why: "Très fréquentes (≈ 40 000 ruptures simple brin par jour)." },
+        { t: "Les facteurs de croissance entrent directement dans la cellule.", ok: false, why: "Ils agissent via un récepteur." },
+        { t: "Des anomalies persistantes peuvent entraîner l’apoptose, la cancérisation ou la transmission de maladies héréditaires.", ok: true },
+        { t: "La phase S correspond à la réplication de l’ADN.", ok: true },
+        { t: "La phase G2 correspond à la mitose.", ok: false, why: "G2 = croissance et préparation de la mitose ; la mitose est la phase M." } ] },
+    { id: "alt1-11", n: "Q 11", type: "qcm", p: "Immunité : cochez les propositions exactes.",
+      o: [
+        { t: "Toutes les cellules mutées donnent des cancers.", ok: false },
+        { t: "Les lymphocytes T peuvent détruire une cellule cancéreuse par reconnaissance des antigènes.", ok: true },
+        { t: "Les lymphocytes T sont contenus dans les ganglions lymphatiques.", ok: true },
+        { t: "Des ganglions enflés peuvent être un signe d’envahissement tumoral.", ok: true } ] },
+    { id: "alt1-12", n: "Q 12", type: "open", p: "Classez par catégories les facteurs de risque du cancer du sein.",
+      a: "Âge (+ 50 ans) · histoire hormonale (ménarche précoce, ménopause tardive, grossesse tardive/nulliparité, absence d’allaitement, traitement hormonal) · familiaux (antécédents 1er degré, BRCA 1 ou 2) · comportementaux (alcool, tabac, sédentarité, surpoids, alimentation, travail de nuit et changements d’horaires)." },
+    { id: "alt1-13", n: "Q 13", type: "open", p: "Quels facteurs, tabac mis à part, augmentent le risque de cancer du poumon ?",
+      a: "Cannabis ; facteurs environnementaux et professionnels : amiante, gaz d’échappement, radon, hydrocarbures, rayonnements ionisants, silice, cadmium. (Pour le tabac : âge de début, durée, consommation moyenne.)" },
+    { id: "alt1-14", n: "Q 14", type: "vf", p: "Facteurs endogènes / exogènes : vrai ou faux ?",
+      i: [
+        { t: "Le sexe est un facteur exogène.", ok: false, why: "Endogène (avec l’âge, les facteurs physiologiques, psychologiques, génétiques)." },
+        { t: "L’alimentation est un facteur exogène.", ok: true },
+        { t: "L’habitat et le milieu professionnel sont des facteurs exogènes.", ok: true },
+        { t: "20 % des cancers pourraient être évités par des changements de comportements.", ok: false, why: "40 %." },
+        { t: "Tabac, alcool et alimentation sont les 3 principaux facteurs de risque exogènes.", ok: true } ] }
+  ]
+});
+
+SETS.push({
+  id: "alt2", title: "Alt 2", group: "alt",
+  sub: "Variante du TD 2 — classification, anatomopathologie, traitements",
+  obj: "Mêmes connaissances que le TD 2, questions reformulées ; affirmations retournées à partir des corrections.",
+  questions: [
+    { id: "alt2-1", n: "Q 1", type: "open", p: "À quoi sert la classification des cancers, et à quoi sert un bilan d’extension ?",
+      a: "Classification : établir un pronostic et proposer un traitement. Bilan d’extension : imagerie déterminant si le cancer est localisé, localement avancé ou métastatique." },
+    { id: "alt2-2", n: "Q 2", type: "qcm", p: "Anatomopathologie : cochez les propositions exactes.",
+      o: [
+        { t: "Le diagnostic de cancer repose sur l’examen anatomopathologique.", ok: true },
+        { t: "L’examen anatomopathologique peut se faire sans prélèvement.", ok: false, why: "Il s’effectue uniquement après un prélèvement." },
+        { t: "Il permet de déterminer le caractère bénin ou malin.", ok: true },
+        { t: "Il permet de distinguer une tumeur primitive d’une métastase.", ok: true },
+        { t: "L’immunohistochimie marque un anticorps pour rechercher un récepteur membranaire particulier.", ok: true },
+        { t: "L’immunohistochimie séquence l’ADN de la tumeur.", ok: false, why: "C’est la biologie moléculaire." } ] },
+    { id: "alt2-3", n: "Q 3", type: "vf", p: "Types histologiques et classification anatomique : vrai ou faux ?",
+      i: [
+        { t: "Les carcinomes épidermoïdes proviennent des cellules épithéliales.", ok: true },
+        { t: "Les adénocarcinomes proviennent des cellules glandulaires (ex : prostate, sein).", ok: true },
+        { t: "Les sarcomes proviennent des mélanocytes.", ok: false, why: "Tissu conjonctif (os, muscle, graisse) ; les mélanomes viennent des mélanocytes." },
+        { t: "Les tumeurs gliales proviennent des cellules gliales (cellules de soutien du système nerveux).", ok: true },
+        { t: "Les tumeurs liquides sont les plus fréquentes.", ok: false, why: "Les tumeurs solides sont les plus fréquentes." },
+        { t: "Les 3 groupes de tumeurs liquides sont les myélomes, les leucémies et les lymphomes.", ok: true } ] },
+    { id: "alt2-4", n: "Q 4", type: "vf", p: "Cancer in situ / infiltrant, tumeur : vrai ou faux ?",
+      i: [
+        { t: "Un cancer in situ a franchi la lame basale.", ok: false },
+        { t: "Un cancer infiltrant peut métastaser.", ok: true },
+        { t: "Un cancer in situ ne métastase pas car il n’a pas franchi la membrane basale.", ok: true },
+        { t: "La néo-angiogenèse est la formation de nouveaux vaisseaux provoquée par la tumeur maligne.", ok: true },
+        { t: "La mastectomie est une chirurgie conservatrice.", ok: false, why: "Non conservatrice ; la tumorectomie est conservatrice." } ] },
+    { id: "alt2-5", n: "Q 5", type: "match", p: "Déclinaisons de la classification TNM.",
+      cols: ["Signification"], ch: [["Clinique", "Après chirurgie", "Après traitement d’induction"]],
+      rows: [{ l: "cTNM", a: ["Clinique"] }, { l: "pTNM", a: ["Après chirurgie"] }, { l: "ypTNM", a: ["Après traitement d’induction"] }] },
+    { id: "alt2-6", n: "Q 6", type: "qcm", p: "TNM et stade : cochez les propositions exactes.",
+      o: [
+        { t: "La classification TNM permet de déterminer le stade d’un cancer.", ok: true },
+        { t: "Le stade permet de connaître le pronostic et le taux de survie globale.", ok: true },
+        { t: "La classification TNM est utilisée uniquement en France.", ok: false, why: "Classification internationale." },
+        { t: "La classification TNM concerne les cancers solides.", ok: true },
+        { t: "N désigne la présence de métastase.", ok: false, why: "N = envahissement ganglionnaire ; M = métastase." } ] },
+    { id: "alt2-7", n: "Q 7", type: "qcm", p: "RCP et surveillance : cochez les propositions exactes.",
+      o: [
+        { t: "Un traitement est toujours précédé d’une RCP.", ok: true },
+        { t: "Oncologues, radiothérapeutes et radiologues peuvent participer à une RCP.", ok: true },
+        { t: "Les décisions de RCP s’appuient sur des diagrammes décisionnels.", ok: true },
+        { t: "La surveillance après traitement dure au minimum 5 ans.", ok: true },
+        { t: "La surveillance après traitement dure au minimum 3 ans.", ok: false, why: "C’est 5 ans." } ] },
+    { id: "alt2-8", n: "Q 8", type: "open", p: "Une métastase osseuse peut créer un « trou » ou une hyperdensité : nommez ces deux types.",
+      a: "Ostéolytique (lyse osseuse → trou) et ostéocondensante (hyperdensité)." },
+    { id: "alt2-9", n: "Q 9", type: "order", p: "Reconstituez la chronologie de la prise en charge d’un cancer.",
+      items: ["Prélèvement", "Anatomopathologie", "Bilan d’extension", "Classification", "Pronostic", "RCP", "Traitement", "Surveillance"],
+      shuffle: [3, 7, 0, 6, 2, 5, 1, 4] },
+    { id: "alt2-10", n: "Q 10", type: "vf", p: "Chirurgie : vrai ou faux ?",
+      i: [
+        { t: "La chirurgie est le principal traitement des tumeurs solides.", ok: true },
+        { t: "La radiothérapie est le principal traitement des tumeurs solides.", ok: false },
+        { t: "La chirurgie peut être un traitement unique si la lésion est diagnostiquée précocement.", ok: true },
+        { t: "La chirurgie est fréquemment associée à la radiothérapie ou aux traitements systémiques.", ok: true, why: "Retourné depuis « peu associée », jugé faux au TD." },
+        { t: "La prostatectomie totale retire la prostate et les vésicules séminales, avec éventuellement un curage ganglionnaire.", ok: true } ] },
+    { id: "alt2-11", n: "Q 11", type: "match", p: "Associez chaque but au terme médical correspondant.",
+      cols: ["Terme"], ch: [TD2_TERMES],
+      rows: [
+        { l: "Détruire les cellules résiduelles et diminuer le risque de rechute (après chirurgie)", a: ["Adjuvant"] },
+        { l: "Diminuer la taille de la tumeur pour faciliter l’opération (avant chirurgie)", a: ["Néoadjuvant"] },
+        { l: "Radiothérapie pendant l’intervention : diminuer le temps de traitement", a: ["Per opératoire"] },
+        { l: "Chimiothérapie pour détruire les métastases", a: ["Chimiothérapie métastatique"] },
+        { l: "Rendre les cellules cancéreuses plus sensibles aux rayonnements", a: ["Radio-chimiothérapie concomitante"] } ] },
+    { id: "alt2-12", n: "Q 12", type: "qcm", p: "Chimiothérapie : cochez les propositions exactes.",
+      o: [
+        { t: "Elle agit sur toutes les cellules, ce qui entraîne beaucoup d’effets secondaires.", ok: true },
+        { t: "Il existe 4 familles : inhibiteurs de topoisomérase, poisons du fuseau, alkylants et sels de platine, antimétabolites.", ok: true },
+        { t: "Les poisons du fuseau agissent sur le fuseau mitotique créé lors de la prophase.", ok: true },
+        { t: "Les antimétabolites bloquent la synthèse d’ADN et d’ARN.", ok: true },
+        { t: "Les alkylants bloquent le dépliement de l’ADN.", ok: false, why: "C’est le rôle des inhibiteurs de topoisomérase ; les alkylants empêchent réplication et transcription." },
+        { t: "La thérapie ciblée est efficace uniquement si les targets sont présents dans les cellules cancéreuses.", ok: true } ] },
+    { id: "alt2-13", n: "Q 13", type: "match", p: "Associez chaque traitement systémique à sa description.",
+      cols: ["Description"],
+      ch: [["Bloque l’action stimulante des hormones sur les cellules cancéreuses", "Rétablit la réponse immunitaire (lymphocytes T)", "Anticorps ciblant une protéine + chimiothérapie libérée dans la cellule", "Cible des targets à l’intérieur ou à la surface des cellules cancéreuses"]],
+      rows: [
+        { l: "Hormonothérapie", a: ["Bloque l’action stimulante des hormones sur les cellules cancéreuses"] },
+        { l: "Immunothérapie", a: ["Rétablit la réponse immunitaire (lymphocytes T)"] },
+        { l: "ADC (antibody-drug conjugate)", a: ["Anticorps ciblant une protéine + chimiothérapie libérée dans la cellule"] },
+        { l: "Thérapie ciblée", a: ["Cible des targets à l’intérieur ou à la surface des cellules cancéreuses"] } ] },
+    { id: "alt2-14", n: "Q 14", type: "qcm", p: "Immunothérapie, hormonothérapie, soins de support : cochez les propositions exactes.",
+      o: [
+        { t: "Un check-point immunitaire est un frein de la réaction immunitaire.", ok: true },
+        { t: "L’immunothérapie réactive le système immunitaire en inhibant les points de contrôle.", ok: true },
+        { t: "L’hormonothérapie empêche l’action stimulante des hormones.", ok: true },
+        { t: "L’hormonothérapie concerne principalement les cancers du sein et de la prostate.", ok: true },
+        { t: "Les soins de support interviennent uniquement après la maladie.", ok: false, why: "Pendant et après la maladie." },
+        { t: "L’hormonothérapie stimule les hormones.", ok: false } ] }
+  ]
+});
+
+SETS.push({
+  id: "alt3", title: "Alt 3", group: "alt",
+  sub: "Variante du TD 3 — synthèse",
+  obj: "Mêmes connaissances que le TD 3, formats différents (association, classement, vrai/faux retournés).",
+  questions: [
+    { id: "alt3-1", n: "Q 1", type: "match", p: "Associez chaque définition au terme correspondant.",
+      cols: ["Terme"],
+      ch: [["Prévalence", "Incidence", "Prévention primaire", "Prévention secondaire", "Dépistage", "Facteur de croissance", "Hyperplasie", "Cancer in situ"]],
+      rows: [
+        { l: "Nombre de cas (nouveaux + anciens) à un moment donné", a: ["Prévalence"] },
+        { l: "Nombre de nouveaux cas pendant une période donnée", a: ["Incidence"] },
+        { l: "Supprimer ou diminuer les facteurs de risque pour empêcher l’apparition de la maladie", a: ["Prévention primaire"] },
+        { l: "Déceler au plus vite la maladie chez des individus asymptomatiques", a: ["Prévention secondaire"] },
+        { l: "Recherche d’une maladie chez une personne en bonne santé (asymptomatique)", a: ["Dépistage"] },
+        { l: "Protéine activant la croissance et la multiplication cellulaires via un récepteur à activité tyrosine kinase", a: ["Facteur de croissance"] },
+        { l: "Augmentation du nombre de cellules ou du nombre de mitoses", a: ["Hyperplasie"] },
+        { l: "Cancer localisé n’ayant pas franchi la lame basale", a: ["Cancer in situ"] } ] },
+    { id: "alt3-2", n: "Q 2", type: "qcm", p: "Un dépistage efficient (adapté) est… (cochez les exactes)",
+      o: [
+        { t: "Sensible (beaucoup de VP)", ok: true }, { t: "Spécifique (beaucoup de VN)", ok: true },
+        { t: "Sans danger, simple à réaliser, reproductible", ok: true },
+        { t: "Très coûteux", ok: false, why: "Il doit être peu coûteux (coût acceptable)." },
+        { t: "Invasif et douloureux", ok: false, why: "Il doit être acceptable pour la population." } ] },
+    { id: "alt3-3", n: "Q 3", type: "open", p: "Quels organismes nationaux interviennent dans le dépistage en France ?",
+      a: "Ministère de la santé, Santé publique France, Institut national du cancer (INCa), régimes de l’assurance maladie." },
+    { id: "alt3-4a", n: "Q 4a", type: "order", p: "Mortalité chez l’<b>homme</b> : classez du plus au moins mortel.", items: ["Poumon", "Colon", "Prostate"], shuffle: [1, 2, 0] },
+    { id: "alt3-4b", n: "Q 4b", type: "order", p: "Incidence chez la <b>femme</b> : classez du plus au moins fréquent.", items: ["Sein", "Colon", "Poumon"], shuffle: [2, 0, 1] },
+    { id: "alt3-4c", n: "Q 4c", type: "order", p: "Incidence chez l’<b>homme</b> : classez du plus au moins fréquent.", items: ["Prostate", "Poumon", "Colon"], shuffle: [1, 2, 0] },
+    { id: "alt3-4d", n: "Q 4d", type: "order", p: "Mortalité chez la <b>femme</b> : classez du plus au moins mortel.", items: ["Sein", "Poumon", "Colon"], shuffle: [1, 0, 2] },
+    { id: "alt3-5", n: "Q 5", type: "vf", p: "Facteurs de risque : vrai ou faux ?",
+      i: [
+        { t: "L’âge est le 1er facteur de risque endogène.", ok: true },
+        { t: "L’hérédité est un facteur de risque endogène.", ok: true },
+        { t: "Le tabac et l’alcool sont les 2 principaux facteurs de risque exogènes.", ok: true },
+        { t: "20 % des cancers pourraient être évités par des changements de modes de vie.", ok: false, why: "40 %." } ] },
+    { id: "alt3-6", n: "Q 6", type: "qcm", p: "Quels éléments empêchent une cellule mutée de devenir cancéreuse ?",
+      o: [
+        { t: "La réparation de l’ADN par des enzymes", ok: true }, { t: "L’apoptose (mort cellulaire programmée)", ok: true },
+        { t: "Le système immunitaire (lymphocytes T)", ok: true }, { t: "La néo-angiogenèse", ok: false, why: "C’est la formation de nouveaux vaisseaux par la tumeur maligne." },
+        { t: "L’hyperplasie", ok: false } ] },
+    { id: "alt3-7", n: "Q 7", type: "qcm", p: "Facteurs de croissance et hyperplasie : cochez les propositions exactes.",
+      o: [
+        { t: "Un facteur de croissance est une protéine sécrétée dans le milieu extracellulaire.", ok: true },
+        { t: "Il se fixe sur un récepteur à activité tyrosine kinase.", ok: true },
+        { t: "Sa surexpression favorise la croissance des cellules cancéreuses.", ok: true },
+        { t: "L’hyperplasie est une diminution du nombre de cellules.", ok: false, why: "Augmentation du nombre de cellules ou de mitoses." } ] },
+    { id: "alt3-8", n: "Q 8", type: "match", p: "Soins de support : classez chaque soin.",
+      cols: ["Catégorie"], ch: [["Socle", "Complémentaire", "Non conventionnel"]],
+      rows: [
+        { l: "Prise en charge diététique et nutritionnelle", a: ["Socle"] }, { l: "Prise en charge psychologique", a: ["Socle"] },
+        { l: "Activité physique", a: ["Complémentaire"] }, { l: "Préservation de la fertilité", a: ["Complémentaire"] },
+        { l: "Reiki", a: ["Non conventionnel"] }, { l: "Homéopathie", a: ["Non conventionnel"] } ] },
+    { id: "alt3-9", n: "Q 9", type: "vf", p: "Vécu psychologique du cancer : vrai ou faux ?",
+      i: [
+        { t: "Le cancer est perçu par certains comme fragilisateur du rôle social et professionnel.", ok: true },
+        { t: "Le cancer précipite le patient dans un travail psychique de deuil.", ok: true },
+        { t: "La phase d’adaptation dure environ 3 mois.", ok: true },
+        { t: "Plus de 20 % des patients vivent le cancer de façon adaptée.", ok: true },
+        { t: "Environ 20 % des patients décompensent des troubles psychiatriques à l’issue du diagnostic.", ok: true },
+        { t: "Moins de 15 % des patients décompensent des troubles psychiatriques.", ok: false, why: "Correction : 20 %." } ] },
+    { id: "alt3-10", n: "Q 10", type: "vf", p: "Radiothérapie et IRM-Linac : vrai ou faux ?",
+      i: [
+        { t: "L’index thérapeutique est le rapport TCP / NTCP.", ok: true },
+        { t: "L’IRM-Linac est un système de radiothérapie guidée par IRM.", ok: true },
+        { t: "Il permet de réduire les marges du PTV.", ok: true },
+        { t: "Il permet de recalculer quotidiennement le plan de traitement selon les changements anatomiques.", ok: true },
+        { t: "Il impose d’augmenter les marges du PTV.", ok: false },
+        { t: "Il empêche toute ré-irradiation.", ok: false, why: "La ré-irradiation fait partie de ses intérêts." },
+        { t: "Il permet de délivrer des doses plus faibles avec davantage de séances.", ok: false, why: "Doses plus élevées avec moins de séances." } ] },
+    { id: "alt3-11", n: "Q 11", type: "vf", p: "Chimiothérapie : vrai ou faux ?",
+      i: [
+        { t: "Elle vise à éliminer les cellules cancéreuses où qu’elles se trouvent dans le corps.", ok: true },
+        { t: "Elle peut traiter aussi les métastases.", ok: true },
+        { t: "Elle peut être utilisée seule.", ok: true },
+        { t: "Elle peut se délivrer par voie sous-cutanée ou orale.", ok: true },
+        { t: "Elle se délivre uniquement par voie veineuse (DVI).", ok: false },
+        { t: "Elle peut être prescrite avant une chirurgie pour diminuer le risque de récidive.", ok: true } ] }
+  ]
+});
+/* ===== FLASHCARDS (toutes issues des documents) ===== */
+const THEMES = {
+  epi: "Épidémiologie", prev: "Prévention & dépistage", frisk: "Facteurs de risque", cell: "Cancérogenèse & cellule",
+  immu: "Immunité", clas: "Classification & diagnostic", trt: "Traitements", rt: "Radiothérapie", sup: "Soins de support & psycho"
+};
+const CARDS = [
+  // Épidémiologie
+  ["epi", "Épidémiologie descriptive ?", "Décrit l’état sanitaire et quantifie l’importance des problèmes de santé."],
+  ["epi", "Épidémiologie analytique ?", "Étudie et analyse le rôle des facteurs susceptibles de favoriser la survenue d’une maladie (facteurs de risque)."],
+  ["epi", "Prévalence ?", "Nombre de cas d’une maladie dans une population <b>à un moment donné</b> (nouveaux + anciens cas)."],
+  ["epi", "Incidence ?", "Nombre de <b>nouveaux cas</b> d’une maladie pendant une période donnée, dans une population donnée."],
+  ["epi", "Risque relatif (RR) ?", "Risque de survenue d’un événement dans un groupe exposé, par rapport à un groupe non exposé."],
+  ["epi", "RR = 1 ?", "Absence de corrélation ; hypothèse nulle."],
+  ["epi", "RR &lt; 1 ?", "Diminution du risque : facteur de protection."],
+  ["epi", "RR &gt; 1 ?", "Augmentation du risque : existence d’un facteur de risque."],
+  ["epi", "Incidence la plus élevée chez l’homme : les 3 cancers dans l’ordre ?", "1. Prostate · 2. Poumon · 3. Colon"],
+  ["epi", "Incidence la plus élevée chez la femme : les 3 cancers dans l’ordre ?", "1. Sein · 2. Colon · 3. Poumon"],
+  ["epi", "Mortalité la plus élevée chez l’homme : les 3 cancers dans l’ordre ?", "1. Poumon · 2. Colon · 3. Prostate"],
+  ["epi", "Mortalité la plus élevée chez la femme : les 3 cancers dans l’ordre ?", "1. Sein · 2. Poumon · 3. Colon"],
+  ["epi", "Cancer du poumon : incidence selon le sexe et tendance ?", "Plus élevée chez les hommes que chez les femmes ; tendance à <b>augmenter chez les femmes</b>."],
+  ["epi", "La mortalité par cancer diminue-t-elle davantage chez l’homme ou chez la femme ?", "Elle diminue davantage chez les <b>hommes</b>."],
+  ["epi", "Cancer de la prostate : survie à 5 ans et mortalité ?", "Survie à 5 ans élevée (<b>93 %</b>) ; taux de mortalité qui diminue tous les ans en France."],
+  ["epi", "Cancer du poumon : survie à 5 ans ?", "<b>20 %</b> (non élevée)."],
+  ["epi", "Cancer colorectal : survie à 5 ans selon le stade ?", "<b>90 %</b> si diagnostiqué à un stade précoce ; pas importante au stade métastatique."],
+  ["epi", "Cancers de la peau : répartition et tendance ?", "<b>80 % de carcinomes cutanés</b> et 20 % de mélanomes (et non l’inverse) ; incidence en forte augmentation en France ; 83 % des mélanomes seraient dus à l’exposition solaire."],
+  ["epi", "Quelle part des cancers pourrait être évitée par des changements de comportements et de modes de vie ?", "<b>40 %</b>."],
+  // Prévention & dépistage
+  ["prev", "Définition de la prévention (OMS) ?", "Ensemble des mesures visant à éviter ou réduire le nombre et la gravité des maladies, des accidents et des handicaps."],
+  ["prev", "Prévention primaire ?", "Supprimer ou diminuer les facteurs de risque (diminue l’incidence) ; empêcher l’apparition de la maladie ; individus non malades. Ex : information, promotion de la santé en milieu scolaire, vaccination."],
+  ["prev", "Prévention secondaire ?", "Suivi de l’état de santé de la population = <b>dépistage</b> ; déceler au plus tôt la maladie, avant les symptômes. Ex : dépistage du cholestérol, de l’HTA, de la glycémie, sevrage tabagique."],
+  ["prev", "Prévention tertiaire ?", "Limiter les conséquences ou complications d’une maladie, ralentir la maladie ; personnes malades. Ex : rééducation, réadaptation, soutien psychologique, prévention des escarres, anticoagulant après AVC."],
+  ["prev", "Prévention quaternaire ?", "Soins palliatifs lorsque la maladie est incurable."],
+  ["prev", "Dépistage ?", "Recherche d’une maladie chez une personne en bonne santé apparente (asymptomatique), avant l’apparition des symptômes ; individuel ou collectif."],
+  ["prev", "Les 7 critères de qualité d’un dépistage ?", "<ul><li>Sensible</li><li>Spécifique</li><li>Sans danger</li><li>Simple à réaliser</li><li>Reproductible</li><li>Acceptable (peu invasif, peu douloureux)</li><li>Coût acceptable</li></ul>"],
+  ["prev", "Sensibilité ?", "Probabilité qu’un test soit + chez les sujets malades (taux de VP). Plus il est sensible, moins il y a de <b>FN</b>."],
+  ["prev", "Spécificité ?", "Probabilité qu’un test soit – chez les sujets non malades (taux de VN). Plus il est spécifique, moins il y a de <b>FP</b>."],
+  ["prev", "VP, VN, FP, FN ?", "<ul><li>VP : malades, test +</li><li>VN : sains, test –</li><li>FP : sains, test +</li><li>FN : malades, test –</li></ul>"],
+  ["prev", "Dépistage organisé national du cancer colorectal ?", "Existe. Test immunologique (sensibilité importante) ; <b>coloscopie</b> proposée si test positif."],
+  ["prev", "Dépistage du cancer de la prostate ?", "Par prise de sang ; il n’existe <b>pas</b> de dépistage national organisé."],
+  ["prev", "Avantage du dépistage ?", "Détecter la maladie à un stade précoce ; traiter précocement pour réduire la mortalité."],
+  ["prev", "2 acteurs nationaux du dépistage en France ?", "Ministère de la santé, Santé publique France, INCa, régimes de l’assurance maladie."],
+  // Facteurs de risque
+  ["frisk", "Facteurs endogènes ?", "Proviennent de l’intérieur de l’organisme : sexe, âge, facteurs physiologiques, psychologiques, caractéristiques génétiques."],
+  ["frisk", "Facteurs exogènes ?", "Proviennent de l’extérieur : modes de vie et comportements (alimentation, tabac, alcool, comportements à risque), environnement physique et social (habitat, milieu professionnel, loisirs…), système de soins."],
+  ["frisk", "3 facteurs de risque exogènes principaux des cancers ?", "Tabac · Alcool · Alimentation."],
+  ["frisk", "2 principaux facteurs de risque endogènes ?", "<b>Âge</b> (1er facteur de risque) et <b>hérédité</b>."],
+  ["frisk", "Facteurs de risque du cancer du sein ?", "<ul><li>Âge (+ 50 ans)</li><li>Histoire hormonale : ménarche précoce, ménopause tardive, grossesse tardive ou nulliparité, absence d’allaitement, traitement hormonal</li><li>Familiaux : antécédents 1er degré, BRCA 1 ou 2</li><li>Comportementaux : alcool, tabac, sédentarité, surpoids, alimentation, travail de nuit / horaires changeants</li></ul>"],
+  ["frisk", "Facteurs de risque du cancer du poumon ?", "Tabac (âge de début, durée, consommation moyenne), cannabis, amiante, gaz d’échappement, radon, hydrocarbures, rayonnements ionisants, silice, cadmium."],
+  ["frisk", "Facteurs de risque des cancers colorectaux ?", "Âge (+ 50 ans), antécédents familiaux, habitudes de vie (alimentation, surpoids, sédentarité, alcool, tabac)."],
+  ["frisk", "HPV et cancers ?", "100 % des cancers du col de l’utérus sont dus aux HPV ; le virus induit aussi des cancers ORL ; la vaccination n’est pas réservée aux filles."],
+  ["frisk", "Hormones et risque de cancer ?", "Traitements hormonaux de la ménopause → ↑ risque de cancer du sein ; pilules œstroprogestatives → ↑ risque de cancer du foie."],
+  // Cellule
+  ["cell", "Les phases du cycle cellulaire ?", "<b>G1</b> croissance + préparation de la réplication · <b>S</b> réplication de l’ADN · <b>G2</b> croissance + préparation de la mitose (G1+S+G2 = interphase) · <b>M</b> mitose (prophase, métaphase, anaphase, télophase)."],
+  ["cell", "Facteur de croissance ?", "Protéine sécrétée dans le milieu extracellulaire activant la croissance et la multiplication des cellules, en se fixant sur un récepteur à activité tyrosine kinase. Surexpression → favorise la croissance des cellules cancéreuses."],
+  ["cell", "Un facteur de croissance entre-t-il directement dans la cellule ?", "Non : il agit <b>via un récepteur</b>."],
+  ["cell", "Fréquence des lésions de l’ADN et réparation ?", "Très fréquentes (≈ 40 000 ruptures simple brin par jour) ; mécanismes de réparation très efficaces."],
+  ["cell", "Devenir d’anomalies cellulaires persistantes après correction ?", "Apoptose, cancérisation, ou transmission de maladies héréditaires (si mutation d’une cellule germinale)."],
+  ["cell", "3 mécanismes empêchant une cellule mutée de devenir cancéreuse ?", "Réparation (enzymes) · apoptose (mort cellulaire programmée) · système immunitaire (lymphocytes T). Toutes les cellules mutées ne donnent pas un cancer."],
+  ["cell", "Hyperplasie ?", "Augmentation du nombre de cellules ou du nombre de mitoses."],
+  ["cell", "Néo-angiogenèse ?", "Formation de nouveaux vaisseaux provoquée par la tumeur maligne."],
+  ["cell", "Cancer in situ vs infiltrant ?", "<b>In situ</b> : localisé, n’a pas franchi la lame basale, ne métastase pas. <b>Infiltrant</b> : a franchi la lame basale, peut métastaser."],
+  // Immunité
+  ["immu", "Rôle des lymphocytes T face au cancer ?", "Par reconnaissance des antigènes, ils peuvent détruire une cellule cancéreuse."],
+  ["immu", "Où trouve-t-on les lymphocytes T et comment circulent-ils ?", "Contenus dans les ganglions lymphatiques ; transportés via les vaisseaux lymphatiques. Ganglions enflés = un signe possible d’envahissement tumoral."],
+  ["immu", "Check-point immunitaire ?", "Point de contrôle exprimé par certaines cellules cancéreuses : frein de la réaction immunitaire. L’immunothérapie l’inhibe pour réactiver le système immunitaire."],
+  // Classification
+  ["clas", "But de la classification des cancers ?", "Établir un pronostic et proposer un traitement."],
+  ["clas", "3 types de classification des cancers ?", "TNM · anatomique · anatomopathologique (et moléculaire)."],
+  ["clas", "But du bilan d’extension ?", "Imagerie déterminant si le cancer est localisé, localement avancé ou métastatique."],
+  ["clas", "Classification anatomique ?", "Tumeurs <b>solides</b> (les plus fréquentes) vs tumeurs <b>liquides</b> / hémopathies malignes (cellules circulant dans le sang ou la lymphe)."],
+  ["clas", "3 groupes de tumeurs liquides ?", "Myélomes (moelle osseuse), leucémies (globules blancs), lymphomes (lymphocytes)."],
+  ["clas", "Les 4 types histologiques ?", "Carcinomes (épidermoïdes : épithélium ; adénocarcinomes : cellules glandulaires) · sarcomes (tissu conjonctif) · mélanomes (mélanocytes) · tumeurs gliales (cellules gliales)."],
+  ["clas", "Exemples de carcinomes épidermoïdes et d’adénocarcinomes ?", "Épidermoïdes : ORL, gynécologique. Adénocarcinomes : prostate, sein."],
+  ["clas", "Examen anatomopathologique : rôle ?", "Diagnostic du cancer ; uniquement après prélèvement ; bénin ou malin ; origine (primitif ou métastase)."],
+  ["clas", "Immunohistochimie vs biologie moléculaire ?", "Immunohistochimie : marquer un anticorps à la recherche d’un récepteur membranaire particulier. Séquençage de l’ADN (anomalies génétiques) : biologie moléculaire."],
+  ["clas", "Classification TNM ?", "Classification internationale des cancers solides (pronostic + thérapie) : <b>T</b> taille de la tumeur · <b>N</b> envahissement ganglionnaire · <b>M</b> métastase."],
+  ["clas", "cTNM, pTNM, ypTNM ?", "cTNM clinique · pTNM post-chirurgie · ypTNM après traitement d’induction."],
+  ["clas", "À quoi sert le stade d’un cancer ?", "À connaître le pronostic, donc le taux de survie globale (déterminé par la classification TNM)."],
+  ["clas", "2 types de métastases osseuses ?", "Ostéolytiques (lyse → « trou ») et ostéocondensantes (hyperdensité)."],
+  ["clas", "Chronologie de la prise en charge (8 étapes) ?", "1 Prélèvement · 2 Anatomopathologie · 3 Bilan d’extension · 4 Classification · 5 Pronostic · 6 RCP · 7 Traitement · 8 Surveillance."],
+  ["clas", "RCP : qui, comment, quand ?", "Toujours avant de proposer un traitement ; oncologues, radiothérapeutes, radiologues… ; décisions appuyées sur des diagrammes décisionnels."],
+  ["clas", "Durée minimale de surveillance après traitement ?", "<b>5 ans</b>."],
+  // Traitements
+  ["trt", "Principal traitement des tumeurs solides ?", "La <b>chirurgie</b> (principal traitement des cancers localisés du sein, prostate, colon, poumon) ; traitement unique si lésion précoce ; souvent associée à radiothérapie / traitements systémiques."],
+  ["trt", "Tumorectomie vs mastectomie ?", "Tumorectomie : retrait de la tumeur seule (conservatrice). Mastectomie : retrait de toute la glande mammaire (non conservatrice)."],
+  ["trt", "Prostatectomie totale ?", "Retrait entier de la prostate et des vésicules séminales, éventuellement avec curage ganglionnaire."],
+  ["trt", "Traitement adjuvant ?", "Après chirurgie : détruire les cellules résiduelles et diminuer le risque de rechute (radiothérapie ou chimiothérapie)."],
+  ["trt", "Traitement néoadjuvant ?", "Avant chirurgie : diminuer la taille de la tumeur pour faciliter l’opération et diminuer les risques de récidive."],
+  ["trt", "Radiothérapie per opératoire ?", "Pendant l’intervention : diminuer le temps de traitement."],
+  ["trt", "Chimiothérapie métastatique ?", "Chimiothérapie pour traiter les métastases : les détruire."],
+  ["trt", "Radio-chimiothérapie concomitante ?", "Chimiothérapie associée à la radiothérapie : rend les cellules cancéreuses plus sensibles aux rayonnements."],
+  ["trt", "Les 4 traitements systémiques vus en TD ?", "Chimiothérapie · thérapie ciblée (dont ADC) · hormonothérapie · immunothérapie."],
+  ["trt", "Chimiothérapie : principe et voies ?", "Agent cytotoxique agissant sur le cycle cellulaire (blocage d’étapes) ou sur l’ADN / ARN / protéines ; agit sur toutes les cellules → effets secondaires. Voie orale, sous-cutanée ou veineuse ; seule ou associée ; traite aussi les métastases."],
+  ["trt", "4 familles de chimiothérapie ?", "<ul><li>Inhibiteurs de topoisomérase : bloquent le dépliement de l’ADN (réplication, transcription)</li><li>Poisons du fuseau : fuseau mitotique créé en prophase</li><li>Alkylants et sels de platine : empêchent réplication et transcription de l’ADN</li><li>Antimétabolites : bloquent la synthèse d’ADN et d’ARN</li></ul>"],
+  ["trt", "Thérapie ciblée ?", "Médicaments agissant sélectivement sur des targets (intérieur ou surface des cellules cancéreuses) ; efficace seulement si présents. Agit sur facteurs de croissance, récepteurs, transduction intracellulaire. Ex : anticorps monoclonaux, inhibiteurs de protéines kinases, anti-VEGF."],
+  ["trt", "ADC ?", "Antibody-drug conjugate : anticorps ciblant une protéine spécifique + chimiothérapie libérée dans la cellule."],
+  ["trt", "Hormonothérapie ?", "Traitement antihormonal bloquant l’action stimulante des hormones sur les cellules cancéreuses : sein → blocage des œstrogènes ; prostate → blocage des androgènes."],
+  ["trt", "Immunothérapie ?", "Rétablit la réponse immunitaire pour détecter les cellules cancéreuses et les détruire par les lymphocytes T (inhibition des points de contrôle)."],
+  // Radiothérapie
+  ["rt", "Index thérapeutique en radiothérapie ?", "Rapport entre la probabilité de contrôle tumoral (<b>TCP</b>) et la probabilité de complications des tissus sains (<b>NTCP</b>)."],
+  ["rt", "Intérêts de l’IRM-Linac ?", "Radiothérapie guidée par IRM : meilleur contraste des tissus, meilleur ciblage, réduction des marges du PTV et des effets secondaires, tumeurs mobiles, doses plus élevées avec moins de séances, meilleure qualité de vie, ré-irradiation, radiothérapie adaptative « online », recalcul quotidien du plan."],
+  // Soins de support
+  ["sup", "Soins de support ?", "Ensemble des soins et soutiens nécessaires aux malades tout au long de la maladie (de l’annonce au stade palliatif, y compris patients guéris), conjointement aux traitements spécifiques ; prise en charge globale, notamment de la douleur. ≠ soins non conventionnels."],
+  ["sup", "Les 4 soins de support « socle » ?", "Douleur (dont hypnoanalgésie, analgésie intrathécale) · diététique et nutritionnelle · psychologique · sociale, familiale et professionnelle."],
+  ["sup", "Les 5 soins de support « complémentaires » ?", "Activité physique · conseils d’hygiène de vie · soutien psychologique des proches et aidants · préservation de la fertilité · santé sexuelle."],
+  ["sup", "Soins non conventionnels ?", "Ostéopathie, reiki, acupuncture, hypnose, homéopathie, phytothérapie… (à différencier des soins de support)."],
+  ["sup", "Vécu psychologique : chiffres à retenir ?", "Phase d’adaptation ≈ <b>3 mois</b> ; ≈ <b>20 %</b> décompensent des troubles psychiatriques ; plus de 20 % (≈ 50 %) vivent le cancer de façon adaptée."],
+  ["sup", "Représentations du cancer ?", "Fragilisateur du rôle social et professionnel ; associé à la douleur physique et émotionnelle et à la mort ; précipite un travail psychique de deuil."]
+];
+/* ===== APP ===== */
+const KEY = "ue210_onco_v1";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let memOnly = false;
+
+function blank() { return { v: 1, cards: {}, q: {}, prefs: { auto: true, order: "theme" } }; }
+function load() {
+  try { const r = JSON.parse(localStorage.getItem(KEY)); if (r && r.v === 1) return Object.assign(blank(), r); }
+  catch (e) { memOnly = true; }
+  return blank();
+}
+let S = load();
+let saveTimer;
+function save() {
+  S.saved = Date.now();
+  try { localStorage.setItem(KEY, JSON.stringify(S)); memOnly = false; } catch (e) { memOnly = true; }
+  const el = $("#savestate");
+  el.textContent = memOnly ? "⚠ stockage interne indisponible : utilise 💾" : "✓ enregistré";
+  clearTimeout(saveTimer); saveTimer = setTimeout(() => { if (!memOnly) el.textContent = "Sauvegarde interne active"; }, 1800);
+}
+const cardId = i => "c" + i + "_" + CARDS[i][1].replace(/[^a-z0-9]/gi, "").slice(0, 24);
+
+/* ---------- export / import ---------- */
+$("#btnExport").onclick = () => {
+  const blob = new Blob([JSON.stringify(S, null, 1)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "ue210-oncologie-sauvegarde-" + new Date().toISOString().slice(0, 10) + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+};
+$("#btnImport").onclick = () => $("#fileImport").click();
+$("#fileImport").onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const o = JSON.parse(rd.result);
+      if (!o || o.v !== 1 || typeof o.cards !== "object" || typeof o.q !== "object") throw 0;
+      if (!confirm("Remplacer ta progression actuelle par celle du fichier ?")) return;
+      S = Object.assign(blank(), o); save(); renderAll();
+    } catch (err) { alert("Fichier de sauvegarde invalide."); }
+  };
+  rd.readAsText(f); e.target.value = "";
+};
+
+/* ---------- tabs ---------- */
+const TABS = [{ id: "home", t: "🏠 Accueil" }].concat(
+  SETS.filter(s => s.group === "td").map(s => ({ id: s.id, t: s.title })), [{ sep: 1 }],
+  SETS.filter(s => s.group === "alt").map(s => ({ id: s.id, t: s.title, alt: 1 })), [{ sep: 1 }],
+  [{ id: "cards", t: "🃏 Flashcards" }]);
+let cur = "home";
+function renderTabs() {
+  $("#tabs").innerHTML = TABS.map(t => t.sep ? '<span class="sep"></span>' :
+    `<button class="tab ${t.alt ? "alt" : ""}" role="tab" data-tab="${t.id}" aria-selected="${t.id === cur}">${t.t}</button>`).join("");
+}
+$("#tabs").onclick = e => { const b = e.target.closest("[data-tab]"); if (b) go(b.dataset.tab); };
+function go(id) {
+  cur = id; renderTabs();
+  $$("section.view").forEach(s => s.classList.toggle("on", s.id === "v-" + id));
+  if (id === "home") renderHome();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- question helpers ---------- */
+const qst = id => S.q[id] || (S.q[id] = {});
+function isOk(q, st) {
+  if (q.type === "open") return st.self === "su";
+  if (!st.done) return null;
+  return st.ok;
+}
+function setStats(set) {
+  let done = 0, ok = 0, pts = 0, tot = 0;
+  set.questions.forEach(q => {
+    const st = S.q[q.id] || {};
+    const fin = q.type === "open" ? !!st.self : !!st.done;
+    if (fin) done++;
+    const g = isOk(q, st);
+    if (g) { ok++; pts += q.pts || 0; }
+    tot += q.pts || 0;
+  });
+  return { done, ok, n: set.questions.length, pts, tot };
+}
+
+/* ---------- renderers per type ---------- */
+const L = "ABCDEFGH";
+function bodyOpen(q, st) {
+  return `<textarea data-a="text" placeholder="Ta réponse (facultatif, enregistrée)…">${esc(st.text || "")}</textarea>
+  <div class="actions"><button class="primary" data-a="reveal">${st.rev ? "Masquer la correction" : "Voir la correction"}</button></div>
+  ${st.rev ? `<div class="corr">${q.a}<div class="actions"><span class="muted">Auto-évaluation :</span>
+  <button class="good ${st.self === "su" ? "primary" : ""}" data-a="self" data-v="su">✓ Je savais</button>
+  <button class="bad" data-a="self" data-v="rev">↻ À revoir</button>
+  ${st.self ? `<span class="muted">(${st.self === "su" ? "su" : "à revoir"})</span>` : ""}</div></div>` : ""}`;
+}
+function bodyQcm(q, st) {
+  const sel = st.a || [];
+  return q.o.map((o, i) => {
+    let cls = "opt", mark = "";
+    if (st.done) {
+      const on = sel.includes(i);
+      if (o.ok && on) { cls += " r-ok"; mark = "✓"; } else if (!o.ok && on) { cls += " r-ko"; mark = "✗"; } else if (o.ok) { cls += " r-miss"; mark = "← à cocher"; }
+    } else if (sel.includes(i)) cls += " sel";
+    return `<label class="${cls}"><input type="checkbox" data-a="chk" data-i="${i}" ${sel.includes(i) ? "checked" : ""} ${st.done ? "disabled" : ""}>
+    <span class="L">${L[i]}</span><span style="flex:1">${o.t}${st.done && o.why ? `<div class="why">${o.why}</div>` : ""}${st.done && !o.why && o.ok ? "" : ""}</span><span class="mark">${mark}</span></label>`;
+  }).join("") + actionsCheck(st);
+}
+function bodyVf(q, st) {
+  const a = st.a || {};
+  return q.i.map((o, i) => {
+    let cls = "vfrow";
+    if (st.done) cls += (a[i] === (o.ok ? "V" : "F")) ? " r-ok" : " r-ko";
+    return `<div class="${cls}"><div class="t">${o.t}${st.done ? `<div class="why">${a[i] === (o.ok ? "V" : "F") ? "✓ " : "✗ "}Réponse : <b>${o.ok ? "Vrai" : "Faux"}</b>${o.why ? " — " + o.why : ""}</div>` : ""}</div>
+    <div class="btns"><button data-a="vf" data-i="${i}" data-v="V" class="${a[i] === "V" ? "on" : ""}" ${st.done ? "disabled" : ""}>V</button><button data-a="vf" data-i="${i}" data-v="F" class="${a[i] === "F" ? "on" : ""}" ${st.done ? "disabled" : ""}>F</button></div></div>`;
+  }).join("") + actionsCheck(st);
+}
+function bodyOrder(q, st) {
+  const a = st.a || {}, n = q.items.length;
+  const rows = q.shuffle.map(idx => {
+    const ok = st.done && +a[idx] === idx + 1;
+    return `<tr><td>${q.items[idx]}</td><td><select data-a="ord" data-i="${idx}" class="${st.done ? (ok ? "r-ok" : "r-ko") : ""}" ${st.done ? "disabled" : ""}>
+    <option value="">—</option>${q.items.map((_, k) => `<option value="${k + 1}" ${+a[idx] === k + 1 ? "selected" : ""}>${k + 1}</option>`).join("")}</select>${st.done && !ok ? ` <span class="muted">→ ${idx + 1}</span>` : ""}</td></tr>`;
+  }).join("");
+  return `<table class="m"><tr><th>Élément</th><th>Rang / ordre</th></tr>${rows}</table>` + actionsCheck(st);
+}
+function bodyMatch(q, st) {
+  const a = st.a || {};
+  const head = `<tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join("")}</tr>`;
+  const rows = q.rows.map((r, ri) => `<tr><td><b>${r.l}</b></td>${q.cols.map((c, ci) => {
+    const v = (a[ri] || [])[ci] || "";
+    const ok = st.done && v === r.a[ci];
+    return `<td><select data-a="mat" data-r="${ri}" data-c="${ci}" class="${st.done ? (ok ? "r-ok" : "r-ko") : ""}" ${st.done ? "disabled" : ""}>
+      <option value="">—</option>${q.ch[ci].map(o => `<option ${v === o ? "selected" : ""}>${o}</option>`).join("")}</select>${st.done && !ok ? `<div class="why">→ ${r.a[ci]}</div>` : ""}</td>`;
+  }).join("")}</tr>`).join("");
+  return `<table class="m">${head}${rows}</table>` + actionsCheck(st);
+}
+function actionsCheck(st) {
+  if (!st.done) return `<div class="actions"><button class="primary" data-a="check">Valider</button></div>`;
+  return `<div class="verdict ${st.ok ? "ok" : "ko"}">${st.ok ? "✓ Tout est juste" : "✗ Des erreurs — regarde les corrections ci-dessus"}${st.n != null ? ` (${st.n} bonne(s) réponse(s) sur ${st.m})` : ""}</div>
+  <div class="actions"><button data-a="retry">↻ Refaire</button></div>`;
+}
+function evaluate(q, st) {
+  if (q.type === "qcm") {
+    const sel = st.a || []; let g = 0;
+    q.o.forEach((o, i) => { if (sel.includes(i) === o.ok) g++; });
+    st.n = g; st.m = q.o.length; st.ok = g === q.o.length;
+  } else if (q.type === "vf") {
+    const a = st.a || {}; let g = 0;
+    q.i.forEach((o, i) => { if (a[i] === (o.ok ? "V" : "F")) g++; });
+    st.n = g; st.m = q.i.length; st.ok = g === q.i.length;
+  } else if (q.type === "order") {
+    const a = st.a || {}; let g = 0;
+    q.items.forEach((_, i) => { if (+a[i] === i + 1) g++; });
+    st.n = g; st.m = q.items.length; st.ok = g === q.items.length;
+  } else if (q.type === "match") {
+    const a = st.a || {}; let g = 0, m = 0;
+    q.rows.forEach((r, ri) => r.a.forEach((x, ci) => { m++; if ((a[ri] || [])[ci] === x) g++; }));
+    st.n = g; st.m = m; st.ok = g === m;
+  }
+  st.done = true;
+}
+function qHtml(set, q) {
+  const st = S.q[q.id] || {};
+  const fin = q.type === "open" ? !!st.self : !!st.done;
+  const g = isOk(q, st);
+  const cls = "card q" + (fin ? (g ? " done-ok" : " done-ko") : "");
+  const body = { open: bodyOpen, qcm: bodyQcm, vf: bodyVf, order: bodyOrder, match: bodyMatch }[q.type](q, st);
+  const alt = set.group === "alt" ? '<span class="badge alt">variante</span>' : "";
+  return `<div class="${cls}" id="q-${q.id}" data-q="${q.id}"><div class="qt"><span class="qn">${q.n}</span>${alt}<span class="badge">${{ open: "question ouverte", qcm: "QCM", vf: "vrai / faux", order: "ordre", match: "tableau" }[q.type]}</span></div>
+  <p class="qp">${q.p}</p>${body}</div>`;
+}
+function setHeadHtml(set) {
+  const s = setStats(set);
+  const pct = Math.round(100 * s.done / s.n);
+  return `<div class="card"><div class="setHead"><div><h2>${set.title}${set.group === "alt" ? ' <span class="badge alt">alternatif</span>' : ""}</h2><div class="muted">${set.sub}</div><p class="muted" style="margin:6px 0 0">${set.obj}</p></div>
+  <div style="min-width:220px"><div><b>${s.done}</b>/${s.n} traitées · <b>${s.ok}</b> réussies${s.tot ? ` · <b>${s.pts}</b>/${s.tot} pts` : ""}</div><div class="progress"><i style="width:${pct}%"></i></div>
+  <div class="actions" style="margin-top:4px">${set.timer ? `<button class="sm" data-a="timer">⏱ Chrono ${set.timer} min</button><span class="tmr" id="tmr-${set.id}"></span>` : ""}<button class="sm" data-a="resetset">Réinitialiser</button></div></div></div></div>`;
+}
+function renderSet(set) {
+  const v = $("#v-" + set.id);
+  v.innerHTML = `<div id="head-${set.id}">${setHeadHtml(set)}</div>` + set.questions.map(q => qHtml(set, q)).join("");
+}
+function refreshQ(set, q) {
+  const old = $("#q-" + q.id); const tmp = document.createElement("div"); tmp.innerHTML = qHtml(set, q);
+  old.replaceWith(tmp.firstElementChild);
+  $("#head-" + set.id).innerHTML = setHeadHtml(set);
+}
+
+/* ---------- events on sets ---------- */
+function bindSets() {
+  document.addEventListener("input", e => {
+    const t = e.target; if (t.dataset.a !== "text") return;
+    const qid = t.closest("[data-q]").dataset.q; qst(qid).text = t.value; debounceSave();
+  });
+  document.addEventListener("change", e => {
+    const t = e.target, a = t.dataset.a; if (!a) return;
+    const box = t.closest("[data-q]"); if (!box) return;
+    const q = findQ(box.dataset.q), st = qst(q.id);
+    if (a === "chk") { const s = new Set(st.a || []); t.checked ? s.add(+t.dataset.i) : s.delete(+t.dataset.i); st.a = [...s]; box.querySelectorAll(".opt").forEach((l, i) => l.classList.toggle("sel", (st.a).includes(i))); debounceSave(); }
+    if (a === "ord") { st.a = st.a || {}; st.a[t.dataset.i] = t.value; debounceSave(); }
+    if (a === "mat") { st.a = st.a || {}; const r = +t.dataset.r; st.a[r] = st.a[r] || []; st.a[r][+t.dataset.c] = t.value; debounceSave(); }
+  });
+  document.addEventListener("click", e => {
+    const b = e.target.closest("button[data-a]"); if (!b) return;
+    const a = b.dataset.a;
+    if (a === "resetset") { const set = SETS.find(s => $("#v-" + s.id).contains(b)); if (confirm("Réinitialiser toutes les réponses de « " + set.title + " » ?")) { set.questions.forEach(q => delete S.q[q.id]); save(); renderSet(set); } return; }
+    if (a === "timer") { const set = SETS.find(s => $("#v-" + s.id).contains(b)); startTimer(set); return; }
+    const box = b.closest("[data-q]"); if (!box) return;
+    const q = findQ(box.dataset.q), set = SETS.find(s => s.questions.includes(q)), st = qst(q.id);
+    if (a === "reveal") st.rev = !st.rev;
+    else if (a === "self") st.self = b.dataset.v;
+    else if (a === "vf") { st.a = st.a || {}; st.a[b.dataset.i] = b.dataset.v; }
+    else if (a === "check") evaluate(q, st);
+    else if (a === "retry") { delete st.done; delete st.ok; delete st.a; delete st.n; delete st.m; }
+    else return;
+    save(); refreshQ(set, q);
+  });
+}
+function findQ(id) { for (const s of SETS) for (const q of s.questions) if (q.id === id) return q; }
+let dsT; function debounceSave() { clearTimeout(dsT); dsT = setTimeout(save, 400); }
+let tmrI;
+function startTimer(set) {
+  clearInterval(tmrI); let left = set.timer * 60; const el = $("#tmr-" + set.id);
+  const tick = () => { el.textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0"); if (left-- <= 0) { clearInterval(tmrI); el.textContent = "⏰ Temps écoulé"; } };
+  tick(); tmrI = setInterval(tick, 1000);
+}
+
+/* ---------- home ---------- */
+function renderHome() {
+  const tdSets = SETS.filter(s => s.group === "td"), alt = SETS.filter(s => s.group === "alt");
+  const card = s => { const t = setStats(s); return `<div class="card stat"><div><b>${s.title}</b> <span class="muted">${t.done}/${t.n}</span></div><div class="progress"><i style="width:${Math.round(100 * t.done / t.n)}%"></i></div><div class="muted">${t.ok} réussies</div><button class="sm" data-tab-go="${s.id}">Ouvrir</button></div>`; };
+  const total = CARDS.length, su = CARDS.filter((_, i) => S.cards[cardId(i)] === "su").length, rev = CARDS.filter((_, i) => S.cards[cardId(i)] === "rev").length;
+  $("#v-home").innerHTML = `<div class="card hero"><h2>UE 2.10 Oncologie — révisions</h2>
+  <p class="muted">Construit à partir de tes 8 PDF : TD 1, 2 et 3 (versions vierges, régulations et corrections) et le partiel S3 de janvier 2024. Les bonnes réponses viennent des surlignages / textes en vert de tes régulations.</p>
+  <ul><li><b>TD 1 – 3 + Partiel</b> : questions ouvertes (auto-évaluation), QCM, vrai/faux, tableaux à compléter, ordres.</li>
+  <li><b>Alt 1 – 3</b> : mêmes savoirs, questions reformulées et affirmations retournées (vrai ↔ faux) à partir des corrections.</li>
+  <li><b>Flashcards</b> : ${total} cartes triables par thème, avec statut « su / à revoir ».</li></ul>
+  <p class="muted"><b>Sauvegarde :</b> tout est enregistré automatiquement dans le navigateur ; le bouton 💾 (en haut) crée un fichier .json à garder, et 📂 le recharge (autre appareil, navigateur vidé…).</p></div>
+  <h3>TD officiels</h3><div class="grid">${tdSets.map(card).join("")}</div>
+  <h3>TD alternatifs</h3><div class="grid">${alt.map(card).join("")}</div>
+  <h3>Flashcards</h3><div class="card"><div><b>${su}</b> sues · <b>${rev}</b> à revoir · <b>${total - su - rev}</b> non vues / ${total}</div><div class="progress"><i style="width:${Math.round(100 * su / total)}%"></i></div><button class="sm" data-tab-go="cards">Ouvrir les flashcards</button></div>`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-tab-go]"); if (b) go(b.dataset.tabGo); });
+
+/* ---------- flashcards ---------- */
+const F = { themes: new Set(), status: "all", q: "", idx: 0, flipped: false, list: [], seed: 1 };
+function shuffled(arr, seed) { const a = arr.slice(); let s = seed; for (let i = a.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor(s / 233280 * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function buildList() {
+  let l = CARDS.map((c, i) => i);
+  if (F.themes.size) l = l.filter(i => F.themes.has(CARDS[i][0]));
+  if (F.status !== "all") l = l.filter(i => { const s = S.cards[cardId(i)] || "new"; return F.status === "todo" ? s !== "su" : s === F.status; });
+  if (F.q) { const q = F.q.toLowerCase(); l = l.filter(i => (CARDS[i][1] + " " + CARDS[i][2]).toLowerCase().includes(q)); }
+  if (S.prefs.order === "random") l = shuffled(l, F.seed);
+  F.list = l; if (F.idx >= l.length) F.idx = Math.max(0, l.length - 1);
+}
+function renderCards() {
+  buildList();
+  const keys = Object.keys(THEMES);
+  const chips = keys.map(k => { const idxs = CARDS.map((c, i) => i).filter(i => CARDS[i][0] === k); const su = idxs.filter(i => S.cards[cardId(i)] === "su").length;
+    return `<span class="chip ${F.themes.has(k) ? "on" : ""}" data-th="${k}">${THEMES[k]} <small>${su}/${idxs.length}</small></span>`; }).join("");
+  const i = F.list[F.idx], c = i != null ? CARDS[i] : null, st = c ? (S.cards[cardId(i)] || "new") : "new";
+  const stTxt = { su: '<span style="color:var(--ok)">✓ su</span>', rev: '<span style="color:var(--warn)">↻ à revoir</span>', new: "" }[st];
+  $("#v-cards").innerHTML = `<div class="card"><div class="fcbar">
+    <input type="search" id="fq" placeholder="Rechercher…" value="${esc(F.q)}">
+    <select id="fst"><option value="all">Toutes</option><option value="new">Non vues</option><option value="rev">À revoir seulement</option><option value="su">Sues</option><option value="todo">Non sues (non vues + à revoir)</option></select>
+    <select id="ford"><option value="theme">Ordre par thème</option><option value="random">Mélangées</option></select>
+    <button class="sm" id="fall">Tous les thèmes</button><button class="sm" id="freset">Réinitialiser statuts</button></div>
+    <div class="chips" id="chips">${chips}</div>
+    <div class="muted">Aucun thème sélectionné = tous les thèmes. Raccourcis : ← → naviguer · Espace retourner · S su · R à revoir.</div></div>
+    ${c ? `<div class="counter">Carte ${F.idx + 1} / ${F.list.length}</div>
+    <div class="deck st-${st}"><div class="flip ${F.flipped ? "flipped" : ""}" id="flip" tabindex="0" role="button" aria-label="Retourner la carte">
+      <div class="inner"><div class="face front"><span class="tag">${THEMES[c[0]]} · question</span><span class="stat">${stTxt}</span><div class="qa">${c[1]}</div><span class="hint">cliquer pour voir la réponse</span></div>
+      <div class="face back"><span class="tag">${THEMES[c[0]]} · réponse</span><span class="stat">${stTxt}</span><div class="qa">${c[2]}</div><span class="hint">cliquer pour revoir la question</span></div></div></div>
+      <div class="deckctl"><button id="prev">← Précédente</button><button class="good" id="su">✓ Su</button><button class="bad" id="rev">↻ À revoir</button><button id="next">Suivante →</button></div>
+      <div class="deckctl"><label class="muted"><input type="checkbox" id="auto" ${S.prefs.auto ? "checked" : ""}> passer à la suivante après « su / à revoir »</label></div></div>`
+      : `<div class="card"><p>Aucune carte pour ce filtre.</p></div>`}`;
+  $("#fst").value = F.status; $("#ford").value = S.prefs.order;
+}
+function fcBind() {
+  const v = $("#v-cards");
+  v.addEventListener("click", e => {
+    const t = e.target;
+    if (t.closest("[data-th]")) { const k = t.closest("[data-th]").dataset.th; F.themes.has(k) ? F.themes.delete(k) : F.themes.add(k); F.idx = 0; F.flipped = false; renderCards(); return; }
+    if (t.id === "fall") { F.themes.clear(); F.idx = 0; renderCards(); return; }
+    if (t.id === "freset") { if (confirm("Remettre toutes les flashcards à « non vue » ?")) { S.cards = {}; save(); renderCards(); } return; }
+    if (t.closest("#flip")) { F.flipped = !F.flipped; $("#flip").classList.toggle("flipped", F.flipped); return; }
+    if (t.id === "prev") return nav(-1);
+    if (t.id === "next") return nav(1);
+    if (t.id === "su") return mark("su");
+    if (t.id === "rev") return mark("rev");
+  });
+  v.addEventListener("input", e => { if (e.target.id === "fq") { F.q = e.target.value; F.idx = 0; F.flipped = false; const p = e.target.selectionStart; renderCards(); const n = $("#fq"); n.focus(); n.setSelectionRange(p, p); } });
+  v.addEventListener("change", e => {
+    if (e.target.id === "fst") { F.status = e.target.value; F.idx = 0; F.flipped = false; renderCards(); }
+    if (e.target.id === "ford") { S.prefs.order = e.target.value; F.seed = Date.now() % 10000; F.idx = 0; save(); renderCards(); }
+    if (e.target.id === "auto") { S.prefs.auto = e.target.checked; save(); }
+  });
+  document.addEventListener("keydown", e => {
+    if (cur !== "cards" || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    if (e.key === "ArrowRight") nav(1); else if (e.key === "ArrowLeft") nav(-1);
+    else if (e.key === " " || e.key === "Enter") { e.preventDefault(); F.flipped = !F.flipped; const f = $("#flip"); f && f.classList.toggle("flipped", F.flipped); }
+    else if (e.key.toLowerCase() === "s") mark("su"); else if (e.key.toLowerCase() === "r") mark("rev");
+  });
+}
+function nav(d) { if (!F.list.length) return; F.idx = (F.idx + d + F.list.length) % F.list.length; F.flipped = false; renderCards(); }
+function mark(s) {
+  const i = F.list[F.idx]; if (i == null) return;
+  S.cards[cardId(i)] = s; save();
+  if (S.prefs.auto) {
+    buildList();
+    if (F.list.length && F.list[F.idx] === i) F.idx = (F.idx + 1) % F.list.length;
+  }
+  F.flipped = false; renderCards();
+}
+
+/* ---------- init ---------- */
+function renderAll() { SETS.forEach(renderSet); renderCards(); renderHome(); renderTabs(); }
+(function init() {
+  const main = $("#main");
+  main.innerHTML = ["home", ...SETS.map(s => s.id), "cards"].map(id => `<section class="view" id="v-${id}"></section>`).join("");
+  bindSets(); fcBind(); renderAll(); go("home");
+  $("#savestate").textContent = memOnly ? "⚠ stockage interne indisponible : utilise 💾" : "Sauvegarde interne active";
+})();
+</script></body></html>

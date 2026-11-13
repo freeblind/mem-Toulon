@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UE 3.3 — Physique appliquée IRM : TD, TD alternatifs & flashcards</title>
+<style>
+:root{
+  --bg:#f4f6f9;--card:#fff;--ink:#1b2430;--mut:#5d6b7c;--line:#dde3ea;--acc:#0f766e;--acc2:#115e59;--accbg:#e6f4f2;
+  --ok:#15803d;--okbg:#e7f6ec;--ko:#b45309;--kobg:#fdf1e1;--bad:#b91c1c;--badbg:#fde8e8;--c1:#2563eb;--c2:#ea580c;--shadow:0 1px 3px rgba(20,30,45,.08),0 4px 14px rgba(20,30,45,.05);
+}
+html[data-theme=dark]{
+  --bg:#0f1620;--card:#18212d;--ink:#e6ecf3;--mut:#9aa8b8;--line:#2a3646;--acc:#2dd4bf;--acc2:#5eead4;--accbg:#13302d;
+  --ok:#4ade80;--okbg:#12301f;--ko:#fbbf24;--kobg:#33270f;--bad:#f87171;--badbg:#3a1717;--c1:#60a5fa;--c2:#fb923c;--shadow:none;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+header.top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.top-in{max-width:1000px;margin:0 auto;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.brand{font-weight:700;font-size:1.05rem;margin-right:auto}
+.brand small{display:block;font-weight:400;color:var(--mut);font-size:.75rem}
+.tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--card);padding:6px 11px;border-radius:9px;cursor:pointer;font-size:.88rem;line-height:1.2}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+html[data-theme=dark] .btn.pri{color:#06201d}
+.btn.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok)}
+.btn.ko{background:var(--kobg);border-color:var(--ko);color:var(--ko)}
+.btn.sm{padding:3px 9px;font-size:.8rem}
+.btn[disabled]{opacity:.5;cursor:default}
+.savebar{width:100%;font-size:.78rem;color:var(--mut)}
+.savebar b{color:var(--ink)}
+.savebar .warn{color:var(--ko);font-weight:600}
+nav.tabs{max-width:1000px;margin:0 auto;display:flex;gap:2px;padding:0 10px;overflow-x:auto}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:9px 13px;cursor:pointer;color:var(--mut);font-weight:600;white-space:nowrap}
+nav.tabs button.on{color:var(--acc);border-color:var(--acc)}
+main{max-width:1000px;margin:0 auto;padding:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px}
+.setbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.setbar .btn{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:92px}
+.setbar .btn.on{background:var(--accbg);border-color:var(--acc);color:var(--acc2);font-weight:600}
+.setbar .btn small{font-weight:400;color:var(--mut);font-size:.72rem}
+.setbar .mini-bar{width:100%;height:4px;border-radius:3px;background:var(--line);overflow:hidden;display:flex}
+.mini-bar i{display:block;height:100%}
+.mini-bar .g{background:var(--ok)}.mini-bar .o{background:var(--ko)}
+h2{margin:0 0 4px;font-size:1.2rem}
+.src{color:var(--mut);font-size:.85rem}
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 0}
+.filters select{border:1px solid var(--line);background:var(--card);border-radius:9px;padding:5px 8px}
+.chipbtn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 11px;cursor:pointer;font-size:.82rem}
+.chipbtn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+html[data-theme=dark] .chipbtn.on{color:#06201d}
+.prog{margin-top:10px;font-size:.85rem;color:var(--mut)}
+.bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden;display:flex;margin-top:4px}
+.bar i{display:block;height:100%}.bar .g{background:var(--ok)}.bar .o{background:var(--ko)}
+.q{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.q[data-status=ok]{border-left-color:var(--ok)}.q[data-status=ko]{border-left-color:var(--ko)}
+.q.hide{display:none}
+.qh{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px;font-size:.78rem}
+.num{background:var(--acc);color:#fff;border-radius:7px;padding:1px 8px;font-weight:700}
+html[data-theme=dark] .num{color:#06201d}
+.chip{border-radius:999px;padding:1px 9px;border:1px solid var(--line);color:var(--mut)}
+.chip.th{background:var(--accbg);color:var(--acc2);border-color:transparent}
+.st{margin-left:auto;font-weight:600}
+.qt{font-weight:600;margin-bottom:8px}
+.note{font-size:.8rem;color:var(--ko);background:var(--kobg);border-radius:8px;padding:5px 9px;margin:6px 0}
+.hint{font-size:.8rem;color:var(--mut);margin-bottom:5px}
+textarea.ta{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px;background:var(--bg);resize:vertical;min-height:70px}
+.opts{display:grid;gap:6px}
+.opt{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:7px 9px;cursor:pointer;background:var(--bg)}
+.opt:hover{border-color:var(--acc)}
+.opt input{margin-top:5px}
+.ltr{font-weight:700;color:var(--mut);min-width:1.1em}
+.opt.good{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.opt.missed{border:2px dashed var(--ok)}
+.vf{width:100%;border-collapse:collapse}
+.vf td{padding:6px 4px;border-top:1px solid var(--line);vertical-align:top}
+.vf td.r{white-space:nowrap;text-align:right}
+.vf label{margin-left:8px;cursor:pointer}
+.vf tr.good td:first-child{box-shadow:inset 4px 0 var(--ok)}.vf tr.bad td:first-child{box-shadow:inset 4px 0 var(--bad)}
+.vf .why{display:block;font-size:.82rem;margin-top:3px;color:var(--mut)}
+.vf tr.bad .why{color:var(--bad)}
+.legend{margin:0 0 8px;padding-left:0;list-style:none;display:grid;gap:3px;font-size:.9rem}
+.legend b{display:inline-block;min-width:1.5em;color:var(--acc2)}
+.rows{display:grid;gap:6px}
+.row{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:9px;padding:6px 8px;background:var(--bg)}
+.row .lab{flex:1}
+.row.good{background:var(--okbg);border-color:var(--ok)}.row.bad{background:var(--badbg);border-color:var(--bad)}
+select.s,input.n{border:1px solid var(--line);border-radius:8px;padding:5px 7px;background:var(--card);max-width:100%}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th,.tbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+.tbl th{background:var(--accbg);color:var(--acc2)}
+.tbl td.good{background:var(--okbg)}.tbl td.bad{background:var(--badbg)}
+.tbl select{width:100%}
+.tbl .fix{display:block;font-size:.78rem;color:var(--ok);margin-top:2px}
+.tblwrap{overflow-x:auto}
+table.mini{border-collapse:collapse;margin:6px 0}table.mini th,table.mini td{border:1px solid var(--line);padding:4px 10px}
+.qa{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.qr{margin-top:10px;border-radius:10px;padding:10px 12px;background:var(--accbg);border:1px solid transparent}
+.qr.okr{background:var(--okbg);border-color:var(--ok)}.qr.kor{background:var(--badbg);border-color:var(--bad)}
+.qr .verdict{font-weight:700;margin-bottom:3px}
+.qr ul,.qr ol{margin:.3em 0;padding-left:1.3em}
+.qs{margin-top:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--mut)}
+img.qimg{max-height:220px;border-radius:8px;border:1px solid var(--line);display:block;margin:6px 0}
+svg.fig{width:100%;max-width:600px;height:auto;display:block;margin:8px 0;color:var(--ink)}
+svg.fig .ax{stroke:var(--mut);stroke-width:1.4;fill:none}
+svg.fig .dash{stroke:var(--mut);stroke-dasharray:4 3;stroke-width:1;fill:none}
+svg.fig .dbl{stroke:var(--ink);stroke-width:1.5}
+svg.fig .c1{stroke:var(--c1);stroke-width:2.4}svg.fig .c2{stroke:var(--c2);stroke-width:2.4}
+svg.fig .k1{fill:var(--c1)}svg.fig .k2{fill:var(--c2)}
+svg.fig .sm{font-size:10.5px;fill:var(--ink);paint-order:stroke;stroke:var(--accbg);stroke-width:3px;stroke-linejoin:round}svg.fig .mk0{fill:var(--ink)}svg.fig .mk1{fill:var(--c1)}svg.fig .mk2{fill:var(--c2)}svg.fig .tt{font-size:12px;font-weight:700;fill:var(--ink)}
+svg.fig .arr{stroke:var(--c1);color:var(--c1)}svg.fig .arr2{stroke:var(--c2);color:var(--c2)}
+svg.fig .rf{fill:var(--c2)}svg.fig .gz{fill:#6aa7ff;stroke:var(--c1)}svg.fig .gy{fill:#c79bff;stroke:#7c3aed}svg.fig .gx{fill:#b9c2cc;stroke:var(--mut)}
+/* flashcards */
+.fc-ctrl{display:grid;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.fc-stats{font-size:.85rem;color:var(--mut)}
+.fc-stage{perspective:1400px;margin:12px 0}
+.fcard{display:grid;transform-style:preserve-3d;transition:transform .5s;cursor:pointer;min-height:240px}
+.fcard.flip{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px;justify-content:center}
+.face.back{transform:rotateY(180deg);background:var(--accbg)}
+.face .lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+.face .big{font-size:1.2rem;font-weight:600}
+.face .ans{font-size:1.05rem}
+.face .ans ul,.face .ans ol{margin:.3em 0;padding-left:1.3em}
+.face .tap{margin-top:auto;font-size:.78rem;color:var(--mut)}
+.fc-st{position:absolute;top:10px;right:14px;font-size:.8rem;font-weight:700}
+.fcwrap{position:relative}
+.fc-act{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.fc-act .btn{padding:9px 18px;font-size:.98rem}
+.fc-nav{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:8px;font-size:.9rem}
+.strip{display:flex;flex-wrap:wrap;gap:3px;margin-top:10px}
+.strip i{width:13px;height:13px;border-radius:3px;background:var(--line);cursor:pointer;display:block}
+.strip i.su{background:var(--ok)}.strip i.rev{background:var(--ko)}.strip i.cur{outline:2px solid var(--acc);outline-offset:1px}
+.kbd{font-size:.75rem;color:var(--mut);text-align:center;margin-top:6px}
+.empty{padding:24px;text-align:center;color:var(--mut)}
+table.bil{width:100%;border-collapse:collapse;font-size:.9rem}
+table.bil th,table.bil td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+table.bil td.n{text-align:right;white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:10px;font-size:.9rem;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:92vw}
+.linklist{display:grid;gap:4px;margin:6px 0 0;padding:0;list-style:none}
+.linklist button{all:unset;cursor:pointer;color:var(--acc2);text-decoration:underline;font-size:.88rem}
+@media (max-width:560px){header.top{position:static}main{padding:8px}.panel{padding:10px}.fc-act .btn{flex:1}}
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">UE 3.3 · Physique appliquée & technologie en remnographie<small>TD interactifs · TD alternatifs · Flashcards — MERM</small></div>
+    <div class="tools">
+      <button class="btn pri" id="exp" title="Télécharger votre progression dans un fichier .json">💾 Exporter</button>
+      <button class="btn" id="imp" title="Recharger une sauvegarde .json">📂 Importer</button>
+      <input type="file" id="file" accept=".json,application/json" hidden>
+      <button class="btn" id="dark" title="Mode clair / sombre">🌓</button>
+      <button class="btn sm" id="rstall">Tout effacer</button>
+    </div>
+    <div class="savebar" id="savebar"></div>
+  </div>
+  <nav class="tabs">
+    <button data-tab="td">📝 TD</button>
+    <button data-tab="alt">🔀 TD alternatifs</button>
+    <button data-tab="fc">🃏 Flashcards</button>
+    <button data-tab="bil">📊 Bilan</button>
+  </nav>
+</header>
+<main id="main"></main>
+<script>
+/* ===== Schémas SVG (redessinés d'après les TD) ===== */
+const FIG = {};
+(function () {
+  const ax = (x0, y0, w, h, lx, ly) =>
+    `<line class="ax" x1="${x0}" y1="${y0}" x2="${x0}" y2="${y0 - h}"/><line class="ax" x1="${x0}" y1="${y0}" x2="${x0 + w}" y2="${y0}"/>` +
+    `<text x="${x0 + w}" y="${y0 + 14}" text-anchor="end" class="sm">${lx}</text><text x="${x0 - 6}" y="${y0 - h + 4}" text-anchor="end" class="sm">${ly}</text>`;
+  const curve = (x0, y0, w, h, f, cls, n = 60) => {
+    let d = '';
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      d += (i ? 'L' : 'M') + (x0 + t * w).toFixed(1) + ' ' + (y0 - f(t) * h).toFixed(1);
+    }
+    return `<path d="${d}" class="${cls}" fill="none"/>`;
+  };
+
+  FIG.relax = () => {
+    const w = 190, h = 110;
+    // T1 : repousse ; T2 : décroissance (constante de temps = 0.3 en unité normalisée)
+    const T = 0.3;
+    const l = 40, r = 300, y = 140;
+    return `<svg viewBox="0 0 560 190" class="fig" role="img" aria-label="Courbes de relaxation T1 et T2">
+      <text x="135" y="14" text-anchor="middle" class="tt">Relaxation longitudinale (T1)</text>
+      ${ax(l, y, w + 30, h + 5, 'temps', 'Mz')}
+      <line class="dash" x1="${l}" y1="${y - h}" x2="${l + w + 30}" y2="${y - h}"/><text x="${l - 6}" y="${y - h + 12}" text-anchor="end" class="sm">M0</text>
+      ${curve(l, y, w, h, t => 1 - Math.exp(-t / T), 'c1')}
+      <line class="dash" x1="${l}" y1="${y - 0.63 * h}" x2="${l + T * w}" y2="${y - 0.63 * h}"/>
+      <line class="dash" x1="${l + T * w}" y1="${y - 0.63 * h}" x2="${l + T * w}" y2="${y}"/>
+      <text x="${l + T * w}" y="${y + 14}" text-anchor="middle" class="sm">T1</text>
+      <text x="${l + T * w + 8}" y="${y - 0.63 * h - 4}" class="sm">63 % de M0</text>
+      <text x="415" y="14" text-anchor="middle" class="tt">Relaxation transversale (T2)</text>
+      ${ax(330, y, w + 30, h + 5, 'temps', 'Mxy')}
+      ${curve(330, y, w, h, t => Math.exp(-t / T), 'c2')}
+      <line class="dash" x1="330" y1="${y - 0.37 * h}" x2="${330 + T * w}" y2="${y - 0.37 * h}"/>
+      <line class="dash" x1="${330 + T * w}" y1="${y - 0.37 * h}" x2="${330 + T * w}" y2="${y}"/>
+      <text x="${330 + T * w}" y="${y + 14}" text-anchor="middle" class="sm">T2</text>
+      <text x="${330 + T * w + 8}" y="${y - 0.37 * h - 6}" class="sm">37 % de la valeur initiale</text>
+    </svg>`;
+  };
+
+  const MK = `<defs><marker id="mk0" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mk0" d="M0 0L10 5L0 10z"/></marker><marker id="mk1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mk1" d="M0 0L10 5L0 10z"/></marker><marker id="mk2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mk2" d="M0 0L10 5L0 10z"/></marker></defs>`;
+  FIG.pol = () => `<svg viewBox="0 0 560 210" class="fig" role="img" aria-label="Spins hors champ et sous champ B0">
+    ${MK}
+    <text x="130" y="16" text-anchor="middle" class="tt">Hors champ : M = 0</text>
+    <g stroke="var(--ink)" stroke-width="2" marker-end="url(#mk0)">
+      ${[0, 40, 80, 125, 170, 215, 255, 300, 340].map((a, i) => {
+        const cx = 55 + (i % 3) * 75, cy = 60 + Math.floor(i / 3) * 50, L = 24, r = a * Math.PI / 180;
+        return `<line x1="${cx - Math.cos(r) * L / 2}" y1="${cy + Math.sin(r) * L / 2}" x2="${cx + Math.cos(r) * L / 2}" y2="${cy - Math.sin(r) * L / 2}"/>`;
+      }).join('')}
+    </g>
+    <text x="420" y="16" text-anchor="middle" class="tt">Sous B0 : polarisation (Boltzmann)</text>
+    <line x1="330" y1="200" x2="330" y2="30" stroke="var(--ink)" stroke-width="1.6" marker-end="url(#mk0)"/><text x="338" y="36" class="sm">B0 (z)</text>
+    <g stroke="var(--c1)" stroke-width="2" marker-end="url(#mk1)">
+      ${[0, 1, 2, 3, 4, 5].map(i => `<line x1="${370 + i * 26}" y1="125" x2="${370 + i * 26}" y2="80"/>`).join('')}
+    </g>
+    <g stroke="var(--c2)" stroke-width="2" marker-end="url(#mk2)">
+      <line x1="383" y1="140" x2="383" y2="185"/><line x1="435" y1="140" x2="435" y2="185"/>
+    </g>
+    <text x="440" y="70" text-anchor="middle" class="sm">parallèles (basse énergie) : excès</text>
+    <text x="440" y="203" text-anchor="middle" class="sm">antiparallèles (haute énergie)</text>
+    <text x="545" y="108" text-anchor="end" class="sm">M ≠ 0</text>
+  </svg>`;
+
+  FIG.chrono = () => {
+    const x0 = 100, ex = 356, rows = { rf: 52, sig: 100, gz: 150, gy: 195, gx: 240 };
+    const L = (t, y) => `<text x="${x0 - 8}" y="${y}" text-anchor="end" class="sm">${t}</text><line class="ax" x1="${x0}" y1="${y}" x2="520" y2="${y}"/>`;
+    let echo = '';
+    for (let i = -40; i <= 40; i += 2) {
+      const a = Math.exp(-Math.pow(i / 18, 2)) * 22 * Math.cos(i * 0.9);
+      echo += (i === -40 ? 'M' : 'L') + (ex + i).toFixed(1) + ' ' + (rows.sig - a).toFixed(1);
+    }
+    return `<svg viewBox="0 0 560 290" class="fig" role="img" aria-label="Chronogramme d'une séquence spin écho">
+      <defs><marker id="mk0" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="mk0" d="M0 0L10 5L0 10z"/></marker></defs>
+      ${L('RF', rows.rf)}${L('Signal', rows.sig)}${L('Gz (coupe)', rows.gz)}${L('Gy (phase)', rows.gy)}${L('Gx (lecture)', rows.gx)}
+      <rect x="${x0 + 50}" y="${rows.rf - 18}" width="8" height="18" class="rf"/><text x="${x0 + 54}" y="${rows.rf - 22}" text-anchor="middle" class="sm">90°</text>
+      <rect x="${x0 + 150}" y="${rows.rf - 30}" width="10" height="30" class="rf"/><text x="${x0 + 155}" y="${rows.rf - 34}" text-anchor="middle" class="sm">180°</text>
+      <path d="${echo}" class="c1" fill="none"/><text x="${ex + 50}" y="${rows.sig - 14}" class="sm">écho</text>
+      <rect x="${x0 + 44}" y="${rows.gz - 18}" width="20" height="18" class="gz"/><rect x="${x0 + 143}" y="${rows.gz - 18}" width="24" height="18" class="gz"/>
+      <rect x="${x0 + 85}" y="${rows.gy - 18}" width="26" height="18" class="gy"/>
+      <rect x="${ex - 40}" y="${rows.gx - 18}" width="80" height="18" class="gx"/>
+      <line class="dash" x1="${x0 + 54}" y1="26" x2="${x0 + 54}" y2="${rows.gx}"/>
+      <line class="dash" x1="${x0 + 155}" y1="26" x2="${x0 + 155}" y2="${rows.gx}"/>
+      <line class="dash" x1="${ex}" y1="26" x2="${ex}" y2="${rows.gx}"/>
+      <line x1="${x0 + 54}" y1="266" x2="${ex}" y2="266" stroke="var(--ink)" stroke-width="1.4" marker-end="url(#mk0)"/>
+      <text x="${(x0 + 54 + ex) / 2}" y="282" text-anchor="middle" class="sm">TE</text>
+    </svg>`;
+  };
+
+  const twoTissues = (type) => {
+    const l = 50, y = 150, w = 300, h = 110;
+    const grow = T => t => 1 - Math.exp(-t / T);
+    const decay = T => t => Math.exp(-t / T);
+    const f1 = type === 'T1' ? grow(0.18) : decay(0.30), f2 = type === 'T1' ? grow(0.45) : decay(0.55);
+    const p1 = type === 'T1' ? 0.22 : 0.20, p2 = type === 'T1' ? 0.80 : 0.62;
+    const n = type === 'T1' ? 'TR' : 'TE';
+    const vl = (p, f1, f2, lab, txt) => `<line class="dash" x1="${l + p * w}" y1="${y + 6}" x2="${l + p * w}" y2="${y - h - 5}"/>
+      <text x="${l + p * w}" y="${y + 20}" text-anchor="middle" class="sm">${lab}</text>
+      <line class="dbl" x1="${l + p * w + 5}" y1="${y - f1(p) * h}" x2="${l + p * w + 5}" y2="${y - f2(p) * h}"/>
+      <text x="${l + p * w + 10}" y="${y - (f1(p) + f2(p)) / 2 * h + 4}" class="sm">${txt}</text>`;
+    return `<svg viewBox="0 0 560 190" class="fig" role="img" aria-label="Contraste ${type}">
+      ${ax(l, y, w + 30, h + 10, 'temps', type === 'T1' ? 'Mz' : 'Mxy')}
+      ${curve(l, y, w, h, f1, 'c1')}${curve(l, y, w, h, f2, 'c2')}
+      <line class="dash" x1="${l}" y1="${y - h}" x2="${l + w + 30}" y2="${y - h}"/><text x="${l - 6}" y="${y - h + 4}" text-anchor="end" class="sm">M0</text>
+      ${vl(p1, f1, f2, n + ' ' + (type === 'T1' ? 'court' : 'court'), type === 'T1' ? 'bon contraste' : 'mauvais contraste')}
+      ${vl(p2, f1, f2, n + ' long', type === 'T1' ? 'mauvais contraste' : 'bon contraste')}
+      <text x="440" y="60" class="sm"><tspan class="k1">━</tspan> tissu à ${type} court</text>
+      <text x="440" y="78" class="sm"><tspan class="k2">━</tspan> tissu à ${type} long</text>
+    </svg>`;
+  };
+  FIG.contrastT1 = () => twoTissues('T1');
+  FIG.contrastT2 = () => twoTissues('T2');
+
+  FIG.kspace = () => `<svg viewBox="0 0 560 225" class="fig" role="img" aria-label="Espace K">
+    <defs><radialGradient id="kg"><stop offset="0" stop-color="#ffffff"/><stop offset="0.35" stop-color="#9db4c8"/><stop offset="1" stop-color="#1e2b3a"/></radialGradient></defs>
+    <rect x="30" y="15" width="190" height="190" fill="url(#kg)" stroke="currentColor"/>
+    <text x="125" y="115" text-anchor="middle" class="sm" fill="#000">centre</text>
+    <text x="250" y="50" class="tt">Centre de l'espace K</text>
+    <text x="250" y="68" class="sm">signaux les plus élevés · basses fréquences</text>
+    <text x="250" y="84" class="sm">→ détermine le CONTRASTE</text>
+    <text x="250" y="124" class="tt">Périphérie de l'espace K</text>
+    <text x="250" y="142" class="sm">signaux les plus faibles · hautes fréquences</text>
+    <text x="250" y="158" class="sm">→ détermine la RÉSOLUTION SPATIALE</text>
+    <text x="250" y="196" class="sm">(= plan de Fourier : Gy sélectionne la ligne,</text>
+    <text x="250" y="212" class="sm">Gx remplit la ligne)</text>
+  </svg>`;
+})();
+
+/* ===== Constructeurs ===== */
+const TH = {
+  mat: 'Matériel & composants', phy: 'Physique de base', rel: 'Excitation & relaxation',
+  pon: 'Pondération & contraste', qua: 'Qualité d’image & TA', cod: 'Codage spatial & espace K',
+  seq: 'Séquences', art: 'Artéfacts', sec: 'Sécurité', pdc: 'Produits de contraste'
+};
+const O = (id, th, q, a, x) => Object.assign({ id, t: 'open', th, q, a }, x || {});
+const QC = (id, th, q, o, c, why, x) => Object.assign({ id, t: 'qcm', th, q, o, c, why: why || '' }, x || {});
+const VF = (id, th, q, items, x) => Object.assign({ id, t: 'vf', th, q, items }, x || {});
+const MA = (id, th, q, l, r, c, why, x) => Object.assign({ id, t: 'match', th, q, l, r, c, why: why || '' }, x || {});
+const TB = (id, th, q, cols, rows, opts, why, x) => Object.assign({ id, t: 'table', th, q, cols, rows, opts, why: why || '' }, x || {});
+const NU = (id, th, q, ans, tol, unit, why, x) => Object.assign({ id, t: 'num', th, q, ans, tol, unit, why: why || '' }, x || {});
+const OR = (id, th, q, items, why, x) => Object.assign({ id, t: 'order', th, q, items, why: why || '' }, x || {});
+
+/* ===================== TD ORIGINAUX ===================== */
+const TD_ORIG = [
+  /* ---------- TD 1 ---------- */
+  {
+    id: 'td1', title: 'TD 1', sub: 'Composants, spin, polarisation, Larmor', src: 'TD n°1 — 18/11/25 (CM du 05, 07 et 13/11)',
+    qs: [
+      O('td1-01', TH.mat, 'Définissez le terme IRMN.', 'Imagerie par Résonance Magnétique Nucléaire.'),
+      O('td1-02', TH.mat, 'Citez l’ordre de grandeur du champ B0 (en Tesla) utilisé sur les machines IRM cliniques.', '<b>1,5 à 3 T</b>.'),
+      MA('td1-03', TH.mat, 'Associez chacun des 3 principaux composants de l’IRM à son rôle.',
+        ['Aimant de champ magnétique statique B0 (1,5 ou 3 T)', 'Antenne de radiofréquence (RF) fonctionnant à la fréquence de Larmor', 'Gradients de corps entier (bobines de gradient)'],
+        ['Émettre l’onde RF pour exciter les spins et recevoir les signaux restitués par les protons', 'Générer un champ magnétique B0 constant et magnétiser l’aimantation', 'Créer des variations de champ pour encoder spatialement le signal'],
+        [1, 0, 2], 'Fréquence de Larmor : <b>64 MHz</b> à 1,5 T, <b>123 MHz</b> à 3 T.'),
+      O('td1-04', TH.phy, 'Définissez le phénomène de résonance.',
+        'Principe physique consistant à faire interférer 2 systèmes pour obtenir un échange d’énergie : transfert d’énergie entre deux systèmes ayant la <b>même fréquence</b>.<br>En IRM : interaction entre une onde de radiofréquence (RF) et les spins en précession. L’onde RF n’entraîne une résonance que si sa fréquence = celle de précession des spins. Elle apporte de l’énergie au système de spins : c’est la <b>phase d’excitation</b>. À l’arrêt de la RF, le système restitue l’énergie absorbée pour retourner à l’équilibre : c’est la <b>phase de relaxation</b>.'),
+      O('td1-05', TH.mat, 'Explicitez le type d’aimant utilisé en IRM clinique.',
+        '<b>Aimant supraconducteur</b> : bobines de fil en alliages métalliques spéciaux (niobium-titane) produisant un courant électrique qui fabrique le champ magnétique <b>sans perte d’énergie</b>, car refroidi par de l’<b>hélium liquide à −269 °C (4 K)</b>, proche du zéro absolu. Aimant puissant et homogène.'),
+      O('td1-06', TH.mat, 'Définissez la cage de Faraday.', 'Enceinte métallique en <b>cuivre ou aluminium</b> qui entoure complètement la salle d’examen IRM.'),
+      O('td1-07', TH.mat, 'Expliquez le rôle de la cage de Faraday.',
+        'Elle isole électriquement :<ul><li>l’<b>intérieur</b> de la salle de toutes perturbations électriques extérieures (ex. ondes RF) ;</li><li>l’<b>extérieur</b> de la salle des ondes RF utilisées pendant l’examen ;</li><li>elle assure la qualité du signal RMN en éliminant les bruits électromagnétiques.</li></ul>'),
+      O('td1-08', TH.phy, 'Définissez le spin et représentez-le par un schéma.',
+        'Paramètre physique de toute particule chargée correspondant au <b>mouvement de rotation de la particule sur elle-même</b>. Cette rotation induit un champ magnétique appelé <b>moment magnétique</b> (vecteur d’aimantation µ) se comportant comme une boussole.<br>Le <b>rapport gyromagnétique γ</b> est le rapport du moment magnétique au spin : µ est proportionnel à γ.'),
+      O('td1-09', TH.phy, 'Le carbone 12 (¹²C) possède-t-il un moment magnétique nucléaire ? Justifiez.',
+        '<b>Non.</b> Seuls les noyaux possédant un nombre impair de charges (proton isolé) engendrent un moment magnétique. Quand le nombre est pair, les moments magnétiques s’annulent deux par deux.'),
+      O('td1-10', TH.phy, 'Citez les 2 principaux constituants du corps humain possédant un moment magnétique nucléaire utile au signal RMN.', '<b>L’eau (H₂O)</b> et <b>la graisse</b> (ramifications en CH₃).'),
+      O('td1-11', TH.mat, 'Explicitez le composant de l’IRM à l’origine du bruit acoustique.',
+        'Les <b>gradients de champ magnétique</b> : la commutation des gradients (chaque impulsion électrique, courant alternatif, dans les bobines) provoque une vibration qui produit un son caractéristique.'),
+      O('td1-12', TH.phy, 'Expliquez le comportement des spins (a) en dehors d’un champ magnétique externe, (b) sous l’action d’un champ magnétique B0. Définissez ce phénomène.',
+        '<b>(a) Hors champ :</b> les moments magnétiques (spins) pointent dans toutes les directions : pas d’aimantation macroscopique (M = somme vectorielle des moments élémentaires = 0).<br><b>(b) Sous B0 :</b> les spins s’alignent dans l’axe de B0, mais pas dans le même sens : 2 populations <b>parallèle</b> et <b>antiparallèle</b>, avec un petit excès de protons parallèles (basse énergie). Ce surnombre crée un vecteur d’aimantation macroscopique M ≠ 0 (responsable du signal).<br>Ce phénomène = <b>état d’équilibre de Boltzmann</b> ou <b>polarisation</b> (créé par l’aimant).', { fig: 'pol' }),
+      O('td1-13', TH.phy, 'Explicitez les 2 composantes du vecteur d’aimantation M sous l’action de B0.',
+        '<ul><li><b>Aimantation longitudinale Mz</b> : projection de M suivant l’axe de B0 (axe Oz).</li><li><b>Aimantation transversale Mxy</b> : projection de M dans le plan xOy perpendiculaire à B0.</li></ul>Objectif de l’action du champ : mesurer l’aimantation tissulaire.'),
+      O('td1-14', TH.phy, 'Définissez le mouvement de précession.', 'Mouvement de rotation du moment magnétique µ autour de l’axe de B0 selon une fréquence : la <b>fréquence de Larmor</b> (mouvement de toupie).'),
+      O('td1-15', TH.phy, 'Expliquez la relation entre la fréquence angulaire de précession ω₀ et le champ magnétique. Donnez la formule.',
+        'La fréquence de précession dépend de la valeur du champ B0 et du rapport gyromagnétique γ. À chaque valeur de B0 correspond une fréquence particulière (fréquence angulaire de précession = de Larmor).<br><b>ω₀ = γ · B0</b>'),
+      O('td1-16', TH.mat, 'Cas pratique : vous travaillez sur une IRM 1,5 T. Votre antenne genou est en panne. Pouvez-vous utiliser l’antenne genou de l’IRM 3 T du même service ? Justifiez.',
+        '<b>Non.</b> Pour chaque valeur de champ, la fréquence de Larmor est différente (ω₀ = γ·B0). Les antennes sont accordées sur la fréquence de précession des protons du champ concerné.<br>L’onde RF de l’antenne (ωr) doit remplir la condition de résonance : <b>ωr = ω₀</b>, afin d’avoir un transfert d’énergie au système à l’équilibre.'),
+      O('td1-17', TH.phy, 'Citez les 3 grandes étapes du principe d’une acquisition IRM.', '<ol><li>La <b>polarisation</b></li><li>L’<b>excitation</b></li><li>La <b>relaxation</b> (longitudinale et transversale)</li></ol>')
+    ]
+  },
+
+  /* ---------- TD 2 ---------- */
+  {
+    id: 'td2', title: 'TD 2', sub: 'Excitation, relaxation, T1/T2, T2*', src: 'TD n°2 — 24/11/25 (CM du 13 et 17/11)',
+    qs: [
+      TB('td2-01', TH.rel, 'B0 est orienté selon z. M = Mz + Mxy. Donnez les valeurs de Mz et Mxy à l’équilibre thermodynamique puis après une impulsion RF de 90°.',
+        ['Mz', 'Mxy'],
+        [['À l’équilibre thermodynamique', ['maximale', 'nulle']], ['Après une impulsion RF de 90°', ['nulle', 'maximale']]],
+        ['maximale', 'nulle', 'maximale mais inversée (−M0)'],
+        'À l’équilibre : Mz maximale, Mxy = 0 car les spins précessent de manière déphasée.<br>Après 90° : M est basculé dans le plan xOy (phase d’<b>excitation</b>) ; Mz = 0 (égalisation des populations parallèle/antiparallèle) et Mxy maximale (spins mis en phase).'),
+      QC('td2-02', TH.rel, 'Que devient Mz après une impulsion RF de 180° ?',
+        ['Elle s’annule', 'Elle s’inverse : M = −Mz (maximale mais de sens opposé à B0)', 'Elle reste inchangée', 'Elle devient transversale'], [1],
+        'Après 180°, le vecteur Mz s’inverse par rapport à l’axe z (direction de B0) : Mz est de nouveau maximale mais orientée dans le sens inverse de B0.'),
+      O('td2-03', TH.rel, 'Indiquez la direction de B1 (pulse RF) par rapport à B0 et les conséquences du pulse RF.',
+        'B1 est toujours <b>perpendiculaire</b> à B0. Le pulse RF provoque :<ul><li>une transition d’énergie des moments magnétiques de l’état fondamental vers l’état d’énergie élevée ;</li><li>une mise en phase des spins ;</li><li>une inclinaison de l’aimantation M par rapport à B0.</li></ul>'),
+      TB('td2-04', TH.rel, 'Approche quantique : donnez la répartition des populations de spins et le nom de la phase correspondante.',
+        ['Répartition des populations', 'Phase'],
+        [['À l’état thermodynamique', ['majorité de spins parallèles (basse énergie)', 'polarisation']], ['Après un angle de bascule de 90°', ['populations égalisées', 'excitation']]],
+        ['majorité de spins parallèles (basse énergie)', 'populations égalisées', 'majorité de spins antiparallèles', 'polarisation', 'excitation', 'relaxation'],
+        'Équilibre : excès de protons parallèles de basse énergie. À 90° : autant de protons sur le niveau de haute énergie que sur le niveau de basse énergie.'),
+      O('td2-05', TH.rel, 'Citez la condition pour laquelle on peut observer un phénomène RMN.',
+        'La fréquence d’excitation de l’onde RF doit être <b>égale à la fréquence de Larmor</b> (différence d’énergie entre les 2 niveaux : résonance). Sinon, aucun phénomène RMN n’est observable.'),
+      QC('td2-06', TH.rel, 'Quel phénomène observe-t-on après l’arrêt du pulse de radiofréquence ?', ['La polarisation', 'L’excitation', 'La relaxation', 'La précession'], [2]),
+      O('td2-07', TH.rel, 'Expliquez le phénomène observé lors de l’arrêt de l’onde RF de 90°.',
+        'Les spins excités redescendent sur le niveau stable (état fondamental) en émettant une énergie qui est la <b>source du signal RMN</b>. M retourne à l’équilibre thermodynamique, avec l’apparition simultanée de 2 phénomènes :<ul><li><b>Relaxation longitudinale (spin-réseau)</b> : repousse de Mz jusqu’à M0 ;</li><li><b>Relaxation transversale (spin-spin)</b> : diminution de Mxy jusqu’à 0.</li></ul>(M continue de tourner autour de B0 pendant son retour à l’équilibre.)'),
+      O('td2-08', TH.rel, 'Expliquez en quelques lignes la relaxation longitudinale (spin-réseau) à l’arrêt de la RF 90°.',
+        'Retour du spin de l’état excité à l’état stable (protons au niveau de basse énergie). Repousse de Mz selon une <b>exponentielle croissante</b> de constante de temps <b>T1</b>, propre à chaque tissu (selon l’environnement moléculaire). C’est la base du <b>contraste T1</b>.', { fig: 'relax' }),
+      O('td2-09', TH.rel, 'Expliquez l’origine de la relaxation transversale (spin-spin) à l’arrêt de la RF 90°.',
+        'Perte de <b>cohérence de phase</b> des spins dans le plan transverse, <b>sans échange d’énergie</b>. Mxy décroît à mesure que les spins se déphasent (déphasages dus aux inhomogénéités de champ propres à chaque tissu), avec une constante de temps T2*. Phénomène indépendant de la relaxation longitudinale.'),
+      QC('td2-10', TH.rel, 'Quel type de relaxation est le plus rapide ?', ['La relaxation longitudinale', 'La relaxation transversale', 'Elles ont la même vitesse'], [1]),
+      O('td2-11', TH.rel, 'Représentez par une courbe les 2 types de relaxation et définissez leur constante de temps après une impulsion RF de 90°.',
+        '<b>(a) Longitudinale</b> : exponentielle croissante, constante T1 = temps nécessaire pour retrouver <b>63 %</b> de l’état initial (repousse de 63 % de Mz). À chaque tissu correspond un T1.<br><b>(b) Transversale</b> : exponentielle décroissante, constante T2 (37 % de la valeur initiale). Contrairement au T1, les T2 peuvent être considérés comme indépendants de l’intensité de B0.', { fig: 'relax' }),
+      O('td2-12', TH.rel, 'À l’arrêt d’une onde RF de 90°, pourquoi parle-t-on de décroissance T2* et non de T2 ? Quel paramètre permet d’obtenir un T2 « vrai » ? Nom de la séquence ?',
+        'T2* : le déphasage des spins est causé à la fois par les inhomogénéités propres aux tissus (<b>intrinsèques</b>) et par celles du champ B0 (<b>extrinsèques</b>).<br>Pour un T2 « vrai » : on ajoute, après le 90°, une <b>impulsion RF de 180°</b> qui compense les déphasages extrinsèques (rephasage compensateur → apparition d’un écho de spin). Séquence : <b>écho de spin</b>.')
+    ]
+  },
+
+  /* ---------- TD 3 ---------- */
+  {
+    id: 'td3', title: 'TD 3', sub: 'Pondération, contraste, qualité d’image, gradients, espace K', src: 'TD n°3 — 05/12/25 (CM du 17 et 25/11)',
+    qs: [
+      O('td3-01', TH.pon, 'Citez les étapes nécessaires à l’obtention du contraste en IRM (intensité du signal).',
+        '<ol><li>Application de l’onde RF faisant disparaître l’aimantation longitudinale</li><li>Apparition d’une aimantation transversale par rephasage des protons</li><li>Arrêt de l’onde RF</li><li>Repousse de l’aimantation longitudinale en T1</li><li>Mesure de l’aimantation transversale (déphasage des protons) par l’antenne = signal</li></ol>Le contraste est la différence d’intensité de signal émis par les structures lors de la relaxation transversale.'),
+      O('td3-02', TH.pon, 'Explicitez les paramètres d’acquisition influençant le contraste en IRM.',
+        '<ul><li><b>TR</b> : temps de répétition (intervalle entre 2 excitations)</li><li><b>TE</b> : temps d’écho (temps de récupération du signal)</li><li>l’<b>angle de bascule</b> des protons créé par l’onde RF</li></ul>TE et TR permettent d’obtenir une pondération T1 ou T2. Le <b>TE</b> conditionne la pondération <b>T2</b> (et le <b>TR</b> la pondération <b>T1</b>).'),
+      TB('td3-03', TH.pon, 'Complétez les réglages du TR et du TE (court / long) pour chaque pondération.',
+        ['TR', 'TE'],
+        [['T1', ['Court', 'Court']], ['T2', ['Long', 'Long']], ['Densité de protons', ['Long', 'Court']]],
+        ['Court', 'Long'],
+        'T1 : TR court (max 700 ms), TE court (max 50 ms). T2 : TR long (&gt; 1800 ms), TE long (80–120 ms). Densité de protons : TR long, TE court.'),
+      O('td3-04', TH.pon, 'À partir du tableau précédent, représentez un diagramme des différents types de pondération en fonction des valeurs de TR et TE.',
+        '<table class="mini"><tr><th></th><th>TE court</th><th>TE long</th></tr><tr><th>TR court</th><td><b>Pondération T1</b></td><td>(pas de contraste)</td></tr><tr><th>TR long</th><td><b>Densité de protons</b></td><td><b>Pondération T2</b></td></tr></table>Résumé du TD : TR court + TE court → pondération T1 ; TR long + TE long → pondération T2.'),
+      O('td3-05', TH.pon, 'Nommez et légendez les graphiques d’influence de TR (courbe 1) et de TE (courbe 2).',
+        '<b>Contraste T1 = courbe de relaxation longitudinale</b> : 1 = axe Mz ; 2 = TR court, bon contraste ; 3 = TR long, mauvais contraste.<br><b>Contraste T2 = courbe de relaxation transversale</b> : 1 = axe Mxy ; 2 = TE court, mauvais contraste ; 3 = TE long, bon contraste.<br>T1 rapide → signal élevé en T1 (hypersignal) ; T1 lent → hyposignal. T2 rapide → signal faible en T2 ; T2 lent → hypersignal.', { fig: 'contrastT1', fig2: 'contrastT2' }),
+      TB('td3-06', TH.pon, 'Complétez : comportement du signal (hypersignal / hyposignal) selon la pondération.',
+        ['Signal'],
+        [['Pondération T2 : tissu à T2 court', ['Hyposignal']], ['Pondération T2 : tissu à T2 long', ['Hypersignal']],
+         ['Pondération T1 : tissu à T1 court', ['Hypersignal']], ['Pondération T1 : tissu à T1 long', ['Hyposignal']],
+         ['Densité de protons : grande densité', ['Hypersignal']], ['Densité de protons : petite densité', ['Hyposignal']]],
+        ['Hypersignal', 'Hyposignal']),
+      TB('td3-07', TH.pon, 'Données : EAU T1 long / T2 long ; GRAISSE T1 court / T2 court ; OS T1 long / T2 court. Donnez le comportement du signal dans la séquence indiquée.',
+        ['Signal'],
+        [['EAU en séquence T2', ['Hypersignal']], ['GRAISSE en séquence T1', ['Hypersignal']], ['OS en séquence T1', ['Hyposignal']]],
+        ['Hypersignal', 'Hyposignal']),
+      O('td3-08', TH.qua, 'Citez les 4 critères qualité de l’image en IRM (TD 3) — et le 5ᵉ ajouté au TD 4.',
+        '<ol><li>Rapport signal sur bruit</li><li>Contraste</li><li>Résolution spatiale</li><li>Absence d’artéfacts</li></ol>(TD 4 : 5 facteurs = ces 4 critères + le <b>temps d’acquisition</b>.)'),
+      O('td3-09', TH.qua, 'Énumérez les facteurs dont dépend le rapport signal/bruit (S/B).', '<ul><li>La taille du voxel</li><li>La quantité d’eau</li><li>Les paramètres de la séquence</li></ul>'),
+      O('td3-10', TH.qua, 'Vous êtes MERM : comment agir sur les paramètres pour obtenir une image de qualité ?', 'Les paramètres doivent correspondre à un <b>compromis</b> entre le rapport signal/bruit, la résolution spatiale et la durée d’acquisition totale de la séquence.'),
+      O('td3-11', TH.cod, 'Citez les 2 outils nécessaires pour localiser le signal dans l’espace (codage spatial).', '<ul><li>Un outil <b>physique</b> : le gradient de champ magnétique</li><li>Un outil <b>mathématique</b> : la transformée de Fourier</li></ul>Pour passer du signal à la TF, il faut l’outil physique : le gradient.'),
+      O('td3-12', TH.cod, 'Précisez l’objectif de la transformée de Fourier.', 'Transformer la visualisation du signal du <b>domaine temporel</b> (amplitude en fonction du temps) au <b>domaine fréquentiel</b> (amplitude en fonction de la fréquence).'),
+      O('td3-13', TH.cod, 'Définissez le gradient de champ magnétique et indiquez son rôle.',
+        'Champ magnétique de <b>faible intensité</b> qui varie <b>linéairement</b> dans l’espace et qui s’ajoute à B0 de manière contrôlée dans le temps.<br>Rôle : sélectionner un plan de coupe (d’où vient le signal ?) et coder le signal dans la coupe.'),
+      O('td3-14', TH.cod, 'Citez les conséquences de l’application d’un gradient sur les spins.', 'Toujours 2 conséquences : modification de la <b>fréquence de précession</b> des spins et modification de leurs <b>phases</b> respectives.'),
+      MA('td3-15', TH.cod, 'Associez chaque gradient à son rôle et à son moment d’application.',
+        ['Gz', 'Gy', 'Gx'],
+        ['Codage de phase : sélectionne la ligne du plan de Fourier — appliqué avant la réception du signal', 'Gradient de lecture (codage par la fréquence) : remplit les lignes du plan de Fourier — appliqué pendant la réception', 'Gradient de coupe : sélection d’une coupe — appliqué en même temps que l’onde RF'],
+        [2, 0, 1], 'Tous les gradients sont perpendiculaires entre eux.'),
+      O('td3-16', TH.cod, 'Représentez le chronogramme d’une séquence spin écho avec l’application des gradients.',
+        'RF : impulsion 90° puis 180°. <b>Gz</b> (coupe) : pendant chaque impulsion RF. <b>Gy</b> (codage de phase) : entre le 90° et le signal. <b>Gx</b> (lecture) : pendant l’écho (réception du signal).', { fig: 'chrono' }),
+      O('td3-17', TH.cod, 'Définissez l’espace K.', 'Espace mathématique dans lequel est stocké le signal enregistré lors d’une séquence. L’espace K correspond exactement à un <b>plan de Fourier</b> : les données recueillies sont placées dans l’espace K (lignes et colonnes). Le codage spatial permet d’acquérir les données sous forme fréquentielle, adaptées à l’espace K.'),
+      O('td3-18', TH.cod, 'Indiquez les propriétés de l’espace K (plan de Fourier).',
+        '<ul><li><b>Centre</b> : signaux les plus élevés = basses fréquences → détermine le <b>contraste</b>.</li><li><b>Périphérie</b> : signaux les plus faibles = hautes fréquences → détermine la <b>résolution spatiale</b> (détails).</li></ul>Chaque point de l’espace K contribue à tous les points de l’espace image et inversement (pic de bruit à éviter).', { fig: 'kspace' }),
+      O('td3-19', TH.qua, 'Explicitez la formule qui détermine le temps d’acquisition d’une séquence IRM.',
+        '<b>TA = TR · Np · Nex</b><br>TA : temps d’acquisition ; TR : temps de répétition ; Np : nombre de lignes de la matrice (nombre de phases) ; Nex : nombre d’excitations = nombre de fois que l’on répète la séquence pour accumuler du signal → meilleur RSB.')
+    ]
+  },
+
+  /* ---------- TD 4 ---------- */
+  {
+    id: 'td4', title: 'TD 4', sub: 'Artéfacts, sécurité, produits de contraste', src: 'TD n°4 — 09/01/26 (la « reprise du TD 3 » = questions 11 à 19 du TD 3, non dupliquées)',
+    qs: [
+      O('td4-01', TH.art, 'Citez des types d’artéfacts courants en IRM.', 'Repliement · Mouvements · Flux · Volume partiel · Décalage chimique · Métallique · Troncature · Susceptibilité magnétique.'),
+      MA('td4-02', TH.art, 'Associez chaque artéfact à son origine.',
+        ['Artéfact de mouvement', 'Artéfact de susceptibilité magnétique', 'Artéfact métallique', 'Artéfact de repliement (aliasing)'],
+        ['Champ de vue sélectionné inférieur à la zone à examiner', 'Respiration, agitation du patient', 'Prothèse du genou ou matériel d’ostéosynthèse : distorsion locale des lignes de champ', 'Perte de signal à l’interface de structures de susceptibilités différentes (air/tissu, os/tissu, hémoglobine/tissu)'],
+        [1, 3, 2, 0]),
+      MA('td4-03', TH.art, 'Associez chaque artéfact à l’action corrective du MERM.',
+        ['Artéfact de mouvement', 'Artéfact de susceptibilité magnétique', 'Artéfact métallique', 'Artéfact de repliement (aliasing)'],
+        ['Augmenter le FOV, changer le codage de phase, utiliser des bandes de saturation', 'Séquence en apnée, synchronisation respiratoire si mouvement périodique, explication de l’examen au patient', 'Retirer tout objet métallique du patient ; si métal inévitable mais compatible : séquences adaptées (écho de spin…)', 'Utiliser une séquence en spin écho'],
+        [1, 3, 2, 0], 'Intérêt de l’artéfact de susceptibilité : dépister les lésions hémorragiques (hémosidérine) et les calcifications.'),
+      QC('td4-04', TH.art, 'Quelle séquence est la plus sensible aux artéfacts ? Pourquoi ?',
+        ['Spin écho', 'Écho de gradient', 'Inversion récupération', 'Suppression de graisse'], [1],
+        'L’écho de gradient est la plus sensible aux artéfacts car il n’y a pas de correction d’homogénéité du champ par l’impulsion de 180° comme en spin écho.'),
+      O('td4-05', TH.sec, 'Citez les 3 catégories d’accidents évitables à 100 % lors d’un examen IRM.', '<ul><li>Brûlures thermiques par les ondes de RF</li><li>Effets projectiles d’objets ferromagnétiques</li><li>Perte d’audition chez les patients insuffisamment protégés</li></ul>'),
+      MA('td4-06', TH.sec, 'Associez chaque composant de l’IRM à l’effet biologique ressenti.',
+        ['Champ magnétique statique', 'Gradients', 'Ondes de radiofréquence'],
+        ['Échauffement des tissus', 'Vertiges, nausées, goût métallique', 'Stimulations nerveuses périphériques'], [1, 2, 0]),
+      O('td4-07', TH.sec, 'Explicitez les 2 façons d’éteindre le champ magnétique lors d’un incident.',
+        '<ul><li><b>Bouton d’arrêt d’urgence</b> : perte soudaine de la supraconductivité de la bobine = le <b>quench</b>.</li><li><b>Baisse contrôlée</b> du champ en 20 secondes par un technicien.</li></ul>'),
+      O('td4-08', TH.sec, 'Citez les 2 circonstances pour lesquelles le bouton de quench peut être activé.', '<ul><li>Sujet blessé ou bloqué par un objet métallique enclavé dans l’aimant</li><li>Incendie dans la salle</li></ul>'),
+      O('td4-09', TH.sec, 'Lors de l’activation du bouton d’arrêt d’urgence, pourquoi le patient doit-il être évacué et la porte fermée ?',
+        'L’hélium liquide qui refroidit l’aimant se vaporise rapidement en hélium gazeux : risque d’<b>asphyxie</b> (raréfaction de l’oxygène) et de <b>brûlure par le froid</b>.'),
+      O('td4-10', TH.sec, 'Définissez le taux d’absorption spécifique (TAS ou SAR).',
+        'Quantité d’énergie déposée par les ondes de radiofréquence (antennes) dans les tissus du patient, par unité de temps et de poids. Elle est liée à la puissance du champ magnétique. Ce dépôt peut provoquer un échauffement, voire des brûlures graves.'),
+      O('td4-11', TH.sec, 'Vous prenez en charge Mr P. pour une IRM cérébrale ; il signale une claustrophobie (ascenseurs). Quelles actions mettre en œuvre ?',
+        '<ul><li>Veiller à un débit d’air suffisant</li><li>Fournir la lumière dans le tunnel</li><li>Couvrir les yeux / utiliser des miroirs</li><li>Communiquer avec le patient</li><li>Diffuser de la musique</li></ul>'),
+      O('td4-12', TH.sec, 'Citez les contre-indications absolues à un examen IRM.',
+        '<ul><li>Matériel électronique implantable : pacemaker, pompes implantables, neurostimulateurs, implant cochléaire</li><li>Valves cardiaques anciennes</li><li>Clips cérébraux anciens</li><li>Corps étrangers intra-oculaires</li></ul>'),
+      O('td4-13', TH.sec, 'Un patient est porteur d’un dispositif métallique dont vous ne connaissez pas la compatibilité IRM. L’examen sera-t-il annulé ?',
+        '<b>Non.</b> La compatibilité du matériel avec le champ magnétique doit être vérifiée sur le site <b>www.securirm.com</b> (recherche des références exactes).'),
+      O('td4-14', TH.sec, 'Indiquez l’intérêt du zonage en IRM.', 'Il découpe l’espace propre à l’IRM en <b>4 zones</b> de risques et de restriction d’accès croissants.'),
+      O('td4-15', TH.pdc, 'Citez la propriété des produits de contraste en IRM et leur action.', 'Propriété <b>paramagnétique</b> : ils <b>raccourcissent le temps de relaxation</b> des tissus où ils se trouvent et <b>augmentent le contraste T1</b> là où le produit diffuse.'),
+      O('td4-16', TH.pdc, 'Précisez l’importance de respecter la dose injectée (0,2 ml/kg).', 'Le signal diminue si l’on augmente la quantité : l’injection augmente le contraste T1, mais une dose trop élevée provoque un <b>effet T2</b> et dégrade la qualité de l’image.'),
+      /* QCM (réponses surlignées dans le TD) */
+      QC('td4-17', TH.art, 'L’artéfact en IRM correspond à :', ['Une structure anatomique normale', 'Une image indésirable ou déformée', 'Une substance injectée pour contraster l’image', 'Une image de haute qualité'], [1]),
+      QC('td4-18', TH.art, 'L’artéfact provoqué par une absence de synchronisation des battements cardiaques se nomme :', ['Artéfact de mouvement', 'Artéfact de flux', 'Artéfact de susceptibilité', 'Artéfact de troncature'], [0]),
+      QC('td4-19', TH.art, 'Les objets métalliques présents dans la zone à explorer provoquent :', ['Artéfact de susceptibilité magnétique', 'Artéfact chimique', 'Artéfact métallique', 'Artéfact de résonance'], [0, 2]),
+      QC('td4-20', TH.art, 'Une inhomogénéité du champ magnétique principal peut provoquer :', ['Artéfact de mouvement', 'Artéfact chimique', 'Artéfact de susceptibilité magnétique', 'Artéfact de résonance'], [2]),
+      QC('td4-21', TH.sec, 'Les objets métalliques doivent être retirés avant un examen IRM pour :', ['Éviter les interférences radiofréquences', 'Garantir une image de haute qualité', 'Prévenir les risques de brûlures', 'Éviter les déplacements d’objets métalliques'], [1, 2, 3]),
+      QC('td4-22', TH.sec, 'L’effet projectile dans la salle d’examen IRM peut se produire avec :', ['Un stylo à bille', 'Un obus d’oxygène', 'Une chaise roulante en acier', 'Un téléphone portable'], [0, 1, 2, 3]),
+      QC('td4-23', TH.sec, 'Le terme « magnéto-protection » en IRM signifie :', ['Protéger l’équipement IRM contre les dommages', 'Protéger les patients contre les champs magnétiques', 'Protéger le personnel médical contre les radiations', 'Protéger les artéfacts dans les images IRM'], [1]),
+      QC('td4-24', TH.sec, 'En présence d’implants métalliques dans le corps du patient, le MERM doit :', ['Ne prendre aucune précaution', 'Informer le patient que l’IRM est contre-indiquée', 'Évaluer la compatibilité de l’implant avec l’IRM', 'Ignorer la présence de l’implant'], [2]),
+      QC('td4-25', TH.sec, 'La première étape lorsqu’un patient entre dans la salle d’IRM est :', ['La vérification des antécédents médicaux', 'L’enlèvement de tout objet métallique', 'La mesure de la fréquence cardiaque', 'L’injection du produit de contraste'], [1]),
+      QC('td4-26', TH.sec, 'La recommandation pour le port de vêtements par le patient dans la salle d’examen est :', ['Vêtements en coton uniquement', 'Vêtements ajustés sans métal', 'Vêtements larges avec des boutons métalliques', 'Vêtements en matière plastique uniquement'], [1]),
+      QC('td4-27', TH.sec, 'Concernant les précautions en IRM :',
+        ['La proximité de plusieurs zones cutanées qui se touchent favorise le risque de brûlures', 'Pour son confort, le patient peut garder ses jambes croisées', 'Pour éviter le contact direct avec le tunnel, le patient doit être protégé par des cales en mousse', 'Les tatouages sont des contre-indications à l’examen IRM'], [0, 2],
+        'B est faux : risque d’échauffement des tissus. D est faux : le patient doit être prévenu du risque d’échauffement et avoir la poire d’appel en cas de sensation anormale.'),
+      QC('td4-28', TH.sec, 'La classification des implants médicaux en IRM est importante pour :', ['Sélectionner la séquence d’IRM appropriée', 'Déterminer la compatibilité de l’implant avec l’IRM', 'Ajuster la fréquence de la radiofréquence', 'Minimiser les artéfacts de susceptibilité'], [1]),
+      QC('td4-29', TH.sec, 'La sécurité des implants électroniques dans la salle d’examen permet d’éviter :', ['Un risque d’effet projectile', 'Un risque d’interférences électromagnétiques', 'Un risque d’artéfacts de mouvement', 'Un risque de brûlures cutanées'], [1]),
+      QC('td4-30', TH.pdc, 'Les produits de contraste en IRM :', ['Il n’existe pas d’allergie aux produits de contraste en IRM', 'Augmentent le contraste en T1', 'Sont contre-indiqués chez la femme enceinte', 'Un taux de créatininémie n’est pas nécessaire chez les sujets de plus de 65 ans'], [1, 2]),
+      QC('td4-31', TH.pdc, 'Les produits de contraste en IRM (suite) :', ['Leur demi-vie d’élimination est de l’ordre de 1 h 30', 'Il existe un risque de rétention du gadolinium dans le tissu cérébral', 'Les produits macrocycliques ont été retirés par les autorités européennes', 'Pour obtenir plus de signal, on augmente la dose injectée'], [0, 1],
+        'C est faux : ce sont les produits <b>linéaires</b> qui ont été retirés. D est faux : l’effet diminue (contrairement au produit iodé).')
+    ]
+  },
+
+  /* ---------- TD 5 ---------- */
+  {
+    id: 'td5', title: 'TD 5', sub: 'Séquences en IRM — préparation à la validation', src: 'TD n°5 — 13/01/26',
+    qs: [
+      O('td5-01', TH.seq, 'Citez les 6 grands types de séquences les plus utilisés en IRM.', '<ol><li>Spin écho</li><li>Écho de gradient</li><li>Inversion récupération</li><li>Suppression de graisse</li><li>EPI (Echo Planar Imaging — ex. séquence de diffusion)</li><li>Angiographie par résonance magnétique (ARM)</li></ol>'),
+      VF('td5-02', TH.seq, 'Pour chaque affirmation, indiquez Vrai ou Faux.', [
+        ['Une impulsion de rephasage de 180° compense les hétérogénéités de champ constantes et permet d’obtenir un écho pondéré en T2 et non en T2*.', true, ''],
+        ['L’inconvénient majeur des séquences d’écho de spin pondérées T2 est lié aux longs TR entraînant des temps d’acquisition trop longs.', true, ''],
+        ['La séquence inversion récupération permet de détecter les dépôts d’hémosidérine dans la prise en charge d’un AVC.', false, 'C’est l’<b>écho de gradient</b>.'],
+        ['L’impulsion initiale d’une séquence inversion récupération est de 90°.', false, 'Elle est de <b>180°</b>.'],
+        ['Les séquences écho de gradient sont des séquences rapides, proches de la seconde par coupe.', true, ''],
+        ['L’angle de bascule des séquences écho de gradient est en général supérieur à 90°.', false, 'Il est <b>inférieur à 90°</b>.'],
+        ['Il existe des séquences avec ajout d’une impulsion sélective centrée sur le pic de la graisse à la fin des séquences.', true, 'Séquence de suppression de graisse ou FAT SAT.'],
+        ['La particularité de l’écho planar imaging (EPI) est le codage très rapide de l’espace K.', true, 'Séquence la plus rapide.'],
+        ['L’avantage des séquences de suppression de graisse est de ne pas modifier le temps d’acquisition.', false, 'Le temps d’acquisition est <b>rallongé</b>.'],
+        ['Les séquences inversion récupération sont utilisées essentiellement pour les grands champs type appareil locomoteur et ont comme objectif de modifier les contrastes cellulaires.', true, 'Corrigé du TD : Vrai — TI court pour la graisse (STIR) et TI long pour le LCR (FLAIR).']
+      ]),
+      TB('td5-03', TH.pon, 'Séquence spin écho : complétez hyper- ou hyposignal.',
+        ['Pondération T1', 'Pondération T2'],
+        [['EAU', ['Hyposignal', 'Hypersignal']], ['OS', ['Hyposignal', 'Hyposignal']], ['GRAISSE', ['Hypersignal', 'Hypersignal']]],
+        ['Hypersignal', 'Hyposignal']),
+      O('td5-04', TH.seq, 'Séquence écho de spin rapide : expliquez sa particularité et donnez la formule du temps d’acquisition spécifique.',
+        'Application de <b>nouvelles impulsions de 180°</b> qui permettent d’obtenir un <b>train d’échos de spin</b>. Le nombre d’échos recueillis pendant le TR est le <b>facteur turbo</b> ou longueur du train d’échos (<b>ETL</b>).<br><b>TA = TR × Np × Nex / ETL</b> (Ne = ETL).'),
+      QC('td5-05', TH.seq, 'La séquence sensible aux variations de champ magnétique produisant des images rapides se nomme :', ['SE (Spin Echo)', 'GRE (Gradient Echo)', 'FSE (Fast Spin Echo)', 'Séquence inversion récupération'], [1]),
+      QC('td5-06', TH.seq, 'La séquence utilisée pour évaluer la diffusion cérébrale est une :', ['Séquence Echo Planar Imaging (EPI)', 'Séquence inversion récupération', 'Séquence spin écho', 'Séquence suppression de graisse'], [0]),
+      QC('td5-07', TH.seq, 'La séquence sensible à la présence de dépôts de fer (ex. hémosidérine) se nomme :', ['Séquence spin écho', 'Séquence GRE (écho de gradient)', 'Séquence TOF (Time of Flight)', 'Séquence FLAIR'], [1]),
+      QC('td5-08', TH.seq, 'La séquence permettant d’obtenir une image de haute résolution anatomique se nomme :', ['Séquence SE pondérée T1', 'Séquence SE pondérée T2', 'Séquence EPI', 'Séquence inversion récupération'], [0]),
+      QC('td5-09', TH.seq, 'La séquence écho de spin permet de corriger :', ['Les artéfacts de mouvement', 'Les inhomogénéités du champ B0', 'Les artéfacts de repliement', 'Les artéfacts chimiques'], [1]),
+      QC('td5-10', TH.seq, 'En écho de spin, l’impulsion de 180° sert à :', ['Exciter les protons', 'Accélérer l’acquisition', 'Rephaser les spins', 'Supprimer la graisse'], [2]),
+      QC('td5-11', TH.pon, 'Une séquence pondérée T1 en écho de spin utilise généralement :', ['TR long – TE long', 'TR court – TE court', 'TR long – TE court', 'TR court – TE long'], [1]),
+      QC('td5-12', TH.seq, 'Les séquences GRE sont particulièrement utiles pour :', ['L’imagerie de diffusion', 'La détection des saignements et de dépôts d’hémosidérine', 'L’imagerie T2 standard', 'La suppression de l’eau'], [1]),
+      QC('td5-13', TH.seq, 'Les séquences écho de gradient se caractérisent par :', ['Une impulsion 180°', 'Une faible sensibilité aux susceptibilités', 'Des angles de bascule variables', 'Des temps d’acquisition longs'], [2]),
+      QC('td5-14', TH.seq, 'Un inconvénient majeur des séquences GRE est :', ['Leur lenteur', 'Leur faible résolution spatiale', 'Leur sensibilité aux artéfacts de susceptibilité', 'L’impossibilité de pondération T1'], [2]),
+      QC('td5-15', TH.seq, 'La séquence EPI permet :', ['Une acquisition ligne par ligne', 'Une acquisition très rapide de l’espace K', 'Une réduction des artéfacts métalliques', 'Une meilleure résolution spatiale'], [1]),
+      QC('td5-16', TH.seq, 'L’EPI est principalement utilisée pour :', ['Les séquences T1', 'L’imagerie cardiaque', 'La diffusion', 'L’arthro-IRM'], [2]),
+      QC('td5-17', TH.seq, 'La séquence de diffusion a pour principe l’étude :', ['De la perfusion sanguine', 'Des mouvements des protons libres', 'Des mouvements des molécules d’eau', 'De la densité osseuse'], [2]),
+      QC('td5-18', TH.seq, 'Dans la séquence de diffusion, le coefficient de diffusion apparent (ADC) permet de :', ['Confirmer une restriction de diffusion', 'Supprimer les artéfacts EPI', 'Augmenter le signal graisseux', 'Réduire le bruit'], [0]),
+      QC('td5-19', TH.seq, 'La séquence de diffusion est essentielle dans le cadre :', ['D’un bilan tumoral', 'D’un AVC aigu', 'D’une infection', 'Pour toutes les réponses proposées'], [1], 'Réponse retenue dans le corrigé du TD : l’AVC aigu.'),
+      QC('td5-20', TH.seq, 'Le principe de la séquence avec suppression de graisse est de :', ['Réduire le TR', 'Annuler le signal de la graisse', 'Augmenter le signal hydrique', 'Augmenter le signal T1'], [1]),
+      QC('td5-21', TH.seq, 'Concernant la séquence STIR :', ['Son temps d’acquisition est très court', 'Elle est incompatible avec l’imagerie T2', 'Elle utilise un temps d’inversion spécifique à la graisse', 'Elle se caractérise par des impulsions répétées de 180°'], [2]),
+      QC('td5-22', TH.seq, 'La suppression de graisse spectrale (Fat Sat) est :', ['Indépendante du champ magnétique', 'Sensible aux inhomogénéités de B0', 'Utilisable uniquement en T2', 'Utilisable uniquement en T1'], [1]),
+      QC('td5-23', TH.seq, 'Parmi les séquences proposées, la plus rapide est :', ['Spin écho', 'Turbo spin écho', 'Écho de gradient', 'EPI'], [3]),
+      QC('td5-24', TH.seq, 'La séquence particulièrement sensible à la vitesse des flux sanguins se nomme :', ['Séquence T2', 'Séquence TOF (Time of Flight)', 'Séquence GRE', 'Séquence de diffusion'], [1]),
+      QC('td5-25', TH.seq, 'Pour supprimer le signal de la graisse sur un examen du rachis lombaire, le MERM doit utiliser une :', ['Séquence de perfusion', 'Séquence STIR (inversion récupération)', 'Séquence T1', 'Séquence T2'], [1]),
+      QC('td5-26', TH.seq, 'La séquence ayant une impulsion initiale de RF à 180° se nomme :', ['Séquence T2*', 'Séquence inversion récupération', 'Séquence écho de gradient', 'Séquence de diffusion'], [1]),
+      QC('td5-27', TH.pdc, 'L’injection de produit de contraste IRM s’utilise sur une séquence :', ['TOF', 'T1', 'FLAIR', 'STIR'], [1]),
+      QC('td5-28', TH.seq, 'Principale différence entre une séquence spin écho (SE) et une séquence écho de gradient (GRE) :',
+        ['La SE utilise une impulsion de 180° pour refocaliser les spins, contrairement à la GRE', 'La GRE est insensible aux hétérogénéités de champ magnétique', 'La SE permet des temps d’acquisition plus courts que la GRE', 'La SE nécessite une impulsion initiale de 180°'], [0]),
+      QC('td5-29', TH.seq, 'La séquence FLAIR est principalement utilisée pour :', ['Supprimer le signal de la graisse', 'Supprimer le signal du liquide céphalorachidien (LCR)', 'Augmenter le contraste des structures osseuses', 'Évaluer le déplacement des molécules d’eau'], [1]),
+      QC('td5-30', TH.seq, 'La séquence qui met en évidence les flux sanguins sans injection de produit de contraste est :', ['Écho de gradient (GRE)', 'Séquence de diffusion', 'Angiographie par résonance magnétique (ARM)', 'Séquence FLAIR'], [2]),
+      QC('td5-31', TH.seq, 'En diffusion, le paramètre ajusté pour augmenter la sensibilité au mouvement des molécules d’eau est :', ['TR', 'Facteur b', 'Angle de bascule', 'TE'], [1]),
+      QC('td5-32', TH.pon, 'En pondération T1, le tissu qui apparaît le plus en hypersignal est :', ['Le liquide', 'La graisse', 'L’os cortical', 'L’air'], [1]),
+      QC('td5-33', TH.pon, 'La pondération utilisée pour étudier les structures cartilagineuses ou les ménisques est :', ['Densité protonique (DP)', 'Pondération T2', 'Pondération T1', 'Pondération T2*'], [0]),
+      QC('td5-34', TH.seq, 'En exploration ostéo-articulaire, la séquence qui met en évidence les phénomènes inflammatoires est :', ['Séquence de diffusion', 'Séquence STIR', 'Séquence FLAIR', 'Séquence pondérée T1'], [1]),
+      QC('td5-35', TH.pon, 'L’image IRM ci-dessous (coupe sagittale du rachis cervico-dorsal) correspond à une séquence pondérée :', ['T1', 'T2', 'T1 avec gadolinium', 'STIR'], [1], 'Corrigé du TD : T2.', { img: 'Q31' })
+    ]
+  }
+];
+
+/* ===================== SUJET DE VALIDATION (session 1 — 28/01/2024) ===================== */
+const NOTE_DED = 'Corrigé déduit du cours et des TD (aucun corrigé n’est fourni pour ce sujet). Réponse « tout ou rien » comme à l’examen.';
+const TD_VAL = {
+  id: 'val', title: 'Validation', sub: 'Ancien sujet UE 3.3 S3 (28/01/2024)', src: 'Sujet de validation — session 1, 1 h, 30 pts ramenés sur 20. Questions rédactionnelles corrigées d’après les TD ; QCM déduits du cours.',
+  qs: [
+    MA('val-01', TH.mat, 'Q1 (3 pts) — Associez les 3 composants principaux de l’IRM à leur rôle.',
+      ['Aimant de champ magnétique statique B0', 'Antenne de radiofréquence', 'Gradients de corps entier'],
+      ['Émettre l’onde RF pour exciter les spins et recevoir le signal', 'Créer des variations de champ pour encoder spatialement le signal', 'Générer un champ B0 constant et magnétiser l’aimantation'],
+      [2, 0, 1]),
+    O('val-02', TH.phy, 'Q2 (3 pts) — Expliquez le phénomène de polarisation (équilibre de Boltzmann) et illustrez par un schéma.',
+      'Sous B0, les spins s’alignent dans l’axe de B0 mais pas dans le même sens : 2 populations <b>parallèle</b> et <b>antiparallèle</b>, avec un petit excès de protons parallèles (basse énergie). Ce surnombre crée un vecteur d’aimantation macroscopique <b>M ≠ 0</b> (responsable du signal). Hors champ : moments dans toutes les directions, M = 0. Phénomène créé par l’aimant.', { fig: 'pol' }),
+    O('val-03', TH.mat, 'Q3 (3 pts) — Au Centre des Lices, vous travaillez sur la 3 T et l’antenne genou est défectueuse. Pouvez-vous utiliser l’antenne de la 1,5 T ? Justifiez en explicitant la formule.',
+      '<b>Non.</b> ω₀ = γ · B0 : à chaque valeur de champ correspond une fréquence de Larmor différente (≈ 64 MHz à 1,5 T, ≈ 123 MHz à 3 T). Les antennes sont accordées sur la fréquence de précession des protons du champ concerné ; la condition de résonance <b>ωr = ω₀</b> ne serait pas respectée → pas de transfert d’énergie.'),
+    MA('val-04', TH.phy, 'Q4 (2,25 pts) — Reliez chaque terme à sa définition.',
+      ['Moment magnétique', 'Spin', 'Mouvement de précession', 'Résonance', 'Relaxation', 'Supraconductivité', 'Antenne', 'Transformée de Fourier', 'Excitation'],
+      ['Retour de l’aimantation à son point d’équilibre initial suite à une impulsion d’excitation', 'Outil mathématique qui permet de passer du domaine temporel au domaine fréquentiel', 'Mouvement rotatoire en forme de cône suivi par le moment magnétique autour de l’axe de B0', 'Propriété physique des noyaux ayant un nombre de protons et/ou de neutrons impairs', 'Grandeur vectorielle notée µ qui mesure l’intensité d’une source magnétique', 'Propriété d’alliages qui perdent toute résistance électrique à de très basses températures', 'Bobinage de conducteur visant à émettre ou recevoir des signaux de radiofréquence', 'Création d’une composante d’aimantation transversale par application d’un champ B1 de RF', 'Phénomène selon lequel un système peut accumuler de l’énergie si celle-ci est proche d’une fréquence propre au système'],
+      [4, 3, 2, 8, 0, 5, 6, 1, 7], 'Définitions rapprochées de celles du TPG de révision.'),
+    O('val-05', TH.phy, 'Q5 (1,5 pt) — Citez les 3 grandes étapes du principe d’une acquisition IRM.', '<ol><li>Polarisation</li><li>Excitation</li><li>Relaxation (longitudinale et transversale)</li></ol>'),
+    TB('val-06', TH.rel, 'Q6 (2 pts) — Valeurs de Mz et Mxy à l’équilibre thermodynamique puis après une impulsion RF de 90°.',
+      ['Mz', 'Mxy'], [['À l’équilibre thermodynamique', ['maximale', 'nulle']], ['Après une impulsion RF de 90°', ['nulle', 'maximale']]],
+      ['maximale', 'nulle']),
+    O('val-07', TH.qua, 'Q7 (1,5 pt) — Explicitez la formule qui détermine le temps d’acquisition d’une séquence IRM.', '<b>TA = TR · Np · Nex</b> (TR : temps de répétition ; Np : nombre de lignes/phases de la matrice ; Nex : nombre d’excitations, qui améliore le RSB).'),
+    O('val-08', TH.cod, 'Q8 (1,75 pt) — Représentez le chronogramme d’une séquence spin écho avec l’application des gradients.', 'RF : 90° puis 180° ; Gz (coupe) pendant chaque impulsion RF ; Gy (phase) entre le 90° et la lecture ; Gx (lecture) pendant l’écho.', { fig: 'chrono' }),
+    O('val-09', TH.rel, 'Q9 (2 pts) — Après l’arrêt d’une RF de 90°, on observe une décroissance T2* et non T2 : justifiez, puis citez la séquence qui permet d’obtenir un vrai T2.',
+      'Le déphasage des spins est causé par les inhomogénéités propres aux tissus (intrinsèques) <b>et</b> par celles du champ B0 (extrinsèques) : T2* les traduit toutes les deux. L’ajout d’une impulsion de <b>180°</b> compense les déphasages extrinsèques (rephasage → écho de spin) : séquence <b>écho de spin</b> → T2 « vrai ».'),
+    /* Q10 */
+    QC('val-10-1', TH.phy, 'Q10.1 — La RMN étudie le comportement des :', ['Électrons', 'Protons', 'Neutrons', 'Photons'], [1], '', { note: NOTE_DED }),
+    QC('val-10-2', TH.phy, 'Q10.2 — Dans le contexte de la RMN, la résonance magnétique signifie :', ['Une résonance sonore émise par les noyaux', 'Une résonance lumineuse provoquée par les noyaux', 'Une résonance magnétique des noyaux avec une fréquence spécifique', 'Une résonance électrique générée par les noyaux'], [2], '', { note: NOTE_DED }),
+    QC('val-10-3', TH.phy, 'Q10.3 — L’unité de mesure d’un champ magnétique est :', ['Tesla (T)', 'Hertz (Hz)', 'Joule (J)', 'Watt (W)'], [0]),
+    QC('val-10-4', TH.phy, 'Q10.5 — L’alignement des moments magnétiques nucléaires dans l’axe du champ B0 se nomme :', ['L’excitation', 'La polarisation', 'La précession', 'La relaxation'], [1]),
+    QC('val-10-5', TH.pon, 'Q10.6 — Le réglage des paramètres en IRM :', ['TR court et TE court permettent d’obtenir une pondération T2', 'TR long et TE long permettent d’obtenir une pondération T1', 'Le réglage du TE conditionne la pondération T2', 'Le réglage du TR conditionne la pondération T1'], [2, 3], '', { note: NOTE_DED }),
+    QC('val-10-6', TH.mat, 'Q10.7 — La cage de Faraday :', ['Est une enceinte métallique en cuivre', 'Isole uniquement l’intérieur de la salle des perturbations électriques extérieures', 'Isole l’extérieur de la salle des ondes RF utilisées pendant l’examen', 'Isole l’intérieur de la salle de toutes perturbations électriques extérieures'], [0, 2, 3], '', { note: NOTE_DED }),
+    QC('val-10-7', TH.cod, 'Q10.8 — Les gradients en IRM :', ['Le gradient de coupe permet de remplir les lignes du plan de Fourier', 'Le gradient de lecture permet de réaliser un codage par la fréquence', 'Le gradient de codage de phase permet de remplir les lignes du plan de Fourier', 'Le gradient Gz correspond au gradient de coupe'], [1, 2, 3], '', { note: NOTE_DED }),
+    QC('val-10-8', TH.cod, 'Q10.9 — L’espace K :', ['Correspond à un plan de Fourier', 'Le centre de l’espace K détermine la résolution spatiale', 'La périphérie détermine le contraste de l’image', 'Le centre contient les signaux les plus élevés (basses fréquences)'], [0, 3], '', { note: NOTE_DED }),
+    QC('val-10-9', TH.sec, 'Q10.10 — Le taux d’absorption spécifique correspond à :', ['La quantité d’énergie déposée dans les tissus par le champ magnétique B0', 'Il est lié à la puissance du champ magnétique', 'Il peut être responsable d’un échauffement voire de brûlures graves', 'La quantité d’énergie déposée dans les tissus par les ondes de radiofréquence'], [1, 2, 3], 'La proposition B reprend la définition du TD 4 (« liée à la puissance du champ magnétique »).', { note: NOTE_DED }),
+    /* Q12 */
+    QC('val-12-1', TH.seq, 'Q12.1 — La séquence particulièrement sensible à la vitesse des flux sanguins se nomme :', ['Séquence T2', 'Séquence TOF (Time of Flight)', 'Séquence GRE', 'Séquence spin écho'], [1]),
+    QC('val-12-2', TH.seq, 'Q12.2 — La séquence sensible à la présence de dépôts d’hémosidérine se nomme :', ['Séquence T2', 'Séquence GRE (écho de gradient)', 'TOF', 'Séquence FSE'], [1]),
+    QC('val-12-3', TH.seq, 'Q12.3 — La séquence permettant une image de haute résolution anatomique se nomme :', ['Séquence en pondération T2', 'Séquence en pondération T1', 'Séquence avec suppression du signal de la graisse', 'Séquence FLAIR'], [1], '', { note: NOTE_DED }),
+    QC('val-12-4', TH.seq, 'Q12.4 — L’imagerie IRM de diffusion est utilisée pour :', ['Évaluer la diffusion des molécules de sang dans les tissus', 'Supprimer le signal de l’eau', 'Évaluer la diffusion des molécules d’eau dans les tissus', 'Supprimer le signal de la graisse'], [2]),
+    QC('val-12-5', TH.seq, 'Q12.5 — Pour supprimer le signal de la graisse sur un rachis lombaire, le MERM doit utiliser une :', ['Séquence de perfusion', 'Séquence STIR (inversion récupération)', 'Séquence T1', 'Séquence FLAIR'], [1]),
+    QC('val-12-6', TH.seq, 'Q12.6 — Pour la prise en charge d’un AVC, on réalise les séquences :', ['Diffusion, FLAIR, T2*, TOF', 'T1, T2*, FLAIR, TOF', 'Diffusion, FLAIR, T2, T1', 'FLAIR, Diffusion, T2, TOF'], [0], 'Déduit : diffusion (AVC aigu), FLAIR, T2* (GRE, hémosidérine), TOF (flux). Combinaison non détaillée dans les TD fournis — à confirmer avec votre cours.', { note: NOTE_DED }),
+    QC('val-12-7', TH.pdc, 'Q12.7 — Les produits de contraste en IRM (1/2) :', ['Ont une propriété paramagnétique', 'Augmentent le temps de relaxation des tissus', 'Augmentent le contraste en T2', 'Augmentent le contraste en T1'], [0, 3], '', { note: NOTE_DED }),
+    QC('val-12-8', TH.pdc, 'Q12.8 — Les produits de contraste (2/2) :', ['Il est important de respecter la dose de 1 ml/kg', 'Sont contre-indiqués en cas de grossesse', 'Peuvent provoquer un effet T2', 'Peuvent dégrader la qualité de l’image'], [1, 2, 3], 'La dose du cours est de 0,2 ml/kg.', { note: NOTE_DED }),
+    /* Q14 */
+    QC('val-14-1', TH.sec, 'Q14.1 — Contre-indications absolues à l’IRM :', ['Les corps étrangers intra-oculaires', 'Les tatouages', 'Le pacemaker', 'La prothèse du genou'], [0, 2], '', { note: NOTE_DED }),
+    QC('val-14-2', TH.sec, 'Q14.2 — Lors d’un examen IRM, le MERM peut éviter à 100 % :', ['Les brûlures thermiques par les ondes RF', 'Les vertiges et nausées', 'Le goût métallique', 'Les stimulations nerveuses périphériques'], [0], '', { note: NOTE_DED }),
+    QC('val-14-3', TH.sec, 'Q14.5 — En présence d’implants métalliques, le MERM doit :', ['Ne prendre aucune précaution', 'Informer le patient que l’IRM est contre-indiquée', 'Évaluer la compatibilité de l’implant avec l’IRM', 'Ignorer la présence de l’implant'], [2]),
+    QC('val-14-4', TH.sec, 'Q14.6 — Précautions en IRM :', ['Les tatouages ne sont pas des contre-indications à l’IRM', 'La proximité de plusieurs zones cutanées qui se touchent favorise le risque de brûlures', 'Pour éviter le contact direct avec le tunnel, le patient doit être protégé par des cales en mousse', 'Il n’est pas nécessaire de proposer des bouchons d’oreille'], [0, 1, 2], '', { note: NOTE_DED }),
+    QC('val-14-5', TH.sec, 'Q14.7 — La classification des implants médicaux en IRM est importante pour :', ['Ajuster la fréquence de la radiofréquence', 'Minimiser les artéfacts de susceptibilité', 'Déterminer la compatibilité de l’implant avec l’IRM', 'Éviter un risque de brûlures cutanées'], [2]),
+    QC('val-14-6', TH.sec, 'Q14.8 — En IRM, « magnéto-protection » signifie :', ['Minimiser les artéfacts de susceptibilité', 'Protéger le personnel médical contre les radiations', 'Protéger les patients contre les champs magnétiques', 'Protéger l’équipement IRM contre les dommages'], [2])
+  ]
+};
+
+/* ===================== TD ALTERNATIFS (reformulations / V-F modifiés, toujours conformes au cours) ===================== */
+const TD_ALT = [
+  /* ---------- Alt 1 ---------- */
+  {
+    id: 'a1', title: 'Alt 1', sub: 'Équipement, spin, polarisation, Larmor (d’après TD 1)', src: 'Version alternative du TD 1',
+    qs: [
+      VF('a1-01', TH.mat, 'Équipement et salle d’examen : Vrai ou Faux ?', [
+        ['Les IRM cliniques utilisent un champ B0 de l’ordre de 1,5 à 3 T.', true, ''],
+        ['Les IRM cliniques utilisent un champ B0 de l’ordre de 0,1 T.', false, 'Ordre de grandeur : <b>1,5 à 3 T</b>.'],
+        ['L’aimant supraconducteur est refroidi à l’hélium liquide (−269 °C, soit 4 K).', true, ''],
+        ['L’aimant supraconducteur est refroidi à l’azote liquide.', false, 'C’est de l’<b>hélium liquide</b> (−269 °C ou 4 K).'],
+        ['La cage de Faraday est une enceinte métallique (cuivre ou aluminium) qui entoure la salle d’examen.', true, ''],
+        ['La cage de Faraday protège uniquement l’intérieur de la salle des perturbations extérieures.', false, 'Elle isole aussi l’<b>extérieur</b> des ondes RF utilisées pendant l’examen.'],
+        ['Le bruit acoustique est dû à la commutation des gradients.', true, ''],
+        ['Le bruit acoustique est produit par l’aimant supraconducteur.', false, 'Il est produit par les <b>gradients</b> (vibration des bobines à chaque impulsion électrique).']
+      ]),
+      VF('a1-02', TH.phy, 'Fréquence de Larmor et antennes : Vrai ou Faux ?', [
+        ['À 1,5 T, la fréquence de Larmor est d’environ 64 MHz ; à 3 T, d’environ 123 MHz.', true, ''],
+        ['La fréquence de Larmor est la même à 1,5 T et à 3 T.', false, 'ω₀ = γ·B0 : elle dépend de B0.'],
+        ['Une antenne est accordée sur la fréquence de précession des protons du champ dans lequel elle est utilisée.', true, ''],
+        ['Une antenne conçue pour 3 T peut être utilisée sur une IRM 1,5 T car il s’agit des mêmes protons.', false, 'La fréquence de Larmor dépend du <b>champ</b> : la condition de résonance ne serait pas respectée.'],
+        ['Si B0 double, la fréquence de précession double (ω₀ = γ·B0).', true, 'ω₀ est proportionnelle à B0.'],
+        ['Le rapport gyromagnétique γ est le rapport entre le moment magnétique et le spin.', true, '']
+      ]),
+      QC('a1-03', TH.phy, 'Quels éléments donnent un signal RMN utile dans le corps humain ?', ['L’eau (H₂O)', 'La graisse (groupements CH₃)', 'Tout noyau à nombre pair de nucléons (ex. ¹²C)', 'Aucun : le corps n’a pas de moment magnétique'], [0, 1],
+        '¹²C n’a pas de moment magnétique : avec un nombre pair, les moments s’annulent deux à deux.'),
+      QC('a1-04', TH.phy, 'En l’absence de champ magnétique externe, l’aimantation macroscopique M est :', ['Maximale et alignée sur z', 'Nulle (moments orientés dans toutes les directions)', 'Uniquement transversale', 'Égale à M0'], [1]),
+      QC('a1-05', TH.phy, 'Sous B0, l’excès de protons se trouve :', ['En position parallèle (basse énergie)', 'En position antiparallèle (haute énergie)', 'Perpendiculairement à B0', 'Dans le plan xOy'], [0]),
+      QC('a1-06', TH.phy, 'Comment nomme-t-on l’alignement des moments magnétiques dans l’axe de B0 (état d’équilibre de Boltzmann) ?', ['L’excitation', 'La polarisation', 'La précession', 'La relaxation'], [1]),
+      QC('a1-07', TH.phy, 'Le mouvement de précession est :', ['La rotation du moment magnétique autour de B0 à la fréquence de Larmor (mouvement de toupie)', 'La rotation de la particule sur elle-même', 'L’oscillation de l’antenne', 'La vibration des gradients'], [0], 'La rotation de la particule sur elle-même est le <b>spin</b>.'),
+      QC('a1-08', TH.phy, 'Les 2 composantes du vecteur d’aimantation M sont :', ['Mz longitudinale (suivant B0) et Mxy transversale (plan xOy)', 'Mx et My seulement', 'Mz transversale et Mxy longitudinale', 'B0 et B1'], [0]),
+      O('a1-09', TH.phy, 'Pourquoi le carbone 12 ne peut-il pas fournir de signal RMN ?', 'Son noyau a un nombre <b>pair</b> de particules : les moments magnétiques s’annulent deux à deux, il n’a donc pas de moment magnétique nucléaire. Seuls les noyaux à nombre impair (proton isolé) engendrent un moment magnétique.'),
+      O('a1-10', TH.mat, 'Un collègue veut brancher sur la 3 T une antenne de la 1,5 T « puisque c’est la même antenne ». Que lui répondez-vous ? Appuyez-vous sur une formule.',
+        'Impossible : <b>ω₀ = γ·B0</b>. Chaque champ a sa fréquence de Larmor (≈ 64 MHz à 1,5 T, ≈ 123 MHz à 3 T) et les antennes sont accordées sur cette fréquence. Pour avoir une résonance (transfert d’énergie), il faut ωr = ω₀ : ce ne serait pas le cas.'),
+      O('a1-11', TH.phy, 'Décrivez, avec un schéma, la différence d’état des spins hors champ et sous B0.', 'Hors champ : spins orientés dans toutes les directions → M = 0. Sous B0 : alignement dans l’axe de B0, 2 populations (parallèle / antiparallèle) avec un excès parallèle de basse énergie → M ≠ 0 (polarisation / équilibre de Boltzmann).', { fig: 'pol' }),
+      OR('a1-12', TH.phy, 'Remettez dans l’ordre les 3 étapes d’une acquisition IRM.', ['Polarisation', 'Excitation', 'Relaxation'])
+    ]
+  },
+
+  /* ---------- Alt 2 ---------- */
+  {
+    id: 'a2', title: 'Alt 2', sub: 'Excitation, relaxation T1/T2 (d’après TD 2)', src: 'Version alternative du TD 2',
+    qs: [
+      VF('a2-01', TH.rel, 'Excitation : Vrai ou Faux ?', [
+        ['Après une impulsion RF de 90°, Mz est nulle et Mxy est maximale.', true, ''],
+        ['Après une impulsion RF de 90°, Mz est maximale.', false, 'Mz = 0 : populations égalisées, M dans le plan xOy.'],
+        ['À l’équilibre thermodynamique, Mxy est maximale.', false, 'Mxy = 0 (spins déphasés) ; c’est Mz qui est maximale.'],
+        ['Après une impulsion de 180°, Mz est inversée (−Mz).', true, ''],
+        ['B1 est parallèle à B0.', false, 'B1 est toujours <b>perpendiculaire</b> à B0.'],
+        ['Un phénomène RMN n’est observable que si la fréquence de l’onde RF est égale à la fréquence de Larmor.', true, '']
+      ]),
+      VF('a2-02', TH.rel, 'Relaxation : Vrai ou Faux ?', [
+        ['La relaxation longitudinale est aussi appelée spin-réseau.', true, ''],
+        ['La relaxation transversale est aussi appelée spin-réseau.', false, 'Transversale = <b>spin-spin</b>.'],
+        ['La relaxation transversale (T2) s’accompagne d’un échange d’énergie avec le réseau.', false, 'Le T2 est une interaction <b>sans échange d’énergie</b> (perte de cohérence de phase).'],
+        ['La relaxation longitudinale est plus rapide que la relaxation transversale.', false, 'La plus rapide est la relaxation <b>transversale</b>.'],
+        ['Le T1 correspond au temps nécessaire pour retrouver 63 % de l’aimantation longitudinale initiale.', true, ''],
+        ['Contrairement au T1, les valeurs de T2 peuvent être considérées comme indépendantes de B0.', true, '']
+      ]),
+      MA('a2-03', TH.rel, 'Associez chaque situation à l’état de M.',
+        ['À l’équilibre thermodynamique', 'Juste après une impulsion RF de 90°', 'Après une impulsion RF de 180°'],
+        ['Mz maximale ; Mxy = 0', 'Mz inversée (−Mz), maximale et opposée à B0', 'Mz = 0 ; Mxy maximale (spins en phase)'], [0, 2, 1]),
+      TB('a2-04', TH.rel, 'Comparez les deux relaxations.',
+        ['Relaxation longitudinale', 'Relaxation transversale'],
+        [['Autre nom', ['Spin-réseau', 'Spin-spin'], ['Spin-réseau', 'Spin-spin']],
+         ['Constante de temps', ['T1', 'T2'], ['T1', 'T2']],
+         ['Évolution', ['Repousse de Mz (croissante)', 'Diminution de Mxy (décroissante)'], ['Repousse de Mz (croissante)', 'Diminution de Mxy (décroissante)']],
+         ['Valeur associée à la constante de temps', ['63 %', '37 %'], ['63 %', '37 %']],
+         ['Échange d’énergie', ['Oui', 'Non (perte de cohérence de phase)'], ['Oui', 'Non (perte de cohérence de phase)']]],
+        null, 'T1 = temps pour retrouver 63 % de Mz ; T2 = 37 % de la valeur initiale de Mxy.'),
+      QC('a2-05', TH.rel, 'À l’arrêt de la RF, l’énergie restituée par les spins qui redescendent au niveau stable est :', ['La source du signal RMN mesuré', 'Dissipée sans conséquence', 'À l’origine du bruit acoustique', 'La cause de la polarisation'], [0]),
+      QC('a2-06', TH.rel, 'Le T2* traduit les déphasages dus :', ['Aux seules inhomogénéités intrinsèques des tissus', 'Aux seules inhomogénéités de B0', 'Aux inhomogénéités intrinsèques ET extrinsèques (B0)', 'À la repousse de Mz'], [2]),
+      QC('a2-07', TH.rel, 'Quelle séquence, grâce à une impulsion de 180° de rephasage, donne un T2 « vrai » ?', ['Écho de spin', 'Écho de gradient', 'EPI', 'TOF'], [0]),
+      QC('a2-08', TH.rel, 'Après un 90°, Mxy devient maximale car :', ['Les spins sont mis en phase', 'Mz repousse', 'Il y a un excès de protons antiparallèles', 'B0 augmente'], [0]),
+      O('a2-09', TH.rel, 'Pourquoi n’observe-t-on aucun phénomène RMN si l’onde RF n’a pas la fréquence de Larmor ?', 'La condition de résonance (ωr = ω₀ = γ·B0) n’est pas remplie : il n’y a pas de transfert d’énergie au système de spins à l’équilibre, donc pas d’excitation et pas de phénomène RMN observable.'),
+      O('a2-10', TH.rel, 'Décrivez l’évolution des populations de spins lors du 90° puis à l’arrêt de la RF.', 'Équilibre : majorité de spins parallèles (basse énergie) — polarisation. Pendant le 90° : égalisation des populations (autant de spins sur le niveau de haute énergie que de basse énergie) — excitation. À l’arrêt de la RF : les spins redescendent vers le niveau stable en émettant l’énergie absorbée (signal RMN) — relaxation.'),
+      O('a2-11', TH.rel, 'Quelle est la direction de B1 et quelles sont les 3 conséquences du pulse RF ?', 'B1 est perpendiculaire à B0. Conséquences : transition des moments magnétiques de l’état fondamental à l’état d’énergie élevée ; mise en phase des spins ; inclinaison de M par rapport à B0.')
+    ]
+  },
+
+  /* ---------- Alt 3 ---------- */
+  {
+    id: 'a3', title: 'Alt 3', sub: 'Pondération, qualité, gradients, espace K, TA (d’après TD 3)', src: 'Version alternative du TD 3',
+    qs: [
+      TB('a3-01', TH.pon, 'Quelle pondération obtient-on avec ces réglages (valeurs du cours : T1 = TR ≤ 700 ms / TE ≤ 50 ms ; T2 = TR > 1800 ms / TE 80–120 ms ; DP = TR long / TE court) ?',
+        ['Pondération obtenue'],
+        [['TR = 500 ms ; TE = 20 ms', ['T1']], ['TR = 2500 ms ; TE = 100 ms', ['T2']], ['TR = 2500 ms ; TE = 15 ms', ['Densité de protons']]],
+        ['T1', 'T2', 'Densité de protons']),
+      VF('a3-02', TH.pon, 'Pondération et contraste : Vrai ou Faux ?', [
+        ['Un tissu à T1 court apparaît en hypersignal en pondération T1.', true, ''],
+        ['Un tissu à T2 court apparaît en hypersignal en pondération T2.', false, 'Il apparaît en <b>hyposignal</b> ; c’est le T2 long qui donne l’hypersignal.'],
+        ['Un TR long et un TE long donnent une pondération T1.', false, 'Ils donnent une pondération <b>T2</b>.'],
+        ['L’eau (T1 long, T2 long) est en hypersignal en pondération T1.', false, 'Hyposignal en T1, hypersignal en T2.'],
+        ['L’os (T1 long, T2 court) est en hyposignal en pondération T1.', true, ''],
+        ['La graisse (T1 court) est en hypersignal en pondération T1.', true, ''],
+        ['Un tissu à grande densité de protons est en hypersignal en pondération DP.', true, '']
+      ]),
+      QC('a3-03', TH.pon, 'Pour pondérer en T2, le TR long sert à :', ['S’affranchir des contrastes T1', 'Exprimer les contrastes T2', 'Raccourcir l’acquisition', 'Augmenter l’angle de bascule'], [0], 'Le TE long exprime les contrastes T2 ; le TR long s’affranchit des contrastes T1.'),
+      QC('a3-04', TH.pon, 'Pour pondérer en T1, le TE court sert à :', ['Ne pas pondérer en T2', 'Pondérer en T1', 'Supprimer la graisse', 'Rephaser les spins'], [0], 'Le TR court est ce qui pondère en T1.'),
+      QC('a3-05', TH.pon, 'Parmi EAU, OS et GRAISSE, lesquels sont en hypersignal en pondération T2 (spin écho) ?', ['Eau', 'Os', 'Graisse'], [0, 2], 'Os : hyposignal en T1 et en T2.'),
+      QC('a3-06', TH.pon, 'Parmi EAU, OS et GRAISSE, lesquels sont en hyposignal en pondération T1 (spin écho) ?', ['Eau', 'Os', 'Graisse'], [0, 1]),
+      QC('a3-07', TH.qua, 'Quels sont les 5 facteurs de qualité de l’image en IRM ?', ['Rapport signal/bruit', 'Contraste', 'Résolution spatiale', 'Temps d’acquisition', 'Présence d’artéfacts', 'Fréquence de Larmor'], [0, 1, 2, 3, 4]),
+      QC('a3-08', TH.qua, 'Le rapport signal/bruit dépend :', ['De la taille du voxel', 'De la quantité d’eau', 'Des paramètres de la séquence', 'Du nombre de bobines de gradient'], [0, 1, 2]),
+      QC('a3-09', TH.cod, 'Quel gradient est appliqué en même temps que l’onde RF ?', ['Gz (coupe)', 'Gy (codage de phase)', 'Gx (lecture)', 'Aucun'], [0]),
+      QC('a3-10', TH.cod, 'Quel gradient est appliqué pendant la réception du signal ?', ['Gz (coupe)', 'Gy (codage de phase)', 'Gx (lecture / fréquence)', 'Aucun'], [2]),
+      QC('a3-11', TH.cod, 'L’application d’un gradient modifie toujours :', ['La fréquence de précession et la phase des spins', 'Uniquement l’amplitude du signal', 'Uniquement le T1', 'Le champ B0 de façon permanente'], [0]),
+      QC('a3-12', TH.cod, 'La transformée de Fourier permet de passer :', ['Du domaine temporel au domaine fréquentiel', 'Du domaine fréquentiel au domaine temporel', 'Du T1 au T2', 'Du champ B0 au champ B1'], [0]),
+      VF('a3-13', TH.cod, 'Espace K : Vrai ou Faux ?', [
+        ['L’espace K correspond à un plan de Fourier.', true, ''],
+        ['Le centre de l’espace K contient les signaux les plus élevés (basses fréquences) et détermine le contraste.', true, ''],
+        ['La périphérie de l’espace K détermine le contraste.', false, 'Elle détermine la <b>résolution spatiale</b> (hautes fréquences, détails).'],
+        ['Le centre de l’espace K détermine la résolution spatiale.', false, 'Le centre détermine le <b>contraste</b>.']
+      ], { fig: 'kspace' }),
+      OR('a3-14', TH.cod, 'Classez ces gradients dans l’ordre de leur application lors de l’acquisition.', ['Gz — gradient de coupe (avec l’onde RF)', 'Gy — gradient de codage de phase (avant la réception)', 'Gx — gradient de lecture (pendant la réception)']),
+      NU('a3-15', TH.qua, 'Application de TA = TR · Np · Nex : TR = 600 ms, Np = 256, Nex = 2. Calculez TA (en secondes).', 307.2, 0.5, 's', '600 × 256 × 2 = 307 200 ms = <b>307,2 s</b> (≈ 5 min 7 s).'),
+      NU('a3-16', TH.qua, 'TR = 2000 ms, Np = 192, Nex = 1. Calculez TA (en secondes).', 384, 0.5, 's', '2000 × 192 × 1 = 384 000 ms = <b>384 s</b> (6 min 24 s).'),
+      QC('a3-17', TH.qua, 'On double Nex en gardant TR et Np : que se passe-t-il ?', ['TA doublé et meilleur RSB', 'TA inchangé', 'TA divisé par 2', 'RSB dégradé'], [0], 'TA = TR·Np·Nex ; Nex accumule du signal → meilleur RSB.'),
+      O('a3-18', TH.qua, 'Pourquoi le réglage des paramètres d’une séquence est-il toujours un compromis ?', 'Il faut concilier le <b>rapport signal/bruit</b>, la <b>résolution spatiale</b> et la <b>durée d’acquisition</b> totale de la séquence.'),
+      O('a3-19', TH.cod, 'Quels sont les 2 outils du codage spatial et comment s’articulent-ils ?', 'Un outil <b>physique</b> (le gradient de champ magnétique) et un outil <b>mathématique</b> (la transformée de Fourier, qui passe du domaine temporel au domaine fréquentiel). Pour passer du signal à la TF, il faut d’abord l’outil physique : le gradient.'),
+      O('a3-20', TH.cod, 'Que contiennent le centre et la périphérie de l’espace K ?', 'Centre : signaux les plus élevés (basses fréquences) → contraste. Périphérie : signaux les plus faibles (hautes fréquences) → résolution spatiale / détails.', { fig: 'kspace' })
+    ]
+  },
+
+  /* ---------- Alt 4 ---------- */
+  {
+    id: 'a4', title: 'Alt 4', sub: 'Artéfacts, sécurité, produits de contraste (d’après TD 4)', src: 'Version alternative du TD 4',
+    qs: [
+      TB('a4-01', TH.art, 'Quel artéfact est le plus probable dans chaque situation ?',
+        ['Artéfact probable'],
+        [['Le patient respire et bouge pendant l’acquisition', ['Mouvement']], ['Le patient est porteur d’une prothèse de genou', ['Métallique']],
+         ['Le FOV est plus petit que la zone à examiner', ['Repliement']], ['Perte de signal à l’interface air/tissu', ['Susceptibilité magnétique']]],
+        ['Mouvement', 'Métallique', 'Repliement', 'Susceptibilité magnétique', 'Flux', 'Troncature']),
+      QC('a4-02', TH.art, 'Actions correctives possibles pour un artéfact de mouvement :', ['Séquence en apnée', 'Synchronisation respiratoire (mouvement périodique)', 'Explication de l’examen au patient', 'Augmenter le FOV'], [0, 1, 2], 'Augmenter le FOV corrige le repliement.'),
+      QC('a4-03', TH.art, 'Actions correctives possibles pour un artéfact de repliement :', ['Augmenter le champ de vue (FOV)', 'Changer le codage de phase', 'Utiliser des bandes de saturation', 'Séquence en apnée'], [0, 1, 2]),
+      O('a4-04', TH.art, 'Pourquoi la séquence écho de gradient est-elle plus sensible aux artéfacts que le spin écho ?', 'Parce qu’il n’y a pas de correction de l’homogénéité du champ par l’impulsion de <b>180°</b> de rephasage, présente en spin écho.'),
+      O('a4-05', TH.art, 'À quoi sert l’artéfact de susceptibilité magnétique en pratique ?', 'Il dépiste les lésions hémorragiques (dépôts d’hémosidérine) et les calcifications ; il résulte d’une perte de signal aux interfaces de structures de susceptibilités différentes (air/tissu, os/tissu, hémoglobine/tissu).'),
+      VF('a4-06', TH.sec, 'Effets biologiques et accidents : Vrai ou Faux ?', [
+        ['Les brûlures thermiques par les ondes de RF font partie des accidents évitables à 100 %.', true, ''],
+        ['Les vertiges, nausées et goût métallique sont évitables à 100 % par le MERM.', false, 'Ce sont des effets biologiques du champ statique ; seuls brûlures RF, effets projectiles et perte d’audition sont évitables à 100 %.'],
+        ['Les stimulations nerveuses périphériques sont liées aux gradients.', true, ''],
+        ['Les stimulations nerveuses périphériques sont dues aux ondes de radiofréquence.', false, 'Elles sont dues aux <b>gradients</b> ; les ondes RF provoquent un échauffement des tissus.'],
+        ['Un patient qui croise les jambes pendant l’examen n’a aucun risque particulier.', false, 'Risque d’échauffement des tissus (zones cutanées en contact → brûlures).'],
+        ['Les tatouages ne sont pas une contre-indication, mais le patient doit être prévenu du risque d’échauffement et disposer de la poire d’appel.', true, '']
+      ]),
+      VF('a4-07', TH.sec, 'Quench et hélium : Vrai ou Faux ?', [
+        ['Le quench est la perte soudaine de la supraconductivité de la bobine de l’aimant.', true, ''],
+        ['Le bouton de quench peut être utilisé en cas d’incendie dans la salle.', true, ''],
+        ['Après un quench, on peut laisser le patient dans la salle porte ouverte.', false, 'Le patient doit être <b>évacué et la porte fermée</b> (hélium gazeux : asphyxie, brûlure par le froid).'],
+        ['Le champ peut aussi être diminué de façon contrôlée en 20 secondes par un technicien.', true, ''],
+        ['Le TAS (SAR) correspond à l’énergie déposée dans les tissus par le champ statique B0.', false, 'Par les <b>ondes de radiofréquence</b>.']
+      ]),
+      QC('a4-08', TH.sec, 'Quelles sont des contre-indications absolues à l’IRM ?', ['Pacemaker', 'Implant cochléaire', 'Corps étranger intra-oculaire', 'Valve cardiaque ancienne', 'Clip cérébral ancien', 'Tatouage', 'Prothèse du genou'], [0, 1, 2, 3, 4], 'Tatouage et prothèse du genou ne sont pas des contre-indications absolues du cours.'),
+      QC('a4-09', TH.sec, 'Quelles actions aident un patient claustrophobe ?', ['Veiller à un débit d’air suffisant', 'Fournir la lumière dans le tunnel', 'Couvrir les yeux / utiliser des miroirs', 'Communiquer avec le patient', 'Diffuser de la musique', 'Retirer la poire d’appel'], [0, 1, 2, 3, 4]),
+      QC('a4-10', TH.sec, 'Dispositif métallique de compatibilité inconnue : que faites-vous ?', ['Annuler systématiquement l’examen', 'Vérifier la compatibilité (références exactes) sur securirm.com', 'Réaliser l’examen sans précaution', 'Demander au patient de retirer l’implant'], [1]),
+      QC('a4-11', TH.sec, 'Le zonage en IRM découpe l’espace en :', ['2 zones', '3 zones', '4 zones de risques et de restriction d’accès croissants', '10 zones'], [2]),
+      QC('a4-12', TH.sec, 'Pourquoi évacuer le patient et fermer la porte après activation du quench ?', ['Asphyxie (raréfaction de l’oxygène) et brûlure par le froid liées à l’hélium', 'Rayonnement ionisant', 'Risque d’explosion de l’aimant', 'Aucun risque'], [0]),
+      QC('a4-13', TH.sec, 'Quels accidents sont évitables à 100 % ?', ['Brûlures thermiques par RF', 'Effets projectiles', 'Perte d’audition chez les patients insuffisamment protégés', 'Vertiges et goût métallique'], [0, 1, 2]),
+      QC('a4-14', TH.sec, 'Un patient présente un tatouage. Que faire ?', ['Contre-indication absolue', 'Le prévenir du risque d’échauffement et lui donner la poire d’appel', 'Aucune précaution', 'Retirer le tatouage'], [1]),
+      VF('a4-15', TH.pdc, 'Produits de contraste : Vrai ou Faux ?', [
+        ['Les produits de contraste ont une propriété paramagnétique.', true, ''],
+        ['Ils allongent le temps de relaxation des tissus.', false, 'Ils le <b>raccourcissent</b>.'],
+        ['Ils augmentent le contraste T1 là où le produit diffuse.', true, ''],
+        ['Augmenter la dose augmente toujours le signal.', false, 'Le signal diminue si l’on augmente la quantité (effet T2, image dégradée).'],
+        ['La dose à respecter est de 0,2 ml/kg.', true, ''],
+        ['Ils sont contre-indiqués chez la femme enceinte.', true, ''],
+        ['Il existe un risque de rétention de gadolinium dans le tissu cérébral.', true, ''],
+        ['Ce sont les produits linéaires qui ont été retirés par les autorités européennes.', true, ''],
+        ['La demi-vie d’élimination est de l’ordre de 1 h 30.', true, '']
+      ]),
+      O('a4-16', TH.pdc, 'Pourquoi ne faut-il pas augmenter la dose de produit de contraste pour obtenir plus de signal ?', 'Au-delà de la dose (0,2 ml/kg), le signal <b>diminue</b> : on passe en <b>effet T2</b> et la qualité de l’image se dégrade. L’injection sert à augmenter le contraste T1.'),
+      O('a4-17', TH.sec, 'Quelle grandeur quantifie l’énergie RF déposée dans les tissus et quel risque lui est associé ?', 'Le <b>taux d’absorption spécifique (TAS / SAR)</b> : énergie déposée par les ondes RF par unité de temps et de poids. Risque : échauffement, voire brûlures graves.')
+    ]
+  },
+
+  /* ---------- Alt 5 ---------- */
+  {
+    id: 'a5', title: 'Alt 5', sub: 'Séquences en IRM (d’après TD 5)', src: 'Version alternative du TD 5',
+    qs: [
+      VF('a5-01', TH.seq, 'Séquences : Vrai ou Faux ?', [
+        ['L’angle de bascule des séquences écho de gradient est en général inférieur à 90°.', true, ''],
+        ['La séquence inversion récupération débute par une impulsion de 180°.', true, ''],
+        ['La séquence inversion récupération est la séquence de choix pour détecter l’hémosidérine.', false, 'C’est l’<b>écho de gradient</b>.'],
+        ['L’EPI est la séquence la plus lente.', false, 'L’EPI est la séquence la <b>plus rapide</b> (codage très rapide de l’espace K).'],
+        ['Les séquences de suppression de graisse allongent la durée d’acquisition.', true, ''],
+        ['Le Fat Sat utilise une impulsion sélective centrée sur le pic de la graisse.', true, ''],
+        ['En spin écho T2, le principal inconvénient est la durée liée aux longs TR.', true, ''],
+        ['L’écho de gradient est insensible aux inhomogénéités de champ.', false, 'Il y est <b>sensible</b> (artéfact de susceptibilité).'],
+        ['Le Fat Sat spectral est sensible aux inhomogénéités de B0.', true, ''],
+        ['La séquence FLAIR supprime le signal de la graisse.', false, 'Elle supprime le signal du <b>LCR</b> (TI long) ; la STIR supprime la graisse (TI court).']
+      ]),
+      MA('a5-02', TH.seq, 'Associez chaque séquence à sa caractéristique principale.',
+        ['Spin écho', 'Écho de gradient', 'Inversion récupération', 'Suppression de graisse', 'Echo Planar Imaging (EPI)'],
+        ['Impulsion initiale de 180° ; modifie les contrastes tissulaires (STIR, FLAIR)', 'Séquence la plus rapide ; diffusion, perfusion, flux ; facteur b', 'Impulsion de rephasage de 180° ; écho pondéré en T2 et non T2*', 'Angle de bascule < 90° ; rapide ; sensible aux inhomogénéités de champ ; T2*', 'Impulsion sélective centrée sur le pic de la graisse ; durée rallongée'],
+        [2, 3, 0, 4, 1]),
+      TB('a5-03', TH.seq, 'Quelle séquence privilégier dans chaque situation ?',
+        ['Séquence'],
+        [['Suspicion d’AVC aigu', ['Diffusion (EPI)']], ['Recherche de saignement / dépôts d’hémosidérine', ['Écho de gradient (GRE)']],
+         ['Supprimer le signal du LCR', ['FLAIR']], ['Supprimer la graisse sur un rachis lombaire', ['STIR']],
+         ['Phénomène inflammatoire ostéo-articulaire', ['STIR']], ['Flux sanguins sans produit de contraste', ['ARM']]],
+        ['Diffusion (EPI)', 'Écho de gradient (GRE)', 'FLAIR', 'STIR', 'ARM', 'Spin écho T1']),
+      TB('a5-04', TH.pon, 'Quelle pondération pour chaque besoin ?',
+        ['Pondération'],
+        [['Étudier le cartilage ou les ménisques', ['Densité protonique (DP)']], ['Séquence réalisée après injection de produit de contraste', ['Pondération T1']]],
+        ['Densité protonique (DP)', 'Pondération T1', 'Pondération T2', 'STIR']),
+      TB('a5-05', TH.seq, 'Séquences d’inversion récupération : complétez.',
+        ['Temps d’inversion', 'Signal supprimé'],
+        [['STIR', ['TI court', 'Graisse']], ['FLAIR', ['TI long', 'LCR (liquide céphalorachidien)']]],
+        ['TI court', 'TI long', 'Graisse', 'LCR (liquide céphalorachidien)']),
+      NU('a5-06', TH.seq, 'Spin écho rapide : TR = 3000 ms, Np = 256, Nex = 1, ETL = 8. Calculez TA (secondes) avec TA = TR × Np × Nex / ETL.', 96, 0.5, 's', '3000 × 256 × 1 / 8 = 96 000 ms = <b>96 s</b>.'),
+      NU('a5-07', TH.seq, 'Spin écho rapide : TR = 4000 ms, Np = 256, Nex = 2, ETL = 16. Calculez TA (secondes).', 128, 0.5, 's', '4000 × 256 × 2 / 16 = 128 000 ms = <b>128 s</b>.'),
+      O('a5-08', TH.seq, 'Quel est l’intérêt de l’écho de spin rapide par rapport à l’écho de spin classique ?', 'L’application de <b>nouvelles impulsions de 180°</b> produit un <b>train d’échos</b> (facteur turbo / ETL) pendant un même TR : le temps d’acquisition est divisé par l’ETL (TA = TR × Np × Nex / ETL).'),
+      QC('a5-09', TH.seq, 'Une image de diffusion est suspecte : quel outil permet de confirmer une restriction de diffusion ?', ['Le coefficient de diffusion apparent (ADC)', 'Le temps d’inversion (TI)', 'L’ETL', 'Le Nex'], [0]),
+      QC('a5-10', TH.seq, 'Quel paramètre règle la sensibilité au mouvement des molécules d’eau en diffusion ?', ['Le facteur b', 'Le TR', 'L’angle de bascule', 'Le TE'], [0]),
+      QC('a5-11', TH.seq, 'Quelle séquence est particulièrement sensible à la vitesse des flux sanguins ?', ['TOF (Time of Flight)', 'T2', 'GRE', 'Diffusion'], [0]),
+      QC('a5-12', TH.seq, 'À quoi sert l’impulsion de 180° en écho de spin ?', ['Rephaser les spins', 'Exciter les protons', 'Supprimer la graisse', 'Accélérer l’acquisition'], [0]),
+      QC('a5-13', TH.seq, 'Quelle séquence est la plus sensible aux dépôts de fer (hémosidérine) ?', ['Écho de gradient (GRE)', 'Spin écho', 'TOF', 'FLAIR'], [0]),
+      TB('a5-14', TH.pon, 'Spin écho : donnez le signal de chaque tissu.',
+        ['Pondération T1', 'Pondération T2'],
+        [['EAU', ['Hyposignal', 'Hypersignal']], ['OS', ['Hyposignal', 'Hyposignal']], ['GRAISSE', ['Hypersignal', 'Hypersignal']]],
+        ['Hypersignal', 'Hyposignal'])
+    ]
+  },
+
+  /* ---------- Alt 6 : synthèse ---------- */
+  {
+    id: 'a6', title: 'Alt 6', sub: 'Synthèse type examen (tout ou rien)', src: 'Mélange de tous les TD — définitions et QCM à réponses multiples',
+    qs: [
+      MA('a6-01', TH.phy, 'Associez chaque terme à sa définition.',
+        ['Moment magnétique', 'Spin', 'Précession', 'Résonance', 'Relaxation', 'Excitation', 'Gradient de champ magnétique', 'Antenne', 'Supraconductivité'],
+        ['Bobinage de conducteur pour émettre ou recevoir des signaux de radiofréquence', 'Mouvement rotatoire en cône du moment magnétique autour de l’axe de B0', 'Propriété des noyaux ayant un nombre de protons et/ou de neutrons impairs', 'Champ de faible intensité variant linéairement dans l’espace et s’ajoutant à B0', 'Retour de l’aimantation à son équilibre initial après une impulsion d’excitation', 'Grandeur vectorielle µ mesurant l’intensité d’une source magnétique', 'Perte totale de résistance électrique de certains alliages à très basse température', 'Échange d’énergie entre 2 systèmes de même fréquence', 'Création d’une composante transversale par application d’un champ B1 de RF'],
+        [5, 2, 1, 7, 4, 8, 3, 0, 6]),
+      QC('a6-02', TH.phy, 'Concernant le comportement des spins sous B0 :', ['Ils s’alignent dans l’axe de B0', 'Ils se répartissent en deux populations (parallèle et antiparallèle)', 'Les deux populations sont strictement égales', 'L’excès de protons parallèles crée l’aimantation M'], [0, 1, 3]),
+      QC('a6-03', TH.rel, 'Après une impulsion RF de 90° :', ['Mz devient nulle', 'Mxy devient maximale', 'Les spins sont mis en phase', 'Les populations parallèle/antiparallèle sont égalisées'], [0, 1, 2, 3]),
+      QC('a6-04', TH.rel, 'La relaxation transversale (T2) :', ['Est aussi appelée spin-spin', 'S’accompagne d’une repousse de Mz', 'Correspond à une perte de cohérence de phase', 'Est la plus rapide des deux relaxations'], [0, 2, 3]),
+      QC('a6-05', TH.pon, 'En pondération T2 :', ['Le TE conditionne le contraste', 'Le TR long permet de s’affranchir des contrastes T1', 'Un tissu à T2 long apparaît en hypersignal', 'Un TR court est recommandé'], [0, 1, 2]),
+      QC('a6-06', TH.cod, 'À propos de l’espace K :', ['Il correspond à un plan de Fourier', 'Le centre contient les signaux les plus élevés (basses fréquences)', 'La périphérie détermine la résolution spatiale', 'Le centre détermine la résolution spatiale'], [0, 1, 2]),
+      QC('a6-07', TH.cod, 'À propos des gradients :', ['Gz sélectionne la coupe, appliqué avec l’onde RF', 'Gy code la phase, appliqué avant la réception', 'Gx est le gradient de lecture, appliqué pendant la réception', 'Les trois gradients sont parallèles entre eux'], [0, 1, 2], 'Les gradients sont perpendiculaires entre eux.'),
+      QC('a6-08', TH.sec, 'En matière de sécurité :', ['Le quench est la perte soudaine de la supraconductivité', 'Le quench peut être utilisé en cas d’incendie', 'Après un quench, l’hélium gazeux présente un risque d’asphyxie', 'Le TAS est lié à l’énergie déposée par le champ statique B0'], [0, 1, 2], 'Le TAS concerne l’énergie déposée par les ondes de radiofréquence.'),
+      QC('a6-09', TH.pdc, 'Produits de contraste :', ['Paramagnétiques', 'Raccourcissent le temps de relaxation', 'Augmentent le contraste T1', 'Dose recommandée : 1 ml/kg'], [0, 1, 2], 'La dose du cours est de 0,2 ml/kg.'),
+      QC('a6-10', TH.seq, 'Séquences :', ['Écho de gradient : angle de bascule < 90°, sensible aux inhomogénéités', 'Inversion récupération : impulsion initiale de 180°', 'EPI : séquence la plus rapide', 'Fat Sat : n’allonge pas la durée d’acquisition'], [0, 1, 2])
+    ]
+  }
+];
+
+/* ===================== FLASHCARDS =====================
+   Format : [thème, question, réponse, schéma (optionnel)]
+   L'identifiant de chaque carte = son rang dans ce tableau (ne pas réordonner si vous modifiez le fichier). */
+const CARDS = [
+  /* --- Matériel & composants --- */
+  [TH.mat, 'Que signifie IRMN ?', 'Imagerie par Résonance Magnétique Nucléaire.'],
+  [TH.mat, 'Quel est l’ordre de grandeur du champ B0 en IRM clinique ?', '<b>1,5 à 3 T</b> (Tesla).'],
+  [TH.mat, 'Quels sont les 3 principaux composants d’une IRM ?', '<ol><li>L’aimant (champ statique B0)</li><li>L’antenne de radiofréquence (RF)</li><li>Les gradients (bobines de gradient)</li></ol>'],
+  [TH.mat, 'Rôle de l’aimant en IRM ?', 'Générer un champ magnétique B0 <b>constant</b> et magnétiser l’aimantation.'],
+  [TH.mat, 'Rôle de l’antenne RF ?', '<b>Émettre</b> l’onde RF pour exciter les spins et <b>recevoir</b> les signaux restitués par les protons. Elle fonctionne à la fréquence de Larmor.'],
+  [TH.mat, 'Rôle des gradients ?', 'Créer des variations de champ pour <b>encoder spatialement</b> le signal.'],
+  [TH.mat, 'Quel type d’aimant est utilisé en IRM clinique ?', '<b>Supraconducteur</b> : bobines en alliage niobium-titane, refroidies par de l’<b>hélium liquide à −269 °C (4 K)</b>. Courant sans perte d’énergie ; champ puissant et homogène.'],
+  [TH.mat, 'Qu’est-ce que la supraconductivité ?', 'Propriété de certains alliages qui perdent totalement leur résistance électrique à de très basses températures (proches du zéro absolu).'],
+  [TH.mat, 'Définition de la cage de Faraday ?', 'Enceinte métallique en <b>cuivre ou aluminium</b> qui entoure complètement la salle d’examen IRM.'],
+  [TH.mat, 'Rôle de la cage de Faraday ?', 'Isole l’<b>intérieur</b> de la salle des perturbations électriques extérieures (ondes RF) et l’<b>extérieur</b> des ondes RF de l’examen ; garantit la qualité du signal en éliminant les bruits électromagnétiques.'],
+  [TH.mat, 'Quel composant est à l’origine du bruit acoustique ?', 'Les <b>gradients</b> : la commutation (courant alternatif dans les bobines) provoque une vibration, donc un son.'],
+  [TH.mat, 'Fréquence de Larmor à 1,5 T et à 3 T ?', '≈ <b>64 MHz</b> à 1,5 T ; ≈ <b>123 MHz</b> à 3 T.'],
+  [TH.mat, 'Peut-on utiliser une antenne 3 T sur une IRM 1,5 T ?', '<b>Non</b> : la fréquence de Larmor dépend du champ (ω₀ = γ·B0). Les antennes sont accordées sur la fréquence de précession des protons du champ concerné.'],
+  [TH.mat, 'Qu’est-ce qu’une antenne ?', 'Bobinage de conducteur visant à émettre ou à recevoir des signaux de radiofréquence.'],
+
+  /* --- Physique de base --- */
+  [TH.phy, 'Qu’est-ce que le spin ?', 'Paramètre physique de toute particule chargée : <b>rotation de la particule sur elle-même</b>, qui induit un moment magnétique.'],
+  [TH.phy, 'Qu’est-ce que le moment magnétique ?', 'Grandeur vectorielle notée µ qui mesure l’intensité d’une source magnétique (comportement de boussole).'],
+  [TH.phy, 'Qu’est-ce que le rapport gyromagnétique γ ?', 'Rapport du moment magnétique d’une particule à son spin (µ proportionnel à γ).'],
+  [TH.phy, 'Quels noyaux possèdent un moment magnétique nucléaire ?', 'Ceux ayant un nombre <b>impair</b> de protons et/ou de neutrons (proton isolé). Si le nombre est pair, les moments s’annulent deux à deux (ex. ¹²C : pas de moment).'],
+  [TH.phy, 'Quels sont les 2 constituants du corps utiles au signal RMN ?', 'L’<b>eau (H₂O)</b> et la <b>graisse</b> (ramifications CH₃).'],
+  [TH.phy, 'Comportement des spins hors champ magnétique ?', 'Moments orientés dans toutes les directions : somme nulle, <b>M = 0</b> (pas d’aimantation macroscopique).', 'pol'],
+  [TH.phy, 'Comportement des spins sous B0 ?', 'Alignement dans l’axe de B0 en 2 populations (<b>parallèle</b> / <b>antiparallèle</b>) avec un petit excès parallèle (basse énergie) → <b>M ≠ 0</b>.', 'pol'],
+  [TH.phy, 'Qu’est-ce que la polarisation ?', 'Établissement de l’état d’équilibre de <b>Boltzmann</b> sous B0 (excès de spins parallèles, M ≠ 0). Créée par l’aimant.'],
+  [TH.phy, 'Quelles sont les 2 composantes de M ?', '<b>Mz</b> : aimantation longitudinale (projection sur B0, axe Oz). <b>Mxy</b> : aimantation transversale (projection dans le plan xOy).'],
+  [TH.phy, 'Qu’est-ce que la précession ?', 'Rotation du moment magnétique µ autour de l’axe de B0 à la fréquence de <b>Larmor</b> (mouvement de toupie).'],
+  [TH.phy, 'Équation de Larmor ?', '<b>ω₀ = γ · B0</b> : la fréquence de précession dépend de B0 et de γ.'],
+  [TH.phy, 'Quelles sont les 3 grandes étapes d’une acquisition IRM ?', '<b>Polarisation → Excitation → Relaxation</b> (longitudinale et transversale).'],
+  [TH.phy, 'Définition de la résonance ?', 'Échange d’énergie entre 2 systèmes de <b>même fréquence</b>. En IRM : onde RF ↔ spins en précession.'],
+  [TH.phy, 'Condition de résonance en IRM ?', '<b>ωr = ω₀ = γ·B0</b> : la fréquence de l’onde RF doit être égale à la fréquence de Larmor. Sinon, pas de phénomène RMN.'],
+  [TH.phy, 'Unité du champ magnétique ?', 'Le <b>Tesla (T)</b>.'],
+
+  /* --- Excitation & relaxation --- */
+  [TH.rel, 'Valeurs de Mz et Mxy à l’équilibre thermodynamique ?', '<b>Mz maximale</b> (M0), <b>Mxy = 0</b> (spins déphasés).'],
+  [TH.rel, 'Valeurs de Mz et Mxy après une impulsion RF de 90° ?', '<b>Mz = 0</b> (populations égalisées), <b>Mxy maximale</b> (spins en phase). Phase d’<b>excitation</b>.'],
+  [TH.rel, 'Que fait une impulsion RF de 180° ?', 'Inverse Mz : <b>M = −Mz</b> (maximale mais de sens opposé à B0).'],
+  [TH.rel, 'Direction de B1 par rapport à B0 ?', 'Toujours <b>perpendiculaire</b> à B0.'],
+  [TH.rel, 'Conséquences du pulse RF (B1) ?', 'Transition des moments vers l’état de haute énergie ; mise en phase des spins ; inclinaison de M par rapport à B0.'],
+  [TH.rel, 'Répartition des populations à l’équilibre puis après 90° ?', 'Équilibre : majorité de spins parallèles (basse énergie) — <b>polarisation</b>. Après 90° : populations égalisées — <b>excitation</b>.'],
+  [TH.rel, 'Quel phénomène suit l’arrêt de l’onde RF ?', 'La <b>relaxation</b> : retour à l’équilibre ; l’énergie restituée par les spins est la source du signal RMN.'],
+  [TH.rel, 'Relaxation longitudinale : nom, constante, évolution ?', '<b>Spin-réseau</b>, constante <b>T1</b> : repousse exponentielle de Mz jusqu’à M0. Base du contraste T1.', 'relax'],
+  [TH.rel, 'Relaxation transversale : nom, constante, évolution ?', '<b>Spin-spin</b>, constante <b>T2</b> : décroissance exponentielle de Mxy (perte de cohérence de phase), sans échange d’énergie.', 'relax'],
+  [TH.rel, 'Définition du T1 ?', 'Temps nécessaire à Mz pour retrouver <b>63 %</b> de sa valeur initiale.'],
+  [TH.rel, 'Définition du T2 ?', 'Constante de décroissance de Mxy (<b>37 %</b> de la valeur initiale).'],
+  [TH.rel, 'Quelle relaxation est la plus rapide ?', 'La relaxation <b>transversale</b>.'],
+  [TH.rel, 'T1 et T2 dépendent-ils de B0 ?', 'Le T2 peut être considéré comme <b>indépendant de B0</b>, contrairement au T1.'],
+  [TH.rel, 'T2* vs T2 ?', 'Le T2* traduit les déphasages dus aux inhomogénéités <b>intrinsèques</b> (tissus) ET <b>extrinsèques</b> (B0). Le T2 « vrai » s’obtient avec un 180° de rephasage.'],
+  [TH.rel, 'Comment obtenir un T2 « vrai » ?', 'Ajouter une impulsion RF de <b>180°</b> après le 90° (rephasage compensateur → écho de spin) : séquence <b>écho de spin</b>.'],
+  [TH.rel, 'Étapes d’obtention du signal / contraste ?', '<ol><li>RF : Mz disparaît</li><li>Apparition de Mxy (rephasage)</li><li>Arrêt de la RF</li><li>Repousse de Mz (T1)</li><li>Mesure de Mxy par l’antenne = signal</li></ol>'],
+
+  /* --- Pondération & contraste --- */
+  [TH.pon, 'Qu’est-ce que le contraste en IRM ?', 'Différence d’intensité de signal émis par les structures lors de la relaxation transversale.'],
+  [TH.pon, 'Quels paramètres influencent le contraste ?', 'Le <b>TR</b>, le <b>TE</b> et l’<b>angle de bascule</b>.'],
+  [TH.pon, 'Qu’est-ce que le TR et quelle pondération conditionne-t-il ?', 'Temps de répétition : intervalle entre 2 excitations. Il conditionne la pondération <b>T1</b>.', 'contrastT1'],
+  [TH.pon, 'Qu’est-ce que le TE et quelle pondération conditionne-t-il ?', 'Temps d’écho : temps de récupération du signal. Il conditionne la pondération <b>T2</b>.', 'contrastT2'],
+  [TH.pon, 'Réglages TR/TE pour une pondération T1 ?', '<b>TR court</b> (max 700 ms) et <b>TE court</b> (max 50 ms).'],
+  [TH.pon, 'Réglages TR/TE pour une pondération T2 ?', '<b>TR long</b> (&gt; 1800 ms) et <b>TE long</b> (80–120 ms).'],
+  [TH.pon, 'Réglages TR/TE pour une pondération en densité de protons ?', '<b>TR long</b> et <b>TE court</b>.'],
+  [TH.pon, 'Rôle du TE court et du TR court pour pondérer en T1 ?', 'TE court : ne pas pondérer en T2. TR court : pondérer en T1.'],
+  [TH.pon, 'Rôle du TE long et du TR long pour pondérer en T2 ?', 'TE long : exprimer les contrastes T2. TR long : s’affranchir des contrastes T1.'],
+  [TH.pon, 'Signal d’un tissu à T1 court / T1 long en pondération T1 ?', 'T1 court → <b>hypersignal</b> ; T1 long → <b>hyposignal</b>.'],
+  [TH.pon, 'Signal d’un tissu à T2 court / T2 long en pondération T2 ?', 'T2 court → <b>hyposignal</b> ; T2 long → <b>hypersignal</b>.'],
+  [TH.pon, 'Signal en pondération densité de protons ?', 'Grande densité de protons → hypersignal ; petite densité → hyposignal.'],
+  [TH.pon, 'Données T1/T2 de l’eau, de la graisse et de l’os ?', '<b>Eau</b> : T1 long / T2 long. <b>Graisse</b> : T1 court / T2 court. <b>Os</b> : T1 long / T2 court.'],
+  [TH.pon, 'Signal de l’eau, de l’os et de la graisse en spin écho T1 et T2 ?', '<b>Eau</b> : hypo T1 / hyper T2. <b>Os</b> : hypo / hypo. <b>Graisse</b> : hyper / hyper.'],
+  [TH.pon, 'Quel tissu est le plus en hypersignal en pondération T1 ?', 'La <b>graisse</b>.'],
+  [TH.pon, 'Quelle pondération pour étudier cartilage et ménisques ?', 'La pondération en <b>densité protonique (DP)</b>.'],
+
+  /* --- Qualité d'image & TA --- */
+  [TH.qua, 'Quels sont les 5 facteurs de qualité d’une image IRM ?', 'Rapport signal/bruit · contraste · résolution spatiale · temps d’acquisition · présence d’artéfacts.'],
+  [TH.qua, 'De quoi dépend le rapport signal/bruit (S/B) ?', 'De la <b>taille du voxel</b>, de la <b>quantité d’eau</b> et des <b>paramètres de la séquence</b>.'],
+  [TH.qua, 'Comment obtenir une image de qualité ?', 'Trouver un <b>compromis</b> entre rapport signal/bruit, résolution spatiale et durée d’acquisition.'],
+  [TH.qua, 'Formule du temps d’acquisition ?', '<b>TA = TR · Np · Nex</b>'],
+  [TH.qua, 'Que représentent Np et Nex ?', '<b>Np</b> : nombre de lignes de la matrice (nombre de phases). <b>Nex</b> : nombre d’excitations = nombre de répétitions pour accumuler du signal → meilleur RSB.'],
+  [TH.qua, 'Effet d’une augmentation de Nex ?', 'Meilleur RSB, mais temps d’acquisition plus long (TA ∝ Nex).'],
+
+  /* --- Codage spatial & espace K --- */
+  [TH.cod, 'Quels sont les 2 outils du codage spatial ?', 'Outil <b>physique</b> : le gradient de champ magnétique. Outil <b>mathématique</b> : la transformée de Fourier.'],
+  [TH.cod, 'Objectif de la transformée de Fourier ?', 'Passer du domaine <b>temporel</b> (amplitude/temps) au domaine <b>fréquentiel</b> (amplitude/fréquence).'],
+  [TH.cod, 'Définition d’un gradient de champ magnétique ?', 'Champ de <b>faible intensité</b>, variant <b>linéairement</b> dans l’espace, qui s’ajoute à B0 de manière contrôlée dans le temps.'],
+  [TH.cod, 'Rôle d’un gradient ?', 'Sélectionner un plan de coupe (d’où vient le signal ?) et coder le signal dans la coupe.'],
+  [TH.cod, 'Conséquences d’un gradient sur les spins ?', 'Modification de leur <b>fréquence de précession</b> et de leur <b>phase</b>.'],
+  [TH.cod, 'Gradient Gz ?', '<b>Gradient de coupe</b> : sélection d’une coupe ; appliqué en même temps que l’onde RF.', 'chrono'],
+  [TH.cod, 'Gradient Gy ?', '<b>Gradient de codage de phase</b> : sélectionne la ligne du plan de Fourier ; appliqué avant la réception du signal.', 'chrono'],
+  [TH.cod, 'Gradient Gx ?', '<b>Gradient de lecture (fréquence)</b> : codage par la fréquence, remplit les lignes du plan de Fourier ; appliqué pendant la réception.', 'chrono'],
+  [TH.cod, 'Orientation relative des gradients ?', 'Tous les gradients sont <b>perpendiculaires</b> entre eux.'],
+  [TH.cod, 'Qu’est-ce que l’espace K ?', 'Espace mathématique où est stocké le signal enregistré ; il correspond exactement à un <b>plan de Fourier</b> (lignes et colonnes).'],
+  [TH.cod, 'Que contient le centre de l’espace K ?', 'Les signaux les <b>plus élevés</b> = basses fréquences → détermine le <b>contraste</b>.', 'kspace'],
+  [TH.cod, 'Que contient la périphérie de l’espace K ?', 'Les signaux les plus faibles = hautes fréquences → détermine la <b>résolution spatiale</b> (détails).', 'kspace'],
+  [TH.cod, 'Lien entre un point de l’espace K et l’image ?', 'Chaque point de l’espace K contribue à tous les points de l’espace image, et inversement.'],
+  [TH.cod, 'Chronogramme d’une séquence spin écho avec gradients ?', 'RF : 90° puis 180° ; Gz pendant les impulsions RF ; Gy entre le 90° et la lecture ; Gx pendant l’écho.', 'chrono'],
+
+  /* --- Séquences --- */
+  [TH.seq, 'Quels sont les 6 grands types de séquences ?', 'Spin écho · Écho de gradient · Inversion récupération · Suppression de graisse · EPI · ARM (angiographie).'],
+  [TH.seq, 'Caractéristiques de la séquence spin écho ?', 'Impulsion de rephasage de <b>180°</b> (compense les hétérogénéités de champ → écho pondéré T2, pas T2*) ; image anatomique de bonne qualité en T1 ; séquences longues.'],
+  [TH.seq, 'Caractéristiques de l’écho de gradient (GRE) ?', 'Angle de bascule <b>&lt; 90°</b> ; séquence rapide (proche de la seconde par coupe) ; sensible aux inhomogénéités (artéfact de susceptibilité) ; T2* ; détecte les dépôts d’hémosidérine.'],
+  [TH.seq, 'Caractéristiques de l’inversion récupération ?', 'Impulsion initiale de <b>180°</b> ; modifie les contrastes tissulaires ; STIR (TI court : graisse) et FLAIR (TI long : LCR).'],
+  [TH.seq, 'Caractéristiques de la suppression de graisse ?', 'Possible en T1, DP ou T2 ; impulsion sélective centrée sur le pic de la graisse (Fat Sat) ; <b>durée de séquence rallongée</b>.'],
+  [TH.seq, 'Caractéristiques de l’EPI ?', 'Séquence la <b>plus rapide</b> (codage très rapide de l’espace K) ; diffusion, perfusion, flux ; étude de la diffusion des molécules d’eau ; pathologie tumorale ; facteur b.'],
+  [TH.seq, 'Particularité de l’écho de spin rapide ?', 'Nouvelles impulsions de 180° → <b>train d’échos</b> (facteur turbo / ETL). <b>TA = TR × Np × Nex / ETL</b>.'],
+  [TH.seq, 'Séquence STIR : intérêt ?', 'Inversion récupération à <b>TI court</b> : supprime la graisse (ex. rachis lombaire) ; met en évidence les phénomènes inflammatoires ostéo-articulaires.'],
+  [TH.seq, 'Séquence FLAIR : intérêt ?', 'Inversion récupération à <b>TI long</b> : supprime le signal du liquide céphalorachidien (LCR).'],
+  [TH.seq, 'Principe de la séquence de diffusion ?', 'Étude des mouvements des <b>molécules d’eau</b>. L’<b>ADC</b> confirme une restriction de diffusion ; le <b>facteur b</b> règle la sensibilité au mouvement. Essentielle dans l’AVC aigu.'],
+  [TH.seq, 'Quelle séquence met en évidence les flux sans produit de contraste ?', 'L’<b>ARM</b> (angiographie par résonance magnétique). La séquence <b>TOF</b> est sensible à la vitesse des flux.'],
+  [TH.seq, 'Quelle séquence est la plus sensible aux artéfacts ?', 'L’<b>écho de gradient</b> : pas d’impulsion de 180° pour corriger l’homogénéité du champ.'],
+  [TH.seq, 'Quelle séquence détecte les dépôts d’hémosidérine ?', 'L’<b>écho de gradient (GRE)</b> (saignements, T2*).'],
+  [TH.seq, 'Quelle séquence a une impulsion initiale de 180° ?', 'L’<b>inversion récupération</b>.'],
+  [TH.seq, 'Quelle séquence donne une image de haute résolution anatomique ?', 'Le <b>spin écho pondéré T1</b>.'],
+  [TH.seq, 'Quelle est la séquence la plus rapide ?', 'L’<b>EPI</b>.'],
+  [TH.seq, 'Fat Sat spectral : sensibilité ?', 'Sensible aux <b>inhomogénéités de B0</b>.'],
+  [TH.seq, 'Sur quelle séquence injecte-t-on le produit de contraste ?', 'Sur une séquence pondérée en <b>T1</b>.'],
+
+  /* --- Artéfacts --- */
+  [TH.art, 'Quels types d’artéfacts courants en IRM ?', 'Repliement · mouvements · flux · volume partiel · décalage chimique · métallique · troncature · susceptibilité magnétique.'],
+  [TH.art, 'Qu’est-ce qu’un artéfact ?', 'Une image indésirable ou déformée.'],
+  [TH.art, 'Artéfact de mouvement : origine et correction ?', 'Respiration, agitation du patient. Correction : séquence en <b>apnée</b>, synchronisation respiratoire (mouvement périodique), explication de l’examen au patient.'],
+  [TH.art, 'Artéfact de susceptibilité magnétique : origine, correction, intérêt ?', 'Perte de signal aux interfaces air/tissu, os/tissu, hémoglobine/tissu (inhomogénéité de B0). Correction : séquence spin écho. Intérêt : dépister hémorragies (hémosidérine) et calcifications.'],
+  [TH.art, 'Artéfact métallique : origine et correction ?', 'Prothèse de genou, ostéosynthèse… : distorsion locale des lignes de champ. Retirer tout objet métallique ; si métal compatible inévitable, séquences adaptées (écho de spin…).'],
+  [TH.art, 'Artéfact de repliement (aliasing) : origine et correction ?', 'FOV inférieur à la zone à examiner. Correction : augmenter le FOV, changer le codage de phase, utiliser des bandes de saturation.'],
+  [TH.art, 'Quel artéfact résulte d’une inhomogénéité du champ B0 ?', 'L’artéfact de <b>susceptibilité magnétique</b>.'],
+  [TH.art, 'Quel artéfact provoque l’absence de synchronisation des battements cardiaques ?', 'L’artéfact de <b>mouvement</b>.'],
+
+  /* --- Sécurité --- */
+  [TH.sec, 'Quels sont les 3 accidents évitables à 100 % ?', 'Brûlures thermiques par les ondes RF · effets projectiles d’objets ferromagnétiques · perte d’audition chez les patients non protégés.'],
+  [TH.sec, 'Effets biologiques du champ statique ?', 'Vertiges, nausées, goût métallique.'],
+  [TH.sec, 'Effets biologiques des gradients ?', 'Stimulations nerveuses périphériques.'],
+  [TH.sec, 'Effets biologiques des ondes RF ?', 'Échauffement des tissus.'],
+  [TH.sec, 'Comment éteindre le champ magnétique lors d’un incident ?', '<b>Bouton d’arrêt d’urgence</b> (quench : perte soudaine de la supraconductivité) ou <b>baisse contrôlée</b> en 20 s par un technicien.'],
+  [TH.sec, 'Quand activer le quench ?', 'Sujet blessé ou bloqué par un objet métallique enclavé dans l’aimant · incendie dans la salle.'],
+  [TH.sec, 'Pourquoi évacuer le patient et fermer la porte après un quench ?', 'L’hélium liquide se vaporise en hélium gazeux : risque d’<b>asphyxie</b> (raréfaction de l’oxygène) et de <b>brûlure par le froid</b>.'],
+  [TH.sec, 'Qu’est-ce que le TAS (SAR) ?', 'Énergie déposée par les ondes RF dans les tissus, par unité de temps et de poids. Risque d’échauffement, voire de brûlures graves.'],
+  [TH.sec, 'Que faire face à un patient claustrophobe ?', 'Débit d’air suffisant · lumière dans le tunnel · couvrir les yeux / miroirs · communiquer · musique.'],
+  [TH.sec, 'Contre-indications absolues à l’IRM ?', 'Matériel électronique implantable (pacemaker, pompes, neurostimulateurs, implant cochléaire) · valves cardiaques anciennes · clips cérébraux anciens · corps étrangers intra-oculaires.'],
+  [TH.sec, 'Dispositif métallique de compatibilité inconnue : conduite à tenir ?', 'L’examen n’est <b>pas annulé</b> : vérifier la compatibilité (références exactes) sur <b>securirm.com</b>.'],
+  [TH.sec, 'Intérêt du zonage en IRM ?', 'Découper l’espace en <b>4 zones</b> de risques et de restriction d’accès croissants.'],
+  [TH.sec, 'Exemples d’objets à risque d’effet projectile ?', 'Stylo à bille, obus d’oxygène, chaise roulante en acier, téléphone portable.'],
+  [TH.sec, 'Première étape à l’entrée du patient en salle d’IRM ?', 'L’<b>enlèvement de tout objet métallique</b>.'],
+  [TH.sec, 'Pourquoi retirer les objets métalliques ?', 'Garantir une image de qualité, prévenir les brûlures, éviter les déplacements d’objets métalliques.'],
+  [TH.sec, 'Quels vêtements pour le patient ?', 'Vêtements <b>ajustés sans métal</b>.'],
+  [TH.sec, 'Précautions de contact cutané (brûlures) ?', 'Zones cutanées qui se touchent et jambes croisées favorisent l’échauffement ; protéger du contact direct avec le tunnel par des cales en mousse.'],
+  [TH.sec, 'Tatouage : conduite à tenir ?', 'Pas de contre-indication : prévenir le patient du risque d’échauffement et lui donner la poire d’appel.'],
+  [TH.sec, 'Pourquoi classer les implants médicaux en IRM ?', 'Pour déterminer leur <b>compatibilité</b> avec l’IRM.'],
+  [TH.sec, 'Que signifie « magnéto-protection » ?', 'Protéger les patients contre les champs magnétiques.'],
+  [TH.sec, 'Que permet d’éviter la sécurité des implants électroniques ?', 'Les risques d’interférences électromagnétiques.'],
+
+  /* --- Produits de contraste --- */
+  [TH.pdc, 'Propriété et action des produits de contraste en IRM ?', '<b>Paramagnétiques</b> : raccourcissent le temps de relaxation des tissus et augmentent le <b>contraste T1</b> là où ils diffusent.'],
+  [TH.pdc, 'Dose de produit de contraste ?', '<b>0,2 ml/kg</b>. Une dose trop élevée fait diminuer le signal (effet T2) et dégrade l’image.'],
+  [TH.pdc, 'Gadolinium : risques ?', 'Risque de <b>rétention</b> dans le tissu cérébral ; ce sont les produits <b>linéaires</b> qui ont été retirés par les autorités européennes.'],
+  [TH.pdc, 'Demi-vie d’élimination du produit de contraste ?', 'De l’ordre de <b>1 h 30</b>.'],
+  [TH.pdc, 'Produit de contraste et grossesse ?', 'Contre-indiqué chez la femme enceinte.']
+];
+
+(function () {
+  'use strict';
+  const $ = (s, r) => (r || document).querySelector(s);
+  const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const IMG = { Q31: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/wAALCADCAGIBAREA/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oACAEBAAA/APKHfP0pAcVu28E9tLm3AmjdPnQnqK9L+FGtQX2n3eg3Q2TKCI8nlk7g+4z+X0rnby2ktbyW3kGHjcofqK1tWm+029lOjkxpAI+B0I61JpsKahaXNu52SRx5jJGc85qO/JS48sOH8jy4yRznrzWXezWmn73u5DGn30I5P0x3rmprvUfFN/FaQpJ9nT/V2+eAPU12Nzpg8E+C5Y32DUdTOxyP4IxyR/n1ryyWQySu/qaZTitOEJKEjnFb9hJFJZWryOQN5R+Cc4+lall4st4Lg3aQi1vIbkSwSBMB8cEH6jj8a6rxVNb32oW2rWv+p1C3ScfXoR+ldhp2g6Y/gu0/tAYjSLzzIDgjPJrh/Eceq207waZY3dhpZj3vMkiebP8AUk8D2rk7O913U7v7HpokeQ8YxvOPUnoKva9piaLEkN3N9u1aRAZJnORAOyIPX3ru/hp4ZhsLIXskYN1OgkZiPug/cA/nXHfFbWPtWuSWkZ/d2o8ofXqf8+1edUlPq3Zje4x3q/CXsrebZjfA+8ZGeDxQlkJtLklcfPnius06OVPAejPJnma4Cf7mR/XNdt4suJE+GdhbwyFDdLDGSDg4xk/yp2j+Gy+gW8OoxiEeXiREOZH+p7cVpR2mn6PaSQ2kEdrFGnmSbBjI9z3ryXToJ/FninzpM+XPMefavdNMtoLK0SOEARxjA+gr5r8S3ZvdYuJs58yZ3/M1j0U6pbecwSBxzitLTp/tNxKZznfjP510MtjHDohhATlOuec1uvGE+HXhvHZ5Qfx5rqbzxHpujeG9BW+EbyOnmIHxwEU88/Wsm1+IVrNrBhQERSYKZ6F++D2/lWl46uvJ8NuEf57kbMnqPWo/hxoSWmjDUnB825H7sA42Rjp9c9a1tf8AGGk6Jpl0kl7FJdGMokEbgvvxivnm9ffcE5qvRTjTkAKHJxV3SpI0uczZEePn+la154hE2Yre3/dEYBPU111q5m+F+ksTzDdyJUV7p95ql3bmO3NxBbaZGHAIyASegPWsvR9OR/Eun2jxZhefY49vcdq3fiTqDyana2KH93DGSfeuw1a5fSvhnNPaEpJHp8YQjtkAf1r5+eeQOSDyep71X60UU6lQF3AFaFuUTU0TAKFPLP4iukCWtjbBAIoS6dTgE1paRex3PhKWxjcHyLrzMDtkEVej1f8Asu8sZdhKTWgR/cAmsm9untfFCXVr8kRuUkHOcAnpVnxhGbrW5HmcI58uN0xjy/X68c16Dqb2un/D+4j1NwkJshGc9d+zge56V88zY6VFRRTyMGlR9mcdans/+PmM55zW/b6LHOhuL66kklPUVs6DbQQWmoxxn955YfHoARWhqNkk3g+1vym/7HdGKTt8hwabqNtor6ZJd6Q8nyGN3ikfJTBo8WgP4htx/A97Hz6ocY/ma0fjXPJHZaVZxnEJLucdyMYryB/emUUU9zmkrY8P+RHcfaJeSD8g9DVxLq+vSYbXEaBzvkJ5Nauh2U8GsQvJdeYHzE/PZwQP1xXX6BPnw1r1mcZEHnjIzyP8iuPlnjS8iSFALe6gIcDoTT9euzPBo0+cyfu8/UEAfyr1HxJ4ds/F2jiC4OyUDMEg/gc9c14Vr2hXeiahJZ3abJE79nHqKxqKKdRWjaoUshJn78hH0xV211RLXf8Aug8p6U+S51B7czCPYB84fBBBHNd54Rke71GS3lGw39o6OO2SM1laj4WENhHqFpLGbL76AyfvIT3H+2P1rm9SmMEFvg5IOYz6c17hot159pECeAKy/HvhiPxFoxkhjAvbUZjI6kdxXgtxA8Mjhxgg4I9KhptOoq3byEWzp2zW7a3VnbRxZCJIgJkcD5z6CiTVxOhMCTkAdQldRoEz2t7o10eDNDG/58VP/ZFwLe5teJrYzOH2SDfA4POR6VxOr2NxG8iO+fJ9K9i0fUEn0y2vAR5VzGj+hBI5rdgm359jlPeuV8R/DnSvEU5u4HNlcv8AfwPkc/SvLfFHhC78N3JinG9P4JB0NczUnUU0VdslDoU7k1rW9tF9tieRMhzjnpWo93aLE8YuIh22ZHNavnJN4f0TUIDkRwm3f2eM5/kaNbu5rLxbeFCUjnCXMbjph0B/xrK1sTX0UN8JATxG5ToR0FdV4E1UHQzpruBPZSbH7/Ieh9xXXJIY3Hzg56EjFW7WdJOHcBx6nr9KzPG2mDW/DUv7smSAb8kjOPSvBWtWDEYHWqg6U2p7V9kmD0fitaQ+dp8YyQUODitOPR4TzJM7p2wMVv6ZbJ/whd9bgY+x3aXCf7jjYf1FTas+/R/D+rocOm+ymPZwOUB/WiS5tb6CS3ezijkdDzGmzJxkVznhbWrXQNcmn1WJ3juh5YmH8GD3H5V6TFfREg/aM85QYxWhbSHzz8gfdyB2rbW3jmsriFAdkkZyH4xkeleFS2X75/kH3j/nrXIfw0BMocUAVoW0xePr161rHXUOBFGCnq74/StnwnfTXWq3Vi4/d6hZSRjGcbx84/rWnbQPqvw/1qxj/wBdZul7D7Y6/pmqOlJ9qsra7jvojGEG/jmM9MEf1qDXNLsbuKURcS5D5x19a9EsoyLiKMZ2G2TySADkgc/4/hWnFlwUlyU7gf8A1u9aNlINkgz8gGwE149JOnmv+7/iNedVLCcPRPHsf681LYrvkKfjXS6dIJNPiJQccZxWnpt1Faaxp91KCnk3KDPbB4OfwNdH4WhFr40vtIl/1c6T27D+X6VzVtAIxcWcx2S2sjwHHByDis+9nuIRJA6CYTpjPfNegeCL2fUdO0+aYgRwwTRIncSoMcn/AHM10FujyR/wJgY+c1YlvjZaXdX8gGYIz0/jNeHza1D58nI+8f51y1OQ7DViQiZAQcEUli/l3Y98itixkvzBsiGyNOPkKf1qSS2vJreQSSPv6gmbP6V26Xvl+M9K1XOBeJbzn/gYwf60eJrKLSviRdvJYpdWeoQpLImcFD0yD9Qag+yaZe6h+6RAmCDnIeP04/rV/wACyDTNZudDlODDOLpP9woQcfXIrsUSPzw42bx1yKoeMHePwJcuDy+ASPrmvAt1VqKcnanISk4Poa6DTD/pdwmcJwa0g6Dq6D6mrrzeZoWl3SHL2zy2+f8AcfeP0eut+JTiGLRddj/5aDynPbBGR/WuTuCHt3ut5EoGQ6dqi0zUbiPxhpV/NOZHmf7NJ05Br123D+ZvCbwR2471T8WRiTwPqKgY2c49PnzXzycZqrRV2ygB3zPwEHH1qrnL/jWwbUyXvkGd4w8aPx34q1HpEaYxLnnr5YrYsYQmgXsAORDdxyD/AIGhH9K7XxTF/a/whtCBmVVjCfUcVg2VrbyaPFi3QXkMeyYJzvI6EVnX8Fv/AG7oF9ABDA4BPbnPX9K9TsZpwARGHjxlOeTTtedJ/CepSY4e2L/jivnCQJ5r8j7xqtSjrWlbgSWzhOuKoiNxMBjvW0SBqEMkjoP3I9sDFXBqNmAAZh8p7c1f0y6jnGqxQnehtUkHH9yT/wCvXoWkRrqPwmuoD96OOXb7FDkf0ri9A1GGe3jn6OEz+PpVDxDn+w7NEPzwXIgBH416/EjwRQonPloB+QqHXjs8HakCTxA4P1zXzyZOTzVOip7acwyA9q2UjQ+Y5TJxx9TVfy0nubczx5QjZ19K0U06z5JjP/fZrV0i0ihuLgRpsD6fMPxGD/Su88EuT4E1MYyEE/Hr8lcFotpFbeHpBIE+1CTfDIh5IPas6Z3fS8Svl01FK9nhc435O9Oo9aZ4p/5FPVh/0xz/ACr5221BRT4vvg1rpdAkegGfxoNzDBLbmQ8ICeO5Jq9FqEcx/dwSnv2/xrR0y7EmqxoEdN8E4wR/0zNeh/DlgfDmoI3Te/8A6BXnmjzx30U1u8mBAX/74FZvNzZxF+BNqGT7CvZYpEPlvg4dMPzS+IxnwlqgH/PsT+VfPRU5qvRS/Q1NbyYcCrtrzdjIyDkEGthLW3wT5CflWjpltCNRjeNEQCCcnA/6Zmu48CP5HhTU5/7kcj/kleb2dobTSLgl088yB0cf3COlVr5zDo0KIeRdf0r2S22SRR7DjIBzUusJnwxqgz/y6uK+fnX52+bv6VTopRUkOTJmrVrO8MhdIHkwO3atW31B5gSUiTHYyYP8q0dJvRNqcgRMbLWYnBBH3Mf1r0DwtIlp4D1Sd/ueTMT+WK870r/TdOB/uc5+lZF9JvsIkHQzkivZrXIigjQcpGgP5VZ1WR/+Ec1HnkWzmvAZX/ev/vGqlFLViD5Iy/rwK0dKjcGR+laiY2DIzV+yRB9tnGBstdgA93A/pXUyb4PhNehDh5wIwf8AfeuAd5NM0+JI/kkkjMbp6moJbQg6ba9zIM/mK9etpAk/JyG6VJqsmzQNUwOts/8AKvCm++frVKilRSTirL5Qog7VZiS+hQeWSU9hmtGG9dEBeaMnuHTZir2nTmfTr2bBRHmjiH4ZJ/pXXeLbpdN+GVlBnD3NzHj8Oa4LVZN6QSJ1cZd6t2ZE+q6anXaN/wCpr0eN3JQjipNSmA0LUhjjyH/lXiT/AH2+tdVd2FmrnFpAPpGKg+w2n/PrD/37FPisrTf/AMesP/fsU77JbZP+jxf98CpYoowBiNfyqZYo8fcX8qfEiCxwFGPPJ6d6tauTdafZpcEzLFny1k+YJ06Z6VQltrc22DBHj/cFPtIo1v4SqKCAMECtSK5uM/6+T/vs0t3c3DWdwrTyFTFyC5xXNfY7X/n2i/74Ff/Z' };
+  const LS_KEY = 'merm_ue33_revisions_v1';
+
+  /* ------------------------------------------------------------------ état + sauvegarde */
+  let S = { v: 1, q: {}, f: {}, ui: {}, exportedAt: 0, savedAt: 0 };
+  let storageOK = true, dirty = false;
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) { const o = JSON.parse(raw); if (o && o.v === 1) S = Object.assign(S, o); }
+    } catch (e) { storageOK = false; }
+    S.q = S.q || {}; S.f = S.f || {}; S.ui = S.ui || {};
+  }
+  function save() {
+    S.savedAt = Date.now(); dirty = true;
+    try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { storageOK = false; }
+    renderSaveBar();
+  }
+  const fmt = t => t ? new Date(t).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
+  function renderSaveBar() {
+    const el = $('#savebar'); if (!el) return;
+    const warn = !storageOK
+      ? '<span class="warn">⚠ Stockage interne indisponible dans ce contexte : exportez régulièrement un fichier.</span>'
+      : (dirty && S.savedAt > S.exportedAt ? '<span class="warn">● modifications non exportées en fichier</span>' : '');
+    el.innerHTML = `💾 Sauvegarde interne ${storageOK ? '<b>active</b>' : '<b>indisponible</b>'} (dernière : ${fmt(S.savedAt)}) · Fichier exporté : ${fmt(S.exportedAt)} ${warn}`;
+  }
+  function exportFile() {
+    S.exportedAt = Date.now();
+    const data = JSON.stringify({ app: 'ue33-irm-revisions', v: 1, exportedAt: new Date().toISOString(), q: S.q, f: S.f }, null, 1);
+    try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+    a.download = 'ue33-sauvegarde-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    renderSaveBar(); toast('Sauvegarde exportée dans un fichier (.json).');
+  }
+  function importFile(file) {
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const o = JSON.parse(r.result);
+        if (!o || o.app !== 'ue33-irm-revisions' || typeof o.q !== 'object' || typeof o.f !== 'object') throw new Error('format');
+        Object.assign(S.q, o.q); Object.assign(S.f, o.f);
+        S.exportedAt = Date.now(); save(); S.exportedAt = Date.now(); renderSaveBar();
+        render(); toast(`Sauvegarde chargée : ${Object.keys(o.q).length} questions, ${Object.keys(o.f).length} cartes.`);
+      } catch (e) { toast('Fichier non reconnu : choisissez un .json exporté depuis cette page.'); }
+    };
+    r.readAsText(file);
+  }
+  let toastT;
+  function toast(msg) {
+    let t = $('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+    t.textContent = msg; t.style.display = 'block'; clearTimeout(toastT); toastT = setTimeout(() => { t.style.display = 'none'; }, 3500);
+  }
+  function twoStep(btn, label, fn) {
+    let armed = false, t;
+    const orig = btn.textContent;
+    btn.onclick = () => {
+      if (!armed) { armed = true; btn.textContent = label; t = setTimeout(() => { armed = false; btn.textContent = orig; }, 4000); }
+      else { clearTimeout(t); armed = false; btn.textContent = orig; fn(); }
+    };
+  }
+
+  /* ------------------------------------------------------------------ données */
+  const SETS = { td: TD_ORIG.concat([TD_VAL]), alt: TD_ALT };
+  const ALL = SETS.td.concat(SETS.alt);
+  const THEMES = Object.values(TH);
+  const stOf = id => (S.q[id] && S.q[id].s) || null;
+  function setSt(id, s) { S.q[id] = Object.assign(S.q[id] || {}, { s: s }); if (!s) delete S.q[id].s; save(); }
+  function counts(set) {
+    let ok = 0, ko = 0; set.qs.forEach(q => { const s = stOf(q.id); if (s === 'ok') ok++; else if (s === 'ko') ko++; });
+    return { ok, ko, todo: set.qs.length - ok - ko, n: set.qs.length };
+  }
+  function seeded(id) { let h = 2166136261; for (const c of id) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return () => { h += 0x6D2B79F5; let t = Math.imul(h ^ h >>> 15, 1 | h); t ^= t + Math.imul(t ^ t >>> 7, 61 | t); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function shuffled(arr, id) { const r = seeded(id), a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+  /* ------------------------------------------------------------------ vue / navigation */
+  const ui = () => S.ui;
+  function go(tab, extra) { Object.assign(S.ui, { tab }, extra || {}); save(); render(); window.scrollTo(0, 0); }
+  function render() {
+    $$('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === (S.ui.tab || 'td')));
+    const m = $('#main'); m.innerHTML = '';
+    const tab = S.ui.tab || 'td';
+    if (tab === 'td') renderSets(m, 'td'); else if (tab === 'alt') renderSets(m, 'alt');
+    else if (tab === 'fc') renderCards(m); else renderBilan(m);
+    renderSaveBar();
+  }
+
+  /* ------------------------------------------------------------------ TD */
+  function renderSets(m, grp) {
+    const sets = SETS[grp];
+    const key = grp === 'td' ? 'td' : 'alt';
+    let cur = sets.find(s => s.id === S.ui[key]) || sets[0];
+    const filter = S.ui.filter || 'all', theme = S.ui.theme || 'all';
+
+    const bar = document.createElement('div'); bar.className = 'setbar';
+    sets.forEach(s => {
+      const c = counts(s), b = document.createElement('button');
+      b.className = 'btn' + (s.id === cur.id ? ' on' : '');
+      b.innerHTML = `${esc(s.title)}<small>${c.ok}/${c.n} su</small><span class="mini-bar"><i class="g" style="width:${100 * c.ok / c.n}%"></i><i class="o" style="width:${100 * c.ko / c.n}%"></i></span>`;
+      b.onclick = () => { S.ui[key] = s.id; save(); render(); };
+      bar.appendChild(b);
+    });
+    m.appendChild(bar);
+
+    const head = document.createElement('div'); head.className = 'panel';
+    const themes = THEMES.filter(t => cur.qs.some(q => q.th === t));
+    head.innerHTML = `<h2>${esc(cur.title)} — ${esc(cur.sub)}</h2><div class="src">${esc(cur.src)}</div>
+      <div class="prog" id="prog"></div>
+      <div class="filters"><span class="src">Afficher :</span>
+        ${[['all', 'Toutes'], ['todo', 'À faire'], ['ko', 'À revoir'], ['ok', 'Sues']].map(([k, l]) => `<button class="chipbtn${filter === k ? ' on' : ''}" data-f="${k}">${l}</button>`).join('')}
+        <select id="thsel" aria-label="Thème"><option value="all">Tous les thèmes</option>${themes.map(t => `<option${theme === t ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>
+        <button class="btn sm" id="rst" style="margin-left:auto">Recommencer ce TD</button></div>`;
+    m.appendChild(head);
+    $$('[data-f]', head).forEach(b => b.onclick = () => { S.ui.filter = b.dataset.f; save(); render(); });
+    $('#thsel', head).onchange = e => { S.ui.theme = e.target.value; save(); render(); };
+    twoStep($('#rst', head), 'Confirmer ?', () => { cur.qs.forEach(q => { delete S.q[q.id]; }); save(); render(); toast('TD remis à zéro.'); });
+
+    cur.qs.forEach((q, i) => {
+      const el = buildQuestion(q, i + 1);
+      const s = stOf(q.id);
+      const okF = filter === 'all' || (filter === 'todo' && !s) || (filter === 'ko' && s === 'ko') || (filter === 'ok' && s === 'ok');
+      const okT = theme === 'all' || q.th === theme;
+      if (!(okF && okT)) el.classList.add('hide');
+      m.appendChild(el);
+    });
+    if (!$$('.q:not(.hide)', m).length) { const e = document.createElement('div'); e.className = 'panel empty'; e.textContent = 'Aucune question ne correspond à ce filtre.'; m.appendChild(e); }
+    updateProg(cur);
+    if (S.ui.scrollTo) { const t = $('#q-' + S.ui.scrollTo); S.ui.scrollTo = null; if (t) setTimeout(() => t.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50); }
+  }
+  function updateProg(set) {
+    const c = counts(set), p = $('#prog'); if (!p) return;
+    p.innerHTML = `<b>${c.ok}</b> sues · <b>${c.ko}</b> à revoir · ${c.todo} à faire (sur ${c.n})<div class="bar"><i class="g" style="width:${100 * c.ok / c.n}%"></i><i class="o" style="width:${100 * c.ko / c.n}%"></i></div>`;
+    $$('.setbar .btn').forEach((b, i) => {
+      const s = (SETS[S.ui.tab === 'alt' ? 'alt' : 'td'])[i]; if (!s) return; const cc = counts(s);
+      const sm = $('small', b); if (sm) sm.textContent = `${cc.ok}/${cc.n} su`;
+      const bars = $$('.mini-bar i', b); if (bars.length) { bars[0].style.width = 100 * cc.ok / cc.n + '%'; bars[1].style.width = 100 * cc.ko / cc.n + '%'; }
+    });
+  }
+  const TYPE_LABEL = { open: 'Question ouverte', qcm: 'QCM', vf: 'Vrai / Faux', match: 'Association', table: 'Tableau à compléter', num: 'Calcul', order: 'Remise en ordre' };
+  const MULTI_RE = /^(val|a6)-|^td4-(1[7-9]|2\d|3[01])$/;
+
+  function buildQuestion(q, n) {
+    const el = document.createElement('article'); el.className = 'q'; el.id = 'q-' + q.id; el.dataset.id = q.id;
+    el.innerHTML = `<header class="qh"><span class="num">${n}</span><span class="chip">${TYPE_LABEL[q.t]}</span><span class="chip th">${esc(q.th)}</span><span class="st"></span></header>
+      <div class="qt">${q.q}</div>${q.note ? `<div class="note">${esc(q.note)}</div>` : ''}${q.img ? `<img class="qimg" alt="Image de la question" src="${IMG[q.img]}">` : ''}
+      <div class="qb"></div><div class="qa"></div><div class="qr" hidden></div><div class="qs" hidden></div>`;
+    const ctx = {
+      q, el, body: $('.qb', el), act: $('.qa', el), res: $('.qr', el), self: $('.qs', el),
+      btn(label, fn, cls) { const b = document.createElement('button'); b.className = 'btn ' + (cls || ''); b.textContent = label; b.onclick = fn; this.act.appendChild(b); return b; },
+      show(html, kind) { this.res.hidden = false; this.res.className = 'qr' + (kind === true ? ' okr' : kind === false ? ' kor' : ''); this.res.innerHTML = html; },
+      figs() { return (q.fig ? FIG[q.fig]() : '') + (q.fig2 ? FIG[q.fig2]() : ''); },
+      finish(ok) { if (ok !== undefined && ok !== null) setSt(q.id, ok ? 'ok' : 'ko'); refreshStatus(el, q); updateProg(currentSet()); }
+    };
+    ({ open: mOpen, qcm: mQcm, vf: mVf, match: mMatch, table: mTable, num: mNum, order: mOrder })[q.t](ctx);
+    refreshStatus(el, q);
+    return el;
+  }
+  function currentSet() { const g = S.ui.tab === 'alt' ? 'alt' : 'td'; return SETS[g].find(s => s.id === S.ui[g]) || SETS[g][0]; }
+  function refreshStatus(el, q) {
+    const s = stOf(q.id); el.dataset.status = s || '';
+    $('.st', el).textContent = s === 'ok' ? '✅ Su' : s === 'ko' ? '🔁 À revoir' : '';
+    const bar = $('.qs', el);
+    const shown = !!(el._checked || s);
+    bar.hidden = !shown;
+    if (shown) {
+      bar.innerHTML = '<span>Marquer :</span>';
+      [['ok', '✅ Su', 'ok'], ['ko', '🔁 À revoir', 'ko']].forEach(([k, l, c]) => {
+        const b = document.createElement('button'); b.className = 'btn sm' + (s === k ? ' ' + c : ''); b.textContent = l;
+        b.onclick = () => { setSt(q.id, s === k ? null : k); refreshStatus(el, q); updateProg(currentSet()); };
+        bar.appendChild(b);
+      });
+    }
+  }
+  function letter(i) { return String.fromCharCode(65 + i); }
+
+  /* --- ouverte */
+  function mOpen(c) {
+    const q = c.q;
+    c.body.innerHTML = '<textarea class="ta" rows="3" placeholder="Votre réponse (facultatif — elle est sauvegardée)…"></textarea>';
+    const ta = $('textarea', c.body); ta.value = (S.q[q.id] && S.q[q.id].t) || '';
+    let t; ta.oninput = () => { clearTimeout(t); t = setTimeout(() => { S.q[q.id] = Object.assign(S.q[q.id] || {}, { t: ta.value }); save(); }, 500); };
+    const b = c.btn('Voir la correction', () => {
+      c.show('<div class="verdict">Correction</div>' + q.a + c.figs()); c.el._checked = true; b.textContent = 'Masquer la correction';
+      b.onclick = () => { c.res.hidden = !c.res.hidden; b.textContent = c.res.hidden ? 'Voir la correction' : 'Masquer la correction'; };
+      c.finish();
+    }, 'pri');
+  }
+  /* --- QCM */
+  function mQcm(c) {
+    const q = c.q, multi = MULTI_RE.test(q.id) || q.c.length > 1;
+    c.body.innerHTML = (multi ? '<div class="hint">Une ou plusieurs réponses exactes — réponse « tout ou rien ».</div>' : '') +
+      '<div class="opts">' + q.o.map((o, i) => `<label class="opt"><input type="${multi ? 'checkbox' : 'radio'}" name="${q.id}" value="${i}"><span class="ltr">${letter(i)}</span><span>${esc(o)}</span></label>`).join('') + '</div>';
+    const run = () => {
+      const sel = $$('input:checked', c.body).map(i => +i.value);
+      if (!sel.length) { toast('Sélectionnez au moins une réponse.'); return; }
+      const ok = sel.length === q.c.length && sel.every(i => q.c.includes(i));
+      $$('.opt', c.body).forEach((l, i) => { const inp = $('input', l); inp.disabled = true; const isC = q.c.includes(i), isS = sel.includes(i); l.classList.add(isC && isS ? 'good' : isS ? 'bad' : isC ? 'missed' : 'x'); });
+      c.show(`<div class="verdict">${ok ? '✅ Correct' : '❌ Incorrect'}</div>${ok ? '' : 'Bonne(s) réponse(s) : <b>' + q.c.map(letter).join(', ') + '</b>. '}${q.why || ''}`, ok);
+      c.el._checked = true; c.act.innerHTML = ''; c.btn('Recommencer', () => { c.el._checked = false; c.res.hidden = true; c.act.innerHTML = ''; mQcm(c); setSt(q.id, null); refreshStatus(c.el, q); updateProg(currentSet()); });
+      c.finish(ok);
+    };
+    c.act.innerHTML = ''; c.btn('Vérifier', run, 'pri');
+  }
+  /* --- Vrai / Faux */
+  function mVf(c) {
+    const q = c.q;
+    c.body.innerHTML = '<table class="vf">' + q.items.map((it, k) => `<tr data-k="${k}"><td>${esc(it[0])}<span class="why" hidden></span></td><td class="r"><label><input type="radio" name="${q.id}-${k}" value="1"> Vrai</label><label><input type="radio" name="${q.id}-${k}" value="0"> Faux</label></td></tr>`).join('') + '</table>';
+    const run = () => {
+      let good = 0;
+      q.items.forEach((it, k) => {
+        const sel = $(`input[name="${q.id}-${k}"]:checked`, c.body), tr = $(`tr[data-k="${k}"]`, c.body);
+        const ok = sel && (sel.value === '1') === it[1]; if (ok) good++;
+        tr.classList.add(ok ? 'good' : 'bad'); $$('input', tr).forEach(i => i.disabled = true);
+        const w = $('.why', tr); w.hidden = false;
+        w.innerHTML = (ok ? '✅ ' : '❌ ') + (it[1] ? 'Vrai' : 'Faux') + (it[2] ? ' — ' + it[2] : '');
+      });
+      const all = good === q.items.length;
+      c.show(`<div class="verdict">${all ? '✅' : '❌'} ${good} / ${q.items.length} bonnes réponses</div>`, all);
+      c.el._checked = true; c.act.innerHTML = ''; c.btn('Recommencer', () => { c.el._checked = false; c.res.hidden = true; c.act.innerHTML = ''; mVf(c); setSt(q.id, null); refreshStatus(c.el, q); updateProg(currentSet()); });
+      c.finish(all);
+    };
+    c.act.innerHTML = ''; c.btn('Vérifier', run, 'pri');
+  }
+  /* --- Association */
+  function mMatch(c) {
+    const q = c.q;
+    c.body.innerHTML = '<ol class="legend" style="list-style:none">' + q.r.map((r, i) => `<li><b>${letter(i)}.</b> ${esc(r)}</li>`).join('') + '</ol><div class="rows">' +
+      q.l.map((l, i) => `<div class="row" data-i="${i}"><span class="lab">${esc(l)}</span><select class="s"><option value="">—</option>${q.r.map((_, j) => `<option value="${j}">${letter(j)}</option>`).join('')}</select></div>`).join('') + '</div>';
+    const run = () => {
+      let good = 0;
+      q.l.forEach((_, i) => {
+        const row = $(`.row[data-i="${i}"]`, c.body), sel = $('select', row), ok = sel.value !== '' && +sel.value === q.c[i];
+        if (ok) good++; row.classList.add(ok ? 'good' : 'bad'); sel.disabled = true;
+        if (!ok) { const s = document.createElement('span'); s.className = 'src'; s.textContent = '→ ' + letter(q.c[i]); row.appendChild(s); }
+      });
+      const all = good === q.l.length;
+      c.show(`<div class="verdict">${all ? '✅' : '❌'} ${good} / ${q.l.length} associations correctes</div>${q.why || ''}`, all);
+      c.el._checked = true; c.act.innerHTML = ''; c.btn('Recommencer', () => { c.el._checked = false; c.res.hidden = true; c.act.innerHTML = ''; mMatch(c); setSt(q.id, null); refreshStatus(c.el, q); updateProg(currentSet()); });
+      c.finish(all);
+    };
+    c.act.innerHTML = ''; c.btn('Vérifier', run, 'pri');
+  }
+  /* --- Tableau */
+  function mTable(c) {
+    const q = c.q;
+    const opts = (r) => (r[2] || q.opts);
+    c.body.innerHTML = '<div class="tblwrap"><table class="tbl"><thead><tr><th></th>' + q.cols.map(x => `<th>${esc(x)}</th>`).join('') + '</tr></thead><tbody>' +
+      q.rows.map((r, i) => `<tr><th>${esc(r[0])}</th>${r[1].map((_, j) => `<td data-i="${i}" data-j="${j}"><select class="s"><option value="">—</option>${opts(r).map((o, k) => `<option value="${k}">${esc(o)}</option>`).join('')}</select></td>`).join('')}</tr>`).join('') + '</tbody></table></div>';
+    const run = () => {
+      let good = 0, tot = 0;
+      q.rows.forEach((r, i) => r[1].forEach((ans, j) => {
+        tot++; const td = $(`td[data-i="${i}"][data-j="${j}"]`, c.body), sel = $('select', td), o = opts(r);
+        const ok = sel.value !== '' && o[+sel.value] === ans; if (ok) good++;
+        td.classList.add(ok ? 'good' : 'bad'); sel.disabled = true;
+        if (!ok) { const f = document.createElement('span'); f.className = 'fix'; f.textContent = '→ ' + ans; td.appendChild(f); }
+      }));
+      const all = good === tot;
+      c.show(`<div class="verdict">${all ? '✅' : '❌'} ${good} / ${tot} cases correctes</div>${q.why || ''}`, all);
+      c.el._checked = true; c.act.innerHTML = ''; c.btn('Recommencer', () => { c.el._checked = false; c.res.hidden = true; c.act.innerHTML = ''; mTable(c); setSt(q.id, null); refreshStatus(c.el, q); updateProg(currentSet()); });
+      c.finish(all);
+    };
+    c.act.innerHTML = ''; c.btn('Vérifier', run, 'pri');
+  }
+  /* --- Numérique */
+  function mNum(c) {
+    const q = c.q;
+    c.body.innerHTML = `<div class="row"><span class="lab">Votre résultat :</span><input class="n" inputmode="decimal" size="8" aria-label="Résultat"> <span>${esc(q.unit || '')}</span></div>`;
+    const run = () => {
+      const v = parseFloat($('input', c.body).value.replace(',', '.').replace(/\s/g, ''));
+      if (isNaN(v)) { toast('Saisissez un nombre.'); return; }
+      const ok = Math.abs(v - q.ans) <= (q.tol || 0);
+      c.show(`<div class="verdict">${ok ? '✅ Correct' : '❌ Incorrect'}</div>${q.why || ''}`, ok);
+      $('input', c.body).disabled = true; c.el._checked = true; c.act.innerHTML = ''; c.btn('Recommencer', () => { c.el._checked = false; c.res.hidden = true; c.act.innerHTML = ''; mNum(c); setSt(q.id, null); refreshStatus(c.el, q); updateProg(currentSet()); });
+      c.finish(ok);
+    };
+    c.act.innerHTML = ''; c.btn('Vérifier', run, 'pri');
+  }
+  /* --- Remise en ordre */
+  function mOrder(c) {
+    const q = c.q, n = q.items.length;
+    const order = shuffled(q.items.map((_, i) => i), q.id);
+    c.body.innerHTML = '<div class="hint">Attribuez à chaque élément son rang (1 = en premier).</div><div class="rows">' +
+      order.map(i => `<div class="row" data-i="${i}"><span class="lab">${esc(q.items[i])}</span><select class="s"><option value="">—</option>${q.items.map((_, k) => `<option value="${k + 1}">${k + 1}</option>`).join('')}</select></div>`).join('') + '</div>';
+    const run = () => {
+      let good = 0;
+      order.forEach(i => { const row = $(`.row[data-i="${i}"]`, c.body), sel = $('select', row), ok = +sel.value === i + 1; if (ok) good++; row.classList.add(ok ? 'good' : 'bad'); sel.disabled = true; });
+      const all = good === n;
+      c.show(`<div class="verdict">${all ? '✅ Ordre correct' : '❌ Ordre incorrect'}</div>Ordre attendu : <ol>${q.items.map(x => `<li>${esc(x)}</li>`).join('')}</ol>${q.why || ''}`, all);
+      c.el._checked = true; c.act.innerHTML = ''; c.btn('Recommencer', () => { c.el._checked = false; c.res.hidden = true; c.act.innerHTML = ''; mOrder(c); setSt(q.id, null); refreshStatus(c.el, q); updateProg(currentSet()); });
+      c.finish(all);
+    };
+    c.act.innerHTML = ''; c.btn('Vérifier', run, 'pri');
+  }
+
+  /* ------------------------------------------------------------------ Flashcards */
+  const FC = CARDS.map((c, i) => ({ id: 'fc' + i, th: c[0], q: c[1], a: c[2], fig: c[3] || null }));
+  let deck = [], pos = 0, flipped = false, fcKey = '';
+  const fcs = id => S.f[id] || null;
+  function fcFilter() {
+    const f = S.ui.fcF || {}; const th = f.th || [], st = f.st || 'all', qq = (f.q || '').toLowerCase();
+    let list = FC.filter(c => (!th.length || th.includes(c.th)) && (st === 'all' || (st === 'new' && !fcs(c.id)) || (st === 'su' && fcs(c.id) === 'su') || (st === 'rev' && fcs(c.id) === 'rev')) && (!qq || (c.q + ' ' + c.a).toLowerCase().includes(qq)));
+    if (f.shuf) list = shuffled(list.map(c => c.id), 'fc' + (f.seed || 1)).map(id => FC.find(c => c.id === id));
+    return list;
+  }
+  function rebuildDeck(keepPos) { deck = fcFilter().map(c => c.id); if (!keepPos) pos = 0; if (pos >= deck.length) pos = Math.max(0, deck.length - 1); flipped = false; }
+  function renderCards(m) {
+    const f = S.ui.fcF = S.ui.fcF || {};
+    const key = JSON.stringify([f.th, f.st, f.q, f.shuf, f.seed]);
+    { const same = key === fcKey; fcKey = key; rebuildDeck(same); }
+    const cnt = { su: 0, rev: 0, nw: 0 }; FC.forEach(c => { const s = fcs(c.id); if (s === 'su') cnt.su++; else if (s === 'rev') cnt.rev++; else cnt.nw++; });
+    const ctrl = document.createElement('div'); ctrl.className = 'panel fc-ctrl';
+    ctrl.innerHTML = `<h2>Flashcards (${FC.length})</h2>
+      <div class="chips" id="thchips"><button class="chipbtn${!(f.th || []).length ? ' on' : ''}" data-th="">Tous les thèmes</button>${THEMES.map(t => `<button class="chipbtn${(f.th || []).includes(t) ? ' on' : ''}" data-th="${esc(t)}">${esc(t)} <small>(${FC.filter(c => c.th === t).length})</small></button>`).join('')}</div>
+      <div class="chips">${[['all', 'Toutes'], ['rev', '🔁 À revoir (' + cnt.rev + ')'], ['su', '✅ Sues (' + cnt.su + ')'], ['new', 'Non vues (' + cnt.nw + ')']].map(([k, l]) => `<button class="chipbtn${(f.st || 'all') === k ? ' on' : ''}" data-st="${k}">${l}</button>`).join('')}
+        <input type="search" id="fcq" placeholder="Rechercher…" value="${esc(f.q || '')}" style="border:1px solid var(--line);border-radius:999px;padding:3px 12px;background:var(--card)">
+        <button class="chipbtn${f.shuf ? ' on' : ''}" id="shuf">🔀 Mélanger</button>
+        <label class="fc-stats"><input type="checkbox" id="adv" ${f.noadv ? '' : 'checked'}> passer à la suivante après réponse</label></div>
+      <div class="fc-stats" id="fcs">Total : ${cnt.su} sues · ${cnt.rev} à revoir · ${cnt.nw} non vues — deck actuel : ${deck.length} carte(s)</div>`;
+    m.appendChild(ctrl);
+    $$('[data-th]', ctrl).forEach(b => b.onclick = () => {
+      const t = b.dataset.th; let cur = f.th || [];
+      if (!t) cur = []; else cur = cur.includes(t) ? cur.filter(x => x !== t) : cur.concat(t);
+      f.th = cur; save(); render();
+    });
+    $$('[data-st]', ctrl).forEach(b => b.onclick = () => { f.st = b.dataset.st; save(); render(); });
+    let qt; $('#fcq', ctrl).oninput = e => { clearTimeout(qt); qt = setTimeout(() => { f.q = e.target.value; save(); render(); const i = $('#fcq'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 350); };
+    $('#shuf', ctrl).onclick = () => { f.shuf = !f.shuf; f.seed = (f.seed || 1) + 1; save(); render(); };
+    $('#adv', ctrl).onchange = e => { f.noadv = !e.target.checked; save(); };
+
+    const stage = document.createElement('div'); stage.id = 'stage'; m.appendChild(stage);
+    drawCard();
+  }
+  function drawCard() {
+    const stage = $('#stage'); if (!stage) return;
+    if (!deck.length) { stage.innerHTML = '<div class="panel empty">Aucune carte ne correspond à ces filtres.<br>Changez de thème ou de statut.</div>'; return; }
+    const c = FC.find(x => x.id === deck[pos]), s = fcs(c.id);
+    const stl = s === 'su' ? '✅ Sue' : s === 'rev' ? '🔁 À revoir' : '';
+    stage.innerHTML = `<div class="fc-stage fcwrap"><span class="fc-st">${stl}</span>
+      <div class="fcard${flipped ? ' flip' : ''}" id="fcard" tabindex="0" role="button" aria-label="Retourner la carte">
+        <div class="face front"><span class="lbl">${esc(c.th)} · question</span><div class="big">${c.q}</div><span class="tap">Cliquer (ou Espace) pour retourner</span></div>
+        <div class="face back"><span class="lbl">${esc(c.th)} · réponse</span><div class="ans">${c.a}${c.fig ? FIG[c.fig]() : ''}</div><span class="tap">Cliquer pour revoir la question</span></div>
+      </div></div>
+      <div class="fc-act"><button class="btn ok" id="su">✅ Je savais</button><button class="btn ko" id="rev">🔁 À revoir</button></div>
+      <div class="fc-nav"><button class="btn sm" id="prv">◀ Précédente</button><span>${pos + 1} / ${deck.length}</span><button class="btn sm" id="nxt">Suivante ▶</button></div>
+      <div class="strip">${deck.map((id, i) => `<i class="${fcs(id) || ''} ${i === pos ? 'cur' : ''}" data-i="${i}" title="${i + 1}"></i>`).join('')}</div>
+      <div class="kbd">Raccourcis : Espace = retourner · S = su · R = à revoir · ← → = naviguer</div>`;
+    const card = $('#fcard'); card.onclick = flip;
+    $('#su').onclick = () => mark('su'); $('#rev').onclick = () => mark('rev');
+    $('#prv').onclick = () => nav(-1); $('#nxt').onclick = () => nav(1);
+    $$('.strip i').forEach(i => i.onclick = () => { pos = +i.dataset.i; flipped = false; drawCard(); });
+  }
+  function flip() { flipped = !flipped; const c = $('#fcard'); if (c) c.classList.toggle('flip', flipped); }
+  function nav(d) { if (!deck.length) return; pos = (pos + d + deck.length) % deck.length; flipped = false; drawCard(); }
+  function mark(s) {
+    if (!deck.length) return; const id = deck[pos]; S.f[id] = s; save();
+    const f = S.ui.fcF || {};
+    if (f.noadv) { drawCard(); updateFcStats(); } else { updateFcStats(); if (pos < deck.length - 1) { pos++; } flipped = false; drawCard(); }
+  }
+  function updateFcStats() { /* rafraîchit les compteurs sans reconstruire le deck */
+    const cnt = { su: 0, rev: 0, nw: 0 }; FC.forEach(c => { const s = fcs(c.id); if (s === 'su') cnt.su++; else if (s === 'rev') cnt.rev++; else cnt.nw++; });
+    const st = $$('[data-st]'); st.forEach(b => { const k = b.dataset.st; if (k === 'rev') b.textContent = '🔁 À revoir (' + cnt.rev + ')'; if (k === 'su') b.textContent = '✅ Sues (' + cnt.su + ')'; if (k === 'new') b.textContent = 'Non vues (' + cnt.nw + ')'; });
+    const el = $('#fcs'); if (el) el.textContent = `Total : ${cnt.su} sues · ${cnt.rev} à revoir · ${cnt.nw} non vues — deck actuel : ${deck.length} carte(s)`;
+  }
+  document.addEventListener('keydown', e => {
+    if ((S.ui.tab || 'td') !== 'fc') return;
+    const t = e.target; if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT')) return;
+    if (e.key === ' ' || e.key === 'Enter') { if (t && t.tagName === 'BUTTON') return; e.preventDefault(); flip(); }
+    else if (e.key === 'ArrowRight') nav(1); else if (e.key === 'ArrowLeft') nav(-1);
+    else if (e.key === 's' || e.key === 'S') mark('su'); else if (e.key === 'r' || e.key === 'R') mark('rev');
+  });
+
+  /* ------------------------------------------------------------------ Bilan */
+  function renderBilan(m) {
+    const tot = { ok: 0, ko: 0, n: 0 }; ALL.forEach(s => { const c = counts(s); tot.ok += c.ok; tot.ko += c.ko; tot.n += c.n; });
+    const fsu = FC.filter(c => fcs(c.id) === 'su').length, frev = FC.filter(c => fcs(c.id) === 'rev').length;
+    const p = document.createElement('div'); p.className = 'panel';
+    p.innerHTML = `<h2>Bilan global</h2>
+      <div class="prog">Questions : <b>${tot.ok}</b> sues · <b>${tot.ko}</b> à revoir · ${tot.n - tot.ok - tot.ko} à faire (sur ${tot.n})<div class="bar"><i class="g" style="width:${100 * tot.ok / tot.n}%"></i><i class="o" style="width:${100 * tot.ko / tot.n}%"></i></div></div>
+      <div class="prog">Flashcards : <b>${fsu}</b> sues · <b>${frev}</b> à revoir · ${FC.length - fsu - frev} non vues (sur ${FC.length})<div class="bar"><i class="g" style="width:${100 * fsu / FC.length}%"></i><i class="o" style="width:${100 * frev / FC.length}%"></i></div></div>`;
+    m.appendChild(p);
+
+    const p2 = document.createElement('div'); p2.className = 'panel';
+    p2.innerHTML = '<h2>Par TD</h2><table class="bil"><thead><tr><th>TD</th><th class="n">Sues</th><th class="n">À revoir</th><th class="n">À faire</th><th></th></tr></thead><tbody></tbody></table>';
+    const tb = $('tbody', p2);
+    [['td', SETS.td], ['alt', SETS.alt]].forEach(([g, arr]) => arr.forEach(s => {
+      const c = counts(s), tr = document.createElement('tr');
+      tr.innerHTML = `<td>${esc(s.title)} — ${esc(s.sub)}</td><td class="n">${c.ok}/${c.n}</td><td class="n">${c.ko}</td><td class="n">${c.todo}</td><td class="n"><button class="btn sm">Ouvrir</button></td>`;
+      $('button', tr).onclick = () => { S.ui[g] = s.id; S.ui.filter = 'all'; S.ui.theme = 'all'; go(g); };
+      tb.appendChild(tr);
+    }));
+    m.appendChild(p2);
+
+    const p3 = document.createElement('div'); p3.className = 'panel';
+    p3.innerHTML = '<h2>Par thème</h2><table class="bil"><thead><tr><th>Thème</th><th class="n">Questions sues</th><th class="n">À revoir</th><th class="n">Cartes sues</th><th class="n">Cartes à revoir</th><th></th></tr></thead><tbody></tbody></table>';
+    const t3 = $('tbody', p3);
+    THEMES.forEach(t => {
+      const qs = ALL.flatMap(s => s.qs).filter(q => q.th === t), ok = qs.filter(q => stOf(q.id) === 'ok').length, ko = qs.filter(q => stOf(q.id) === 'ko').length;
+      const cs = FC.filter(c => c.th === t), su = cs.filter(c => fcs(c.id) === 'su').length, rv = cs.filter(c => fcs(c.id) === 'rev').length;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${esc(t)}</td><td class="n">${ok}/${qs.length}</td><td class="n">${ko}</td><td class="n">${su}/${cs.length}</td><td class="n">${rv}</td><td class="n"><button class="btn sm">Réviser les cartes</button></td>`;
+      $('button', tr).onclick = () => { S.ui.fcF = { th: [t], st: rv ? 'rev' : 'all' }; go('fc'); };
+      t3.appendChild(tr);
+    });
+    m.appendChild(p3);
+
+    const todo = []; ALL.forEach(s => s.qs.forEach((q, i) => { if (stOf(q.id) === 'ko') todo.push([s, q, i]); }));
+    const p4 = document.createElement('div'); p4.className = 'panel';
+    p4.innerHTML = `<h2>Questions à revoir (${todo.length})</h2>` + (todo.length ? '<ul class="linklist"></ul>' : '<div class="src">Rien à revoir pour l’instant.</div>');
+    todo.forEach(([s, q, i]) => {
+      const li = document.createElement('li'), b = document.createElement('button');
+      const txt = q.q.replace(/<[^>]+>/g, '').slice(0, 110); b.textContent = `${s.title} · Q${i + 1} — ${txt}`;
+      b.onclick = () => { const g = SETS.alt.includes(s) ? 'alt' : 'td'; S.ui[g] = s.id; S.ui.filter = 'all'; S.ui.theme = 'all'; S.ui.scrollTo = q.id; go(g); };
+      li.appendChild(b); $('.linklist', p4).appendChild(li);
+    });
+    m.appendChild(p4);
+  }
+
+  /* ------------------------------------------------------------------ init */
+  function init() {
+    load();
+    document.documentElement.dataset.theme = S.ui.dark ? 'dark' : (S.ui.dark === false ? 'light' : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+    $$('nav.tabs button').forEach(b => b.onclick = () => go(b.dataset.tab));
+    $('#exp').onclick = exportFile;
+    $('#imp').onclick = () => $('#file').click();
+    $('#file').onchange = e => { if (e.target.files[0]) importFile(e.target.files[0]); e.target.value = ''; };
+    twoStep($('#rstall'), 'Tout effacer ? Confirmer', () => { S.q = {}; S.f = {}; deck = []; save(); render(); toast('Toute la progression a été effacée.'); });
+    $('#dark').onclick = () => { const d = document.documentElement.dataset.theme !== 'dark'; S.ui.dark = d; document.documentElement.dataset.theme = d ? 'dark' : 'light'; save(); };
+    window.addEventListener('beforeunload', e => { if (dirty && S.savedAt > S.exportedAt && !storageOK) { e.preventDefault(); e.returnValue = ''; } });
+    render();
+  }
+  init();
+})();
+
+</script>
+</body>
+</html>
