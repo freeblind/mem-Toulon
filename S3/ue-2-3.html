@@ -140,15 +140,27 @@
     <div class="section-title"><span>📚</span><span>Quiz / activités</span></div>
     <div class="grid">
 
-      <a class="card-link single" href="UE_2_3_Anat/AnatomyLab.html">
+      <a class="card-link" href="UE_2_3_Anat/AnatomyLab.html">
         <div class="card-header">
           <div class="card-title"><span class="emoji">🦴</span><span>AnatomyLab</span></div>
           <span class="card-badge">Disponible</span>
         </div>
-        <p class="card-desc">Révisions interactives d’anatomie.</p>
+        <p class="card-desc">Version vierge : révisions interactives d’anatomie.</p>
         <div class="card-footer">
           <span class="tag">Anatomie</span>
           <span class="open-pill">ouvrir <span>→</span></span>
+        </div>
+      </a>
+
+      <a class="card-link" id="dl-json" href="UE_2_3_Anat/anatomylab_sauvegarde.json" download="anatomylab_sauvegarde.json">
+        <div class="card-header">
+          <div class="card-title"><span class="emoji">🗂️</span><span>Ressource anatomie S3</span></div>
+          <span class="card-badge">Téléchargeable</span>
+        </div>
+        <p class="card-desc">Schémas légendés du S3 pour AnatomyLab : sauvegarde à charger dans l’outil.</p>
+        <div class="card-footer">
+          <span class="tag">JSON</span>
+          <span class="open-pill">télécharger <span>↓</span></span>
         </div>
       </a>
 
@@ -160,5 +172,26 @@
   </div>
 
 </div>
+<script>
+  // Force le téléchargement du JSON (sinon certains navigateurs l'affichent).
+  document.getElementById('dl-json').addEventListener('click', function (e) {
+    var url = this.getAttribute('href'), name = this.getAttribute('download');
+    e.preventDefault();
+    fetch(url).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.blob();
+    }).then(function (b) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([b], { type: 'application/octet-stream' }));
+      a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    }).catch(function () {
+      // Téléchargement impossible depuis ce contexte (ex. ouverture en file://) :
+      // on n'affiche plus le JSON, on explique quoi faire.
+      alert("Le téléchargement automatique est bloqué ici.\nFais un clic droit sur la carte → « Enregistrer le lien sous… », ou ouvre la page depuis le site en ligne.");
+    });
+  });
+</script>
 </body>
 </html>
