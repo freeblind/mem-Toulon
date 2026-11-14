@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UE 2.7 – Physio, sémio, patho – Oncologie – S3</title>
+  <style>
+    :root {
+      --bg-grad: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 35%, #fdfdfd 100%);
+      --card-bg: rgba(255,255,255,0.96);
+      --border-soft: #e5e7eb;
+      --shadow-soft: 0 18px 40px rgba(15,23,42,0.12);
+      --text-main: #0f172a;
+      --text-soft: #6b7280;
+      --radius-pill: 999px;
+      --transition: 0.18s ease-out;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      background: var(--bg-grad);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px 40px;
+    }
+    .page { width: 100%; max-width: 1100px; margin: 0 auto; }
+
+    .back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; color: var(--text-soft);
+      text-decoration: none; margin-bottom: 12px;
+    }
+    .back:hover { color: var(--text-main); text-decoration: underline; text-underline-offset: 2px; }
+
+    .header-card {
+      border-radius: 30px;
+      background: var(--card-bg);
+      border: 1px solid rgba(148,163,184,0.25);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 24px;
+      margin-bottom: 26px;
+      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+    }
+    .avatar-circle {
+      width: 64px; height: 64px; border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #fef3c7, #e0f2fe 45%, #ffffff 100%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 10px 30px rgba(37,99,235,0.25);
+      font-size: 1.9rem;
+    }
+    .header-text h1 {
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      font-weight: 800; letter-spacing: 0.01em;
+      display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    }
+    .header-text h1 small { font-size: 0.9rem; font-weight: 500; color: var(--text-soft); }
+    .subtitle { margin-top: 6px; font-size: 0.9rem; color: var(--text-soft); max-width: 640px; }
+
+    .section-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-note { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 12px; }
+    .section + .section { margin-top: 28px; }
+
+    .grid { display: grid; gap: 12px; }
+    @media (min-width: 640px)  { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (min-width: 900px)  { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+    .card-link {
+      position: relative; display: block;
+      border-radius: 20px; border: 1px solid var(--border-soft);
+      padding: 14px 15px; text-decoration: none;
+      background: rgba(255,255,255,0.94); color: inherit;
+      box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+      overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition),
+                  border-color var(--transition), background var(--transition);
+    }
+    .card-link::before {
+      content: ""; position: absolute; inset: -40%; opacity: 0;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(59,130,246,0.18), transparent 60%),
+        radial-gradient(circle at 80% 120%, rgba(129,140,248,0.18), transparent 60%);
+      transition: opacity var(--transition); z-index: -1;
+    }
+    .card-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 35px rgba(15,23,42,0.16);
+      border-color: rgba(129,140,248,0.7);
+      background: #ffffff;
+    }
+    .card-link:hover::before { opacity: 1; }
+
+    .card-link.pending { opacity: 0.55; cursor: default; pointer-events: none; box-shadow: none; }
+    .card-link.pending .card-badge { background: #e5e7eb; color: #6b7280; border-color: #e5e7eb; }
+    .card-link.pending .open-pill { background: transparent; color: #6b7280; border: 1px dashed #d1d5db; }
+
+    .card-header { display: flex; justify-content: space-between; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .card-title { font-size: 0.98rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .card-title .emoji { font-size: 1.3rem; }
+    .card-badge {
+      border-radius: var(--radius-pill); padding: 2px 9px; font-size: 0.75rem;
+      background: #e0e7ff; color: #1e3a8a; border: 1px solid rgba(79,70,229,0.4);
+      white-space: nowrap;
+    }
+    .card-desc { font-size: 0.83rem; color: var(--text-soft); margin-bottom: 10px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-soft); }
+    .tag {
+      border-radius: 999px; padding: 1px 8px; font-size: 0.7rem;
+      background: #f3f4ff; color: #4b5563;
+    }
+    .open-pill {
+      border-radius: var(--radius-pill); padding: 2px 10px;
+      background: #0f172a; color: #f9fafb; font-size: 0.78rem;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+
+    .footer-main { padding: 22px 4px 6px; font-size: 0.72rem; color: var(--text-soft); text-align: center; }
+  
+    .card-link.single { max-width: 520px; }
+
+    .page { position: relative; z-index: 1; }
+    .decor { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    .decor svg { width: 100%; height: 100%; display: block; }
+
+    :root { --bg-grad: radial-gradient(circle at top left, #fce7f3 0, #ede9fe 38%, #fdfcff 100%); --acc: #be185d; --acc-soft: #fbcfe8; }
+    .avatar-circle { background: radial-gradient(circle at 30% 20%, #fbcfe8, #ede9fe 50%, #ffffff 100%); box-shadow: 0 10px 30px rgba(190,24,93,0.25); }
+    .card-badge { background: #fce7f3; color: #9d174d; border-color: rgba(190,24,93,0.35); }
+    .card-link:hover { border-color: rgba(219,39,119,0.6); }
+    .card-link::before { background: radial-gradient(circle at 10% 0%, rgba(236,72,153,0.18), transparent 60%), radial-gradient(circle at 80% 120%, rgba(139,92,246,0.18), transparent 60%); }
+    .tag { background: #fdf2f8; color: #9d174d; }
+    .open-pill { background: #831843; }
+    .header-card { border-top: 4px solid #ec4899; }
+</style>
+</head>
+<body>
+<div class="decor" aria-hidden="true">
+  <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g opacity="0.35"><circle cx="1080" cy="120" r="120" fill="#f9a8d4"/><circle cx="1101.6" cy="105.6" r="45.6" fill="#f472b6"/></g><g opacity="0.4"><circle cx="1010" cy="260" r="48" fill="#c4b5fd"/><circle cx="1018.64" cy="254.24" r="18.240000000000002" fill="#a78bfa"/></g><g opacity="0.3"><circle cx="130" cy="640" r="150" fill="#c4b5fd"/><circle cx="157.0" cy="622.0" r="57.0" fill="#a78bfa"/></g><g opacity="0.35"><circle cx="300" cy="730" r="60" fill="#f9a8d4"/><circle cx="310.8" cy="722.8" r="22.8" fill="#ec4899"/></g><g opacity="0.4"><circle cx="1120" cy="620" r="90" fill="#fbcfe8"/><circle cx="1136.2" cy="609.2" r="34.2" fill="#f472b6"/></g><g opacity="0.45"><circle cx="640" cy="40" r="36" fill="#ddd6fe"/><circle cx="646.48" cy="35.68" r="13.68" fill="#a78bfa"/></g><g opacity="0.35"><circle cx="40" cy="260" r="40" fill="#fbcfe8"/><circle cx="47.2" cy="255.2" r="15.2" fill="#ec4899"/></g><g opacity="0.35"><circle cx="860" cy="740" r="44" fill="#ddd6fe"/><circle cx="867.92" cy="734.72" r="16.72" fill="#8b5cf6"/></g></svg>
+</div>
+<div class="page">
+
+  <a class="back" href="index.html">← Semestre 3</a>
+
+  <section class="header-card">
+    <div class="avatar-circle" aria-hidden="true">🎗️</div>
+    <div class="header-text">
+      <h1>UE 2.7 <small>Physio, sémio, patho · Semestre 3</small></h1>
+      <p class="subtitle">Oncologie : TD et flashcards.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title"><span>🃏</span><span>Flashcards & TD</span></div>
+    <div class="grid">
+
+      <a class="card-link single" href="UE_2_7_onco/ue210-oncologie-td-flashcards.html">
+        <div class="card-header">
+          <div class="card-title"><span class="emoji">🎗️</span><span>Oncologie – TD & flashcards</span></div>
+          <span class="card-badge">Disponible</span>
+        </div>
+        <p class="card-desc">Révisions de cancérologie : TD et cartes mémoire.</p>
+        <div class="card-footer">
+          <span class="tag">Oncologie</span>
+          <span class="open-pill">ouvrir <span>→</span></span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <div class="footer-main">
+    Ce site n’est pas professionnel et ne remplace pas les cours officiels – CC BY-NC 4.0.
+  </div>
+
+</div>
+</body>
+</html>

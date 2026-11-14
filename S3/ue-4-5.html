@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>UE 4.5 – Scanner – S3</title>
+  <style>
+    :root {
+      --bg-grad: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 35%, #fdfdfd 100%);
+      --card-bg: rgba(255,255,255,0.96);
+      --border-soft: #e5e7eb;
+      --shadow-soft: 0 18px 40px rgba(15,23,42,0.12);
+      --text-main: #0f172a;
+      --text-soft: #6b7280;
+      --radius-pill: 999px;
+      --transition: 0.18s ease-out;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      background: var(--bg-grad);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px 40px;
+    }
+    .page { width: 100%; max-width: 1100px; margin: 0 auto; }
+
+    .back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; color: var(--text-soft);
+      text-decoration: none; margin-bottom: 12px;
+    }
+    .back:hover { color: var(--text-main); text-decoration: underline; text-underline-offset: 2px; }
+
+    .header-card {
+      border-radius: 30px;
+      background: var(--card-bg);
+      border: 1px solid rgba(148,163,184,0.25);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 24px;
+      margin-bottom: 26px;
+      display: flex; gap: 18px; align-items: center; flex-wrap: wrap;
+    }
+    .avatar-circle {
+      width: 64px; height: 64px; border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #fef3c7, #e0f2fe 45%, #ffffff 100%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 10px 30px rgba(37,99,235,0.25);
+      font-size: 1.9rem;
+    }
+    .header-text h1 {
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      font-weight: 800; letter-spacing: 0.01em;
+      display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+    }
+    .header-text h1 small { font-size: 0.9rem; font-weight: 500; color: var(--text-soft); }
+    .subtitle { margin-top: 6px; font-size: 0.9rem; color: var(--text-soft); max-width: 640px; }
+
+    .section-title {
+      font-size: 1rem; font-weight: 700; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-note { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 12px; }
+    .section + .section { margin-top: 28px; }
+
+    .grid { display: grid; gap: 12px; }
+    @media (min-width: 640px)  { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (min-width: 900px)  { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+    .card-link {
+      position: relative; display: block;
+      border-radius: 20px; border: 1px solid var(--border-soft);
+      padding: 14px 15px; text-decoration: none;
+      background: rgba(255,255,255,0.94); color: inherit;
+      box-shadow: 0 10px 26px rgba(15,23,42,0.08);
+      overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition),
+                  border-color var(--transition), background var(--transition);
+    }
+    .card-link::before {
+      content: ""; position: absolute; inset: -40%; opacity: 0;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(59,130,246,0.18), transparent 60%),
+        radial-gradient(circle at 80% 120%, rgba(129,140,248,0.18), transparent 60%);
+      transition: opacity var(--transition); z-index: -1;
+    }
+    .card-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 35px rgba(15,23,42,0.16);
+      border-color: rgba(129,140,248,0.7);
+      background: #ffffff;
+    }
+    .card-link:hover::before { opacity: 1; }
+
+    .card-link.pending { opacity: 0.55; cursor: default; pointer-events: none; box-shadow: none; }
+    .card-link.pending .card-badge { background: #e5e7eb; color: #6b7280; border-color: #e5e7eb; }
+    .card-link.pending .open-pill { background: transparent; color: #6b7280; border: 1px dashed #d1d5db; }
+
+    .card-header { display: flex; justify-content: space-between; gap: 6px; align-items: center; margin-bottom: 6px; }
+    .card-title { font-size: 0.98rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .card-title .emoji { font-size: 1.3rem; }
+    .card-badge {
+      border-radius: var(--radius-pill); padding: 2px 9px; font-size: 0.75rem;
+      background: #e0e7ff; color: #1e3a8a; border: 1px solid rgba(79,70,229,0.4);
+      white-space: nowrap;
+    }
+    .card-desc { font-size: 0.83rem; color: var(--text-soft); margin-bottom: 10px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-soft); }
+    .tag {
+      border-radius: 999px; padding: 1px 8px; font-size: 0.7rem;
+      background: #f3f4ff; color: #4b5563;
+    }
+    .open-pill {
+      border-radius: var(--radius-pill); padding: 2px 10px;
+      background: #0f172a; color: #f9fafb; font-size: 0.78rem;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+
+    .footer-main { padding: 22px 4px 6px; font-size: 0.72rem; color: var(--text-soft); text-align: center; }
+  
+    .card-link.single { max-width: 520px; }
+
+    .page { position: relative; z-index: 1; }
+    .decor { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+    .decor svg { width: 100%; height: 100%; display: block; }
+
+    :root { --bg-grad: radial-gradient(circle at top right, #cffafe 0, #e2e8f0 38%, #f8fafc 100%); }
+    .avatar-circle { background: radial-gradient(circle at 30% 20%, #a5f3fc, #e2e8f0 50%, #ffffff 100%); box-shadow: 0 10px 30px rgba(8,145,178,0.28); }
+    .card-badge { background: #cffafe; color: #155e75; border-color: rgba(8,145,178,0.4); }
+    .card-link:hover { border-color: rgba(6,182,212,0.75); }
+    .card-link::before { background: radial-gradient(circle at 10% 0%, rgba(6,182,212,0.2), transparent 60%), radial-gradient(circle at 80% 120%, rgba(100,116,139,0.2), transparent 60%); }
+    .tag { background: #ecfeff; color: #155e75; }
+    .open-pill { background: #164e63; }
+    .header-card { border-top: 4px solid #06b6d4; }
+</style>
+</head>
+<body>
+<div class="decor" aria-hidden="true">
+  <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#0891b2"><circle cx="1020" cy="170" r="210" stroke-width="26" opacity=".12"/><circle cx="1020" cy="170" r="150" stroke-width="3" opacity=".30"/><circle cx="1020" cy="170" r="105" stroke-width="2" opacity=".25" stroke-dasharray="6 10"/><circle cx="1020" cy="170" r="260" stroke-width="2" opacity=".18"/><circle cx="130" cy="680" r="170" stroke-width="22" opacity=".10"/><circle cx="130" cy="680" r="115" stroke-width="2" opacity=".28"/><circle cx="130" cy="680" r="70" stroke-width="2" opacity=".22" stroke-dasharray="5 9"/></g><g stroke="#0e7490" stroke-width="2" opacity=".22"><line x1="0" y1="430" x2="1200" y2="430"/><line x1="0" y1="438" x2="1200" y2="438" opacity=".5"/></g><g fill="#0e7490" opacity=".25"><circle cx="640" cy="560" r="2.5"/><circle cx="640" cy="606" r="2.5"/><circle cx="640" cy="652" r="2.5"/><circle cx="686" cy="560" r="2.5"/><circle cx="686" cy="606" r="2.5"/><circle cx="686" cy="652" r="2.5"/><circle cx="732" cy="560" r="2.5"/><circle cx="732" cy="606" r="2.5"/><circle cx="732" cy="652" r="2.5"/><circle cx="778" cy="560" r="2.5"/><circle cx="778" cy="606" r="2.5"/><circle cx="778" cy="652" r="2.5"/><circle cx="824" cy="560" r="2.5"/><circle cx="824" cy="606" r="2.5"/><circle cx="824" cy="652" r="2.5"/><circle cx="870" cy="560" r="2.5"/><circle cx="870" cy="606" r="2.5"/><circle cx="870" cy="652" r="2.5"/><circle cx="916" cy="560" r="2.5"/><circle cx="916" cy="606" r="2.5"/><circle cx="916" cy="652" r="2.5"/><circle cx="962" cy="560" r="2.5"/><circle cx="962" cy="606" r="2.5"/><circle cx="962" cy="652" r="2.5"/><circle cx="1008" cy="560" r="2.5"/><circle cx="1008" cy="606" r="2.5"/><circle cx="1008" cy="652" r="2.5"/><circle cx="1054" cy="560" r="2.5"/><circle cx="1054" cy="606" r="2.5"/><circle cx="1054" cy="652" r="2.5"/></g></svg>
+</div>
+<div class="page">
+
+  <a class="back" href="index.html">← Semestre 3</a>
+
+  <section class="header-card">
+    <div class="avatar-circle" aria-hidden="true">🩻</div>
+    <div class="header-text">
+      <h1>UE 4.5 <small>Scanner · Semestre 3</small></h1>
+      <p class="subtitle">Scanner : rappel sur le fenêtrage et activité d’entraînement.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title"><span>📖</span><span>Rappel</span></div>
+    <div class="grid">
+
+      <a class="card-link" href="UE_4_5_scanner/Le_fenetrage_en_scanner.html">
+        <div class="card-header">
+          <div class="card-title"><span class="emoji">🪟</span><span>Le fenêtrage en scanner</span></div>
+          <span class="card-badge">Disponible</span>
+        </div>
+        <p class="card-desc">Rappel : largeur et niveau de fenêtre, densités en UH.</p>
+        <div class="card-footer">
+          <span class="tag">Rappel</span>
+          <span class="open-pill">ouvrir <span>→</span></span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-title"><span>📚</span><span>Quiz / activités</span></div>
+    <div class="grid">
+
+      <a class="card-link" href="UE_4_5_scanner/batch_scanner.html">
+        <div class="card-header">
+          <div class="card-title"><span class="emoji">🩻</span><span>Batch scanner</span></div>
+          <span class="card-badge">Disponible</span>
+        </div>
+        <p class="card-desc">Activité d’entraînement sur le scanner.</p>
+        <div class="card-footer">
+          <span class="tag">Scanner</span>
+          <span class="open-pill">ouvrir <span>→</span></span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <div class="footer-main">
+    Ce site n’est pas professionnel et ne remplace pas les cours officiels – CC BY-NC 4.0.
+  </div>
+
+</div>
+</body>
+</html>

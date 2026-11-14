@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UE 4.2 – Relation de soin : révision TD</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d2330;--mut:#667085;--line:#e3e0d8;--acc:#2f5d62;--acc2:#e07a5f;--ok:#2e7d4f;--okbg:#e4f3ea;--ko:#b3402a;--kobg:#fbe9e4;--warn:#9a6b00;--warnbg:#fff3d6;--sh:0 1px 2px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.05)}
+@media(prefers-color-scheme:dark){:root{--bg:#14181f;--card:#1c222c;--ink:#e8ebf0;--mut:#9aa4b2;--line:#2c3441;--acc:#6fb7b0;--acc2:#f0997f;--ok:#6fd09a;--okbg:#17321f;--ko:#ff9b85;--kobg:#3a1d17;--warn:#f0c15a;--warnbg:#3a2f12;--sh:0 1px 2px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 80px}
+h1{font-size:1.35rem;margin:6px 0 2px}.sub{color:var(--mut);font-size:.9rem;margin-bottom:14px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--sh);margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);width:100%;margin:6px 0 0}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;font:inherit;font-size:.9rem}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.mode .chip{flex:1;text-align:center;padding:10px}
+.btn{border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:600;cursor:pointer;background:var(--acc);color:#fff}
+.btn.sec{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ok{background:var(--ok);color:#fff}.btn.ko{background:var(--ko);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}.b-su{background:var(--ok)}.b-ns{background:var(--acc2)}
+.stats{display:flex;flex-wrap:wrap;gap:14px;font-size:.88rem;color:var(--mut);margin-top:8px}
+.stats b{color:var(--ink)}
+.tag{display:inline-block;font-size:.72rem;padding:2px 8px;border-radius:999px;background:var(--line);color:var(--mut);margin-right:6px}
+.tag.alt{background:var(--warnbg);color:var(--warn)}
+.ctx{font-size:.88rem;background:var(--bg);border-left:3px solid var(--acc);padding:8px 10px;border-radius:6px;margin:10px 0;color:var(--mut)}
+.ctx summary{cursor:pointer;color:var(--ink);font-weight:600}
+.q{font-size:1.12rem;font-weight:600;margin:8px 0 12px}
+.fc{min-height:210px;cursor:pointer;display:flex;flex-direction:column;justify-content:center}
+.ans{background:var(--okbg);border:1px solid var(--ok);border-radius:10px;padding:12px;margin-top:10px;white-space:pre-wrap}
+.hint{color:var(--mut);font-size:.85rem;text-align:center;margin-top:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1px solid var(--line);background:transparent;color:var(--ink);padding:11px 12px;border-radius:10px;margin:7px 0;font:inherit;cursor:pointer}
+.opt:hover{border-color:var(--acc)}.opt.sel{border-color:var(--acc);background:rgba(47,93,98,.1)}
+.opt.good{border-color:var(--ok);background:var(--okbg)}.opt.bad{border-color:var(--ko);background:var(--kobg)}
+.opt .k{flex:none;width:22px;height:22px;border:1.5px solid var(--mut);border-radius:50%;display:grid;place-items:center;font-size:.75rem}
+.opt.multi .k{border-radius:5px}
+textarea{width:100%;min-height:130px;border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit;background:var(--bg);color:var(--ink);resize:vertical}
+.res{margin-top:12px;border-radius:10px;padding:12px}.res.ok{background:var(--okbg)}.res.mid{background:var(--warnbg)}.res.ko{background:var(--kobg)}
+.kw{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.kw span{font-size:.8rem;padding:3px 9px;border-radius:999px}.kw .y{background:var(--okbg);color:var(--ok)}.kw .n{background:var(--kobg);color:var(--ko)}
+.nav{display:flex;gap:8px;justify-content:space-between;margin-top:14px;flex-wrap:wrap}
+.nav .grow{flex:1}
+.empty{text-align:center;padding:30px 10px;color:var(--mut)}
+.save{font-size:.85rem}.save code{font-size:.8rem}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--mut);margin-right:6px}.dot.on{background:var(--ok)}
+.tbl{width:100%;border-collapse:collapse;font-size:.88rem}.tbl td,.tbl th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+.hide{display:none}
+details.panel>summary{cursor:pointer;font-weight:600}
+</style></head><body><div class="wrap">
+<h1>UE 4.2 · Relation de soin et communication</h1>
+<div class="sub">Révision des TD 1 et 7 + partiel · flashcards, QCM, questions ouvertes autocorrigées</div>
+<div class="panel" id="ctrl">
+ <div class="row mode" id="modes"></div>
+ <div class="lbl">Série</div><div class="row" id="sets"></div>
+ <div class="lbl">Version</div><div class="row" id="vers"></div>
+ <div class="lbl">Cartes à travailler</div><div class="row" id="filt"></div>
+ <div class="row" style="margin-top:10px"><button class="chip" id="shuf">🔀 Mélanger : <span id="shufv">oui</span></button><button class="btn sec" id="restart">Relancer la série</button></div>
+ <div id="gstats" class="stats"></div>
+</div>
+<div id="stage"></div>
+<details class="panel save" id="savebox"><summary>💾 Sauvegarde &amp; progression</summary>
+ <div style="margin-top:10px"><span class="dot" id="dloc"></span>Sauvegarde locale (ce navigateur) · <span class="dot" id="dext"></span><span id="dextt">Sauvegarde externe : connexion…</span></div>
+ <p style="color:var(--mut);margin:8px 0">La progression est enregistrée automatiquement sur ce navigateur et, si disponible, sur ton compte (base externe de la page, privée). Tu peux aussi exporter un fichier de secours.</p>
+ <div class="row"><button class="btn sec" id="bexp">Télécharger le fichier</button><button class="btn sec" id="bcopy">Copier le code</button><button class="btn sec" id="bimp">Importer (coller ci-dessous)</button><button class="btn sec" id="bfile">Importer un fichier</button><input type="file" id="ffile" accept=".json,application/json" class="hide"></div>
+ <textarea id="tbox" placeholder="Code de sauvegarde (JSON) à copier ou coller ici" style="min-height:70px;margin-top:8px"></textarea>
+ <div id="smsg" class="hint"></div>
+ <div class="lbl">Détail par série</div><table class="tbl" id="detail"></table>
+ <div class="row" style="margin-top:10px"><button class="btn sec" id="breset">Réinitialiser la série affichée</button></div>
+</details>
+</div>
+<script>
+window.Q=window.Q||[];
+window.SIT=window.SIT||{};
+(function(){
+const P=[
+["juge","Le juge","Juge en bien ou en mal, vrai ou faux.","Délivre une sentence nécessaire non discutable.","Exige telle conduite en s'appuyant sur des connaissances.",[["juge"],["sentence","non discutable"],["exige","connaissance"]]],
+["commandant","Le commandant","Donne des conseils ou des ordres.","Ordonne sans discussion.","Conseille les actions à mener pour les soins du patient.",[["commandant"],["ordonne","sans discussion"],["conseille","action"]]],
+["prophete","Le prophète","Pense à l'après et s'y raccroche.","Prédit l'avenir.","Évite de dramatiser en introduisant la notion de durée.",[["prophete"],["predit","avenir"],["dramatis","duree"]]],
+["confesseur","Le confesseur","Aime les confidences.","Écoute dans le « secret ».","Position de confident, d'écoute.",[["confesseur"],["secret"],["confident","ecoute"]]],
+["professeur","Le professeur","Aime expliquer.","Toujours à expliquer et à étaler son savoir.","Explique quand c'est nécessaire.",[["professeur"],["etaler","savoir","toujours"],["necessaire","quand"]]],
+["aidant","L'aidant","Cherche à soutenir, à aider.","Réside surtout dans la négation de ses propres limites et capacités à pouvoir tenir ce rôle dans toutes les situations.","Sait utiliser à différents moments des attitudes relationnelles variées en fonction de l'ensemble de la situation présente.",[["aidant"],["negation","limite"],["varie","attitude","moments"]]]
+];
+window.P1=P;
+P.forEach((p,n)=>{
+Q.push({i:"td1-o-p"+n,s:"td1",v:"o",t:"Ex.1 · Profils de relation",q:"Profil « "+p[1]+" » : définition, excès et forme « normale » ?",a:p[2]+" | Excès : "+p[3]+" | Normal : "+p[4],k:p[5]});
+const others=P.filter((_,j)=>j!==n).map(x=>x[1]);
+const opts=[p[1]].concat(others.sort(()=>0).slice(0,3));
+Q.push({i:"td1-o-pq"+n,s:"td1",v:"o",t:"Ex.1 · Profils de relation",q:"Quel profil correspond à l'EXCÈS suivant : « "+p[3]+" » ?",a:p[1],o:opts,c:[0],e:"Excès : "+p[3]+" Normal : "+p[4]});
+});
+const A=[
+["Accueil","Formules neutres montrant notre disponibilité (« Voulez-vous m'en parler ? Je peux vous demander ce qu'il se passe ? J'écoute… »).",1],
+["Initiatives","Je pose mes questions en fonction de mes préoccupations.",0],
+["Centrées sur le vécu","Ce qui est éprouvé, le sentiment exprimé (« J'entends que c'est particulièrement douloureux… »).",1],
+["Centrées sur la personne","Compréhension, se mettre à la place de l'autre.",1],
+["Centrées sur les faits","Intérêt sur les détails, les éléments et évènements pour eux-mêmes.",0],
+["Centrées sur le problème","Ressasser les éléments problématiques, absence de prise en compte du contexte.",0],
+["Recherche d'un mode de communication adapté","Reformulation, clarification.",1],
+["Perspicacité","Difficulté à rester effacé et à respecter le rythme de l'autre. Interpréter.",0],
+["Respect de la personne","Considération de l'autre.",1],
+["Révélations","Donner les clés d'une situation à la place du patient.",0]
+];
+A.forEach((x,n)=>{
+Q.push({i:"td1-o-a"+n,s:"td1",v:"o",t:"Ex.2 · Attitudes +/−",q:"Attitude « "+x[0]+" » ("+x[1]+") : favorable (+) ou défavorable (−) à la relation d'aide ?",a:(x[2]?"+ Favorable":"− Défavorable")+" : "+(x[2]?"habileté travaillée":"attitude spontanée"),o:["+ Favorable à la relation d'aide","− Défavorable à la relation d'aide"],c:[x[2]?0:1],e:(x[2]?"Habileté travaillée, favorable.":"Attitude spontanée, défavorable.")});
+});
+Q.push({i:"td1-o-a10",s:"td1",v:"o",t:"Ex.2 · Attitudes +/−",q:"Citez les 5 habiletés travaillées (favorables) et les 5 attitudes spontanées (défavorables) de la relation d'aide.",a:"Favorables : accueil, centrées sur le vécu, centrées sur la personne, recherche d'un mode de communication adapté, respect de la personne. Défavorables : initiatives, centrées sur les faits, centrées sur le problème, révélations, perspicacité.",k:[["accueil"],["vecu"],["personne"],["mode de communication","adapte"],["respect"],["initiative"],["faits"],["probleme"],["revelation"],["perspicacite"]]});
+Q.push({i:"td1-o-r0",s:"td1",v:"o",t:"Ex.3 · Types de relations",q:"Citez les différents types de relation (UE 1.1, dynamique des relations de soins).",a:"Relation éducative, autorité, dépendance, maternage, dominance, coopération, conflit, relation d'aide.",k:[["educative"],["autorite"],["dependance"],["maternage"],["dominance"],["cooperation"],["conflit"],["aide"]]});
+const R=["Relation éducative","Autorité","Dépendance","Coopération","Conflit","Dominance"];
+const S=[
+["Bonjour M. Crochet, nous allons réaliser un scanner TAP (thorax, abdomen, pelvis). Il faudra tenir des apnées de courtes durées lorsqu'on vous le dira.",0,"Le MEM informe et explique : relation éducative."],
+["Votre cadre de santé vous impose de réaliser une radiographie au lit car vos collègues sont occupés avec un patient peu coopérant.",1,"Ordre hiérarchique : autorité."],
+["Mme Yzma, hospitalisée en orthopédie, attend depuis plus de 30 min et vous demande un bassin pour uriner.",2,"Le patient ne peut pas satisfaire seul un besoin : dépendance."],
+["Votre collègue prépare l'injecteur pendant que vous accueillez le patient et posez la VVP ; il reste ensuite auprès du patient pour vérifier l'absence d'extravasation.",3,"Répartition des tâches vers un but commun : coopération."],
+["Après une IRM prostatique, le patient refuse de partir sans son résultat, vous répondez que le radiologue n'a pas le temps, il crie qu'il restera tant qu'il n'aura pas son résultat.",4,"Opposition ouverte des deux parties : conflit."],
+["En réunion d'équipe, on propose de travailler en 12 h. Mireille dit que c'est hors de question et rétorque que vous ne comprenez rien et ne connaissez pas le service.",5,"Une personne cherche à imposer son point de vue et disqualifie l'autre : dominance."]
+];
+S.forEach((x,n)=>{
+Q.push({i:"td1-o-s"+n,s:"td1",v:"o",t:"Ex.3 · Situations → relation",q:"Situation : « "+x[0]+" » Quel type de relation ?",a:R[x[1]]+" — "+x[2],o:R.slice(),c:[x[1]],e:x[2],k:[[R[x[1]].toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").split(" ").pop()]]});
+});
+Q.push({i:"td1-o-d0",s:"td1",v:"o",t:"Ex.4 · Relation soignant-soigné",q:"Définissez la relation soignant – soigné (but + définition de Carl Rogers de la relation d'aide).",a:"Elle a pour but l'aide et le soutien de la personne soignée jusqu'à son retour à l'autonomie. Rogers : « La relation d'aide consiste en une interaction particulière entre deux personnes, l'intervenant et l'aidé, chacun contribuant à la recherche et à la satisfaction d'un besoin d'aide chez ce dernier. L'intervenant adopte une façon d'être et la communique en fonction des buts poursuivis. Ses buts sont à la fois liés à la demande du patient et à la compréhension que le professionnel a de son rôle ».",k:[["aide","soutien"],["autonomie"],["interaction"],["deux personnes","intervenant","aide"],["besoin"],["role","demande"]]});
+Q.push({i:"td1-o-d1",s:"td1",v:"o",t:"Ex.4 · Relation soignant-soigné",q:"Explicitez les 3 types de relations constituant les relations aidantes.",a:"Relation de civilité (politesse, règles sociales) ; relation fonctionnelle (règles structurées à visée pédagogique ou informative, liée au métier) ; relation de compréhension (explication, conseil).",k:[["civilite"],["politesse","regles sociales","social"],["fonctionnelle"],["pedagogique","informati","metier"],["comprehension"],["explication","conseil"]]});
+Q.push({i:"td1-o-d2",s:"td1",v:"o",t:"Ex.4 · Relation soignant-soigné",q:"Explicitez les 4 attitudes soignantes dans la relation d'aide.",a:"Présence et écoute active (reformulation, ne pas couper la parole, ici et maintenant) ; congruence (penser ce que l'on dit, être « vrai ») ; empathie (ressentir/se mettre à la place de l'autre sans basculer dans la sympathie) ; acceptation inconditionnelle ou non-jugement.",k:[["presence"],["ecoute active","reformul","couper"],["congruence"],["vrai","penser ce que"],["empathie"],["place de l'autre","ressentir","sympathie"],["acceptation","non jugement","non-jugement"],["jug"]]});
+})();
+(function(){
+SIT.s8="Didier, manipulateur en électroradiologie en imagerie conventionnelle, prend en charge Simon, 10 ans, venu des urgences avec sa mère pour une radio de cheville. La mère explique que Simon est autiste et peut être violent. Simon tient son doudou près du visage, se cache et ne parle pas. Didier dit : « Il faut t'installer là, sur la table et on va faire une photo. Il ne faut surtout pas bouger ». Simon refuse, fait « non » de la tête, grogne, tire sa mère vers la porte. Sa mère l'explique et l'installe ; il se calme un peu mais se balance. Sans parler à l'enfant ni à la mère, Didier bouge la suspension : Simon crie de peur, veut descendre, sa mère le retient de force, il se débat, pleure et tape l'appareil. Didier appelle les urgences pédiatriques devant eux : « L'enfant a presque cassé l'appareil, on ne peut pas faire la radio dans ces conditions ! Je vous le renvoie ». La mère proteste (2 h d'attente). Didier répond implacable que la salle d'attente est pleine, puis ouvre la porte pour les inviter à partir.";
+SIT.s9="Cunégonde, en soins palliatifs, arrive sur brancard pour un scanner abdomino-pelvien. Thérèse (MEM) regarde son bracelet et demande si elle peut passer seule sur la table. « Je vais essayer » — « Non, non, ici on n'essaye pas, soit vous pouvez, soit vous ne pouvez pas, parce qu'on perd du temps sinon ». Cunégonde dit qu'elle ne sait pas si elle va y arriver. Thérèse décide qu'elle reste couchée et attend son collègue pour le transfert avec le roller : « Allez ! Zoup ». Cunégonde grimace sans rien dire. Voie veineuse, acquisitions ; à la fin Thérèse voit des larmes : « Qu'est-ce qu'il y a ? Ça ne va pas ma p'tite dame ? Vous avez mal ? » — « Je vais mourir madame, comme mon mari » — « Oh non ! Ne dites pas ça ! C'est juste un examen et il fait beau aujourd'hui, ça va aller, vous allez retourner dans votre service ».";
+SIT.par="Marguerite travaille en IRM (rendez-vous toutes les 15 min). À 9h30, le radiologue ajoute M. Picassiette, 62 ans, hospitalisé, pour une IRM hépatique à intégrer avant 13h. Il attend en salle d'attente avec son épouse. Au bout de 2 h, elle s'impatiente, en colère : « Mon mari est à jeun, nous attendons depuis trop longtemps ! Qu'est-ce qu'il se passe ici ?! ». Marguerite rétorque que ce n'est pas le seul patient et qu'il n'avait pas besoin d'être à jeun. Mme demande un petit déjeuner : « ce n'est pas un service de soins, il n'y a rien à manger ». M. demande « Quand vais-je passer ? » ; Marguerite souffle : « Bientôt monsieur, mais on vous a rajouté donc il faut attendre, les autres patients ont rendez-vous vous savez ? » M. : « Mais je suis hospitalisé moi, c'est important a dit le docteur ! » ; Marguerite sort : « Oui monsieur, comme tout le monde ici ».";
+function E(i,s,x,t,q,a,k,extra){Q.push(Object.assign({i:i,s:s,v:"o",x:x,t:t,q:q,a:a,k:k},extra||{}));}
+// ---- TD7 situation 8
+const T8="TD7 · Situation 8 (Simon, autisme)";
+E("td7-o-8a","td7","s8",T8,"Q1 – Éléments de communication VERBALE du soignant (Didier).","« Il faut t'installer là… » ; il appelle les urgences pédiatriques en leur présence « L'enfant a presque cassé l'appareil… » ; il répond que c'est pareil pour tout le monde et qu'il y a beaucoup de monde.",[["installer"],["urgences","casse","appareil"],["beaucoup de monde","pareil","attente","salle"]]);
+E("td7-o-8b","td7","s8",T8,"Q1 – Éléments de communication NON VERBALE du soignant (Didier).","Il accueille l'enfant ; il bouge la suspension ; il décide de le faire descendre ; il ouvre la porte.",[["accueil"],["suspension"],["descendre"],["porte"]]);
+E("td7-o-8c","td7","s8",T8,"Q1 – Éléments de communication VERBALE de la personne soignée (Simon) et de sa mère.","La mère explique que Simon est autiste et peut être violent ; elle prend le temps de lui expliquer ; Simon crie ; sa mère proteste.",[["autiste","violent"],["explique","temps"],["crie"],["proteste"]]);
+E("td7-o-8d","td7","s8",T8,"Q1 – Éléments de communication NON VERBALE de la personne soignée (Simon) et de sa mère.","Simon se cache derrière sa maman, tient son doudou près du visage et ne parle pas ; signe « non » de la tête, grognements ; sa mère l'installe ; il s'agite ; sa mère le retient de force, il se débat, pleure et tape l'appareil.",[["cache","doudou"],["non","grogne"],["installe"],["agite","balance"],["retient","force"],["pleure","tape","debat"]]);
+E("td7-o-8e","td7","s8",T8,"Q2 – Donnez du sens aux éléments VERBAUX du MEM.","Information directive, sécurisation, prise en compte de l'enfant de manière autoritaire ; agacement, manque de respect et discours culpabilisant.",[["directive","information"],["autoritaire"],["agacement"],["respect"],["culpabilis"]]);
+E("td7-o-8f","td7","s8",T8,"Q2 – Donnez du sens aux éléments NON VERBAUX du MEM.","Résignation ; indifférence aux difficultés de la mère ; il se comporte avec l'enfant sans tenir compte de son handicap = malaise, méconnaissance du handicap.",[["resignation"],["indifference","mere"],["handicap"],["malaise","meconnaissance"]]);
+E("td7-o-8g","td7","s8",T8,"Q2 – Donnez du sens aux éléments de communication de la mère et de Simon.","Mère : information, prudence, stress ; préparation adaptée à l'enfant (elle essaie en douceur) ; incompréhension, déception, stress. Simon : peur, ne comprend pas, met à distance le MEM, refus, agacement, subit, frayeur ; la contrainte entraîne un rapport de force et de la violence de la part de l'enfant.",[["information","prudence","stress"],["adapt","douceur"],["incomprehension","deception"],["peur","terrorise","frayeur"],["distance","refus"],["contrainte","rapport de force","violence"]]);
+E("td7-o-8h","td7","s8",T8,"Q3 – Citez 2 caractéristiques du trouble du spectre de l'autisme (TSA).","Difficultés de communication ; interactions sociales altérées ; comportements répétitifs ; sensibilité sensorielle (toucher, lumière, son) ; résistance marquée aux changements de routine ; quasi-absence de contact visuel ; difficultés avec les notions abstraites ; difficulté à utiliser le langage verbal dans la relation.",[["communication","langage"],["social","interaction"],["repetitif","stereotyp"],["sensori","bruit","lumiere","toucher"],["routine","changement"],["visuel","regard"],["abstrait"]],{o:["Difficultés de communication et interactions sociales altérées","Hyperactivité avec intolérance à l'attente","Excellente compréhension des notions abstraites","Besoin de changements fréquents de routine"],c:[0],e:"TSA : communication/interactions altérées, comportements répétitifs, sensibilité sensorielle, résistance aux changements de routine, notions abstraites difficiles."});
+E("td7-o-8i","td7","s8",T8,"Q4 – Réajustement VERBAL de Didier.","Prendre le temps d'expliquer à la mère ; proposer de faire avec le doudou, rechercher la coopération ; parler au doudou ; collaborer avec la mère, demander son aide ; discours professionnel, rassurer la mère ; chercher une solution (médicale ou non) pour effectuer l'examen.",[["temps","expliquer"],["doudou"],["cooperation","collabor","aide de la mere","mere"],["professionnel","rassur"],["solution"]]);
+E("td7-o-8j","td7","s8",T8,"Q4 – Réajustement NON VERBAL de Didier.","Gestes doux et rassurants ; adapter la lumière ; être attentif au bruit ; préparer au maximum la salle avant l'entrée de l'enfant (suspension à la bonne place, matériel de confort…).",[["geste","doux","rassur"],["lumiere"],["bruit"],["preparer","salle","suspension","confort"]]);
+// ---- TD7 situation 9
+const T9="TD7 · Situation 9 (Cunégonde, soins palliatifs)";
+E("td7-o-9a","td7","s9",T9,"Q1 – Éléments de communication VERBALE du soignant (Thérèse).","Demande si elle peut passer seule sur la table ; « Non, non, ici on n'essaye pas… parce qu'on perd du temps » ; « Allez ! Zoup » ; « Qu'est-ce qu'il y a ? Ça ne va pas ma p'tite dame ? Vous avez mal ? » ; « Oh non ! Ne dites pas ça ! C'est juste un examen… ça va aller ».",[["seule","table"],["essaye","perd du temps"],["zoup","allez"],["p'tite dame","qu'est-ce qu'il y a","mal"],["ne dites pas","juste un examen","ca va aller"]]);
+E("td7-o-9b","td7","s9",T9,"Q1 – Éléments de communication NON VERBALE du soignant (Thérèse).","Elle regarde son bracelet ; elle et son collègue mettent en place la voie veineuse et réalisent les acquisitions ; le ton ; elle décide de prendre le roller.",[["bracelet"],["voie veineuse","acquisition"],["ton"],["roller"]]);
+E("td7-o-9c","td7","s9",T9,"Q1 – Éléments de communication de la personne soignée (Cunégonde), verbaux et non verbaux.","Verbal : « Je vais essayer », « Je ne sais pas », « Je vais mourir madame, comme mon mari ». Non verbal : elle est sur un brancard, grimace un peu mais ne dit rien, des larmes coulent sur ses joues.",[["essayer"],["sais pas"],["mourir","mari"],["brancard"],["grimace"],["larmes"]]);
+E("td7-o-9d","td7","s9",T9,"Q2 – Donnez du sens aux éléments de communication de Thérèse.","Verbal : information ; agacement ; brusque, « violence verbale » ; renseignement, familiarité ; moralisateur, refus de la parole du patient, propos décalé. Non verbal : vérification de l'identité ; effectue son travail ; prend la décision à la place de la patiente ; manque de respect en décidant à sa place.",[["information","renseignement"],["agacement"],["brusque","violence"],["familiarite"],["moralisateur","refus","decale"],["identite"],["decision","place"],["respect"]]);
+E("td7-o-9e","td7","s9",T9,"Q2 – Donnez du sens aux éléments de communication de Cunégonde.","Verbal : recherche à se conformer ; aveu, recherche d'être consolée, besoin de parler et d'exprimer sa tristesse. Non verbal : position allongée (soumission), perte de confiance en soi, douleur, tristesse, angoisse, augmentation du stress.",[["conformer"],["aveu","consol","besoin de parler"],["allongee","soumission"],["confiance"],["douleur"],["tristesse"],["angoisse","stress"]]);
+E("td7-o-9f","td7","s9",T9,"Q3 – Nommez les outils de communication en défaut chez Thérèse.","Le respect (ne considère pas la patiente dans sa singularité) ; l'écoute ; la reformulation ; l'immédiateté (temporalités différentes : l'une pressée, l'autre dans l'avenir) ; l'empathie.",[["respect"],["ecoute"],["reformulation"],["immediatete","temporalite"],["empathie"]],{o:["Respect, écoute, reformulation, immédiateté, empathie","Congruence, assertivité et toucher uniquement","Apparence, posture et distance sociale","Registre de langage et intonation uniquement"],c:[0],e:"Capacités de l'aidant en défaut : respect, écoute, reformulation, immédiateté, empathie."});
+E("td7-o-9g","td7","s9",T9,"Q4 – Réajustement VERBAL de Thérèse.","Expliquer l'examen, prendre le temps, écouter, reformuler ; établir un but à atteindre (aller sur la table) ; s'assurer de la compréhension et réexpliquer ; rassurer ; accepter ce que dit la patiente sans minimiser ; être positive ; être empathique.",[["expliquer","temps"],["ecouter","reformul"],["but"],["comprehension","reexpliquer"],["rassur"],["minimis","accepter"],["positi"],["empathi"]]);
+E("td7-o-9h","td7","s9",T9,"Q4 – Réajustement NON VERBAL de Thérèse.","Se mettre dans la temporalité de la patiente ; mouvements doux ; regard accueillant ; intonation, tessiture ; toucher dans le soin ; se mettre à la hauteur de la patiente ; ne pas faire de supposition ; prendre le temps dans les gestes ; installer confortablement ; vérifier le feed-back ; rester dans le moment présent sans stress.",[["temporalite","rythme"],["doux"],["regard"],["intonation","tessiture"],["toucher"],["hauteur"],["supposition"],["temps","gestes"],["confortable","installer"],["feed","retour"],["present","stress"]]);
+// ---- Partiel
+const TP="Partiel 2024 · Situation Picassiette";
+E("par-o-1","par","par",TP,"Q1 – Repérez les éléments de communication verbale et non verbale de M. Picassiette, Mme Picassiette et Marguerite.","Marguerite verbal : « ce n'est pas le seul patient », « il n'avait pas besoin d'être à jeun », « pas un service de soins, rien à manger », « Bientôt monsieur… les autres patients ont rendez-vous », « comme tout le monde ici ». Non verbal : elle souffle, sort de la salle d'attente. Mme : colère, interpelle, « Mon mari est à jeun… trop longtemps ! », demande un petit déjeuner. M. : « Quand vais-je passer ? », « Mais je suis hospitalisé moi, c'est important ! » ; il est installé en salle d'attente, accompagné de son épouse. (Proposition de corrigé)",[["souffle"],["pas le seul","autres patients"],["jeun"],["petit dejeuner","rien a manger"],["comme tout le monde"],["sort","sortant"],["colere","interpelle"],["quand","passer"],["hospitalise","important"]]);
+E("par-o-2","par","par",TP,"Q2 – Donnez du sens aux éléments repérés.","Marguerite : agacement, impatience, manque d'empathie et d'écoute, minimise, justifie sa position, rejette la parole des patients, quitte la relation (fuite). Mme : colère, inquiétude, besoin d'information et de considération, besoin physiologique non pris en compte. M. : inquiétude, perte de repères, besoin d'être reconnu comme singulier, sentiment d'abandon, d'injustice. (Proposition de corrigé)",[["agacement","impatience"],["empathie","ecoute"],["minimis","justifi"],["fuite","quitte"],["colere"],["inquietude","anxiete"],["information"],["singulier","reconnu","considera"],["abandon","injustice"]]);
+E("par-o-3","par","par",TP,"Q3 – Proposez trois éléments verbaux et trois éléments non verbaux de réajustement de Marguerite.","Verbal : s'excuser de l'attente et informer (retard, horaire estimé) ; reformuler / dévoiler l'émotion (« vous avez l'air agacé ») avec écoute active ; vérifier le besoin (jeûne, petit-déjeuner) et proposer une solution (contacter le service/le médecin). Non verbal : rester calme, ton posé ; se mettre à la hauteur, regard accueillant, ne pas souffler ; rester présente, gestuelle ouverte (main à plat apaisante), distance adaptée. (Proposition de corrigé)",[["excuse","informer","attente"],["reformul","ecoute","avez l'air","emotion"],["jeun","petit dejeuner","solution","besoin"],["calme","pose","ton"],["hauteur","regard","souffl"],["presente","ouvert","distance","geste"]]);
+})();
+(function(){
+const P=window.P1, VF=["Vrai","Faux"];
+function push(o){o.s=o.s||"td1";o.v="a";Q.push(o);}
+function vf(i,t,q,truth,e,extra){push(Object.assign({i:i,t:t,q:q,a:(truth?"Vrai":"Faux")+" — "+e,o:VF.slice(),c:[truth?0:1],e:e},extra||{}));}
+const T1="TD1 alt · Ex.1 Profils";
+P.forEach((p,n)=>{
+const q=P[(n+2)%6], r=P[(n+4)%6];
+// vrai/faux mélangés : vraie, fausse (excès d'un autre), inversée (normal<->excès)
+vf("td1-a-p"+n+"a",T1,"Vrai ou faux : le profil « "+p[1]+" » consiste à : « "+p[2].replace(/\.$/,"")+" ».",true,p[1]+" : "+p[2]);
+vf("td1-a-p"+n+"b",T1,"Vrai ou faux : l'EXCÈS du profil « "+p[1]+" » est : « "+q[3].replace(/\.$/,"")+" ».",false,"Cet excès appartient à « "+q[1]+" ». Excès de « "+p[1]+" » : "+p[3]);
+vf("td1-a-p"+n+"c",T1,"Vrai ou faux : sous sa forme NORMALE, « "+p[1]+" » : « "+p[4].replace(/\.$/,"")+" ».",true,"Forme normale de « "+p[1]+" » : "+p[4]);
+vf("td1-a-p"+n+"d",T1,"Vrai ou faux : « "+p[3].replace(/\.$/,"")+" » est la forme NORMALE du profil « "+p[1]+" ».",false,"C'est son excès. Normal : "+p[4]);
+const opts=[p[1],q[1],r[1],P[(n+1)%6][1]];
+push({i:"td1-a-p"+n+"e",t:T1,q:"Quel profil, dans sa forme NORMALE, « "+p[4].replace(/\.$/,"")+" » ?",a:p[1],o:opts,c:[0],e:p[1]+" — normal : "+p[4]});
+});
+// attitudes
+const A=[
+["Accueil","Formules neutres montrant notre disponibilité.",1],
+["Initiatives","Poser ses questions en fonction de ses propres préoccupations.",0],
+["Centrées sur le vécu","Ce qui est éprouvé, le sentiment exprimé.",1],
+["Centrées sur la personne","Compréhension, se mettre à la place de l'autre.",1],
+["Centrées sur les faits","Intérêt pour les détails et événements pour eux-mêmes.",0],
+["Centrées sur le problème","Ressasser les éléments problématiques sans prendre en compte le contexte.",0],
+["Recherche d'un mode de communication adapté","Reformulation, clarification.",1],
+["Perspicacité","Difficulté à rester effacé et à respecter le rythme de l'autre ; interpréter.",0],
+["Respect de la personne","Considération de l'autre.",1],
+["Révélations","Donner les clés d'une situation à la place du patient.",0]];
+const T2="TD1 alt · Ex.2 Attitudes";
+A.forEach((x,n)=>{
+const m=n%3, lab=ok=>ok?"favorable":"défavorable";
+if(m===0) vf("td1-a-a"+n,T2,"Vrai ou faux : « "+x[0]+" » ("+x[1].replace(/\.$/,"")+") est une attitude "+lab(x[2])+" à la relation d'aide.",true,lab(x[2])+(x[2]?" (habileté travaillée).":" (attitude spontanée)."));
+else if(m===1) vf("td1-a-a"+n,T2,"Vrai ou faux : « "+x[0]+" » ("+x[1].replace(/\.$/,"")+") est une attitude "+lab(!x[2])+" à la relation d'aide.",false,"Elle est en réalité "+lab(x[2])+(x[2]?" (habileté travaillée).":" (attitude spontanée)."));
+else { const o=[x[1],A[(n+3)%10][1],A[(n+5)%10][1],A[(n+7)%10][1]];
+ push({i:"td1-a-a"+n,t:T2,q:"Quelle explication correspond à l'attitude « "+x[0]+" » ?",a:x[1],o:o,c:[0],e:"« "+x[0]+" » : "+x[1]+" ("+lab(x[2])+")."}); }
+});
+push({i:"td1-a-a10",t:T2,q:"Parmi ces attitudes, lesquelles sont DÉFAVORABLES à la relation d'aide ? (plusieurs réponses)",a:"Initiatives, Perspicacité, Révélations",o:["Initiatives","Respect de la personne","Perspicacité","Accueil","Révélations","Centrées sur le vécu"],c:[0,2,4],e:"Défavorables : initiatives, centrées sur les faits, centrées sur le problème, révélations, perspicacité."});
+push({i:"td1-a-a11",t:T2,q:"Parmi ces attitudes, lesquelles sont FAVORABLES (habiletés travaillées) ? (plusieurs réponses)",a:"Accueil, Centrées sur la personne, Recherche d'un mode de communication adapté",o:["Accueil","Centrées sur les faits","Centrées sur la personne","Centrées sur le problème","Recherche d'un mode de communication adapté","Révélations"],c:[0,2,4],e:"Favorables : accueil, centrées sur le vécu, centrées sur la personne, mode de communication adapté, respect."});
+push({i:"td1-a-a12",t:T2,q:"Expliquez pourquoi « centré sur le problème » ou « centré sur les faits » nuit à la relation d'aide, et citez les attitudes à privilégier à la place.",a:"Ces attitudes spontanées ressassent les éléments problématiques/détails sans tenir compte du contexte ni de la personne. À privilégier : accueil, centrées sur le vécu et sur la personne, communication adaptée (reformulation, clarification), respect.",k:[["contexte","personne","vecu"],["ressass","detail","fait","probleme"],["accueil"],["reformul","clarif","adapte"],["respect"]]});
+// relations
+const R=["Relation éducative","Autorité","Dépendance","Coopération","Conflit","Dominance"];
+const T3="TD1 alt · Ex.3 Types de relations";
+const SH=["Le MEM explique à M. Crochet le déroulé du scanner TAP et les apnées à tenir.","Le cadre impose une radio au lit car les collègues sont occupés.","Mme Yzma, en attente, demande un bassin pour uriner.","Un collègue prépare l'injecteur pendant que l'autre pose la VVP, puis surveille l'extravasation.","Le patient d'IRM refuse de partir sans résultat et crie qu'il restera.","En réunion, Mireille rejette la proposition de 12 h et dit à l'autre qu'il ne comprend rien."];
+SH.forEach((s,n)=>{
+const o=[SH[n],SH[(n+1)%6],SH[(n+3)%6],SH[(n+4)%6]];
+push({i:"td1-a-r"+n,t:T3,q:"Laquelle de ces situations illustre la relation de type « "+R[n]+" » ?",a:SH[n],o:o,c:[0],e:R[n]+" : "+SH[n]});
+const wrong=(n+2)%6, truth=(n%2===0);
+vf("td1-a-rv"+n,T3,"Vrai ou faux : « "+s.replace(/\.$/,"")+" » illustre la relation de type « "+(truth?R[n]:R[wrong])+" ».",truth,"Bonne réponse : "+R[n]+".");
+});
+const NEW=[
+["Vous expliquez à une patiente comment se préparer (jeûne, hydratation) avant son scanner et vérifiez qu'elle a compris.",0],
+["Votre cadre vous demande de changer de poste ce matin sans discussion possible.",1],
+["Un patient âgé en fauteuil ne peut pas se déshabiller seul et vous demande de l'aide.",2],
+["Vous et votre collègue réalisez ensemble un transfert patient en répartissant les rôles.",3],
+["Un accompagnant hurle contre vous et vous lui répondez sur le même ton, chacun campant sur sa position.",4],
+["Un collègue décide seul du planning et balaie vos objections en disant que vous n'y connaissez rien.",5]];
+NEW.forEach((x,n)=>{
+const o=R.slice(); 
+push({i:"td1-a-rn"+n,t:T3+" (nouvelle situation)",q:"Nouvelle situation : « "+x[0]+" » Quel type de relation ?",a:R[x[1]],o:o,c:[x[1]],e:"Type : "+R[x[1]]+"."});
+});
+push({i:"td1-a-r10",t:T3,q:"Parmi ces propositions, lesquelles sont des types de relation vus en UE 1.1 ? (plusieurs réponses)",a:"Éducative, dépendance, maternage, coopération",o:["Relation éducative","Relation de dépendance","Relation de séduction","Relation de maternage","Relation de coopération","Relation de fusion"],c:[0,1,3,4],e:"Liste : éducative, autorité, dépendance, maternage, dominance, coopération, conflit, relation d'aide."});
+push({i:"td1-a-r11",t:T3,q:"Quels types de relation n'ont pas été cités dans les 6 situations du TD (maternage et relation d'aide) : donnez une phrase illustrant le maternage et une phrase illustrant la relation d'aide.",a:"Maternage : le soignant fait trop à la place du patient (« laissez, je m'occupe de tout »). Relation d'aide : accompagner le patient à trouver ses propres réponses (écoute, reformulation, empathie).",k:[["maternage"],["place","trop","surprotec","tout"],["aide"],["ecoute","reformul","empath","propres reponses"]]});
+// Ex.4
+const T4="TD1 alt · Ex.4 Relation soignant-soigné";
+vf("td1-a-d0",T4,"Vrai ou faux : la relation soignant-soigné a pour but de rendre la personne soignée dépendante du soignant.",false,"Elle vise l'aide et le soutien jusqu'au retour à l'autonomie.");
+vf("td1-a-d1",T4,"Vrai ou faux : pour Rogers, les buts de l'intervenant sont liés à la demande du patient et à la compréhension qu'il a de son rôle.",true,"C'est la fin de la définition de Rogers.");
+push({i:"td1-a-d2",t:T4,q:"Associez : « le temps de la rencontre, du soin, de la consultation » aux relations de civilité, fonctionnelle, de compréhension (dans l'ordre civilité / fonctionnelle / compréhension).",a:"Rencontre / consultation / soin",o:["Rencontre / consultation / soin","Soin / rencontre / consultation","Consultation / soin / rencontre","Rencontre / soin / consultation"],c:[0],e:"Civilité = temps de la rencontre ; fonctionnelle = temps de la consultation ; compréhension = temps du soin."});
+push({i:"td1-a-d3",t:T4,q:"Quelle relation aidante correspond à : « règles structurées à visée pédagogique ou informative, liée au métier » ?",a:"La relation fonctionnelle",o:["Relation de civilité","Relation fonctionnelle","Relation de compréhension","Relation de dépendance"],c:[1],e:"Fonctionnelle : échange structuré, visée informative ou pédagogique."});
+push({i:"td1-a-d4",t:T4,q:"« Penser ce que l'on dit, être vrai » définit quelle attitude soignante ?",a:"La congruence",o:["L'empathie","La congruence","L'acceptation inconditionnelle","La présence et l'écoute active"],c:[1],e:"Congruence = correspondance entre ce que l'on vit, pense, dit et montre."});
+push({i:"td1-a-d5",t:T4,q:"Laquelle de ces propositions décrit correctement l'empathie ?",a:"Se mettre à la place de l'autre sans basculer dans la sympathie",o:["Ressentir exactement la même chose que le patient et s'identifier à lui","Se mettre à la place de l'autre sans basculer dans la sympathie","Donner des conseils pour que le patient se sente mieux","Rester neutre et distant"],c:[1],e:"Empathie : comprendre ce que vit l'autre « comme si », en gardant la distance (on ne s'identifie pas)."});
+vf("td1-a-d6",T4,"Vrai ou faux : l'écoute active implique de reformuler, ne pas couper la parole et rester dans l'ici et maintenant.",true,"Présence et écoute active.");
+vf("td1-a-d7",T4,"Vrai ou faux : l'acceptation inconditionnelle revient à approuver tous les comportements du patient.",false,"C'est le non-jugement : accueillir la personne sans la juger, sans approuver pour autant.");
+push({i:"td1-a-d8",t:T4,q:"Différenciez la relation de civilité, la relation fonctionnelle et la relation de compréhension en donnant un exemple de soin pour chacune.",a:"Civilité : politesse, règles sociales (« Bonjour, installez-vous »). Fonctionnelle : échange structuré informatif/pédagogique (expliquer l'examen). Compréhension : le patient est sujet et partenaire, relation de conseil pendant le soin.",k:[["civilite"],["politesse","bonjour","social"],["fonctionnelle"],["informati","pedagogi","explique"],["comprehension"],["partenaire","sujet","conseil"]]});
+push({i:"td1-a-d9",t:T4,q:"Quelle différence faites-vous entre empathie et sympathie ? Pourquoi est-ce important en radiologie ?",a:"L'empathie permet de comprendre l'émotion de l'autre en gardant la distance professionnelle (« comme si »). La sympathie/identification fait perdre la distance et brouille la relation. Elle permet d'accueillir l'émotion sans s'impliquer.",k:[["empathie"],["comprendre","place de l'autre","comme si"],["distance","professionnel"],["sympathie","identif"],["sans s'impliquer","accueill","emotion"]]});
+})();
+(function(){
+const VF=["Vrai","Faux"];
+function push(o){o.v="a";Q.push(o);}
+function vf(i,s,x,t,q,truth,e){push({i:i,s:s,x:x,t:t,q:q,a:(truth?"Vrai":"Faux")+" — "+e,o:VF.slice(),c:[truth?0:1],e:e});}
+function mc(i,s,x,t,q,opts,c,e){push({i:i,s:s,x:x,t:t,q:q,a:c.map(k=>opts[k]).join(" ; "),o:opts,c:c,e:e});}
+const T8="TD7 alt · Situation 8 (Simon)", T9="TD7 alt · Situation 9 (Cunégonde)";
+// --- Sit 8
+mc("td7-a-8a","td7","s8",T8,"Parmi ces éléments, lesquels sont de la communication NON VERBALE du soignant (Didier) ? (plusieurs réponses)",["Il bouge la suspension sans prévenir","« Il faut t'installer là… »","Il ouvre la porte pour inviter la famille à partir","« Je vous le renvoie »"],[0,2],"Gestes (suspension, porte) = non verbal ; les phrases = verbal.");
+mc("td7-a-8b","td7","s8",T8,"Parmi ces éléments, lesquels sont de la communication VERBALE de la mère ou de Simon ? (plusieurs réponses)",["La mère explique que Simon est autiste et peut être violent","Simon fait « non » de la tête","Simon crie","La mère proteste « on a attendu 2 heures »"],[0,2,3],"Le signe « non » de la tête est non verbal ; explication, cri, protestation sont verbaux.");
+mc("td7-a-8c","td7","s8",T8,"Que signifie la phrase de Didier « Il faut t'installer là… il ne faut surtout pas bouger » ?",["Une information directive, autoritaire, non adaptée à l'enfant","Une marque d'empathie envers l'enfant","Une reformulation de la demande de la mère","Une négociation avec l'enfant"],[0],"Information directive, sécurisation, prise en compte de l'enfant de manière autoritaire.");
+mc("td7-a-8d","td7","s8",T8,"Quelle interprétation correspond au fait que Didier « se comporte avec l'enfant sans tenir compte de son handicap » ?",["Malaise et méconnaissance du handicap","Grande expertise du TSA","Respect du rythme de l'enfant","Congruence"],[0],"Malaise, méconnaissance du handicap.");
+mc("td7-a-8e","td7","s8",T8,"Simon crie quand la suspension bouge sans explication. Comment l'interpréter ?",["Peur, incompréhension : l'enfant subit et se sent agressé","Un caprice sans signification","Une marque d'agressivité volontaire envers le soignant","Un refus de coopérer par opposition"],[0],"Peur, ne comprend pas, frayeur ; la contrainte déclenche un rapport de force et de la violence.");
+vf("td7-a-8f","td7","s8",T8,"Vrai ou faux : la mère de Simon adopte une attitude adaptée en prenant le temps de lui expliquer et en l'installant en douceur.",true,"Elle essaie en douceur, préparation adaptée à l'enfant.");
+vf("td7-a-8g","td7","s8",T8,"Vrai ou faux : Didier fait preuve d'empathie en répondant à la mère qu'il comprend mais que la salle d'attente est pleine.",false,"Il dit comprendre mais reste implacable : justification et rejet, pas d'empathie réelle.");
+mc("td7-a-8h","td7","s8",T8,"Quelles sont des caractéristiques du TSA ? (plusieurs réponses)",["Résistance marquée aux changements de routine","Sensibilité sensorielle (lumière, bruit, toucher)","Besoin permanent de contact visuel","Comportements répétitifs"],[0,1,3],"Le contact visuel est quasi absent dans le TSA.");
+vf("td7-a-8i","td7","s8",T8,"Vrai ou faux : dans le TSA, les notions abstraites sont généralement bien comprises, ce qui facilite les consignes du type « ne bouge surtout pas ».",false,"Difficultés de compréhension des notions abstraites : il faut des consignes concrètes, adaptées.");
+mc("td7-a-8j","td7","s8",T8,"Quel réajustement VERBAL est adapté pour Didier ?",["Demander l'aide de la mère et proposer de faire avec le doudou","Dire à l'enfant qu'il doit se tenir tranquille sinon il repart","Renvoyer l'enfant aux urgences","Parler uniquement à la mère sans s'adresser à l'enfant"],[0],"Collaborer avec la mère, parler au doudou, chercher la coopération.");
+mc("td7-a-8k","td7","s8",T8,"Quels réajustements NON VERBAUX conviennent ? (plusieurs réponses)",["Préparer la salle avant l'entrée (suspension en place, matériel de confort)","Adapter la lumière et limiter le bruit","Bouger l'appareil rapidement pour gagner du temps","Gestes doux et rassurants"],[0,1,3],"Anticiper, limiter les stimulations sensorielles, gestes doux.");
+push({i:"td7-a-8l",s:"td7",x:"s8",t:T8,q:"Reformulez en une phrase ce qui a mis l'enfant en difficulté dans l'attitude de Didier et proposez-lui trois ajustements.",a:"Didier n'a pas expliqué ses gestes ni tenu compte du handicap : la peur a déclenché la crise. Ajustements : expliquer et montrer l'appareil à l'enfant/avec le doudou, solliciter la mère, préparer la salle, gestes doux, limiter bruit/lumière.",k:[["pas explique","sans parler","anticip","handicap"],["peur","crise"],["doudou","mere"],["prepar","salle"],["doux","lumiere","bruit"]]});
+// --- Sit 9
+mc("td7-a-9a","td7","s9",T9,"Quels éléments sont NON VERBAUX chez Thérèse ? (plusieurs réponses)",["Elle regarde le bracelet","Le ton employé","« Allez ! Zoup »","Elle décide d'utiliser le roller"],[0,1,3],"« Allez ! Zoup » est verbal ; le ton relève du paralangage (non verbal).");
+mc("td7-a-9b","td7","s9",T9,"« Non, non, ici on n'essaye pas, soit vous pouvez, soit vous ne pouvez pas » exprime :",["De l'agacement, de la brusquerie (violence verbale)","De l'empathie","De la reformulation","De la congruence avec l'état de la patiente"],[0],"Brusque, agacement, refus de la parole du patient.");
+mc("td7-a-9c","td7","s9",T9,"« Oh non ! Ne dites pas ça ! C'est juste un examen et il fait beau » est :",["Moralisateur, minimisant, décalé par rapport à ce que vit la patiente","Une écoute active","Une reformulation","Une acceptation inconditionnelle"],[0],"Refus de la parole du patient, minimisation : à éviter absolument.");
+vf("td7-a-9d","td7","s9",T9,"Vrai ou faux : la position allongée de Cunégonde peut traduire une position de soumission.",true,"Position allongée (de soumission), perte de confiance en soi.");
+vf("td7-a-9e","td7","s9",T9,"Vrai ou faux : en disant « Je vais mourir madame, comme mon mari », la patiente cherche surtout à fuir l'examen.",false,"Aveu, recherche d'être consolée, besoin de parler et d'exprimer sa tristesse.");
+mc("td7-a-9f","td7","s9",T9,"Quel outil de communication est en défaut quand Thérèse est pressée alors que la patiente pense à l'avenir ?",["L'immédiateté","La congruence","L'assertivité","Le toucher"],[0],"Immédiateté : temporalités différentes ; il faut rester dans le moment présent.");
+mc("td7-a-9g","td7","s9",T9,"Quels outils sont en défaut chez Thérèse ? (plusieurs réponses)",["Le respect (singularité de la patiente)","L'écoute","L'empathie","La congruence parfaite"],[0,1,2],"En défaut : respect, écoute, reformulation, immédiateté, empathie.");
+vf("td7-a-9h","td7","s9",T9,"Vrai ou faux : décider à la place de la patiente qu'elle reste couchée est une marque de respect de sa singularité.",false,"Elle prend la décision à sa place : manque de respect, suppositions (échec à se lever).");
+mc("td7-a-9i","td7","s9",T9,"Quelle réponse verbale à « Je vais mourir madame, comme mon mari » serait la plus adaptée ?",["« Vous pensez à votre mari… Voulez-vous m'en parler ? »","« Mais non, ça va aller, il fait beau »","« Ne pleurez pas, on va retourner dans votre service »","« Vous n'avez pas mal ? Alors tout va bien »"],[0],"Reformulation, écoute, accueil de l'émotion sans minimiser.");
+mc("td7-a-9j","td7","s9",T9,"Quels réajustements NON VERBAUX conviennent ? (plusieurs réponses)",["Se mettre à la hauteur de la patiente","Prendre le temps dans les gestes","Accélérer le transfert pour ne pas perdre de temps","Regard accueillant, toucher dans le soin"],[0,1,3],"Se mettre dans la temporalité de la patiente, mouvements doux, installer confortablement.");
+mc("td7-a-9k","td7","s9",T9,"Pour obtenir la coopération de Cunégonde, quel premier pas la procédure indique-t-elle ?",["Établir un but de départ (aller sur la table) et s'assurer qu'elle l'a compris","Imposer sa solution","Justifier sa propre position","Exiger rapidement"],[0],"Coopération : but, compréhension, écoute active, reformuler, présent, recentrer.");
+push({i:"td7-a-9l",s:"td7",x:"s9",t:T9,q:"Réécrivez avec vos mots une réplique de Thérèse mieux adaptée à « Je vais essayer ».",a:"Ex. : « Prenez le temps. On va y aller ensemble : je vous explique, et si c'est trop difficile, nous utiliserons le roller. » (explication, but, rassurer, respect du rythme).",k:[["temps","rythme"],["ensemble","aide","accompagn"],["explique","but"],["rassur","roller","difficile"]]});
+// --- Partiel alt
+const TP="Partiel alt · Situation Picassiette";
+mc("par-a-1","par","par",TP,"Quels éléments sont de la communication NON VERBALE de Marguerite ? (plusieurs réponses)",["Elle souffle","Elle sort de la salle d'attente","« Comme tout le monde ici »","« Ce n'est pas un service de soins »"],[0,1],"Soupir et départ = non verbal ; les phrases sont verbales.");
+mc("par-a-2","par","par",TP,"Que traduit la réponse de Marguerite « Les autres patients ont rendez-vous vous savez ? »",["Une justification de sa position, un rejet de la demande du patient","De l'empathie","Une reformulation","De l'écoute active"],[0],"À éviter : justifier sa position, rejeter ce que dit le patient.");
+vf("par-a-3","par","par",TP,"Vrai ou faux : la colère de Mme Picassiette est une émotion primaire normale, qu'il faut accueillir (dévoilement de l'émotion puis écoute active).",true,"Colère = émotion primaire ; technique empathique : « vous avez l'air agacé ? » puis écoute.");
+vf("par-a-4","par","par",TP,"Vrai ou faux : face à la colère d'un proche, la meilleure stratégie est de lui rappeler que d'autres patients attendent aussi.",false,"Informer, s'excuser de l'attente, comprendre la raison de la colère.");
+mc("par-a-5","par","par",TP,"Quelle phrase est une technique de communication SIMPLE (donner de l'information) ?",["« Je suis désolée de l'attente, on va bientôt venir s'occuper de vous. »","« Calmez-vous ! »","« Vous avez l'air en colère ? »","« Je vous invite à sortir vous calmer. »"],[0],"Simple : donner / demander de l'information. Empathique : dévoiler l'émotion. Complexe : demande de changement / de fin.");
+mc("par-a-6","par","par",TP,"Quelle phrase est un DÉVOILEMENT DE L'ÉMOTION de l'autre (technique empathique) ?",["« Vous avez l'air agacé, tendu ? »","« Qu'est-ce qui vous arrive ? »","« Je vais vous inviter à sortir. »","« On vous a rajouté, il faut attendre. »"],[0],"Dévoilement de l'émotion, puis écoute active et attentive.");
+mc("par-a-7","par","par",TP,"Quels réajustements NON VERBAUX conviennent pour Marguerite ? (plusieurs réponses)",["Rester calme, ton posé","Ne pas souffler ni s'éloigner","Quitter la salle sans répondre","Gestuelle ouverte, main à plat apaisante"],[0,1,3],"Gestes d'apaisement, présence, regard et ton ajustés.");
+push({i:"par-a-8",s:"par",x:"par",t:TP,q:"Rédigez une réponse de Marguerite à Mme Picassiette qui informe, reconnaît l'émotion et propose une action.",a:"Ex. : « Je comprends que l'attente soit pénible, vous avez l'air inquiète. Je suis désolée. Je vérifie avec le radiologue l'horaire de passage et je me renseigne pour le petit-déjeuner de votre mari. »",k:[["desole","comprends","excuse"],["inquiet","emotion","air"],["verifie","renseigne","radiologue","horaire"],["petit-dej","petit dej","jeun"]]});
+})();
+(function(){
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[’`]/g,"'").replace(/[^a-z0-9' ]+/g," ").replace(/\s+/g," ").trim();
+const KEY="ue42-prog-v1", SKEY="ue42-settings-v1";
+const SETS=[["all","Tout"],["td1","TD 1"],["td7","TD 7"],["par","Partiel 2024"]];
+const VERS=[["all","Originale + alternative"],["o","Originale (TD)"],["a","Alternative"]];
+const FILT=[["all","Toutes"],["todo","Non sues + non vues"],["ns","Non sues seulement"]];
+const MODES=[["fc","🃏 Flashcards"],["qcm","✅ QCM"],["open","✍️ Questions ouvertes"]];
+let S=Object.assign({mode:"fc",set:"all",ver:"all",filt:"all",shuf:true},load(SKEY)||{});
+let prog=load(KEY)||{fc:{},qcm:{},open:{}};
+["fc","qcm","open"].forEach(m=>prog[m]=prog[m]||{});
+let deck=[],idx=0,st={};
+function load(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(prog));localStorage.setItem(SKEY,JSON.stringify(S));$("#dloc").classList.add("on")}catch(e){$("#dloc").classList.remove("on")}queueExt()}
+function applies(q,m){return m==="fc"||(m==="qcm"&&q.o)||(m==="open"&&q.k)}
+function inScope(q,m){return (S.set==="all"||q.s===S.set)&&(S.ver==="all"||q.v===S.ver)&&applies(q,m)}
+function rec(m,id){return prog[m][id]}
+function build(){
+ let p=Q.filter(q=>inScope(q,S.mode)).filter(q=>{const r=rec(S.mode,q.i);const v=r&&r.r;return S.filt==="all"||(S.filt==="todo"&&v!=="su")||(S.filt==="ns"&&v==="ns")});
+ if(S.shuf){for(let i=p.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[p[i],p[j]]=[p[j],p[i]]}}
+ deck=p;idx=0;st={};
+}
+function mark(m,id,r){prog[m][id]={r:r,t:Date.now()};persist();renderStats()}
+function counts(m,pool){let su=0,ns=0;pool.forEach(q=>{const r=rec(m,q.i);if(r&&r.r==="su")su++;else if(r&&r.r==="ns")ns++});return{su:su,ns:ns,n:pool.length,nv:pool.length-su-ns}}
+function bar(c){const t=c.n||1;return '<div class="bar"><i class="b-su" style="width:'+c.su/t*100+'%"></i><i class="b-ns" style="width:'+c.ns/t*100+'%"></i></div>'}
+function renderCtrl(){
+ const mk=(el,arr,key)=>{$(el).innerHTML=arr.map(a=>'<button class="chip'+(S[key]===a[0]?" on":"")+'" data-k="'+key+'" data-v="'+a[0]+'">'+a[1]+'</button>').join("")};
+ mk("#modes",MODES,"mode");mk("#sets",SETS,"set");mk("#vers",VERS,"ver");mk("#filt",FILT,"filt");
+ $("#shufv").textContent=S.shuf?"oui":"non";
+ document.querySelectorAll("#ctrl [data-k]").forEach(b=>b.onclick=()=>{S[b.dataset.k]=b.dataset.v;persist();renderCtrl();start()});
+}
+function renderStats(){
+ const pool=Q.filter(q=>inScope(q,S.mode)),c=counts(S.mode,pool);
+ $("#gstats").innerHTML='<div style="width:100%">'+bar(c)+'</div><span><b>'+c.su+'</b> sues</span><span><b>'+c.ns+'</b> non sues</span><span><b>'+c.nv+'</b> non vues</span><span>sur <b>'+c.n+'</b> cartes</span>';
+ let h='<tr><th>Série</th><th>Mode</th><th>Sues</th><th>Non sues</th><th>Total</th></tr>';
+ SETS.slice(1).forEach(s=>MODES.forEach(m=>{const pl=Q.filter(q=>q.s===s[0]&&applies(q,m[0])),cc=counts(m[0],pl);h+='<tr><td>'+s[1]+'</td><td>'+m[1]+'</td><td>'+cc.su+'</td><td>'+cc.ns+'</td><td>'+cc.n+'</td></tr>'}));
+ $("#detail").innerHTML=h;
+}
+function tags(q){return '<span class="tag">'+esc(q.t)+'</span><span class="tag'+(q.v==="a"?" alt":"")+'">'+(q.v==="a"?"Alternative":"Originale")+'</span>'}
+function ctx(q){return q.x?'<details class="ctx"><summary>📖 Situation (texte du TD)</summary><div style="margin-top:6px">'+esc(SIT[q.x])+'</div></details>':""}
+function start(){build();renderStats();render()}
+function nav(extra){const last=idx>=deck.length-1;return '<div class="nav"><button class="btn sec" id="prev"'+(idx===0?" disabled":"")+'>← Précédente</button>'+(extra||"")+'<button class="btn sec" id="next">'+(last?"Terminer":"Passer →")+'</button></div>'}
+function bindNav(){const p=$("#prev"),n=$("#next");if(p)p.onclick=()=>{idx--;st={};render()};if(n)n.onclick=()=>go()}
+function go(){if(idx>=deck.length-1){idx=deck.length;}else idx++;st={};render()}
+function render(){
+ const el=$("#stage");
+ if(!deck.length){el.innerHTML='<div class="panel empty">Aucune carte pour ce filtre. 🎉<br>Change de série, de version ou de filtre.</div>';return}
+ if(idx>=deck.length){const c=counts(S.mode,deck);el.innerHTML='<div class="panel empty"><h3 style="color:var(--ink)">Série terminée</h3><p>Dans cette série : <b>'+c.su+'</b> sues · <b>'+c.ns+'</b> non sues · '+c.nv+' non vues.</p><div class="row" style="justify-content:center"><button class="btn" id="again">Recommencer</button><button class="btn sec" id="onlyns">Ne revoir que les non sues</button></div></div>';$("#again").onclick=start;$("#onlyns").onclick=()=>{S.filt="ns";persist();renderCtrl();start()};return}
+ const q=deck[idx];
+ const head='<div class="row" style="justify-content:space-between;color:var(--mut);font-size:.85rem;margin-bottom:6px"><span>Carte '+(idx+1)+' / '+deck.length+'</span><span>'+(rec(S.mode,q.i)?(rec(S.mode,q.i).r==="su"?"✔ déjà sue":"✘ déjà non sue"):"nouvelle")+'</span></div><div class="bar" style="margin-bottom:12px"><i class="b-su" style="width:'+(idx/deck.length*100)+'%;background:var(--acc)"></i></div>';
+ let body="";
+ if(S.mode==="fc")body=rFc(q);else if(S.mode==="qcm")body=rQcm(q);else body=rOpen(q);
+ el.innerHTML='<div class="panel">'+head+body+'</div>';
+ (S.mode==="fc"?bFc:S.mode==="qcm"?bQcm:bOpen)(q);
+}
+window.__app={renderStage:()=>render(),S:()=>S,prog:()=>prog,setProg:p=>{prog=p;["fc","qcm","open"].forEach(m=>prog[m]=prog[m]||{})},persist:persist,start:start,renderStats:renderStats,renderCtrl:renderCtrl,esc:esc,norm:norm,go:go,bindNav:bindNav,nav:nav,tags:tags,ctx:ctx,mark:mark,st:()=>st,deck:()=>deck,inScope:inScope,applies:applies,SETS:SETS,MODES:MODES,load:load,KEY:KEY};
+let rFc,bFc,rQcm,bQcm,rOpen,bOpen;
+window.__reg=f=>{rFc=f.rFc;bFc=f.bFc;rQcm=f.rQcm;bQcm=f.bQcm;rOpen=f.rOpen;bOpen=f.bOpen};
+window.__boot=()=>{renderCtrl();$("#shuf").onclick=()=>{S.shuf=!S.shuf;persist();renderCtrl();start()};$("#restart").onclick=start;start();persist()};
+function queueExt(){if(window.__queueExt)window.__queueExt()}
+})();
+(function(){
+const A=window.__app,$=s=>document.querySelector(s),esc=A.esc,norm=A.norm;
+const rec=(m,id)=>A.prog()[m][id];
+function shuffled(n){const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function curQ(){return A.deck()[idxNow()]}
+function idxNow(){return A.__idx?A.__idx():0}
+// ---------- Flashcards
+function rFc(q){
+ const st=A.st();
+ return A.tags(q)+A.ctx(q)+'<div class="fc" id="fc"><div class="q">'+esc(q.q)+(q.o?'<div style="font-weight:400;font-size:.92rem;color:var(--mut);margin-top:6px">'+q.o.map(esc).join(" · ")+'</div>':"")+'</div>'+(st.flip?'<div class="ans">'+esc(q.a)+(q.e&&q.e!==q.a&&q.o?'\n\n'+esc(q.e):"")+'</div>':'<div class="hint">Touche la carte (ou Espace) pour voir la réponse</div>')+'</div>'+(st.flip?'<div class="nav"><button class="btn ko grow" id="ns">✘ Non su</button><button class="btn ok grow" id="su">✔ Su</button></div>':"")+A.nav();
+}
+function bFc(q){
+ const st=A.st();
+ $("#fc").onclick=e=>{if(e.target.closest("details"))return;st.flip=!st.flip;redraw()};
+ if(st.flip){$("#su").onclick=()=>{A.mark("fc",q.i,"su");A.go()};$("#ns").onclick=()=>{A.mark("fc",q.i,"ns");A.go()}}
+ A.bindNav();
+}
+// ---------- QCM
+function rQcm(q){
+ const st=A.st();
+ if(!st.perm){st.perm=shuffled(q.o.length);st.sel=[];st.done=false}
+ const multi=q.c.length>1;
+ let h=A.tags(q)+A.ctx(q)+'<div class="q">'+esc(q.q)+'</div>';
+ st.perm.forEach((oi,p)=>{
+  let cls="opt"+(multi?" multi":"");
+  const isC=q.c.includes(oi),sel=st.sel.includes(oi);
+  if(st.done){if(isC)cls+=" good";else if(sel)cls+=" bad"}else if(sel)cls+=" sel";
+  h+='<button class="'+cls+'" data-o="'+oi+'"><span class="k">'+(multi?(sel?"✓":""):String.fromCharCode(65+p))+'</span><span>'+esc(q.o[oi])+'</span></button>';
+ });
+ if(multi&&!st.done)h+='<div class="nav"><button class="btn grow" id="val"'+(st.sel.length?"":" disabled")+'>Valider</button></div>';
+ if(st.done){h+='<div class="res '+(st.ok?"ok":"ko")+'"><b>'+(st.ok?"✔ Correct":"✘ Incorrect")+'</b><div style="margin-top:4px">'+esc(q.e||q.a)+'</div></div>'}
+ return h+A.nav();
+}
+function bQcm(q){
+ const st=A.st(),multi=q.c.length>1;
+ function fin(){const a=[...st.sel].sort().join(),b=[...q.c].sort().join();st.ok=a===b;st.done=true;A.mark("qcm",q.i,st.ok?"su":"ns");redraw()}
+ document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{if(st.done)return;const o=+b.dataset.o;
+  if(multi){st.sel=st.sel.includes(o)?st.sel.filter(x=>x!==o):st.sel.concat(o);redraw()}else{st.sel=[o];fin()}});
+ const v=$("#val");if(v)v.onclick=fin;
+ A.bindNav();
+}
+// ---------- Ouvertes
+function score(q,txt){
+ const t=norm(txt);
+ const groups=q.k.map(g=>({g:g,hit:g.some(s=>t.includes(norm(s)))}));
+ const gs=groups.filter(x=>x.hit).length/groups.length;
+ const words=[...new Set(norm(q.a).split(" ").filter(w=>w.length>4))];
+ const ov=words.length?words.filter(w=>t.includes(w.slice(0,Math.max(5,w.length-2)))).length/words.length:0;
+ return{groups:groups,pct:Math.round((0.8*gs+0.2*ov)*100)};
+}
+function rOpen(q){
+ const st=A.st();
+ let h=A.tags(q)+A.ctx(q)+'<div class="q">'+esc(q.q)+'</div>'+'<textarea id="ta" placeholder="Écris ta réponse avec tes mots…"'+(st.res?" readonly":"")+'>'+esc(st.txt||"")+'</textarea>';
+ if(!st.res)h+='<div class="nav"><button class="btn grow" id="chk">Corriger ma réponse</button></div>';
+ else{const r=st.res,cls=r.pct>=70?"ok":r.pct>=40?"mid":"ko",lab=r.pct>=70?"Bien":r.pct>=40?"Partiel":"À revoir";
+  h+='<div class="res '+cls+'"><b>'+lab+' — '+r.pct+' % des points clés</b><div class="kw">'+r.groups.map(x=>'<span class="'+(x.hit?"y":"n")+'">'+(x.hit?"✓ ":"✗ ")+esc(x.g[0])+'</span>').join("")+'</div><div style="margin-top:8px"><b>Réponse attendue :</b></div><div style="white-space:pre-wrap;margin-top:4px">'+esc(q.a)+'</div></div>'+
+  '<div class="hint">Autocorrection par mots-clés : juge toi-même si tu as bien le sens, puis valide.</div><div class="nav"><button class="btn ko grow" id="ns">✘ Non su</button><button class="btn ok grow" id="su">✔ Su</button></div>';}
+ return h+A.nav();
+}
+function bOpen(q){
+ const st=A.st(),ta=$("#ta");
+ ta.oninput=()=>{st.txt=ta.value};
+ const c=$("#chk");if(c)c.onclick=()=>{st.txt=ta.value;st.res=score(q,st.txt);redraw()};
+ if(st.res){$("#su").onclick=()=>{A.mark("open",q.i,"su");A.go()};$("#ns").onclick=()=>{A.mark("open",q.i,"ns");A.go()}}
+ A.bindNav();
+}
+function redraw(){A.renderStage()}
+window.__reg({rFc:rFc,bFc:bFc,rQcm:rQcm,bQcm:bQcm,rOpen:rOpen,bOpen:bOpen});
+document.addEventListener("keydown",e=>{
+ if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT")return;
+ const st=A.st(),m=A.S().mode;
+ if(m==="fc"){if(e.key===" "||e.key==="Enter"){e.preventDefault();st.flip=!st.flip;redraw()}else if(st.flip&&e.key==="ArrowRight"){const b=$("#su");b&&b.click()}else if(st.flip&&e.key==="ArrowLeft"){const b=$("#ns");b&&b.click()}}
+});
+})();
+(function(){
+const A=window.__app,$=s=>document.querySelector(s);
+let doc=null,timer=null;
+function merge(a,b){const o={fc:{},qcm:{},open:{}};["fc","qcm","open"].forEach(m=>{const x=(a&&a[m])||{},y=(b&&b[m])||{};new Set([...Object.keys(x),...Object.keys(y)]).forEach(k=>{const p=x[k],q=y[k];o[m][k]=!p?q:!q?p:(q.t>p.t?q:p)})});return o}
+function msg(t){$("#smsg").textContent=t}
+function ext(t,on){$("#dextt").textContent=t;$("#dext").classList.toggle("on",!!on)}
+window.__queueExt=()=>{if(!doc)return;clearTimeout(timer);timer=setTimeout(async()=>{try{await doc.set({json:JSON.stringify(A.prog()),t:Date.now()});ext("Sauvegarde externe : synchronisée ✔",true)}catch(e){ext("Sauvegarde externe : échec (réessai au prochain changement)",false)}},1500)};
+async function initExt(){
+ try{
+  if(!window.claude||!claude.use){ext("Sauvegarde externe : indisponible ici (utilise l'export)",false);return}
+  const user=await claude.use("user"),db=await claude.use("db");
+  if(!user||!db||!user.id){ext("Sauvegarde externe : connecte-toi à claude.ai pour l'activer (export possible)",false);return}
+  const id=await user.id();doc=db.doc("data/users/"+id+"/progress");
+  let d=null;try{const s=await doc.get();d=s&&(typeof s.data==="function"?s.data():s)}catch(e){}
+  if(d&&d.json){const remote=JSON.parse(d.json);A.setProg(merge(A.prog(),remote));A.persist();A.renderStats();A.start()}
+  ext("Sauvegarde externe : active ✔",true);window.__queueExt();
+ }catch(e){ext("Sauvegarde externe : indisponible (utilise l'export)",false)}
+}
+function payload(){return JSON.stringify({app:"ue42-revision",v:1,exported:new Date().toISOString(),prog:A.prog()})}
+function doImport(txt){try{const o=JSON.parse(txt);const p=o.prog||o;if(!p||!(p.fc||p.qcm||p.open))throw 0;A.setProg(merge(A.prog(),p));A.persist();A.renderStats();A.start();msg("Import réussi : progression fusionnée ✔")}catch(e){msg("Code invalide : colle le JSON exporté.")}}
+$("#bcopy").onclick=async()=>{const t=payload();$("#tbox").value=t;try{await navigator.clipboard.writeText(t);msg("Code copié dans le presse-papiers ✔ (colle-le dans un fichier ou un message)")}catch(e){$("#tbox").select();msg("Copie bloquée : le code est affiché ci-dessous, sélectionne-le et copie-le.")}};
+$("#bexp").onclick=async()=>{const t=payload(),name="ue42-progression-"+new Date().toISOString().slice(0,10)+".json";$("#tbox").value=t;
+ try{const dl=window.claude&&await claude.use("downloads");if(!dl)throw 0;await dl.save({filename:name,data:new Blob([t],{type:"application/json"})});msg("Fichier prêt ✔")}catch(e){msg("Téléchargement indisponible : le code est affiché ci-dessous, copie-le dans un fichier .json.")}};
+$("#bimp").onclick=()=>doImport($("#tbox").value);
+$("#bfile").onclick=()=>$("#ffile").click();
+$("#ffile").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>doImport(r.result);r.readAsText(f)};
+let armed=false;
+$("#breset").onclick=()=>{const b=$("#breset");if(!armed){armed=true;b.textContent="Confirmer la réinitialisation (clique encore)";setTimeout(()=>{armed=false;b.textContent="Réinitialiser la série affichée"},4000);return}
+ armed=false;b.textContent="Réinitialiser la série affichée";const S=A.S(),p=A.prog();
+ Q.forEach(q=>{if(S.set==="all"||q.s===S.set)["fc","qcm","open"].forEach(m=>{if(p[m][q.i])delete p[m][q.i]})});
+ A.persist();A.renderStats();A.start();msg("Série réinitialisée.")};
+A.__boot=null;window.__boot();initExt();
+})();
+</script></body></html>

@@ -3,42 +3,48 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Le batch en scanner — reconstruction MPR</title>
+<title>Comprendre les coupes, les vues et le batch en scanner</title>
 <style>
-:root{--bg:#0a1016;--panel:#111a23;--panel2:#16222d;--line:#243242;--txt:#e6edf3;--mut:#8ea0b2;--teal:#2dd4bf;--amber:#fbbf24;--rose:#fb7185}
+:root{--bg:#0a1016;--panel:#111a23;--panel2:#16222d;--line:#243242;--txt:#e6edf3;--mut:#8ea0b2;--teal:#2dd4bf;--amber:#fbbf24;--blue:#7aa7d9}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.wrap{max-width:1100px;margin:0 auto;padding:16px 14px 40px}
-h1{font-size:clamp(20px,4vw,28px);margin:6px 0 4px;letter-spacing:-.01em}
-.sub{color:var(--mut);margin:0 0 14px;font-size:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:14px}
+.wrap{max-width:1100px;margin:0 auto;padding:14px 12px 40px}
+h1{font-size:clamp(19px,4vw,27px);margin:4px 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin:0 0 12px;font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;padding:10px;font-weight:600}
 .stage{position:relative;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#16222e 0%,#0a1016 75%)}
 @media(max-width:700px){.stage{aspect-ratio:4/5}}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
-.badge{position:absolute;left:10px;top:10px;background:rgba(10,16,22,.78);border:1px solid var(--line);padding:5px 10px;border-radius:999px;font-size:13px;font-weight:600;color:var(--teal);pointer-events:none}
+.badge{position:absolute;left:10px;top:10px;background:rgba(10,16,22,.82);border:1px solid var(--line);padding:5px 11px;border-radius:999px;font-size:13px;font-weight:700;color:var(--teal);pointer-events:none}
 .hint{position:absolute;right:10px;top:10px;font-size:11px;color:var(--mut);pointer-events:none;background:rgba(10,16,22,.6);padding:3px 8px;border-radius:999px}
-.caption{margin:10px 2px 8px;min-height:64px}
+.caption{margin:10px 2px 8px;min-height:84px}
 .caption b{color:var(--teal)}
-.caption span.k{color:var(--amber)}
+.caption .k{color:var(--amber);font-weight:600;white-space:nowrap}
 .transport{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-button,select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer}
+button,select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:8px 12px;font:inherit;font-size:14px;cursor:pointer}
 button:hover{border-color:var(--teal)}
 button.on{background:var(--teal);color:#04201c;border-color:var(--teal);font-weight:700}
-input[type=range]{accent-color:var(--teal);width:100%}
-#tl{flex:1;min-width:140px}
+button.big{background:var(--amber);color:#2a1d00;border-color:var(--amber);font-weight:700}
 .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.chips button{font-size:13px;padding:6px 10px}
-.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.chips button{font-size:12.5px;padding:6px 9px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+input[type=range]{accent-color:var(--teal);width:100%}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px;margin-top:8px}
 .sliders label{font-size:13px;color:var(--mut);display:block}
+.chks{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:8px}.chk{font-size:13px;color:var(--mut);cursor:pointer}.chk input{margin-right:6px}.xinfo{font-size:13px;margin:8px 0 0;padding:6px 10px;border-left:3px solid #facc15;background:rgba(250,204,21,.07);border-radius:4px}
 .sliders output{float:right;color:var(--txt);font-weight:600}
-h2{font-size:16px;margin:0 0 10px}
+h2{font-size:16px;margin:0 0 8px}
+.ro{margin-top:8px;font-size:14px;color:var(--mut)}
+.ro b{color:var(--amber)}
 .panels{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
 @media(max-width:800px){.panels{grid-template-columns:1fr}}
 .refs{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
 figure{margin:0;text-align:center;font-size:12px;color:var(--mut)}
 figure canvas{display:block;background:#000;border-radius:6px;border:1px solid var(--line);width:auto;height:auto;max-width:100%;max-height:215px;margin:0 auto 4px}
-#res{max-height:330px}
+.refs canvas{cursor:crosshair;touch-action:none}
+#res{max-height:340px}
 .thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .thumbs canvas{height:54px;width:auto;border:2px solid var(--line);border-radius:5px;background:#000;cursor:pointer}
 .thumbs canvas.sel{border-color:var(--amber)}
@@ -48,55 +54,214 @@ figure canvas{display:block;background:#000;border-radius:6px;border:1px solid v
 .note{color:var(--mut);font-size:12px;margin-top:8px}
 .leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:6px}
 .leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.hide{display:none!important}
+details.intro summary{cursor:pointer;margin-bottom:6px}
+.introgrid{display:grid;grid-template-columns:minmax(220px,300px) 1fr;gap:16px;align-items:center;margin-top:8px}
+@media(max-width:700px){.introgrid{grid-template-columns:1fr}}
+.introtext p{margin:0 0 8px;font-size:14.5px}
+.pa{color:#2dd4bf;font-weight:700}.pc{color:#fbbf24;font-weight:700}.ps{color:#f472b6;font-weight:700}
+.gr{color:#4ade80;font-weight:700}.ye{color:#facc15;font-weight:700}
+.steps3{margin:0 0 12px;padding-left:20px;font-size:14px;color:var(--mut)}
+.steps3 b{color:var(--txt)}
+.xgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:12px}
+@media(max-width:800px){.xgrid{grid-template-columns:1fr}}
+.xinsets{display:flex;flex-direction:column;gap:12px;align-items:center}
+@media(max-width:800px){.xinsets{flex-direction:row;flex-wrap:wrap;justify-content:center}}
+.stage.sq{aspect-ratio:1/1;max-height:640px}
+.legendbox{position:absolute;right:10px;bottom:10px;font-size:12px;background:rgba(10,16,22,.85);border:1px solid var(--line);padding:5px 9px;border-radius:8px;pointer-events:none}
+.inset canvas{max-height:300px}
+.inset.big canvas{max-height:340px;border-color:#facc15}
+.inset figcaption{font-size:12.5px;color:var(--mut);margin-top:2px;max-width:320px}
+.inset figcaption b{color:var(--txt)}
+.why{display:flex;flex-direction:column;gap:8px}
+.why>div{background:var(--panel2);border-radius:10px;padding:9px 12px;font-size:14.5px}
+.wl{display:block;font-size:12px;color:var(--amber);font-weight:700;margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em}
+.swatches{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--mut)}
+.swatches i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:6px;vertical-align:-3px}
+.swatches.small{font-size:11.5px;margin-top:8px;gap:4px 10px}
+.batchinfo{font-size:14px;color:var(--mut);margin:0 0 10px}.batchinfo b{color:var(--amber)}
+.readout{font-size:12.5px;color:var(--mut);margin-top:8px;min-height:36px}
+.reshead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.reshead button{padding:5px 10px;font-size:13px}
+.refs canvas{max-height:250px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Le batch en scanner : du volume axial aux coupes reformatées</h1>
-  <p class="sub">Fémur simulé (schéma pédagogique). Placer le batch, découper, éclater, puis lire la nouvelle coupe.</p>
+  <h1>Comprendre les coupes, les vues et le batch en scanner</h1>
+  <p class="sub">Fémur simulé (schéma pédagogique). Ordre conseillé : « Comprendre les vues », puis le cours animé, puis le labo.</p>
 
-  <section class="card">
-    <div class="stage"><canvas id="c3d"></canvas><div class="badge" id="badge">1 · Volume acquis</div><div class="hint">glisser = tourner · molette/pincer = zoom</div></div>
+  <details class="card intro" open>
+    <summary><b>Avant de commencer : 4 idées simples</b></summary>
+    <div class="introgrid">
+      <div>
+        <svg id="planesSvg" viewBox="0 0 270 215" role="img" aria-label="Les trois plans de coupe"></svg>
+        <div class="leg" style="justify-content:center"><span><i style="background:#2dd4bf"></i>axial</span><span><i style="background:#fbbf24"></i>coronal</span><span><i style="background:#f472b6"></i>sagittal</span></div>
+      </div>
+      <div class="introtext">
+        <p><b>1 · Une coupe</b> est l'image d'une « tranche » du corps, à un endroit précis. Comme une rondelle de saucisson : on ne voit que ce qui est exactement dans cette tranche.</p>
+        <p><b>2 · Une vue (ou plan)</b> est la direction dans laquelle on tranche :
+          <span class="pa">axial</span> = en rondelles, comme si on regardait le patient depuis les pieds ;
+          <span class="pc">coronal</span> = de face, comme on ouvre un livre ;
+          <span class="ps">sagittal</span> = de profil, comme si on le coupait en deux gauche / droite.</p>
+        <p><b>3 · Le scanner n'acquiert que des coupes axiales.</b> Les autres vues sont recalculées ensuite à partir de ces coupes empilées.</p>
+        <p><b>4 · Un batch</b> est un lot de coupes qu'on demande à la console de calculer : on choisit le plan, le nombre de coupes, l'épaisseur et l'espacement.</p>
+      </div>
+    </div>
+  </details>
+
+  <div class="tabs" id="tabs">
+    <button data-m="coupe" class="on">🔍 Comprendre les vues</button>
+    <button data-m="cours">🎬 Cours animé</button>
+    <button data-m="labo">🧪 Labo libre</button>
+  </div>
+
+  <!-- ========== Onglet : Comprendre les vues ========== -->
+  <section class="card" id="expCtl">
+    <ol class="steps3">
+      <li><b>Choisis comment tu regardes le fémur</b> (la vue principale).</li>
+      <li><b>Choisis dans quel sens tu tranches</b> : le batch. Ses coupes sont les lignes <span class="gr">vertes</span>.</li>
+      <li><b>Fais avancer la ligne <span class="ye">jaune</span></b> : c'est la coupe affichée. Regarde ce qui change dans les deux vues de droite.</li>
+    </ol>
+    <h2>① Vue principale : je regarde le fémur…</h2>
+    <div class="seg" id="x_main">
+      <button data-v="coronal" class="on">De face (coronal)</button>
+      <button data-v="sagittal">De profil (sagittal)</button>
+      <button data-v="axial">Axial · vue inférieure (podo‑crâniale)</button>
+    </div>
+    <h2 style="margin-top:12px">② Batch : je tranche dans le sens…</h2>
+    <div class="seg" id="x_o"></div>
+    <div class="sliders">
+      <label>Nombre de coupes du batch <output id="o_xn"></output><input type="range" id="x_n" min="3" max="90" step="1"></label>
+      <label>Espacement entre coupes <output id="o_xsp"></output><input type="range" id="x_sp" min="2" max="50" step="1"></label>
+      <label>Épaisseur des coupes <output id="o_xth"></output><input type="range" id="x_th" min="1" max="50" step="1"></label>
+    </div>
+    <p class="xinfo" id="x_info"></p>
+    <div class="chks">
+      <label class="chk"><input type="checkbox" id="x_prog"> Garder aussi les coupes déjà passées (cumul)</label>
+      <label class="chk"><input type="checkbox" id="x_fill"> Combler les trous entre coupes</label>
+    </div>
+  </section>
+
+  <section class="card" id="expStage">
+    <div class="xgrid">
+      <div>
+        <div class="stage sq"><canvas id="c3d2"></canvas><div class="badge" id="badge2"></div>
+          <div class="legendbox"><span class="gr">━</span> coupes du batch &nbsp; <span class="ye">━</span> coupe affichée</div>
+          <div class="hint">glisser = tourner</div></div>
+        <div class="note">Un plan de coupe vu « par la tranche » n'est qu'une ligne. C'est pour ça que les coupes ressemblent à des lignes dans les vues 2D.</div>
+      </div>
+      <div class="xinsets">
+        <figure class="inset big"><canvas id="x_a"></canvas><figcaption id="x_ta"></figcaption></figure>
+        <figure class="inset"><canvas id="x_b"></canvas><figcaption id="x_tb"></figcaption></figure>
+      </div>
+    </div>
+    <div class="transport" style="margin-top:10px">
+      <button id="x_prev">◀ Coupe précédente</button>
+      <button id="x_play" class="on">▶ Faire avancer</button>
+      <button id="x_next">Coupe suivante ▶</button>
+      <input type="range" id="x_idx" min="1" max="15" step="1" style="flex:1;min-width:140px" aria-label="Coupe affichée">
+      <output id="x_out" style="min-width:90px;text-align:right"></output>
+    </div>
+  </section>
+
+  <section class="card" id="expWhy">
+    <h2>Ce que tu vois sur cette coupe, et pourquoi</h2>
+    <div class="why">
+      <div><span class="wl">📍 Où est‑on ?</span><span id="why_where"></span></div>
+      <div><span class="wl">👁 Ce qu'on voit</span><span id="why_what"></span></div>
+      <div><span class="wl">❓ Pourquoi</span><span id="why_why"></span></div>
+    </div>
+    <h2 style="margin-top:14px">Lire une image de scanner</h2>
+    <div class="swatches">
+      <span><i style="background:#fff"></i>blanc : os dur (corticale)</span>
+      <span><i style="background:#707070"></i>gris clair : os spongieux</span>
+      <span><i style="background:#484848"></i>gris : muscle</span>
+      <span><i style="background:#313131"></i>gris foncé : graisse, moelle</span>
+      <span><i style="background:#000;border:1px solid #555"></i>noir : air</span>
+    </div>
+    <div class="note">Plus un tissu est dense (il arrête les rayons X), plus il est clair sur l'image.</div>
+  </section>
+
+  <!-- ========== Cours animé / Labo ========== -->
+  <section class="card" id="stageCard">
+    <div class="stage"><canvas id="c3d"></canvas><div class="badge" id="badge"></div><div class="hint">glisser = tourner · molette / pincer = zoom · double‑clic = recentrer</div></div>
     <div class="caption" id="caption"></div>
     <div class="transport">
-      <button id="play" class="on">⏸ Pause</button>
+      <button id="prev">◀</button>
+      <button id="auto" class="on">⏸ Pause</button>
+      <button id="next">▶</button>
       <button id="replay">↺ Rejouer</button>
-      <input type="range" id="tl" min="0" max="1000" value="0" aria-label="Chronologie">
       <select id="speed" aria-label="Vitesse"><option value="0.6">0,6×</option><option value="1" selected>1×</option><option value="1.6">1,6×</option></select>
     </div>
     <div class="chips" id="chips"></div>
   </section>
 
-  <section class="card">
-    <h2>Plan du batch</h2>
+  <section class="card" id="orientCard">
+    <h2>Que veux‑tu reconstruire à partir de l'axial ?</h2>
     <div class="seg" id="orient">
-      <button data-o="axial" class="on">Axial (plan d'acquisition)</button>
-      <button data-o="sagittal">Reconstruction sagittale</button>
-      <button data-o="coronal">Reconstruction coronale</button>
+      <button data-o="sagittal" class="on">Coupes sagittales</button>
+      <button data-o="coronal">Coupes coronales</button>
+      <button data-o="axial">Coupes axiales (re‑coupe)</button>
     </div>
-    <div class="sliders">
-      <label>Nombre de coupes <output id="o_n"></output><input type="range" id="s_n" min="3" max="15" step="1"></label>
-      <label>Épaisseur de coupe <output id="o_th"></output><input type="range" id="s_th" min="1" max="10" step="1"></label>
-      <label>Espacement (entre centres) <output id="o_sp"></output><input type="range" id="s_sp" min="2" max="50" step="1"></label>
-      <label>Position du centre <output id="o_pos"></output><input type="range" id="s_pos" min="-120" max="120" step="5"></label>
-    </div>
-    <div class="note">Les distances sont à l'échelle d'un fémur d'environ 45 cm. L'écartement de la phase « éclaté » est volontairement exagéré.</div>
   </section>
 
-  <section class="card">
+  <section class="card" id="acqCard">
+    <h2>1 · Acquisition axiale (ce que le scanner a réellement mesuré)</h2>
+    <div class="sliders">
+      <label>Nombre de coupes axiales <output id="o_na"></output><input type="range" id="s_na" min="10" max="300" step="1"></label>
+      <label>Pas entre coupes axiales <output id="o_pas"></output><input type="range" id="s_pas" min="1" max="10" step="1"></label>
+      <label>Centre du volume <output id="o_sc"></output><input type="range" id="s_sc" min="-200" max="200" step="5"></label>
+    </div>
+    <div class="ro" id="acqInfo"></div>
+  </section>
+
+  <section class="card" id="labCard">
+    <h2>2 · Batch à poser (Labo)</h2>
+    <div class="sliders">
+      <label>Nombre de coupes <output id="o_n"></output><input type="range" id="s_n" min="3" max="15" step="1"></label>
+      <label>Épaisseur de coupe <output id="o_th"></output><input type="range" id="s_th" min="1" max="30" step="1"></label>
+      <label>Espacement (entre centres) <output id="o_sp"></output><input type="range" id="s_sp" min="2" max="50" step="1"></label>
+      <label>Position du centre <output id="o_pos"></output><input type="range" id="s_pos" min="-230" max="230" step="5"></label>
+    </div>
+    <div class="note">Tu peux aussi poser le batch directement sur les images de référence, en bas.</div>
+    <div class="row">
+      <button class="big" id="lab_go">⚡ Poser le batch → voir la nouvelle vue</button>
+      <button id="lab_reset">↺ Revenir au départ</button>
+    </div>
+    <div class="row" id="camPresets">
+      <span style="color:var(--mut);font-size:13px;align-self:center">Caméra :</span>
+      <button data-c="3d">Vue 3D</button><button data-c="axial">Vue axiale</button><button data-c="coronal">Vue coronale</button><button data-c="sagittal">Vue sagittale</button>
+    </div>
+  </section>
+
+  <section class="card" id="panCard">
     <h2>À la console : images de référence et résultat</h2>
+    <ol class="steps3">
+      <li><b>Images de référence</b> : les 3 images 2D sur lesquelles on pose le batch.</li>
+      <li><b>Glisse</b> sur une image pour déplacer le batch, <b>tire sur ses bords</b> (poignées vertes) pour changer l'espacement.</li>
+      <li><b>Lis le résultat</b> à droite : fais défiler les coupes (molette, ◀ ▶ ou ▶ Défiler).</li>
+    </ol>
+    <div class="batchinfo" id="batchInfo"></div>
     <div class="panels">
       <div>
         <div class="refs">
-          <figure><canvas id="r_ax"></canvas>Axial</figure>
-          <figure><canvas id="r_co"></canvas>Coronal</figure>
-          <figure><canvas id="r_sa"></canvas>Sagittal</figure>
+          <figure><canvas id="r_ax"></canvas><b>Axial</b> · vue inférieure (podo‑crâniale)</figure>
+          <figure><canvas id="r_co"></canvas><b>Coronal</b> · de face</figure>
+          <figure><canvas id="r_sa"></canvas><b>Sagittal</b> · de profil</figure>
         </div>
-        <div class="leg"><span><i style="background:#2dd4bf"></i>coupes du batch</span><span><i style="background:#fbbf24"></i>coupe sélectionnée</span></div>
+        <div class="leg"><span><i style="background:#2dd4bf"></i>coupes du batch</span><span><i style="background:#fbbf24"></i>coupe sélectionnée</span><span><i style="background:#fb923c"></i>niveau de l'image de référence</span></div>
+        <div class="readout" id="readout"></div>
       </div>
       <div>
+        <div class="reshead"><b>Résultat : la coupe lue</b>
+          <span><button id="res_prev">◀</button> <button id="res_play">▶ Défiler</button> <button id="res_next">▶</button></span></div>
         <figure><canvas id="res"></canvas><span id="resInfo"></span></figure>
         <div class="thumbs" id="thumbs"></div>
+        <div class="swatches small">
+          <span><i style="background:#fff"></i>os dur</span><span><i style="background:#707070"></i>os spongieux</span><span><i style="background:#484848"></i>muscle</span><span><i style="background:#313131"></i>graisse / moelle</span><span><i style="background:#000;border:1px solid #555"></i>air</span>
+        </div>
       </div>
     </div>
   </section>
@@ -104,10 +269,11 @@ figure canvas{display:block;background:#000;border-radius:6px;border:1px solid v
   <section class="card">
     <h2>À retenir</h2>
     <div class="learn">
-      <div><b>Un batch, c'est quoi ?</b>Un lot de coupes recalculées à partir du volume : plan, centre, champ de vue, nombre, épaisseur, espacement (et angulation).</div>
-      <div><b>Pas de nouvelle acquisition</b>Le post-traitement réutilise les données déjà acquises : aucune irradiation supplémentaire.</div>
-      <div><b>Épaisseur vs espacement</b>Épaisseur &gt; espacement : chevauchement. Épaisseur &lt; espacement : une partie du volume n'est pas visible.</div>
-      <div><b>Voxels isotropes</b>Des coupes fines (≈ 1 mm) donnent des reformatages sagittaux et coronaux nets. Des voxels anisotropes donnent des « marches d'escalier ».</div>
+      <div><b>Un batch, c'est quoi ?</b>Un lot de coupes recalculées à partir du volume : plan, centre, nombre, épaisseur, espacement (et angulation).</div>
+      <div><b>Hauteur de la vue reconstruite</b>Elle vaut <i>nombre de coupes axiales × pas</i>. Pas de coupes axiales au‑dessus ou en dessous : pas d'image sagittale ou coronale à cet endroit.</div>
+      <div><b>Pas de nouvelle acquisition</b>Le post‑traitement réutilise les données déjà acquises : aucune irradiation supplémentaire.</div>
+      <div><b>Épaisseur vs espacement</b>Épaisseur &gt; espacement : chevauchement. Épaisseur &lt; espacement : une partie du volume n'est visible dans aucune coupe.</div>
+      <div><b>Pas fin = image nette</b>Avec un pas axial grand (≈ 10 mm), les reformatages sagittaux et coronaux deviennent flous, avec des « marches d'escalier ».</div>
     </div>
   </section>
 </div>
@@ -121,9 +287,8 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
 const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 const easeO=t=>1-Math.pow(1-t,3);
-const MM=1/214;               // 1 mm en unités du modèle
-const TX=0.1;                 // cible caméra
-const DEG=Math.PI/180;
+const MM=1/214, TX=0.1, DEG=Math.PI/180;
+let needDraw=true;
 
 /* ================= Modèle : fémur simulé ================= */
 function smin(a,b,k){const h=Math.max(k-Math.abs(a-b),0)/k;return Math.min(a,b)-h*h*k*.25}
@@ -164,7 +329,7 @@ function HU(x,y,z){
   return lerp(bg,inner,clamp((depth+0.003)/0.006));
 }
 
-/* ================= Nuage de points (surface 3D) ================= */
+/* ================= Nuage de points (peau de l'os) ================= */
 const PT=(()=>{
   const h=0.0145,X=[],Y=[],Z=[],NX=[],NY=[],NZ=[];
   let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
@@ -173,57 +338,26 @@ const PT=(()=>{
     const d=boneSDF(px,py,pz);
     if(d>0||d<-1.15*h)continue;
     const e=0.004;
-    let gx=boneSDF(px+e,py,pz)-boneSDF(px-e,py,pz),gy=boneSDF(px,py+e,pz)-boneSDF(px,py-e,pz),gz=boneSDF(px,py,pz+e)-boneSDF(px,py,pz-e);
+    const gx=boneSDF(px+e,py,pz)-boneSDF(px-e,py,pz),gy=boneSDF(px,py+e,pz)-boneSDF(px,py-e,pz),gz=boneSDF(px,py,pz+e)-boneSDF(px,py,pz-e);
     const l=Math.hypot(gx,gy,gz)||1;
     X.push(px);Y.push(py);Z.push(pz);NX.push(gx/l);NY.push(gy/l);NZ.push(gz/l);
   }
   const n=X.length;
-  return {n,x:Float32Array.from(X),y:Float32Array.from(Y),z:Float32Array.from(Z),nx:Float32Array.from(NX),ny:Float32Array.from(NY),nz:Float32Array.from(NZ),
-    sx:new Float32Array(n),sy:new Float32Array(n),sh:new Uint8Array(n),inB:new Uint8Array(n),sortBuf:new Float64Array(n+32),h}
+  return {n,h,x:Float32Array.from(X),y:Float32Array.from(Y),z:Float32Array.from(Z),nx:Float32Array.from(NX),ny:Float32Array.from(NY),nz:Float32Array.from(NZ),
+    sx:new Float32Array(n),sy:new Float32Array(n),sh:new Uint8Array(n),tint:new Uint8Array(n),al:new Float32Array(n),
+    sN:new Float32Array(n),grp:new Int8Array(n).fill(-2),buf:new Float64Array(n+64)}
 })();
-
-/* ================= Plans / textures ================= */
-const EXT={axial:{u0:-0.45,u1:0.65,v0:-0.45,v1:0.45},coronal:{u0:-0.45,u1:0.65,v0:-1.12,v1:1.08},sagittal:{u0:-0.45,u1:0.45,v0:-1.12,v1:1.08}};
-const AXIS={axial:1,coronal:2,sagittal:0};
-const PXS=0.009;
-function pt(o,u,v,s){return o==='axial'?[u,s,v]:o==='coronal'?[u,v,s]:[s,v,-u]}
-function quad(o,s){const e=EXT[o];return [pt(o,e.u0,e.v1,s),pt(o,e.u1,e.v1,s),pt(o,e.u1,e.v0,s),pt(o,e.u0,e.v0,s)]}
-function hash(i,j,k){let h=(i*374761393+j*668265263+k*2147483647)|0;h=(h^(h>>>13))*1274126177|0;h^=h>>>16;return (h>>>0)/4294967295}
-const texCache=new Map();
-function getTex(o,s,thick){
-  const key=o+'|'+s.toFixed(4)+'|'+thick.toFixed(4);
-  if(texCache.has(key))return texCache.get(key);
-  if(texCache.size>260)texCache.clear();
-  const e=EXT[o],W=Math.round((e.u1-e.u0)/PXS),H=Math.round((e.v1-e.v0)/PXS);
-  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
-  const c=cv.getContext('2d'),img=c.createImageData(W,H),d=img.data;
-  const ns=thick>0.03?5:thick>0.015?3:1,seed=Math.round(s*1000);
-  for(let j=0;j<H;j++){const v=e.v1-(j+.5)*PXS;
-    for(let i=0;i<W;i++){
-      const u=e.u0+(i+.5)*PXS;let sum=0;
-      for(let k=0;k<ns;k++){
-        const off=ns===1?0:(k/(ns-1)-.5)*thick;let x,y,z;
-        if(o==='axial'){x=u;z=v;y=s+off}else if(o==='coronal'){x=u;y=v;z=s+off}else{x=s+off;y=v;z=-u}
-        sum+=HU(x,y,z);
-      }
-      let hu=sum/ns;
-      if(hu>-900)hu+=(hash(i,j,seed)-.5)*26;
-      const g=clamp((hu+400)/1600)*255,a=clamp((hu+960)/60)*255,p=(j*W+i)*4;
-      d[p]=g*.96;d[p+1]=g;d[p+2]=g*1.03;d[p+3]=a;
-    }}
-  c.putImageData(img,0,0);
-  const t={cv,W,H};texCache.set(key,t);return t;
-}
 
 /* ================= État ================= */
 const DEF={axial:{c:0,n:7,th:5,sp:30},sagittal:{c:0.1,n:9,th:5,sp:15},coronal:{c:0.03,n:9,th:5,sp:10}};
 const FR={axial:'axiale',sagittal:'sagittale',coronal:'coronale'};
-const S={orient:'axial',n:7,th:5,sp:30,pos:0,sel:3,T:0,playing:true,speed:1,offYaw:0,offPitch:0,zoom:1,tex:[]};
-const P0E=2.2,P1E=4.8,P2E=8.2,P3E=10.8,P4E=14.2,TOTAL=15.5;
-const PSTART=[0,P0E,P1E,P2E,P3E];
-const PNAME=['1 · Volume acquis','2 · Placer le batch','3 · Découpe','4 · Éclaté','5 · Nouvelle coupe'];
-const CAM={axial:{s:[-35,24],e:[-10,-68]},coronal:{s:[-50,14],e:[-8,5]},sagittal:{s:[40,14],e:[78,5]}};
-
+const AXIS={axial:1,coronal:2,sagittal:0};
+const S={orient:'sagittal',mode:'cours',n:9,th:5,sp:15,pos:0,sel:4,scanN:90,pas:5,scanC:0,refY:0.8,refZ:0.03,refX:0.0,
+  step:0,auto:true,stopAt:7,holdT:0,speed:1,zoom:1,tex:[],y0:0,y1:0,L:0,E:null};
+function updateScan(){
+  const L=S.scanN*S.pas*MM;S.L=L;S.y0=S.scanC*MM-L/2;S.y1=S.y0+L;
+  S.E={axial:{u0:-0.45,u1:0.65,v0:-0.45,v1:0.45},coronal:{u0:-0.45,u1:0.65,v0:S.y0,v1:S.y1},sagittal:{u0:-0.45,u1:0.45,v0:S.y0,v1:S.y1}};
+}
 function centerPos(){return DEF[S.orient].c+S.pos*MM}
 function basePositions(){const c=centerPos(),sp=S.sp*MM,a=[];for(let i=0;i<S.n;i++)a.push(c+(i-(S.n-1)/2)*sp);return a}
 function explodedPositions(e){
@@ -231,334 +365,839 @@ function explodedPositions(e){
   const step=Math.max(sp,Math.min(sp+extra,1.6/Math.max(1,n-1))),a=[];
   for(let i=0;i<n;i++)a.push(c+(i-(n-1)/2)*step);return a}
 function boxRange(){const b=basePositions(),hp=Math.max(S.sp,S.th)*MM/2;return [b[0]-hp,b[S.n-1]+hp]}
+function pt(o,u,v,s){return o==='axial'?[u,s,v]:o==='coronal'?[u,v,s]:[s,v,-u]}
 
-/* ================= Caméra ================= */
+/* ================= Textures de coupes ================= */
+const PXS=0.009,texCache=new Map();
+function hash(i,j,k){let h=(i*374761393+j*668265263+k*2147483647)|0;h=(h^(h>>>13))*1274126177|0;h^=h>>>16;return (h>>>0)/4294967295}
+function getTex(o,s,thick){
+  const E=S.E[o];
+  const key=[o,s.toFixed(4),thick.toFixed(4),S.y0.toFixed(3),S.y1.toFixed(3),S.pas,S.scanN].join('|');
+  if(texCache.has(key))return texCache.get(key);
+  if(texCache.size>300)texCache.clear();
+  const W=Math.max(2,Math.round((E.u1-E.u0)/PXS)),H=Math.max(2,Math.round((E.v1-E.v0)/PXS));
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const c=cv.getContext('2d');
+  const t={cv,W,H};
+  if(o==='axial'&&(s<S.y0||s>S.y1)){texCache.set(key,t);return t}
+  const img=c.createImageData(W,H),d=img.data;
+  const cv3=document.createElement('canvas');cv3.width=W;cv3.height=H;const c3=cv3.getContext('2d'),img3=c3.createImageData(W,H),d3=img3.data;t.cv3=cv3;
+  const ns=thick>0.1?9:thick>0.04?7:thick>0.02?5:thick>0.008?3:1,seed=Math.round(s*1000),pasU=S.pas*MM,nA=S.scanN;
+  for(let j=0;j<H;j++){const v=E.v1-(j+.5)*PXS;
+    let f=0,a=0,b=0,ya=0,yb=0,tt=0;
+    if(o!=='axial'){f=(v-S.y0)/pasU-0.5;const k0=Math.floor(f);tt=clamp(f-k0,0,1);a=clamp(k0,0,nA-1);b=clamp(k0+1,0,nA-1);ya=S.y0+(a+.5)*pasU;yb=S.y0+(b+.5)*pasU}
+    for(let i=0;i<W;i++){
+      const u=E.u0+(i+.5)*PXS;let sum=0;
+      for(let k=0;k<ns;k++){
+        const off=ns===1?0:(k/(ns-1)-.5)*thick;
+        if(o==='axial')sum+=HU(u,s+off,v);
+        else{
+          const xx=o==='coronal'?u:s+off,zz=o==='coronal'?s+off:-u;
+          sum+=lerp(HU(xx,ya,zz),HU(xx,yb,zz),tt);
+        }
+      }
+      let hu=sum/ns;
+      if(hu>-900)hu+=(hash(i,j,seed)-.5)*26;
+      const g=clamp((hu+400)/1600)*255,al=clamp((hu+960)/60)*255,p=(j*W+i)*4;
+      d[p]=g*.96;d[p+1]=g;d[p+2]=g*1.03;d[p+3]=al;
+      d3[p]=d[p];d3[p+1]=d[p+1];d3[p+2]=d[p+2];d3[p+3]=hu>180?al:Math.min(al,60);
+    }}
+  c.putImageData(img,0,0);c3.putImageData(img3,0,0);texCache.set(key,t);return t;
+}
+
+/* ================= Groupes de points (tranches d'os) ================= */
+function buildGroups(){
+  const o=S.orient,E=S.E[o],base=basePositions(),n=S.n,sp=S.sp*MM,c=centerPos();
+  const thD=Math.max(S.th*MM,0.03),[lo,hi]=boxRange();
+  for(let i=0;i<PT.n;i++){
+    const x=PT.x[i],y=PT.y[i],z=PT.z[i];let u,v,s;
+    if(o==='axial'){u=x;v=z;s=y}else if(o==='coronal'){u=x;v=y;s=z}else{u=-z;v=y;s=x}
+    PT.sN[i]=s;
+    if(u<E.u0||u>E.u1||v<E.v0||v>E.v1||s<lo||s>hi){PT.grp[i]=-2;continue}
+    let k=Math.round((s-c)/sp+(n-1)/2);k=clamp(k,0,n-1);
+    PT.grp[i]=Math.abs(s-base[k])<=thD/2?k:-1;
+  }
+}
+
+/* ================= Étapes / tween ================= */
+const CAMS={
+  start:[-35,22],
+  ref:{sagittal:[0,-90],coronal:[0,-90],axial:[0,4]},
+  cut:{sagittal:[-50,-40],coronal:[-30,-44],axial:[-35,18]},
+  exp:{sagittal:[52,16],coronal:[-46,16],axial:[-35,24]},
+  fin:{sagittal:[80,4],coronal:[-6,4],axial:[0,-90]},
+  siz:{sagittal:[62,12],coronal:[-40,12],axial:[-30,20]}};
+const ZMREF={sagittal:1.8,coronal:1.8,axial:1.05};
+const DUR=[1.2,3.6,2.8,2.6,3.8,2.8,3.4,7.5],HOLD=[1.5,1.8,3.0,3.4,1.2,3.0,3.6,0];
+const STEPN=['Fémur 3D','Acquisition axiale','Vue axiale','Poser le batch','Trancher','Éclater','Nouvelle vue','Taille de la vue'];
+function stepState(k){
+  const o=S.orient,C=a=>({yaw:a[0]*DEG,pitch:a[1]*DEG});
+  const B={oy:0,op:0,zm:1,dim:1,scanDim:1,front:1,scanA:.05,refP:0,placeP:0,cutP:0,expE:0,focusP:0,brk:0};
+  const M=(...a)=>Object.assign({},B,...a);
+  switch(k){
+    case 0:return M(C(CAMS.start),{scanDim:0,front:0,scanA:0});
+    case 1:return M(C([-42,18]),{scanA:.32});
+    case 2:return M(C(CAMS.ref[o]),{zm:ZMREF[o],dim:.28,scanA:.1,refP:1});
+    case 3:return M(C(CAMS.ref[o]),{zm:ZMREF[o],dim:.28,scanA:.1,refP:1,placeP:1});
+    case 4:return M(C(CAMS.cut[o]),{zm:1.1,refP:1,placeP:1,cutP:1});
+    case 5:return M(C(CAMS.exp[o]),{placeP:1,cutP:1,expE:1});
+    case 6:return M(C(CAMS.fin[o]),{zm:o==='axial'?1.5:1.05,placeP:1,cutP:1,expE:1,focusP:1});
+    default:return M(C(CAMS.siz[o]),{placeP:1,cutP:1,expE:1,focusP:.8,scanA:.3,brk:1});
+  }
+}
+const Z=Object.assign({},stepState(0));
+let TW=null;
+function goStep(k,dur){
+  k=clamp(k,0,7);S.step=k;S.holdT=0;
+  const to=stepState(k),from=Object.assign({},Z);
+  let custom=null;
+  if(k===1)custom=(u,z)=>{z.scanDim=Math.min(1,u*6);z.front=clamp((u-0.12)/0.88)};
+  if(k===7)custom=(u,z)=>{z.front=u<0.12?lerp(1,0.2,easeIO(u/0.12)):lerp(0.2,1,easeIO((u-0.12)/0.88))};
+  TW={from,to,t:0,dur:dur||DUR[k],custom,step:true};needDraw=true;
+}
+function tweenCam(yaw,pitch,zm){
+  const from=Object.assign({},Z),to=Object.assign({},Z,{yaw:yaw*DEG,pitch:pitch*DEG,oy:0,op:0,zm:zm||1});
+  TW={from,to,t:0,dur:1.4,custom:null,step:false};needDraw=true;
+}
+function jump(k){S.step=k;TW=null;Object.assign(Z,stepState(k));if(k===7)Z.front=1;needDraw=true}
+function updateTween(dt){
+  if(!TW)return;
+  TW.t+=dt*S.speed;
+  const u=clamp(TW.t/TW.dur),e=easeIO(u);
+  for(const k in TW.to)Z[k]=lerp(TW.from[k],TW.to[k],e);
+  if(TW.custom)TW.custom(u,Z);
+  if(u>=1){const st=TW.step;TW=null;if(st)S.holdT=0}
+  needDraw=true;
+}
+
+/* ================= Caméra / projection ================= */
+const CNV={main:{cv:$('#c3d'),w:300,h:300,dpr:1},exp:{cv:$('#c3d2'),w:300,h:300,dpr:1}};
+CNV.main.ctx=CNV.main.cv.getContext('2d');CNV.exp.ctx=CNV.exp.cv.getContext('2d');
+const cv=CNV.main.cv;
+let ctx=CNV.main.ctx,DPR=1,CW=300,CH=300,CAMV=null,SC=150,CX=0,CYc=0,curA=1;
+function useCanvas(c){ctx=c.ctx;CW=c.w;CH=c.h;DPR=c.dpr;curA=1}
 function camVec(yaw,pitch){
   const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
   const b=[cp*sy,sp,cp*cy],r=[cy,0,-sy];
   const u=[b[1]*r[2]-b[2]*r[1],b[2]*r[0]-b[0]*r[2],b[0]*r[1]-b[1]*r[0]];
   return {r,u,b}}
-function camera(T){
-  const c=CAM[S.orient];
-  const drift=Math.sin(Math.min(T,P3E)*0.45)*0.10;
-  let yaw=c.s[0]*DEG+drift,pitch=c.s[1]*DEG+drift*0.3;
-  if(T>P3E){
-    const y0=c.s[0]*DEG+Math.sin(P3E*0.45)*0.10,p0=c.s[1]*DEG+Math.sin(P3E*0.45)*0.03;
-    const p=easeIO(clamp((T-P3E)/(P4E-P3E)));
-    yaw=lerp(y0,c.e[0]*DEG,p);pitch=lerp(p0,c.e[1]*DEG,p);
-  }
-  return {yaw:yaw+S.offYaw,pitch:clamp(pitch+S.offPitch,-1.55,1.55)};
-}
-
-/* ================= Rendu 3D ================= */
-const cv=$('#c3d'),ctx=cv.getContext('2d');
-let DPR=1,CW=300,CH=300,CAMV=camVec(0,0),SC=150,CX=0,CYc=0;
-function resize(){DPR=Math.min(window.devicePixelRatio||1,2);const r=cv.getBoundingClientRect();CW=r.width;CH=r.height;cv.width=Math.round(CW*DPR);cv.height=Math.round(CH*DPR);needDraw=true}
+function resize(){for(const k in CNV){const c=CNV[k],r=c.cv.getBoundingClientRect();c.dpr=Math.min(window.devicePixelRatio||1,2);c.w=r.width;c.h=r.height;c.cv.width=Math.round(c.w*c.dpr);c.cv.height=Math.round(c.h*c.dpr)}needDraw=true}
 function P3(x,y,z){
   const dx=x-TX,r=CAMV.r,u=CAMV.u,b=CAMV.b;
   return [CX+SC*(r[0]*dx+r[2]*z),CYc-SC*(u[0]*dx+u[1]*y+u[2]*z),b[0]*dx+b[1]*y+b[2]*z]}
-const PAL=[];for(let i=0;i<32;i++){const t=i/31;PAL.push(`rgb(${Math.round(40+t*205)},${Math.round(38+t*190)},${Math.round(40+t*165)})`)}
-let curA=1;
+const PAL=[],PALT=[];
+for(let i=0;i<32;i++){const t=i/31;
+  PAL.push(`rgb(${Math.round(40+t*205)},${Math.round(38+t*190)},${Math.round(40+t*165)})`);
+  PALT.push(`rgb(${Math.round(30+t*130)},${Math.round(60+t*190)},${Math.round(62+t*180)})`)}
 function setA(a){if(a!==curA){ctx.globalAlpha=a;curA=a}}
-function polyPath(pts){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath()}
-function projQuad(o,s){return quad(o,s).map(p=>P3(p[0],p[1],p[2]))}
-
-function drawPlane(o,s,tex,alpha,sel,wire){
-  const q=projQuad(o,s),A=q[0],B=q[1],D=q[3];
-  const ux=B[0]-A[0],uy=B[1]-A[1],vx=D[0]-A[0],vy=D[1]-A[1];
-  if(Math.abs(ux*vy-uy*vx)>30){
-    ctx.save();ctx.globalAlpha=alpha;
-    ctx.setTransform(DPR*ux/tex.W,DPR*uy/tex.W,DPR*vx/tex.H,DPR*vy/tex.H,DPR*A[0],DPR*A[1]);
-    ctx.drawImage(tex.cv,0,0);ctx.restore();
-  }
-  ctx.save();ctx.globalAlpha=Math.min(1,alpha);
-  polyPath(q);ctx.lineWidth=sel?2.6:1;ctx.strokeStyle=sel?'#fbbf24':'rgba(45,212,191,.75)';ctx.stroke();
-  if(wire){
-    const t=Math.max(S.th*MM,0.014)/2,q1=projQuad(o,s-t),q2=projQuad(o,s+t);
-    ctx.globalAlpha=.45*alpha;ctx.lineWidth=1;ctx.strokeStyle='#2dd4bf';
-    polyPath(q1);ctx.stroke();polyPath(q2);ctx.stroke();
-    ctx.beginPath();for(let k=0;k<4;k++){ctx.moveTo(q1[k][0],q1[k][1]);ctx.lineTo(q2[k][0],q2[k][1])}ctx.stroke();
-  }
-  ctx.restore();
+function polyPath(p){ctx.beginPath();ctx.moveTo(p[0][0],p[0][1]);for(let i=1;i<p.length;i++)ctx.lineTo(p[i][0],p[i][1]);ctx.closePath()}
+function quadScreen(o,s,frac){
+  const E=S.E[o],v1=frac<1?E.v0+frac*(E.v1-E.v0):E.v1;
+  return [pt(o,E.u0,v1,s),pt(o,E.u1,v1,s),pt(o,E.u1,E.v0,s),pt(o,E.u0,E.v0,s)].map(p=>P3(p[0],p[1],p[2]));
 }
-function boxWire(o,lo,hi,alpha,dashed){
-  const e=EXT[o],c=[];
-  for(const s of [lo,hi])for(const [u,v] of [[e.u0,e.v1],[e.u1,e.v1],[e.u1,e.v0],[e.u0,e.v0]]){const p=pt(o,u,v,s);c.push(P3(p[0],p[1],p[2]))}
-  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle='#2dd4bf';ctx.lineWidth=1.6;
-  if(dashed)ctx.setLineDash([6,5]);
-  ctx.fillStyle='rgba(45,212,191,.05)';
-  polyPath(c.slice(0,4));ctx.fill();ctx.stroke();polyPath(c.slice(4));ctx.fill();ctx.stroke();
-  ctx.beginPath();for(let k=0;k<4;k++){ctx.moveTo(c[k][0],c[k][1]);ctx.lineTo(c[k+4][0],c[k+4][1])}ctx.stroke();
-  ctx.restore();
-  return c;
+function drawImg(o,s,tex,alpha,frac,use3){
+  frac=frac||1;const q=quadScreen(o,s,frac),A=q[0],B=q[1],D=q[3];
+  const ux=B[0]-A[0],uy=B[1]-A[1],vx=D[0]-A[0],vy=D[1]-A[1];
+  if(Math.abs(ux*vy-uy*vx)>30&&alpha>0.01&&tex){
+    const sh=tex.H*frac,sy=tex.H-sh;
+    ctx.save();ctx.globalAlpha=alpha;
+    ctx.setTransform(DPR*ux/tex.W,DPR*uy/tex.W,DPR*vx/sh,DPR*vy/sh,DPR*A[0],DPR*A[1]);
+    ctx.drawImage((use3&&tex.cv3)||tex.cv,0,sy,tex.W,sh,0,0,tex.W,sh);
+    ctx.restore();
+  }
+  return q;
 }
 function pill(text,x,y,color){
   ctx.save();ctx.font='600 12px system-ui,sans-serif';const w=ctx.measureText(text).width+14;
   x=clamp(x,4,CW-w-4);y=clamp(y,18,CH-8);
-  ctx.fillStyle='rgba(10,16,22,.85)';ctx.strokeStyle=color;ctx.lineWidth=1;
-  ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y-14,w,20,10):ctx.rect(x,y-14,w,20);ctx.fill();ctx.stroke();
+  ctx.fillStyle='rgba(10,16,22,.88)';ctx.strokeStyle=color;ctx.lineWidth=1;
+  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y-14,w,20,10);else ctx.rect(x,y-14,w,20);ctx.fill();ctx.stroke();
   ctx.fillStyle=color;ctx.fillText(text,x+7,y);ctx.restore();
 }
 function gizmo(){
-  const ox=38,oy=CH-38,L=24,r=CAMV.r,u=CAMV.u;
-  const ax=[[1,0,0,'G'],[0,1,0,'S'],[0,0,1,'A']];
+  const ox=36,oy=CH-36,L=22,r=CAMV.r,u=CAMV.u;
   ctx.save();ctx.font='700 11px system-ui,sans-serif';ctx.lineWidth=2;
-  for(const [x,y,z,l] of ax){
+  for(const [x,y,z,l] of [[1,0,0,'G'],[0,1,0,'S'],[0,0,1,'A']]){
     const dx=r[0]*x+r[2]*z,dy=u[0]*x+u[1]*y+u[2]*z;
     ctx.strokeStyle='rgba(142,160,178,.8)';ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+dx*L,oy-dy*L);ctx.stroke();
     ctx.fillStyle='#e6edf3';ctx.fillText(l,ox+dx*(L+7)-3,oy-dy*(L+7)+4);
   }
   ctx.restore();
 }
+function letters(q,L){
+  const m=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2],c=[(q[0][0]+q[2][0])/2,(q[0][1]+q[2][1])/2];
+  const pts=[m(q[0],q[1]),m(q[3],q[2]),m(q[0],q[3]),m(q[1],q[2])];
+  ctx.save();ctx.font='700 15px system-ui,sans-serif';ctx.fillStyle='#fbbf24';ctx.textAlign='center';ctx.textBaseline='middle';
+  pts.forEach((p,i)=>{ctx.fillText(L[i],p[0]+(c[0]-p[0])*0.1,p[1]+(c[1]-p[1])*0.1)});ctx.restore();
+}
 
-let needDraw=true;
+/* ================= Rendu 3D ================= */
 const SORT_MUL=65536;
 function draw(){
-  const T=S.T,o=S.orient,n=S.n;
+  useCanvas(CNV.main);if(CW<5)return;
+  const o=S.orient,n=S.n,E=S.E[o],ax=AXIS[o];
   ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalAlpha=1;curA=1;ctx.clearRect(0,0,CW,CH);
-  const cam=camera(T);CAMV=camVec(cam.yaw,cam.pitch);
-  SC=Math.min(CH/2.55,CW/2.3)*S.zoom;CX=CW/2;CYc=CH/2;
+  CAMV=camVec(Z.yaw+Z.oy,clamp(Z.pitch+Z.op,-1.5708,1.5708));
+  SC=Math.min(CH/2.55,CW/2.3)*Z.zm*S.zoom;CX=CW/2;CYc=CH/2;
   const r=CAMV.r,u=CAMV.u,b=CAMV.b;
-  const p0=clamp(T/P0E),p1=clamp((T-P0E)/(P1E-P0E)),p2=clamp((T-P1E)/(P2E-P1E)),p3=clamp((T-P2E)/(P3E-P2E));
-  const fade=easeO(clamp(T/1.2)),e=easeIO(p3);
-  const base=basePositions(),exp=explodedPositions(e),[lo,hi]=boxRange();
-  const sb=lerp(lo,hi,easeIO(p2));
-  const ghost=1-0.9*easeIO(clamp((T-P1E-0.4)/2.6));
-  const ax=AXIS[o];
+  const base=basePositions(),expP=explodedPositions(Z.expE),DELTA=base.map((s,i)=>expP[i]-s);
+  const [lo,hi]=boxRange(),sb=lerp(lo,hi,Z.cutP),sp=S.sp*MM,th=S.th*MM;
+  const passed=base.map(s=>Z.cutP>0&&s<=sb+1e-9);
+  const frontY=S.y0+Z.front*S.L;
+  const nvec=[0,0,0];nvec[ax]=1;
 
-  // volume natif : coupes axiales
-  const natA=0.28*fade*(1-clamp(p2*1.4));
-  if(natA>0.01){
-    const cnt=Math.floor(p0*22);ctx.save();ctx.strokeStyle='#7aa7d9';ctx.lineWidth=1;ctx.globalAlpha=natA;
-    for(let k=0;k<cnt;k++){const y=-1.05+k*0.1,e0=EXT.axial;
-      polyPath([pt('axial',e0.u0,e0.v1,y),pt('axial',e0.u1,e0.v1,y),pt('axial',e0.u1,e0.v0,y),pt('axial',e0.u0,e0.v0,y)].map(p=>P3(p[0],p[1],p[2])));ctx.stroke()}
+  /* pile des coupes axiales acquises */
+  if(Z.scanA>0.01){
+    const NA=S.scanN,stride=Math.max(1,Math.ceil(NA/70)),ea=S.E.axial;
+    ctx.save();ctx.lineWidth=1;ctx.strokeStyle=`rgba(122,167,217,${Z.scanA})`;
+    const kmax=Math.floor(Z.front*NA);
+    for(let k=0;k<=kmax;k+=stride){
+      const y=S.y0+(k+0.5)*S.pas*MM;
+      polyPath([pt('axial',ea.u0,ea.v1,y),pt('axial',ea.u1,ea.v1,y),pt('axial',ea.u1,ea.v0,y),pt('axial',ea.u0,ea.v0,y)].map(p=>P3(p[0],p[1],p[2])));ctx.stroke();
+    }
+    if(Z.front>0.001&&Z.front<0.999){
+      const y=S.y0+Z.front*S.L,qq=[pt('axial',ea.u0,ea.v1,y),pt('axial',ea.u1,ea.v1,y),pt('axial',ea.u1,ea.v0,y),pt('axial',ea.u0,ea.v0,y)].map(p=>P3(p[0],p[1],p[2]));
+      polyPath(qq);ctx.fillStyle='rgba(122,167,217,.2)';ctx.fill();ctx.strokeStyle='#bcd8f5';ctx.lineWidth=1.6;ctx.stroke();
+    }
     ctx.restore();
   }
 
-  // visibles
-  const vis=[];
-  for(let i=0;i<n;i++)if(p2>0&&(base[i]<=sb+1e-9||p3>0))vis.push(i);
-  const nv=vis.length,plS=vis.map(i=>exp[i]);
+  /* plans visibles (feuilles texturées) */
+  const vis=[];for(let i=0;i<n;i++)if(passed[i]||Z.cutP>=1)vis.push(i);
+  const nv=vis.length,plS=vis.map(i=>expP[i]);
   const nb=b[ax],edge=Math.abs(nb)<0.12,flip=nb<0;
+  const slabA=base.map((s,i)=>i===S.sel?1:lerp(1,0.14,Z.focusP));
+  const gapA=lerp(1,0.1,0.9)*lerp(1,0.4,Z.focusP),outA=lerp(1,0.18,Z.scanDim),oth=lerp(1,0.4,Z.focusP);
 
-  // points
-  const N=PT.n,X=PT.x,Y=PT.y,Z=PT.z,NX=PT.nx,NY=PT.ny,NZ=PT.nz,sx=PT.sx,sy=PT.sy,sh=PT.sh,inB=PT.inB,buf=PT.sortBuf;
-  const coord=ax===0?X:ax===1?Y:Z;
+  /* points */
+  const N=PT.n,X=PT.x,Y=PT.y,Zc=PT.z,NX=PT.nx,NY=PT.ny,NZ=PT.nz,sx=PT.sx,sy=PT.sy,sh=PT.sh,tint=PT.tint,al=PT.al,GRP=PT.grp,sN=PT.sN,buf=PT.buf;
   let cnt=0;
   for(let i=0;i<N;i++){
     const nz=b[0]*NX[i]+b[1]*NY[i]+b[2]*NZ[i];
     if(nz<-0.08)continue;
-    const dx=X[i]-TX,dy=Y[i],dz=Z[i];
+    const g=GRP[i],gi=(g>=0&&passed[g])?g:-3;
+    let a;
+    if(gi>=0)a=slabA[gi];
+    else if(g===-1&&Z.cutP>0&&sN[i]<=sb)a=gapA;
+    else a=oth;
+    const yy=Y[i];
+    a*=Z.dim*((yy>=S.y0&&yy<=frontY)?1:outA);
+    if(a<0.03)continue;
+    const ex=gi>=0?DELTA[gi]:0;
+    const dx=X[i]-TX+ex*nvec[0],dy=yy+ex*nvec[1],dz=Zc[i]+ex*nvec[2];
     const vx=r[0]*dx+r[2]*dz,vy=u[0]*dx+u[1]*dy+u[2]*dz,vz=b[0]*dx+b[1]*dy+b[2]*dz;
-    sx[i]=CX+SC*vx;sy[i]=CYc-SC*vy;
+    sx[i]=CX+SC*vx;sy[i]=CYc-SC*vy;al[i]=a;tint[i]=gi>=0?1:0;
     const nx_=r[0]*NX[i]+r[2]*NZ[i],ny_=u[0]*NX[i]+u[1]*NY[i]+u[2]*NZ[i];
-    let s=0.25+0.7*Math.max(0,-0.35*nx_+0.55*ny_+0.75*nz)+0.18*Math.pow(1-clamp(nz),2);
+    const s=0.25+0.7*Math.max(0,-0.35*nx_+0.55*ny_+0.75*nz)+0.18*Math.pow(1-clamp(nz),2);
     sh[i]=Math.max(0,Math.min(31,(s*31)|0));
     const dn=clamp((vz+2)/4,0,0.999);
     let K;
     if(edge||nv===0)K=dn;
     else{
-      const sn=coord[i];let L=0;while(L<nv&&plS[L]<sn)L++;
+      const sn=sN[i]+ex;let L=0;while(L<nv&&plS[L]<sn)L++;
       K=(flip?(nv-L):L)*2+dn;
     }
     buf[cnt++]=Math.floor(K*4096)*SORT_MUL+i;
   }
-  // plans
-  const alphaP=[];
+  const alphaP=[],frac=Z.front;
   for(let k=0;k<nv;k++){
-    const i=vis[k],q=projQuad(o,exp[i]);
-    const cz=(q[0][2]+q[2][2])/2;
-    const dn=clamp((cz+2)/4,0,0.999);
+    const i=vis[k],q=quadScreen(o,expP[i],1),cz=(q[0][2]+q[2][2])/2,dn=clamp((cz+2)/4,0,0.999);
     const K=(edge||nv===0)?dn:(flip?2*(nv-k)-0.5:2*k+1.5);
     buf[cnt++]=Math.floor(K*4096)*SORT_MUL+(N+k);
-    alphaP.push(p3>0?lerp(1,i===S.sel?1:0.14,easeIO(clamp((T-P3E)/(P4E-P3E)))):clamp((sb-base[i])/0.07));
+    let a=Z.cutP>=1?1:clamp((sb-base[i])/0.07);
+    a*=(i===S.sel?1:lerp(1,0.14,Z.focusP));
+    if(o==='axial'&&expP[i]>frontY)a=0;
+    alphaP.push(a);
   }
   const sorted=buf.subarray(0,cnt);sorted.sort();
-  const sz=Math.max(2.2,PT.h*SC*1.35);
+  const szp=Math.max(2.2,PT.h*SC*1.35);
   for(let m=0;m<cnt;m++){
     const v=sorted[m],idx=v%SORT_MUL;
     if(idx>=N){
       const k=idx-N,i=vis[k];
-      drawPlane(o,exp[i],S.tex[i],alphaP[k],p3>=1&&i===S.sel&&T>P3E-0.4,e>0.02);
+      if(alphaP[k]<0.01)continue;
+      const q=drawImg(o,expP[i],S.tex[i],alphaP[k],o==='axial'?1:frac,true);
+      const sel=i===S.sel&&Z.focusP>0.5;
+      ctx.save();ctx.globalAlpha=Math.min(1,alphaP[k]+0.2);polyPath(q);ctx.lineWidth=sel?2.8:1;ctx.strokeStyle=sel?'#fbbf24':'rgba(45,212,191,.8)';ctx.stroke();
+      if(Z.expE>0.02){
+        const t=Math.max(th,0.014)/2,q1=quadScreen(o,expP[i]-t,1),q2=quadScreen(o,expP[i]+t,1);
+        ctx.globalAlpha=.4*alphaP[k];ctx.lineWidth=1;ctx.strokeStyle='#2dd4bf';
+        polyPath(q1);ctx.stroke();polyPath(q2);ctx.stroke();
+        ctx.beginPath();for(let c=0;c<4;c++){ctx.moveTo(q1[c][0],q1[c][1]);ctx.lineTo(q2[c][0],q2[c][1])}ctx.stroke();
+      }
+      ctx.restore();
     }else{
-      setA(inB[idx]?fade*ghost:fade);
-      ctx.fillStyle=PAL[sh[idx]];
-      ctx.fillRect(sx[idx]-sz/2,sy[idx]-sz/2,sz,sz);
+      setA(al[idx]);
+      ctx.fillStyle=(tint[idx]?PALT:PAL)[sh[idx]];
+      ctx.fillRect(sx[idx]-szp/2,sy[idx]-szp/2,szp,szp);
     }
   }
   setA(1);
 
-  // boîte du batch
-  const boxA=Math.min(p1*3,1)*(1-clamp((T-P2E)/1.0));
-  let corners=null;
-  if(T>P0E&&boxA>0.01){
-    const off=(1-easeO(p1))*0.9;
-    corners=boxWire(o,lo+off,hi+off,boxA*0.95,p1<1);
-    if(p1>0.5&&p2===0){
-      ctx.save();ctx.globalAlpha=0.35*clamp((p1-.5)*2);ctx.strokeStyle='#2dd4bf';ctx.lineWidth=1;
-      for(let i=0;i<n;i++){polyPath(projQuad(o,base[i]+off));ctx.stroke()}
-      ctx.restore();
-    }
-    const top=corners.reduce((a,c)=>c[1]<a[1]?c:a,corners[0]);
-    pill(`Batch ${FR[o]} · ${n} coupes · ép. ${S.th} mm · esp. ${S.sp} mm`,top[0]-60,top[1]-8,'#2dd4bf');
+  /* image de référence (axiale, ou coronale pour un batch axial) */
+  const refA=Z.refP*(1-clamp(Z.cutP*5));
+  if(refA>0.01){
+    const R=o==='axial'?'coronal':'axial';
+    const lvl=R==='axial'?S.refY:S.refZ;
+    const tex=getTex(R,lvl,0);
+    const q=drawImg(R,lvl,tex,refA*0.94,1);
+    ctx.save();ctx.globalAlpha=refA;polyPath(q);ctx.strokeStyle='#fb923c';ctx.lineWidth=1.6;ctx.stroke();ctx.restore();
+    ctx.save();ctx.globalAlpha=refA;letters(q,R==='axial'?['A','P','D','G']:['S','I','D','G']);ctx.restore();
+    const lab=R==='axial'?'Image axiale (vue inférieure, podo‑crâniale)':'Image coronale (vue de face)';
+    ctx.save();ctx.globalAlpha=refA;pill(lab,q[3][0]+4,q[3][1]+22,'#fb923c');ctx.restore();
   }
-  // lame de coupe
-  if(p2>0&&p2<1){
-    const q=projQuad(o,sb);
-    ctx.save();polyPath(q);ctx.fillStyle='rgba(45,212,191,.22)';ctx.fill();ctx.strokeStyle='#9ff5e8';ctx.lineWidth=2;ctx.stroke();ctx.restore();
+
+  /* boîte du batch + grille */
+  const boxA=Z.placeP*(1-clamp(Z.cutP*2));
+  if(boxA>0.01){
+    const off=(1-easeO(Z.placeP))*0.9,c=[];
+    for(const s of [lo+off,hi+off])for(const [uu,vv] of [[E.u0,E.v1],[E.u1,E.v1],[E.u1,E.v0],[E.u0,E.v0]]){const p=pt(o,uu,vv,s);c.push(P3(p[0],p[1],p[2]))}
+    ctx.save();ctx.globalAlpha=boxA*0.95;ctx.strokeStyle='#2dd4bf';ctx.lineWidth=1.6;if(Z.placeP<1)ctx.setLineDash([6,5]);
+    ctx.fillStyle='rgba(45,212,191,.05)';polyPath(c.slice(0,4));ctx.fill();ctx.stroke();polyPath(c.slice(4));ctx.fill();ctx.stroke();
+    ctx.beginPath();for(let k=0;k<4;k++){ctx.moveTo(c[k][0],c[k][1]);ctx.lineTo(c[k+4][0],c[k+4][1])}ctx.stroke();ctx.setLineDash([]);
+    ctx.globalAlpha=boxA*0.9;ctx.strokeStyle='#5eead4';ctx.lineWidth=1.8;
+    for(let i=0;i<n;i++){polyPath(quadScreen(o,base[i]+off,1));ctx.stroke()}
+    ctx.restore();
+    const top=c.reduce((a,p)=>p[1]<a[1]?p:a,c[0]);
+    ctx.save();ctx.globalAlpha=boxA;pill(`Batch ${FR[o]} · ${n} coupes · ép. ${S.th} mm · esp. ${S.sp} mm`,top[0]-70,top[1]-8,'#2dd4bf');ctx.restore();
+  }
+  /* lame */
+  if(Z.cutP>0.001&&Z.cutP<0.999){
+    ctx.save();polyPath(quadScreen(o,sb,1));ctx.fillStyle='rgba(45,212,191,.22)';ctx.fill();ctx.strokeStyle='#9ff5e8';ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  }
+  /* compteur de coupe axiale + cote de hauteur */
+  const NA=S.scanN,Neff=Math.max(1,Math.round(Z.front*NA)),Leff=Math.round(Neff*S.pas);
+  if(Z.front>0.001&&Z.front<0.999&&S.step<=1){
+    const ea=S.E.axial,p=pt('axial',ea.u1,ea.v1,S.y0+Z.front*S.L),q=P3(p[0],p[1],p[2]);
+    pill(`coupe axiale ${Neff}/${NA}`,q[0]+8,q[1],'#7aa7d9');
+  }
+  if(Z.brk>0.01){
+    const a=P3(-0.52,S.y0,0.5),bb=P3(-0.52,S.y0+Z.front*S.L,0.5),xo=-18;
+    ctx.save();ctx.globalAlpha=Z.brk;ctx.strokeStyle='#fbbf24';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(a[0]+xo,a[1]);ctx.lineTo(bb[0]+xo,bb[1]);ctx.moveTo(a[0]+xo-6,a[1]);ctx.lineTo(a[0]+xo+6,a[1]);ctx.moveTo(bb[0]+xo-6,bb[1]);ctx.lineTo(bb[0]+xo+6,bb[1]);ctx.stroke();
+    pill(`${Neff} coupes × ${S.pas} mm = ${Leff} mm`,bb[0]+xo+10,(a[1]+bb[1])/2,'#fbbf24');ctx.restore();
   }
   gizmo();
-  if(T<P1E)pill('Fémur droit (simulé)',12,CH-12,'#8ea0b2');
 }
 
 /* ================= Panneaux 2D ================= */
-function paintRef(canvas,tex,refO,pos){
-  const cw=tex.W*2,ch=tex.H*2;canvas.width=cw;canvas.height=ch;
+function modelFromRef(refO,u,v){return refO==='axial'?{x:u,z:v}:refO==='coronal'?{x:u,y:v}:{z:-u,y:v}}
+function refTex(refO){
+  const o=S.orient,base=basePositions(),sel=Math.min(S.sel,S.n-1);
+  if(refO==='axial')return getTex('axial',o==='axial'?base[sel]:S.refY,0);
+  if(refO==='coronal')return getTex('coronal',o==='coronal'?base[sel]:S.refZ,0);
+  return getTex('sagittal',o==='sagittal'?base[sel]:S.refX,0);
+}
+const REFG={};
+function paintRef(canvas,refO){
+  const tex=refTex(refO),cw=tex.W*2,ch=tex.H*2;canvas.width=cw;canvas.height=ch;
   const c=canvas.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,cw,ch);
   c.imageSmoothingQuality='high';c.drawImage(tex.cv,0,0,cw,ch);
-  const e=EXT[refO],mu=u=>(u-e.u0)/(e.u1-e.u0)*cw,mv=v=>(e.v1-v)/(e.v1-e.v0)*ch;
+  const e=S.E[refO],mu=u=>(u-e.u0)/(e.u1-e.u0)*cw,mv=v=>(e.v1-v)/(e.v1-e.v0)*ch;
   const tgt=S.orient,nax=tgt==='axial'?'y':tgt==='coronal'?'z':'x';
   const hor={axial:'x',coronal:'x',sagittal:'z'}[refO],ver={axial:'z',coronal:'y',sagittal:'y'}[refO];
   const base=basePositions(),[lo,hi]=boxRange();
+  const G={cw,ch,axis:null,lo:0,hi:0,hor,ver,nax};REFG[refO]=G;
   c.lineWidth=2;
   if(refO===tgt){
     c.setLineDash([8,6]);c.strokeStyle='#2dd4bf';c.strokeRect(6,6,cw-12,ch-12);c.setLineDash([]);
-    c.fillStyle='#2dd4bf';c.font='600 16px system-ui';c.fillText('FOV du batch',12,24);
+    c.fillStyle='#2dd4bf';c.font='600 15px system-ui';c.fillText('FOV du batch',12,24);
   }else if(nax===hor){
-    const U=s=>mu(hor==='z'?-s:s);
-    c.setLineDash([8,6]);c.strokeStyle='rgba(45,212,191,.8)';
-    const a=U(lo),bb=U(hi);c.strokeRect(Math.min(a,bb),3,Math.abs(bb-a),ch-6);c.setLineDash([]);
+    const U=s=>mu(hor==='z'?-s:s);G.axis='h';G.lo=U(lo);G.hi=U(hi);
+    c.setLineDash([8,6]);c.strokeStyle='rgba(45,212,191,.8)';c.strokeRect(Math.min(G.lo,G.hi),3,Math.abs(G.hi-G.lo),ch-6);c.setLineDash([]);
     base.forEach((s,i)=>{c.strokeStyle=i===S.sel?'#fbbf24':'#2dd4bf';c.lineWidth=i===S.sel?3.5:1.6;c.beginPath();c.moveTo(U(s),0);c.lineTo(U(s),ch);c.stroke()});
+    c.fillStyle='#2dd4bf';[G.lo,G.hi].forEach(x=>{c.fillRect(x-6,ch/2-18,12,36)});
   }else if(nax===ver){
-    c.setLineDash([8,6]);c.strokeStyle='rgba(45,212,191,.8)';
-    const a=mv(lo),bb=mv(hi);c.strokeRect(3,Math.min(a,bb),cw-6,Math.abs(bb-a));c.setLineDash([]);
+    G.axis='v';G.lo=mv(lo);G.hi=mv(hi);
+    c.setLineDash([8,6]);c.strokeStyle='rgba(45,212,191,.8)';c.strokeRect(3,Math.min(G.lo,G.hi),cw-6,Math.abs(G.hi-G.lo));c.setLineDash([]);
     base.forEach((s,i)=>{c.strokeStyle=i===S.sel?'#fbbf24':'#2dd4bf';c.lineWidth=i===S.sel?3.5:1.6;c.beginPath();c.moveTo(0,mv(s));c.lineTo(cw,mv(s));c.stroke()});
+    c.fillStyle='#2dd4bf';[G.lo,G.hi].forEach(y=>{c.fillRect(cw/2-18,y-6,36,12)});
   }
+  c.save();c.setLineDash([4,5]);c.strokeStyle='#fb923c';c.lineWidth=2;
+  if(tgt!=='axial'&&ver==='y'&&refO!=='axial'&&S.refY>=S.y0&&S.refY<=S.y1){c.beginPath();c.moveTo(0,mv(S.refY));c.lineTo(cw,mv(S.refY));c.stroke()}
+  if(tgt==='axial'&&refO==='axial'){c.beginPath();c.moveTo(0,mv(S.refZ));c.lineTo(cw,mv(S.refZ));c.stroke()}
+  c.restore();
 }
 function paintResult(tex){
-  const canvas=$('#res'),cw=tex.W*2,ch=tex.H*2;canvas.width=cw;canvas.height=ch;
+  const canvas=$('#res'),o=S.orient,mar=o==='axial'?0:56,cw=tex.W*2+mar,ch=tex.H*2;canvas.width=cw;canvas.height=ch;
   const c=canvas.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,cw,ch);
-  c.imageSmoothingQuality='high';c.drawImage(tex.cv,0,0,cw,ch);
-  const L={axial:['A','P','D','G'],coronal:['S','I','D','G'],sagittal:['S','I','A','P']}[S.orient];
+  c.imageSmoothingQuality='high';c.drawImage(tex.cv,mar,0,tex.W*2,ch);
+  const L={axial:['A','P','D','G'],coronal:['S','I','D','G'],sagittal:['S','I','A','P']}[o];
   c.fillStyle='#fbbf24';c.font='700 20px system-ui';c.textAlign='center';
-  c.fillText(L[0],cw/2,24);c.fillText(L[1],cw/2,ch-10);c.textAlign='left';c.fillText(L[2],8,ch/2);c.textAlign='right';c.fillText(L[3],cw-8,ch/2);
+  c.fillText(L[0],mar+tex.W,24);c.fillText(L[1],mar+tex.W,ch-10);c.textAlign='left';c.fillText(L[2],mar+8,ch/2);c.textAlign='right';c.fillText(L[3],cw-8,ch/2);
+  if(o!=='axial'){
+    c.strokeStyle='#fbbf24';c.lineWidth=2;c.beginPath();c.moveTo(40,6);c.lineTo(40,ch-6);c.moveTo(32,6);c.lineTo(48,6);c.moveTo(32,ch-6);c.lineTo(48,ch-6);c.stroke();
+    c.save();c.translate(22,ch/2);c.rotate(-Math.PI/2);c.textAlign='center';c.font='600 14px system-ui';c.fillStyle='#fbbf24';
+    c.fillText(`${S.scanN} coupes × ${S.pas} mm = ${Math.round(S.scanN*S.pas)} mm`,0,0);c.restore();
+  }
 }
 function refreshPanels(){
   const o=S.orient,base=basePositions(),sel=S.sel;
-  const ya=o==='axial'?base[sel]:0.8,zc=o==='coronal'?base[sel]:0.03,xs=o==='sagittal'?base[sel]:0.0;
-  paintRef($('#r_ax'),getTex('axial',ya,0),'axial');
-  paintRef($('#r_co'),getTex('coronal',zc,0),'coronal');
-  paintRef($('#r_sa'),getTex('sagittal',xs,0),'sagittal');
+  paintRef($('#r_ax'),'axial');paintRef($('#r_co'),'coronal');paintRef($('#r_sa'),'sagittal');
   paintResult(S.tex[sel]);
   const mm=Math.round(base[sel]/MM);
   $('#resInfo').textContent=`Coupe ${FR[o]} ${sel+1}/${S.n} · position ${mm>0?'+':''}${mm} mm · ép. ${S.th} mm`;
+  $('#batchInfo').innerHTML=`Batch ${FR[o]} : <b>${S.n} coupes</b> · épaisseur <b>${S.th} mm</b> · espacement <b>${S.sp} mm</b> · zone couverte <b>${Math.round((S.n-1)*S.sp+Math.max(S.sp,S.th))} mm</b>`;
   const th=$('#thumbs');th.innerHTML='';
   S.tex.forEach((t,i)=>{
     const c=document.createElement('canvas');c.width=t.W;c.height=t.H;
     const k=c.getContext('2d');k.fillStyle='#000';k.fillRect(0,0,t.W,t.H);k.drawImage(t.cv,0,0);
-    if(i===sel)c.className='sel';
-    c.title='Coupe '+(i+1);c.onclick=()=>{S.sel=i;refreshPanels();needDraw=true};
-    th.appendChild(c);
+    if(i===sel)c.className='sel';c.title='Coupe '+(i+1);
+    c.onclick=()=>{S.sel=i;refreshPanels();needDraw=true};th.appendChild(c);
   });
 }
-function updateInBox(){
-  const o=S.orient,e=EXT[o],[lo,hi]=boxRange(),N=PT.n;
-  for(let i=0;i<N;i++){
-    const x=PT.x[i],y=PT.y[i],z=PT.z[i];
-    let u,v,s;
-    if(o==='axial'){u=x;v=z;s=y}else if(o==='coronal'){u=x;v=y;s=z}else{u=-z;v=y;s=x}
-    PT.inB[i]=(u>=e.u0&&u<=e.u1&&v>=e.v0&&v<=e.v1&&s>=lo&&s<=hi)?1:0;
-  }
-}
 function rebuild(){
+  updateScan();
+  S.sel=clamp(S.sel,0,S.n-1);
   const base=basePositions(),th=S.th*MM;
   S.tex=base.map(s=>getTex(S.orient,s,th));
-  S.sel=Math.min(S.sel,S.n-1);
-  updateInBox();refreshPanels();needDraw=true;
+  buildGroups();refreshPanels();syncSliders();needDraw=true;
 }
+let rbT=0;function scheduleRebuild(ms){clearTimeout(rbT);rbT=setTimeout(rebuild,ms||90)}
 
-/* ================= UI ================= */
-const caption=$('#caption'),badge=$('#badge'),tl=$('#tl');
-let lastCap='';
-function captionFor(P){
-  const o=S.orient,sp=S.sp,th=S.th,n=S.n;
-  const k=t=>`<span class="k">${t}</span>`;
-  switch(P){
-    case 0:return `<b>Volume acquis.</b> Le scanner acquiert des coupes axiales très fines. Empilées, elles forment un volume de voxels : c'est la matière première du post-traitement.`+(o!=='axial'?` Ici, on part de ce volume axial pour fabriquer des plans ${FR[o]}s qui n'ont jamais été acquis.`:'');
-    case 1:return `<b>Placer le batch.</b> `+({axial:`Sur une image de référence (coronale ou sagittale), on place le batch : plan axial, centre, champ de vue (FOV), nombre de coupes.`,sagittal:`Sur les images de référence axiale et coronale, on trace le batch : plans sagittaux, perpendiculaires à l'axe droite-gauche.`,coronal:`Sur les images de référence axiale et sagittale, on trace le batch : plans coronaux, perpendiculaires à l'axe antéro-postérieur.`})[o];
-    case 2:return `<b>Découpe.</b> Le logiciel recalcule chaque coupe en interpolant les voxels du volume : une coupe tous les ${k(sp+' mm')}, chacune moyennée sur ${k(th+' mm')} d'épaisseur.`;
-    case 3:return `<b>Éclaté.</b> ${n} coupes écartées pour voir le lot (écartement exagéré). `+(th>sp?`Épaisseur > espacement : les coupes se chevauchent.`:th<sp?`Épaisseur < espacement : une partie du volume n'apparaît dans aucune coupe.`:`Épaisseur = espacement : coupes jointives.`);
-    default:return `<b>Nouvelle coupe.</b> `+({axial:`On tourne pour lire une coupe de face : image axiale reformatée, dans le plan d'acquisition mais avec l'épaisseur et l'espacement choisis.`,sagittal:`On tourne pour lire une coupe sagittale née du volume axial, jamais acquise directement. Convention : antérieur à gauche, supérieur en haut.`,coronal:`On tourne pour lire une coupe coronale née du volume axial, jamais acquise directement. Convention : droite du patient à gauche de l'image.`})[o];
+/* ================= Textes ================= */
+function captionFor(){
+  const o=S.orient,k=S.step,N=S.scanN,pas=S.pas,Lmm=Math.round(N*pas);
+  const kk=t=>`<span class="k">${t}</span>`;
+  const plan={sagittal:'sagittal',coronal:'coronal',axial:'axial'}[o];
+  const perp={sagittal:"perpendiculaire à l'axe droite‑gauche",coronal:"perpendiculaire à l'axe avant‑arrière",axial:"perpendiculaire à l'axe tête‑pieds"}[o];
+  const Neff=Math.max(1,Math.round(Z.front*N)),Leff=Math.round(Neff*pas);
+  switch(k){
+    case 0:return `<b>Le fémur.</b> Le scanner ne le « voit » pas d'un bloc : il le mesure tranche par tranche, dans le <b>plan axial</b> (perpendiculaire à l'axe du corps).`;
+    case 1:return `<b>Acquisition axiale.</b> La table avance et le scanner enregistre ${kk(N+' coupes axiales')}, une tous les ${kk(pas+' mm')} : le volume couvre ${kk(Lmm+' mm')}. Ce qui est hors du volume n'existe pas pour le post‑traitement (os estompé).`;
+    case 2:return o==='axial'?`<b>Vue coronale.</b> Pour re‑couper en axial, on se place sur une image coronale de référence (vue de face). Repères : S/I, D/G.`:`<b>Vue axiale.</b> On se place dans la vue axiale, comme à la console (vue inférieure, dite podo‑crâniale : on regarde depuis les pieds). C'est l'image de départ. Repères : A/P, D/G. Le fémur est ici en transparence.`;
+    case 3:return `<b>Poser le batch.</b> On pose la grille sur l'image : chaque trait est un plan ${plan}, ${perp}. Ici ${kk(S.n+' coupes')}, une tous les ${kk(S.sp+' mm')}, épaisseur ${kk(S.th+' mm')}.`;
+    case 4:return `<b>Trancher.</b> Le logiciel tranche le volume le long de la grille : l'os est découpé en ${kk(S.n+' tranches')}. `+(o==='axial'?`Chaque coupe est recalculée dans le plan axial.`:`Chaque pixel est interpolé entre les coupes axiales voisines.`);
+    case 5:return `<b>Éclater.</b> On écarte les tranches pour les voir (écartement exagéré). `+(S.th>S.sp?`Épaisseur > espacement : les coupes se chevauchent.`:S.th<S.sp?`Épaisseur < espacement : une partie du volume n'apparaît dans aucune coupe.`:`Épaisseur = espacement : coupes jointives.`);
+    case 6:return `<b>Nouvelle vue.</b> On tourne autour : la coupe ${FR[o]} n°${S.sel+1}, jamais acquise telle quelle, se lit de face. `+({sagittal:`Convention : avant à gauche, haut en haut.`,coronal:`Convention : droite du patient à gauche de l'image.`,axial:`Convention : vue inférieure (podo‑crâniale), depuis les pieds.`})[o];
+    default:return o==='axial'?`<b>Taille du volume.</b> Le nombre de coupes axiales limite la zone où l'on peut poser un batch : ${kk(Neff+' coupes × '+pas+' mm = '+Leff+' mm')}.`:`<b>Taille de la vue.</b> La hauteur de la vue ${FR[o]} = nombre de coupes axiales × pas : ${kk(Neff+' × '+pas+' mm = '+Leff+' mm')}. Moins de coupes axiales, vue plus courte. Essaie le curseur « Nombre de coupes axiales ».`;
   }
 }
-function phaseOf(T){return T<P0E?0:T<P1E?1:T<P2E?2:T<P3E?3:4}
-let lastP=-1;
+let lastCap='',lastStep=-1,lastAuto=null;
 function syncUI(){
-  const P=phaseOf(S.T);
-  const html=captionFor(P);
-  if(html!==lastCap){caption.innerHTML=html;lastCap=html}
-  if(P!==lastP){
-    badge.textContent=PNAME[P];
-    document.querySelectorAll('#chips button').forEach((b,i)=>b.classList.toggle('on',i===P));
-    lastP=P;
+  const cap=captionFor();if(cap!==lastCap){$('#caption').innerHTML=cap;lastCap=cap}
+  if(S.step!==lastStep){
+    $('#badge').textContent=`${S.step+1}/8 · ${stepName(S.step)}`;
+    document.querySelectorAll('#chips button').forEach((b,i)=>b.classList.toggle('on',i===S.step));lastStep=S.step;
   }
-  if(document.activeElement!==tl)tl.value=Math.round(S.T/TOTAL*1000);
+  if(lastAuto!==S.auto){const b=$('#auto');b.textContent=S.auto?'⏸ Pause':'▶ Auto';b.classList.toggle('on',S.auto);lastAuto=S.auto}
 }
-PNAME.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{S.T=i===0?0:PSTART[i]+0.02;S.playing=true;updPlay();needDraw=true};$('#chips').appendChild(b)});
-function updPlay(){const b=$('#play');b.textContent=S.playing?'⏸ Pause':'▶ Lecture';b.classList.toggle('on',S.playing)}
-$('#play').onclick=()=>{if(!S.playing&&S.T>=TOTAL)S.T=0;S.playing=!S.playing;updPlay()};
-$('#replay').onclick=()=>{S.T=0;S.playing=true;S.offYaw=S.offPitch=0;S.zoom=1;updPlay();needDraw=true};
-tl.oninput=()=>{S.T=tl.value/1000*TOTAL;S.playing=false;updPlay();needDraw=true};
-$('#speed').onchange=e=>S.speed=+e.target.value;
+function stepName(i){return i===2?(S.orient==='axial'?'Vue coronale':'Vue axiale'):STEPN[i]}
+function buildChips(){const c=$('#chips');c.innerHTML='';STEPN.forEach((_,i)=>{const b=document.createElement('button');b.textContent=`${i+1} · ${stepName(i)}`;b.onclick=()=>{S.stopAt=7;goStep(i)};c.appendChild(b)});lastStep=-1}
 
+/* ================= Interface ================= */
 function syncSliders(){
+  $('#s_na').value=S.scanN;$('#s_pas').value=S.pas;$('#s_sc').value=S.scanC;
+  $('#o_na').textContent=S.scanN;$('#o_pas').textContent=S.pas+' mm';$('#o_sc').textContent=(S.scanC>0?'+':'')+S.scanC+' mm';
+  $('#acqInfo').innerHTML=`Hauteur du volume = ${S.scanN} × ${S.pas} mm = <b>${Math.round(S.scanN*S.pas)} mm</b>. Les vues sagittale et coronale reconstruites auront exactement cette hauteur.`;
   $('#s_n').value=S.n;$('#s_th').value=S.th;$('#s_sp').value=S.sp;$('#s_pos').value=S.pos;
   $('#o_n').textContent=S.n;$('#o_th').textContent=S.th+' mm';$('#o_sp').textContent=S.sp+' mm';$('#o_pos').textContent=(S.pos>0?'+':'')+S.pos+' mm';
 }
-function setOrient(o,restart){
+function setOrient(o,keepStep){
   S.orient=o;const d=DEF[o];S.n=d.n;S.th=d.th;S.sp=d.sp;S.pos=0;S.sel=Math.floor(d.n/2);
   document.querySelectorAll('#orient button').forEach(b=>b.classList.toggle('on',b.dataset.o===o));
-  syncSliders();
-  if(restart){S.T=0;S.playing=true;S.offYaw=S.offPitch=0;updPlay()}
-  rebuild();
+  buildChips();rebuild();
+  if(!keepStep){
+    S.stopAt=7;
+    if(S.mode==='cours'){S.auto=true;goStep(0,1.2)}else{S.auto=false;goStep(2,1.6)}
+  }
 }
-document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>setOrient(b.dataset.o,true));
-let rbT=0;
-[['s_n','n'],['s_th','th'],['s_sp','sp'],['s_pos','pos']].forEach(([id,k])=>{
-  $('#'+id).oninput=e=>{
-    S[k]=+e.target.value;if(k==='n')S.sel=Math.min(S.sel,S.n-1);
-    syncSliders();clearTimeout(rbT);rbT=setTimeout(rebuild,40);lastCap='';
-  };
+function setMode(m){
+  S.mode=m;document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  const show=(id,v)=>$(id).classList.toggle('hide',!v);
+  show('#stageCard',m!=='coupe');show('#orientCard',m!=='coupe');show('#acqCard',m!=='coupe');show('#panCard',m!=='coupe');show('#labCard',m==='labo');
+  show('#expCtl',m==='coupe');show('#expStage',m==='coupe');show('#expWhy',m==='coupe');
+  resize();
+  if(m==='labo'){S.auto=false;goStep(2,1.6)}else if(m==='cours'){S.auto=true;S.stopAt=7;goStep(0,1.2)}else{S.auto=false;xRefresh()}
+  needDraw=true;
+}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>setOrient(b.dataset.o,false));
+$('#prev').onclick=()=>{S.stopAt=7;goStep(S.step-1)};
+$('#next').onclick=()=>{S.stopAt=7;goStep(S.step+1)};
+$('#auto').onclick=()=>{S.auto=!S.auto;S.holdT=0;if(S.auto&&S.step>=7&&!TW){S.stopAt=7;goStep(0)}};
+$('#replay').onclick=()=>{S.auto=true;S.stopAt=7;S.zoom=1;goStep(0,1.2)};
+$('#speed').onchange=e=>S.speed=+e.target.value;
+$('#lab_go').onclick=()=>{S.auto=true;S.stopAt=6;goStep(3)};
+$('#lab_reset').onclick=()=>{S.auto=false;goStep(2)};
+document.querySelectorAll('#camPresets button').forEach(b=>b.onclick=()=>{S.auto=false;const c={'3d':[-35,22,1],axial:[0,-89,1.7],coronal:[0,0,1],sagittal:[90,0,1]}[b.dataset.c];tweenCam(c[0],c[1],c[2])});
+[['s_na','scanN'],['s_pas','pas'],['s_sc','scanC'],['s_n','n'],['s_th','th'],['s_sp','sp'],['s_pos','pos']].forEach(([id,k])=>{
+  $('#'+id).oninput=e=>{S[k]=+e.target.value;if(k==='n')S.sel=Math.min(S.sel,S.n-1);
+    $('#o_na').textContent=S.scanN;$('#o_pas').textContent=S.pas+' mm';$('#o_sc').textContent=S.scanC+' mm';
+    scheduleRebuild(120);needDraw=true};
 });
 
-/* interactions 3D */
+/* poser / redimensionner le batch sur les images de référence */
+const HINT='Survole une image pour lire les coordonnées. Glisse pour déplacer le batch ; tire sur un bord (poignée verte) pour changer l\'espacement.';
+function fmm(v){const m=Math.round(v/MM);return (m>0?'+':'')+m+' mm'}
+function refDrag(canvas,refO){
+  let mode=null;
+  const info=e=>{const r=canvas.getBoundingClientRect(),fx=clamp((e.clientX-r.left)/r.width),fy=clamp((e.clientY-r.top)/r.height),E=S.E[refO];
+    return {fx,fy,r,m:modelFromRef(refO,E.u0+fx*(E.u1-E.u0),E.v1-fy*(E.v1-E.v0))}};
+  const hit=e=>{
+    const G=REFG[refO];if(!G||!G.axis)return null;
+    const {fx,fy,r}=info(e),px=G.axis==='h'?fx*G.cw:fy*G.ch,sc=G.axis==='h'?r.width/G.cw:r.height/G.ch;
+    return (Math.abs(px-G.lo)*sc<12||Math.abs(px-G.hi)*sc<12)?'resize':'move';
+  };
+  const apply=(e,md)=>{
+    const {m}=info(e),o=S.orient,nax=o==='axial'?'y':o==='coronal'?'z':'x';
+    const hor={axial:'x',coronal:'x',sagittal:'z'}[refO],ver={axial:'z',coronal:'y',sagittal:'y'}[refO];
+    let val=null;
+    if(nax===hor)val=m[hor];else if(nax===ver)val=m[ver];
+    if(md==='resize'&&val!==null){
+      const d=Math.abs(val-centerPos());S.sp=clamp(Math.round(2*d/MM/S.n),2,50);
+    }else{
+      if(val!==null)S.pos=clamp(Math.round((val-DEF[o].c)/MM/5)*5,-230,230);
+      if(refO!==o&&ver==='y'&&o!=='axial')S.refY=clamp(m.y,S.y0,S.y1);
+      if(o==='axial'&&refO==='axial')S.refZ=clamp(m.z,-0.4,0.4);
+    }
+    syncSliders();scheduleRebuild(60);needDraw=true;
+  };
+  const say=e=>{
+    const {m}=info(e);
+    $('#readout').innerHTML=`<b style="color:var(--txt)">Curseur</b> : `+(refO==='axial'?`gauche‑droite ${fmm(m.x)} · avant‑arrière ${fmm(m.z)}`:refO==='coronal'?`gauche‑droite ${fmm(m.x)} · haut‑bas ${fmm(m.y)}`:`avant‑arrière ${fmm(m.z)} · haut‑bas ${fmm(m.y)}`)+`<br>`+HINT;
+  };
+  canvas.addEventListener('pointerdown',e=>{mode=hit(e)||'move';canvas.setPointerCapture(e.pointerId);apply(e,mode)});
+  canvas.addEventListener('pointermove',e=>{
+    say(e);
+    if(mode){apply(e,mode);return}
+    const h=hit(e),G=REFG[refO];
+    canvas.style.cursor=h==='resize'?(G.axis==='h'?'ew-resize':'ns-resize'):'crosshair';
+  });
+  canvas.addEventListener('pointerup',()=>mode=null);canvas.addEventListener('pointercancel',()=>mode=null);
+  canvas.addEventListener('pointerleave',()=>{if(!mode)$('#readout').innerHTML=HINT});
+}
+refDrag($('#r_ax'),'axial');refDrag($('#r_co'),'coronal');refDrag($('#r_sa'),'sagittal');
+$('#readout').innerHTML=HINT;
+function selMove(d){S.sel=clamp(S.sel+d,0,S.n-1);refreshPanels();needDraw=true}
+$('#res_prev').onclick=()=>selMove(-1);$('#res_next').onclick=()=>selMove(1);
+$('#res_play').onclick=()=>{S.cine=!S.cine;S.cineT=0;$('#res_play').textContent=S.cine?'⏸ Stop':'▶ Défiler';$('#res_play').classList.toggle('on',S.cine)};
+$('#res').addEventListener('wheel',e=>{e.preventDefault();selMove(e.deltaY>0?1:-1)},{passive:false});
+$('#thumbs').addEventListener('wheel',e=>{e.preventDefault();selMove(e.deltaY>0?1:-1)},{passive:false});
+
+
+/* rotation / zoom 3D */
 const ptrs=new Map();let pinch=0;
 cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);cv.style.cursor='grabbing';
   if(ptrs.size===2){const a=[...ptrs.values()];pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])}});
 cv.addEventListener('pointermove',e=>{
-  if(!ptrs.has(e.pointerId))return;
-  const p=ptrs.get(e.pointerId);
-  if(ptrs.size===1){S.offYaw-=(e.clientX-p[0])*0.008;S.offPitch+=(e.clientY-p[1])*0.008;needDraw=true}
+  if(!ptrs.has(e.pointerId))return;const p=ptrs.get(e.pointerId);
+  if(ptrs.size===1){Z.oy-=(e.clientX-p[0])*0.008;Z.op+=(e.clientY-p[1])*0.008;needDraw=true}
   ptrs.set(e.pointerId,[e.clientX,e.clientY]);
-  if(ptrs.size===2){const a=[...ptrs.values()],d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(pinch>0){S.zoom=clamp(S.zoom*d/pinch,.6,2.5);needDraw=true}pinch=d}
+  if(ptrs.size===2){const a=[...ptrs.values()],d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(pinch>0){S.zoom=clamp(S.zoom*d/pinch,.5,2.5);needDraw=true}pinch=d}
 });
 const endP=e=>{ptrs.delete(e.pointerId);pinch=0;cv.style.cursor='grab'};
 cv.addEventListener('pointerup',endP);cv.addEventListener('pointercancel',endP);
-cv.addEventListener('wheel',e=>{e.preventDefault();S.zoom=clamp(S.zoom*Math.exp(-e.deltaY*0.001),.6,2.5);needDraw=true},{passive:false});
-cv.addEventListener('dblclick',()=>{S.offYaw=S.offPitch=0;S.zoom=1;needDraw=true});
-window.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('#play').click()}});
+cv.addEventListener('wheel',e=>{e.preventDefault();S.zoom=clamp(S.zoom*Math.exp(-e.deltaY*0.001),.5,2.5);needDraw=true},{passive:false});
+cv.addEventListener('dblclick',()=>{Z.oy=0;Z.op=0;S.zoom=1;needDraw=true});
 window.addEventListener('resize',resize);
+
+/* ================= Onglet « Comprendre les vues » ================= */
+const V={main:'coronal',o:'axial',n:15,sp:30,th:10,pos:0,idx:7,cur:7,shown:-1,play:false,playT:0,dir:1,zoom:1,oy:0,op:0,texCur:null};
+const XCAM={coronal:[-18,10],sagittal:[72,10],axial:[0,-90]};
+const XDEF={axial:{n:15,sp:30,th:10},sagittal:{n:13,sp:12,th:4},coronal:{n:13,sp:8,th:3}};
+const xZoom=m=>m==='axial'?1.7:1;
+const VN={axial:'Vue axiale',coronal:'Vue coronale',sagittal:'Vue sagittale'};
+const VD={axial:'vue inférieure, podo‑crâniale',coronal:'de face',sagittal:'de profil'};
+const ALL3=['axial','sagittal','coronal'];
+const xOthers=m=>ALL3.filter(a=>a!==m);
+const xThird=(m,o)=>ALL3.find(a=>a!==m&&a!==o);
+const xCenter=()=>DEF[V.o].c+V.pos*MM;
+function xBase(){const c=xCenter(),sp=V.sp*MM,a=[];for(let i=0;i<V.n;i++)a.push(c+(i-(V.n-1)/2)*sp);return a}
+const xCur=()=>xCenter()+(V.cur-(V.n-1)/2)*V.sp*MM;
+const xLevel=T=>T==='axial'?0.8:T==='coronal'?0.03:0.0;
+const PALY=[];for(let i=0;i<32;i++){const t=i/31;PALY.push(`rgb(${Math.round(120+t*135)},${Math.round(100+t*110)},${Math.round(10+t*40)})`)}
+
+function drawExplorer(){
+  const c=CNV.exp;useCanvas(c);if(CW<5)return;
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalAlpha=1;curA=1;ctx.clearRect(0,0,CW,CH);
+  const cm=XCAM[V.main];CAMV=camVec(cm[0]*DEG+V.oy,clamp(cm[1]*DEG+V.op,-1.5708,1.5708));
+  SC=Math.min(CH/2.35,CW/1.85)*V.zoom;CX=CW/2;CYc=CH/2;
+  const r=CAMV.r,u=CAMV.u,b=CAMV.b,o=V.o,ax=AXIS[o],base=xBase(),sCur=xCur(),E=S.E[o];
+  const hw=Math.max(0.013,V.th*MM/2),nb=b[ax],edge=Math.abs(nb)<0.12,flip=nb<0;
+  const N=PT.n,X=PT.x,Y=PT.y,Zc=PT.z,NX=PT.nx,NY=PT.ny,NZ=PT.nz,sx=PT.sx,sy=PT.sy,sh=PT.sh,tint=PT.tint,al=PT.al,buf=PT.buf;
+  const coord=ax===0?X:ax===1?Y:Zc;
+  let cnt=0;
+  for(let i=0;i<N;i++){
+    const nz=b[0]*NX[i]+b[1]*NY[i]+b[2]*NZ[i];
+    if(nz<-0.08)continue;
+    const dx=X[i]-TX,dy=Y[i],dz=Zc[i];
+    const vx=r[0]*dx+r[2]*dz,vy=u[0]*dx+u[1]*dy+u[2]*dz,vz=b[0]*dx+b[1]*dy+b[2]*dz;
+    sx[i]=CX+SC*vx;sy[i]=CYc-SC*vy;
+    const nx_=r[0]*NX[i]+r[2]*NZ[i],ny_=u[0]*NX[i]+u[1]*NY[i]+u[2]*NZ[i];
+    const s=0.25+0.7*Math.max(0,-0.35*nx_+0.55*ny_+0.75*nz)+0.18*Math.pow(1-clamp(nz),2);
+    sh[i]=Math.max(0,Math.min(31,(s*31)|0));
+    tint[i]=Math.abs(coord[i]-sCur)<hw?2:0;
+    al[i]=(Y[i]>=S.y0&&Y[i]<=S.y1)?1:0.25;
+    const dn=clamp((vz+2)/4,0,0.999);
+    const side=((coord[i]>sCur)!==flip)?1:0;
+    const K=edge?dn:side*2+dn;
+    buf[cnt++]=Math.floor(K*4096)*SORT_MUL+i;
+  }
+  let qc=quadScreen(o,sCur,1);
+  {const dn=clamp(((qc[0][2]+qc[2][2])/2+2)/4,0,0.999);buf[cnt++]=Math.floor((edge?dn:1.5)*4096)*SORT_MUL+N}
+  const sorted=buf.subarray(0,cnt);sorted.sort();
+  const szp=Math.max(2.2,PT.h*SC*1.35);
+  for(let m=0;m<cnt;m++){
+    const v=sorted[m],idx=v%SORT_MUL;
+    if(idx>=N){
+      const q=drawImg(o,sCur,V.texCur,0.7,1,true);
+      ctx.save();polyPath(q);ctx.fillStyle='rgba(250,204,21,.14)';ctx.fill();ctx.strokeStyle='#facc15';ctx.lineWidth=3.2;ctx.stroke();ctx.restore();
+    }else{
+      setA(al[idx]);
+      ctx.fillStyle=(tint[idx]===2?PALY:PAL)[sh[idx]];
+      ctx.fillRect(sx[idx]-szp/2,sy[idx]-szp/2,szp,szp);
+    }
+  }
+  setA(1);
+  ctx.save();ctx.strokeStyle='rgba(74,222,128,.9)';ctx.lineWidth=1.4;
+  for(let i=0;i<V.n;i++){polyPath(quadScreen(o,base[i],1));ctx.stroke()}
+  if(V.th*MM>0.012){ctx.strokeStyle='rgba(250,204,21,.7)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+    polyPath(quadScreen(o,sCur-V.th*MM/2,1));ctx.stroke();polyPath(quadScreen(o,sCur+V.th*MM/2,1));ctx.stroke()}
+  ctx.restore();
+  if(V.main==='axial'&&!V.oy&&!V.op){ctx.fillStyle='#fbbf24';ctx.font='700 14px system-ui';ctx.textAlign='center';
+    ctx.fillText('A',CW*0.75,18);ctx.fillText('P',CW*0.75,CH-8);ctx.textAlign='left';ctx.fillText('D',8,CH/2);ctx.textAlign='right';ctx.fillText('G',CW-8,CH/2)}
+  const cur=pt(o,E.u1,E.v1,sCur),pc=P3(cur[0],cur[1],cur[2]);
+  pill(`coupe ${V.idx+1} / ${V.n}`,pc[0]+8,pc[1]-4,'#facc15');
+  gizmo();
+}
+
+/* ---- encarts 2D ---- */
+function reconBands(c,tex,T,cw,ch,e){
+  const o=V.o,nax=o==='axial'?'y':o==='coronal'?'z':'x',hor={axial:'x',coronal:'x',sagittal:'z'}[T];
+  const vert=(nax===hor),base=xBase(),th=V.th*MM,sp=V.sp*MM,fill=$('#x_fill').checked,first=$('#x_prog').checked?0:V.idx,last=V.idx;
+  const pos=s=>vert?(hor==='z'?(-s-e.u0):(s-e.u0))/(e.u1-e.u0)*cw:(e.v1-s)/(e.v1-e.v0)*ch;
+  const tmp=document.createElement('canvas'),tc=tmp.getContext('2d');tc.imageSmoothingQuality='high';
+  const half=(fill?Math.max(th,sp):th)/2;
+  for(let i=first;i<=last;i++){
+    const s=base[i],p0=pos(s-half),p1=pos(s+half),q0=Math.min(p0,p1),q1=Math.max(p0,p1),w0=q1-q0,w=Math.max(i===V.idx?7:1.5,w0),qq=(q0+q1)/2-w/2;
+    // moyenne du signal sur l'épaisseur de la coupe, puis étalement sur toute la bande
+    const m0=pos(s-th/2),m1=pos(s+th/2),a0=Math.min(m0,m1),a1=Math.max(m0,m1);
+    const sx=vert?a0/cw*tex.W:0,sy=vert?0:a0/ch*tex.H,sw=vert?Math.max(1,(a1-a0)/cw*tex.W):tex.W,sh=vert?tex.H:Math.max(1,(a1-a0)/ch*tex.H);
+    if(vert){tmp.width=1;tmp.height=tex.H;tc.drawImage(tex.cv,sx,sy,sw,sh,0,0,1,tex.H);c.drawImage(tmp,0,0,1,tex.H,qq,0,w,ch)}
+    else{tmp.width=tex.W;tmp.height=1;tc.drawImage(tex.cv,sx,sy,sw,sh,0,0,tex.W,1);c.drawImage(tmp,0,0,tex.W,1,0,qq,cw,w)}
+  }
+}
+let XG=null;
+function paintView(canvas,refO,tex,opts){
+  const cw=tex.W*2,ch=tex.H*2;canvas.width=cw;canvas.height=ch;
+  const c=canvas.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,cw,ch);
+  c.imageSmoothingQuality='high';
+  const e=S.E[refO],mu=u=>(u-e.u0)/(e.u1-e.u0)*cw,mv=v=>(e.v1-v)/(e.v1-e.v0)*ch;
+  if(opts.recon)reconBands(c,tex,refO,cw,ch,e);else c.drawImage(tex.cv,0,0,cw,ch);
+  const L={axial:['A','P','D','G'],coronal:['S','I','D','G'],sagittal:['S','I','A','P']}[refO];
+  c.fillStyle='#fbbf24';c.font='700 18px system-ui';c.textAlign='center';
+  c.fillText(L[0],cw/2,22);c.fillText(L[1],cw/2,ch-8);c.textAlign='left';c.fillText(L[2],8,ch/2+6);c.textAlign='right';c.fillText(L[3],cw-8,ch/2+6);
+  if(opts.lines){
+    const o=V.o,nax=o==='axial'?'y':o==='coronal'?'z':'x';
+    const hor={axial:'x',coronal:'x',sagittal:'z'}[refO],ver={axial:'z',coronal:'y',sagittal:'y'}[refO];
+    const base=xBase(),sCur=xCur();let pos=null;
+    if(nax===hor){const U=s=>mu(hor==='z'?-s:s);XG={refO,axis:'h',hor,ver};
+      c.strokeStyle='#4ade80';c.lineWidth=1.8;base.forEach(s=>{c.beginPath();c.moveTo(U(s),0);c.lineTo(U(s),ch);c.stroke()});
+      c.strokeStyle='#facc15';c.lineWidth=4;c.beginPath();c.moveTo(U(sCur),0);c.lineTo(U(sCur),14);c.moveTo(U(sCur),ch-14);c.lineTo(U(sCur),ch);c.stroke()}
+    else if(nax===ver){const U=s=>mv(s);XG={refO,axis:'v',hor,ver};
+      c.strokeStyle='#4ade80';c.lineWidth=1.8;base.forEach(s=>{c.beginPath();c.moveTo(0,U(s));c.lineTo(cw,U(s));c.stroke()});
+      c.strokeStyle='#facc15';c.lineWidth=4;c.beginPath();c.moveTo(0,U(sCur));c.lineTo(14,U(sCur));c.moveTo(cw-14,U(sCur));c.lineTo(cw,U(sCur));c.stroke()}
+  }
+  if(opts.slice){c.strokeStyle='#facc15';c.lineWidth=6;c.strokeRect(3,3,cw-6,ch-6)}
+}
+function bestLevel(o,s,T){
+  const R={x:[-0.45,0.65],y:[S.y0,S.y1],z:[-0.45,0.45]},nm=a=>({axial:'y',coronal:'z',sagittal:'x'})[a];
+  const no=nm(o),nt=nm(T),th=['x','y','z'].find(k=>k!==no&&k!==nt);
+  let best=-1,lv=xLevel(T);
+  for(let i=0;i<48;i++){const l=R[nt][0]+(i+.5)/48*(R[nt][1]-R[nt][0]);let c=0;
+    for(let j=0;j<40;j++){const t=R[th][0]+(j+.5)/40*(R[th][1]-R[th][0]),p={x:0,y:0,z:0};p[no]=s;p[nt]=l;p[th]=t;if(boneSDF(p.x,p.y,p.z)<0)c++}
+    if(c>best+0.5){best=c;lv=l}}
+  return best>0?lv:xLevel(T);
+}
+function paintXT(){
+  const T=xThird(V.main,V.o),lv=bestLevel(V.o,xBase()[V.idx],T);
+  paintView($('#x_b'),T,getTex(T,lv,0),{lines:true,recon:true});
+}
+function xSettle(){
+  const base=xBase();V.shown=V.idx;
+  V.texCur=getTex(V.o,base[V.idx],V.th*MM);
+  paintView($('#x_a'),V.o,V.texCur,{slice:true});
+  paintXT();xText();
+}
+
+/* ---- analyse + explications ---- */
+function analyse(o,s){
+  const E=S.E[o],nu=44,nv=Math.max(10,Math.round(nu*(E.v1-E.v0)/(E.u1-E.u0)));
+  const du=(E.u1-E.u0)/nu,dv=(E.v1-E.v0)/nv,m=new Uint8Array(nu*nv);let bone=0,canal=0,sx=0,sy=0,sz=0;
+  for(let j=0;j<nv;j++){const v=E.v1-(j+.5)*dv;for(let i=0;i<nu;i++){const u=E.u0+(i+.5)*du;
+    let x,y,z;if(o==='axial'){x=u;z=v;y=s}else if(o==='coronal'){x=u;y=v;z=s}else{x=s;y=v;z=-u}
+    if(boneSDF(x,y,z)<0){m[j*nu+i]=1;bone++;sx+=x;sy+=y;sz+=z;if(HU(x,y,z)<-30)canal++}}}
+  let blobs=0;const seen=new Uint8Array(nu*nv);
+  for(let k=0;k<m.length;k++){if(m[k]&&!seen[k]){let sz=0;const st=[k];seen[k]=1;
+    while(st.length){const q=st.pop();sz++;const qi=q%nu,qj=(q/nu)|0;
+      for(const [di,dj] of [[1,0],[-1,0],[0,1],[0,-1]]){const ni=qi+di,nj=qj+dj;if(ni<0||nj<0||ni>=nu||nj>=nv)continue;const nk=nj*nu+ni;if(m[nk]&&!seen[nk]){seen[nk]=1;st.push(nk)}}}
+    if(sz>=3)blobs++}}
+  return {bone,canal,blobs,cx:bone?sx/bone:0,cy:bone?sy/bone:0,cz:bone?sz/bone:0};
+}
+function explain(o,s,a){
+  if(a.bone<6)return {what:"Aucun os sur cette coupe : seulement des muscles (gris) et de la graisse (gris foncé).",why:"La coupe passe au‑dessus, en dessous ou à côté du fémur. Une coupe ne « voit » que ce qui se trouve exactement dans son plan."};
+  if(o==='axial'){
+    const y=s;
+    if(y<-0.80)return {what:a.blobs>=2?"Deux ovales d'os côte à côte, avec une fine paroi blanche et un intérieur gris.":"Une forme d'os large, avec une fine paroi blanche et un intérieur gris.",why:"On coupe au niveau du genou, là où le fémur se divise en deux « boules » : les condyles. L'intérieur est de l'os spongieux (gris texturé), entouré d'une paroi dure très fine."};
+    if(y<-0.52)return {what:"Une forme ovale large : intérieur gris, paroi blanche fine.",why:"Le fémur s'évase vers le genou : il y a plus d'os spongieux et moins de paroi dure, donc moins de blanc."};
+    if(y<0.42)return {what:a.canal>0?"Un anneau blanc avec un centre sombre.":"Un disque d'os.",why:"On coupe un tube en travers. Le blanc est l'os cortical, très dense. Le centre sombre est le canal médullaire, rempli de moelle graisseuse, peu dense."};
+    if(y<0.62)return {what:"Un anneau blanc un peu plus épais, avec une petite bosse sur l'arrière‑intérieur.",why:"Vers la hanche le fût s'élargit. La petite bosse est le petit trochanter, où s'attache un muscle (le psoas)."};
+    if(y<0.78)return {what:"Une forme allongée, presque pleine, sans vrai centre sombre.",why:"Près de la hanche l'os est surtout spongieux : le canal médullaire se referme. Le grand trochanter (bosse externe) allonge la forme."};
+    if(y<0.97)return {what:"Une forme d'haltère : la tête ronde d'un côté, le grand trochanter de l'autre, reliés par le col.",why:"Le col du fémur monte en biais vers l'intérieur. Une coupe horizontale le traverse dans sa longueur, d'où cette forme allongée."};
+    return {what:"Un petit disque : le sommet de la tête du fémur.",why:"Tout en haut, la coupe ne fait que « raboter » le dessus de la boule de la hanche."};
+  }
+  if(o==='sagittal'){
+    const x=s;
+    if(a.canal>0&&Math.abs(x-0.0)<0.13)return {what:"Deux bandes blanches parallèles, légèrement courbes, avec du sombre entre elles. La tête et le genou apparaissent aux extrémités.",why:"On coupe le tube dans sa longueur : les deux parois (avant et arrière) ressortent en blanc, la moelle entre elles est sombre. La courbure est l'arc naturel du fémur."};
+    if(x<-0.09)return {what:"Une bande d'os fine, ou seulement le grand trochanter en haut.",why:"La coupe passe sur le bord externe du fémur : elle ne fait qu'effleurer sa surface."};
+    if(x<0.26)return {what:"Le fût plus étroit, le petit trochanter et le condyle interne vers le bas.",why:"On s'approche du bord interne du fémur : le tube est coupé près de sa paroi, donc la moelle disparaît."};
+    return {what:"Une grosse boule ronde en haut (la tête du fémur), du col, et le condyle interne en bas.",why:"La tête du fémur est décalée vers l'intérieur du corps : seul un plan sagittal décalé de ce côté la traverse."};
+  }
+  const z=s;
+  if(Math.abs(z-0.03)<0.10)return {what:"Tout le fémur, de la hanche au genou : tête, col, grand trochanter, fût en tube (deux parois blanches) et condyles.",why:"Le fémur est presque « à plat » dans ce plan de face : une seule coupe peut donc le montrer en entier."};
+  if(z>0.13)return {what:"Une bande blanche étroite le long du fût, et la tête qui dépasse un peu en haut.",why:"La coupe est en avant de l'os : elle n'effleure que la face avant du fût et la tête, qui est légèrement tournée vers l'avant."};
+  return {what:"Le fût en bande étroite, des morceaux de condyles en bas, le petit trochanter en haut.",why:"La coupe est en arrière de l'os : elle n'en traverse que la partie postérieure."};
+}
+function xText(){
+  const o=V.o,base=xBase(),s=base[V.shown],a=analyse(o,s),mm=Math.round(s/MM),f=(mm>0?'+':'')+mm+' mm';
+  const where={axial:`Coupe axiale n°${V.shown+1}/${V.n} à ${f} (${mm>=0?'vers la hanche':'vers le genou'}).`,sagittal:`Coupe sagittale n°${V.shown+1}/${V.n} à ${f} (${mm>=0?"vers l'intérieur du corps":"vers l'extérieur"}).`,coronal:`Coupe coronale n°${V.shown+1}/${V.n} à ${f} (${mm>=0?"vers l'avant":"vers l'arrière"}).`}[o];
+  const ex=explain(o,s,a);
+  $('#why_where').textContent=where;$('#why_what').textContent=ex.what;$('#why_why').textContent=ex.why;
+}
+
+/* ---- interface ---- */
+function xSyncUI(){
+  document.querySelectorAll('#x_main button').forEach(b=>b.classList.toggle('on',b.dataset.v===V.main));
+  const box=$('#x_o');box.innerHTML='';
+  xOthers(V.main).forEach(a=>{const b=document.createElement('button');b.textContent=({axial:'En rondelles (axial)',sagittal:'De profil (sagittal)',coronal:'De face (coronal)'})[a];b.classList.toggle('on',a===V.o);b.onclick=()=>xSetO(a);box.appendChild(b)});
+  $('#x_n').value=V.n;$('#x_sp').value=V.sp;$('#x_th').value=V.th;$('#o_xn').textContent=V.n;$('#o_xsp').textContent=V.sp+' mm';$('#o_xth').textContent=V.th+' mm';
+  $('#x_info').innerHTML=V.th<V.sp?`Épaisseur (${V.th} mm) &lt; espacement (${V.sp} mm) : <b>des trous</b> restent entre les coupes. Plus la coupe est fine, plus l'image est nette, mais plus il faut de coupes.`:V.th>V.sp?`Épaisseur (${V.th} mm) &gt; espacement (${V.sp} mm) : les coupes <b>se chevauchent</b>, l'image est plus lisse mais plus floue.`:`Épaisseur = espacement (${V.sp} mm) : les coupes se touchent, sans trou ni chevauchement.`;
+  const x=$('#x_idx');x.max=V.n;x.value=V.idx+1;$('#x_out').textContent=`coupe ${V.idx+1}/${V.n}`;
+  const T=xThird(V.main,V.o);
+  $('#badge2').textContent=`Vue principale : ${VD[V.main]}`;
+  $('#x_ta').innerHTML=`<b>${VN[V.o]}</b> (${VD[V.o]}) · coupe n°${V.idx+1}<br>C'est l'image que tu lirais à l'écran : une seule tranche.`;
+  $('#x_tb').innerHTML=`<b>${VN[T]}</b> (${VD[T]}) · repère<br>Ici on ne voit que <b>la coupe en cours</b> (la jaune) : le reste de l'image est vide car il n'a pas été tranché. Clique pour déplacer.`;
+}
+function xRefresh(){
+  V.idx=clamp(V.idx,0,V.n-1);V.cur=V.idx;
+  xSettle();paintXT();xSyncUI();needDraw=true;
+}
+function xSetMain(m){
+  V.main=m;V.oy=0;V.op=0;V.zoom=xZoom(m);
+  if(!xOthers(m).includes(V.o))V.o=xOthers(m)[0];
+  const d=XDEF[V.o];V.n=d.n;V.sp=d.sp;V.th=d.th;V.pos=0;V.idx=Math.floor(V.n/2);
+  xRefresh();
+}
+function xSetO(o){
+  V.o=o;const d=XDEF[o];V.n=d.n;V.sp=d.sp;V.th=d.th;V.pos=0;V.idx=Math.floor(V.n/2);xRefresh();
+}
+function xGo(i){V.idx=clamp(i,0,V.n-1);$('#x_idx').value=V.idx+1;$('#x_out').textContent=`coupe ${V.idx+1}/${V.n}`;
+  $('#x_ta').innerHTML=$('#x_ta').innerHTML.replace(/coupe n°\d+/,'coupe n°'+(V.idx+1));needDraw=true}
+document.querySelectorAll('#x_main button').forEach(b=>b.onclick=()=>xSetMain(b.dataset.v));
+$('#x_prev').onclick=()=>{V.play=false;xPlayUI();xGo(V.idx-1)};
+$('#x_next').onclick=()=>{V.play=false;xPlayUI();xGo(V.idx+1)};
+function xPlayUI(){const b=$('#x_play');b.textContent=V.play?'⏸ Arrêter':'▶ Faire avancer';b.classList.toggle('on',!V.play)}
+$('#x_play').onclick=()=>{V.play=!V.play;V.playT=0;xPlayUI()};
+$('#x_idx').oninput=e=>{V.play=false;xPlayUI();xGo(+e.target.value-1)};
+let xrb=0;
+$('#x_prog').onchange=$('#x_fill').onchange=()=>{paintXT()};
+[['x_n','n'],['x_sp','sp'],['x_th','th']].forEach(([id,k])=>{$('#'+id).oninput=e=>{V[k]=+e.target.value;V.idx=clamp(V.idx,0,V.n-1);$('#o_xn').textContent=V.n;$('#o_xsp').textContent=V.sp+' mm';$('#o_xth').textContent=V.th+' mm';clearTimeout(xrb);xrb=setTimeout(xRefresh,90)}});
+$('#x_b').addEventListener('pointerdown',e=>{
+  const cvb=$('#x_b');cvb.setPointerCapture(e.pointerId);cvb._d=true;pick(e);
+  function pick(ev){if(!XG)return;const r=cvb.getBoundingClientRect(),fx=clamp((ev.clientX-r.left)/r.width),fy=clamp((ev.clientY-r.top)/r.height),E=S.E[XG.refO];
+    const m=modelFromRef(XG.refO,E.u0+fx*(E.u1-E.u0),E.v1-fy*(E.v1-E.v0));
+    const val=XG.axis==='h'?m[XG.hor]:m[XG.ver];
+    V.play=false;xPlayUI();xGo(Math.round((val-xCenter())/(V.sp*MM)+(V.n-1)/2))}
+  cvb._pick=pick});
+$('#x_b').addEventListener('pointermove',e=>{const c=$('#x_b');if(c._d&&c._pick)c._pick(e)});
+$('#x_b').addEventListener('pointerup',()=>{$('#x_b')._d=false});
+$('#x_b').style.cursor='pointer';
+
+/* rotation de la vue 3D de l'onglet */
+(function(){
+  const c=CNV.exp.cv,pp=new Map();let pinch=0;
+  c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);pp.set(e.pointerId,[e.clientX,e.clientY]);if(pp.size===2){const a=[...pp.values()];pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])}});
+  c.addEventListener('pointermove',e=>{if(!pp.has(e.pointerId))return;const p=pp.get(e.pointerId);
+    if(pp.size===1){V.oy-=(e.clientX-p[0])*0.008;V.op+=(e.clientY-p[1])*0.008;needDraw=true}
+    pp.set(e.pointerId,[e.clientX,e.clientY]);
+    if(pp.size===2){const a=[...pp.values()],d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(pinch>0){V.zoom=clamp(V.zoom*d/pinch,.5,2.5);needDraw=true}pinch=d}});
+  const end=e=>{pp.delete(e.pointerId);pinch=0};c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
+  c.addEventListener('wheel',e=>{e.preventDefault();V.zoom=clamp(V.zoom*Math.exp(-e.deltaY*0.001),.5,2.5);needDraw=true},{passive:false});
+  c.addEventListener('dblclick',()=>{V.oy=0;V.op=0;V.zoom=xZoom(V.main);needDraw=true});
+  c.style.touchAction='none';
+})();
+
+function xTick(dt){
+  if(V.play){V.playT+=dt;if(V.playT>1.05){V.playT=0;let n=V.idx+V.dir;if(n>=V.n){V.dir=-1;n=V.n-2}else if(n<0){V.dir=1;n=1}xGo(n)}}
+  const d=V.idx-V.cur;
+  if(Math.abs(d)>0.004){V.cur+=d*(1-Math.exp(-dt*9));if(Math.abs(V.idx-V.cur)<0.02)V.cur=V.idx;needDraw=true}
+  if(Math.abs(V.idx-V.cur)<0.05&&V.shown!==V.idx){xSettle();needDraw=true}
+}
+
+/* schéma des 3 plans (intro) */
+(function planesSvg(){
+  const ox=44,oy=176,L=104,M=L/2,P=(x,y,z)=>[ox+x+z*0.62,oy-y-z*0.42];
+  const poly=(pts,fill,stroke,w)=>`<polygon points="${pts.map(p=>P(...p).map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${w||1}"/>`;
+  let s='';
+  s+=poly([[0,0,L],[L,0,L],[L,L,L],[0,L,L]],'rgba(255,255,255,.03)','#3b4b5c');
+  s+=poly([[0,L,0],[L,L,0],[L,L,L],[0,L,L]],'rgba(255,255,255,.05)','#3b4b5c');
+  s+=poly([[L,0,0],[L,0,L],[L,L,L],[L,L,0]],'rgba(255,255,255,.05)','#3b4b5c');
+  s+=poly([[0,0,0],[L,0,0],[L,L,0],[0,L,0]],'rgba(255,255,255,.04)','#3b4b5c');
+  s+=poly([[0,M,0],[L,M,0],[L,M,L],[0,M,L]],'rgba(45,212,191,.38)','#2dd4bf',2);
+  s+=poly([[0,0,M],[L,0,M],[L,L,M],[0,L,M]],'rgba(251,191,36,.26)','#fbbf24',2);
+  s+=poly([[M,0,0],[M,0,L],[M,L,L],[M,L,0]],'rgba(244,114,182,.3)','#f472b6',2);
+  const t=(x,y,z,txt,anchor)=>{const p=P(x,y,z);return `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" fill="#e6edf3" font-size="12" font-weight="700" text-anchor="${anchor||'middle'}">${txt}</text>`};
+  s+=t(M,L+22,L/2,'↑ tête');s+=t(M,-16,L/2,'↓ pieds');
+  s+=`<text x="${P(L,M,L)[0]+6}" y="${P(L,M,L)[1]+4}" fill="#2dd4bf" font-size="12" font-weight="700">axial</text>`;
+  s+=`<text x="${P(0,L*0.9,M)[0]-4}" y="${P(0,L*0.9,M)[1]}" fill="#fbbf24" font-size="12" font-weight="700" text-anchor="end">coronal</text>`;
+  s+=`<text x="${P(M,L,L)[0]}" y="${P(M,L,L)[1]-8}" fill="#f472b6" font-size="12" font-weight="700" text-anchor="middle">sagittal</text>`;
+  $('#planesSvg').innerHTML=s;
+})();
+
+/* schéma des 3 plans (intro) */
+(function planesSvg(){
+  const ox=44,oy=176,L=104,M=L/2,P=(x,y,z)=>[ox+x+z*0.62,oy-y-z*0.42];
+  const poly=(pts,fill,stroke,w)=>`<polygon points="${pts.map(p=>P(...p).map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="${w||1}"/>`;
+  let s='';
+  s+=poly([[0,0,L],[L,0,L],[L,L,L],[0,L,L]],'rgba(255,255,255,.03)','#3b4b5c');
+  s+=poly([[0,L,0],[L,L,0],[L,L,L],[0,L,L]],'rgba(255,255,255,.05)','#3b4b5c');
+  s+=poly([[L,0,0],[L,0,L],[L,L,L],[L,L,0]],'rgba(255,255,255,.05)','#3b4b5c');
+  s+=poly([[0,0,0],[L,0,0],[L,L,0],[0,L,0]],'rgba(255,255,255,.04)','#3b4b5c');
+  s+=poly([[0,M,0],[L,M,0],[L,M,L],[0,M,L]],'rgba(45,212,191,.38)','#2dd4bf',2);
+  s+=poly([[0,0,M],[L,0,M],[L,L,M],[0,L,M]],'rgba(251,191,36,.26)','#fbbf24',2);
+  s+=poly([[M,0,0],[M,0,L],[M,L,L],[M,L,0]],'rgba(244,114,182,.3)','#f472b6',2);
+  const t=(x,y,z,txt,anchor)=>{const p=P(x,y,z);return `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" fill="#e6edf3" font-size="12" font-weight="700" text-anchor="${anchor||'middle'}">${txt}</text>`};
+  s+=t(M-34,L+20,L/2,'↑ tête');s+=t(M,-16,L/2,'↓ pieds');
+  s+=`<text x="${P(L,M,L)[0]+6}" y="${P(L,M,L)[1]+4}" fill="#2dd4bf" font-size="12" font-weight="700">axial</text>`;
+  s+=`<text x="${P(0,L*0.9,M)[0]-4}" y="${P(0,L*0.9,M)[1]}" fill="#fbbf24" font-size="12" font-weight="700" text-anchor="end">coronal</text>`;
+  s+=`<text x="${P(M,L,L)[0]+22}" y="${P(M,L,L)[1]-8}" fill="#f472b6" font-size="12" font-weight="700" text-anchor="middle">sagittal</text>`;
+  $('#planesSvg').innerHTML=s;
+})();
 
 /* boucle */
 let last=performance.now();
 function loop(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;
-  if(S.playing){S.T+=dt*S.speed;if(S.T>=TOTAL){S.T=TOTAL;S.playing=false;updPlay()}needDraw=true}
-  if(needDraw){needDraw=false;draw();syncUI()}
+  updateTween(dt);
+  if(S.auto&&!TW){
+    S.holdT+=dt*S.speed;
+    if(S.holdT>=HOLD[S.step]){
+      if(S.step<7&&S.step<S.stopAt)goStep(S.step+1);else S.auto=false;
+    }
+  }
+  if(S.mode==='coupe')xTick(dt);
+  if(S.cine&&S.mode!=='coupe'){S.cineT=(S.cineT||0)+dt;if(S.cineT>0.5){S.cineT=0;selMove(1>=S.n-S.sel?-(S.n-1):1)}}
+  if(needDraw){needDraw=false;if(S.mode==='coupe'){drawExplorer();paintXT()}else{draw();syncUI()}}
   requestAnimationFrame(loop);
 }
-setOrient('axial',false);
+window.__batch={S,V,Z,jump,goStep,setOrient,setMode,rebuild,xSetMain,xSetO,xGo};
+updateScan();
+setOrient('sagittal',true);
+jump(0);
 resize();
+xSetMain('coronal');
+setMode('coupe');
 requestAnimationFrame(t=>{last=t;loop(t)});
 })();
 </script>
