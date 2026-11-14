@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le batch en scanner — reconstruction MPR</title>
+<style>
+:root{--bg:#0a1016;--panel:#111a23;--panel2:#16222d;--line:#243242;--txt:#e6edf3;--mut:#8ea0b2;--teal:#2dd4bf;--amber:#fbbf24;--rose:#fb7185}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px 14px 40px}
+h1{font-size:clamp(20px,4vw,28px);margin:6px 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mut);margin:0 0 14px;font-size:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:14px}
+.stage{position:relative;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#16222e 0%,#0a1016 75%)}
+@media(max-width:700px){.stage{aspect-ratio:4/5}}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+.badge{position:absolute;left:10px;top:10px;background:rgba(10,16,22,.78);border:1px solid var(--line);padding:5px 10px;border-radius:999px;font-size:13px;font-weight:600;color:var(--teal);pointer-events:none}
+.hint{position:absolute;right:10px;top:10px;font-size:11px;color:var(--mut);pointer-events:none;background:rgba(10,16,22,.6);padding:3px 8px;border-radius:999px}
+.caption{margin:10px 2px 8px;min-height:64px}
+.caption b{color:var(--teal)}
+.caption span.k{color:var(--amber)}
+.transport{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:7px 12px;font:inherit;font-size:14px;cursor:pointer}
+button:hover{border-color:var(--teal)}
+button.on{background:var(--teal);color:#04201c;border-color:var(--teal);font-weight:700}
+input[type=range]{accent-color:var(--teal);width:100%}
+#tl{flex:1;min-width:140px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chips button{font-size:13px;padding:6px 10px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 18px}
+.sliders label{font-size:13px;color:var(--mut);display:block}
+.sliders output{float:right;color:var(--txt);font-weight:600}
+h2{font-size:16px;margin:0 0 10px}
+.panels{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+@media(max-width:800px){.panels{grid-template-columns:1fr}}
+.refs{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+figure{margin:0;text-align:center;font-size:12px;color:var(--mut)}
+figure canvas{display:block;background:#000;border-radius:6px;border:1px solid var(--line);width:auto;height:auto;max-width:100%;max-height:215px;margin:0 auto 4px}
+#res{max-height:330px}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.thumbs canvas{height:54px;width:auto;border:2px solid var(--line);border-radius:5px;background:#000;cursor:pointer}
+.thumbs canvas.sel{border-color:var(--amber)}
+.learn{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.learn div{background:var(--panel2);border-radius:10px;padding:10px 12px;font-size:14px}
+.learn b{color:var(--teal);display:block;margin-bottom:2px}
+.note{color:var(--mut);font-size:12px;margin-top:8px}
+.leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:6px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Le batch en scanner : du volume axial aux coupes reformatées</h1>
+  <p class="sub">Fémur simulé (schéma pédagogique). Placer le batch, découper, éclater, puis lire la nouvelle coupe.</p>
+
+  <section class="card">
+    <div class="stage"><canvas id="c3d"></canvas><div class="badge" id="badge">1 · Volume acquis</div><div class="hint">glisser = tourner · molette/pincer = zoom</div></div>
+    <div class="caption" id="caption"></div>
+    <div class="transport">
+      <button id="play" class="on">⏸ Pause</button>
+      <button id="replay">↺ Rejouer</button>
+      <input type="range" id="tl" min="0" max="1000" value="0" aria-label="Chronologie">
+      <select id="speed" aria-label="Vitesse"><option value="0.6">0,6×</option><option value="1" selected>1×</option><option value="1.6">1,6×</option></select>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="card">
+    <h2>Plan du batch</h2>
+    <div class="seg" id="orient">
+      <button data-o="axial" class="on">Axial (plan d'acquisition)</button>
+      <button data-o="sagittal">Reconstruction sagittale</button>
+      <button data-o="coronal">Reconstruction coronale</button>
+    </div>
+    <div class="sliders">
+      <label>Nombre de coupes <output id="o_n"></output><input type="range" id="s_n" min="3" max="15" step="1"></label>
+      <label>Épaisseur de coupe <output id="o_th"></output><input type="range" id="s_th" min="1" max="10" step="1"></label>
+      <label>Espacement (entre centres) <output id="o_sp"></output><input type="range" id="s_sp" min="2" max="50" step="1"></label>
+      <label>Position du centre <output id="o_pos"></output><input type="range" id="s_pos" min="-120" max="120" step="5"></label>
+    </div>
+    <div class="note">Les distances sont à l'échelle d'un fémur d'environ 45 cm. L'écartement de la phase « éclaté » est volontairement exagéré.</div>
+  </section>
+
+  <section class="card">
+    <h2>À la console : images de référence et résultat</h2>
+    <div class="panels">
+      <div>
+        <div class="refs">
+          <figure><canvas id="r_ax"></canvas>Axial</figure>
+          <figure><canvas id="r_co"></canvas>Coronal</figure>
+          <figure><canvas id="r_sa"></canvas>Sagittal</figure>
+        </div>
+        <div class="leg"><span><i style="background:#2dd4bf"></i>coupes du batch</span><span><i style="background:#fbbf24"></i>coupe sélectionnée</span></div>
+      </div>
+      <div>
+        <figure><canvas id="res"></canvas><span id="resInfo"></span></figure>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>À retenir</h2>
+    <div class="learn">
+      <div><b>Un batch, c'est quoi ?</b>Un lot de coupes recalculées à partir du volume : plan, centre, champ de vue, nombre, épaisseur, espacement (et angulation).</div>
+      <div><b>Pas de nouvelle acquisition</b>Le post-traitement réutilise les données déjà acquises : aucune irradiation supplémentaire.</div>
+      <div><b>Épaisseur vs espacement</b>Épaisseur &gt; espacement : chevauchement. Épaisseur &lt; espacement : une partie du volume n'est pas visible.</div>
+      <div><b>Voxels isotropes</b>Des coupes fines (≈ 1 mm) donnent des reformatages sagittaux et coronaux nets. Des voxels anisotropes donnent des « marches d'escalier ».</div>
+    </div>
+  </section>
+</div>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const easeO=t=>1-Math.pow(1-t,3);
+const MM=1/214;               // 1 mm en unités du modèle
+const TX=0.1;                 // cible caméra
+const DEG=Math.PI/180;
+
+/* ================= Modèle : fémur simulé ================= */
+function smin(a,b,k){const h=Math.max(k-Math.abs(a-b),0)/k;return Math.min(a,b)-h*h*k*.25}
+function ell(x,y,z,cx,cy,cz,rx,ry,rz){const dx=(x-cx)/rx,dy=(y-cy)/ry,dz=(z-cz)/rz;return (Math.sqrt(dx*dx+dy*dy+dz*dz)-1)*Math.min(rx,ry,rz)}
+function capsule(x,y,z,ax,ay,az,bx,by,bz,r){
+  const px=x-ax,py=y-ay,pz=z-az,bax=bx-ax,bay=by-ay,baz=bz-az;
+  const h=clamp((px*bax+py*bay+pz*baz)/(bax*bax+bay*bay+baz*baz));
+  const dx=px-bax*h,dy=py-bay*h,dz=pz-baz*h;return Math.sqrt(dx*dx+dy*dy+dz*dz)-r}
+function boneSDF(x,y,z){
+  const cz=0.05*(1-(y/0.75)*(y/0.75));
+  const ex=x/0.125,ez=(z-cz)/0.13;
+  let d=(Math.sqrt(ex*ex+ez*ez)-1)*0.125;
+  d=Math.max(d,Math.abs(y+0.01)-0.69);
+  d=smin(d,ell(x,y,z,0.03,0.66,0,0.15,0.13,0.14),0.05);
+  d=smin(d,ell(x,y,z,-0.10,0.79,-0.01,0.075,0.095,0.085),0.05);
+  d=smin(d,capsule(x,y,z,0,0.74,0,0.36,0.88,0.05,0.075),0.05);
+  d=smin(d,ell(x,y,z,0.39,0.89,0.05,0.155,0.155,0.155),0.03);
+  d=smin(d,ell(x,y,z,0.07,0.55,-0.10,0.04,0.05,0.04),0.03);
+  d=smin(d,ell(x,y,z,0,-0.68,-0.02,0.19,0.16,0.15),0.06);
+  d=smin(d,ell(x,y,z,0.115,-0.88,-0.06,0.105,0.13,0.14),0.03);
+  d=smin(d,ell(x,y,z,-0.115,-0.88,-0.06,0.10,0.125,0.135),0.03);
+  return d}
+function wCanal(y){return sstep(-0.62,-0.42,y)*sstep(0.62,0.44,y)}
+function HU(x,y,z){
+  const bx=(x-0.1)/0.52,bz=z/0.42,q=bx*bx+bz*bz;
+  let bg=-1000;
+  if(q<1)bg=q>0.8?-95:55;
+  if(x<-0.3||x>0.62||z<-0.3||z>0.34||y<-1.06||y>1.08)return bg;
+  const d=boneSDF(x,y,z);
+  if(d>0.003)return bg;
+  const depth=-d,w=wCanal(y),t=0.013+0.03*w;
+  let inner;
+  if(depth<t)inner=1250;
+  else{
+    const n=Math.sin(x*95+y*40)*Math.sin(z*88+y*55+1.3)*Math.sin(y*70-x*30);
+    inner=lerp(300+140*n,-90,w*sstep(t,t+0.02,depth));
+  }
+  return lerp(bg,inner,clamp((depth+0.003)/0.006));
+}
+
+/* ================= Nuage de points (surface 3D) ================= */
+const PT=(()=>{
+  const h=0.0145,X=[],Y=[],Z=[],NX=[],NY=[],NZ=[];
+  let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  for(let x=-0.26;x<0.58;x+=h)for(let y=-1.04;y<1.07;y+=h)for(let z=-0.27;z<0.29;z+=h){
+    const px=x+(rnd()-.5)*h*.7,py=y+(rnd()-.5)*h*.7,pz=z+(rnd()-.5)*h*.7;
+    const d=boneSDF(px,py,pz);
+    if(d>0||d<-1.15*h)continue;
+    const e=0.004;
+    let gx=boneSDF(px+e,py,pz)-boneSDF(px-e,py,pz),gy=boneSDF(px,py+e,pz)-boneSDF(px,py-e,pz),gz=boneSDF(px,py,pz+e)-boneSDF(px,py,pz-e);
+    const l=Math.hypot(gx,gy,gz)||1;
+    X.push(px);Y.push(py);Z.push(pz);NX.push(gx/l);NY.push(gy/l);NZ.push(gz/l);
+  }
+  const n=X.length;
+  return {n,x:Float32Array.from(X),y:Float32Array.from(Y),z:Float32Array.from(Z),nx:Float32Array.from(NX),ny:Float32Array.from(NY),nz:Float32Array.from(NZ),
+    sx:new Float32Array(n),sy:new Float32Array(n),sh:new Uint8Array(n),inB:new Uint8Array(n),sortBuf:new Float64Array(n+32),h}
+})();
+
+/* ================= Plans / textures ================= */
+const EXT={axial:{u0:-0.45,u1:0.65,v0:-0.45,v1:0.45},coronal:{u0:-0.45,u1:0.65,v0:-1.12,v1:1.08},sagittal:{u0:-0.45,u1:0.45,v0:-1.12,v1:1.08}};
+const AXIS={axial:1,coronal:2,sagittal:0};
+const PXS=0.009;
+function pt(o,u,v,s){return o==='axial'?[u,s,v]:o==='coronal'?[u,v,s]:[s,v,-u]}
+function quad(o,s){const e=EXT[o];return [pt(o,e.u0,e.v1,s),pt(o,e.u1,e.v1,s),pt(o,e.u1,e.v0,s),pt(o,e.u0,e.v0,s)]}
+function hash(i,j,k){let h=(i*374761393+j*668265263+k*2147483647)|0;h=(h^(h>>>13))*1274126177|0;h^=h>>>16;return (h>>>0)/4294967295}
+const texCache=new Map();
+function getTex(o,s,thick){
+  const key=o+'|'+s.toFixed(4)+'|'+thick.toFixed(4);
+  if(texCache.has(key))return texCache.get(key);
+  if(texCache.size>260)texCache.clear();
+  const e=EXT[o],W=Math.round((e.u1-e.u0)/PXS),H=Math.round((e.v1-e.v0)/PXS);
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const c=cv.getContext('2d'),img=c.createImageData(W,H),d=img.data;
+  const ns=thick>0.03?5:thick>0.015?3:1,seed=Math.round(s*1000);
+  for(let j=0;j<H;j++){const v=e.v1-(j+.5)*PXS;
+    for(let i=0;i<W;i++){
+      const u=e.u0+(i+.5)*PXS;let sum=0;
+      for(let k=0;k<ns;k++){
+        const off=ns===1?0:(k/(ns-1)-.5)*thick;let x,y,z;
+        if(o==='axial'){x=u;z=v;y=s+off}else if(o==='coronal'){x=u;y=v;z=s+off}else{x=s+off;y=v;z=-u}
+        sum+=HU(x,y,z);
+      }
+      let hu=sum/ns;
+      if(hu>-900)hu+=(hash(i,j,seed)-.5)*26;
+      const g=clamp((hu+400)/1600)*255,a=clamp((hu+960)/60)*255,p=(j*W+i)*4;
+      d[p]=g*.96;d[p+1]=g;d[p+2]=g*1.03;d[p+3]=a;
+    }}
+  c.putImageData(img,0,0);
+  const t={cv,W,H};texCache.set(key,t);return t;
+}
+
+/* ================= État ================= */
+const DEF={axial:{c:0,n:7,th:5,sp:30},sagittal:{c:0.1,n:9,th:5,sp:15},coronal:{c:0.03,n:9,th:5,sp:10}};
+const FR={axial:'axiale',sagittal:'sagittale',coronal:'coronale'};
+const S={orient:'axial',n:7,th:5,sp:30,pos:0,sel:3,T:0,playing:true,speed:1,offYaw:0,offPitch:0,zoom:1,tex:[]};
+const P0E=2.2,P1E=4.8,P2E=8.2,P3E=10.8,P4E=14.2,TOTAL=15.5;
+const PSTART=[0,P0E,P1E,P2E,P3E];
+const PNAME=['1 · Volume acquis','2 · Placer le batch','3 · Découpe','4 · Éclaté','5 · Nouvelle coupe'];
+const CAM={axial:{s:[-35,24],e:[-10,-68]},coronal:{s:[-50,14],e:[-8,5]},sagittal:{s:[40,14],e:[78,5]}};
+
+function centerPos(){return DEF[S.orient].c+S.pos*MM}
+function basePositions(){const c=centerPos(),sp=S.sp*MM,a=[];for(let i=0;i<S.n;i++)a.push(c+(i-(S.n-1)/2)*sp);return a}
+function explodedPositions(e){
+  const c=centerPos(),sp=S.sp*MM,n=S.n,extra=e*(Math.max(0.17-sp,0)+sp*0.6);
+  const step=Math.max(sp,Math.min(sp+extra,1.6/Math.max(1,n-1))),a=[];
+  for(let i=0;i<n;i++)a.push(c+(i-(n-1)/2)*step);return a}
+function boxRange(){const b=basePositions(),hp=Math.max(S.sp,S.th)*MM/2;return [b[0]-hp,b[S.n-1]+hp]}
+
+/* ================= Caméra ================= */
+function camVec(yaw,pitch){
+  const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+  const b=[cp*sy,sp,cp*cy],r=[cy,0,-sy];
+  const u=[b[1]*r[2]-b[2]*r[1],b[2]*r[0]-b[0]*r[2],b[0]*r[1]-b[1]*r[0]];
+  return {r,u,b}}
+function camera(T){
+  const c=CAM[S.orient];
+  const drift=Math.sin(Math.min(T,P3E)*0.45)*0.10;
+  let yaw=c.s[0]*DEG+drift,pitch=c.s[1]*DEG+drift*0.3;
+  if(T>P3E){
+    const y0=c.s[0]*DEG+Math.sin(P3E*0.45)*0.10,p0=c.s[1]*DEG+Math.sin(P3E*0.45)*0.03;
+    const p=easeIO(clamp((T-P3E)/(P4E-P3E)));
+    yaw=lerp(y0,c.e[0]*DEG,p);pitch=lerp(p0,c.e[1]*DEG,p);
+  }
+  return {yaw:yaw+S.offYaw,pitch:clamp(pitch+S.offPitch,-1.55,1.55)};
+}
+
+/* ================= Rendu 3D ================= */
+const cv=$('#c3d'),ctx=cv.getContext('2d');
+let DPR=1,CW=300,CH=300,CAMV=camVec(0,0),SC=150,CX=0,CYc=0;
+function resize(){DPR=Math.min(window.devicePixelRatio||1,2);const r=cv.getBoundingClientRect();CW=r.width;CH=r.height;cv.width=Math.round(CW*DPR);cv.height=Math.round(CH*DPR);needDraw=true}
+function P3(x,y,z){
+  const dx=x-TX,r=CAMV.r,u=CAMV.u,b=CAMV.b;
+  return [CX+SC*(r[0]*dx+r[2]*z),CYc-SC*(u[0]*dx+u[1]*y+u[2]*z),b[0]*dx+b[1]*y+b[2]*z]}
+const PAL=[];for(let i=0;i<32;i++){const t=i/31;PAL.push(`rgb(${Math.round(40+t*205)},${Math.round(38+t*190)},${Math.round(40+t*165)})`)}
+let curA=1;
+function setA(a){if(a!==curA){ctx.globalAlpha=a;curA=a}}
+function polyPath(pts){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath()}
+function projQuad(o,s){return quad(o,s).map(p=>P3(p[0],p[1],p[2]))}
+
+function drawPlane(o,s,tex,alpha,sel,wire){
+  const q=projQuad(o,s),A=q[0],B=q[1],D=q[3];
+  const ux=B[0]-A[0],uy=B[1]-A[1],vx=D[0]-A[0],vy=D[1]-A[1];
+  if(Math.abs(ux*vy-uy*vx)>30){
+    ctx.save();ctx.globalAlpha=alpha;
+    ctx.setTransform(DPR*ux/tex.W,DPR*uy/tex.W,DPR*vx/tex.H,DPR*vy/tex.H,DPR*A[0],DPR*A[1]);
+    ctx.drawImage(tex.cv,0,0);ctx.restore();
+  }
+  ctx.save();ctx.globalAlpha=Math.min(1,alpha);
+  polyPath(q);ctx.lineWidth=sel?2.6:1;ctx.strokeStyle=sel?'#fbbf24':'rgba(45,212,191,.75)';ctx.stroke();
+  if(wire){
+    const t=Math.max(S.th*MM,0.014)/2,q1=projQuad(o,s-t),q2=projQuad(o,s+t);
+    ctx.globalAlpha=.45*alpha;ctx.lineWidth=1;ctx.strokeStyle='#2dd4bf';
+    polyPath(q1);ctx.stroke();polyPath(q2);ctx.stroke();
+    ctx.beginPath();for(let k=0;k<4;k++){ctx.moveTo(q1[k][0],q1[k][1]);ctx.lineTo(q2[k][0],q2[k][1])}ctx.stroke();
+  }
+  ctx.restore();
+}
+function boxWire(o,lo,hi,alpha,dashed){
+  const e=EXT[o],c=[];
+  for(const s of [lo,hi])for(const [u,v] of [[e.u0,e.v1],[e.u1,e.v1],[e.u1,e.v0],[e.u0,e.v0]]){const p=pt(o,u,v,s);c.push(P3(p[0],p[1],p[2]))}
+  ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle='#2dd4bf';ctx.lineWidth=1.6;
+  if(dashed)ctx.setLineDash([6,5]);
+  ctx.fillStyle='rgba(45,212,191,.05)';
+  polyPath(c.slice(0,4));ctx.fill();ctx.stroke();polyPath(c.slice(4));ctx.fill();ctx.stroke();
+  ctx.beginPath();for(let k=0;k<4;k++){ctx.moveTo(c[k][0],c[k][1]);ctx.lineTo(c[k+4][0],c[k+4][1])}ctx.stroke();
+  ctx.restore();
+  return c;
+}
+function pill(text,x,y,color){
+  ctx.save();ctx.font='600 12px system-ui,sans-serif';const w=ctx.measureText(text).width+14;
+  x=clamp(x,4,CW-w-4);y=clamp(y,18,CH-8);
+  ctx.fillStyle='rgba(10,16,22,.85)';ctx.strokeStyle=color;ctx.lineWidth=1;
+  ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y-14,w,20,10):ctx.rect(x,y-14,w,20);ctx.fill();ctx.stroke();
+  ctx.fillStyle=color;ctx.fillText(text,x+7,y);ctx.restore();
+}
+function gizmo(){
+  const ox=38,oy=CH-38,L=24,r=CAMV.r,u=CAMV.u;
+  const ax=[[1,0,0,'G'],[0,1,0,'S'],[0,0,1,'A']];
+  ctx.save();ctx.font='700 11px system-ui,sans-serif';ctx.lineWidth=2;
+  for(const [x,y,z,l] of ax){
+    const dx=r[0]*x+r[2]*z,dy=u[0]*x+u[1]*y+u[2]*z;
+    ctx.strokeStyle='rgba(142,160,178,.8)';ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox+dx*L,oy-dy*L);ctx.stroke();
+    ctx.fillStyle='#e6edf3';ctx.fillText(l,ox+dx*(L+7)-3,oy-dy*(L+7)+4);
+  }
+  ctx.restore();
+}
+
+let needDraw=true;
+const SORT_MUL=65536;
+function draw(){
+  const T=S.T,o=S.orient,n=S.n;
+  ctx.setTransform(DPR,0,0,DPR,0,0);ctx.globalAlpha=1;curA=1;ctx.clearRect(0,0,CW,CH);
+  const cam=camera(T);CAMV=camVec(cam.yaw,cam.pitch);
+  SC=Math.min(CH/2.55,CW/2.3)*S.zoom;CX=CW/2;CYc=CH/2;
+  const r=CAMV.r,u=CAMV.u,b=CAMV.b;
+  const p0=clamp(T/P0E),p1=clamp((T-P0E)/(P1E-P0E)),p2=clamp((T-P1E)/(P2E-P1E)),p3=clamp((T-P2E)/(P3E-P2E));
+  const fade=easeO(clamp(T/1.2)),e=easeIO(p3);
+  const base=basePositions(),exp=explodedPositions(e),[lo,hi]=boxRange();
+  const sb=lerp(lo,hi,easeIO(p2));
+  const ghost=1-0.9*easeIO(clamp((T-P1E-0.4)/2.6));
+  const ax=AXIS[o];
+
+  // volume natif : coupes axiales
+  const natA=0.28*fade*(1-clamp(p2*1.4));
+  if(natA>0.01){
+    const cnt=Math.floor(p0*22);ctx.save();ctx.strokeStyle='#7aa7d9';ctx.lineWidth=1;ctx.globalAlpha=natA;
+    for(let k=0;k<cnt;k++){const y=-1.05+k*0.1,e0=EXT.axial;
+      polyPath([pt('axial',e0.u0,e0.v1,y),pt('axial',e0.u1,e0.v1,y),pt('axial',e0.u1,e0.v0,y),pt('axial',e0.u0,e0.v0,y)].map(p=>P3(p[0],p[1],p[2])));ctx.stroke()}
+    ctx.restore();
+  }
+
+  // visibles
+  const vis=[];
+  for(let i=0;i<n;i++)if(p2>0&&(base[i]<=sb+1e-9||p3>0))vis.push(i);
+  const nv=vis.length,plS=vis.map(i=>exp[i]);
+  const nb=b[ax],edge=Math.abs(nb)<0.12,flip=nb<0;
+
+  // points
+  const N=PT.n,X=PT.x,Y=PT.y,Z=PT.z,NX=PT.nx,NY=PT.ny,NZ=PT.nz,sx=PT.sx,sy=PT.sy,sh=PT.sh,inB=PT.inB,buf=PT.sortBuf;
+  const coord=ax===0?X:ax===1?Y:Z;
+  let cnt=0;
+  for(let i=0;i<N;i++){
+    const nz=b[0]*NX[i]+b[1]*NY[i]+b[2]*NZ[i];
+    if(nz<-0.08)continue;
+    const dx=X[i]-TX,dy=Y[i],dz=Z[i];
+    const vx=r[0]*dx+r[2]*dz,vy=u[0]*dx+u[1]*dy+u[2]*dz,vz=b[0]*dx+b[1]*dy+b[2]*dz;
+    sx[i]=CX+SC*vx;sy[i]=CYc-SC*vy;
+    const nx_=r[0]*NX[i]+r[2]*NZ[i],ny_=u[0]*NX[i]+u[1]*NY[i]+u[2]*NZ[i];
+    let s=0.25+0.7*Math.max(0,-0.35*nx_+0.55*ny_+0.75*nz)+0.18*Math.pow(1-clamp(nz),2);
+    sh[i]=Math.max(0,Math.min(31,(s*31)|0));
+    const dn=clamp((vz+2)/4,0,0.999);
+    let K;
+    if(edge||nv===0)K=dn;
+    else{
+      const sn=coord[i];let L=0;while(L<nv&&plS[L]<sn)L++;
+      K=(flip?(nv-L):L)*2+dn;
+    }
+    buf[cnt++]=Math.floor(K*4096)*SORT_MUL+i;
+  }
+  // plans
+  const alphaP=[];
+  for(let k=0;k<nv;k++){
+    const i=vis[k],q=projQuad(o,exp[i]);
+    const cz=(q[0][2]+q[2][2])/2;
+    const dn=clamp((cz+2)/4,0,0.999);
+    const K=(edge||nv===0)?dn:(flip?2*(nv-k)-0.5:2*k+1.5);
+    buf[cnt++]=Math.floor(K*4096)*SORT_MUL+(N+k);
+    alphaP.push(p3>0?lerp(1,i===S.sel?1:0.14,easeIO(clamp((T-P3E)/(P4E-P3E)))):clamp((sb-base[i])/0.07));
+  }
+  const sorted=buf.subarray(0,cnt);sorted.sort();
+  const sz=Math.max(2.2,PT.h*SC*1.35);
+  for(let m=0;m<cnt;m++){
+    const v=sorted[m],idx=v%SORT_MUL;
+    if(idx>=N){
+      const k=idx-N,i=vis[k];
+      drawPlane(o,exp[i],S.tex[i],alphaP[k],p3>=1&&i===S.sel&&T>P3E-0.4,e>0.02);
+    }else{
+      setA(inB[idx]?fade*ghost:fade);
+      ctx.fillStyle=PAL[sh[idx]];
+      ctx.fillRect(sx[idx]-sz/2,sy[idx]-sz/2,sz,sz);
+    }
+  }
+  setA(1);
+
+  // boîte du batch
+  const boxA=Math.min(p1*3,1)*(1-clamp((T-P2E)/1.0));
+  let corners=null;
+  if(T>P0E&&boxA>0.01){
+    const off=(1-easeO(p1))*0.9;
+    corners=boxWire(o,lo+off,hi+off,boxA*0.95,p1<1);
+    if(p1>0.5&&p2===0){
+      ctx.save();ctx.globalAlpha=0.35*clamp((p1-.5)*2);ctx.strokeStyle='#2dd4bf';ctx.lineWidth=1;
+      for(let i=0;i<n;i++){polyPath(projQuad(o,base[i]+off));ctx.stroke()}
+      ctx.restore();
+    }
+    const top=corners.reduce((a,c)=>c[1]<a[1]?c:a,corners[0]);
+    pill(`Batch ${FR[o]} · ${n} coupes · ép. ${S.th} mm · esp. ${S.sp} mm`,top[0]-60,top[1]-8,'#2dd4bf');
+  }
+  // lame de coupe
+  if(p2>0&&p2<1){
+    const q=projQuad(o,sb);
+    ctx.save();polyPath(q);ctx.fillStyle='rgba(45,212,191,.22)';ctx.fill();ctx.strokeStyle='#9ff5e8';ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  }
+  gizmo();
+  if(T<P1E)pill('Fémur droit (simulé)',12,CH-12,'#8ea0b2');
+}
+
+/* ================= Panneaux 2D ================= */
+function paintRef(canvas,tex,refO,pos){
+  const cw=tex.W*2,ch=tex.H*2;canvas.width=cw;canvas.height=ch;
+  const c=canvas.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,cw,ch);
+  c.imageSmoothingQuality='high';c.drawImage(tex.cv,0,0,cw,ch);
+  const e=EXT[refO],mu=u=>(u-e.u0)/(e.u1-e.u0)*cw,mv=v=>(e.v1-v)/(e.v1-e.v0)*ch;
+  const tgt=S.orient,nax=tgt==='axial'?'y':tgt==='coronal'?'z':'x';
+  const hor={axial:'x',coronal:'x',sagittal:'z'}[refO],ver={axial:'z',coronal:'y',sagittal:'y'}[refO];
+  const base=basePositions(),[lo,hi]=boxRange();
+  c.lineWidth=2;
+  if(refO===tgt){
+    c.setLineDash([8,6]);c.strokeStyle='#2dd4bf';c.strokeRect(6,6,cw-12,ch-12);c.setLineDash([]);
+    c.fillStyle='#2dd4bf';c.font='600 16px system-ui';c.fillText('FOV du batch',12,24);
+  }else if(nax===hor){
+    const U=s=>mu(hor==='z'?-s:s);
+    c.setLineDash([8,6]);c.strokeStyle='rgba(45,212,191,.8)';
+    const a=U(lo),bb=U(hi);c.strokeRect(Math.min(a,bb),3,Math.abs(bb-a),ch-6);c.setLineDash([]);
+    base.forEach((s,i)=>{c.strokeStyle=i===S.sel?'#fbbf24':'#2dd4bf';c.lineWidth=i===S.sel?3.5:1.6;c.beginPath();c.moveTo(U(s),0);c.lineTo(U(s),ch);c.stroke()});
+  }else if(nax===ver){
+    c.setLineDash([8,6]);c.strokeStyle='rgba(45,212,191,.8)';
+    const a=mv(lo),bb=mv(hi);c.strokeRect(3,Math.min(a,bb),cw-6,Math.abs(bb-a));c.setLineDash([]);
+    base.forEach((s,i)=>{c.strokeStyle=i===S.sel?'#fbbf24':'#2dd4bf';c.lineWidth=i===S.sel?3.5:1.6;c.beginPath();c.moveTo(0,mv(s));c.lineTo(cw,mv(s));c.stroke()});
+  }
+}
+function paintResult(tex){
+  const canvas=$('#res'),cw=tex.W*2,ch=tex.H*2;canvas.width=cw;canvas.height=ch;
+  const c=canvas.getContext('2d');c.fillStyle='#000';c.fillRect(0,0,cw,ch);
+  c.imageSmoothingQuality='high';c.drawImage(tex.cv,0,0,cw,ch);
+  const L={axial:['A','P','D','G'],coronal:['S','I','D','G'],sagittal:['S','I','A','P']}[S.orient];
+  c.fillStyle='#fbbf24';c.font='700 20px system-ui';c.textAlign='center';
+  c.fillText(L[0],cw/2,24);c.fillText(L[1],cw/2,ch-10);c.textAlign='left';c.fillText(L[2],8,ch/2);c.textAlign='right';c.fillText(L[3],cw-8,ch/2);
+}
+function refreshPanels(){
+  const o=S.orient,base=basePositions(),sel=S.sel;
+  const ya=o==='axial'?base[sel]:0.8,zc=o==='coronal'?base[sel]:0.03,xs=o==='sagittal'?base[sel]:0.0;
+  paintRef($('#r_ax'),getTex('axial',ya,0),'axial');
+  paintRef($('#r_co'),getTex('coronal',zc,0),'coronal');
+  paintRef($('#r_sa'),getTex('sagittal',xs,0),'sagittal');
+  paintResult(S.tex[sel]);
+  const mm=Math.round(base[sel]/MM);
+  $('#resInfo').textContent=`Coupe ${FR[o]} ${sel+1}/${S.n} · position ${mm>0?'+':''}${mm} mm · ép. ${S.th} mm`;
+  const th=$('#thumbs');th.innerHTML='';
+  S.tex.forEach((t,i)=>{
+    const c=document.createElement('canvas');c.width=t.W;c.height=t.H;
+    const k=c.getContext('2d');k.fillStyle='#000';k.fillRect(0,0,t.W,t.H);k.drawImage(t.cv,0,0);
+    if(i===sel)c.className='sel';
+    c.title='Coupe '+(i+1);c.onclick=()=>{S.sel=i;refreshPanels();needDraw=true};
+    th.appendChild(c);
+  });
+}
+function updateInBox(){
+  const o=S.orient,e=EXT[o],[lo,hi]=boxRange(),N=PT.n;
+  for(let i=0;i<N;i++){
+    const x=PT.x[i],y=PT.y[i],z=PT.z[i];
+    let u,v,s;
+    if(o==='axial'){u=x;v=z;s=y}else if(o==='coronal'){u=x;v=y;s=z}else{u=-z;v=y;s=x}
+    PT.inB[i]=(u>=e.u0&&u<=e.u1&&v>=e.v0&&v<=e.v1&&s>=lo&&s<=hi)?1:0;
+  }
+}
+function rebuild(){
+  const base=basePositions(),th=S.th*MM;
+  S.tex=base.map(s=>getTex(S.orient,s,th));
+  S.sel=Math.min(S.sel,S.n-1);
+  updateInBox();refreshPanels();needDraw=true;
+}
+
+/* ================= UI ================= */
+const caption=$('#caption'),badge=$('#badge'),tl=$('#tl');
+let lastCap='';
+function captionFor(P){
+  const o=S.orient,sp=S.sp,th=S.th,n=S.n;
+  const k=t=>`<span class="k">${t}</span>`;
+  switch(P){
+    case 0:return `<b>Volume acquis.</b> Le scanner acquiert des coupes axiales très fines. Empilées, elles forment un volume de voxels : c'est la matière première du post-traitement.`+(o!=='axial'?` Ici, on part de ce volume axial pour fabriquer des plans ${FR[o]}s qui n'ont jamais été acquis.`:'');
+    case 1:return `<b>Placer le batch.</b> `+({axial:`Sur une image de référence (coronale ou sagittale), on place le batch : plan axial, centre, champ de vue (FOV), nombre de coupes.`,sagittal:`Sur les images de référence axiale et coronale, on trace le batch : plans sagittaux, perpendiculaires à l'axe droite-gauche.`,coronal:`Sur les images de référence axiale et sagittale, on trace le batch : plans coronaux, perpendiculaires à l'axe antéro-postérieur.`})[o];
+    case 2:return `<b>Découpe.</b> Le logiciel recalcule chaque coupe en interpolant les voxels du volume : une coupe tous les ${k(sp+' mm')}, chacune moyennée sur ${k(th+' mm')} d'épaisseur.`;
+    case 3:return `<b>Éclaté.</b> ${n} coupes écartées pour voir le lot (écartement exagéré). `+(th>sp?`Épaisseur > espacement : les coupes se chevauchent.`:th<sp?`Épaisseur < espacement : une partie du volume n'apparaît dans aucune coupe.`:`Épaisseur = espacement : coupes jointives.`);
+    default:return `<b>Nouvelle coupe.</b> `+({axial:`On tourne pour lire une coupe de face : image axiale reformatée, dans le plan d'acquisition mais avec l'épaisseur et l'espacement choisis.`,sagittal:`On tourne pour lire une coupe sagittale née du volume axial, jamais acquise directement. Convention : antérieur à gauche, supérieur en haut.`,coronal:`On tourne pour lire une coupe coronale née du volume axial, jamais acquise directement. Convention : droite du patient à gauche de l'image.`})[o];
+  }
+}
+function phaseOf(T){return T<P0E?0:T<P1E?1:T<P2E?2:T<P3E?3:4}
+let lastP=-1;
+function syncUI(){
+  const P=phaseOf(S.T);
+  const html=captionFor(P);
+  if(html!==lastCap){caption.innerHTML=html;lastCap=html}
+  if(P!==lastP){
+    badge.textContent=PNAME[P];
+    document.querySelectorAll('#chips button').forEach((b,i)=>b.classList.toggle('on',i===P));
+    lastP=P;
+  }
+  if(document.activeElement!==tl)tl.value=Math.round(S.T/TOTAL*1000);
+}
+PNAME.forEach((n,i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{S.T=i===0?0:PSTART[i]+0.02;S.playing=true;updPlay();needDraw=true};$('#chips').appendChild(b)});
+function updPlay(){const b=$('#play');b.textContent=S.playing?'⏸ Pause':'▶ Lecture';b.classList.toggle('on',S.playing)}
+$('#play').onclick=()=>{if(!S.playing&&S.T>=TOTAL)S.T=0;S.playing=!S.playing;updPlay()};
+$('#replay').onclick=()=>{S.T=0;S.playing=true;S.offYaw=S.offPitch=0;S.zoom=1;updPlay();needDraw=true};
+tl.oninput=()=>{S.T=tl.value/1000*TOTAL;S.playing=false;updPlay();needDraw=true};
+$('#speed').onchange=e=>S.speed=+e.target.value;
+
+function syncSliders(){
+  $('#s_n').value=S.n;$('#s_th').value=S.th;$('#s_sp').value=S.sp;$('#s_pos').value=S.pos;
+  $('#o_n').textContent=S.n;$('#o_th').textContent=S.th+' mm';$('#o_sp').textContent=S.sp+' mm';$('#o_pos').textContent=(S.pos>0?'+':'')+S.pos+' mm';
+}
+function setOrient(o,restart){
+  S.orient=o;const d=DEF[o];S.n=d.n;S.th=d.th;S.sp=d.sp;S.pos=0;S.sel=Math.floor(d.n/2);
+  document.querySelectorAll('#orient button').forEach(b=>b.classList.toggle('on',b.dataset.o===o));
+  syncSliders();
+  if(restart){S.T=0;S.playing=true;S.offYaw=S.offPitch=0;updPlay()}
+  rebuild();
+}
+document.querySelectorAll('#orient button').forEach(b=>b.onclick=()=>setOrient(b.dataset.o,true));
+let rbT=0;
+[['s_n','n'],['s_th','th'],['s_sp','sp'],['s_pos','pos']].forEach(([id,k])=>{
+  $('#'+id).oninput=e=>{
+    S[k]=+e.target.value;if(k==='n')S.sel=Math.min(S.sel,S.n-1);
+    syncSliders();clearTimeout(rbT);rbT=setTimeout(rebuild,40);lastCap='';
+  };
+});
+
+/* interactions 3D */
+const ptrs=new Map();let pinch=0;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,[e.clientX,e.clientY]);cv.style.cursor='grabbing';
+  if(ptrs.size===2){const a=[...ptrs.values()];pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])}});
+cv.addEventListener('pointermove',e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const p=ptrs.get(e.pointerId);
+  if(ptrs.size===1){S.offYaw-=(e.clientX-p[0])*0.008;S.offPitch+=(e.clientY-p[1])*0.008;needDraw=true}
+  ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+  if(ptrs.size===2){const a=[...ptrs.values()],d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(pinch>0){S.zoom=clamp(S.zoom*d/pinch,.6,2.5);needDraw=true}pinch=d}
+});
+const endP=e=>{ptrs.delete(e.pointerId);pinch=0;cv.style.cursor='grab'};
+cv.addEventListener('pointerup',endP);cv.addEventListener('pointercancel',endP);
+cv.addEventListener('wheel',e=>{e.preventDefault();S.zoom=clamp(S.zoom*Math.exp(-e.deltaY*0.001),.6,2.5);needDraw=true},{passive:false});
+cv.addEventListener('dblclick',()=>{S.offYaw=S.offPitch=0;S.zoom=1;needDraw=true});
+window.addEventListener('keydown',e=>{if(e.code==='Space'&&e.target===document.body){e.preventDefault();$('#play').click()}});
+window.addEventListener('resize',resize);
+
+/* boucle */
+let last=performance.now();
+function loop(now){
+  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  if(S.playing){S.T+=dt*S.speed;if(S.T>=TOTAL){S.T=TOTAL;S.playing=false;updPlay()}needDraw=true}
+  if(needDraw){needDraw=false;draw();syncUI()}
+  requestAnimationFrame(loop);
+}
+setOrient('axial',false);
+resize();
+requestAnimationFrame(t=>{last=t;loop(t)});
+})();
+</script>
+</body>
+</html>
